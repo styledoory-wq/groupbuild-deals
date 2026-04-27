@@ -285,6 +285,13 @@ export default function AdminSuppliers() {
                     </button>
                   );
                 })}
+                <button
+                  type="button"
+                  onClick={() => setNewCatOpen(true)}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-bold border border-dashed border-gold text-primary bg-gold/10 inline-flex items-center gap-1"
+                >
+                  <Plus className="h-3 w-3" /> קטגוריה חדשה
+                </button>
               </div>
             </div>
 
