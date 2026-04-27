@@ -2,95 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* GroupBuild — Premium real-estate design system
+   Palette: navy / gold / cream. Heebo Hebrew RTL.
+   All colors HSL.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Cream surface */
+    --background: 42 33% 96%;          /* #F8F6F1 */
+    --foreground: 217 56% 13%;         /* navy text */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 217 56% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 217 56% 13%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Navy primary */
+    --primary: 217 56% 13%;            /* #0F1E35 */
+    --primary-foreground: 42 33% 96%;
+    --primary-soft: 217 49% 21%;       /* #1A2F4E */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Gold secondary */
+    --secondary: 44 53% 54%;           /* #C8A84B */
+    --secondary-foreground: 217 56% 13%;
+    --gold: 44 53% 54%;
+    --gold-light: 44 73% 66%;          /* #E8C96A */
+    --gold-foreground: 217 56% 13%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 40 24% 92%;
+    --muted-foreground: 217 18% 38%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 44 53% 54%;
+    --accent-foreground: 217 56% 13%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --success: 145 49% 32%;            /* #2A7A4C */
+    --success-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --border: 38 24% 84%;              /* #E2DDD4 */
+    --input: 38 24% 84%;
+    --ring: 44 53% 54%;
 
-    --sidebar-background: 0 0% 98%;
+    --radius: 1rem;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(217 56% 13%) 0%, hsl(217 49% 21%) 50%, hsl(217 56% 18%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(44 53% 54%) 0%, hsl(44 73% 66%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(42 33% 98%) 100%);
+    --gradient-navy-deep: linear-gradient(160deg, hsl(217 60% 10%) 0%, hsl(217 49% 21%) 100%);
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(217 56% 13% / 0.06), 0 4px 16px -4px hsl(217 56% 13% / 0.05);
+    --shadow-card: 0 4px 20px -8px hsl(217 56% 13% / 0.10), 0 2px 6px -2px hsl(217 56% 13% / 0.04);
+    --shadow-elevated: 0 12px 40px -12px hsl(217 56% 13% / 0.18);
+    --shadow-gold: 0 8px 24px -8px hsl(44 53% 54% / 0.45);
 
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -99,7 +70,61 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    direction: rtl;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: 'Heebo', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "kern" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
+  }
+
+  h1, h2, h3, h4, h5 {
+    @apply font-bold tracking-tight;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .gb-card {
+    @apply bg-card rounded-2xl border border-border;
+    box-shadow: var(--shadow-card);
+  }
+
+  .gb-card-flat {
+    @apply bg-card rounded-2xl border border-border;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .gb-hero {
+    background: var(--gradient-hero);
+    @apply text-primary-foreground;
+  }
+
+  .gb-gold-text {
+    @apply text-secondary;
+  }
+
+  .gb-gradient-gold {
+    background: var(--gradient-gold);
+  }
+
+  .gb-divider-gold {
+    @apply h-[2px] w-12 rounded-full;
+    background: var(--gradient-gold);
+  }
+
+  /* Hide scrollbar but keep scroll for category strip */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
   }
 }
