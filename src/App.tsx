@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/store/AppStore";
+import { RequireAdmin } from "@/components/auth/RequireAdmin";
 
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound.tsx";
@@ -22,6 +23,7 @@ import OfferEditor from "./pages/supplier/OfferEditor";
 import SupplierLeads from "./pages/supplier/SupplierLeads";
 import SupplierReviews from "./pages/supplier/SupplierReviews";
 
+import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProjects from "./pages/admin/AdminProjects";
 import AdminSuppliers from "./pages/admin/AdminSuppliers";
@@ -32,6 +34,8 @@ import AdminDeposits from "./pages/admin/AdminDeposits";
 import AdminStats from "./pages/admin/AdminStats";
 
 const queryClient = new QueryClient();
+
+const adminRoute = (el: React.ReactNode) => <RequireAdmin>{el}</RequireAdmin>;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -60,15 +64,16 @@ const App = () => (
             <Route path="/supplier/leads" element={<SupplierLeads />} />
             <Route path="/supplier/reviews" element={<SupplierReviews />} />
 
-            {/* Admin */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/projects" element={<AdminProjects />} />
-            <Route path="/admin/suppliers" element={<AdminSuppliers />} />
-            <Route path="/admin/residents" element={<AdminResidents />} />
-            <Route path="/admin/categories" element={<AdminCategories />} />
-            <Route path="/admin/deals" element={<AdminDeals />} />
-            <Route path="/admin/deposits" element={<AdminDeposits />} />
-            <Route path="/admin/stats" element={<AdminStats />} />
+            {/* Admin — hidden, gated */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={adminRoute(<AdminDashboard />)} />
+            <Route path="/admin/projects" element={adminRoute(<AdminProjects />)} />
+            <Route path="/admin/suppliers" element={adminRoute(<AdminSuppliers />)} />
+            <Route path="/admin/residents" element={adminRoute(<AdminResidents />)} />
+            <Route path="/admin/categories" element={adminRoute(<AdminCategories />)} />
+            <Route path="/admin/deals" element={adminRoute(<AdminDeals />)} />
+            <Route path="/admin/deposits" element={adminRoute(<AdminDeposits />)} />
+            <Route path="/admin/stats" element={adminRoute(<AdminStats />)} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
