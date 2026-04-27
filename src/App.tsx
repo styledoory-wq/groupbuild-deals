@@ -1,26 +1,80 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
+import { AppProvider } from "@/store/AppStore";
+
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound.tsx";
+
+import ResidentDashboard from "./pages/resident/ResidentDashboard";
+import ProjectsList from "./pages/resident/ProjectsList";
+import CategoriesList from "./pages/resident/CategoriesList";
+import DealsList from "./pages/resident/DealsList";
+import DealDetail from "./pages/resident/DealDetail";
+import ResidentProfile from "./pages/resident/ResidentProfile";
+import Notifications from "./pages/resident/Notifications";
+
+import SupplierDashboard from "./pages/supplier/SupplierDashboard";
+import SupplierOffers from "./pages/supplier/SupplierOffers";
+import OfferEditor from "./pages/supplier/OfferEditor";
+import SupplierLeads from "./pages/supplier/SupplierLeads";
+import SupplierReviews from "./pages/supplier/SupplierReviews";
+
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProjects from "./pages/admin/AdminProjects";
+import AdminSuppliers from "./pages/admin/AdminSuppliers";
+import AdminResidents from "./pages/admin/AdminResidents";
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminDeals from "./pages/admin/AdminDeals";
+import AdminDeposits from "./pages/admin/AdminDeposits";
+import AdminStats from "./pages/admin/AdminStats";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AppProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner position="top-center" dir="rtl" />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Auth />} />
+
+            {/* Resident */}
+            <Route path="/resident" element={<ResidentDashboard />} />
+            <Route path="/resident/projects" element={<ProjectsList />} />
+            <Route path="/resident/categories" element={<CategoriesList />} />
+            <Route path="/resident/categories/:categoryId" element={<DealsList />} />
+            <Route path="/resident/deals" element={<DealsList />} />
+            <Route path="/resident/deals/:dealId" element={<DealDetail />} />
+            <Route path="/resident/profile" element={<ResidentProfile />} />
+            <Route path="/resident/notifications" element={<Notifications />} />
+
+            {/* Supplier */}
+            <Route path="/supplier" element={<SupplierDashboard />} />
+            <Route path="/supplier/offers" element={<SupplierOffers />} />
+            <Route path="/supplier/offers/new" element={<OfferEditor />} />
+            <Route path="/supplier/leads" element={<SupplierLeads />} />
+            <Route path="/supplier/reviews" element={<SupplierReviews />} />
+
+            {/* Admin */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/projects" element={<AdminProjects />} />
+            <Route path="/admin/suppliers" element={<AdminSuppliers />} />
+            <Route path="/admin/residents" element={<AdminResidents />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/deals" element={<AdminDeals />} />
+            <Route path="/admin/deposits" element={<AdminDeposits />} />
+            <Route path="/admin/stats" element={<AdminStats />} />
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AppProvider>
   </QueryClientProvider>
 );
 
