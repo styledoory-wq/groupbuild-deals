@@ -57,10 +57,23 @@ function supplierIsIncomplete(s: Supplier) {
 }
 
 export default function AdminSuppliers() {
-  const { suppliers, setSuppliers, categories } = useApp();
+  const { suppliers, setSuppliers, categories, setCategories } = useApp();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [newCatOpen, setNewCatOpen] = useState(false);
+  const [newCat, setNewCat] = useState({ name: "", icon: "🏷️" });
+
+  const addCategory = () => {
+    const name = newCat.name.trim();
+    if (!name) { toast.error("יש להזין שם קטגוריה"); return; }
+    const id = `cat_${Date.now()}`;
+    setCategories([...categories, { id, name, icon: newCat.icon || "🏷️" }]);
+    setForm((f) => ({ ...f, categoryIds: [...f.categoryIds, id] }));
+    toast.success("הקטגוריה נוספה");
+    setNewCat({ name: "", icon: "🏷️" });
+    setNewCatOpen(false);
+  };
 
   const setStatus = (id: string, approvalStatus: "approved" | "rejected") => {
     setSuppliers(suppliers.map((s) => s.id === id ? { ...s, approvalStatus, verified: approvalStatus === "approved" } : s));
