@@ -57,10 +57,23 @@ function supplierIsIncomplete(s: Supplier) {
 }
 
 export default function AdminSuppliers() {
-  const { suppliers, setSuppliers, categories } = useApp();
+  const { suppliers, setSuppliers, categories, setCategories } = useApp();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [newCatOpen, setNewCatOpen] = useState(false);
+  const [newCat, setNewCat] = useState({ name: "", icon: "🏷️" });
+
+  const addCategory = () => {
+    const name = newCat.name.trim();
+    if (!name) { toast.error("יש להזין שם קטגוריה"); return; }
+    const id = `cat_${Date.now()}`;
+    setCategories([...categories, { id, name, icon: newCat.icon || "🏷️" }]);
+    setForm((f) => ({ ...f, categoryIds: [...f.categoryIds, id] }));
+    toast.success("הקטגוריה נוספה");
+    setNewCat({ name: "", icon: "🏷️" });
+    setNewCatOpen(false);
+  };
 
   const setStatus = (id: string, approvalStatus: "approved" | "rejected") => {
     setSuppliers(suppliers.map((s) => s.id === id ? { ...s, approvalStatus, verified: approvalStatus === "approved" } : s));
@@ -285,6 +298,13 @@ export default function AdminSuppliers() {
                     </button>
                   );
                 })}
+                <button
+                  type="button"
+                  onClick={() => setNewCatOpen(true)}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-bold border border-dashed border-gold text-primary bg-gold/10 inline-flex items-center gap-1"
+                >
+                  <Plus className="h-3 w-3" /> קטגוריה חדשה
+                </button>
               </div>
             </div>
 
@@ -385,6 +405,40 @@ export default function AdminSuppliers() {
       </Dialog>
 
       {/* Delete confirmation */}
+      {/* New category dialog */}
+      <Dialog open={newCatOpen} onOpenChange={setNewCatOpen}>
+        <DialogContent dir="rtl" className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-right">הוספת קטגוריה חדשה</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-2">
+            <div className="grid grid-cols-[80px_1fr] gap-3">
+              <div>
+                <Label className="text-xs">אייקון</Label>
+                <Input
+                  value={newCat.icon}
+                  onChange={(e) => setNewCat({ ...newCat, icon: e.target.value })}
+                  className="text-center text-2xl"
+                  maxLength={4}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">שם הקטגוריה *</Label>
+                <Input
+                  value={newCat.name}
+                  onChange={(e) => setNewCat({ ...newCat, name: e.target.value })}
+                  placeholder="לדוגמה: ריהוט גן"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="mt-4 gap-2 sm:gap-2">
+            <button onClick={() => setNewCatOpen(false)} className="h-10 px-4 rounded-xl bg-muted text-foreground text-sm font-bold flex-1">ביטול</button>
+            <button onClick={addCategory} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex-1">הוספה</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
