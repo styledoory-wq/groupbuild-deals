@@ -1,47 +1,64 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Briefcase, ShieldCheck, Phone, Mail, Sparkles } from "lucide-react";
+import { Building2, Briefcase, Phone, Mail, Sparkles } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { resolveRoleForIdentifier, setAdminSession } from "@/lib/auth";
+import { useHiddenAdminGesture } from "@/hooks/useHiddenAdminGesture";
 import type { Role } from "@/types";
 
 export default function Auth() {
   const navigate = useNavigate();
   const { loginDemo, setUser } = useApp();
-  const [role, setRole] = useState<Role>("resident");
+  const [role, setRole] = useState<Exclude<Role, "admin">>("resident");
   const [method, setMethod] = useState<"phone" | "email">("phone");
   const [value, setValue] = useState("");
 
+  const hiddenAdmin = useHiddenAdminGesture();
+
   const goRole = (r: Role) => {
     if (r === "resident") navigate("/resident");
-    if (r === "supplier") navigate("/supplier");
-    if (r === "admin") navigate("/admin");
+    else if (r === "supplier") navigate("/supplier");
+    else if (r === "admin") navigate("/admin");
   };
 
-  const handleDemo = (r: Role) => {
+  const handleDemo = (r: Exclude<Role, "admin">) => {
     loginDemo(r);
     goRole(r);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const resolved = resolveRoleForIdentifier(role, value);
+    if (resolved === "admin") {
+      // Identifier matches admin allowlist — grant admin session and route to admin.
+      setAdminSession(true);
+      setUser({
+        id: "u_admin",
+        role: "admin",
+        name: "מנהל מערכת",
+        phone: method === "phone" ? value : "",
+        email: method === "email" ? value : "",
+      });
+      navigate("/admin");
+      return;
+    }
     setUser({
       id: `u_${Date.now()}`,
-      role,
-      name: role === "resident" ? "דייר חדש" : role === "supplier" ? "ספק חדש" : "מנהל",
+      role: resolved,
+      name: resolved === "resident" ? "דייר חדש" : "ספק חדש",
       phone: method === "phone" ? value : "",
       email: method === "email" ? value : "",
-      projectId: role === "resident" ? "p1" : undefined,
+      projectId: resolved === "resident" ? "p1" : undefined,
     });
-    goRole(role);
+    goRole(resolved);
   };
 
-  const roles: { id: Role; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [
+  const roles: { id: Exclude<Role, "admin">; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [
     { id: "resident", label: "דייר", icon: Building2, desc: "הצטרפו לעסקאות" },
     { id: "supplier", label: "ספק", icon: Briefcase, desc: "צרו הצעות" },
-    { id: "admin", label: "מנהל", icon: ShieldCheck, desc: "ניהול מערכת" },
   ];
 
   return (
@@ -60,7 +77,13 @@ export default function Auth() {
 
             <h1 className="text-4xl font-extrabold leading-tight mb-3">
               ברוכים הבאים ל-
-              <span className="block gb-gold-text mt-1">GroupBuild</span>
+              <span
+                className="block gb-gold-text mt-1 cursor-pointer select-none"
+                {...hiddenAdmin}
+                aria-label="GroupBuild"
+              >
+                GroupBuild
+              </span>
             </h1>
             <div className="gb-divider-gold mb-4" />
             <p className="text-primary-foreground/70 text-sm leading-relaxed max-w-sm">
@@ -74,7 +97,7 @@ export default function Auth() {
           <div className="space-y-6 animate-fade-up">
             <div>
               <h2 className="text-lg font-bold mb-3">בחרו את התפקיד שלכם</h2>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {roles.map(({ id, label, icon: Icon, desc }) => (
                   <button
                     key={id}
