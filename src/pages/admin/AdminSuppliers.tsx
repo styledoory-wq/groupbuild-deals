@@ -405,6 +405,40 @@ export default function AdminSuppliers() {
       </Dialog>
 
       {/* Delete confirmation */}
+      {/* New category dialog */}
+      <Dialog open={newCatOpen} onOpenChange={setNewCatOpen}>
+        <DialogContent dir="rtl" className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-right">הוספת קטגוריה חדשה</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-2">
+            <div className="grid grid-cols-[80px_1fr] gap-3">
+              <div>
+                <Label className="text-xs">אייקון</Label>
+                <Input
+                  value={newCat.icon}
+                  onChange={(e) => setNewCat({ ...newCat, icon: e.target.value })}
+                  className="text-center text-2xl"
+                  maxLength={4}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">שם הקטגוריה *</Label>
+                <Input
+                  value={newCat.name}
+                  onChange={(e) => setNewCat({ ...newCat, name: e.target.value })}
+                  placeholder="לדוגמה: ריהוט גן"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="mt-4 gap-2 sm:gap-2">
+            <button onClick={() => setNewCatOpen(false)} className="h-10 px-4 rounded-xl bg-muted text-foreground text-sm font-bold flex-1">ביטול</button>
+            <button onClick={addCategory} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex-1">הוספה</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
