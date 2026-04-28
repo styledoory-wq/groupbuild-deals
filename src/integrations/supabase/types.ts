@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      cities: {
+        Row: {
+          created_at: string
+          id: string
+          name_he: string
+          region_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name_he: string
+          region_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name_he?: string
+          region_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cities_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deposits: {
         Row: {
           amount: number
@@ -64,40 +93,187 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           business_name: string | null
           city: string | null
           created_at: string
           email: string | null
           full_name: string | null
           id: string
+          interest_categories: string[]
+          is_active: boolean
+          notification_prefs: Json
           phone: string | null
           project_id: string | null
+          region: string | null
           updated_at: string
           user_type: string
         }
         Insert: {
+          address?: string | null
           business_name?: string | null
           city?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
+          interest_categories?: string[]
+          is_active?: boolean
+          notification_prefs?: Json
           phone?: string | null
           project_id?: string | null
+          region?: string | null
           updated_at?: string
           user_type?: string
         }
         Update: {
+          address?: string | null
           business_name?: string | null
           city?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
+          interest_categories?: string[]
+          is_active?: boolean
+          notification_prefs?: Json
           phone?: string | null
           project_id?: string | null
+          region?: string | null
           updated_at?: string
           user_type?: string
+        }
+        Relationships: []
+      }
+      regions: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name_he: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_he: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_he?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      supplier_cities: {
+        Row: {
+          city_id: string
+          supplier_id: string
+        }
+        Insert: {
+          city_id: string
+          supplier_id: string
+        }
+        Update: {
+          city_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_cities_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_cities_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_regions: {
+        Row: {
+          region_id: string
+          supplier_id: string
+        }
+        Insert: {
+          region_id: string
+          supplier_id: string
+        }
+        Update: {
+          region_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_regions_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_regions_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          approval_status: string
+          business_name: string
+          categories: string[]
+          contact_name: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          phone: string | null
+          serves_all_country: boolean
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          approval_status?: string
+          business_name: string
+          categories?: string[]
+          contact_name?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          serves_all_country?: boolean
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          approval_status?: string
+          business_name?: string
+          categories?: string[]
+          contact_name?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          serves_all_country?: boolean
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
