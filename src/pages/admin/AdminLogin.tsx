@@ -1,47 +1,67 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ShieldCheck, Lock, ArrowRight } from "lucide-react";
+import { ShieldCheck, Lock, ArrowRight, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useApp } from "@/store/AppStore";
-import { isAdminIdentifier, setAdminSession } from "@/lib/auth";
+import { ADMIN_EMAIL, isAdminEmail, setAdminSession } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
   const location = useLocation();
   const { setUser } = useApp();
-  const [identifier, setIdentifier] = useState("");
-  const [code, setCode] = useState("");
-  const [step, setStep] = useState<"identify" | "verify">("identify");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleIdentify = (e: React.FormEvent) => {
+  // If an admin session already exists, go straight to /admin
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session && isAdminEmail(data.session.user.email)) {
+        setAdminSession(true);
+        const from = (location.state as { from?: string } | null)?.from;
+        navigate(from && from.startsWith("/admin") ? from : "/admin", { replace: true });
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAdminIdentifier(identifier)) {
-      toast.error("פרטי הזיהוי אינם מורשים לגישת ניהול");
+    if (!isAdminEmail(email)) {
+      toast.error("אין לך הרשאה לגשת לאזור זה");
       return;
     }
-    // Demo: accept any 4+ digit code. In production this is OTP / Supabase Auth.
-    setStep("verify");
-    toast.success("נשלח קוד אימות לאדמין (דמו: הקלידו 4 ספרות)");
-  };
-
-  const handleVerify = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (code.trim().length < 4) {
-      toast.error("יש להזין קוד תקין");
-      return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) throw error;
+      if (!isAdminEmail(data.user?.email)) {
+        await supabase.auth.signOut();
+        toast.error("אין לך הרשאה לגשת לאזור זה");
+        return;
+      }
+      setAdminSession(true);
+      setUser({
+        id: data.user!.id,
+        role: "admin",
+        name: "מנהל מערכת",
+        phone: "",
+        email: data.user!.email ?? "",
+      });
+      const from = (location.state as { from?: string } | null)?.from;
+      navigate(from && from.startsWith("/admin") ? from : "/admin", { replace: true });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "ההתחברות נכשלה");
+    } finally {
+      setLoading(false);
     }
-    setAdminSession(true);
-    setUser({
-      id: "u_admin",
-      role: "admin",
-      name: "מנהל מערכת",
-      phone: identifier.includes("@") ? "" : identifier,
-      email: identifier.includes("@") ? identifier : "",
-    });
-    const from = (location.state as { from?: string } | null)?.from;
-    navigate(from && from.startsWith("/admin") ? from : "/admin", { replace: true });
   };
 
   return (
@@ -64,72 +84,50 @@ export default function AdminLogin() {
             <h1 className="text-3xl font-extrabold mb-2">כניסת ניהול</h1>
             <div className="gb-divider-gold mb-4" />
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
-              גישה מאובטחת לפאנל ניהול GroupBuild. רק מזהים מורשים יכולים להיכנס.
+              אזור זה מוגבל. רק חשבון המנהל המורשה יכול להיכנס.
             </p>
           </div>
         </div>
 
         <div className="mt-10 bg-background text-foreground rounded-3xl p-6 shadow-elevated animate-fade-up">
-          {step === "identify" ? (
-            <form onSubmit={handleIdentify} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-muted-foreground mb-2 block">
-                  טלפון או אימייל מנהל
-                </label>
-                <Input
-                  type="text"
-                  placeholder="הזן מזהה ניהול"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  className="h-12 rounded-2xl bg-card border-border text-base"
-                  dir="ltr"
-                  autoFocus
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold text-base shadow-card"
-              >
-                <Lock className="h-4 w-4 ml-2" />
-                המשך לאימות
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerify} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-muted-foreground mb-2 block">
-                  קוד אימות
-                </label>
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="••••"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  className="h-14 rounded-2xl bg-card border-border text-2xl text-center tracking-[0.5em] font-bold"
-                  dir="ltr"
-                  autoFocus
-                  maxLength={6}
-                />
-                <p className="text-[11px] text-muted-foreground text-center mt-2">
-                  במצב דמו — כל קוד בן 4 ספרות יתקבל
-                </p>
-              </div>
-              <Button
-                type="submit"
-                className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold text-base shadow-gold"
-              >
-                כניסה לפאנל הניהול
-              </Button>
-              <button
-                type="button"
-                onClick={() => setStep("identify")}
-                className="w-full text-xs text-muted-foreground hover:text-primary transition-smooth"
-              >
-                חזרה לזיהוי
-              </button>
-            </form>
-          )}
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="text-xs font-bold text-muted-foreground mb-2 block flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5" /> אימייל מנהל
+              </label>
+              <Input
+                type="email"
+                placeholder={ADMIN_EMAIL}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-12 rounded-2xl bg-card border-border text-base"
+                dir="ltr"
+                autoFocus
+                required
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-muted-foreground mb-2 block flex items-center gap-1.5">
+                <Lock className="h-3.5 w-3.5" /> סיסמה
+              </label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-12 rounded-2xl bg-card border-border text-base"
+                dir="ltr"
+                required
+                minLength={6}
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold text-base shadow-gold"
+            >
+              {loading ? "מתחבר…" : "כניסה לפאנל הניהול"}
+            </Button>
+          </form>
         </div>
 
         <p className="text-center text-[11px] text-primary-foreground/50 mt-6">
