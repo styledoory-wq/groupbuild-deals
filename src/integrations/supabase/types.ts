@@ -325,6 +325,45 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_leads: {
+        Row: {
+          business_name: string | null
+          category: string | null
+          city: string | null
+          created_at: string
+          full_name: string
+          id: string
+          lead_type: string
+          phone: string
+          project_name: string | null
+          service_areas: string | null
+        }
+        Insert: {
+          business_name?: string | null
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          lead_type: string
+          phone: string
+          project_name?: string | null
+          service_areas?: string | null
+        }
+        Update: {
+          business_name?: string | null
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          lead_type?: string
+          phone?: string
+          project_name?: string | null
+          service_areas?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

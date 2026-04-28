@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/store/AppStore";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
 
+import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound.tsx";
@@ -53,7 +54,8 @@ const App = () => (
         <Sonner position="top-center" dir="rtl" />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Auth />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Resident */}
