@@ -18,34 +18,49 @@ type LeadType = "resident" | "supplier";
 export default function Landing() {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
-  const [checking, setChecking] = useState(true);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userType, setUserType] = useState<"resident" | "supplier">("resident");
 
-  // If already logged in → route by role.
+  // Detect session WITHOUT auto-redirecting. Landing always renders.
   useEffect(() => {
     let cancelled = false;
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    const load = async (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
       if (cancelled) return;
       if (!session) {
-        setChecking(false);
+        setIsAuthed(false);
+        setUserEmail("");
         return;
       }
-      const email = session.user.email ?? "";
-      if (isAdminEmail(email)) {
-        navigate("/admin", { replace: true });
-        return;
-      }
+      setIsAuthed(true);
+      setUserEmail(session.user.email ?? "");
       const { data: profile } = await supabase
         .from("profiles")
         .select("user_type")
         .eq("id", session.user.id)
         .maybeSingle();
-      const t = profile?.user_type ?? "resident";
-      navigate(t === "supplier" ? "/supplier" : "/resident", { replace: true });
-    });
+      if (cancelled) return;
+      setUserType((profile?.user_type as "resident" | "supplier") ?? "resident");
+    };
+    supabase.auth.getSession().then(({ data: { session } }) => load(session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => load(session));
     return () => {
       cancelled = true;
+      sub.subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
+
+  const goToDashboard = () => {
+    if (!isAuthed) {
+      navigate("/auth");
+      return;
+    }
+    if (isAdminEmail(userEmail)) {
+      navigate("/admin");
+      return;
+    }
+    navigate(userType === "supplier" ? "/supplier" : "/resident");
+  };
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -91,13 +106,6 @@ export default function Landing() {
     }
   };
 
-  if (checking) {
-    return (
-      <div className="min-h-screen bg-primary flex items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-2 border-gold border-t-transparent animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-primary text-primary-foreground flex justify-center">
@@ -113,13 +121,23 @@ export default function Landing() {
                 <span className="gb-gold-text">Group</span>Build
               </span>
             </div>
-            <Button
-              type="button"
-              onClick={scrollToForm}
-              className="h-9 px-4 rounded-xl bg-gradient-gold text-primary hover:opacity-90 font-bold text-xs shadow-gold"
-            >
-              הצטרף לרשימה
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                onClick={goToDashboard}
+                variant="ghost"
+                className="h-9 px-3 rounded-xl text-primary-foreground hover:text-gold hover:bg-white/5 font-bold text-xs"
+              >
+                {isAuthed ? "המשך לדשבורד" : "כניסה לחשבון"}
+              </Button>
+              <Button
+                type="button"
+                onClick={scrollToForm}
+                className="h-9 px-4 rounded-xl bg-gradient-gold text-primary hover:opacity-90 font-bold text-xs shadow-gold"
+              >
+                הצטרף לרשימה
+              </Button>
+            </div>
           </div>
         </header>
 
@@ -158,10 +176,10 @@ export default function Landing() {
               </Button>
               <button
                 type="button"
-                onClick={() => navigate("/auth")}
+                onClick={goToDashboard}
                 className="text-xs text-primary-foreground/70 hover:text-gold underline-offset-4 hover:underline transition-smooth"
               >
-                כבר יש לך חשבון? התחבר
+                {isAuthed ? "המשך לדשבורד שלך ←" : "כבר יש לך חשבון? התחבר"}
               </button>
             </div>
           </div>
