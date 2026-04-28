@@ -8,12 +8,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/auth";
 import { toast } from "sonner";
 
 type LeadType = "resident" | "supplier";
+type Region = { id: string; name_he: string };
+type City = { id: string; name_he: string; region_id: string };
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -70,12 +75,31 @@ export default function Landing() {
   const [leadType, setLeadType] = useState<LeadType>("resident");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [city, setCity] = useState("");
+  const [regionId, setRegionId] = useState("");
+  const [cityId, setCityId] = useState("");
   const [projectName, setProjectName] = useState("");
   const [businessName, setBusinessName] = useState("");
-  const [serviceAreas, setServiceAreas] = useState("");
+  const [supplierRegionId, setSupplierRegionId] = useState("");
   const [category, setCategory] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Real regions & cities from DB
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  useEffect(() => {
+    (async () => {
+      const [r, c] = await Promise.all([
+        supabase.from("regions").select("id,name_he").order("display_order"),
+        supabase.from("cities").select("id,name_he,region_id").order("name_he"),
+      ]);
+      if (r.data) setRegions(r.data as Region[]);
+      if (c.data) setCities(c.data as City[]);
+    })();
+  }, []);
+
+  const filteredCities = regionId
+    ? cities.filter((c) => c.region_id === regionId)
+    : [];
 
   const submitLead = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,21 +107,35 @@ export default function Landing() {
       toast.error("נא למלא שם וטלפון");
       return;
     }
+    if (leadType === "resident" && (!regionId || !cityId)) {
+      toast.error("נא לבחור אזור ועיר מהרשימה");
+      return;
+    }
+    if (leadType === "supplier" && !supplierRegionId) {
+      toast.error("נא לבחור אזור שירות מהרשימה");
+      return;
+    }
+
+    // Resolve names from selected IDs (only real values can be saved)
+    const selectedRegion = regions.find((r) => r.id === regionId);
+    const selectedCity = cities.find((c) => c.id === cityId);
+    const selectedSupplierRegion = regions.find((r) => r.id === supplierRegionId);
+
     setSubmitting(true);
     try {
       const { error } = await supabase.from("waitlist_leads").insert({
         lead_type: leadType,
         full_name: fullName.trim(),
         phone: phone.trim(),
-        city: leadType === "resident" ? city.trim() || null : null,
+        city: leadType === "resident" ? selectedCity?.name_he ?? null : null,
         project_name: leadType === "resident" ? projectName.trim() || null : null,
         business_name: leadType === "supplier" ? businessName.trim() || null : null,
-        service_areas: leadType === "supplier" ? serviceAreas.trim() || null : null,
+        service_areas: leadType === "supplier" ? selectedSupplierRegion?.name_he ?? null : null,
         category: leadType === "supplier" ? category.trim() || null : null,
       });
       if (error) throw error;
-      setFullName(""); setPhone(""); setCity(""); setProjectName("");
-      setBusinessName(""); setServiceAreas(""); setCategory("");
+      setFullName(""); setPhone(""); setRegionId(""); setCityId(""); setProjectName("");
+      setBusinessName(""); setSupplierRegionId(""); setCategory("");
       navigate("/thank-you");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שליחה נכשלה, נסו שוב");
@@ -257,14 +295,40 @@ export default function Landing() {
               <>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 gb-gold-text" /> אזור
+                  </Label>
+                  <Select
+                    value={regionId}
+                    onValueChange={(v) => { setRegionId(v); setCityId(""); }}
+                  >
+                    <SelectTrigger className="h-12 rounded-2xl bg-card border-border">
+                      <SelectValue placeholder="בחר אזור" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {regions.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>{r.name_he}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5 gb-gold-text" /> עיר / יישוב
                   </Label>
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="תל אביב"
-                    className="h-12 rounded-2xl bg-card border-border"
-                  />
+                  <Select
+                    value={cityId}
+                    onValueChange={setCityId}
+                    disabled={!regionId}
+                  >
+                    <SelectTrigger className="h-12 rounded-2xl bg-card border-border">
+                      <SelectValue placeholder={regionId ? "בחר עיר" : "בחר אזור קודם"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredCities.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name_he}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
@@ -293,14 +357,18 @@ export default function Landing() {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 gb-gold-text" /> אזורי שירות
+                    <MapPin className="h-3.5 w-3.5 gb-gold-text" /> אזור שירות
                   </Label>
-                  <Input
-                    value={serviceAreas}
-                    onChange={(e) => setServiceAreas(e.target.value)}
-                    placeholder="גוש דן, השרון…"
-                    className="h-12 rounded-2xl bg-card border-border"
-                  />
+                  <Select value={supplierRegionId} onValueChange={setSupplierRegionId}>
+                    <SelectTrigger className="h-12 rounded-2xl bg-card border-border">
+                      <SelectValue placeholder="בחר אזור שירות" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {regions.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>{r.name_he}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
