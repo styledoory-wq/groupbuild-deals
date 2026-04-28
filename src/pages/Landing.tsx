@@ -349,7 +349,7 @@ export default function Landing() {
         </section>
 
         {/* STATS */}
-        <section className="bg-background px-6 pb-10">
+        <section className="bg-background text-foreground px-6 pb-10">
           <div className="grid grid-cols-2 gap-3">
             {[
               { v: "+240", l: "דירות בפרויקט הדגמה" },
