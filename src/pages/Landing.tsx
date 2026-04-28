@@ -295,14 +295,40 @@ export default function Landing() {
               <>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 gb-gold-text" /> אזור
+                  </Label>
+                  <Select
+                    value={regionId}
+                    onValueChange={(v) => { setRegionId(v); setCityId(""); }}
+                  >
+                    <SelectTrigger className="h-12 rounded-2xl bg-card border-border">
+                      <SelectValue placeholder="בחר אזור" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {regions.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>{r.name_he}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5 gb-gold-text" /> עיר / יישוב
                   </Label>
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="תל אביב"
-                    className="h-12 rounded-2xl bg-card border-border"
-                  />
+                  <Select
+                    value={cityId}
+                    onValueChange={setCityId}
+                    disabled={!regionId}
+                  >
+                    <SelectTrigger className="h-12 rounded-2xl bg-card border-border">
+                      <SelectValue placeholder={regionId ? "בחר עיר" : "בחר אזור קודם"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredCities.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name_he}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
@@ -331,14 +357,18 @@ export default function Landing() {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 gb-gold-text" /> אזורי שירות
+                    <MapPin className="h-3.5 w-3.5 gb-gold-text" /> אזור שירות
                   </Label>
-                  <Input
-                    value={serviceAreas}
-                    onChange={(e) => setServiceAreas(e.target.value)}
-                    placeholder="גוש דן, השרון…"
-                    className="h-12 rounded-2xl bg-card border-border"
-                  />
+                  <Select value={supplierRegionId} onValueChange={setSupplierRegionId}>
+                    <SelectTrigger className="h-12 rounded-2xl bg-card border-border">
+                      <SelectValue placeholder="בחר אזור שירות" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {regions.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>{r.name_he}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
