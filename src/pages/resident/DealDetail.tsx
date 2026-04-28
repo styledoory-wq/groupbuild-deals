@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
-import { Star, Shield, Clock, TrendingDown, Users, Check, Sparkles } from "lucide-react";
+import { Star, Shield, Clock, TrendingDown, Users, Check, Sparkles, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -9,12 +9,14 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { formatILS, getActiveTier, getNextTier, useApp } from "@/store/AppStore";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function DealDetail() {
   const { dealId } = useParams();
-  const { deals, suppliers, categories, joinDeal, payDeposit, deposits, user } = useApp();
+  const { deals, suppliers, categories, joinDeal, deposits, user } = useApp();
   const deal = deals.find((d) => d.id === dealId);
   const [joined, setJoined] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   if (!deal) {
     return (
@@ -38,9 +40,30 @@ export default function DealDetail() {
     toast.success("הצטרפת לעסקה! עכשיו שלמו פיקדון להבטחת המקום.");
   };
 
-  const handleDeposit = () => {
-    payDeposit(deal.id);
-    toast.success("הפיקדון התקבל בהצלחה ✨");
+  const handleDeposit = async () => {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      toast.error("יש להתחבר עם חשבון אמיתי כדי לשלם פיקדון");
+      return;
+    }
+    setPaying(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-deposit", {
+        body: { deal_id: deal.id, amount: deal.depositAmount },
+      });
+      if (error) throw error;
+      if (!data?.payment_url) throw new Error("לא התקבל קישור תשלום");
+      // Redirect to provider hosted page
+      window.location.href = data.payment_url;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "שגיאה ביצירת תשלום";
+      if (msg.includes("not yet configured") || msg.includes("provider_unavailable")) {
+        toast.error("ספק הסליקה עדיין לא מחובר. צרו קשר עם המנהל.");
+      } else {
+        toast.error(msg);
+      }
+      setPaying(false);
+    }
   };
 
   return (
@@ -174,16 +197,16 @@ export default function DealDetail() {
                 <Check className="h-5 w-5 ml-2" /> הפיקדון שלך התקבל
               </Button>
             ) : joined ? (
-              <Button onClick={handleDeposit} className="w-full h-12 rounded-2xl bg-gradient-gold hover:opacity-90 text-primary font-bold shadow-gold">
-                שלמו פיקדון {formatILS(deal.depositAmount)}
+              <Button onClick={handleDeposit} disabled={paying} className="w-full h-12 rounded-2xl bg-gradient-gold hover:opacity-90 text-primary font-bold shadow-gold">
+                {paying ? <Loader2 className="h-5 w-5 animate-spin" /> : `שלמו פיקדון ${formatILS(deal.depositAmount)}`}
               </Button>
             ) : (
               <>
                 <Button onClick={handleJoin} variant="outline" className="flex-1 h-12 rounded-2xl border-2 border-primary text-primary font-bold">
                   הצטרפו לעסקה
                 </Button>
-                <Button onClick={handleDeposit} className="flex-1 h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold">
-                  פיקדון {formatILS(deal.depositAmount)}
+                <Button onClick={handleDeposit} disabled={paying} className="flex-1 h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold">
+                  {paying ? <Loader2 className="h-5 w-5 animate-spin" /> : `פיקדון ${formatILS(deal.depositAmount)}`}
                 </Button>
               </>
             )}
