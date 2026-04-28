@@ -33,8 +33,9 @@ export default function ResetPassword() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      toast.success("הסיסמה עודכנה בהצלחה");
-      navigate("/");
+      toast.success("הסיסמה עודכנה בהצלחה. התחברו עם הסיסמה החדשה.");
+      await supabase.auth.signOut();
+      navigate("/", { replace: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "עדכון הסיסמה נכשל");
     } finally {
