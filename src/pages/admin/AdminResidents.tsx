@@ -90,6 +90,9 @@ export default function AdminResidents() {
         finalProjectId = newProj.id;
       }
 
+      // Save current admin session so signUp doesn't kick admin out
+      const { data: currentSession } = await supabase.auth.getSession();
+
       // Create the auth user via signUp (auto-confirm is enabled)
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
@@ -112,6 +115,14 @@ export default function AdminResidents() {
         await supabase.from("profiles")
           .update({ project_id: finalProjectId, phone, city: city || (createNewProject ? newProjectCity : "") })
           .eq("id", data.user.id);
+      }
+
+      // Restore admin session
+      if (currentSession.session) {
+        await supabase.auth.setSession({
+          access_token: currentSession.session.access_token,
+          refresh_token: currentSession.session.refresh_token,
+        });
       }
 
       toast.success("הדייר נוסף בהצלחה");
