@@ -64,10 +64,12 @@ const App = () => (
             <Route path="/resident/deals" element={<DealsList />} />
             <Route path="/resident/deals/:dealId" element={<DealDetail />} />
             <Route path="/resident/profile" element={<ResidentProfile />} />
+            <Route path="/resident/profile/edit" element={<ResidentProfileEdit />} />
             <Route path="/resident/notifications" element={<Notifications />} />
 
             {/* Supplier */}
             <Route path="/supplier" element={<SupplierDashboard />} />
+            <Route path="/supplier/profile/edit" element={<SupplierProfileEdit />} />
             <Route path="/supplier/offers" element={<SupplierOffers />} />
             <Route path="/supplier/offers/new" element={<OfferEditor />} />
             <Route path="/supplier/leads" element={<SupplierLeads />} />
@@ -84,6 +86,7 @@ const App = () => (
             <Route path="/admin/deals" element={adminRoute(<AdminDeals />)} />
             <Route path="/admin/deposits" element={adminRoute(<AdminDeposits />)} />
             <Route path="/admin/payment-settings" element={adminRoute(<AdminPaymentSettings />)} />
+            <Route path="/admin/regions" element={adminRoute(<AdminRegions />)} />
             <Route path="/admin/stats" element={adminRoute(<AdminStats />)} />
 
             {/* Payment callbacks */}
