@@ -32,6 +32,10 @@ import AdminCategories from "./pages/admin/AdminCategories";
 import AdminDeals from "./pages/admin/AdminDeals";
 import AdminDeposits from "./pages/admin/AdminDeposits";
 import AdminStats from "./pages/admin/AdminStats";
+import AdminPaymentSettings from "./pages/admin/AdminPaymentSettings";
+
+import PaymentSuccess from "./pages/payment/PaymentSuccess";
+import PaymentCancel from "./pages/payment/PaymentCancel";
 
 const queryClient = new QueryClient();
 
@@ -73,7 +77,12 @@ const App = () => (
             <Route path="/admin/categories" element={adminRoute(<AdminCategories />)} />
             <Route path="/admin/deals" element={adminRoute(<AdminDeals />)} />
             <Route path="/admin/deposits" element={adminRoute(<AdminDeposits />)} />
+            <Route path="/admin/payment-settings" element={adminRoute(<AdminPaymentSettings />)} />
             <Route path="/admin/stats" element={adminRoute(<AdminStats />)} />
+
+            {/* Payment callbacks */}
+            <Route path="/payment/success" element={<PaymentSuccess />} />
+            <Route path="/payment/cancel" element={<PaymentCancel />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
