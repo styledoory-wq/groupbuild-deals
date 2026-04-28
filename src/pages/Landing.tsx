@@ -134,6 +134,22 @@ export default function Landing() {
         category: leadType === "supplier" ? category.trim() || null : null,
       });
       if (error) throw error;
+      // Notify admin (best effort, don't block on failure)
+      supabase.functions.invoke("notify-admin", {
+        body: {
+          event: "waitlist_lead",
+          title: leadType === "resident" ? "דייר חדש ברשימת המתנה" : "ספק חדש ברשימת המתנה",
+          details: {
+            full_name: fullName.trim(),
+            phone: phone.trim(),
+            lead_type: leadType,
+            city: selectedCity?.name_he,
+            region: selectedRegion?.name_he,
+            business_name: businessName,
+            category,
+          },
+        },
+      }).catch(() => { /* ignore */ });
       setFullName(""); setPhone(""); setRegionId(""); setCityId(""); setProjectName("");
       setBusinessName(""); setSupplierRegionId(""); setCategory("");
       navigate("/thank-you");
