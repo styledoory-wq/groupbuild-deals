@@ -10,6 +10,7 @@ import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound.tsx";
+import ThankYou from "./pages/ThankYou";
 
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
 import ProjectsList from "./pages/resident/ProjectsList";
