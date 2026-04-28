@@ -7,6 +7,7 @@ import { AppProvider } from "@/store/AppStore";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
 
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound.tsx";
 
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
@@ -50,6 +51,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Resident */}
             <Route path="/resident" element={<ResidentDashboard />} />
