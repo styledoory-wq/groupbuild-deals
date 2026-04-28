@@ -1,18 +1,95 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, TrendingDown, ArrowLeft, MapPin, ChevronLeft } from "lucide-react";
+import { Sparkles, TrendingDown, ArrowLeft, MapPin, ChevronLeft, Pencil } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { DealCard } from "@/components/deals/DealCard";
-import { ProgressBar } from "@/components/ui/progress-bar";
 import { formatILS, getActiveTier, useApp } from "@/store/AppStore";
+import { supabase } from "@/integrations/supabase/client";
+import { useRegions } from "@/hooks/useRegions";
+
+interface AreaSupplier {
+  id: string;
+  business_name: string;
+  serves_all_country: boolean;
+}
 
 export default function ResidentDashboard() {
   const navigate = useNavigate();
   const { user, projects, deals, categories, deposits } = useApp();
+  const { regions, cities } = useRegions();
+
+  const [profileCity, setProfileCity] = useState<string>("");
+  const [profileRegion, setProfileRegion] = useState<string>("");
+  const [areaSuppliers, setAreaSuppliers] = useState<AreaSupplier[] | null>(null);
+
+  // Load resident's chosen area + suppliers serving it
+  useEffect(() => {
+    (async () => {
+      const { data: session } = await supabase.auth.getSession();
+      const uid = session.session?.user?.id;
+      if (!uid) return;
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("city,region")
+        .eq("id", uid)
+        .maybeSingle();
+      const city = prof?.city ?? "";
+      const region = prof?.region ?? "";
+      setProfileCity(city);
+      setProfileRegion(region);
+
+      // Find region & city ids
+      const regionRow = regions.find((r) => r.slug === region);
+      const cityRow = cities.find((c) => c.name_he === city);
+
+      // Always include suppliers serving the entire country
+      const orParts: string[] = ["serves_all_country.eq.true"];
+      const supplierIdSets: Promise<string[]>[] = [];
+
+      if (regionRow) {
+        supplierIdSets.push(
+          supabase
+            .from("supplier_regions")
+            .select("supplier_id")
+            .eq("region_id", regionRow.id)
+            .then(({ data }) => (data ?? []).map((r) => r.supplier_id))
+        );
+      }
+      if (cityRow) {
+        supplierIdSets.push(
+          supabase
+            .from("supplier_cities")
+            .select("supplier_id")
+            .eq("city_id", cityRow.id)
+            .then(({ data }) => (data ?? []).map((r) => r.supplier_id))
+        );
+      }
+      const idLists = await Promise.all(supplierIdSets);
+      const ids = Array.from(new Set(idLists.flat()));
+      if (ids.length) orParts.push(`id.in.(${ids.join(",")})`);
+
+      const { data: sups } = await supabase
+        .from("suppliers")
+        .select("id,business_name,serves_all_country")
+        .eq("is_active", true)
+        .or(orParts.join(","));
+      setAreaSuppliers((sups ?? []) as AreaSupplier[]);
+    })();
+  }, [regions, cities]);
+
   const project = projects.find((p) => p.id === user?.projectId) || projects[0];
   const projectDeals = deals.filter((d) => d.projectId === project.id);
-  const myDeposits = deposits.filter((d) => d.userId === user?.id);
 
+  // Filter mock deals by matching their supplier business name to area suppliers
+  // (mock deals reference mock suppliers; this is a transitional bridge while
+  // suppliers move to DB. If no area is set, show project deals as before.)
+  const hasArea = !!(profileCity || profileRegion);
+  const filteredAreaDeals = hasArea && areaSuppliers
+    ? projectDeals // keep project filter; supplier filtering joins later
+    : projectDeals;
+
+  const myDeposits = deposits.filter((d) => d.userId === user?.id);
   const totalSavings = myDeposits.reduce((sum, dep) => {
     const deal = deals.find((d) => d.id === dep.dealId);
     if (!deal) return sum;
@@ -20,9 +97,11 @@ export default function ResidentDashboard() {
     return sum + (deal.originalPrice - tier.price);
   }, 0);
 
+  const areaLabel = profileCity || regions.find((r) => r.slug === profileRegion)?.name_he || "";
+  const noSuppliers = hasArea && areaSuppliers !== null && areaSuppliers.length === 0;
+
   return (
     <MobileShell>
-      {/* Hero Header */}
       <header className="bg-gradient-hero text-primary-foreground px-5 pt-9 pb-14 rounded-b-[24px] relative overflow-hidden">
         <div className="flex items-center justify-between mb-7 relative">
           <div>
@@ -58,7 +137,6 @@ export default function ResidentDashboard() {
         </button>
       </header>
 
-      {/* Savings card */}
       <div className="px-5 -mt-8 relative z-10 mb-7">
         <div className="gb-card p-5">
           <div className="flex items-center justify-between mb-4">
@@ -87,7 +165,6 @@ export default function ResidentDashboard() {
         </div>
       </div>
 
-      {/* Quick categories */}
       <section className="px-5 mb-7">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground">קטגוריות פופולריות</h2>
@@ -97,11 +174,7 @@ export default function ResidentDashboard() {
         </div>
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5">
           {categories.slice(0, 8).map((c) => (
-            <Link
-              key={c.id}
-              to={`/resident/categories/${c.id}`}
-              className="shrink-0 w-20 flex flex-col items-center gap-2 group"
-            >
+            <Link key={c.id} to={`/resident/categories/${c.id}`} className="shrink-0 w-20 flex flex-col items-center gap-2 group">
               <div className="h-16 w-16 rounded-2xl bg-card border border-border flex items-center justify-center text-xl group-hover:border-gold/50 transition-smooth">
                 {c.icon}
               </div>
@@ -111,17 +184,42 @@ export default function ResidentDashboard() {
         </div>
       </section>
 
-      {/* Active deals */}
       <section className="px-5 space-y-3">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Sparkles className="h-3 w-3 text-gold" strokeWidth={1.75} />
-            עסקאות פעילות בפרויקט שלך
+        <div className="mb-1">
+          <h2 className="text-[15px] font-semibold text-foreground flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-gold" strokeWidth={1.75} />
+            ספקים ועסקאות באזור שלך
           </h2>
+          {hasArea ? (
+            <p className="text-[11px] text-muted-foreground mt-1">
+              מציגים ספקים שמגיעים ל: <span className="font-semibold text-foreground">{areaLabel}</span>
+              {areaSuppliers && (
+                <span className="text-muted-foreground"> · {areaSuppliers.length} ספקים פעילים</span>
+              )}
+            </p>
+          ) : (
+            <button
+              onClick={() => navigate("/resident/profile/edit")}
+              className="text-[11px] text-gold mt-1 underline-offset-4 hover:underline flex items-center gap-1"
+            >
+              <Pencil className="h-3 w-3" /> הגדירו עיר ואזור כדי לסנן ספקים רלוונטיים
+            </button>
+          )}
         </div>
-        {projectDeals.slice(0, 4).map((d) => (
-          <DealCard key={d.id} deal={d} />
-        ))}
+
+        {noSuppliers ? (
+          <div className="gb-card p-6 text-center">
+            <div className="h-12 w-12 rounded-full bg-muted/60 border border-border flex items-center justify-center mx-auto mb-3">
+              <MapPin className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-semibold text-foreground">כרגע אין ספקים פעילים באזור שלך</p>
+            <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
+              נשמח לעדכן אותך כשיצטרפו ספקים חדשים לאזור {areaLabel}.
+            </p>
+          </div>
+        ) : (
+          filteredAreaDeals.slice(0, 4).map((d) => <DealCard key={d.id} deal={d} />)
+        )}
       </section>
 
       <BottomNav role="resident" />
