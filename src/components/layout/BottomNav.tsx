@@ -1,9 +1,9 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, LayoutGrid, Tag, User, Bell, Briefcase, BarChart3, Users, Building2, ShieldCheck } from "lucide-react";
+import { Home, LayoutGrid, Tag, User, Bell, Briefcase, BarChart3, Users, Building2, ShieldCheck, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types";
 
-const items: Record<Role, { to: string; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> }[]> = {
+const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
   resident: [
     { to: "/resident", label: "בית", icon: Home },
     { to: "/resident/categories", label: "קטגוריות", icon: LayoutGrid },
