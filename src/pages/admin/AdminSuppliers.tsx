@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
-import { ShieldCheck, Star, Check, X, Plus, Pencil, Trash2, AlertCircle } from "lucide-react";
+import { ShieldCheck, Star, Check, X, Plus, Pencil, Trash2, AlertCircle, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -57,6 +58,7 @@ function supplierIsIncomplete(s: Supplier) {
 }
 
 export default function AdminSuppliers() {
+  const navigate = useNavigate();
   const { suppliers, setSuppliers, categories, setCategories } = useApp();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
@@ -210,12 +212,18 @@ export default function AdminSuppliers() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="grid grid-cols-3 gap-2 mt-2">
                 <button
                   onClick={() => openEdit(s)}
                   className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-bold flex items-center justify-center gap-1"
                 >
-                  <Pencil className="h-3.5 w-3.5" /> {incomplete ? "השלמת פרטים" : "עריכה"}
+                  <Pencil className="h-3.5 w-3.5" /> {incomplete ? "השלמה" : "עריכה"}
+                </button>
+                <button
+                  onClick={() => navigate(`/admin/suppliers/${s.id}/areas`)}
+                  className="h-9 rounded-xl bg-gold/10 text-primary border border-gold/30 text-xs font-bold flex items-center justify-center gap-1"
+                >
+                  <MapPin className="h-3.5 w-3.5" /> אזורים
                 </button>
                 <button
                   onClick={() => setDeleteId(s.id)}
