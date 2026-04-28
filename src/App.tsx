@@ -72,6 +72,7 @@ const App = () => (
 
             {/* Admin — hidden, gated */}
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/admin" element={adminRoute(<AdminDashboard />)} />
             <Route path="/admin/projects" element={adminRoute(<AdminProjects />)} />
             <Route path="/admin/suppliers" element={adminRoute(<AdminSuppliers />)} />
