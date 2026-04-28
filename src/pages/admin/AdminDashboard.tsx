@@ -32,7 +32,7 @@ export default function AdminDashboard() {
             <div className="gb-divider-gold mt-3" />
           </div>
           <button
-            onClick={() => { logout(); navigate("/"); }}
+            onClick={handleLogout}
             className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 flex items-center justify-center transition-smooth"
             aria-label="יציאה"
           >
