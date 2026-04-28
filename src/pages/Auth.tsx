@@ -85,6 +85,25 @@ export default function Auth() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      toast.error("הזינו אימייל ואז לחצו 'שכחתי סיסמה'");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("שלחנו אליכם קישור לאיפוס סיסמה במייל");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "שליחת מייל איפוס נכשלה");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim()) return;
@@ -198,6 +217,10 @@ export default function Auth() {
                 {loading ? "מתחבר…" : "התחברות"}
                 <ArrowLeft className="h-4 w-4" />
               </Button>
+              <button type="button" onClick={handleForgotPassword} disabled={loading}
+                className="w-full text-center text-xs text-muted-foreground hover:text-primary underline-offset-4 hover:underline transition-smooth">
+                שכחתי סיסמה
+              </button>
             </form>
           ) : (
             <form onSubmit={handleSignUp} className="space-y-4 animate-fade-up">
