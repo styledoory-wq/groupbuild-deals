@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Briefcase, TrendingUp, Users, DollarSign, Plus, Star, LogOut, type LucideIcon } from "lucide-react";
+import { Briefcase, TrendingUp, Users, DollarSign, Plus, Star, LogOut, Pencil, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -51,12 +51,19 @@ export default function SupplierDashboard() {
         </div>
       </header>
 
-      <div className="px-5 -mt-8 relative z-10 mb-6">
+      <div className="px-5 -mt-8 relative z-10 mb-6 space-y-2">
         <Button
           onClick={() => navigate("/supplier/offers/new")}
           className="w-full h-12 rounded-xl bg-primary hover:bg-primary-soft text-primary-foreground font-semibold shadow-soft"
         >
           <Plus className="h-4 w-4 ml-2" strokeWidth={2} /> צרו הצעה חדשה
+        </Button>
+        <Button
+          onClick={() => navigate("/supplier/profile/edit")}
+          variant="outline"
+          className="w-full h-11 rounded-xl border-border"
+        >
+          <Pencil className="h-4 w-4 ml-2" /> עריכת פרופיל ואזורי שירות
         </Button>
       </div>
 
