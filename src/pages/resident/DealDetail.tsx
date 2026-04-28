@@ -15,8 +15,24 @@ export default function DealDetail() {
   const { dealId } = useParams();
   const { deals, suppliers, categories, joinDeal, deposits, user } = useApp();
   const deal = deals.find((d) => d.id === dealId);
-  const [joined, setJoined] = useState(false);
+  const [interested, setInterested] = useState(false);
+  const [submittingInterest, setSubmittingInterest] = useState(false);
   const [paying, setPaying] = useState(false);
+
+  // Load existing interest from DB
+  useState(() => {
+    (async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session || !dealId) return;
+      const { data } = await supabase
+        .from("deal_interests")
+        .select("id")
+        .eq("user_id", session.session.user.id)
+        .eq("deal_id", dealId)
+        .maybeSingle();
+      if (data) setInterested(true);
+    })();
+  });
 
   if (!deal) {
     return (
@@ -34,10 +50,36 @@ export default function DealDetail() {
   const savings = Math.round(((deal.originalPrice - tier.price) / deal.originalPrice) * 100);
   const paidByMe = deposits.some((d) => d.dealId === deal.id && d.userId === user?.id);
 
-  const handleJoin = () => {
-    joinDeal(deal.id);
-    setJoined(true);
-    toast.success("הצטרפת לעסקה! עכשיו שלמו פיקדון להבטחת המקום.");
+  const handleInterest = async () => {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      toast.error("יש להתחבר כדי להביע עניין בעסקה");
+      return;
+    }
+    setSubmittingInterest(true);
+    try {
+      const { error } = await supabase.from("deal_interests").insert({
+        user_id: session.session.user.id,
+        deal_id: deal.id,
+        status: "interested",
+      });
+      if (error && !error.message.includes("duplicate")) throw error;
+      setInterested(true);
+      joinDeal(deal.id);
+      toast.success("רישמנו את התעניינותך! נחזור אליך עם פרטים נוספים.");
+      // Notify admin (best effort)
+      supabase.functions.invoke("notify-admin", {
+        body: {
+          event: "deal_interest",
+          title: "מתעניין חדש בעסקה",
+          details: { deal_id: deal.id, deal_title: deal.title, user_id: session.session.user.id, user_email: session.session.user.email },
+        },
+      }).catch(() => { /* ignore */ });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
+    } finally {
+      setSubmittingInterest(false);
+    }
   };
 
   const handleDeposit = async () => {
