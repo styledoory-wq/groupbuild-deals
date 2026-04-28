@@ -4,10 +4,18 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { formatILS, getActiveTier, useApp } from "@/store/AppStore";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function SupplierDashboard() {
   const navigate = useNavigate();
   const { user, deals, suppliers, deposits, logout } = useApp();
+  const handleLogout = async () => {
+    try { await supabase.auth.signOut(); } catch (e) { console.warn(e); }
+    logout();
+    toast.success("התנתקת בהצלחה");
+    navigate("/auth", { replace: true });
+  };
   const supplier = suppliers.find((s) => s.ownerName === user?.name) || suppliers[0];
   const myDeals = deals.filter((d) => d.supplierId === supplier.id);
   const totalLeads = myDeals.reduce((s, d) => s + d.joinedParticipants, 0);
@@ -27,7 +35,7 @@ export default function SupplierDashboard() {
             </div>
           </div>
           <button
-            onClick={() => { logout(); navigate("/"); }}
+            onClick={handleLogout}
             className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 flex items-center justify-center transition-smooth"
             aria-label="יציאה"
           >
