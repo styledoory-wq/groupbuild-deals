@@ -14,16 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      deposits: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          deal_id: string
+          id: string
+          metadata: Json | null
+          paid_at: string | null
+          payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
+          provider_payment_url: string | null
+          provider_transaction_id: string | null
+          refunded_at: string | null
+          status: Database["public"]["Enums"]["deposit_status"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          deal_id: string
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
+          provider_payment_url?: string | null
+          provider_transaction_id?: string | null
+          refunded_at?: string | null
+          status?: Database["public"]["Enums"]["deposit_status"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          deal_id?: string
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payment_provider?: Database["public"]["Enums"]["payment_provider_enum"]
+          provider_payment_url?: string | null
+          provider_transaction_id?: string | null
+          refunded_at?: string | null
+          status?: Database["public"]["Enums"]["deposit_status"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          business_name: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          project_id: string | null
+          updated_at: string
+          user_type: string
+        }
+        Insert: {
+          business_name?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          project_id?: string | null
+          updated_at?: string
+          user_type?: string
+        }
+        Update: {
+          business_name?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          project_id?: string | null
+          updated_at?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          active_payment_provider: string
+          commission_percent: number
+          created_at: string
+          deposit_default_amount: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          active_payment_provider?: string
+          commission_percent?: number
+          created_at?: string
+          deposit_default_amount?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          active_payment_provider?: string
+          commission_percent?: number
+          created_at?: string
+          deposit_default_amount?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_deal_paid_count: { Args: { _deal_id: string }; Returns: number }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "resident" | "supplier"
+      deposit_status: "pending" | "paid" | "failed" | "cancelled" | "refunded"
+      payment_provider_enum: "grow" | "cardcom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +293,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "resident", "supplier"],
+      deposit_status: ["pending", "paid", "failed", "cancelled", "refunded"],
+      payment_provider_enum: ["grow", "cardcom"],
+    },
   },
 } as const
