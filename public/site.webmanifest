@@ -1,0 +1,14 @@
+{
+  "name": "GroupBuild",
+  "short_name": "GroupBuild",
+  "description": "רכישה קבוצתית לדיירי פרויקטים חדשים",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0F1E35",
+  "background_color": "#F8F6F1",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
