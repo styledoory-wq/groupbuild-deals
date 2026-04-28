@@ -35,7 +35,7 @@ export default function SupplierDashboard() {
             </div>
           </div>
           <button
-            onClick={() => { logout(); navigate("/"); }}
+            onClick={handleLogout}
             className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 flex items-center justify-center transition-smooth"
             aria-label="יציאה"
           >
