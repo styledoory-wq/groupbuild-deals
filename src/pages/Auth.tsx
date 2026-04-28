@@ -133,6 +133,14 @@ export default function Auth() {
         },
       });
       if (error) throw error;
+      // Notify admin about new signup (best effort)
+      supabase.functions.invoke("notify-admin", {
+        body: {
+          event: role === "supplier" ? "new_supplier" : "new_resident",
+          title: role === "supplier" ? "ספק חדש נרשם" : "דייר חדש נרשם",
+          details: { full_name: fullName, email, phone: "", city, business_name: businessName, role },
+        },
+      }).catch(() => { /* ignore */ });
       toast.success("נרשמתם בהצלחה! מתחברים…");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "הרשמה נכשלה";
