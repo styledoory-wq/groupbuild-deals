@@ -22,7 +22,7 @@ export default function ResidentProfile() {
     }
     logout();
     toast.success("התנתקת בהצלחה");
-    navigate("/auth", { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (

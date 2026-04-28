@@ -14,7 +14,7 @@ export default function AdminDashboard() {
     try { await supabase.auth.signOut(); } catch (e) { console.warn(e); }
     logout();
     toast.success("התנתקת בהצלחה");
-    navigate("/auth", { replace: true });
+    navigate("/", { replace: true });
   };
 
   const totalRevenue = deals.reduce((s, d) => s + d.paidParticipants * getActiveTier(d).price, 0);

@@ -14,7 +14,7 @@ export default function SupplierDashboard() {
     try { await supabase.auth.signOut(); } catch (e) { console.warn(e); }
     logout();
     toast.success("התנתקת בהצלחה");
-    navigate("/auth", { replace: true });
+    navigate("/", { replace: true });
   };
   const supplier = suppliers.find((s) => s.ownerName === user?.name) || suppliers[0];
   const myDeals = deals.filter((d) => d.supplierId === supplier.id);
