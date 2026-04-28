@@ -52,16 +52,20 @@ export default function DealDetail() {
         body: { deal_id: deal.id, amount: deal.depositAmount },
       });
       if (error) throw error;
-      if (!data?.payment_url) throw new Error("לא התקבל קישור תשלום");
-      // Redirect to provider hosted page
+      if (data?.error) {
+        toast.error(data.message || "שגיאה ביצירת תשלום");
+        setPaying(false);
+        return;
+      }
+      if (!data?.payment_url) {
+        toast.error("לא התקבל קישור תשלום מהספק");
+        setPaying(false);
+        return;
+      }
       window.location.href = data.payment_url;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "שגיאה ביצירת תשלום";
-      if (msg.includes("not yet configured") || msg.includes("provider_unavailable")) {
-        toast.error("ספק הסליקה עדיין לא מחובר. צרו קשר עם המנהל.");
-      } else {
-        toast.error(msg);
-      }
+      toast.error(msg);
       setPaying(false);
     }
   };

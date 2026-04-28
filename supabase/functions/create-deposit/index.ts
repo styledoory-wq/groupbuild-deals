@@ -21,7 +21,18 @@ interface ProviderResult {
 // ---------------------------------------------------------------
 // Provider Adapters
 // ---------------------------------------------------------------
-async function createGrowPayment(args: {
+function providerSecretsStatus(provider: "grow" | "cardcom"): { ok: boolean; missing: string[] } {
+  if (provider === "grow") {
+    const required = ["GROW_API_KEY", "GROW_PAGE_CODE", "GROW_USER_ID"];
+    const missing = required.filter((k) => !Deno.env.get(k));
+    return { ok: missing.length === 0, missing };
+  }
+  const required = ["CARDCOM_TERMINAL_NUMBER", "CARDCOM_API_NAME"];
+  const missing = required.filter((k) => !Deno.env.get(k));
+  return { ok: missing.length === 0, missing };
+}
+
+async function createGrowPayment(_args: {
   depositId: string;
   amount: number;
   userEmail: string | null;
@@ -29,92 +40,27 @@ async function createGrowPayment(args: {
   dealId: string;
 }): Promise<ProviderResult> {
   // TODO: Replace with real Grow (MeshulamPay) API call once credentials arrive.
-  // Required secrets to configure in Lovable Cloud:
-  //   - GROW_API_KEY
-  //   - GROW_PAGE_CODE
-  //   - GROW_USER_ID
+  // Required secrets: GROW_API_KEY, GROW_PAGE_CODE, GROW_USER_ID
   // Docs: https://grow.meshulam.co.il/api-docs (createPaymentProcess endpoint)
   //
-  // Example real implementation (uncomment & fill once keys are provided):
-  //
-  // const apiKey   = Deno.env.get("GROW_API_KEY");
-  // const pageCode = Deno.env.get("GROW_PAGE_CODE");
-  // const userId   = Deno.env.get("GROW_USER_ID");
-  // if (!apiKey || !pageCode || !userId) throw new Error("Grow credentials missing");
-  //
-  // const res = await fetch("https://sandbox.meshulam.co.il/api/light/server/1.0/createPaymentProcess/", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify({
-  //     userId, pageCode, apiKey,
-  //     sum: args.amount,
-  //     paymentType: "regular",
-  //     description: `פיקדון לעסקה ${args.dealId}`,
-  //     pageField: { contact: args.userName ?? "", email: args.userEmail ?? "" },
-  //     successUrl: `${Deno.env.get("APP_URL")}/payment/success?dep=${args.depositId}`,
-  //     cancelUrl:  `${Deno.env.get("APP_URL")}/payment/cancel?dep=${args.depositId}`,
-  //     notifyUrl:  `${Deno.env.get("SUPABASE_URL")}/functions/v1/payment-webhook?provider=grow`,
-  //     chargeIdentifier: args.depositId,
-  //   }),
-  // });
-  // const data = await res.json();
-  // if (data.status !== 1) throw new Error(`Grow error: ${JSON.stringify(data)}`);
-  // return {
-  //   payment_url: data.data.url,
-  //   provider_transaction_id: data.data.processId,
-  // };
-
-  throw new Error(
-    "Grow payment provider is not yet configured. Add GROW_API_KEY, GROW_PAGE_CODE and GROW_USER_ID secrets in Lovable Cloud and uncomment the implementation in supabase/functions/create-deposit/index.ts."
-  );
+  // const apiKey   = Deno.env.get("GROW_API_KEY")!;
+  // const pageCode = Deno.env.get("GROW_PAGE_CODE")!;
+  // const userId   = Deno.env.get("GROW_USER_ID")!;
+  // const res = await fetch("https://sandbox.meshulam.co.il/api/light/server/1.0/createPaymentProcess/", { ... });
+  // return { payment_url: data.data.url, provider_transaction_id: data.data.processId };
+  throw new Error("grow_not_implemented");
 }
 
-async function createCardcomPayment(args: {
+async function createCardcomPayment(_args: {
   depositId: string;
   amount: number;
   userEmail: string | null;
   userName: string | null;
   dealId: string;
 }): Promise<ProviderResult> {
-  // TODO: Replace with real Cardcom LowProfile API call.
-  // Required secrets:
-  //   - CARDCOM_TERMINAL_NUMBER
-  //   - CARDCOM_API_NAME
-  // Docs: https://developer.cardcom.solutions/reference/lowprofilecreate
-  //
-  // Example real implementation (uncomment & fill once keys are provided):
-  //
-  // const terminal = Deno.env.get("CARDCOM_TERMINAL_NUMBER");
-  // const apiName  = Deno.env.get("CARDCOM_API_NAME");
-  // if (!terminal || !apiName) throw new Error("Cardcom credentials missing");
-  //
-  // const res = await fetch("https://secure.cardcom.solutions/api/v11/LowProfile/Create", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify({
-  //     TerminalNumber: Number(terminal),
-  //     ApiName: apiName,
-  //     Amount: args.amount,
-  //     ISOCoinId: 1, // ILS
-  //     ReturnValue: args.depositId,
-  //     SuccessRedirectUrl: `${Deno.env.get("APP_URL")}/payment/success?dep=${args.depositId}`,
-  //     FailedRedirectUrl:  `${Deno.env.get("APP_URL")}/payment/cancel?dep=${args.depositId}`,
-  //     WebHookUrl: `${Deno.env.get("SUPABASE_URL")}/functions/v1/payment-webhook?provider=cardcom`,
-  //     Operation: "ChargeOnly",
-  //     UIDefinition: { IsHideCardOwnerName: false },
-  //     Document: { Name: args.userName ?? "", Email: args.userEmail ?? "" },
-  //   }),
-  // });
-  // const data = await res.json();
-  // if (data.ResponseCode !== 0) throw new Error(`Cardcom error: ${data.Description}`);
-  // return {
-  //   payment_url: data.Url,
-  //   provider_transaction_id: String(data.LowProfileId),
-  // };
-
-  throw new Error(
-    "Cardcom payment provider is not yet configured. Add CARDCOM_TERMINAL_NUMBER and CARDCOM_API_NAME secrets in Lovable Cloud and uncomment the implementation in supabase/functions/create-deposit/index.ts."
-  );
+  // TODO: Replace with real Cardcom LowProfile API call once credentials arrive.
+  // Required secrets: CARDCOM_TERMINAL_NUMBER, CARDCOM_API_NAME
+  throw new Error("cardcom_not_implemented");
 }
 
 // ---------------------------------------------------------------
@@ -126,7 +72,7 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return json({ error: "Unauthorized" }, 401);
+      return json({ error: "unauthorized", message: "יש להתחבר כדי לשלם פיקדון" }, 401);
     }
 
     const supabase = createClient(
@@ -135,16 +81,17 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
 
-    const { data: claims, error: claimsErr } = await supabase.auth.getClaims(
-      authHeader.replace("Bearer ", ""),
-    );
-    if (claimsErr || !claims?.claims) return json({ error: "Unauthorized" }, 401);
-    const userId = claims.claims.sub as string;
-    const userEmail = (claims.claims.email as string) ?? null;
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+    if (userErr || !userData?.user) {
+      return json({ error: "unauthorized", message: "המשתמש אינו מחובר" }, 401);
+    }
+    const userId = userData.user.id;
+    const userEmail = userData.user.email ?? null;
 
-    const body = (await req.json()) as CreateDepositBody;
+    const body = (await req.json().catch(() => ({}))) as CreateDepositBody;
     if (!body?.deal_id || typeof body.deal_id !== "string") {
-      return json({ error: "deal_id is required" }, 400);
+      return json({ error: "invalid_request", message: "מזהה עסקה חסר או לא תקין" }, 400);
     }
 
     // Service-role client for trusted writes
@@ -158,10 +105,45 @@ Deno.serve(async (req) => {
       admin.from("profiles").select("full_name").eq("id", userId).maybeSingle(),
     ]);
 
-    const provider = (settings?.active_payment_provider ?? "grow") as
-      | "grow"
-      | "cardcom";
-    const amount = body.amount ?? Number(settings?.deposit_default_amount ?? 1000);
+    if (!settings?.active_payment_provider || !settings?.deposit_default_amount) {
+      console.error("Missing system_settings (active_payment_provider / deposit_default_amount)");
+      return json({
+        error: "settings_missing",
+        message: "הגדרות מערכת התשלומים חסרות. אנא פנו לתמיכה.",
+      }, 409);
+    }
+
+    const provider = settings.active_payment_provider as "grow" | "cardcom";
+    const amount = body.amount ?? Number(settings.deposit_default_amount);
+
+    // Pre-check provider secrets BEFORE creating any deposit row
+    const secretsCheck = providerSecretsStatus(provider);
+    if (!secretsCheck.ok) {
+      console.warn(
+        `Payment attempt blocked: provider=${provider} missing secrets=${secretsCheck.missing.join(",")} user=${userId} deal=${body.deal_id}`,
+      );
+      // Log failed attempt for admin visibility (no real deposit created)
+      await admin.from("deposits").insert({
+        user_id: userId,
+        deal_id: body.deal_id,
+        amount,
+        currency: "ILS",
+        payment_provider: provider,
+        status: "failed",
+        metadata: {
+          reason: "provider_not_configured",
+          missing_secrets: secretsCheck.missing,
+          attempted_at: new Date().toISOString(),
+        },
+      });
+      return json({
+        error: "provider_not_configured",
+        message: "מערכת התשלומים עדיין לא הופעלה. אנא נסו מאוחר יותר.",
+        provider,
+      }, 200);
+      // Note: returning 200 so the client can show the friendly toast without
+      // supabase-js wrapping it as a generic non-2xx error.
+    }
 
     // 1. Insert pending deposit
     const { data: deposit, error: insErr } = await admin
@@ -198,19 +180,16 @@ Deno.serve(async (req) => {
               dealId: body.deal_id,
             });
     } catch (provErr) {
-      // Mark deposit as failed so we don't leave dangling pending rows
+      const reason = provErr instanceof Error ? provErr.message : String(provErr);
       await admin
         .from("deposits")
-        .update({ status: "failed", metadata: { error: String(provErr) } })
+        .update({ status: "failed", metadata: { reason } })
         .eq("id", deposit.id);
-      return json(
-        {
-          error: "payment_provider_unavailable",
-          message: provErr instanceof Error ? provErr.message : String(provErr),
-          provider,
-        },
-        503,
-      );
+      return json({
+        error: "provider_error",
+        message: "שגיאה ביצירת תשלום מול ספק הסליקה. נסו שוב מאוחר יותר.",
+        provider,
+      }, 200);
     }
 
     // 3. Save provider info on the deposit
@@ -223,13 +202,17 @@ Deno.serve(async (req) => {
       .eq("id", deposit.id);
 
     return json({
+      ok: true,
       deposit_id: deposit.id,
       payment_url: providerRes.payment_url,
       provider,
     });
   } catch (e) {
     console.error("create-deposit error", e);
-    return json({ error: e instanceof Error ? e.message : String(e) }, 500);
+    return json({
+      error: "internal_error",
+      message: "אירעה שגיאה לא צפויה. נסו שוב מאוחר יותר.",
+    }, 200);
   }
 });
 
