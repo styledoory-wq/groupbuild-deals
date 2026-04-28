@@ -188,7 +188,7 @@ export default function Landing() {
         {/* WAITLIST FORM */}
         <section
           ref={formRef}
-          className="bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-10 -mt-2 relative"
+          className="bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-10 -mt-2 relative [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground"
         >
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/15 text-foreground mb-3">
