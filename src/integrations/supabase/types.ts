@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          created_at: string
+          id: string
+          notification_email: string | null
+          notify_on_deal_interest: boolean
+          notify_on_new_resident: boolean
+          notify_on_new_supplier: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notification_email?: string | null
+          notify_on_deal_interest?: boolean
+          notify_on_new_resident?: boolean
+          notify_on_new_supplier?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notification_email?: string | null
+          notify_on_deal_interest?: boolean
+          notify_on_new_resident?: boolean
+          notify_on_new_supplier?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           created_at: string
@@ -42,6 +72,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      deal_interests: {
+        Row: {
+          created_at: string
+          deal_id: string
+          id: string
+          notes: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       deposits: {
         Row: {
@@ -94,8 +154,10 @@ export type Database = {
       profiles: {
         Row: {
           address: string | null
+          admin_notes: string | null
           business_name: string | null
           city: string | null
+          city_id: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -106,13 +168,16 @@ export type Database = {
           phone: string | null
           project_id: string | null
           region: string | null
+          region_id: string | null
           updated_at: string
           user_type: string
         }
         Insert: {
           address?: string | null
+          admin_notes?: string | null
           business_name?: string | null
           city?: string | null
+          city_id?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -123,13 +188,16 @@ export type Database = {
           phone?: string | null
           project_id?: string | null
           region?: string | null
+          region_id?: string | null
           updated_at?: string
           user_type?: string
         }
         Update: {
           address?: string | null
+          admin_notes?: string | null
           business_name?: string | null
           city?: string | null
+          city_id?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -140,10 +208,26 @@ export type Database = {
           phone?: string | null
           project_id?: string | null
           region?: string | null
+          region_id?: string | null
           updated_at?: string
           user_type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       regions: {
         Row: {
