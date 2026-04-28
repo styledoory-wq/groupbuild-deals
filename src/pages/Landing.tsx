@@ -188,7 +188,7 @@ export default function Landing() {
         {/* WAITLIST FORM */}
         <section
           ref={formRef}
-          className="bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-10 -mt-2 relative"
+          className="bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-10 -mt-2 relative [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground"
         >
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/15 text-foreground mb-3">
@@ -349,7 +349,7 @@ export default function Landing() {
         </section>
 
         {/* STATS */}
-        <section className="bg-background px-6 pb-10">
+        <section className="bg-background text-foreground px-6 pb-10">
           <div className="grid grid-cols-2 gap-3">
             {[
               { v: "+240", l: "דירות בפרויקט הדגמה" },
@@ -369,7 +369,7 @@ export default function Landing() {
         </section>
 
         {/* HOW IT WORKS */}
-        <section className="bg-background px-6 pb-10">
+        <section className="bg-background text-foreground px-6 pb-10 [&_h2]:text-foreground [&_h3]:text-foreground">
           <div className="text-center mb-6">
             <div className="gb-divider-gold mx-auto mb-3" />
             <h2 className="text-2xl font-extrabold mb-1">שלושה צעדים פשוטים</h2>
@@ -413,7 +413,7 @@ export default function Landing() {
         </section>
 
         {/* RESIDENTS BENEFITS */}
-        <section className="bg-background px-6 pb-10">
+        <section className="bg-background text-foreground px-6 pb-10 [&_h2]:text-foreground [&_h3]:text-foreground">
           <div className="gb-card p-5 bg-gradient-card">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-9 w-9 rounded-xl bg-gold/15 flex items-center justify-center">
@@ -439,7 +439,7 @@ export default function Landing() {
         </section>
 
         {/* SUPPLIERS BENEFITS */}
-        <section className="bg-background px-6 pb-12">
+        <section className="bg-background text-foreground px-6 pb-12 [&_h2]:text-foreground [&_h3]:text-foreground">
           <div className="gb-card p-5 bg-gradient-card">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-9 w-9 rounded-xl bg-gold/15 flex items-center justify-center">
