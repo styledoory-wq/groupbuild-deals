@@ -49,20 +49,24 @@ export default function ResidentDashboard() {
 
       if (regionRow) {
         supplierIdSets.push(
-          supabase
-            .from("supplier_regions")
-            .select("supplier_id")
-            .eq("region_id", regionRow.id)
-            .then(({ data }) => (data ?? []).map((r) => r.supplier_id))
+          (async () => {
+            const { data } = await supabase
+              .from("supplier_regions")
+              .select("supplier_id")
+              .eq("region_id", regionRow.id);
+            return (data ?? []).map((r) => r.supplier_id);
+          })()
         );
       }
       if (cityRow) {
         supplierIdSets.push(
-          supabase
-            .from("supplier_cities")
-            .select("supplier_id")
-            .eq("city_id", cityRow.id)
-            .then(({ data }) => (data ?? []).map((r) => r.supplier_id))
+          (async () => {
+            const { data } = await supabase
+              .from("supplier_cities")
+              .select("supplier_id")
+              .eq("city_id", cityRow.id);
+            return (data ?? []).map((r) => r.supplier_id);
+          })()
         );
       }
       const idLists = await Promise.all(supplierIdSets);
