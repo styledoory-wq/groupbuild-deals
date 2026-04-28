@@ -8,12 +8,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/auth";
 import { toast } from "sonner";
 
 type LeadType = "resident" | "supplier";
+type Region = { id: string; name_he: string };
+type City = { id: string; name_he: string; region_id: string };
 
 export default function Landing() {
   const navigate = useNavigate();
