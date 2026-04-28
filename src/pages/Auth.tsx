@@ -127,7 +127,7 @@ export default function Auth() {
         },
       });
       if (error) throw error;
-      toast.success("נרשמתם בהצלחה! בדקו את האימייל לאישור החשבון.");
+      toast.success("נרשמתם בהצלחה! מתחברים…");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "הרשמה נכשלה";
       if (msg.includes("already registered")) toast.error("המייל הזה כבר רשום");
@@ -316,26 +316,6 @@ export default function Auth() {
             </form>
           )}
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-            <div className="relative flex justify-center"><span className="bg-background px-3 text-xs text-muted-foreground">או נסו במצב הדגמה</span></div>
-          </div>
-
-          <div className="space-y-2">
-            {roles.map(({ id, label, icon: Icon }) => (
-              <button key={id} onClick={() => handleDemo(id)}
-                className="w-full p-3 rounded-2xl bg-card border border-border hover:border-gold transition-smooth flex items-center gap-3 group">
-                <div className="h-10 w-10 rounded-xl bg-gradient-gold flex items-center justify-center shrink-0">
-                  <Icon className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1 text-right">
-                  <div className="font-bold text-sm">דמו {label}</div>
-                  <div className="text-[11px] text-muted-foreground">היכנסו מיד עם נתוני דמו (ללא תשלום אמיתי)</div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     </div>
