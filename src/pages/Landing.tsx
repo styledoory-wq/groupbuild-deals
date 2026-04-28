@@ -176,10 +176,10 @@ export default function Landing() {
               </Button>
               <button
                 type="button"
-                onClick={() => navigate("/auth")}
+                onClick={goToDashboard}
                 className="text-xs text-primary-foreground/70 hover:text-gold underline-offset-4 hover:underline transition-smooth"
               >
-                כבר יש לך חשבון? התחבר
+                {isAuthed ? "המשך לדשבורד שלך ←" : "כבר יש לך חשבון? התחבר"}
               </button>
             </div>
           </div>
