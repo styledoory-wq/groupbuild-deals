@@ -96,9 +96,9 @@ export default function Landing() {
         category: leadType === "supplier" ? category.trim() || null : null,
       });
       if (error) throw error;
-      toast.success("נרשמת בהצלחה! נחזור אליך בהקדם 🎉");
       setFullName(""); setPhone(""); setCity(""); setProjectName("");
       setBusinessName(""); setServiceAreas(""); setCategory("");
+      navigate("/thank-you");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שליחה נכשלה, נסו שוב");
     } finally {
