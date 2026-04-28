@@ -39,6 +39,9 @@ import AdminDeposits from "./pages/admin/AdminDeposits";
 import AdminStats from "./pages/admin/AdminStats";
 import AdminPaymentSettings from "./pages/admin/AdminPaymentSettings";
 import AdminRegions from "./pages/admin/AdminRegions";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminSupplierAreas from "./pages/admin/AdminSupplierAreas";
 
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import PaymentCancel from "./pages/payment/PaymentCancel";
@@ -91,6 +94,9 @@ const App = () => (
             <Route path="/admin/deposits" element={adminRoute(<AdminDeposits />)} />
             <Route path="/admin/payment-settings" element={adminRoute(<AdminPaymentSettings />)} />
             <Route path="/admin/regions" element={adminRoute(<AdminRegions />)} />
+            <Route path="/admin/users" element={adminRoute(<AdminUsers />)} />
+            <Route path="/admin/settings" element={adminRoute(<AdminSettings />)} />
+            <Route path="/admin/suppliers/:supplierId/areas" element={adminRoute(<AdminSupplierAreas />)} />
             <Route path="/admin/stats" element={adminRoute(<AdminStats />)} />
 
             {/* Payment callbacks */}
