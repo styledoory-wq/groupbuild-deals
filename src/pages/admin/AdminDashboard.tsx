@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid } from "lucide-react";
+import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS, getActiveTier, useApp } from "@/store/AppStore";
@@ -15,49 +15,54 @@ export default function AdminDashboard() {
 
   return (
     <MobileShell>
-      <header className="bg-gradient-hero text-primary-foreground px-5 pt-8 pb-12 rounded-b-[32px] relative overflow-hidden">
-        <div className="absolute -top-16 -left-10 h-56 w-56 rounded-full bg-gold/10 blur-3xl" />
-        <div className="flex items-center justify-between mb-6 relative">
+      <header className="bg-gradient-hero text-primary-foreground px-5 pt-9 pb-14 rounded-b-[24px] relative overflow-hidden">
+        <div className="flex items-center justify-between mb-7 relative">
           <div>
-            <p className="text-primary-foreground/60 text-xs">אזור ניהול</p>
-            <h1 className="text-2xl font-bold">GroupBuild Admin</h1>
-            <div className="gb-divider-gold mt-2" />
+            <p className="text-primary-foreground/55 text-[11px] uppercase tracking-wider">אזור ניהול</p>
+            <h1 className="text-[26px] font-semibold mt-1 tracking-tight">GroupBuild Admin</h1>
+            <div className="gb-divider-gold mt-3" />
           </div>
-          <button onClick={() => { logout(); navigate("/"); }} className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">
-            <LogOut className="h-5 w-5" />
+          <button
+            onClick={() => { logout(); navigate("/"); }}
+            className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 flex items-center justify-center transition-smooth"
+            aria-label="יציאה"
+          >
+            <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
           </button>
         </div>
 
         {pendingSuppliers > 0 && (
-          <div className="bg-gold/15 border border-gold/30 rounded-2xl p-3 text-sm flex items-center gap-2 relative">
-            <ShieldCheck className="h-4 w-4 text-gold" />
-            <span><b>{pendingSuppliers}</b> ספקים ממתינים לאישור</span>
+          <div className="bg-white/5 border border-gold/25 rounded-xl px-4 py-3 text-sm flex items-center gap-2.5 relative">
+            <ShieldCheck className="h-4 w-4 text-gold shrink-0" strokeWidth={1.75} />
+            <span className="text-primary-foreground/85"><b className="text-gold">{pendingSuppliers}</b> ספקים ממתינים לאישור</span>
           </div>
         )}
       </header>
 
-      <div className="px-5 -mt-6 relative z-10 grid grid-cols-2 gap-3 mb-5">
-        <StatCard icon={Building2} label="פרויקטים" value={projects.length} accent />
+      <div className="px-5 -mt-8 relative z-10 grid grid-cols-2 gap-3 mb-6">
+        <StatCard icon={Building2} label="פרויקטים" value={projects.length} />
         <StatCard icon={Users} label="ספקים" value={suppliers.length} />
         <StatCard icon={Tag} label="עסקאות פעילות" value={activeDeals} />
         <StatCard icon={LayoutGrid} label="קטגוריות" value={categories.length} />
         <div className="col-span-2">
-          <div className="gb-card p-4 bg-gradient-hero text-primary-foreground">
+          <div className="rounded-2xl border border-border bg-primary text-primary-foreground p-5 shadow-soft">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-[11px] text-primary-foreground/60">הכנסה כוללת</div>
-                <div className="text-2xl font-extrabold gb-gold-text">{formatILS(totalRevenue)}</div>
+                <div className="text-[11px] text-primary-foreground/60 uppercase tracking-wider">הכנסה כוללת</div>
+                <div className="text-[26px] font-semibold gb-gold-text mt-1.5 tracking-tight">{formatILS(totalRevenue)}</div>
               </div>
-              <TrendingUp className="h-8 w-8 text-gold" />
+              <div className="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                <TrendingUp className="h-[18px] w-[18px] text-gold" strokeWidth={1.75} />
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-white/10">
+            <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-white/10">
               <div>
-                <div className="text-[11px] text-primary-foreground/60">פיקדונות</div>
-                <div className="font-bold">{formatILS(totalDeposits)}</div>
+                <div className="text-[11px] text-primary-foreground/55 uppercase tracking-wider">פיקדונות</div>
+                <div className="font-semibold mt-1">{formatILS(totalDeposits)}</div>
               </div>
               <div>
-                <div className="text-[11px] text-primary-foreground/60">דירות בפרויקטים</div>
-                <div className="font-bold">{projects.reduce((s, p) => s + p.apartmentCount, 0)}</div>
+                <div className="text-[11px] text-primary-foreground/55 uppercase tracking-wider">דירות</div>
+                <div className="font-semibold mt-1">{projects.reduce((s, p) => s + p.apartmentCount, 0)}</div>
               </div>
             </div>
           </div>
@@ -65,7 +70,7 @@ export default function AdminDashboard() {
       </div>
 
       <section className="px-5 space-y-2">
-        <h2 className="text-sm font-bold mb-2">ניהול מהיר</h2>
+        <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground mb-3 px-1">ניהול מהיר</h2>
         <QuickLink onClick={() => navigate("/admin/projects")} icon={Building2} label="ניהול פרויקטים" desc="הוספה, עריכה ומחיקה" />
         <QuickLink onClick={() => navigate("/admin/suppliers")} icon={ShieldCheck} label="ניהול ספקים" desc="אישור והגדרת עמלה" badge={pendingSuppliers} />
         <QuickLink onClick={() => navigate("/admin/residents")} icon={Users} label="ניהול דיירים" desc="כל הדיירים והפרויקטים" />
@@ -80,34 +85,34 @@ export default function AdminDashboard() {
   );
 }
 
-function StatCard({ icon: Icon, label, value, accent }: { icon: React.ComponentType<{ className?: string }>; label: string; value: number; accent?: boolean }) {
+function StatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: number }) {
   return (
     <div className="gb-card p-4">
-      <div className="flex items-center justify-between mb-2">
-        <div className={"h-9 w-9 rounded-xl flex items-center justify-center " + (accent ? "bg-gradient-gold text-primary" : "bg-primary/5 text-primary")}>
-          <Icon className="h-4 w-4" />
+      <div className="flex items-center justify-between mb-3">
+        <div className="h-8 w-8 rounded-lg bg-muted/60 border border-border flex items-center justify-center text-primary">
+          <Icon className="h-4 w-4" strokeWidth={1.75} />
         </div>
       </div>
-      <div className="text-2xl font-extrabold text-primary leading-none">{value.toLocaleString("he-IL")}</div>
-      <div className="text-[11px] text-muted-foreground mt-1">{label}</div>
+      <div className="text-[22px] font-semibold text-primary leading-none tracking-tight">{value.toLocaleString("he-IL")}</div>
+      <div className="text-[11px] text-muted-foreground mt-2">{label}</div>
     </div>
   );
 }
 
-function QuickLink({ onClick, icon: Icon, label, desc, badge }: { onClick: () => void; icon: React.ComponentType<{ className?: string }>; label: string; desc: string; badge?: number }) {
+function QuickLink({ onClick, icon: Icon, label, desc, badge }: { onClick: () => void; icon: LucideIcon; label: string; desc: string; badge?: number }) {
   return (
-    <button onClick={onClick} className="w-full gb-card p-3 flex items-center gap-3 text-right hover:shadow-elevated transition-smooth">
-      <div className="h-10 w-10 rounded-xl bg-gradient-hero flex items-center justify-center">
-        <Icon className="h-5 w-5 text-gold" />
+    <button onClick={onClick} className="w-full gb-card p-4 flex items-center gap-3.5 text-right hover:border-gold/40 transition-smooth">
+      <div className="h-10 w-10 rounded-xl bg-muted/60 border border-border flex items-center justify-center text-primary">
+        <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="font-bold text-sm">{label}</div>
-        <div className="text-[11px] text-muted-foreground">{desc}</div>
+        <div className="font-semibold text-sm text-foreground">{label}</div>
+        <div className="text-[11px] text-muted-foreground mt-0.5">{desc}</div>
       </div>
       {badge && badge > 0 ? (
-        <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-destructive text-destructive-foreground">{badge}</span>
+        <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-destructive/10 text-destructive border border-destructive/20">{badge}</span>
       ) : (
-        <span className="text-gold font-bold">←</span>
+        <ChevronLeft className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
       )}
     </button>
   );
