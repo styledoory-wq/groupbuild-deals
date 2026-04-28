@@ -18,34 +18,49 @@ type LeadType = "resident" | "supplier";
 export default function Landing() {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
-  const [checking, setChecking] = useState(true);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userType, setUserType] = useState<"resident" | "supplier">("resident");
 
-  // If already logged in → route by role.
+  // Detect session WITHOUT auto-redirecting. Landing always renders.
   useEffect(() => {
     let cancelled = false;
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    const load = async (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
       if (cancelled) return;
       if (!session) {
-        setChecking(false);
+        setIsAuthed(false);
+        setUserEmail("");
         return;
       }
-      const email = session.user.email ?? "";
-      if (isAdminEmail(email)) {
-        navigate("/admin", { replace: true });
-        return;
-      }
+      setIsAuthed(true);
+      setUserEmail(session.user.email ?? "");
       const { data: profile } = await supabase
         .from("profiles")
         .select("user_type")
         .eq("id", session.user.id)
         .maybeSingle();
-      const t = profile?.user_type ?? "resident";
-      navigate(t === "supplier" ? "/supplier" : "/resident", { replace: true });
-    });
+      if (cancelled) return;
+      setUserType((profile?.user_type as "resident" | "supplier") ?? "resident");
+    };
+    supabase.auth.getSession().then(({ data: { session } }) => load(session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => load(session));
     return () => {
       cancelled = true;
+      sub.subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
+
+  const goToDashboard = () => {
+    if (!isAuthed) {
+      navigate("/auth");
+      return;
+    }
+    if (isAdminEmail(userEmail)) {
+      navigate("/admin");
+      return;
+    }
+    navigate(userType === "supplier" ? "/supplier" : "/resident");
+  };
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
