@@ -90,40 +90,22 @@ export default function AdminResidents() {
         finalProjectId = newProj.id;
       }
 
-      // Save current admin session so signUp doesn't kick admin out
-      const { data: currentSession } = await supabase.auth.getSession();
+      const effectiveCity = city || (createNewProject ? newProjectCity : "");
 
-      // Create the auth user via signUp (auto-confirm is enabled)
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: fullName.trim(),
-            phone,
-            city: city || (createNewProject ? newProjectCity : ""),
-            user_type: "resident",
-            project_id: finalProjectId || null,
-          },
+      // Use admin edge function so the admin session is not affected
+      const { data, error } = await supabase.functions.invoke("admin-create-resident", {
+        body: {
+          full_name: fullName.trim(),
+          email: email.trim(),
+          password,
+          phone,
+          city: effectiveCity,
+          project_id: finalProjectId || null,
         },
       });
+
       if (error) throw error;
-
-      // Make sure profile gets the project_id (trigger writes from metadata, but be safe)
-      if (data.user && finalProjectId) {
-        await supabase.from("profiles")
-          .update({ project_id: finalProjectId, phone, city: city || (createNewProject ? newProjectCity : "") })
-          .eq("id", data.user.id);
-      }
-
-      // Restore admin session
-      if (currentSession.session) {
-        await supabase.auth.setSession({
-          access_token: currentSession.session.access_token,
-          refresh_token: currentSession.session.refresh_token,
-        });
-      }
+      if (data?.error) throw new Error(data.error);
 
       toast.success("הדייר נוסף בהצלחה");
       resetForm();
@@ -131,7 +113,7 @@ export default function AdminResidents() {
       await loadResidents();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "הוספת דייר נכשלה";
-      toast.error(msg);
+      toast.error(`הוספת דייר נכשלה: ${msg}`);
     } finally {
       setSaving(false);
     }
