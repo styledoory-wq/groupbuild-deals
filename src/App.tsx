@@ -16,9 +16,11 @@ import CategoriesList from "./pages/resident/CategoriesList";
 import DealsList from "./pages/resident/DealsList";
 import DealDetail from "./pages/resident/DealDetail";
 import ResidentProfile from "./pages/resident/ResidentProfile";
+import ResidentProfileEdit from "./pages/resident/ResidentProfileEdit";
 import Notifications from "./pages/resident/Notifications";
 
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
+import SupplierProfileEdit from "./pages/supplier/SupplierProfileEdit";
 import SupplierOffers from "./pages/supplier/SupplierOffers";
 import OfferEditor from "./pages/supplier/OfferEditor";
 import SupplierLeads from "./pages/supplier/SupplierLeads";
@@ -34,6 +36,7 @@ import AdminDeals from "./pages/admin/AdminDeals";
 import AdminDeposits from "./pages/admin/AdminDeposits";
 import AdminStats from "./pages/admin/AdminStats";
 import AdminPaymentSettings from "./pages/admin/AdminPaymentSettings";
+import AdminRegions from "./pages/admin/AdminRegions";
 
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import PaymentCancel from "./pages/payment/PaymentCancel";
