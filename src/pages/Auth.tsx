@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { setAdminSession } from "@/lib/auth";
-import { useHiddenAdminGesture } from "@/hooks/useHiddenAdminGesture";
+import { isAdminEmail, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Role } from "@/types";
@@ -29,7 +28,7 @@ export default function Auth() {
   const [businessName, setBusinessName] = useState("");
   const [projectId, setProjectId] = useState<string>("");
 
-  const hiddenAdmin = useHiddenAdminGesture();
+  
 
   // If already logged in → redirect by role
   useEffect(() => {
@@ -49,11 +48,14 @@ export default function Auth() {
   }, []);
 
   const routeForUser = async (userId: string, userEmail: string) => {
-    const [{ data: profile }, { data: roles }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", userId),
-    ]);
-    const isAdmin = roles?.some((r) => r.role === "admin");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
+
+    // Admin access is granted ONLY by verified email match.
+    const isAdmin = isAdminEmail(userEmail);
     const userType = (profile?.user_type ?? "resident") as Role;
     const finalRole: Role = isAdmin ? "admin" : userType;
 
@@ -65,10 +67,14 @@ export default function Auth() {
       email: profile?.email ?? userEmail,
       projectId: profile?.project_id ?? undefined,
     });
-    if (finalRole === "admin") setAdminSession(true);
-    if (finalRole === "resident") navigate("/resident");
-    else if (finalRole === "supplier") navigate("/supplier");
-    else navigate("/admin");
+    if (isAdmin) {
+      setAdminSession(true);
+      navigate("/admin");
+    } else {
+      setAdminSession(false);
+      if (userType === "supplier") navigate("/supplier");
+      else navigate("/resident");
+    }
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -163,7 +169,7 @@ export default function Auth() {
 
             <h1 className="text-4xl font-extrabold leading-tight mb-3">
               ברוכים הבאים ל-
-              <span className="block gb-gold-text mt-1 cursor-pointer select-none" {...hiddenAdmin} aria-label="GroupBuild">
+              <span className="block gb-gold-text mt-1" aria-label="GroupBuild">
                 GroupBuild
               </span>
             </h1>
