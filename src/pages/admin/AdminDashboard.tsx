@@ -3,10 +3,19 @@ import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChar
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS, getActiveTier, useApp } from "@/store/AppStore";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { projects, suppliers, deals, deposits, categories, logout } = useApp();
+
+  const handleLogout = async () => {
+    try { await supabase.auth.signOut(); } catch (e) { console.warn(e); }
+    logout();
+    toast.success("התנתקת בהצלחה");
+    navigate("/auth", { replace: true });
+  };
 
   const totalRevenue = deals.reduce((s, d) => s + d.paidParticipants * getActiveTier(d).price, 0);
   const totalDeposits = deposits.reduce((s, d) => s + d.amount, 0);
