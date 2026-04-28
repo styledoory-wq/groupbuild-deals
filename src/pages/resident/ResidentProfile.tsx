@@ -5,6 +5,8 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { formatILS, getActiveTier, useApp } from "@/store/AppStore";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function ResidentProfile() {
   const navigate = useNavigate();
@@ -12,9 +14,15 @@ export default function ResidentProfile() {
   const myDeposits = deposits.filter((d) => d.userId === user?.id);
   const project = projects.find((p) => p.id === user?.projectId);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn("supabase signOut failed", e);
+    }
     logout();
-    navigate("/");
+    toast.success("התנתקת בהצלחה");
+    navigate("/auth", { replace: true });
   };
 
   return (
