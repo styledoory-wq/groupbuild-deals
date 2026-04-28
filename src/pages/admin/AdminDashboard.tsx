@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, type LucideIcon } from "lucide-react";
+import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS, getActiveTier, useApp } from "@/store/AppStore";
