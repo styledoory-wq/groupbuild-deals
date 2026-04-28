@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Briefcase, TrendingUp, Users, DollarSign, Plus, Star, MessageSquare, LogOut } from "lucide-react";
+import { Briefcase, TrendingUp, Users, DollarSign, Plus, Star, LogOut, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -17,18 +17,21 @@ export default function SupplierDashboard() {
 
   return (
     <MobileShell>
-      <header className="bg-gradient-hero text-primary-foreground px-5 pt-8 pb-12 rounded-b-[32px] relative overflow-hidden">
-        <div className="absolute -top-12 -left-12 h-48 w-48 rounded-full bg-gold/10 blur-3xl" />
-        <div className="flex items-center justify-between mb-6 relative">
+      <header className="bg-gradient-hero text-primary-foreground px-5 pt-9 pb-14 rounded-b-[24px] relative overflow-hidden">
+        <div className="flex items-center justify-between mb-7 relative">
           <div>
-            <p className="text-primary-foreground/60 text-xs">איזור ספק</p>
-            <h1 className="text-2xl font-bold">{supplier.businessName}</h1>
-            <div className="flex items-center gap-1 text-xs gb-gold-text mt-1">
-              <Star className="h-3.5 w-3.5 fill-gold text-gold" /> {supplier.rating} · {supplier.reviewsCount} ביקורות
+            <p className="text-primary-foreground/55 text-[11px] uppercase tracking-wider">איזור ספק</p>
+            <h1 className="text-[24px] font-semibold mt-1 tracking-tight">{supplier.businessName}</h1>
+            <div className="flex items-center gap-1.5 text-[11px] gb-gold-text mt-2">
+              <Star className="h-3 w-3 fill-gold text-gold" strokeWidth={1.75} /> {supplier.rating} · {supplier.reviewsCount} ביקורות
             </div>
           </div>
-          <button onClick={() => { logout(); navigate("/"); }} className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">
-            <LogOut className="h-5 w-5" />
+          <button
+            onClick={() => { logout(); navigate("/"); }}
+            className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 flex items-center justify-center transition-smooth"
+            aria-label="יציאה"
+          >
+            <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
           </button>
         </div>
 
@@ -40,36 +43,36 @@ export default function SupplierDashboard() {
         </div>
       </header>
 
-      <div className="px-5 -mt-6 relative z-10 mb-5">
+      <div className="px-5 -mt-8 relative z-10 mb-6">
         <Button
           onClick={() => navigate("/supplier/offers/new")}
-          className="w-full h-14 rounded-2xl bg-gradient-gold hover:opacity-90 text-primary font-bold shadow-gold"
+          className="w-full h-12 rounded-xl bg-primary hover:bg-primary-soft text-primary-foreground font-semibold shadow-soft"
         >
-          <Plus className="h-5 w-5 ml-2" /> צרו הצעה חדשה
+          <Plus className="h-4 w-4 ml-2" strokeWidth={2} /> צרו הצעה חדשה
         </Button>
       </div>
 
       <section className="px-5 space-y-3">
-        <h2 className="text-base font-bold flex items-center gap-2">
-          <Briefcase className="h-4 w-4 text-gold" /> ההצעות שלי
+        <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-1 px-1">
+          <Briefcase className="h-3 w-3 text-gold" strokeWidth={1.75} /> ההצעות שלי
         </h2>
         {myDeals.map((d) => {
           const tier = getActiveTier(d);
           return (
             <div key={d.id} className="gb-card p-4">
-              <div className="flex items-start justify-between mb-2">
+              <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-sm truncate">{d.title}</h3>
-                  <div className="text-[11px] text-muted-foreground">{tier.label}</div>
+                  <h3 className="font-semibold text-sm truncate">{d.title}</h3>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">{tier.label}</div>
                 </div>
                 <div className="text-left">
-                  <div className="font-extrabold text-primary text-sm">{formatILS(tier.price)}</div>
-                  <div className="text-[10px] text-success font-bold">{d.paidParticipants} שילמו</div>
+                  <div className="font-semibold text-primary text-sm">{formatILS(tier.price)}</div>
+                  <div className="text-[10px] text-success font-medium mt-0.5">{d.paidParticipants} שילמו</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[11px]">
-                <span className="px-2 py-1 rounded-full bg-primary/5 text-primary">{d.joinedParticipants} לידים</span>
-                <span className="px-2 py-1 rounded-full bg-success/10 text-success">{d.paidParticipants} פיקדונות</span>
+              <div className="flex items-center gap-2 text-[11px] pt-3 border-t border-border">
+                <span className="px-2.5 py-1 rounded-full bg-muted/60 text-foreground border border-border">{d.joinedParticipants} לידים</span>
+                <span className="px-2.5 py-1 rounded-full bg-success/10 text-success">{d.paidParticipants} פיקדונות</span>
               </div>
             </div>
           );
@@ -81,14 +84,14 @@ export default function SupplierDashboard() {
   );
 }
 
-function Stat({ icon: Icon, label, value, small }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; small?: boolean }) {
+function Stat({ icon: Icon, label, value, small }: { icon: LucideIcon; label: string; value: string; small?: boolean }) {
   return (
-    <div className="bg-white/10 backdrop-blur border border-white/15 rounded-2xl p-3">
-      <div className="flex items-center gap-2 mb-1">
-        <Icon className="h-4 w-4 text-gold" />
-        <span className="text-[11px] text-primary-foreground/70">{label}</span>
+    <div className="bg-white/[0.06] backdrop-blur border border-white/10 rounded-xl p-3.5">
+      <div className="flex items-center gap-2 mb-1.5">
+        <Icon className="h-3.5 w-3.5 text-gold" strokeWidth={1.75} />
+        <span className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{label}</span>
       </div>
-      <div className={small ? "text-base font-bold" : "text-xl font-extrabold"}>{value}</div>
+      <div className={small ? "text-base font-semibold" : "text-xl font-semibold tracking-tight"}>{value}</div>
     </div>
   );
 }
