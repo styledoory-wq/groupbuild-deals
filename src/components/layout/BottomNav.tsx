@@ -3,7 +3,7 @@ import { Home, LayoutGrid, Tag, User, Bell, Briefcase, BarChart3, Users, Buildin
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types";
 
-const items: Record<Role, { to: string; label: string; icon: React.ComponentType<{ className?: string }> }[]> = {
+const items: Record<Role, { to: string; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> }[]> = {
   resident: [
     { to: "/resident", label: "בית", icon: Home },
     { to: "/resident/categories", label: "קטגוריות", icon: LayoutGrid },
