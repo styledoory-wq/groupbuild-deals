@@ -413,7 +413,7 @@ export default function Landing() {
         </section>
 
         {/* RESIDENTS BENEFITS */}
-        <section className="bg-background px-6 pb-10">
+        <section className="bg-background text-foreground px-6 pb-10 [&_h2]:text-foreground [&_h3]:text-foreground">
           <div className="gb-card p-5 bg-gradient-card">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-9 w-9 rounded-xl bg-gold/15 flex items-center justify-center">
