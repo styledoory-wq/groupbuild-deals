@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, type LucideIcon } from "lucide-react";
+import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, MapPin, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS, getActiveTier, useApp } from "@/store/AppStore";
@@ -87,6 +87,7 @@ export default function AdminDashboard() {
         <QuickLink onClick={() => navigate("/admin/deals")} icon={Tag} label="ניהול עסקאות" desc={`${activeDeals} עסקאות פעילות`} />
         <QuickLink onClick={() => navigate("/admin/deposits")} icon={Wallet} label="ניהול פיקדונות" desc={`${deposits.length} פיקדונות`} />
         <QuickLink onClick={() => navigate("/admin/payment-settings")} icon={CreditCard} label="הגדרות תשלום" desc="ספק סליקה וברירות מחדל" />
+        <QuickLink onClick={() => navigate("/admin/regions")} icon={MapPin} label="אזורי שירות" desc="ניהול אזורים וערים" />
         <QuickLink onClick={() => navigate("/admin/stats")} icon={BarChart3} label="סטטיסטיקות" desc="ניתוח מערכת מלא" />
       </section>
 

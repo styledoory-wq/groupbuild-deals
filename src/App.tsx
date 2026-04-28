@@ -16,9 +16,11 @@ import CategoriesList from "./pages/resident/CategoriesList";
 import DealsList from "./pages/resident/DealsList";
 import DealDetail from "./pages/resident/DealDetail";
 import ResidentProfile from "./pages/resident/ResidentProfile";
+import ResidentProfileEdit from "./pages/resident/ResidentProfileEdit";
 import Notifications from "./pages/resident/Notifications";
 
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
+import SupplierProfileEdit from "./pages/supplier/SupplierProfileEdit";
 import SupplierOffers from "./pages/supplier/SupplierOffers";
 import OfferEditor from "./pages/supplier/OfferEditor";
 import SupplierLeads from "./pages/supplier/SupplierLeads";
@@ -34,6 +36,7 @@ import AdminDeals from "./pages/admin/AdminDeals";
 import AdminDeposits from "./pages/admin/AdminDeposits";
 import AdminStats from "./pages/admin/AdminStats";
 import AdminPaymentSettings from "./pages/admin/AdminPaymentSettings";
+import AdminRegions from "./pages/admin/AdminRegions";
 
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import PaymentCancel from "./pages/payment/PaymentCancel";
@@ -61,10 +64,12 @@ const App = () => (
             <Route path="/resident/deals" element={<DealsList />} />
             <Route path="/resident/deals/:dealId" element={<DealDetail />} />
             <Route path="/resident/profile" element={<ResidentProfile />} />
+            <Route path="/resident/profile/edit" element={<ResidentProfileEdit />} />
             <Route path="/resident/notifications" element={<Notifications />} />
 
             {/* Supplier */}
             <Route path="/supplier" element={<SupplierDashboard />} />
+            <Route path="/supplier/profile/edit" element={<SupplierProfileEdit />} />
             <Route path="/supplier/offers" element={<SupplierOffers />} />
             <Route path="/supplier/offers/new" element={<OfferEditor />} />
             <Route path="/supplier/leads" element={<SupplierLeads />} />
@@ -81,6 +86,7 @@ const App = () => (
             <Route path="/admin/deals" element={adminRoute(<AdminDeals />)} />
             <Route path="/admin/deposits" element={adminRoute(<AdminDeposits />)} />
             <Route path="/admin/payment-settings" element={adminRoute(<AdminPaymentSettings />)} />
+            <Route path="/admin/regions" element={adminRoute(<AdminRegions />)} />
             <Route path="/admin/stats" element={adminRoute(<AdminStats />)} />
 
             {/* Payment callbacks */}
