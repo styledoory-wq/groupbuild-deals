@@ -369,7 +369,7 @@ export default function Landing() {
         </section>
 
         {/* HOW IT WORKS */}
-        <section className="bg-background px-6 pb-10">
+        <section className="bg-background text-foreground px-6 pb-10 [&_h2]:text-foreground [&_h3]:text-foreground">
           <div className="text-center mb-6">
             <div className="gb-divider-gold mx-auto mb-3" />
             <h2 className="text-2xl font-extrabold mb-1">שלושה צעדים פשוטים</h2>
