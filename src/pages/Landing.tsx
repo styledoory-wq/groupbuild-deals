@@ -121,13 +121,23 @@ export default function Landing() {
                 <span className="gb-gold-text">Group</span>Build
               </span>
             </div>
-            <Button
-              type="button"
-              onClick={scrollToForm}
-              className="h-9 px-4 rounded-xl bg-gradient-gold text-primary hover:opacity-90 font-bold text-xs shadow-gold"
-            >
-              הצטרף לרשימה
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                onClick={goToDashboard}
+                variant="ghost"
+                className="h-9 px-3 rounded-xl text-primary-foreground hover:text-gold hover:bg-white/5 font-bold text-xs"
+              >
+                {isAuthed ? "המשך לדשבורד" : "כניסה לחשבון"}
+              </Button>
+              <Button
+                type="button"
+                onClick={scrollToForm}
+                className="h-9 px-4 rounded-xl bg-gradient-gold text-primary hover:opacity-90 font-bold text-xs shadow-gold"
+              >
+                הצטרף לרשימה
+              </Button>
+            </div>
           </div>
         </header>
 
