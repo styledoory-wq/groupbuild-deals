@@ -242,19 +242,19 @@ export default function DealDetail() {
               <Button disabled className="w-full h-12 rounded-2xl bg-success text-success-foreground font-bold">
                 <Check className="h-5 w-5 ml-2" /> הפיקדון שלך התקבל
               </Button>
-            ) : joined ? (
-              <Button onClick={handleDeposit} disabled={paying} className="w-full h-12 rounded-2xl bg-gradient-gold hover:opacity-90 text-primary font-bold shadow-gold">
-                {paying ? <Loader2 className="h-5 w-5 animate-spin" /> : `שלמו פיקדון ${formatILS(deal.depositAmount)}`}
-              </Button>
+            ) : interested ? (
+              <div className="w-full space-y-2">
+                <div className="text-center text-xs font-bold text-success bg-success/10 rounded-xl py-2">
+                  ✓ רשמנו את התעניינותך — נחזור אליך בקרוב
+                </div>
+                <Button onClick={handleDeposit} disabled={paying} className="w-full h-12 rounded-2xl bg-gradient-gold hover:opacity-90 text-primary font-bold shadow-gold">
+                  {paying ? <Loader2 className="h-5 w-5 animate-spin" /> : `אופציונלי: שלמו פיקדון ${formatILS(deal.depositAmount)}`}
+                </Button>
+              </div>
             ) : (
-              <>
-                <Button onClick={handleJoin} variant="outline" className="flex-1 h-12 rounded-2xl border-2 border-primary text-primary font-bold">
-                  הצטרפו לעסקה
-                </Button>
-                <Button onClick={handleDeposit} disabled={paying} className="flex-1 h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold">
-                  {paying ? <Loader2 className="h-5 w-5 animate-spin" /> : `פיקדון ${formatILS(deal.depositAmount)}`}
-                </Button>
-              </>
+              <Button onClick={handleInterest} disabled={submittingInterest} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold">
+                {submittingInterest ? <Loader2 className="h-5 w-5 animate-spin" /> : "אני מעוניין להצטרף"}
+              </Button>
             )}
           </div>
           <div className="text-center text-[10px] text-muted-foreground inline-flex items-center gap-1 w-full justify-center">
