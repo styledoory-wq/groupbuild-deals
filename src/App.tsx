@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound.tsx";
 import ThankYou from "./pages/ThankYou";
+import SupplierProfile from "./pages/SupplierProfile";
 
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
 import ProjectsList from "./pages/resident/ProjectsList";
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/thank-you" element={<ThankYou />} />
+            <Route path="/suppliers/:supplierId" element={<SupplierProfile />} />
 
             {/* Resident */}
             <Route path="/resident" element={<ResidentDashboard />} />
