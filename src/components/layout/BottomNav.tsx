@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, LayoutGrid, Tag, User, Bell, Briefcase, BarChart3, Users, Building2, ShieldCheck, type LucideIcon } from "lucide-react";
+import { Home, LayoutGrid, Tag, User, Bell, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types";
 
@@ -8,7 +8,7 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
     { to: "/resident", label: "בית", icon: Home },
     { to: "/resident/categories", label: "קטגוריות", icon: LayoutGrid },
     { to: "/resident/deals", label: "עסקאות", icon: Tag },
-    { to: "/resident/notifications", label: "התראות", icon: Bell },
+    { to: "/resident/my-offers", label: "ההצעות שלי", icon: Heart },
     { to: "/resident/profile", label: "פרופיל", icon: User },
   ],
   supplier: [

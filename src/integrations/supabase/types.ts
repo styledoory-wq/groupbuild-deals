@@ -77,6 +77,9 @@ export type Database = {
         Row: {
           created_at: string
           deal_id: string
+          deposit_amount: number
+          deposit_required: boolean
+          deposit_status: string
           id: string
           is_demo: boolean
           notes: string | null
@@ -87,6 +90,9 @@ export type Database = {
         Insert: {
           created_at?: string
           deal_id: string
+          deposit_amount?: number
+          deposit_required?: boolean
+          deposit_status?: string
           id?: string
           is_demo?: boolean
           notes?: string | null
@@ -97,6 +103,9 @@ export type Database = {
         Update: {
           created_at?: string
           deal_id?: string
+          deposit_amount?: number
+          deposit_required?: boolean
+          deposit_status?: string
           id?: string
           is_demo?: boolean
           notes?: string | null
@@ -112,6 +121,7 @@ export type Database = {
           category_id: string | null
           created_at: string
           deposit_amount: number
+          deposit_required: boolean
           description: string | null
           discount_percentage: number | null
           discounted_price: number | null
@@ -133,6 +143,7 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           deposit_amount?: number
+          deposit_required?: boolean
           description?: string | null
           discount_percentage?: number | null
           discounted_price?: number | null
@@ -154,6 +165,7 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           deposit_amount?: number
+          deposit_required?: boolean
           description?: string | null
           discount_percentage?: number | null
           discounted_price?: number | null
@@ -631,6 +643,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_deal_interest_count: { Args: { _deal_id: string }; Returns: number }
       get_deal_paid_count: { Args: { _deal_id: string }; Returns: number }
       get_supplier_rating: {
         Args: { _supplier_id: string }
