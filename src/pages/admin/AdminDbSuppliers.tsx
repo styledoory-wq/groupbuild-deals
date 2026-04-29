@@ -57,7 +57,6 @@ const emptyForm: NewForm = {
 
 export default function AdminDbSuppliers() {
   const navigate = useNavigate();
-  const { regions, citiesByRegion } = useRegions();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
