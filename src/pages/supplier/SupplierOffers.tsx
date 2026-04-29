@@ -1,28 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Briefcase, Loader2, AlertCircle } from "lucide-react";
+import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
-import { formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import type { PricingTier } from "@/types";
+import { describeOffer } from "@/lib/offerPricing";
 
 type DealRow = {
   id: string;
   title: string;
   status: string;
-  original_price: number;
-  tiers: PricingTier[] | null;
+  original_price: number | null;
+  discounted_price: number | null;
+  discount_percentage: number | null;
+  base_price: number | null;
+  offer_type: string | null;
   created_at: string;
 };
-
-function activeTier(tiers: PricingTier[] | null): PricingTier | null {
-  if (!tiers || !tiers.length) return null;
-  const sorted = [...tiers].sort((a, b) => a.minParticipants - b.minParticipants);
-  return sorted[0];
-}
 
 export default function SupplierOffers() {
   const [loading, setLoading] = useState(true);
@@ -68,7 +64,7 @@ export default function SupplierOffers() {
 
         const { data, error: dErr } = await supabase
           .from("deals")
-          .select("id, title, status, original_price, tiers, created_at")
+          .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, created_at")
           .eq("supplier_id", sid)
           .order("created_at", { ascending: false });
 
