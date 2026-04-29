@@ -108,16 +108,20 @@ export default function CategorySuppliers() {
   );
 
   const filteredSuppliers = useMemo(() => {
+    // No area filter selected → show all
+    if (regionId === "all" && cityId === "all") return suppliers;
+
     return suppliers.filter((s) => {
+      // National suppliers always match
       if (s.serves_all_country) return true;
-      if (regionId !== "all" && supplierIdsByRegion && !supplierIdsByRegion.has(s.id)) {
-        if (cityId === "all") return false;
-      }
-      if (cityId !== "all" && supplierIdsByCity && !supplierIdsByCity.has(s.id)) {
-        if (regionId === "all") return false;
-        return false;
-      }
-      return true;
+
+      // Match if supplier covers the selected region OR the selected city
+      const regionMatch =
+        regionId !== "all" && supplierIdsByRegion?.has(s.id);
+      const cityMatch =
+        cityId !== "all" && supplierIdsByCity?.has(s.id);
+
+      return Boolean(regionMatch || cityMatch);
     });
   }, [suppliers, regionId, cityId, supplierIdsByRegion, supplierIdsByCity]);
 
