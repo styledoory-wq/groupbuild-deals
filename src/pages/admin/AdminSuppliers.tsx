@@ -30,6 +30,12 @@ type FormState = {
   reviewsCount: string;
   commissionPercent: string;
   logoEmoji: string;
+  logoUrl: string | null;
+  websiteUrl: string;
+  whatsappUrl: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  catalogUrl: string;
   verified: boolean;
   featured: boolean;
   approvalStatus: "approved" | "pending" | "rejected";
@@ -44,6 +50,12 @@ const emptyForm: FormState = {
   reviewsCount: "",
   commissionPercent: "",
   logoEmoji: "🏷️",
+  logoUrl: null,
+  websiteUrl: "",
+  whatsappUrl: "",
+  instagramUrl: "",
+  facebookUrl: "",
+  catalogUrl: "",
   verified: false,
   featured: false,
   approvalStatus: "pending",
