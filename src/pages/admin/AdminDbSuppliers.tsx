@@ -123,13 +123,26 @@ export default function AdminDbSuppliers() {
         .select("id")
         .single();
       if (error) throw error;
-      toast.success("הספק נוצר! עכשיו הגדר אזורי שירות");
+      const newId = data?.id;
+      // Save selected regions/cities
+      if (newId && !form.serves_all_country) {
+        if (selectedRegions.size > 0) {
+          await supabase.from("supplier_regions").insert(
+            [...selectedRegions].map((region_id) => ({ supplier_id: newId, region_id }))
+          );
+        }
+        if (selectedCities.size > 0) {
+          await supabase.from("supplier_cities").insert(
+            [...selectedCities].map((city_id) => ({ supplier_id: newId, city_id }))
+          );
+        }
+      }
+      toast.success("הספק נוצר בהצלחה");
       setOpen(false);
       setForm(emptyForm);
+      setSelectedRegions(new Set());
+      setSelectedCities(new Set());
       await load();
-      if (data?.id && !form.serves_all_country) {
-        navigate(`/admin/suppliers/${data.id}/areas`);
-      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "יצירה נכשלה");
     } finally {
