@@ -122,18 +122,20 @@ export default function ResidentDashboard() {
         </div>
 
         <button
-          onClick={() => navigate("/resident/projects")}
+          onClick={() => navigate("/resident/profile/edit")}
           className="w-full bg-white/[0.06] backdrop-blur border border-white/10 rounded-2xl p-4 text-right hover:bg-white/[0.10] transition-smooth"
         >
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-1.5 text-[10px] text-gold uppercase tracking-wider mb-1.5">
                 <MapPin className="h-3 w-3" strokeWidth={1.75} />
-                <span>הפרויקט שלך</span>
+                <span>{project ? "הפרויקט שלך" : "האזור שלך"}</span>
               </div>
-              <div className="font-semibold text-base">{project.name}</div>
+              <div className="font-semibold text-base">
+                {project?.name || areaLabel || "הגדר אזור / פרויקט"}
+              </div>
               <div className="text-[11px] text-primary-foreground/55 mt-0.5">
-                {project.city} · דירה {user?.apartment || "-"}
+                {project ? `${project.city} · דירה ${user?.apartment || "-"}` : "השלם את הפרופיל לחוויה מותאמת"}
               </div>
             </div>
             <ChevronLeft className="h-5 w-5 text-gold" strokeWidth={1.75} />
