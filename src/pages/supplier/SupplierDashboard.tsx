@@ -14,6 +14,8 @@ type DbSupplier = {
   business_name: string;
   approval_status: string;
   is_active: boolean;
+  user_id?: string | null;
+  email?: string | null;
 };
 
 export default function SupplierDashboard() {
