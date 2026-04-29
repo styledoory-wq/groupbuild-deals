@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ShieldCheck, Loader2, ArrowRight } from "lucide-react";
+import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ShieldCheck, Loader2, ArrowRight, Tag } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
+import { useApp } from "@/store/AppStore";
+import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 
 interface DbSupplier {
   id: string;
@@ -28,6 +30,7 @@ interface DbSupplier {
   instagram_url: string | null;
   facebook_url: string | null;
   catalog_url: string | null;
+  service_areas: string[] | null;
 }
 
 interface GalleryItem {
@@ -45,9 +48,11 @@ const WhatsappIcon = (props: { className?: string }) => (
 export default function SupplierProfile() {
   const { supplierId } = useParams();
   const navigate = useNavigate();
+  const { categories } = useApp();
   const [loading, setLoading] = useState(true);
   const [supplier, setSupplier] = useState<DbSupplier | null>(null);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [serviceAreas, setServiceAreas] = useState<string[]>([]);
   const [interested, setInterested] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
@@ -55,15 +60,37 @@ export default function SupplierProfile() {
   useEffect(() => {
     if (!supplierId) return;
     (async () => {
-      const [{ data: s }, { data: g }] = await Promise.all([
+      const [{ data: s }, { data: g }, { data: sregs }, { data: scits }] = await Promise.all([
         supabase.from("suppliers").select("*").eq("id", supplierId).maybeSingle(),
         supabase.from("supplier_gallery").select("id,image_url,caption").eq("supplier_id", supplierId).order("display_order"),
+        supabase.from("supplier_regions").select("region_id, regions(name_he)").eq("supplier_id", supplierId),
+        supabase.from("supplier_cities").select("city_id, cities(name_he)").eq("supplier_id", supplierId),
       ]);
-      setSupplier((s as DbSupplier | null) ?? null);
+      const sup = (s as DbSupplier | null) ?? null;
+      setSupplier(sup);
       setGallery((g as GalleryItem[] | null) ?? []);
+
+      const regionNames = (sregs ?? []).map((r: any) => r.regions?.name_he).filter(Boolean) as string[];
+      const cityNames = (scits ?? []).map((c: any) => c.cities?.name_he).filter(Boolean) as string[];
+      const fromTable = [...regionNames, ...cityNames];
+      const fromArr = (sup?.service_areas ?? []).filter((x) => x && x !== "כל הארץ");
+      const merged = Array.from(new Set([...fromTable, ...fromArr]));
+      setServiceAreas(merged);
       setLoading(false);
     })();
   }, [supplierId]);
+
+  const supplierCategories = useMemo(() => {
+    if (!supplier) return [] as { id: string; name: string; icon: string }[];
+    return (supplier.categories ?? [])
+      .map((cid) => categories.find((c) => c.id === cid))
+      .filter(Boolean) as { id: string; name: string; icon: string }[];
+  }, [supplier, categories]);
+
+  const whatsappHref = useMemo(
+    () => normalizeWhatsappUrl(supplier?.whatsapp_url ?? supplier?.phone ?? null),
+    [supplier],
+  );
 
   const handleInterest = async () => {
     const { data: session } = await supabase.auth.getSession();
@@ -119,7 +146,7 @@ export default function SupplierProfile() {
 
   const links: { label: string; href: string; Icon: React.ComponentType<{ className?: string }> }[] = [];
   if (supplier.website_url) links.push({ label: "לאתר הספק", href: supplier.website_url, Icon: Globe });
-  if (supplier.whatsapp_url) links.push({ label: "וואטסאפ", href: supplier.whatsapp_url, Icon: WhatsappIcon });
+  if (whatsappHref) links.push({ label: "וואטסאפ", href: whatsappHref, Icon: WhatsappIcon });
   if (supplier.instagram_url) links.push({ label: "אינסטגרם", href: supplier.instagram_url, Icon: Instagram });
   if (supplier.facebook_url) links.push({ label: "פייסבוק", href: supplier.facebook_url, Icon: Facebook });
 
@@ -194,14 +221,48 @@ export default function SupplierProfile() {
           </section>
         )}
 
+        {/* Categories */}
+        {supplierCategories.length > 0 && (
+          <section className="gb-card p-4">
+            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Tag className="h-3.5 w-3.5 text-gold" /> תחומים
+            </h2>
+            <div className="flex flex-wrap gap-1.5">
+              {supplierCategories.map((c) => (
+                <span
+                  key={c.id}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-gold/10 text-primary border border-gold/30"
+                >
+                  <span>{c.icon}</span> {c.name}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Service area */}
         <section className="gb-card p-4">
           <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <MapPin className="h-3.5 w-3.5 text-gold" /> אזורי שירות
           </h2>
-          <p className="text-sm text-foreground">
-            {supplier.serves_all_country ? "נותן שירות בכל הארץ" : "אזורים נבחרים — צור קשר לפרטים"}
-          </p>
+          {supplier.serves_all_country ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-gold/15 text-primary border border-gold/40">
+              נותן שירות בכל הארץ
+            </span>
+          ) : serviceAreas.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {serviceAreas.map((name) => (
+                <span
+                  key={name}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-primary/10 text-primary border border-primary/30"
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">לא הוגדרו אזורי שירות — צרו קשר לפרטים</p>
+          )}
         </section>
 
         {/* Gallery */}
