@@ -112,22 +112,73 @@ export default function OfferEditor() {
       return;
     }
 
-    setSaving(true);
-    try {
-      const payload = {
+    // Validate by offer type
+    const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
+    let payload: Record<string, unknown>;
+
+    if (offerType === "percentage") {
+      const pct = num(discountPercentage);
+      if (!Number.isFinite(pct) || pct < 1 || pct > 100) {
+        toast.error("אחוז ההנחה חייב להיות בין 1 ל-100");
+        return;
+      }
+      const base = basePrice.trim() === "" ? null : num(basePrice);
+      if (base !== null && (!Number.isFinite(base) || base <= 0)) {
+        toast.error("מחיר בסיס חייב להיות מספר חיובי");
+        return;
+      }
+      payload = {
         supplier_id: supplier.id,
         title: title.trim(),
         description: description.trim() || null,
         category_id: categoryId,
-        original_price: originalPrice,
+        offer_type: "percentage",
+        discount_percentage: pct,
+        base_price: base,
+        original_price: base ?? 0,
+        discounted_price: base ? Math.round(base * (1 - pct / 100)) : null,
         deposit_amount: depositAmount,
-        tiers: tiers as unknown as import("@/integrations/supabase/types").Json,
-        highlights: ["מחיר מיוחד", "התקנה כלולה", "אחריות מלאה"] as unknown as import("@/integrations/supabase/types").Json,
+        tiers: [] as unknown as import("@/integrations/supabase/types").Json,
+        highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as import("@/integrations/supabase/types").Json,
         status: "active",
         ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
       };
+    } else {
+      const before = num(originalPrice);
+      const after = num(discountedPrice);
+      if (!Number.isFinite(before) || before <= 0) {
+        toast.error("יש להזין מחיר לפני הנחה תקין");
+        return;
+      }
+      if (!Number.isFinite(after) || after <= 0) {
+        toast.error("יש להזין מחיר אחרי הנחה תקין");
+        return;
+      }
+      if (after >= before) {
+        toast.error("המחיר אחרי הנחה חייב להיות קטן מהמחיר לפני");
+        return;
+      }
+      payload = {
+        supplier_id: supplier.id,
+        title: title.trim(),
+        description: description.trim() || null,
+        category_id: categoryId,
+        offer_type: "price_comparison",
+        original_price: before,
+        discounted_price: after,
+        discount_percentage: Math.round(((before - after) / before) * 100),
+        base_price: null,
+        deposit_amount: depositAmount,
+        tiers: [] as unknown as import("@/integrations/supabase/types").Json,
+        highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as import("@/integrations/supabase/types").Json,
+        status: "active",
+        ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
+      };
+    }
 
-      const { error } = await supabase.from("deals").insert([payload]);
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("deals").insert([payload as never]);
       if (error) {
         console.error("[OfferEditor] insert error", error);
         const msg = error.message?.includes("row-level")
