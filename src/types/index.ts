@@ -41,6 +41,12 @@ export interface Supplier {
   commissionPercent: number;
   approvalStatus: "approved" | "pending" | "rejected";
   logoEmoji: string;
+  logoUrl?: string | null;
+  websiteUrl?: string | null;
+  whatsappUrl?: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+  catalogUrl?: string | null;
 }
 
 export interface PricingTier {
