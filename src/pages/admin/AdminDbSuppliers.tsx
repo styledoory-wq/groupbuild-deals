@@ -298,9 +298,73 @@ export default function AdminDbSuppliers() {
               </select>
             </div>
             {!form.serves_all_country && (
-              <p className="text-[11px] text-muted-foreground">
-                לאחר היצירה תועבר למסך אזורי השירות לבחירת ערים/אזורים.
-              </p>
+              <div className="space-y-3 pt-2 border-t">
+                <div>
+                  <Label className="text-sm font-bold">אזורי שירות</Label>
+                  <p className="text-[11px] text-muted-foreground mb-2">בחר את האזורים שבהם הספק פועל</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {regions.map((r) => {
+                      const active = selectedRegions.has(r.id);
+                      return (
+                        <button
+                          type="button"
+                          key={r.id}
+                          onClick={() => toggleRegion(r.id)}
+                          className={
+                            "h-9 rounded-xl text-xs font-bold border transition px-2 " +
+                            (active
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-card text-foreground border-border")
+                          }
+                        >
+                          {r.name_he}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {selectedRegions.size > 0 && (
+                  <div>
+                    <Label className="text-sm font-bold">ערים ספציפיות (אופציונלי)</Label>
+                    <p className="text-[11px] text-muted-foreground mb-2">
+                      ללא בחירת ערים — הספק יוצג בכל הערים שבאזורים שנבחרו.
+                    </p>
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {[...selectedRegions].map((rid) => {
+                        const region = regions.find((r) => r.id === rid);
+                        const regionCities = citiesByRegion(rid);
+                        if (!region || regionCities.length === 0) return null;
+                        return (
+                          <div key={rid}>
+                            <div className="text-[10px] font-bold text-muted-foreground mb-1">{region.name_he}</div>
+                            <div className="flex flex-wrap gap-1">
+                              {regionCities.map((c) => {
+                                const active = selectedCities.has(c.id);
+                                return (
+                                  <button
+                                    type="button"
+                                    key={c.id}
+                                    onClick={() => toggleCity(c.id)}
+                                    className={
+                                      "px-2 py-1 rounded-full text-[11px] font-bold border transition " +
+                                      (active
+                                        ? "bg-gold/20 text-primary border-gold"
+                                        : "bg-card text-foreground border-border")
+                                    }
+                                  >
+                                    {c.name_he}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
           <DialogFooter>
