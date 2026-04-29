@@ -24,7 +24,7 @@ export function SupplierRatingBadge({ supplierId, className, showEmpty = true }:
     if (!showEmpty) return null;
     return (
       <span className={cn("inline-flex items-center gap-1 text-[11px] text-muted-foreground", className)}>
-        <Star className="h-3 w-3 text-muted" /> אין דירוגים עדיין
+        <Star className="h-3 w-3 text-gold/60" /> ספק חדש בפלטפורמה
       </span>
     );
   }
