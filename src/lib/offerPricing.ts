@@ -65,6 +65,20 @@ export function getActiveTier(tiers: OfferTier[], participants: number): OfferTi
   return active;
 }
 
+/** Returns the next tier (one with higher minParticipants than the active one), or null. */
+export function getNextTier(tiers: OfferTier[], participants: number): OfferTier | null {
+  if (!tiers?.length) return null;
+  const sorted = sortTiers(tiers);
+  const next = sorted.find((t) => t.minParticipants > Math.max(participants, 0));
+  return next ?? null;
+}
+
+/** Short label for a tier (just discount/price headline, no range). */
+export function tierShortValue(type: OfferType, t: OfferTier): string {
+  if (type === "percentage" && t.discount_percentage) return `${t.discount_percentage}%`;
+  if (type === "price_comparison" && t.discounted_price) return ils(Number(t.discounted_price));
+  return "—";
+
 /** Range label like "1–4" or "20+" */
 export function tierRange(t: OfferTier): string {
   if (t.maxParticipants && t.maxParticipants >= t.minParticipants) {
