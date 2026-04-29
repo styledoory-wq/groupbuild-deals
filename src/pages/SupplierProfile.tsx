@@ -47,9 +47,11 @@ const WhatsappIcon = (props: { className?: string }) => (
 export default function SupplierProfile() {
   const { supplierId } = useParams();
   const navigate = useNavigate();
+  const { categories } = useApp();
   const [loading, setLoading] = useState(true);
   const [supplier, setSupplier] = useState<DbSupplier | null>(null);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [serviceAreas, setServiceAreas] = useState<string[]>([]);
   const [interested, setInterested] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
@@ -57,15 +59,37 @@ export default function SupplierProfile() {
   useEffect(() => {
     if (!supplierId) return;
     (async () => {
-      const [{ data: s }, { data: g }] = await Promise.all([
+      const [{ data: s }, { data: g }, { data: sregs }, { data: scits }] = await Promise.all([
         supabase.from("suppliers").select("*").eq("id", supplierId).maybeSingle(),
         supabase.from("supplier_gallery").select("id,image_url,caption").eq("supplier_id", supplierId).order("display_order"),
+        supabase.from("supplier_regions").select("region_id, regions(name_he)").eq("supplier_id", supplierId),
+        supabase.from("supplier_cities").select("city_id, cities(name_he)").eq("supplier_id", supplierId),
       ]);
-      setSupplier((s as DbSupplier | null) ?? null);
+      const sup = (s as DbSupplier | null) ?? null;
+      setSupplier(sup);
       setGallery((g as GalleryItem[] | null) ?? []);
+
+      const regionNames = (sregs ?? []).map((r: any) => r.regions?.name_he).filter(Boolean) as string[];
+      const cityNames = (scits ?? []).map((c: any) => c.cities?.name_he).filter(Boolean) as string[];
+      const fromTable = [...regionNames, ...cityNames];
+      const fromArr = (sup?.service_areas ?? []).filter((x) => x && x !== "כל הארץ");
+      const merged = Array.from(new Set([...fromTable, ...fromArr]));
+      setServiceAreas(merged);
       setLoading(false);
     })();
   }, [supplierId]);
+
+  const supplierCategories = useMemo(() => {
+    if (!supplier) return [] as { id: string; name: string; icon: string }[];
+    return (supplier.categories ?? [])
+      .map((cid) => categories.find((c) => c.id === cid))
+      .filter(Boolean) as { id: string; name: string; icon: string }[];
+  }, [supplier, categories]);
+
+  const whatsappHref = useMemo(
+    () => normalizeWhatsappUrl(supplier?.whatsapp_url ?? supplier?.phone ?? null),
+    [supplier],
+  );
 
   const handleInterest = async () => {
     const { data: session } = await supabase.auth.getSession();
