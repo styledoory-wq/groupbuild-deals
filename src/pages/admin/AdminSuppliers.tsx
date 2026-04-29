@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import type { Supplier } from "@/types";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { uploadSupplierLogo, uploadSupplierCatalog } from "@/lib/supplierUploads";
+import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
+import { useRegions } from "@/hooks/useRegions";
 
 type FormState = {
   id?: string;
@@ -70,8 +72,14 @@ function supplierIsIncomplete(s: Supplier) {
 export default function AdminSuppliers() {
   const navigate = useNavigate();
   const { suppliers, setSuppliers, categories, setCategories } = useApp();
+  const { regionById, cityById } = useRegions();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [areas, setAreas] = useState<AreasComboboxValue>({
+    servesAllCountry: false,
+    regionIds: [],
+    cityIds: [],
+  });
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [newCatOpen, setNewCatOpen] = useState(false);
   const [newCat, setNewCat] = useState({ name: "", icon: "🏷️" });
@@ -79,6 +87,21 @@ export default function AdminSuppliers() {
   const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const catalogInputRef = useRef<HTMLInputElement>(null);
+
+  // Convert area selection → readable Hebrew string for serviceArea
+  const areasToText = (a: AreasComboboxValue): string => {
+    if (a.servesAllCountry) return "כל הארץ";
+    const labels: string[] = [];
+    a.regionIds.forEach((id) => {
+      const r = regionById(id);
+      if (r) labels.push(r.name_he);
+    });
+    a.cityIds.forEach((id) => {
+      const c = cityById(id);
+      if (c) labels.push(c.name_he);
+    });
+    return labels.join(", ");
+  };
 
   const onLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -130,6 +153,7 @@ export default function AdminSuppliers() {
 
   const openCreate = () => {
     setForm(emptyForm);
+    setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] });
     setOpen(true);
   };
 
@@ -151,6 +175,12 @@ export default function AdminSuppliers() {
       verified: !!s.verified,
       featured: !!s.featured,
       approvalStatus: s.approvalStatus ?? "pending",
+    });
+    // Pre-fill the combobox with "all country" if applicable; else leave empty for re-selection
+    setAreas({
+      servesAllCountry: s.serviceArea?.trim() === "כל הארץ",
+      regionIds: [],
+      cityIds: [],
     });
     setOpen(true);
   };
@@ -174,7 +204,7 @@ export default function AdminSuppliers() {
       businessName: form.businessName.trim(),
       ownerName: form.ownerName.trim(),
       categoryIds: form.categoryIds,
-      serviceArea: form.serviceArea.trim(),
+      serviceArea: areasToText(areas) || form.serviceArea.trim(),
       verified: form.verified,
       featured: form.featured,
       rating: form.id ? (suppliers.find(s => s.id === form.id)?.rating ?? 0) : 0,
@@ -344,13 +374,13 @@ export default function AdminSuppliers() {
               />
             </div>
 
-            <div className="rounded-xl border border-gold/30 bg-gold/5 p-3">
-              <Label className="text-xs font-bold flex items-center gap-1.5 mb-1">
+            <div>
+              <Label className="text-xs font-bold flex items-center gap-1.5 mb-1.5">
                 <MapPin className="h-3.5 w-3.5 text-gold" /> אזורי שירות
               </Label>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                בחירת אזורים וערים מתבצעת במסך נפרד לאחר שמירת הספק — לחצו על
-                כפתור <span className="font-bold text-foreground">"אזורים"</span> בכרטיס הספק כדי לבחור מתוך רשימת האזורים והערים המובנית.
+              <AreasCombobox value={areas} onChange={setAreas} />
+              <p className="text-[10px] text-muted-foreground mt-1.5 leading-relaxed">
+                ניתן לבחור "כל הארץ", אזור שלם או ערים בודדות. בחירה מרובה אפשרית.
               </p>
             </div>
 
