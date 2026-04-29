@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { describeOffer } from "@/lib/offerPricing";
+import { describeOffer, describeTier, tierRange, type OfferTier, type OfferType } from "@/lib/offerPricing";
 
 type DealRow = {
   id: string;
@@ -17,6 +17,7 @@ type DealRow = {
   discount_percentage: number | null;
   base_price: number | null;
   offer_type: string | null;
+  tiers: OfferTier[] | null;
   created_at: string;
 };
 
@@ -64,7 +65,7 @@ export default function SupplierOffers() {
 
         const { data, error: dErr } = await supabase
           .from("deals")
-          .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, created_at")
+          .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, tiers, created_at")
           .eq("supplier_id", sid)
           .order("created_at", { ascending: false });
 
@@ -124,13 +125,17 @@ export default function SupplierOffers() {
         )}
 
         {!loading && !error && deals.map((d) => {
+          const offerType = ((d.offer_type as OfferType | null) ?? "percentage") as OfferType;
+          const tiers = Array.isArray(d.tiers) ? d.tiers : [];
+          const hasTiers = tiers.length > 0;
           const display = describeOffer({
-            offer_type: (d.offer_type as "percentage" | "price_comparison" | "tiers" | null) ?? "percentage",
+            offer_type: offerType,
             original_price: d.original_price,
             discounted_price: d.discounted_price,
             discount_percentage: d.discount_percentage,
             base_price: d.base_price,
-          });
+            tiers,
+          }, 0);
           return (
             <div key={d.id} className="gb-card p-4">
               <div className="flex items-start justify-between mb-2">
@@ -144,14 +149,40 @@ export default function SupplierOffers() {
                   {d.status === "active" ? "פעילה" : d.status}
                 </span>
               </div>
+
               <div className="pt-2 border-t border-border mt-2">
                 <div className="font-extrabold text-primary text-base">{display.headline}</div>
                 {display.savings && (
                   <div className="text-[11px] font-bold text-success mt-0.5">{display.savings}</div>
                 )}
                 <p className="text-[10px] text-muted-foreground mt-1.5">
-                  ככל שיותר דיירים מצטרפים — המחיר משתפר
+                  ככל שיותר דיירים מצטרפים — ההנחה גדלה
                 </p>
+
+                {hasTiers && (
+                  <div className="mt-3 rounded-xl border border-border bg-muted/30 overflow-hidden">
+                    <div className="grid grid-cols-2 gap-1 px-3 py-2 bg-muted/60 text-[10px] font-bold text-muted-foreground">
+                      <span>מצטרפים</span>
+                      <span className="text-left">הנחה</span>
+                    </div>
+                    {tiers.map((t, idx) => {
+                      const td = describeTier(offerType, t);
+                      const isFirst = idx === 0;
+                      return (
+                        <div
+                          key={idx}
+                          className={`grid grid-cols-2 gap-1 px-3 py-2 text-[11px] border-t border-border ${
+                            isFirst ? "bg-gold/5" : ""
+                          }`}
+                        >
+                          <span className="font-medium text-foreground">{tierRange(t)}</span>
+                          <span className="text-left font-bold text-primary">{td.headline}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <div className="text-left text-[10px] text-muted-foreground mt-2">
                   {new Date(d.created_at).toLocaleDateString("he-IL")}
                 </div>
