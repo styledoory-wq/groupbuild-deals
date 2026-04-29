@@ -22,6 +22,7 @@ import DealDetail from "./pages/resident/DealDetail";
 import ResidentProfile from "./pages/resident/ResidentProfile";
 import ResidentProfileEdit from "./pages/resident/ResidentProfileEdit";
 import Notifications from "./pages/resident/Notifications";
+import MyOffers from "./pages/resident/MyOffers";
 
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import SupplierProfileEdit from "./pages/supplier/SupplierProfileEdit";
