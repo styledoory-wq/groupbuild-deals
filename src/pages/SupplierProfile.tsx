@@ -146,7 +146,7 @@ export default function SupplierProfile() {
 
   const links: { label: string; href: string; Icon: React.ComponentType<{ className?: string }> }[] = [];
   if (supplier.website_url) links.push({ label: "לאתר הספק", href: supplier.website_url, Icon: Globe });
-  if (supplier.whatsapp_url) links.push({ label: "וואטסאפ", href: supplier.whatsapp_url, Icon: WhatsappIcon });
+  if (whatsappHref) links.push({ label: "וואטסאפ", href: whatsappHref, Icon: WhatsappIcon });
   if (supplier.instagram_url) links.push({ label: "אינסטגרם", href: supplier.instagram_url, Icon: Instagram });
   if (supplier.facebook_url) links.push({ label: "פייסבוק", href: supplier.facebook_url, Icon: Facebook });
 
