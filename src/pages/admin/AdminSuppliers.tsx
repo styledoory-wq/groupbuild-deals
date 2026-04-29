@@ -153,6 +153,12 @@ export default function AdminSuppliers() {
       commissionPercent: parseFloat(form.commissionPercent) || 0,
       approvalStatus: form.approvalStatus,
       logoEmoji: form.logoEmoji || "🏷️",
+      logoUrl: form.logoUrl,
+      websiteUrl: form.websiteUrl.trim() || null,
+      whatsappUrl: form.whatsappUrl.trim() || null,
+      instagramUrl: form.instagramUrl.trim() || null,
+      facebookUrl: form.facebookUrl.trim() || null,
+      catalogUrl: form.catalogUrl.trim() || null,
     };
     if (form.id) {
       setSuppliers(suppliers.map((s) => (s.id === form.id ? payload : s)));
