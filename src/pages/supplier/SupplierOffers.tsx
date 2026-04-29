@@ -67,7 +67,7 @@ export default function SupplierOffers() {
         }
 
         const { data, error: dErr } = await supabase
-          .from("deals" as never)
+          .from("deals")
           .select("id, title, status, original_price, tiers, created_at")
           .eq("supplier_id", sid)
           .order("created_at", { ascending: false });

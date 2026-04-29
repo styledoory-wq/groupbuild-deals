@@ -130,7 +130,7 @@ export default function OfferEditor() {
         ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
       };
 
-      const { error } = await supabase.from("deals" as never).insert(payload as never);
+      const { error } = await supabase.from("deals").insert(payload);
       if (error) {
         console.error("[OfferEditor] insert error", error);
         const msg = error.message?.includes("row-level")
