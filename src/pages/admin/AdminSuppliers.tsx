@@ -153,6 +153,7 @@ export default function AdminSuppliers() {
 
   const openCreate = () => {
     setForm(emptyForm);
+    setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] });
     setOpen(true);
   };
 
@@ -174,6 +175,12 @@ export default function AdminSuppliers() {
       verified: !!s.verified,
       featured: !!s.featured,
       approvalStatus: s.approvalStatus ?? "pending",
+    });
+    // Pre-fill the combobox with "all country" if applicable; else leave empty for re-selection
+    setAreas({
+      servesAllCountry: s.serviceArea?.trim() === "כל הארץ",
+      regionIds: [],
+      cityIds: [],
     });
     setOpen(true);
   };
