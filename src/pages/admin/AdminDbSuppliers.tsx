@@ -64,28 +64,11 @@ export default function AdminDbSuppliers() {
   const [form, setForm] = useState<NewForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [selectedRegions, setSelectedRegions] = useState<Set<string>>(new Set());
-  const [selectedCities, setSelectedCities] = useState<Set<string>>(new Set());
-
-  const toggleRegion = (id: string) => {
-    const s = new Set(selectedRegions);
-    if (s.has(id)) {
-      s.delete(id);
-      const cityIds = citiesByRegion(id).map((c) => c.id);
-      const nc = new Set(selectedCities);
-      cityIds.forEach((cid) => nc.delete(cid));
-      setSelectedCities(nc);
-    } else {
-      s.add(id);
-    }
-    setSelectedRegions(s);
-  };
-
-  const toggleCity = (id: string) => {
-    const s = new Set(selectedCities);
-    if (s.has(id)) s.delete(id); else s.add(id);
-    setSelectedCities(s);
-  };
+  const [areas, setAreas] = useState<AreasComboboxValue>({
+    servesAllCountry: false,
+    regionIds: [],
+    cityIds: [],
+  });
 
   const load = async () => {
     const { data, error } = await supabase
