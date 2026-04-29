@@ -34,6 +34,7 @@ interface Row {
   phone: string | null;
   email: string | null;
   categories: string[];
+  service_areas: string[];
   regionCount?: number;
   cityCount?: number;
 }
@@ -100,7 +101,7 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,short_description,phone,email,categories")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories")
       .order("business_name");
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
@@ -146,6 +147,7 @@ export default function AdminDbSuppliers() {
           email: form.email.trim() || null,
           short_description: form.short_description.trim() || null,
           serves_all_country: areas.servesAllCountry,
+          service_areas: areas.servesAllCountry ? ["כל הארץ"] : [],
           approval_status: form.approval_status,
           is_active: form.is_active,
           categories: form.categoryIds,
@@ -316,7 +318,8 @@ export default function AdminDbSuppliers() {
         )}
         {rows.map((r) => {
           const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name).filter(Boolean) ?? [];
-          const noAreas = !r.serves_all_country && (r.regionCount ?? 0) === 0 && (r.cityCount ?? 0) === 0;
+          const isNational = r.serves_all_country || r.service_areas?.includes("כל הארץ") || ((r.regionCount ?? 0) === 0 && (r.cityCount ?? 0) === 0);
+          const noAreas = false;
           const noCats = !r.categories || r.categories.length === 0;
           const hidden = noAreas || noCats || !r.is_active || r.approval_status !== "approved";
 
@@ -330,7 +333,7 @@ export default function AdminDbSuppliers() {
                     {r.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-gold shrink-0" />}
                   </div>
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {r.serves_all_country ? "כל הארץ" : `${r.regionCount ?? 0} אזורים · ${r.cityCount ?? 0} ערים`} · {r.is_active ? "פעיל" : "לא פעיל"} · {r.approval_status}
+                    {isNational ? "כל הארץ" : `${r.regionCount ?? 0} אזורים · ${r.cityCount ?? 0} ערים`} · {r.is_active ? "פעיל" : "לא פעיל"} · {r.approval_status}
                   </p>
                   <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                     קטגוריות: {catNames.length ? catNames.join(", ") : <span className="text-destructive">אין</span>}
