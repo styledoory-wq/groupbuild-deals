@@ -43,6 +43,8 @@ export default function CategorySuppliers() {
   const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
   const [supplierCityIds, setSupplierCityIds] = useState<Record<string, string[]>>({});
 
+  const activeCategory = categories.find((c) => c.id === activeCategoryId);
+
   useEffect(() => {
     setActiveCategoryId(categoryId ?? "all");
   }, [categoryId]);
@@ -71,69 +73,107 @@ export default function CategorySuppliers() {
 
   useEffect(() => {
     (async () => {
-      if (!categoryId) return;
       setLoading(true);
-      const { data } = await supabase
-        .from("suppliers")
-        .select("id,business_name,short_description,description,logo_url,categories,serves_all_country,is_active,approval_status")
-        .eq("is_active", true)
-        .eq("approval_status", "approved")
-        .contains("categories", [categoryId]);
-      setSuppliers((data ?? []) as DbSupplier[]);
-      setLoading(false);
-    })();
-  }, [categoryId]);
+      setLoadError(null);
+      try {
+        await supabase.auth.getSession();
+        const [suppliersResult, regionsResult, citiesResult] = await Promise.all([
+          supabase
+            .from("suppliers")
+            .select("id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status")
+            .eq("is_active", true)
+            .eq("approval_status", "approved")
+            .order("business_name"),
+          supabase.from("supplier_regions").select("supplier_id,region_id"),
+          supabase.from("supplier_cities").select("supplier_id,city_id"),
+        ]);
 
-  useEffect(() => {
-    (async () => {
-      if (regionId === "all") {
-        setSupplierIdsByRegion(null);
-        return;
-      }
-      const { data } = await supabase
-        .from("supplier_regions")
-        .select("supplier_id")
-        .eq("region_id", regionId);
-      setSupplierIdsByRegion(new Set((data ?? []).map((r) => r.supplier_id)));
-    })();
-  }, [regionId]);
+        if (suppliersResult.error) throw suppliersResult.error;
 
-  useEffect(() => {
-    (async () => {
-      if (cityId === "all") {
-        setSupplierIdsByCity(null);
-        return;
+        const regionMap: Record<string, string[]> = {};
+        (regionsResult.data ?? []).forEach((row: { supplier_id: string; region_id: string }) => {
+          regionMap[row.supplier_id] = [...(regionMap[row.supplier_id] ?? []), row.region_id];
+        });
+
+        const cityMap: Record<string, string[]> = {};
+        (citiesResult.data ?? []).forEach((row: { supplier_id: string; city_id: string }) => {
+          cityMap[row.supplier_id] = [...(cityMap[row.supplier_id] ?? []), row.city_id];
+        });
+
+        setSupplierRegionIds(regionMap);
+        setSupplierCityIds(cityMap);
+        setSuppliers(((suppliersResult.data ?? []) as DbSupplier[]).map((s) => ({
+          ...s,
+          categories: s.categories ?? [],
+          service_areas: s.service_areas ?? [],
+        })));
+      } catch {
+        setLoadError("שגיאה בטעינה");
+        setSuppliers([]);
+        setSupplierRegionIds({});
+        setSupplierCityIds({});
+      } finally {
+        setLoading(false);
       }
-      const { data } = await supabase
-        .from("supplier_cities")
-        .select("supplier_id")
-        .eq("city_id", cityId);
-      setSupplierIdsByCity(new Set((data ?? []).map((r) => r.supplier_id)));
     })();
-  }, [cityId]);
+  }, []);
 
   const filteredCities = useMemo(
     () => (regionId === "all" ? cities : cities.filter((c) => c.region_id === regionId)),
     [cities, regionId],
   );
 
+  const isNationalSupplier = (s: DbSupplier) => {
+    const regionCount = supplierRegionIds[s.id]?.length ?? 0;
+    const cityCount = supplierCityIds[s.id]?.length ?? 0;
+    return s.serves_all_country || s.service_areas.includes(NATIONAL_AREA) || (regionCount === 0 && cityCount === 0 && s.service_areas.length === 0);
+  };
+
+  const matchesArea = (s: DbSupplier) => {
+    if (regionId === "all" && cityId === "all") return true;
+    if (isNationalSupplier(s)) return true;
+
+    const selectedRegion = regions.find((r) => r.id === regionId) ?? null;
+    const selectedCity = cities.find((c) => c.id === cityId) ?? null;
+    const selectedCityRegion = selectedCity ? regions.find((r) => r.id === selectedCity.region_id) ?? null : null;
+    const serviceAreas = new Set(s.service_areas ?? []);
+    const sRegionIds = supplierRegionIds[s.id] ?? [];
+    const sCityIds = supplierCityIds[s.id] ?? [];
+    const supplierRegionNames = sRegionIds.map((id) => regions.find((r) => r.id === id)?.name_he).filter(Boolean) as string[];
+
+    if (cityId !== "all" && selectedCity) {
+      if (sCityIds.includes(selectedCity.id) || serviceAreas.has(selectedCity.name_he)) return true;
+      if (sRegionIds.includes(selectedCity.region_id) || (selectedCityRegion && serviceAreas.has(selectedCityRegion.name_he))) return true;
+      if (selectedCityRegion && NORTH_REGION_NAMES.has(selectedCityRegion.name_he) && (supplierRegionNames.some((name) => NORTH_REGION_NAMES.has(name)) || serviceAreas.has("צפון") || serviceAreas.has("כל הצפון"))) return true;
+    }
+
+    if (regionId !== "all" && selectedRegion) {
+      if (sRegionIds.includes(selectedRegion.id) || serviceAreas.has(selectedRegion.name_he)) return true;
+      if (NORTH_REGION_NAMES.has(selectedRegion.name_he) && (supplierRegionNames.some((name) => NORTH_REGION_NAMES.has(name)) || serviceAreas.has("צפון") || serviceAreas.has("כל הצפון"))) return true;
+    }
+
+    return false;
+  };
+
   const filteredSuppliers = useMemo(() => {
-    // No area filter selected → show all
-    if (regionId === "all" && cityId === "all") return suppliers;
+    const q = searchTerm.trim().toLowerCase();
+    const byCategory = activeCategoryId === "all"
+      ? suppliers
+      : suppliers.filter((s) => (s.categories ?? []).includes(activeCategoryId));
 
-    return suppliers.filter((s) => {
-      // National suppliers always match
-      if (s.serves_all_country) return true;
-
-      // Match if supplier covers the selected region OR the selected city
-      const regionMatch =
-        regionId !== "all" && supplierIdsByRegion?.has(s.id);
-      const cityMatch =
-        cityId !== "all" && supplierIdsByCity?.has(s.id);
-
-      return Boolean(regionMatch || cityMatch);
+    const bySearch = !q ? byCategory : byCategory.filter((s) => {
+      const categoryNames = (s.categories ?? []).map((cid) => categories.find((c) => c.id === cid)?.name ?? cid);
+      const cityNames = (supplierCityIds[s.id] ?? []).map((id) => cities.find((c) => c.id === id)?.name_he ?? "");
+      const haystack = [s.business_name, s.short_description ?? "", s.description ?? "", ...categoryNames, ...cityNames, ...(s.service_areas ?? [])]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
     });
-  }, [suppliers, regionId, cityId, supplierIdsByRegion, supplierIdsByCity]);
+
+    const byArea = bySearch.filter(matchesArea);
+    if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
+    return bySearch.filter(isNationalSupplier);
+  }, [suppliers, activeCategoryId, searchTerm, regionId, cityId, supplierRegionIds, supplierCityIds, regions, cities, categories]);
 
   const areaLabel =
     cityId !== "all"
