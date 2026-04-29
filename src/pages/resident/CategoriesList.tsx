@@ -28,7 +28,7 @@ export default function CategoriesList() {
         .from("suppliers")
         .select("id,business_name,short_description,logo_url,categories,service_areas")
         .eq("is_active", true)
-        .eq("approval_status", "approved")
+        .in("approval_status", ["approved", "active"])
         .order("business_name");
       setSuppliers((data as SupplierLite[]) ?? []);
     })();
