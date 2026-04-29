@@ -61,7 +61,6 @@ function supplierIsIncomplete(s: Supplier) {
   return (
     !s.businessName?.trim() ||
     !s.ownerName?.trim() ||
-    !s.serviceArea?.trim() ||
     !s.categoryIds?.length ||
     !s.commissionPercent ||
     !s.logoEmoji
