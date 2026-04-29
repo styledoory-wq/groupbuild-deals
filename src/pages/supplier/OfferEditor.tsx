@@ -30,15 +30,15 @@ export default function OfferEditor() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
-  const [originalPrice, setOriginalPrice] = useState<number>(50000);
   const [depositAmount, setDepositAmount] = useState<number>(1000);
   const [saving, setSaving] = useState(false);
-  const [tiers, setTiers] = useState<PricingTier[]>([
-    { minParticipants: 1, maxParticipants: 4, price: 45000, label: "מחיר מחירון" },
-    { minParticipants: 5, maxParticipants: 9, price: 40000, label: "הנחה ראשונה" },
-    { minParticipants: 10, maxParticipants: 19, price: 35000, label: "הנחה שנייה" },
-    { minParticipants: 20, maxParticipants: null, price: 30000, label: "המחיר הטוב ביותר" },
-  ]);
+
+  // New offer-type model
+  const [offerType, setOfferType] = useState<"percentage" | "price_comparison">("percentage");
+  const [discountPercentage, setDiscountPercentage] = useState<string>("20");
+  const [basePrice, setBasePrice] = useState<string>("");
+  const [originalPrice, setOriginalPrice] = useState<string>("");
+  const [discountedPrice, setDiscountedPrice] = useState<string>("");
 
   useEffect(() => {
     let cancelled = false;
