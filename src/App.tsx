@@ -43,6 +43,8 @@ import AdminRegions from "./pages/admin/AdminRegions";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminSupplierAreas from "./pages/admin/AdminSupplierAreas";
+import AdminSupplierMedia from "./pages/admin/AdminSupplierMedia";
+import AdminDbSuppliers from "./pages/admin/AdminDbSuppliers";
 
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import PaymentCancel from "./pages/payment/PaymentCancel";
@@ -99,6 +101,8 @@ const App = () => (
             <Route path="/admin/users" element={adminRoute(<AdminUsers />)} />
             <Route path="/admin/settings" element={adminRoute(<AdminSettings />)} />
             <Route path="/admin/suppliers/:supplierId/areas" element={adminRoute(<AdminSupplierAreas />)} />
+            <Route path="/admin/suppliers/:supplierId/media" element={adminRoute(<AdminSupplierMedia />)} />
+            <Route path="/admin/db-suppliers" element={adminRoute(<AdminDbSuppliers />)} />
             <Route path="/admin/stats" element={adminRoute(<AdminStats />)} />
 
             {/* Payment callbacks */}
