@@ -80,6 +80,42 @@ export default function AdminSuppliers() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [newCatOpen, setNewCatOpen] = useState(false);
   const [newCat, setNewCat] = useState({ name: "", icon: "🏷️" });
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingCatalog, setUploadingCatalog] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const catalogInputRef = useRef<HTMLInputElement>(null);
+
+  const onLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const url = await uploadSupplierLogo(file);
+      setForm((f) => ({ ...f, logoUrl: url }));
+      toast.success("הלוגו הועלה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setUploadingLogo(false);
+      if (logoInputRef.current) logoInputRef.current.value = "";
+    }
+  };
+
+  const onCatalogUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCatalog(true);
+    try {
+      const url = await uploadSupplierCatalog(file);
+      setForm((f) => ({ ...f, catalogUrl: url }));
+      toast.success("הקטלוג הועלה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setUploadingCatalog(false);
+      if (catalogInputRef.current) catalogInputRef.current.value = "";
+    }
+  };
 
   const addCategory = () => {
     const name = newCat.name.trim();
