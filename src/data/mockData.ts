@@ -25,14 +25,7 @@ export const projects: Project[] = [
   { id: "p5", name: "מרינה הרצליה", city: "הרצליה", buildingCount: 1, apartmentCount: 48, status: "delivery" },
 ];
 
-export const suppliers: Supplier[] = [
-  { id: "s1", businessName: "מטבחי רויאל דיזיין", ownerName: "אבי לוי", categoryIds: ["kitchen", "carpentry"], serviceArea: "מרכז ושרון", verified: true, featured: true, rating: 4.9, reviewsCount: 187, commissionPercent: 8, approvalStatus: "approved", logoEmoji: "👑" },
-  { id: "s2", businessName: "אקלים פלוס", ownerName: "דוד כהן", categoryIds: ["ac"], serviceArea: "ארצי", verified: true, rating: 4.7, reviewsCount: 312, commissionPercent: 10, approvalStatus: "approved", logoEmoji: "❄️" },
-  { id: "s3", businessName: "פרקטים בוטיק", ownerName: "מיכל גרין", categoryIds: ["flooring"], serviceArea: "מרכז", verified: true, rating: 4.8, reviewsCount: 92, commissionPercent: 7, approvalStatus: "approved", logoEmoji: "🪵" },
-  { id: "s4", businessName: "דלתות מילאנו", ownerName: "יוסי אזולאי", categoryIds: ["doors"], serviceArea: "ארצי", verified: true, rating: 4.6, reviewsCount: 145, commissionPercent: 9, approvalStatus: "approved", logoEmoji: "🚪" },
-  { id: "s5", businessName: "אור הבית", ownerName: "רונית שמש", categoryIds: ["lighting", "electric"], serviceArea: "מרכז וצפון", verified: true, rating: 4.9, reviewsCount: 64, commissionPercent: 8, approvalStatus: "approved", logoEmoji: "💡" },
-  { id: "s6", businessName: "מקלחוני קריסטל", ownerName: "אלון ברק", categoryIds: ["showers", "bath"], serviceArea: "מרכז", verified: false, rating: 4.4, reviewsCount: 28, commissionPercent: 9, approvalStatus: "pending", logoEmoji: "🚿" },
-];
+export const suppliers: Supplier[] = [];
 
 export const deals: Deal[] = [
   {
