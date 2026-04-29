@@ -363,9 +363,32 @@ export default function OfferEditor() {
               {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
             </select>
           </Field>
-          <Field label="פיקדון (₪)">
-            <Input type="number" value={depositAmount} onChange={(e) => setDepositAmount(+e.target.value)} className="h-11 rounded-xl" />
-          </Field>
+          <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={depositRequired}
+                onChange={(e) => setDepositRequired(e.target.checked)}
+                className="h-4 w-4 accent-primary"
+              />
+              <span className="text-sm font-bold text-foreground">דורש פיקדון להצטרפות</span>
+            </label>
+            {depositRequired && (
+              <div>
+                <div className="text-[11px] font-bold text-muted-foreground mb-1">סכום הפיקדון (₪)</div>
+                <Input
+                  type="number"
+                  min={1}
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(+e.target.value)}
+                  className="h-11 rounded-xl"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  בשלב זה הפיקדון מהווה התחייבות בלבד — לא תתבצע גבייה בפועל.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Offer type selector */}
