@@ -16,12 +16,16 @@ export default function OfferEditor() {
   const { categories, projects, suppliers, deals, setDeals, user } = useApp();
   const supplier = suppliers.find((s) => s.ownerName === user?.name) || suppliers[0];
 
+  const safeCategoryId = categories[0]?.id ?? "";
+  const safeProjectId = projects[0]?.id ?? "";
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState(categories[0].id);
-  const [projectId, setProjectId] = useState(projects[0].id);
+  const [categoryId, setCategoryId] = useState(safeCategoryId);
+  const [projectId, setProjectId] = useState(safeProjectId);
   const [originalPrice, setOriginalPrice] = useState(50000);
   const [depositAmount, setDepositAmount] = useState(1000);
+  const [saving, setSaving] = useState(false);
   const [tiers, setTiers] = useState<PricingTier[]>([
     { minParticipants: 1, maxParticipants: 4, price: 45000, label: "מחיר מחירון" },
     { minParticipants: 5, maxParticipants: 9, price: 40000, label: "הנחה ראשונה" },
@@ -33,22 +37,75 @@ export default function OfferEditor() {
     setTiers((prev) => prev.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
   };
 
-  const save = () => {
-    const newDeal: Deal = {
-      id: `d_${Date.now()}`,
-      title: title || "הצעה חדשה",
-      categoryId, projectId, supplierId: supplier.id,
-      description: description || "תיאור ההצעה",
-      originalPrice, tiers,
-      paidParticipants: 0, joinedParticipants: 0,
-      status: "active", depositAmount,
-      endsAt: new Date(Date.now() + 30 * 86400000).toISOString(),
-      highlights: ["מחיר מיוחד", "התקנה כלולה", "אחריות מלאה"],
-    };
-    setDeals([newDeal, ...deals]);
-    toast.success("ההצעה נשמרה בהצלחה!");
-    navigate("/supplier");
+  const save = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      if (!supplier?.id) {
+        toast.error("לא נמצא פרופיל ספק פעיל. השלם את פרטי הספק לפני יצירת הצעה.");
+        setSaving(false);
+        return;
+      }
+      if (!categoryId) {
+        toast.error("יש לבחור קטגוריה");
+        setSaving(false);
+        return;
+      }
+      if (!projectId) {
+        toast.error("יש לבחור פרויקט");
+        setSaving(false);
+        return;
+      }
+      if (!title.trim()) {
+        toast.error("יש להזין שם להצעה");
+        setSaving(false);
+        return;
+      }
+
+      const newDeal: Deal = {
+        id: `d_${Date.now()}`,
+        title: title.trim(),
+        categoryId,
+        projectId,
+        supplierId: supplier.id,
+        description: description.trim() || "תיאור ההצעה",
+        originalPrice,
+        tiers,
+        paidParticipants: 0,
+        joinedParticipants: 0,
+        status: "active",
+        depositAmount,
+        endsAt: new Date(Date.now() + 30 * 86400000).toISOString(),
+        highlights: ["מחיר מיוחד", "התקנה כלולה", "אחריות מלאה"],
+      };
+      setDeals([newDeal, ...deals]);
+      toast.success("ההצעה נשמרה בהצלחה!");
+      navigate("/supplier", { replace: true });
+    } catch (err: any) {
+      console.error("OfferEditor save error", err);
+      toast.error("אירעה שגיאה בשמירת ההצעה. נסה שוב.");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  // Empty-state guard so the page never crashes if mock data is missing
+  if (!categories.length || !projects.length) {
+    return (
+      <MobileShell>
+        <PageHeader title="הצעה חדשה" subtitle="לא ניתן ליצור הצעה כרגע" back />
+        <div className="px-5 mt-6 space-y-3">
+          <div className="gb-card p-4 text-sm text-muted-foreground">
+            חסרים נתוני קטגוריות או פרויקטים. פנה למנהל המערכת.
+          </div>
+          <Button onClick={() => navigate("/supplier", { replace: true })} className="w-full h-12 rounded-2xl">
+            חזרה לדשבורד הספק
+          </Button>
+        </div>
+        <BottomNav role="supplier" />
+      </MobileShell>
+    );
+  }
 
   return (
     <MobileShell>
@@ -121,8 +178,8 @@ export default function OfferEditor() {
           </div>
         </div>
 
-        <Button onClick={save} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card">
-          <Save className="h-4 w-4 ml-2" /> שמירת ההצעה
+        <Button onClick={save} disabled={saving} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card">
+          <Save className="h-4 w-4 ml-2" /> {saving ? "שומר..." : "שמירת ההצעה"}
         </Button>
       </div>
 
