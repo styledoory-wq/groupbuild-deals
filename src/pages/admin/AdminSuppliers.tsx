@@ -72,8 +72,14 @@ function supplierIsIncomplete(s: Supplier) {
 export default function AdminSuppliers() {
   const navigate = useNavigate();
   const { suppliers, setSuppliers, categories, setCategories } = useApp();
+  const { regionById, cityById } = useRegions();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [areas, setAreas] = useState<AreasComboboxValue>({
+    servesAllCountry: false,
+    regionIds: [],
+    cityIds: [],
+  });
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [newCatOpen, setNewCatOpen] = useState(false);
   const [newCat, setNewCat] = useState({ name: "", icon: "🏷️" });
@@ -81,6 +87,21 @@ export default function AdminSuppliers() {
   const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const catalogInputRef = useRef<HTMLInputElement>(null);
+
+  // Convert area selection → readable Hebrew string for serviceArea
+  const areasToText = (a: AreasComboboxValue): string => {
+    if (a.servesAllCountry) return "כל הארץ";
+    const labels: string[] = [];
+    a.regionIds.forEach((id) => {
+      const r = regionById(id);
+      if (r) labels.push(r.name_he);
+    });
+    a.cityIds.forEach((id) => {
+      const c = cityById(id);
+      if (c) labels.push(c.name_he);
+    });
+    return labels.join(", ");
+  };
 
   const onLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
