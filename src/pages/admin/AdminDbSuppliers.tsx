@@ -45,6 +45,13 @@ interface NewForm {
   phone: string;
   email: string;
   short_description: string;
+  description: string;
+  website_url: string;
+  whatsapp_url: string;
+  instagram_url: string;
+  facebook_url: string;
+  logo_url: string;
+  catalog_url: string;
   approval_status: "approved" | "pending" | "rejected";
   is_active: boolean;
   categoryIds: string[];
@@ -56,6 +63,13 @@ const emptyForm: NewForm = {
   phone: "",
   email: "",
   short_description: "",
+  description: "",
+  website_url: "",
+  whatsapp_url: "",
+  instagram_url: "",
+  facebook_url: "",
+  logo_url: "",
+  catalog_url: "",
   approval_status: "approved",
   is_active: true,
   categoryIds: [],
@@ -86,6 +100,34 @@ export default function AdminDbSuppliers() {
     regionIds: [],
     cityIds: [],
   });
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingCatalog, setUploadingCatalog] = useState(false);
+
+  const uploadFile = async (
+    file: File,
+    bucket: "supplier-logos" | "supplier-catalogs",
+    setBusy: (v: boolean) => void,
+    field: "logo_url" | "catalog_url",
+  ) => {
+    setBusy(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "bin";
+      const path = `admin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from(bucket).upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type || undefined,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      setForm((f) => ({ ...f, [field]: data.publicUrl }));
+      toast.success("הקובץ הועלה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   // Match-checker state
   const [matchOpen, setMatchOpen] = useState(false);
@@ -146,6 +188,13 @@ export default function AdminDbSuppliers() {
           phone: form.phone.trim() || null,
           email: form.email.trim() || null,
           short_description: form.short_description.trim() || null,
+          description: form.description.trim() || null,
+          website_url: form.website_url.trim() || null,
+          whatsapp_url: form.whatsapp_url.trim() || null,
+          instagram_url: form.instagram_url.trim() || null,
+          facebook_url: form.facebook_url.trim() || null,
+          logo_url: form.logo_url.trim() || null,
+          catalog_url: form.catalog_url.trim() || null,
           serves_all_country: areas.servesAllCountry,
           service_areas: areas.servesAllCountry ? ["כל הארץ"] : [],
           approval_status: form.approval_status,
@@ -417,6 +466,97 @@ export default function AdminDbSuppliers() {
             <div>
               <Label>תיאור קצר</Label>
               <Textarea rows={2} value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
+            </div>
+            <div>
+              <Label>תיאור מלא</Label>
+              <Textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="תיאור מפורט שיוצג בעמוד הספק" />
+            </div>
+
+            {/* Logo upload */}
+            <div className="pt-2 border-t">
+              <Label className="text-sm font-bold">לוגו</Label>
+              <div className="flex items-center gap-3 mt-1.5">
+                {form.logo_url ? (
+                  <img src={form.logo_url} alt="לוגו" className="h-14 w-14 rounded-xl object-cover border border-border" />
+                ) : (
+                  <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center text-[10px] text-muted-foreground">אין</div>
+                )}
+                <div className="flex-1 space-y-1.5">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) uploadFile(f, "supplier-logos", setUploadingLogo, "logo_url");
+                    }}
+                    className="text-xs"
+                    disabled={uploadingLogo}
+                  />
+                  {form.logo_url && (
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, logo_url: "" }))}
+                      className="text-[11px] text-destructive underline"
+                    >
+                      הסר לוגו
+                    </button>
+                  )}
+                  {uploadingLogo && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* Catalog upload */}
+            <div className="pt-2 border-t">
+              <Label className="text-sm font-bold">קטלוג (PDF)</Label>
+              <div className="space-y-1.5 mt-1.5">
+                <input
+                  type="file"
+                  accept="application/pdf,image/*"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) uploadFile(f, "supplier-catalogs", setUploadingCatalog, "catalog_url");
+                  }}
+                  className="text-xs"
+                  disabled={uploadingCatalog}
+                />
+                {form.catalog_url && (
+                  <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted">
+                    <a href={form.catalog_url} target="_blank" rel="noreferrer noopener" className="text-[11px] text-primary underline truncate">
+                      צפייה בקטלוג שהועלה
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, catalog_url: "" }))}
+                      className="text-[11px] text-destructive underline shrink-0"
+                    >
+                      הסר
+                    </button>
+                  </div>
+                )}
+                {uploadingCatalog && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+              </div>
+            </div>
+
+            {/* Links */}
+            <div className="pt-2 border-t space-y-2">
+              <Label className="text-sm font-bold">קישורים</Label>
+              <div>
+                <Label className="text-xs">אתר אינטרנט</Label>
+                <Input dir="ltr" placeholder="https://" value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">וואטסאפ (קישור wa.me)</Label>
+                <Input dir="ltr" placeholder="https://wa.me/972..." value={form.whatsapp_url} onChange={(e) => setForm({ ...form, whatsapp_url: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">אינסטגרם</Label>
+                <Input dir="ltr" placeholder="https://instagram.com/..." value={form.instagram_url} onChange={(e) => setForm({ ...form, instagram_url: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">פייסבוק</Label>
+                <Input dir="ltr" placeholder="https://facebook.com/..." value={form.facebook_url} onChange={(e) => setForm({ ...form, facebook_url: e.target.value })} />
+              </div>
             </div>
 
             {/* Categories — REQUIRED */}

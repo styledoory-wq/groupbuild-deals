@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronLeft, Globe2, MapPin, Sparkles, Star, UserPlus } from "lucide-react";
+import { ArrowRight, ChevronLeft, MapPin, Sparkles, Star, UserPlus } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -218,32 +218,8 @@ export default function CategorySuppliers() {
       </header>
 
       <div className="px-5 -mt-10 relative z-10 space-y-3 pb-6">
-        {/* Marketplace controls */}
+        {/* Marketplace controls — area filter only */}
         <div className="gb-card p-4 animate-fade-up">
-          <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1 no-scrollbar">
-            <button
-              type="button"
-              onClick={() => setActiveCategoryId("all")}
-              className={`shrink-0 h-9 px-3 rounded-xl border text-xs font-bold transition-smooth flex items-center gap-1.5 ${
-                activeCategoryId === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"
-              }`}
-            >
-              <Globe2 className="h-3.5 w-3.5" /> הכל
-            </button>
-            {categories.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setActiveCategoryId(c.id)}
-                className={`shrink-0 h-9 px-3 rounded-xl border text-xs font-bold transition-smooth flex items-center gap-1.5 ${
-                  activeCategoryId === c.id ? "bg-gold text-primary border-gold" : "bg-card text-foreground border-border"
-                }`}
-              >
-                <span>{c.icon}</span> {c.name}
-              </button>
-            ))}
-          </div>
-
           <div className="flex items-center gap-1.5 mb-3">
             <MapPin className="h-3.5 w-3.5 text-gold" />
             <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
