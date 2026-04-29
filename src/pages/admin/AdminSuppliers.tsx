@@ -204,7 +204,7 @@ export default function AdminSuppliers() {
       businessName: form.businessName.trim(),
       ownerName: form.ownerName.trim(),
       categoryIds: form.categoryIds,
-      serviceArea: form.serviceArea.trim(),
+      serviceArea: areasToText(areas) || form.serviceArea.trim(),
       verified: form.verified,
       featured: form.featured,
       rating: form.id ? (suppliers.find(s => s.id === form.id)?.rating ?? 0) : 0,
