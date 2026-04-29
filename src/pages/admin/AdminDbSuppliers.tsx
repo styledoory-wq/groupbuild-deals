@@ -787,6 +787,195 @@ export default function AdminDbSuppliers() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit supplier dialog */}
+      <Dialog open={editOpen} onOpenChange={(o) => { setEditOpen(o); if (!o) setEditId(null); }}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>עריכת ספק</DialogTitle>
+          </DialogHeader>
+          {editLoading ? (
+            <div className="py-12 flex items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <Label>שם עסק *</Label>
+                <Input value={editForm.business_name} onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label>שם בעל העסק</Label>
+                  <Input value={editForm.contact_name} onChange={(e) => setEditForm({ ...editForm, contact_name: e.target.value })} />
+                </div>
+                <div>
+                  <Label>טלפון</Label>
+                  <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <Label>אימייל</Label>
+                <Input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+              </div>
+              <div>
+                <Label>תיאור קצר</Label>
+                <Textarea rows={2} value={editForm.short_description} onChange={(e) => setEditForm({ ...editForm, short_description: e.target.value })} />
+              </div>
+              <div>
+                <Label>תיאור מלא</Label>
+                <Textarea rows={4} value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+              </div>
+
+              {/* Logo */}
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-bold">לוגו</Label>
+                <div className="flex items-center gap-3 mt-1.5">
+                  {editForm.logo_url ? (
+                    <img src={editForm.logo_url} alt="לוגו" className="h-14 w-14 rounded-xl object-cover border border-border" />
+                  ) : (
+                    <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center text-[10px] text-muted-foreground">אין</div>
+                  )}
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) uploadEditFile(f, "supplier-logos", setUploadingEditLogo, "logo_url");
+                      }}
+                      className="text-xs"
+                      disabled={uploadingEditLogo}
+                    />
+                    {editForm.logo_url && (
+                      <button type="button" onClick={() => setEditForm((f) => ({ ...f, logo_url: "" }))} className="text-[11px] text-destructive underline">
+                        הסר לוגו
+                      </button>
+                    )}
+                    {uploadingEditLogo && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Catalog */}
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-bold">קטלוג (PDF)</Label>
+                <div className="space-y-1.5 mt-1.5">
+                  <input
+                    type="file"
+                    accept="application/pdf,image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) uploadEditFile(f, "supplier-catalogs", setUploadingEditCatalog, "catalog_url");
+                    }}
+                    className="text-xs"
+                    disabled={uploadingEditCatalog}
+                  />
+                  {editForm.catalog_url && (
+                    <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted">
+                      <a href={editForm.catalog_url} target="_blank" rel="noreferrer noopener" className="text-[11px] text-primary underline truncate">
+                        צפייה בקטלוג שהועלה
+                      </a>
+                      <button type="button" onClick={() => setEditForm((f) => ({ ...f, catalog_url: "" }))} className="text-[11px] text-destructive underline shrink-0">
+                        הסר
+                      </button>
+                    </div>
+                  )}
+                  {uploadingEditCatalog && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+                </div>
+              </div>
+
+              {/* Links */}
+              <div className="pt-2 border-t space-y-2">
+                <Label className="text-sm font-bold">קישורים</Label>
+                <div>
+                  <Label className="text-xs">אתר אינטרנט</Label>
+                  <Input dir="ltr" placeholder="https://" value={editForm.website_url} onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">וואטסאפ</Label>
+                  <Input dir="ltr" placeholder="https://wa.me/972..." value={editForm.whatsapp_url} onChange={(e) => setEditForm({ ...editForm, whatsapp_url: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">אינסטגרם</Label>
+                  <Input dir="ltr" placeholder="https://instagram.com/..." value={editForm.instagram_url} onChange={(e) => setEditForm({ ...editForm, instagram_url: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">פייסבוק</Label>
+                  <Input dir="ltr" placeholder="https://facebook.com/..." value={editForm.facebook_url} onChange={(e) => setEditForm({ ...editForm, facebook_url: e.target.value })} />
+                </div>
+              </div>
+
+              {/* Categories */}
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-bold">קטגוריות *</Label>
+                <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto mt-2">
+                  {categories.map((c) => {
+                    const active = editForm.categoryIds.includes(c.id);
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setEditForm((f) => ({
+                          ...f,
+                          categoryIds: active
+                            ? f.categoryIds.filter((x) => x !== c.id)
+                            : [...f.categoryIds, c.id],
+                        }))}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${
+                          active ? "bg-gold text-primary border-gold font-bold" : "bg-card border-border text-foreground hover:border-gold/50"
+                        }`}
+                      >
+                        {c.icon} {c.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Areas */}
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-bold">אזורי שירות *</Label>
+                <div className="mt-2">
+                  <AreasCombobox value={editAreas} onChange={setEditAreas} />
+                </div>
+              </div>
+
+              <label className="flex items-center gap-2 text-sm pt-2 border-t">
+                <input
+                  type="checkbox"
+                  checked={editForm.is_active}
+                  onChange={(e) => setEditForm({ ...editForm, is_active: e.target.checked })}
+                  className="h-4 w-4 accent-primary"
+                />
+                פעיל
+              </label>
+              <div>
+                <Label>סטטוס אישור</Label>
+                <select
+                  value={editForm.approval_status}
+                  onChange={(e) => setEditForm({ ...editForm, approval_status: e.target.value as NewForm["approval_status"] })}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="approved">מאושר</option>
+                  <option value="pending">ממתין</option>
+                  <option value="rejected">נדחה</option>
+                </select>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground pt-2 border-t">
+                💡 לניהול גלריית תמונות, סגרו את החלון ובחרו "מדיה" בכרטיס הספק.
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>ביטול</Button>
+            <Button onClick={handleEditSave} disabled={editSaving || editLoading} className="bg-gradient-gold text-primary font-bold">
+              {editSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "שמור שינויים"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Match checker dialog */}
       <Dialog open={matchOpen} onOpenChange={setMatchOpen}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
