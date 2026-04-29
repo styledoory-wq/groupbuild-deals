@@ -221,14 +221,48 @@ export default function SupplierProfile() {
           </section>
         )}
 
+        {/* Categories */}
+        {supplierCategories.length > 0 && (
+          <section className="gb-card p-4">
+            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Tag className="h-3.5 w-3.5 text-gold" /> תחומים
+            </h2>
+            <div className="flex flex-wrap gap-1.5">
+              {supplierCategories.map((c) => (
+                <span
+                  key={c.id}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-gold/10 text-primary border border-gold/30"
+                >
+                  <span>{c.icon}</span> {c.name}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Service area */}
         <section className="gb-card p-4">
           <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <MapPin className="h-3.5 w-3.5 text-gold" /> אזורי שירות
           </h2>
-          <p className="text-sm text-foreground">
-            {supplier.serves_all_country ? "נותן שירות בכל הארץ" : "אזורים נבחרים — צור קשר לפרטים"}
-          </p>
+          {supplier.serves_all_country ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-gold/15 text-primary border border-gold/40">
+              נותן שירות בכל הארץ
+            </span>
+          ) : serviceAreas.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {serviceAreas.map((name) => (
+                <span
+                  key={name}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-primary/10 text-primary border border-primary/30"
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">לא הוגדרו אזורי שירות — צרו קשר לפרטים</p>
+          )}
         </section>
 
         {/* Gallery */}
