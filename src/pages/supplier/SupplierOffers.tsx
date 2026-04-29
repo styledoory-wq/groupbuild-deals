@@ -124,26 +124,35 @@ export default function SupplierOffers() {
         )}
 
         {!loading && !error && deals.map((d) => {
-          const tier = activeTier(d.tiers);
+          const display = describeOffer({
+            offer_type: (d.offer_type as "percentage" | "price_comparison" | "tiers" | null) ?? "percentage",
+            original_price: d.original_price,
+            discounted_price: d.discounted_price,
+            discount_percentage: d.discount_percentage,
+            base_price: d.base_price,
+          });
           return (
             <div key={d.id} className="gb-card p-4">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-sm truncate">{d.title}</h3>
-                  <p className="text-[11px] text-muted-foreground">{tier?.label ?? ""}</p>
+                  <p className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3 text-gold" /> ספק מאומת
+                  </p>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-success/10 text-success">
                   {d.status === "active" ? "פעילה" : d.status}
                 </span>
               </div>
-              <div className="flex items-end justify-between pt-2 border-t border-border mt-2">
-                <div>
-                  {d.original_price ? (
-                    <div className="text-[10px] text-muted-foreground line-through">{formatILS(d.original_price)}</div>
-                  ) : null}
-                  <div className="font-extrabold text-primary">{tier ? formatILS(tier.price) : "—"}</div>
-                </div>
-                <div className="text-left text-[10px] text-muted-foreground">
+              <div className="pt-2 border-t border-border mt-2">
+                <div className="font-extrabold text-primary text-base">{display.headline}</div>
+                {display.savings && (
+                  <div className="text-[11px] font-bold text-success mt-0.5">{display.savings}</div>
+                )}
+                <p className="text-[10px] text-muted-foreground mt-1.5">
+                  ככל שיותר דיירים מצטרפים — המחיר משתפר
+                </p>
+                <div className="text-left text-[10px] text-muted-foreground mt-2">
                   {new Date(d.created_at).toLocaleDateString("he-IL")}
                 </div>
               </div>
