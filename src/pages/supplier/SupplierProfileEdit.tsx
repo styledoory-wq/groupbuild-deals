@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { Save, ArrowRight, Briefcase, Phone, Mail, MapPin, Tag, User as UserIcon, FileText, Globe } from "lucide-react";
+import { Save, ArrowRight, Briefcase, Phone, Mail, MapPin, Tag, User as UserIcon, FileText, Globe, Image as ImageIcon, Trash2, Plus, Link as LinkIcon, Instagram, Facebook } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { uploadSupplierLogo, uploadSupplierGalleryImage, uploadSupplierCatalog } from "@/lib/supplierUploads";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
