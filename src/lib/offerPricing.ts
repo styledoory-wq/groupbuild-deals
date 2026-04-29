@@ -78,6 +78,7 @@ export function tierShortValue(type: OfferType, t: OfferTier): string {
   if (type === "percentage" && t.discount_percentage) return `${t.discount_percentage}%`;
   if (type === "price_comparison" && t.discounted_price) return ils(Number(t.discounted_price));
   return "—";
+}
 
 /** Range label like "1–4" or "20+" */
 export function tierRange(t: OfferTier): string {
