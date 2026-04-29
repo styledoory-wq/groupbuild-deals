@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 
 interface DbSupplier {
   id: string;
