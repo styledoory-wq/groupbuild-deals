@@ -17,13 +17,7 @@ export const categories: Category[] = [
   { id: "carpentry", name: "נגרות מותאמת", icon: "🪚" },
 ];
 
-export const projects: Project[] = [
-  { id: "p1", name: "מגדלי הים — נווה צדק", city: "תל אביב", buildingCount: 3, apartmentCount: 124, status: "construction" },
-  { id: "p2", name: "פארק הצפון", city: "רמת גן", buildingCount: 2, apartmentCount: 86, status: "delivery" },
-  { id: "p3", name: "גני המושבה", city: "רעננה", buildingCount: 4, apartmentCount: 156, status: "construction" },
-  { id: "p4", name: "מצפה היין", city: "זכרון יעקב", buildingCount: 2, apartmentCount: 64, status: "planning" },
-  { id: "p5", name: "מרינה הרצליה", city: "הרצליה", buildingCount: 1, apartmentCount: 48, status: "delivery" },
-];
+export const projects: Project[] = [];
 
 export const suppliers: Supplier[] = [];
 
