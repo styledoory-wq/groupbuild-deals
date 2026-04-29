@@ -9,9 +9,11 @@ export function normalizeWhatsappUrl(input: string | null | undefined): string |
   let raw = String(input).trim();
   if (!raw) return null;
 
-  // If a wa.me URL was given, extract the digits portion
+  // If a WhatsApp URL was given, extract the phone portion first.
   const waMatch = raw.match(/wa\.me\/(\+?\d[\d\s\-]*)/i);
+  const sendMatch = raw.match(/[?&]phone=(\+?\d[\d\s\-]*)/i);
   if (waMatch) raw = waMatch[1];
+  else if (sendMatch) raw = sendMatch[1];
 
   // Keep digits only (drop +, spaces, dashes, parens, etc.)
   let digits = raw.replace(/\D+/g, "");
@@ -22,7 +24,7 @@ export function normalizeWhatsappUrl(input: string | null | undefined): string |
   else if (digits.startsWith("972")) digits = digits.slice(3);
   if (digits.startsWith("0")) digits = digits.slice(1);
 
-  // Israeli mobile/landline must be 8-9 digits after stripping leading 0
+  // Israeli mobile/landline must be a plausible length after stripping leading 0.
   if (digits.length < 8 || digits.length > 10) return null;
 
   return `https://wa.me/972${digits}`;

@@ -14,6 +14,8 @@ type DbSupplier = {
   business_name: string;
   approval_status: string;
   is_active: boolean;
+  user_id?: string | null;
+  email?: string | null;
 };
 
 export default function SupplierDashboard() {
@@ -41,16 +43,37 @@ export default function SupplierDashboard() {
           return;
         }
 
-        // Try to find an existing supplier record for this user
-        const { data: existing, error: fetchErr } = await supabase
+        const email = session.user.email ?? "";
+
+        // Try to find existing supplier records for this user.
+        // If an admin created/approved a supplier before signup, it may match by email only.
+        const byUser = await supabase
           .from("suppliers")
-          .select("id, business_name, approval_status, is_active")
+          .select("id, business_name, approval_status, is_active, user_id, email")
           .eq("user_id", session.user.id)
-          .maybeSingle();
+          .order("updated_at", { ascending: false });
+
+        const byEmail = email
+          ? await supabase
+            .from("suppliers")
+            .select("id, business_name, approval_status, is_active, user_id, email")
+            .ilike("email", email)
+            .order("updated_at", { ascending: false })
+          : { data: [], error: null };
+
+        const fetchErr = byUser.error ?? byEmail.error;
+        const candidates = [...(byUser.data ?? []), ...(byEmail.data ?? [])];
+        const existing = candidates.find((s) => ["approved", "active"].includes(s.approval_status)) ?? candidates[0] ?? null;
 
         if (fetchErr) throw fetchErr;
 
         if (existing) {
+          if (!existing.user_id || !existing.email) {
+            await supabase
+              .from("suppliers")
+              .update({ user_id: session.user.id, email: email || existing.email })
+              .eq("id", existing.id);
+          }
           if (!cancelled) setDbSupplier(existing as DbSupplier);
         } else {
           // Auto-create a pending supplier so the dashboard never breaks
