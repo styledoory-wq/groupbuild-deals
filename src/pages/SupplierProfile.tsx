@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
+import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
+import type { OfferTier } from "@/lib/offerPricing";
 
 interface DbSupplier {
   id: string;
@@ -56,6 +58,7 @@ export default function SupplierProfile() {
   const [interested, setInterested] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [deals, setDeals] = useState<RealDealCardData[]>([]);
 
   useEffect(() => {
     if (!supplierId) return;
