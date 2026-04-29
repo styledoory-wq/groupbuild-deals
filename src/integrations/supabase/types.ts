@@ -78,6 +78,7 @@ export type Database = {
           created_at: string
           deal_id: string
           id: string
+          is_demo: boolean
           notes: string | null
           status: string
           updated_at: string
@@ -87,6 +88,7 @@ export type Database = {
           created_at?: string
           deal_id: string
           id?: string
+          is_demo?: boolean
           notes?: string | null
           status?: string
           updated_at?: string
@@ -96,6 +98,7 @@ export type Database = {
           created_at?: string
           deal_id?: string
           id?: string
+          is_demo?: boolean
           notes?: string | null
           status?: string
           updated_at?: string
@@ -110,6 +113,7 @@ export type Database = {
           currency: string
           deal_id: string
           id: string
+          is_demo: boolean
           metadata: Json | null
           paid_at: string | null
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
@@ -125,6 +129,7 @@ export type Database = {
           currency?: string
           deal_id: string
           id?: string
+          is_demo?: boolean
           metadata?: Json | null
           paid_at?: string | null
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
@@ -140,6 +145,7 @@ export type Database = {
           currency?: string
           deal_id?: string
           id?: string
+          is_demo?: boolean
           metadata?: Json | null
           paid_at?: string | null
           payment_provider?: Database["public"]["Enums"]["payment_provider_enum"]
@@ -164,6 +170,7 @@ export type Database = {
           id: string
           interest_categories: string[]
           is_active: boolean
+          is_demo: boolean
           notification_prefs: Json
           phone: string | null
           project_id: string | null
@@ -184,6 +191,7 @@ export type Database = {
           id: string
           interest_categories?: string[]
           is_active?: boolean
+          is_demo?: boolean
           notification_prefs?: Json
           phone?: string | null
           project_id?: string | null
@@ -204,6 +212,7 @@ export type Database = {
           id?: string
           interest_categories?: string[]
           is_active?: boolean
+          is_demo?: boolean
           notification_prefs?: Json
           phone?: string | null
           project_id?: string | null
@@ -392,6 +401,7 @@ export type Database = {
           id: string
           instagram_url: string | null
           is_active: boolean
+          is_demo: boolean
           logo_url: string | null
           phone: string | null
           serves_all_country: boolean
@@ -415,6 +425,7 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           is_active?: boolean
+          is_demo?: boolean
           logo_url?: string | null
           phone?: string | null
           serves_all_country?: boolean
@@ -438,6 +449,7 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           is_active?: boolean
+          is_demo?: boolean
           logo_url?: string | null
           phone?: string | null
           serves_all_country?: boolean
@@ -506,6 +518,7 @@ export type Database = {
           created_at: string
           full_name: string
           id: string
+          is_demo: boolean
           lead_type: string
           phone: string
           project_name: string | null
@@ -518,6 +531,7 @@ export type Database = {
           created_at?: string
           full_name: string
           id?: string
+          is_demo?: boolean
           lead_type: string
           phone: string
           project_name?: string | null
@@ -530,6 +544,7 @@ export type Database = {
           created_at?: string
           full_name?: string
           id?: string
+          is_demo?: boolean
           lead_type?: string
           phone?: string
           project_name?: string | null
