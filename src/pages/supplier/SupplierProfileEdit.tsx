@@ -184,6 +184,20 @@ export default function SupplierProfileEdit() {
         }
       }
 
+      // Sync gallery: replace all
+      await supabase.from("supplier_gallery").delete().eq("supplier_id", sid);
+      if (gallery.length) {
+        const { error: galErr } = await supabase.from("supplier_gallery").insert(
+          gallery.map((g, idx) => ({
+            supplier_id: sid!,
+            image_url: g.image_url,
+            caption: g.caption,
+            display_order: idx,
+          }))
+        );
+        if (galErr) throw galErr;
+      }
+
       // Profile mirror (business_name + phone)
       await supabase.from("profiles").update({
         business_name: businessName.trim(),
