@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronLeft, Globe2, MapPin, Search, Sparkles, Star, UserPlus } from "lucide-react";
+import { ArrowRight, ChevronLeft, Globe2, MapPin, Sparkles, Star, UserPlus } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -36,7 +36,6 @@ export default function CategorySuppliers() {
   const [suppliers, setSuppliers] = useState<DbSupplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
 
   const [regionId, setRegionId] = useState<string>("all");
   const [cityId, setCityId] = useState<string>("all");
@@ -77,15 +76,21 @@ export default function CategorySuppliers() {
       setLoadError(null);
       try {
         await supabase.auth.getSession();
-        const [suppliersResult, regionsResult, citiesResult] = await Promise.all([
-          supabase
-            .from("suppliers")
-            .select("id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status")
-            .eq("is_active", true)
-            .eq("approval_status", "approved")
-            .order("business_name"),
-          supabase.from("supplier_regions").select("supplier_id,region_id"),
-          supabase.from("supplier_cities").select("supplier_id,city_id"),
+        const timedOut = new Promise<never>((_, reject) => {
+          window.setTimeout(() => reject(new Error("supplier-load-timeout")), 12000);
+        });
+        const [suppliersResult, regionsResult, citiesResult] = await Promise.race([
+          Promise.all([
+            supabase
+              .from("suppliers")
+              .select("id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status")
+              .eq("is_active", true)
+              .in("approval_status", ["approved", "active"])
+              .order("business_name"),
+            supabase.from("supplier_regions").select("supplier_id,region_id"),
+            supabase.from("supplier_cities").select("supplier_id,city_id"),
+          ]),
+          timedOut,
         ]);
 
         if (suppliersResult.error) throw suppliersResult.error;
@@ -156,24 +161,14 @@ export default function CategorySuppliers() {
   };
 
   const filteredSuppliers = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase();
     const byCategory = activeCategoryId === "all"
       ? suppliers
       : suppliers.filter((s) => (s.categories ?? []).includes(activeCategoryId));
 
-    const bySearch = !q ? byCategory : byCategory.filter((s) => {
-      const categoryNames = (s.categories ?? []).map((cid) => categories.find((c) => c.id === cid)?.name ?? cid);
-      const cityNames = (supplierCityIds[s.id] ?? []).map((id) => cities.find((c) => c.id === id)?.name_he ?? "");
-      const haystack = [s.business_name, s.short_description ?? "", s.description ?? "", ...categoryNames, ...cityNames, ...(s.service_areas ?? [])]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(q);
-    });
-
-    const byArea = bySearch.filter(matchesArea);
+    const byArea = byCategory.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
-    return bySearch.filter(isNationalSupplier);
-  }, [suppliers, activeCategoryId, searchTerm, regionId, cityId, supplierRegionIds, supplierCityIds, regions, cities, categories]);
+    return byCategory.filter(isNationalSupplier);
+  }, [suppliers, activeCategoryId, regionId, cityId, supplierRegionIds, supplierCityIds, regions, cities]);
 
   const areaLabel =
     cityId !== "all"
