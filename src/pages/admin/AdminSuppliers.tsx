@@ -234,7 +234,8 @@ export default function AdminSuppliers() {
                   </p>
                   <div className="flex items-center gap-2 mt-1.5 text-[11px] flex-wrap">
                     <span className="inline-flex items-center gap-0.5 text-muted-foreground">
-                      <Star className="h-3 w-3 fill-gold text-gold" /> <b className="text-foreground">{s.rating || "—"}</b>
+                      <Star className="h-3 w-3 fill-gold text-gold" /> <b className="text-foreground">{s.rating || 0}</b>
+                      <span className="text-[10px]">({s.reviewsCount || 0})</span>
                     </span>
                     <span className="text-muted-foreground">עמלה: <b className="text-primary">{s.commissionPercent || 0}%</b></span>
                     <span className="text-muted-foreground truncate">
