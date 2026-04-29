@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronLeft, MapPin, Sparkles, Star } from "lucide-react";
+import { ArrowRight, ChevronLeft, Globe2, MapPin, Search, Sparkles, Star, UserPlus } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -16,10 +16,14 @@ interface DbSupplier {
   description: string | null;
   logo_url: string | null;
   categories: string[];
+  service_areas: string[];
   serves_all_country: boolean;
   is_active: boolean;
   approval_status: string;
 }
+
+const NORTH_REGION_NAMES = new Set(["צפון", "כל הצפון", "גליל עליון", "גליל תחתון", "רמת הגולן", "עמקים", "חיפה והקריות"]);
+const NATIONAL_AREA = "כל הארץ";
 
 export default function CategorySuppliers() {
   const { categoryId } = useParams();
@@ -27,15 +31,23 @@ export default function CategorySuppliers() {
   const { categories } = useApp();
   const { regions, cities } = useRegions();
 
-  const cat = categories.find((c) => c.id === categoryId);
+  const [activeCategoryId, setActiveCategoryId] = useState<string>(categoryId ?? "all");
 
   const [suppliers, setSuppliers] = useState<DbSupplier[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [regionId, setRegionId] = useState<string>("all");
   const [cityId, setCityId] = useState<string>("all");
-  const [supplierIdsByRegion, setSupplierIdsByRegion] = useState<Set<string> | null>(null);
-  const [supplierIdsByCity, setSupplierIdsByCity] = useState<Set<string> | null>(null);
+  const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
+  const [supplierCityIds, setSupplierCityIds] = useState<Record<string, string[]>>({});
+
+  const activeCategory = categories.find((c) => c.id === activeCategoryId);
+
+  useEffect(() => {
+    setActiveCategoryId(categoryId ?? "all");
+  }, [categoryId]);
 
   // Initialize filter from resident profile
   useEffect(() => {
@@ -61,69 +73,107 @@ export default function CategorySuppliers() {
 
   useEffect(() => {
     (async () => {
-      if (!categoryId) return;
       setLoading(true);
-      const { data } = await supabase
-        .from("suppliers")
-        .select("id,business_name,short_description,description,logo_url,categories,serves_all_country,is_active,approval_status")
-        .eq("is_active", true)
-        .eq("approval_status", "approved")
-        .contains("categories", [categoryId]);
-      setSuppliers((data ?? []) as DbSupplier[]);
-      setLoading(false);
-    })();
-  }, [categoryId]);
+      setLoadError(null);
+      try {
+        await supabase.auth.getSession();
+        const [suppliersResult, regionsResult, citiesResult] = await Promise.all([
+          supabase
+            .from("suppliers")
+            .select("id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status")
+            .eq("is_active", true)
+            .eq("approval_status", "approved")
+            .order("business_name"),
+          supabase.from("supplier_regions").select("supplier_id,region_id"),
+          supabase.from("supplier_cities").select("supplier_id,city_id"),
+        ]);
 
-  useEffect(() => {
-    (async () => {
-      if (regionId === "all") {
-        setSupplierIdsByRegion(null);
-        return;
-      }
-      const { data } = await supabase
-        .from("supplier_regions")
-        .select("supplier_id")
-        .eq("region_id", regionId);
-      setSupplierIdsByRegion(new Set((data ?? []).map((r) => r.supplier_id)));
-    })();
-  }, [regionId]);
+        if (suppliersResult.error) throw suppliersResult.error;
 
-  useEffect(() => {
-    (async () => {
-      if (cityId === "all") {
-        setSupplierIdsByCity(null);
-        return;
+        const regionMap: Record<string, string[]> = {};
+        (regionsResult.data ?? []).forEach((row: { supplier_id: string; region_id: string }) => {
+          regionMap[row.supplier_id] = [...(regionMap[row.supplier_id] ?? []), row.region_id];
+        });
+
+        const cityMap: Record<string, string[]> = {};
+        (citiesResult.data ?? []).forEach((row: { supplier_id: string; city_id: string }) => {
+          cityMap[row.supplier_id] = [...(cityMap[row.supplier_id] ?? []), row.city_id];
+        });
+
+        setSupplierRegionIds(regionMap);
+        setSupplierCityIds(cityMap);
+        setSuppliers(((suppliersResult.data ?? []) as DbSupplier[]).map((s) => ({
+          ...s,
+          categories: s.categories ?? [],
+          service_areas: s.service_areas ?? [],
+        })));
+      } catch {
+        setLoadError("שגיאה בטעינה");
+        setSuppliers([]);
+        setSupplierRegionIds({});
+        setSupplierCityIds({});
+      } finally {
+        setLoading(false);
       }
-      const { data } = await supabase
-        .from("supplier_cities")
-        .select("supplier_id")
-        .eq("city_id", cityId);
-      setSupplierIdsByCity(new Set((data ?? []).map((r) => r.supplier_id)));
     })();
-  }, [cityId]);
+  }, []);
 
   const filteredCities = useMemo(
     () => (regionId === "all" ? cities : cities.filter((c) => c.region_id === regionId)),
     [cities, regionId],
   );
 
+  const isNationalSupplier = (s: DbSupplier) => {
+    const regionCount = supplierRegionIds[s.id]?.length ?? 0;
+    const cityCount = supplierCityIds[s.id]?.length ?? 0;
+    return s.serves_all_country || s.service_areas.includes(NATIONAL_AREA) || (regionCount === 0 && cityCount === 0 && s.service_areas.length === 0);
+  };
+
+  const matchesArea = (s: DbSupplier) => {
+    if (regionId === "all" && cityId === "all") return true;
+    if (isNationalSupplier(s)) return true;
+
+    const selectedRegion = regions.find((r) => r.id === regionId) ?? null;
+    const selectedCity = cities.find((c) => c.id === cityId) ?? null;
+    const selectedCityRegion = selectedCity ? regions.find((r) => r.id === selectedCity.region_id) ?? null : null;
+    const serviceAreas = new Set(s.service_areas ?? []);
+    const sRegionIds = supplierRegionIds[s.id] ?? [];
+    const sCityIds = supplierCityIds[s.id] ?? [];
+    const supplierRegionNames = sRegionIds.map((id) => regions.find((r) => r.id === id)?.name_he).filter(Boolean) as string[];
+
+    if (cityId !== "all" && selectedCity) {
+      if (sCityIds.includes(selectedCity.id) || serviceAreas.has(selectedCity.name_he)) return true;
+      if (sRegionIds.includes(selectedCity.region_id) || (selectedCityRegion && serviceAreas.has(selectedCityRegion.name_he))) return true;
+      if (selectedCityRegion && NORTH_REGION_NAMES.has(selectedCityRegion.name_he) && (supplierRegionNames.some((name) => NORTH_REGION_NAMES.has(name)) || serviceAreas.has("צפון") || serviceAreas.has("כל הצפון"))) return true;
+    }
+
+    if (regionId !== "all" && selectedRegion) {
+      if (sRegionIds.includes(selectedRegion.id) || serviceAreas.has(selectedRegion.name_he)) return true;
+      if (NORTH_REGION_NAMES.has(selectedRegion.name_he) && (supplierRegionNames.some((name) => NORTH_REGION_NAMES.has(name)) || serviceAreas.has("צפון") || serviceAreas.has("כל הצפון"))) return true;
+    }
+
+    return false;
+  };
+
   const filteredSuppliers = useMemo(() => {
-    // No area filter selected → show all
-    if (regionId === "all" && cityId === "all") return suppliers;
+    const q = searchTerm.trim().toLowerCase();
+    const byCategory = activeCategoryId === "all"
+      ? suppliers
+      : suppliers.filter((s) => (s.categories ?? []).includes(activeCategoryId));
 
-    return suppliers.filter((s) => {
-      // National suppliers always match
-      if (s.serves_all_country) return true;
-
-      // Match if supplier covers the selected region OR the selected city
-      const regionMatch =
-        regionId !== "all" && supplierIdsByRegion?.has(s.id);
-      const cityMatch =
-        cityId !== "all" && supplierIdsByCity?.has(s.id);
-
-      return Boolean(regionMatch || cityMatch);
+    const bySearch = !q ? byCategory : byCategory.filter((s) => {
+      const categoryNames = (s.categories ?? []).map((cid) => categories.find((c) => c.id === cid)?.name ?? cid);
+      const cityNames = (supplierCityIds[s.id] ?? []).map((id) => cities.find((c) => c.id === id)?.name_he ?? "");
+      const haystack = [s.business_name, s.short_description ?? "", s.description ?? "", ...categoryNames, ...cityNames, ...(s.service_areas ?? [])]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
     });
-  }, [suppliers, regionId, cityId, supplierIdsByRegion, supplierIdsByCity]);
+
+    const byArea = bySearch.filter(matchesArea);
+    if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
+    return bySearch.filter(isNationalSupplier);
+  }, [suppliers, activeCategoryId, searchTerm, regionId, cityId, supplierRegionIds, supplierCityIds, regions, cities, categories]);
 
   const areaLabel =
     cityId !== "all"
@@ -156,14 +206,14 @@ export default function CategorySuppliers() {
           </div>
 
           <div className="flex items-center gap-3 mb-3">
-            {cat?.icon && (
+            {activeCategory?.icon && (
               <div className="h-12 w-12 rounded-2xl bg-white/8 border border-gold/20 flex items-center justify-center text-2xl shadow-soft">
-                {cat.icon}
+                {activeCategory.icon}
               </div>
             )}
             <div>
               <h1 className="text-[24px] leading-[1.15] font-extrabold">
-                <span className="gb-gold-text">{cat?.name ?? "ספקים"}</span>
+                <span className="gb-gold-text">{activeCategory?.name ?? "ספקים"}</span>
               </h1>
               <p className="text-primary-foreground/65 text-[12px] mt-0.5">ספקים מובילים בתחום</p>
             </div>
@@ -173,8 +223,42 @@ export default function CategorySuppliers() {
       </header>
 
       <div className="px-5 -mt-10 relative z-10 space-y-3 pb-6">
-        {/* Filters card */}
+        {/* Marketplace controls */}
         <div className="gb-card p-4 animate-fade-up">
+          <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1 no-scrollbar">
+            <button
+              type="button"
+              onClick={() => setActiveCategoryId("all")}
+              className={`shrink-0 h-9 px-3 rounded-xl border text-xs font-bold transition-smooth flex items-center gap-1.5 ${
+                activeCategoryId === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"
+              }`}
+            >
+              <Globe2 className="h-3.5 w-3.5" /> הכל
+            </button>
+            {categories.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setActiveCategoryId(c.id)}
+                className={`shrink-0 h-9 px-3 rounded-xl border text-xs font-bold transition-smooth flex items-center gap-1.5 ${
+                  activeCategoryId === c.id ? "bg-gold text-primary border-gold" : "bg-card text-foreground border-border"
+                }`}
+              >
+                <span>{c.icon}</span> {c.name}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative mb-3">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="חיפוש לפי ספק, קטגוריה או עיר"
+              className="h-11 w-full rounded-xl bg-card border border-border pr-9 pl-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-gold focus:outline-none transition-smooth"
+            />
+          </div>
+
           <div className="flex items-center gap-1.5 mb-3">
             <MapPin className="h-3.5 w-3.5 text-gold" />
             <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
@@ -215,15 +299,27 @@ export default function CategorySuppliers() {
             <div className="h-8 w-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin mx-auto mb-3" />
             <p className="text-muted-foreground text-sm">טוען ספקים...</p>
           </div>
+        ) : loadError ? (
+          <div className="gb-card p-8 text-center">
+            <p className="text-sm font-bold text-foreground">שגיאה בטעינה</p>
+            <p className="text-[11px] text-muted-foreground mt-1.5">נסו לרענן את המסך בעוד רגע.</p>
+          </div>
         ) : filteredSuppliers.length === 0 ? (
           <div className="gb-card p-8 text-center">
             <div className="h-14 w-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-3">
-              <MapPin className="h-6 w-6 text-gold" />
+              <UserPlus className="h-6 w-6 text-gold" />
             </div>
-            <p className="text-sm font-bold text-foreground">אין ספקים זמינים באזור זה</p>
+            <p className="text-sm font-bold text-foreground">לא נמצאו ספקים</p>
             <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed max-w-[240px] mx-auto">
-              נסו להרחיב את הסינון לכל האזורים, או חזרו אלינו בקרוב — ספקים חדשים מצטרפים כל הזמן.
+              שנה אזור או הזמן ספקים להצטרף כדי לפתוח עוד אפשרויות לדיירים.
             </p>
+            <button
+              type="button"
+              onClick={() => { setRegionId("all"); setCityId("all"); setSearchTerm(""); }}
+              className="mt-4 h-10 px-4 rounded-xl bg-gradient-gold text-primary text-xs font-bold shadow-gold"
+            >
+              שנה אזור
+            </button>
           </div>
         ) : (
           filteredSuppliers.map((s, idx) => (
