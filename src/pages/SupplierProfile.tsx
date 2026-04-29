@@ -30,6 +30,7 @@ interface DbSupplier {
   instagram_url: string | null;
   facebook_url: string | null;
   catalog_url: string | null;
+  service_areas: string[] | null;
 }
 
 interface GalleryItem {
