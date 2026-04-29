@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { supabase } from "@/integrations/supabase/client";
+import { useRegions } from "@/hooks/useRegions";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -55,12 +56,35 @@ const emptyForm: NewForm = {
 
 export default function AdminDbSuppliers() {
   const navigate = useNavigate();
+  const { regions, citiesByRegion } = useRegions();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<NewForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedRegions, setSelectedRegions] = useState<Set<string>>(new Set());
+  const [selectedCities, setSelectedCities] = useState<Set<string>>(new Set());
+
+  const toggleRegion = (id: string) => {
+    const s = new Set(selectedRegions);
+    if (s.has(id)) {
+      s.delete(id);
+      const cityIds = citiesByRegion(id).map((c) => c.id);
+      const nc = new Set(selectedCities);
+      cityIds.forEach((cid) => nc.delete(cid));
+      setSelectedCities(nc);
+    } else {
+      s.add(id);
+    }
+    setSelectedRegions(s);
+  };
+
+  const toggleCity = (id: string) => {
+    const s = new Set(selectedCities);
+    if (s.has(id)) s.delete(id); else s.add(id);
+    setSelectedCities(s);
+  };
 
   const load = async () => {
     const { data, error } = await supabase
@@ -99,13 +123,26 @@ export default function AdminDbSuppliers() {
         .select("id")
         .single();
       if (error) throw error;
-      toast.success("הספק נוצר! עכשיו הגדר אזורי שירות");
+      const newId = data?.id;
+      // Save selected regions/cities
+      if (newId && !form.serves_all_country) {
+        if (selectedRegions.size > 0) {
+          await supabase.from("supplier_regions").insert(
+            [...selectedRegions].map((region_id) => ({ supplier_id: newId, region_id }))
+          );
+        }
+        if (selectedCities.size > 0) {
+          await supabase.from("supplier_cities").insert(
+            [...selectedCities].map((city_id) => ({ supplier_id: newId, city_id }))
+          );
+        }
+      }
+      toast.success("הספק נוצר בהצלחה");
       setOpen(false);
       setForm(emptyForm);
+      setSelectedRegions(new Set());
+      setSelectedCities(new Set());
       await load();
-      if (data?.id && !form.serves_all_country) {
-        navigate(`/admin/suppliers/${data.id}/areas`);
-      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "יצירה נכשלה");
     } finally {
@@ -203,7 +240,7 @@ export default function AdminDbSuppliers() {
 
       {/* Create dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md" dir="rtl">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle>ספק חדש</DialogTitle>
           </DialogHeader>
@@ -261,9 +298,73 @@ export default function AdminDbSuppliers() {
               </select>
             </div>
             {!form.serves_all_country && (
-              <p className="text-[11px] text-muted-foreground">
-                לאחר היצירה תועבר למסך אזורי השירות לבחירת ערים/אזורים.
-              </p>
+              <div className="space-y-3 pt-2 border-t">
+                <div>
+                  <Label className="text-sm font-bold">אזורי שירות</Label>
+                  <p className="text-[11px] text-muted-foreground mb-2">בחר את האזורים שבהם הספק פועל</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {regions.map((r) => {
+                      const active = selectedRegions.has(r.id);
+                      return (
+                        <button
+                          type="button"
+                          key={r.id}
+                          onClick={() => toggleRegion(r.id)}
+                          className={
+                            "h-9 rounded-xl text-xs font-bold border transition px-2 " +
+                            (active
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-card text-foreground border-border")
+                          }
+                        >
+                          {r.name_he}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {selectedRegions.size > 0 && (
+                  <div>
+                    <Label className="text-sm font-bold">ערים ספציפיות (אופציונלי)</Label>
+                    <p className="text-[11px] text-muted-foreground mb-2">
+                      ללא בחירת ערים — הספק יוצג בכל הערים שבאזורים שנבחרו.
+                    </p>
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {[...selectedRegions].map((rid) => {
+                        const region = regions.find((r) => r.id === rid);
+                        const regionCities = citiesByRegion(rid);
+                        if (!region || regionCities.length === 0) return null;
+                        return (
+                          <div key={rid}>
+                            <div className="text-[10px] font-bold text-muted-foreground mb-1">{region.name_he}</div>
+                            <div className="flex flex-wrap gap-1">
+                              {regionCities.map((c) => {
+                                const active = selectedCities.has(c.id);
+                                return (
+                                  <button
+                                    type="button"
+                                    key={c.id}
+                                    onClick={() => toggleCity(c.id)}
+                                    className={
+                                      "px-2 py-1 rounded-full text-[11px] font-bold border transition " +
+                                      (active
+                                        ? "bg-gold/20 text-primary border-gold"
+                                        : "bg-card text-foreground border-border")
+                                    }
+                                  >
+                                    {c.name_he}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
           <DialogFooter>
