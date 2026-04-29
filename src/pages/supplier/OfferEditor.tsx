@@ -270,7 +270,7 @@ export default function OfferEditor() {
 
   return (
     <MobileShell>
-      <PageHeader title="הצעה חדשה" subtitle="הגדירו פרטים ודרגות מחיר דינמיות" back />
+      <PageHeader title="הצעה חדשה" subtitle="בחרו סוג הצעה והגדירו את התנאים" back />
 
       <div className="px-5 -mt-4 relative z-10 space-y-4">
         <div className="gb-card p-4 space-y-3">
@@ -285,51 +285,92 @@ export default function OfferEditor() {
               {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
             </select>
           </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="מחיר מחירון (₪)">
-              <Input type="number" value={originalPrice} onChange={(e) => setOriginalPrice(+e.target.value)} className="h-11 rounded-xl" />
-            </Field>
-            <Field label="פיקדון (₪)">
-              <Input type="number" value={depositAmount} onChange={(e) => setDepositAmount(+e.target.value)} className="h-11 rounded-xl" />
-            </Field>
-          </div>
+          <Field label="פיקדון (₪)">
+            <Input type="number" value={depositAmount} onChange={(e) => setDepositAmount(+e.target.value)} className="h-11 rounded-xl" />
+          </Field>
         </div>
 
-        <div className="gb-card p-4">
-          <h3 className="font-bold text-sm mb-3">דרגות מחיר דינמיות</h3>
-          <div className="space-y-2">
-            {tiers.map((t, i) => (
-              <div key={i} className="rounded-2xl border-2 border-border bg-muted/40 p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <Input
-                    value={t.label}
-                    onChange={(e) => updateTier(i, { label: e.target.value })}
-                    className="h-9 rounded-lg flex-1 ml-2 bg-card text-sm font-bold"
-                  />
-                  <span className="text-[11px] text-muted-foreground shrink-0">
-                    {t.minParticipants}{t.maxParticipants ? `-${t.maxParticipants}` : "+"} משתתפים
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <Mini label="מינ׳">
-                    <Input type="number" value={t.minParticipants} onChange={(e) => updateTier(i, { minParticipants: +e.target.value })} className="h-9 rounded-lg" />
-                  </Mini>
-                  <Mini label="מקס׳">
-                    <Input
-                      type="number"
-                      value={t.maxParticipants ?? ""}
-                      placeholder="∞"
-                      onChange={(e) => updateTier(i, { maxParticipants: e.target.value ? +e.target.value : null })}
-                      className="h-9 rounded-lg"
-                    />
-                  </Mini>
-                  <Mini label="מחיר ₪">
-                    <Input type="number" value={t.price} onChange={(e) => updateTier(i, { price: +e.target.value })} className="h-9 rounded-lg" />
-                  </Mini>
-                </div>
-              </div>
-            ))}
+        {/* Offer type selector */}
+        <div className="gb-card p-4 space-y-3">
+          <h3 className="font-bold text-sm">סוג הצעה</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setOfferType("percentage")}
+              className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
+                offerType === "percentage"
+                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
+                  : "border-border bg-card text-muted-foreground"
+              }`}
+            >
+              אחוז הנחה
+            </button>
+            <button
+              type="button"
+              onClick={() => setOfferType("price_comparison")}
+              className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
+                offerType === "price_comparison"
+                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
+                  : "border-border bg-card text-muted-foreground"
+              }`}
+            >
+              מחיר לפני ואחרי
+            </button>
           </div>
+
+          {offerType === "percentage" ? (
+            <div className="space-y-3 pt-1">
+              <Field label="אחוז הנחה (1-100)">
+                <Input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={discountPercentage}
+                  onChange={(e) => setDiscountPercentage(e.target.value)}
+                  placeholder="20"
+                  className="h-11 rounded-xl"
+                />
+              </Field>
+              <Field label="מחיר בסיס (אופציונלי, ₪)">
+                <Input
+                  type="number"
+                  value={basePrice}
+                  onChange={(e) => setBasePrice(e.target.value)}
+                  placeholder="לדוגמה: 5000"
+                  className="h-11 rounded-xl"
+                />
+              </Field>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                ככל שיותר דיירים מצטרפים — המחיר משתפר.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3 pt-1">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="מחיר לפני (₪)">
+                  <Input
+                    type="number"
+                    value={originalPrice}
+                    onChange={(e) => setOriginalPrice(e.target.value)}
+                    placeholder="5000"
+                    className="h-11 rounded-xl"
+                  />
+                </Field>
+                <Field label="מחיר אחרי (₪)">
+                  <Input
+                    type="number"
+                    value={discountedPrice}
+                    onChange={(e) => setDiscountedPrice(e.target.value)}
+                    placeholder="4200"
+                    className="h-11 rounded-xl"
+                  />
+                </Field>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                המחיר אחרי חייב להיות נמוך מהמחיר לפני.
+              </p>
+            </div>
+          )}
         </div>
 
         <Button onClick={save} disabled={saving} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card">
