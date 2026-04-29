@@ -26,8 +26,6 @@ type FormState = {
   ownerName: string;
   categoryIds: string[];
   serviceArea: string;
-  rating: string;
-  reviewsCount: string;
   commissionPercent: string;
   logoEmoji: string;
   logoUrl: string | null;
@@ -46,8 +44,6 @@ const emptyForm: FormState = {
   ownerName: "",
   categoryIds: [],
   serviceArea: "",
-  rating: "",
-  reviewsCount: "",
   commissionPercent: "",
   logoEmoji: "🏷️",
   logoUrl: null,
@@ -145,8 +141,6 @@ export default function AdminSuppliers() {
       ownerName: s.ownerName ?? "",
       categoryIds: s.categoryIds ?? [],
       serviceArea: s.serviceArea ?? "",
-      rating: s.rating ? String(s.rating) : "",
-      reviewsCount: s.reviewsCount ? String(s.reviewsCount) : "",
       commissionPercent: s.commissionPercent ? String(s.commissionPercent) : "",
       logoEmoji: s.logoEmoji ?? "🏷️",
       logoUrl: s.logoUrl ?? null,
@@ -184,8 +178,8 @@ export default function AdminSuppliers() {
       serviceArea: form.serviceArea.trim(),
       verified: form.verified,
       featured: form.featured,
-      rating: parseFloat(form.rating) || 0,
-      reviewsCount: parseInt(form.reviewsCount) || 0,
+      rating: form.id ? (suppliers.find(s => s.id === form.id)?.rating ?? 0) : 0,
+      reviewsCount: form.id ? (suppliers.find(s => s.id === form.id)?.reviewsCount ?? 0) : 0,
       commissionPercent: parseFloat(form.commissionPercent) || 0,
       approvalStatus: form.approvalStatus,
       logoEmoji: form.logoEmoji || "🏷️",
@@ -240,7 +234,8 @@ export default function AdminSuppliers() {
                   </p>
                   <div className="flex items-center gap-2 mt-1.5 text-[11px] flex-wrap">
                     <span className="inline-flex items-center gap-0.5 text-muted-foreground">
-                      <Star className="h-3 w-3 fill-gold text-gold" /> <b className="text-foreground">{s.rating || "—"}</b>
+                      <Star className="h-3 w-3 fill-gold text-gold" /> <b className="text-foreground">{s.rating || 0}</b>
+                      <span className="text-[10px]">({s.reviewsCount || 0})</span>
                     </span>
                     <span className="text-muted-foreground">עמלה: <b className="text-primary">{s.commissionPercent || 0}%</b></span>
                     <span className="text-muted-foreground truncate">
@@ -418,40 +413,23 @@ export default function AdminSuppliers() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <Label className="text-xs">דירוג</Label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="5"
-                  value={form.rating}
-                  onChange={(e) => setForm({ ...form, rating: e.target.value })}
-                  placeholder="0-5"
-                />
-              </div>
-              <div>
-                <Label className="text-xs">מס׳ חוות דעת</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={form.reviewsCount}
-                  onChange={(e) => setForm({ ...form, reviewsCount: e.target.value })}
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label className="text-xs">עמלה %</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={form.commissionPercent}
-                  onChange={(e) => setForm({ ...form, commissionPercent: e.target.value })}
-                  placeholder="0"
-                />
-              </div>
+            <div className="rounded-xl bg-muted/40 border border-border px-3 py-2.5 flex items-center gap-2">
+              <Star className="h-4 w-4 text-gold" />
+              <span className="text-[11px] text-muted-foreground leading-snug">
+                הדירוג ומספר חוות הדעת מחושבים אוטומטית מהביקורות של דיירים שהשתתפו בעסקאות.
+              </span>
+            </div>
+
+            <div>
+              <Label className="text-xs">עמלה %</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={form.commissionPercent}
+                onChange={(e) => setForm({ ...form, commissionPercent: e.target.value })}
+                placeholder="0"
+              />
             </div>
 
             <div>

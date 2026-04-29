@@ -253,6 +253,44 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          deal_id: string
+          id: string
+          rating: number
+          supplier_id: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          rating: number
+          supplier_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          rating?: number
+          supplier_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_cities: {
         Row: {
           city_id: string
@@ -502,11 +540,22 @@ export type Database = {
     }
     Functions: {
       get_deal_paid_count: { Args: { _deal_id: string }; Returns: number }
+      get_supplier_rating: {
+        Args: { _supplier_id: string }
+        Returns: {
+          avg_rating: number
+          review_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      user_can_review: {
+        Args: { _deal_id: string; _user_id: string }
         Returns: boolean
       }
     }

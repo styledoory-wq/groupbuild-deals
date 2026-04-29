@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Briefcase, TrendingUp, Users, DollarSign, Plus, Star, LogOut, Pencil, type LucideIcon } from "lucide-react";
+import { Briefcase, TrendingUp, Users, DollarSign, Plus, LogOut, Pencil, type LucideIcon } from "lucide-react";
+import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -30,8 +31,8 @@ export default function SupplierDashboard() {
           <div>
             <p className="text-primary-foreground/55 text-[11px] uppercase tracking-wider">איזור ספק</p>
             <h1 className="text-[24px] font-semibold mt-1 tracking-tight">{supplier.businessName}</h1>
-            <div className="flex items-center gap-1.5 text-[11px] gb-gold-text mt-2">
-              <Star className="h-3 w-3 fill-gold text-gold" strokeWidth={1.75} /> {supplier.rating} · {supplier.reviewsCount} ביקורות
+            <div className="mt-2">
+              <SupplierRatingBadge supplierId={supplier.id} className="text-[11px] gb-gold-text" />
             </div>
           </div>
           <button

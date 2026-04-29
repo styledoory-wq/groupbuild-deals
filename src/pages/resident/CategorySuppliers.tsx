@@ -4,6 +4,7 @@ import { ArrowRight, ChevronLeft, MapPin, Sparkles, Star } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { supabase } from "@/integrations/supabase/client";
@@ -238,6 +239,7 @@ export default function CategorySuppliers() {
                   </p>
                 )}
                 <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                  <SupplierRatingBadge supplierId={s.id} showEmpty={false} />
                   {s.serves_all_country && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-primary border border-gold/20">
                       ארצי
