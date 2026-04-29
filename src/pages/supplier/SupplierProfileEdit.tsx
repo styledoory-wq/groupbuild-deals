@@ -116,6 +116,58 @@ export default function SupplierProfileEdit() {
     setList(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const url = await uploadSupplierLogo(file);
+      setLogoUrl(url);
+      toast.success("הלוגו הועלה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setUploadingLogo(false);
+      if (logoInputRef.current) logoInputRef.current.value = "";
+    }
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setUploadingGallery(true);
+    try {
+      for (const file of files) {
+        const url = await uploadSupplierGalleryImage(file);
+        setGallery((g) => [...g, { image_url: url, caption: null }]);
+      }
+      toast.success("התמונות הועלו");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setUploadingGallery(false);
+      if (galleryInputRef.current) galleryInputRef.current.value = "";
+    }
+  };
+
+  const handleCatalogUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCatalog(true);
+    try {
+      const url = await uploadSupplierCatalog(file);
+      setCatalogUrl(url);
+      toast.success("הקטלוג הועלה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setUploadingCatalog(false);
+      if (catalogInputRef.current) catalogInputRef.current.value = "";
+    }
+  };
+
+  const removeGalleryItem = (idx: number) => setGallery((g) => g.filter((_, i) => i !== idx));
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = supplierSchema.safeParse({
