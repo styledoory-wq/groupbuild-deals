@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Supplier } from "@/types";
+import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 
 type FormState = {
   id?: string;
@@ -166,7 +167,7 @@ export default function AdminSuppliers() {
           return (
             <div key={s.id} className="gb-card p-4">
               <div className="flex items-start gap-3">
-                <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-2xl shrink-0">{s.logoEmoji || "🏷️"}</div>
+                <SupplierLogo name={s.businessName} size="md" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1 mb-0.5">
                     <h3 className="font-bold truncate">{s.businessName || <span className="text-destructive">— ללא שם עסק —</span>}</h3>

@@ -283,6 +283,33 @@ export type Database = {
           },
         ]
       }
+      supplier_gallery: {
+        Row: {
+          caption: string | null
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string
+          supplier_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url: string
+          supplier_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          supplier_id?: string
+        }
+        Relationships: []
+      }
       supplier_regions: {
         Row: {
           region_id: string
@@ -317,47 +344,68 @@ export type Database = {
         Row: {
           approval_status: string
           business_name: string
+          catalog_url: string | null
           categories: string[]
           contact_name: string | null
           created_at: string
           description: string | null
           email: string | null
+          facebook_url: string | null
           id: string
+          instagram_url: string | null
           is_active: boolean
+          logo_url: string | null
           phone: string | null
           serves_all_country: boolean
+          short_description: string | null
           updated_at: string
           user_id: string | null
+          website_url: string | null
+          whatsapp_url: string | null
         }
         Insert: {
           approval_status?: string
           business_name: string
+          catalog_url?: string | null
           categories?: string[]
           contact_name?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
+          facebook_url?: string | null
           id?: string
+          instagram_url?: string | null
           is_active?: boolean
+          logo_url?: string | null
           phone?: string | null
           serves_all_country?: boolean
+          short_description?: string | null
           updated_at?: string
           user_id?: string | null
+          website_url?: string | null
+          whatsapp_url?: string | null
         }
         Update: {
           approval_status?: string
           business_name?: string
+          catalog_url?: string | null
           categories?: string[]
           contact_name?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
+          facebook_url?: string | null
           id?: string
+          instagram_url?: string | null
           is_active?: boolean
+          logo_url?: string | null
           phone?: string | null
           serves_all_country?: boolean
+          short_description?: string | null
           updated_at?: string
           user_id?: string | null
+          website_url?: string | null
+          whatsapp_url?: string | null
         }
         Relationships: []
       }
