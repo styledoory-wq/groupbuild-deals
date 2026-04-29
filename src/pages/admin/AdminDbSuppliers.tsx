@@ -240,7 +240,7 @@ export default function AdminDbSuppliers() {
 
       {/* Create dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md" dir="rtl">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle>ספק חדש</DialogTitle>
           </DialogHeader>
