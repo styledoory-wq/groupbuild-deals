@@ -48,33 +48,50 @@ export default function Auth() {
   }, []);
 
   const routeForUser = async (userId: string, userEmail: string) => {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .maybeSingle();
+    // Load profile + roles + supplier record in parallel.
+    // user_roles is the source of truth for role; profile.user_type is fallback only.
+    const [{ data: profile }, { data: roles }, { data: supplierRow }] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", userId),
+      supabase.from("suppliers").select("id").eq("user_id", userId).maybeSingle(),
+    ]);
 
     // Admin access is granted ONLY by verified email match.
     const isAdmin = isAdminEmail(userEmail);
-    const userType = (profile?.user_type ?? "resident") as Role;
-    const finalRole: Role = isAdmin ? "admin" : userType;
+
+    // Determine role: prefer user_roles, then profile.user_type, then supplier-record presence.
+    const roleNames = (roles ?? []).map((r) => r.role as string);
+    let resolvedRole: Role = "resident";
+    if (isAdmin) {
+      resolvedRole = "admin";
+    } else if (roleNames.includes("supplier")) {
+      resolvedRole = "supplier";
+    } else if (profile?.user_type === "supplier") {
+      resolvedRole = "supplier";
+    } else if (supplierRow?.id) {
+      // Fallback: supplier record exists even though role wasn't set.
+      resolvedRole = "supplier";
+    } else if (profile?.user_type === "resident" || roleNames.includes("resident")) {
+      resolvedRole = "resident";
+    }
 
     setUser({
       id: userId,
-      role: finalRole,
+      role: resolvedRole,
       name: profile?.full_name ?? profile?.business_name ?? userEmail,
       phone: profile?.phone ?? "",
       email: profile?.email ?? userEmail,
       projectId: profile?.project_id ?? undefined,
     });
-    if (isAdmin) {
+
+    if (resolvedRole === "admin") {
       setAdminSession(true);
       navigate("/admin");
-    } else {
-      setAdminSession(false);
-      if (userType === "supplier") navigate("/supplier");
-      else navigate("/resident");
+      return;
     }
+    setAdminSession(false);
+    if (resolvedRole === "supplier") navigate("/supplier");
+    else navigate("/resident");
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
