@@ -79,6 +79,7 @@ const App = () => (
             <Route path="/resident/profile" element={<ResidentProfile />} />
             <Route path="/resident/profile/edit" element={<ResidentProfileEdit />} />
             <Route path="/resident/notifications" element={<Notifications />} />
+            <Route path="/resident/my-offers" element={<MyOffers />} />
 
             {/* Supplier */}
             <Route path="/supplier" element={<SupplierDashboard />} />
