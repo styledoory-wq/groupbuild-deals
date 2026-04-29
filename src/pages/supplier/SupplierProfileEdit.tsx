@@ -315,6 +315,85 @@ export default function SupplierProfileEdit() {
           </div>
         </section>
 
+        {/* Branding & Media */}
+        <section className="gb-card p-4 space-y-4">
+          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <ImageIcon className="h-3.5 w-3.5 text-gold" /> מיתוג ומדיה
+          </h3>
+
+          {/* Logo */}
+          <div className="flex items-center gap-4">
+            <SupplierLogo name={businessName} logoUrl={logoUrl} size="lg" />
+            <div className="flex-1 space-y-2">
+              <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleLogoUpload} />
+              <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo} className="h-9 rounded-xl text-xs w-full">
+                {uploadingLogo ? "מעלה..." : logoUrl ? "החלפת לוגו" : "העלאת לוגו"}
+              </Button>
+              {logoUrl && (
+                <Button type="button" variant="ghost" onClick={() => setLogoUrl(null)} className="h-8 rounded-xl text-xs w-full text-destructive">
+                  הסרת לוגו
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Links */}
+          <div className="space-y-2 pt-2 border-t border-border">
+            <Label className="text-xs font-bold flex items-center gap-1.5">
+              <LinkIcon className="h-3.5 w-3.5 text-gold" /> קישורים
+            </Label>
+            <Input dir="ltr" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://example.com (אתר)" className="h-10 rounded-xl text-sm" maxLength={500} />
+            <Input dir="ltr" value={whatsappUrl} onChange={(e) => setWhatsappUrl(e.target.value)} placeholder="https://wa.me/972500000000" className="h-10 rounded-xl text-sm" maxLength={500} />
+            <Input dir="ltr" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/..." className="h-10 rounded-xl text-sm" maxLength={500} />
+            <Input dir="ltr" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/..." className="h-10 rounded-xl text-sm" maxLength={500} />
+          </div>
+
+          {/* Catalog */}
+          <div className="space-y-2 pt-2 border-t border-border">
+            <Label className="text-xs font-bold flex items-center gap-1.5">
+              <FileText className="h-3.5 w-3.5 text-gold" /> קטלוג
+            </Label>
+            <Input dir="ltr" value={catalogUrl ?? ""} onChange={(e) => setCatalogUrl(e.target.value || null)} placeholder="קישור לקטלוג חיצוני" className="h-10 rounded-xl text-sm" maxLength={500} />
+            <input ref={catalogInputRef} type="file" accept="application/pdf" className="hidden" onChange={handleCatalogUpload} />
+            <Button type="button" variant="outline" onClick={() => catalogInputRef.current?.click()} disabled={uploadingCatalog} className="h-9 rounded-xl text-xs w-full">
+              {uploadingCatalog ? "מעלה..." : "או העלאת PDF"}
+            </Button>
+            {catalogUrl && (
+              <a href={catalogUrl} target="_blank" rel="noreferrer" className="block text-[11px] text-gold underline truncate" dir="ltr">
+                {catalogUrl}
+              </a>
+            )}
+          </div>
+
+          {/* Gallery */}
+          <div className="space-y-2 pt-2 border-t border-border">
+            <Label className="text-xs font-bold flex items-center gap-1.5">
+              <ImageIcon className="h-3.5 w-3.5 text-gold" /> גלריית עבודות
+            </Label>
+            <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleGalleryUpload} />
+            <Button type="button" variant="outline" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery} className="h-9 rounded-xl text-xs w-full">
+              <Plus className="h-3.5 w-3.5 ml-1" /> {uploadingGallery ? "מעלה..." : "הוספת תמונות"}
+            </Button>
+            {gallery.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {gallery.map((g, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-border group">
+                    <img src={g.image_url} alt="" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryItem(idx)}
+                      className="absolute top-1 left-1 h-7 w-7 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                      aria-label="מחיקה"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
         <section className="gb-card p-4 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
             <Tag className="h-3.5 w-3.5 text-gold" /> קטגוריות שירות
