@@ -206,14 +206,14 @@ export default function CategorySuppliers() {
           </div>
 
           <div className="flex items-center gap-3 mb-3">
-            {cat?.icon && (
+            {activeCategory?.icon && (
               <div className="h-12 w-12 rounded-2xl bg-white/8 border border-gold/20 flex items-center justify-center text-2xl shadow-soft">
-                {cat.icon}
+                {activeCategory.icon}
               </div>
             )}
             <div>
               <h1 className="text-[24px] leading-[1.15] font-extrabold">
-                <span className="gb-gold-text">{cat?.name ?? "ספקים"}</span>
+                <span className="gb-gold-text">{activeCategory?.name ?? "ספקים"}</span>
               </h1>
               <p className="text-primary-foreground/65 text-[12px] mt-0.5">ספקים מובילים בתחום</p>
             </div>
@@ -223,8 +223,42 @@ export default function CategorySuppliers() {
       </header>
 
       <div className="px-5 -mt-10 relative z-10 space-y-3 pb-6">
-        {/* Filters card */}
+        {/* Marketplace controls */}
         <div className="gb-card p-4 animate-fade-up">
+          <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1 no-scrollbar">
+            <button
+              type="button"
+              onClick={() => setActiveCategoryId("all")}
+              className={`shrink-0 h-9 px-3 rounded-xl border text-xs font-bold transition-smooth flex items-center gap-1.5 ${
+                activeCategoryId === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"
+              }`}
+            >
+              <Globe2 className="h-3.5 w-3.5" /> הכל
+            </button>
+            {categories.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setActiveCategoryId(c.id)}
+                className={`shrink-0 h-9 px-3 rounded-xl border text-xs font-bold transition-smooth flex items-center gap-1.5 ${
+                  activeCategoryId === c.id ? "bg-gold text-primary border-gold" : "bg-card text-foreground border-border"
+                }`}
+              >
+                <span>{c.icon}</span> {c.name}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative mb-3">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="חיפוש לפי ספק, קטגוריה או עיר"
+              className="h-11 w-full rounded-xl bg-card border border-border pr-9 pl-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-gold focus:outline-none transition-smooth"
+            />
+          </div>
+
           <div className="flex items-center gap-1.5 mb-3">
             <MapPin className="h-3.5 w-3.5 text-gold" />
             <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
@@ -265,15 +299,27 @@ export default function CategorySuppliers() {
             <div className="h-8 w-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin mx-auto mb-3" />
             <p className="text-muted-foreground text-sm">טוען ספקים...</p>
           </div>
+        ) : loadError ? (
+          <div className="gb-card p-8 text-center">
+            <p className="text-sm font-bold text-foreground">שגיאה בטעינה</p>
+            <p className="text-[11px] text-muted-foreground mt-1.5">נסו לרענן את המסך בעוד רגע.</p>
+          </div>
         ) : filteredSuppliers.length === 0 ? (
           <div className="gb-card p-8 text-center">
             <div className="h-14 w-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-3">
-              <MapPin className="h-6 w-6 text-gold" />
+              <UserPlus className="h-6 w-6 text-gold" />
             </div>
-            <p className="text-sm font-bold text-foreground">אין ספקים זמינים באזור זה</p>
+            <p className="text-sm font-bold text-foreground">לא נמצאו ספקים</p>
             <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed max-w-[240px] mx-auto">
-              נסו להרחיב את הסינון לכל האזורים, או חזרו אלינו בקרוב — ספקים חדשים מצטרפים כל הזמן.
+              שנה אזור או הזמן ספקים להצטרף כדי לפתוח עוד אפשרויות לדיירים.
             </p>
+            <button
+              type="button"
+              onClick={() => { setRegionId("all"); setCityId("all"); setSearchTerm(""); }}
+              className="mt-4 h-10 px-4 rounded-xl bg-gradient-gold text-primary text-xs font-bold shadow-gold"
+            >
+              שנה אזור
+            </button>
           </div>
         ) : (
           filteredSuppliers.map((s, idx) => (
