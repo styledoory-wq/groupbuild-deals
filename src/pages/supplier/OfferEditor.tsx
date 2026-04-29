@@ -124,13 +124,13 @@ export default function OfferEditor() {
         category_id: categoryId,
         original_price: originalPrice,
         deposit_amount: depositAmount,
-        tiers: tiers as unknown as object,
-        highlights: ["מחיר מיוחד", "התקנה כלולה", "אחריות מלאה"] as unknown as object,
+        tiers: tiers as unknown as import("@/integrations/supabase/types").Json,
+        highlights: ["מחיר מיוחד", "התקנה כלולה", "אחריות מלאה"] as unknown as import("@/integrations/supabase/types").Json,
         status: "active",
         ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
       };
 
-      const { error } = await supabase.from("deals" as never).insert(payload as never);
+      const { error } = await supabase.from("deals").insert([payload]);
       if (error) {
         console.error("[OfferEditor] insert error", error);
         const msg = error.message?.includes("row-level")
