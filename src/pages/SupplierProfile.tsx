@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
+import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
+import type { OfferTier } from "@/lib/offerPricing";
 
 interface DbSupplier {
   id: string;
@@ -56,15 +58,22 @@ export default function SupplierProfile() {
   const [interested, setInterested] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [deals, setDeals] = useState<RealDealCardData[]>([]);
 
   useEffect(() => {
     if (!supplierId) return;
     (async () => {
-      const [{ data: s }, { data: g }, { data: sregs }, { data: scits }] = await Promise.all([
+      const [{ data: s }, { data: g }, { data: sregs }, { data: scits }, { data: dealsData }] = await Promise.all([
         supabase.from("suppliers").select("*").eq("id", supplierId).maybeSingle(),
         supabase.from("supplier_gallery").select("id,image_url,caption").eq("supplier_id", supplierId).order("display_order"),
         supabase.from("supplier_regions").select("region_id, regions(name_he)").eq("supplier_id", supplierId),
         supabase.from("supplier_cities").select("city_id, cities(name_he)").eq("supplier_id", supplierId),
+        supabase
+          .from("deals")
+          .select("id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at")
+          .eq("supplier_id", supplierId)
+          .eq("status", "active")
+          .order("created_at", { ascending: false }),
       ]);
       const sup = (s as DbSupplier | null) ?? null;
       setSupplier(sup);
@@ -76,6 +85,27 @@ export default function SupplierProfile() {
       const fromArr = (sup?.service_areas ?? []).filter((x) => x && x !== "כל הארץ");
       const merged = Array.from(new Set([...fromTable, ...fromArr]));
       setServiceAreas(merged);
+
+      const dealRows = (dealsData ?? []) as Array<Record<string, unknown>>;
+      setDeals(
+        dealRows.map((r) => ({
+          id: String(r.id),
+          title: String(r.title ?? ""),
+          status: String(r.status ?? "active"),
+          category_id: (r.category_id as string | null) ?? null,
+          supplier_id: String(r.supplier_id),
+          supplier_name: sup?.business_name ?? null,
+          supplier_logo_url: sup?.logo_url ?? null,
+          offer_type: (r.offer_type as string | null) ?? "percentage",
+          original_price: (r.original_price as number | null) ?? null,
+          discounted_price: (r.discounted_price as number | null) ?? null,
+          discount_percentage: (r.discount_percentage as number | null) ?? null,
+          base_price: (r.base_price as number | null) ?? null,
+          tiers: (Array.isArray(r.tiers) ? (r.tiers as OfferTier[]) : []) as OfferTier[],
+          ends_at: (r.ends_at as string | null) ?? null,
+        })),
+      );
+
       setLoading(false);
     })();
   }, [supplierId]);
@@ -262,6 +292,22 @@ export default function SupplierProfile() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">לא הוגדרו אזורי שירות — צרו קשר לפרטים</p>
+          )}
+        </section>
+
+        {/* Active offers from this supplier */}
+        <section className="gb-card p-4">
+          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <Tag className="h-3.5 w-3.5 text-gold" /> ההצעות הפעילות
+          </h2>
+          {deals.length === 0 ? (
+            <p className="text-sm text-muted-foreground">אין עדיין הצעות פעילות מהספק הזה.</p>
+          ) : (
+            <div className="space-y-3">
+              {deals.map((d) => (
+                <RealDealCard key={d.id} deal={d} />
+              ))}
+            </div>
           )}
         </section>
 
