@@ -395,6 +395,7 @@ export type Database = {
           logo_url: string | null
           phone: string | null
           serves_all_country: boolean
+          service_areas: string[]
           short_description: string | null
           updated_at: string
           user_id: string | null
@@ -417,6 +418,7 @@ export type Database = {
           logo_url?: string | null
           phone?: string | null
           serves_all_country?: boolean
+          service_areas?: string[]
           short_description?: string | null
           updated_at?: string
           user_id?: string | null
@@ -439,6 +441,7 @@ export type Database = {
           logo_url?: string | null
           phone?: string | null
           serves_all_country?: boolean
+          service_areas?: string[]
           short_description?: string | null
           updated_at?: string
           user_id?: string | null
@@ -553,6 +556,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      refresh_supplier_service_areas: {
+        Args: { _supplier_id: string }
+        Returns: undefined
       }
       user_can_review: {
         Args: { _deal_id: string; _user_id: string }
