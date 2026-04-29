@@ -136,6 +136,9 @@ export default function SupplierProfile() {
               <h1 className="text-xl font-extrabold truncate">{supplier.business_name}</h1>
               {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-gold shrink-0" />}
             </div>
+            <div className="mb-1">
+              <SupplierRatingBadge supplierId={supplier.id} className="text-[11px] text-primary-foreground/90 [&>b]:text-gold [&>span]:text-primary-foreground/70" />
+            </div>
             {supplier.short_description && (
               <p className="text-primary-foreground/80 text-xs leading-relaxed line-clamp-2">{supplier.short_description}</p>
             )}
