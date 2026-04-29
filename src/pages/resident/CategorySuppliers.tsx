@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronLeft, MapPin, Sparkles, Star } from "lucide-react";
+import { ArrowRight, ChevronLeft, Globe2, MapPin, Search, Sparkles, Star, UserPlus } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -16,10 +16,14 @@ interface DbSupplier {
   description: string | null;
   logo_url: string | null;
   categories: string[];
+  service_areas: string[];
   serves_all_country: boolean;
   is_active: boolean;
   approval_status: string;
 }
+
+const NORTH_REGION_NAMES = new Set(["צפון", "כל הצפון", "גליל עליון", "גליל תחתון", "רמת הגולן", "עמקים", "חיפה והקריות"]);
+const NATIONAL_AREA = "כל הארץ";
 
 export default function CategorySuppliers() {
   const { categoryId } = useParams();
@@ -27,15 +31,21 @@ export default function CategorySuppliers() {
   const { categories } = useApp();
   const { regions, cities } = useRegions();
 
-  const cat = categories.find((c) => c.id === categoryId);
+  const [activeCategoryId, setActiveCategoryId] = useState<string>(categoryId ?? "all");
 
   const [suppliers, setSuppliers] = useState<DbSupplier[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [regionId, setRegionId] = useState<string>("all");
   const [cityId, setCityId] = useState<string>("all");
-  const [supplierIdsByRegion, setSupplierIdsByRegion] = useState<Set<string> | null>(null);
-  const [supplierIdsByCity, setSupplierIdsByCity] = useState<Set<string> | null>(null);
+  const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
+  const [supplierCityIds, setSupplierCityIds] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    setActiveCategoryId(categoryId ?? "all");
+  }, [categoryId]);
 
   // Initialize filter from resident profile
   useEffect(() => {
