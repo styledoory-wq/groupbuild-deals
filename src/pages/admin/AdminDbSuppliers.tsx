@@ -561,6 +561,12 @@ export default function AdminDbSuppliers() {
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
+              <button
+                onClick={() => openEdit(r.id)}
+                className="w-full h-10 rounded-xl bg-gradient-gold text-primary text-sm font-bold flex items-center justify-center gap-1.5 shadow-gold"
+              >
+                <Pencil className="h-4 w-4" /> עריכת ספק
+              </button>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => navigate(`/admin/suppliers/${r.id}/media`)}
