@@ -82,8 +82,8 @@ export default function ResidentDashboard() {
     })();
   }, [regions, cities]);
 
-  const project = projects.find((p) => p.id === user?.projectId) || projects[0];
-  const projectDeals = deals.filter((d) => d.projectId === project.id);
+  const project = projects.find((p) => p.id === user?.projectId) || projects[0] || null;
+  const projectDeals = project ? deals.filter((d) => d.projectId === project.id) : [];
 
   // Filter mock deals by matching their supplier business name to area suppliers
   // (mock deals reference mock suppliers; this is a transitional bridge while
