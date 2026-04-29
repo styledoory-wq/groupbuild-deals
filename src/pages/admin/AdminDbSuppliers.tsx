@@ -467,6 +467,97 @@ export default function AdminDbSuppliers() {
               <Label>תיאור קצר</Label>
               <Textarea rows={2} value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
             </div>
+            <div>
+              <Label>תיאור מלא</Label>
+              <Textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="תיאור מפורט שיוצג בעמוד הספק" />
+            </div>
+
+            {/* Logo upload */}
+            <div className="pt-2 border-t">
+              <Label className="text-sm font-bold">לוגו</Label>
+              <div className="flex items-center gap-3 mt-1.5">
+                {form.logo_url ? (
+                  <img src={form.logo_url} alt="לוגו" className="h-14 w-14 rounded-xl object-cover border border-border" />
+                ) : (
+                  <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center text-[10px] text-muted-foreground">אין</div>
+                )}
+                <div className="flex-1 space-y-1.5">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) uploadFile(f, "supplier-logos", setUploadingLogo, "logo_url");
+                    }}
+                    className="text-xs"
+                    disabled={uploadingLogo}
+                  />
+                  {form.logo_url && (
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, logo_url: "" }))}
+                      className="text-[11px] text-destructive underline"
+                    >
+                      הסר לוגו
+                    </button>
+                  )}
+                  {uploadingLogo && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* Catalog upload */}
+            <div className="pt-2 border-t">
+              <Label className="text-sm font-bold">קטלוג (PDF)</Label>
+              <div className="space-y-1.5 mt-1.5">
+                <input
+                  type="file"
+                  accept="application/pdf,image/*"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) uploadFile(f, "supplier-catalogs", setUploadingCatalog, "catalog_url");
+                  }}
+                  className="text-xs"
+                  disabled={uploadingCatalog}
+                />
+                {form.catalog_url && (
+                  <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted">
+                    <a href={form.catalog_url} target="_blank" rel="noreferrer noopener" className="text-[11px] text-primary underline truncate">
+                      צפייה בקטלוג שהועלה
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, catalog_url: "" }))}
+                      className="text-[11px] text-destructive underline shrink-0"
+                    >
+                      הסר
+                    </button>
+                  </div>
+                )}
+                {uploadingCatalog && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+              </div>
+            </div>
+
+            {/* Links */}
+            <div className="pt-2 border-t space-y-2">
+              <Label className="text-sm font-bold">קישורים</Label>
+              <div>
+                <Label className="text-xs">אתר אינטרנט</Label>
+                <Input dir="ltr" placeholder="https://" value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">וואטסאפ (קישור wa.me)</Label>
+                <Input dir="ltr" placeholder="https://wa.me/972..." value={form.whatsapp_url} onChange={(e) => setForm({ ...form, whatsapp_url: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">אינסטגרם</Label>
+                <Input dir="ltr" placeholder="https://instagram.com/..." value={form.instagram_url} onChange={(e) => setForm({ ...form, instagram_url: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">פייסבוק</Label>
+                <Input dir="ltr" placeholder="https://facebook.com/..." value={form.facebook_url} onChange={(e) => setForm({ ...form, facebook_url: e.target.value })} />
+              </div>
+            </div>
 
             {/* Categories — REQUIRED */}
             <div className="pt-2 border-t">
