@@ -178,8 +178,8 @@ export default function OfferEditor() {
           </div>
         </div>
 
-        <Button onClick={save} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card">
-          <Save className="h-4 w-4 ml-2" /> שמירת ההצעה
+        <Button onClick={save} disabled={saving} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card">
+          <Save className="h-4 w-4 ml-2" /> {saving ? "שומר..." : "שמירת ההצעה"}
         </Button>
       </div>
 
