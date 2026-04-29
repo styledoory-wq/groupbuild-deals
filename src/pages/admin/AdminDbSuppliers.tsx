@@ -103,6 +103,160 @@ export default function AdminDbSuppliers() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCatalog, setUploadingCatalog] = useState(false);
 
+  // ---- Edit state ----
+  const [editOpen, setEditOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<NewForm>(emptyForm);
+  const [editAreas, setEditAreas] = useState<AreasComboboxValue>({
+    servesAllCountry: false,
+    regionIds: [],
+    cityIds: [],
+  });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [uploadingEditLogo, setUploadingEditLogo] = useState(false);
+  const [uploadingEditCatalog, setUploadingEditCatalog] = useState(false);
+
+  const uploadEditFile = async (
+    file: File,
+    bucket: "supplier-logos" | "supplier-catalogs",
+    setBusy: (v: boolean) => void,
+    field: "logo_url" | "catalog_url",
+  ) => {
+    setBusy(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "bin";
+      const path = `admin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from(bucket).upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type || undefined,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      setEditForm((f) => ({ ...f, [field]: data.publicUrl }));
+      toast.success("הקובץ הועלה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openEdit = async (supplierId: string) => {
+    setEditId(supplierId);
+    setEditOpen(true);
+    setEditLoading(true);
+    try {
+      const [{ data: s, error }, { data: sregs }, { data: scits }] = await Promise.all([
+        supabase
+          .from("suppliers")
+          .select("*")
+          .eq("id", supplierId)
+          .single(),
+        supabase.from("supplier_regions").select("region_id").eq("supplier_id", supplierId),
+        supabase.from("supplier_cities").select("city_id").eq("supplier_id", supplierId),
+      ]);
+      if (error || !s) throw error ?? new Error("לא נמצא ספק");
+      setEditForm({
+        business_name: s.business_name ?? "",
+        contact_name: s.contact_name ?? "",
+        phone: s.phone ?? "",
+        email: s.email ?? "",
+        short_description: s.short_description ?? "",
+        description: s.description ?? "",
+        website_url: s.website_url ?? "",
+        whatsapp_url: s.whatsapp_url ?? "",
+        instagram_url: s.instagram_url ?? "",
+        facebook_url: s.facebook_url ?? "",
+        logo_url: s.logo_url ?? "",
+        catalog_url: s.catalog_url ?? "",
+        approval_status: (s.approval_status as NewForm["approval_status"]) ?? "pending",
+        is_active: !!s.is_active,
+        categoryIds: s.categories ?? [],
+      });
+      setEditAreas({
+        servesAllCountry: !!s.serves_all_country,
+        regionIds: (sregs ?? []).map((r) => r.region_id as string),
+        cityIds: (scits ?? []).map((c) => c.city_id as string),
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "טעינת הספק נכשלה");
+      setEditOpen(false);
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!editId) return;
+    if (!editForm.business_name.trim()) {
+      toast.error("שם עסק הוא שדה חובה");
+      return;
+    }
+    if (editForm.categoryIds.length === 0) {
+      toast.error("יש לבחור לפחות קטגוריה אחת");
+      return;
+    }
+    if (!editAreas.servesAllCountry && editAreas.regionIds.length === 0 && editAreas.cityIds.length === 0) {
+      toast.error("יש לבחור אזורי שירות (או 'כל הארץ')");
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const { error } = await supabase
+        .from("suppliers")
+        .update({
+          business_name: editForm.business_name.trim(),
+          contact_name: editForm.contact_name.trim() || null,
+          phone: editForm.phone.trim() || null,
+          email: editForm.email.trim() || null,
+          short_description: editForm.short_description.trim() || null,
+          description: editForm.description.trim() || null,
+          website_url: editForm.website_url.trim() || null,
+          whatsapp_url: editForm.whatsapp_url.trim() || null,
+          instagram_url: editForm.instagram_url.trim() || null,
+          facebook_url: editForm.facebook_url.trim() || null,
+          logo_url: editForm.logo_url.trim() || null,
+          catalog_url: editForm.catalog_url.trim() || null,
+          serves_all_country: editAreas.servesAllCountry,
+          service_areas: editAreas.servesAllCountry ? ["כל הארץ"] : [],
+          approval_status: editForm.approval_status,
+          is_active: editForm.is_active,
+          categories: editForm.categoryIds,
+        })
+        .eq("id", editId);
+      if (error) throw error;
+
+      // Replace region/city links
+      await Promise.all([
+        supabase.from("supplier_regions").delete().eq("supplier_id", editId),
+        supabase.from("supplier_cities").delete().eq("supplier_id", editId),
+      ]);
+      if (!editAreas.servesAllCountry) {
+        if (editAreas.regionIds.length > 0) {
+          await supabase.from("supplier_regions").insert(
+            editAreas.regionIds.map((region_id) => ({ supplier_id: editId, region_id })),
+          );
+        }
+        if (editAreas.cityIds.length > 0) {
+          await supabase.from("supplier_cities").insert(
+            editAreas.cityIds.map((city_id) => ({ supplier_id: editId, city_id })),
+          );
+        }
+      }
+      toast.success("הספק עודכן בהצלחה");
+      setEditOpen(false);
+      setEditId(null);
+      await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "עדכון נכשל");
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+
   const uploadFile = async (
     file: File,
     bucket: "supplier-logos" | "supplier-catalogs",
