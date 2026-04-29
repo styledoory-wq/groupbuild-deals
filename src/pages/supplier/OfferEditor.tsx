@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { PricingTier } from "@/types";
+
 
 type SupplierLite = {
   id: string;
@@ -92,9 +92,6 @@ export default function OfferEditor() {
     return () => { cancelled = true; };
   }, [categories]);
 
-  const updateTier = (i: number, patch: Partial<PricingTier>) => {
-    setTiers((prev) => prev.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
-  };
 
   const save = async () => {
     if (saving) return;
