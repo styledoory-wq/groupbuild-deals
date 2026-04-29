@@ -374,13 +374,13 @@ export default function AdminSuppliers() {
               />
             </div>
 
-            <div className="rounded-xl border border-gold/30 bg-gold/5 p-3">
-              <Label className="text-xs font-bold flex items-center gap-1.5 mb-1">
+            <div>
+              <Label className="text-xs font-bold flex items-center gap-1.5 mb-1.5">
                 <MapPin className="h-3.5 w-3.5 text-gold" /> אזורי שירות
               </Label>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                בחירת אזורים וערים מתבצעת במסך נפרד לאחר שמירת הספק — לחצו על
-                כפתור <span className="font-bold text-foreground">"אזורים"</span> בכרטיס הספק כדי לבחור מתוך רשימת האזורים והערים המובנית.
+              <AreasCombobox value={areas} onChange={setAreas} />
+              <p className="text-[10px] text-muted-foreground mt-1.5 leading-relaxed">
+                ניתן לבחור "כל הארץ", אזור שלם או ערים בודדות. בחירה מרובה אפשרית.
               </p>
             </div>
 
