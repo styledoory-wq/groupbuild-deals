@@ -375,16 +375,16 @@ export default function Landing() {
                   <Label className="text-xs font-bold flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5 gb-gold-text" /> אזור שירות
                   </Label>
-                  <Select value={supplierRegionId} onValueChange={setSupplierRegionId}>
-                    <SelectTrigger className="h-12 rounded-2xl bg-card border-border">
-                      <SelectValue placeholder="בחר אזור שירות" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {regions.map((r) => (
-                        <SelectItem key={r.id} value={r.id}>{r.name_he}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <select
+                    value={supplierRegionId}
+                    onChange={(e) => setSupplierRegionId(e.target.value)}
+                    className="h-12 w-full rounded-2xl bg-card border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold"
+                  >
+                    <option value="">בחר אזור שירות</option>
+                    {regions.map((r) => (
+                      <option key={r.id} value={r.id}>{r.name_he}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
