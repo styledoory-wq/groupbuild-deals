@@ -45,6 +45,13 @@ interface NewForm {
   phone: string;
   email: string;
   short_description: string;
+  description: string;
+  website_url: string;
+  whatsapp_url: string;
+  instagram_url: string;
+  facebook_url: string;
+  logo_url: string;
+  catalog_url: string;
   approval_status: "approved" | "pending" | "rejected";
   is_active: boolean;
   categoryIds: string[];
@@ -56,6 +63,13 @@ const emptyForm: NewForm = {
   phone: "",
   email: "",
   short_description: "",
+  description: "",
+  website_url: "",
+  whatsapp_url: "",
+  instagram_url: "",
+  facebook_url: "",
+  logo_url: "",
+  catalog_url: "",
   approval_status: "approved",
   is_active: true,
   categoryIds: [],
