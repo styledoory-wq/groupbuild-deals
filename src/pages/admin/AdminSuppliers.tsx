@@ -359,6 +359,34 @@ export default function AdminSuppliers() {
               />
             </div>
 
+            {/* Links + Catalog */}
+            <div className="space-y-2 pt-2 border-t border-border">
+              <Label className="text-xs font-bold flex items-center gap-1.5">
+                <LinkIcon className="h-3.5 w-3.5 text-gold" /> קישורים
+              </Label>
+              <Input dir="ltr" value={form.websiteUrl} onChange={(e) => setForm({ ...form, websiteUrl: e.target.value })} placeholder="https://example.com (אתר)" className="h-10 rounded-xl text-sm" maxLength={500} />
+              <Input dir="ltr" value={form.whatsappUrl} onChange={(e) => setForm({ ...form, whatsappUrl: e.target.value })} placeholder="https://wa.me/972500000000" className="h-10 rounded-xl text-sm" maxLength={500} />
+              <Input dir="ltr" value={form.instagramUrl} onChange={(e) => setForm({ ...form, instagramUrl: e.target.value })} placeholder="https://instagram.com/..." className="h-10 rounded-xl text-sm" maxLength={500} />
+              <Input dir="ltr" value={form.facebookUrl} onChange={(e) => setForm({ ...form, facebookUrl: e.target.value })} placeholder="https://facebook.com/..." className="h-10 rounded-xl text-sm" maxLength={500} />
+            </div>
+
+            <div className="space-y-2 pt-2 border-t border-border">
+              <Label className="text-xs font-bold flex items-center gap-1.5">
+                <FileText className="h-3.5 w-3.5 text-gold" /> קטלוג (PDF)
+              </Label>
+              <Input dir="ltr" value={form.catalogUrl} onChange={(e) => setForm({ ...form, catalogUrl: e.target.value })} placeholder="קישור לקטלוג חיצוני" className="h-10 rounded-xl text-sm" maxLength={500} />
+              <input ref={catalogInputRef} type="file" accept="application/pdf" className="hidden" onChange={onCatalogUpload} />
+              <Button type="button" variant="outline" onClick={() => catalogInputRef.current?.click()} disabled={uploadingCatalog} className="h-9 rounded-xl text-xs w-full">
+                <Upload className="h-3.5 w-3.5 ml-1" />
+                {uploadingCatalog ? "מעלה..." : "או העלאת PDF"}
+              </Button>
+              {form.catalogUrl && (
+                <a href={form.catalogUrl} target="_blank" rel="noreferrer" className="block text-[11px] text-gold underline truncate" dir="ltr">
+                  {form.catalogUrl}
+                </a>
+              )}
+            </div>
+
             <div>
               <Label className="text-xs">קטגוריות</Label>
               <div className="flex flex-wrap gap-1.5 mt-1">
