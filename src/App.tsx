@@ -17,6 +17,7 @@ import ResidentDashboard from "./pages/resident/ResidentDashboard";
 import ProjectsList from "./pages/resident/ProjectsList";
 import CategoriesList from "./pages/resident/CategoriesList";
 import DealsList from "./pages/resident/DealsList";
+import CategorySuppliers from "./pages/resident/CategorySuppliers";
 import DealDetail from "./pages/resident/DealDetail";
 import ResidentProfile from "./pages/resident/ResidentProfile";
 import ResidentProfileEdit from "./pages/resident/ResidentProfileEdit";
@@ -71,7 +72,7 @@ const App = () => (
             <Route path="/resident" element={<ResidentDashboard />} />
             <Route path="/resident/projects" element={<ProjectsList />} />
             <Route path="/resident/categories" element={<CategoriesList />} />
-            <Route path="/resident/categories/:categoryId" element={<DealsList />} />
+            <Route path="/resident/categories/:categoryId" element={<CategorySuppliers />} />
             <Route path="/resident/deals" element={<DealsList />} />
             <Route path="/resident/deals/:dealId" element={<DealDetail />} />
             <Route path="/resident/profile" element={<ResidentProfile />} />
