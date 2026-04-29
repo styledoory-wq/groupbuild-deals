@@ -310,24 +310,35 @@ export default function AdminSuppliers() {
           </DialogHeader>
 
           <div className="space-y-3 mt-2">
-            <div className="grid grid-cols-[80px_1fr] gap-3">
-              <div>
-                <Label className="text-xs">אימוג׳י</Label>
-                <Input
-                  value={form.logoEmoji}
-                  onChange={(e) => setForm({ ...form, logoEmoji: e.target.value })}
-                  className="text-center text-2xl"
-                  maxLength={4}
-                />
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <SupplierLogo name={form.businessName} logoUrl={form.logoUrl} size="lg" />
+              <div className="flex-1 space-y-1.5">
+                <Label className="text-xs">לוגו העסק</Label>
+                <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={onLogoUpload} />
+                <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo} className="h-9 rounded-xl text-xs w-full">
+                  <Upload className="h-3.5 w-3.5 ml-1" />
+                  {uploadingLogo ? "מעלה..." : form.logoUrl ? "החלפת לוגו" : "העלאת לוגו"}
+                </Button>
+                {form.logoUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, logoUrl: null })}
+                    className="text-[11px] text-destructive font-bold"
+                  >
+                    הסרת לוגו
+                  </button>
+                )}
               </div>
-              <div>
-                <Label className="text-xs">שם העסק *</Label>
-                <Input
-                  value={form.businessName}
-                  onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-                  placeholder="לדוגמה: מטבחי רויאל"
-                />
-              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs">שם העסק *</Label>
+              <Input
+                value={form.businessName}
+                onChange={(e) => setForm({ ...form, businessName: e.target.value })}
+                placeholder="לדוגמה: מטבחי רויאל"
+              />
             </div>
 
             <div>
