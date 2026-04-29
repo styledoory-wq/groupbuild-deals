@@ -100,6 +100,34 @@ export default function AdminDbSuppliers() {
     regionIds: [],
     cityIds: [],
   });
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingCatalog, setUploadingCatalog] = useState(false);
+
+  const uploadFile = async (
+    file: File,
+    bucket: "supplier-logos" | "supplier-catalogs",
+    setBusy: (v: boolean) => void,
+    field: "logo_url" | "catalog_url",
+  ) => {
+    setBusy(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "bin";
+      const path = `admin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from(bucket).upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type || undefined,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      setForm((f) => ({ ...f, [field]: data.publicUrl }));
+      toast.success("הקובץ הועלה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   // Match-checker state
   const [matchOpen, setMatchOpen] = useState(false);
