@@ -420,17 +420,15 @@ export default function AdminSuppliers() {
             </div>
 
             <div>
-              <div>
-                <Label className="text-xs">עמלה %</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={form.commissionPercent}
-                  onChange={(e) => setForm({ ...form, commissionPercent: e.target.value })}
-                  placeholder="0"
-                />
-              </div>
+              <Label className="text-xs">עמלה %</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={form.commissionPercent}
+                onChange={(e) => setForm({ ...form, commissionPercent: e.target.value })}
+                placeholder="0"
+              />
             </div>
 
             <div>
