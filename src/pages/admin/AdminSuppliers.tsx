@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
-import { ShieldCheck, Star, Check, X, Plus, Pencil, Trash2, AlertCircle, MapPin } from "lucide-react";
+import { ShieldCheck, Star, Check, X, Plus, Pencil, Trash2, AlertCircle, MapPin, Upload, Globe, FileText, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import type { Supplier } from "@/types";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { uploadSupplierLogo, uploadSupplierCatalog } from "@/lib/supplierUploads";
 
 type FormState = {
   id?: string;
