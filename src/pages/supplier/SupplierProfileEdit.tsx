@@ -303,7 +303,10 @@ export default function SupplierProfileEdit() {
               <p className="text-[11px] text-gold mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
             )}
           </Field>
-          <Field label="תיאור עסק" icon={FileText}>
+          <Field label="תיאור קצר (יוצג בכרטיס)" icon={FileText}>
+            <Input value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} maxLength={140} className="h-11 rounded-xl" placeholder="עד 140 תווים" />
+          </Field>
+          <Field label="תיאור עסק מלא" icon={FileText}>
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={4} className="rounded-xl" />
           </Field>
           <div className="flex items-center justify-between py-1 pt-2 border-t border-border">
