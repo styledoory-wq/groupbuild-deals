@@ -1,74 +1,116 @@
-import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Star, Shield, Clock, TrendingDown, Users, Check, Sparkles, Loader2 } from "lucide-react";
+import { useParams, Link } from "react-router-dom";
+import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
-import { ProgressBar } from "@/components/ui/progress-bar";
-import { formatILS, getActiveTier, getNextTier, useApp } from "@/store/AppStore";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
-import { ReviewForm } from "@/components/reviews/ReviewForm";
+import { useApp } from "@/store/AppStore";
+import {
+  describeOffer,
+  describeTier,
+  getActiveTier,
+  tierRange,
+  type OfferTier,
+  type OfferType,
+} from "@/lib/offerPricing";
+
+interface DealRow {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  category_id: string | null;
+  supplier_id: string;
+  offer_type: string | null;
+  original_price: number | null;
+  discounted_price: number | null;
+  discount_percentage: number | null;
+  base_price: number | null;
+  tiers: OfferTier[] | null;
+  ends_at: string | null;
+}
+
+interface SupplierRow {
+  id: string;
+  business_name: string;
+  logo_url: string | null;
+  approval_status: string;
+  service_areas: string[] | null;
+}
 
 export default function DealDetail() {
   const { dealId } = useParams();
-  const { deals, suppliers, categories, joinDeal, deposits, user } = useApp();
-  const deal = deals.find((d) => d.id === dealId);
+  const { categories } = useApp();
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [deal, setDeal] = useState<DealRow | null>(null);
+  const [supplier, setSupplier] = useState<SupplierRow | null>(null);
   const [interested, setInterested] = useState(false);
   const [submittingInterest, setSubmittingInterest] = useState(false);
-  const [paying, setPaying] = useState(false);
-  const [dbSupplierId, setDbSupplierId] = useState<string | null>(null);
 
-  // Resolve mock supplier -> DB supplier UUID by business name (best effort)
   useEffect(() => {
-    const sup = suppliers.find((s) => s.id === deal?.supplierId);
-    if (!sup?.businessName) return;
+    let cancelled = false;
+    if (!dealId) return;
     (async () => {
-      const { data } = await supabase
-        .from("suppliers")
-        .select("id")
-        .eq("business_name", sup.businessName)
-        .maybeSingle();
-      if (data?.id) setDbSupplierId(data.id);
+      setLoading(true);
+      setError(null);
+      try {
+        const { data: dealData, error: dErr } = await supabase
+          .from("deals")
+          .select(
+            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at",
+          )
+          .eq("id", dealId)
+          .maybeSingle();
+        if (dErr) throw dErr;
+        if (!dealData) {
+          if (!cancelled) {
+            setError("העסקה לא נמצאה");
+            setLoading(false);
+          }
+          return;
+        }
+        const d = dealData as unknown as DealRow;
+        if (!cancelled) setDeal(d);
+
+        const { data: supData } = await supabase
+          .from("suppliers")
+          .select("id,business_name,logo_url,approval_status,service_areas")
+          .eq("id", d.supplier_id)
+          .maybeSingle();
+        if (!cancelled) setSupplier((supData as SupplierRow | null) ?? null);
+
+        const { data: session } = await supabase.auth.getSession();
+        if (session.session) {
+          const { data: interest } = await supabase
+            .from("deal_interests")
+            .select("id")
+            .eq("user_id", session.session.user.id)
+            .eq("deal_id", d.id)
+            .maybeSingle();
+          if (!cancelled && interest) setInterested(true);
+        }
+      } catch (e) {
+        console.error("[DealDetail] load error", e);
+        if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינה");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
-  }, [deal?.supplierId, suppliers]);
-
-  // Load existing interest from DB
-  useState(() => {
-    (async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session || !dealId) return;
-      const { data } = await supabase
-        .from("deal_interests")
-        .select("id")
-        .eq("user_id", session.session.user.id)
-        .eq("deal_id", dealId)
-        .maybeSingle();
-      if (data) setInterested(true);
-    })();
-  });
-
-  if (!deal) {
-    return (
-      <MobileShell>
-        <PageHeader title="עסקה לא נמצאה" />
-        <BottomNav role="resident" />
-      </MobileShell>
-    );
-  }
-
-  const supplier = suppliers.find((s) => s.id === deal.supplierId);
-  const category = categories.find((c) => c.id === deal.categoryId);
-  const tier = getActiveTier(deal);
-  const next = getNextTier(deal);
-  const savings = Math.round(((deal.originalPrice - tier.price) / deal.originalPrice) * 100);
-  const paidByMe = deposits.some((d) => d.dealId === deal.id && d.userId === user?.id);
+    return () => {
+      cancelled = true;
+    };
+  }, [dealId]);
 
   const handleInterest = async () => {
+    if (!deal) return;
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
       toast.error("יש להתחבר כדי להביע עניין בעסקה");
@@ -76,23 +118,28 @@ export default function DealDetail() {
     }
     setSubmittingInterest(true);
     try {
-      const { error } = await supabase.from("deal_interests").insert({
+      const { error: insErr } = await supabase.from("deal_interests").insert({
         user_id: session.session.user.id,
         deal_id: deal.id,
         status: "interested",
       });
-      if (error && !error.message.includes("duplicate")) throw error;
+      if (insErr && !insErr.message.toLowerCase().includes("duplicate")) throw insErr;
       setInterested(true);
-      joinDeal(deal.id);
       toast.success("רישמנו את התעניינותך! נחזור אליך עם פרטים נוספים.");
-      // Notify admin (best effort)
-      supabase.functions.invoke("notify-admin", {
-        body: {
-          event: "deal_interest",
-          title: "מתעניין חדש בעסקה",
-          details: { deal_id: deal.id, deal_title: deal.title, user_id: session.session.user.id, user_email: session.session.user.email },
-        },
-      }).catch(() => { /* ignore */ });
+      supabase.functions
+        .invoke("notify-admin", {
+          body: {
+            event: "deal_interest",
+            title: "מתעניין חדש בעסקה",
+            details: {
+              deal_id: deal.id,
+              deal_title: deal.title,
+              user_id: session.session.user.id,
+              user_email: session.session.user.email,
+            },
+          },
+        })
+        .catch(() => {});
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
     } finally {
@@ -100,201 +147,174 @@ export default function DealDetail() {
     }
   };
 
-  const handleDeposit = async () => {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) {
-      toast.error("יש להתחבר עם חשבון אמיתי כדי לשלם פיקדון");
-      return;
-    }
-    setPaying(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-deposit", {
-        body: { deal_id: deal.id, amount: deal.depositAmount },
-      });
-      if (error) throw error;
-      if (data?.error) {
-        toast.error(data.message || "שגיאה ביצירת תשלום");
-        setPaying(false);
-        return;
-      }
-      if (!data?.payment_url) {
-        toast.error("לא התקבל קישור תשלום מהספק");
-        setPaying(false);
-        return;
-      }
-      window.location.href = data.payment_url;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "שגיאה ביצירת תשלום";
-      toast.error(msg);
-      setPaying(false);
-    }
-  };
+  if (loading) {
+    return (
+      <MobileShell>
+        <PageHeader title="טוען עסקה..." back />
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+        <BottomNav role="resident" />
+      </MobileShell>
+    );
+  }
+
+  if (error || !deal) {
+    return (
+      <MobileShell>
+        <PageHeader title="עסקה לא נמצאה" back />
+        <div className="px-5 mt-6">
+          <div className="gb-card p-6 text-center">
+            <p className="text-sm font-bold text-foreground">{error ?? "העסקה לא נמצאה"}</p>
+            <Link to="/resident/deals">
+              <Button variant="outline" className="mt-4">
+                <ArrowRight className="h-4 w-4 ml-2" />
+                חזרה לעסקאות
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <BottomNav role="resident" />
+      </MobileShell>
+    );
+  }
+
+  const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
+  const tiers = Array.isArray(deal.tiers) ? deal.tiers : [];
+  const display = describeOffer(
+    {
+      offer_type: offerType,
+      original_price: deal.original_price,
+      discounted_price: deal.discounted_price,
+      discount_percentage: deal.discount_percentage,
+      base_price: deal.base_price,
+      tiers,
+    },
+    0,
+  );
+  const activeTier = tiers.length > 0 ? getActiveTier(tiers, 0) : null;
+  const category = categories.find((c) => c.id === deal.category_id);
 
   return (
     <MobileShell>
-      {/* Hero */}
       <div className="bg-gradient-hero text-primary-foreground px-5 pt-6 pb-10 rounded-b-[32px] relative overflow-hidden">
         <div className="absolute -top-12 -left-12 h-40 w-40 rounded-full bg-gold/10 blur-3xl" />
         <PageHeader title="" subtitle="" back variant="navy" />
         <div className="-mt-10 relative">
           <div className="flex items-center gap-2 mb-3">
-            <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-xl">{category?.icon}</div>
-            <span className="text-xs text-primary-foreground/70">{category?.name}</span>
-            {deal.status === "closing-soon" && (
-              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-destructive/20 text-destructive-foreground">נסגר בקרוב</span>
+            {category?.icon ? (
+              <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-xl">
+                {category.icon}
+              </div>
+            ) : (
+              <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center">
+                <Tag className="h-5 w-5 text-gold" />
+              </div>
             )}
+            {category?.name && <span className="text-xs text-primary-foreground/70">{category.name}</span>}
           </div>
           <h1 className="text-2xl font-extrabold leading-tight mb-2">{deal.title}</h1>
           <div className="gb-divider-gold mb-3" />
-          <p className="text-primary-foreground/75 text-sm leading-relaxed">{deal.description}</p>
-
-          <div className="flex flex-wrap gap-2 mt-4">
-            {deal.highlights.map((h) => (
-              <span key={h} className="text-[11px] font-medium px-3 py-1.5 rounded-full bg-white/10 border border-white/15 inline-flex items-center gap-1">
-                <Check className="h-3 w-3 text-gold" /> {h}
-              </span>
-            ))}
-          </div>
+          {deal.description && (
+            <p className="text-primary-foreground/75 text-sm leading-relaxed whitespace-pre-line">{deal.description}</p>
+          )}
         </div>
       </div>
 
       {/* Pricing card */}
       <div className="px-5 -mt-6 relative z-10 mb-5">
         <div className="gb-card p-5 bg-gradient-card">
-          <div className="flex items-end justify-between mb-3">
-            <div>
-              <div className="text-xs text-muted-foreground line-through">מחיר מחירון: {formatILS(deal.originalPrice)}</div>
-              <div className="text-3xl font-extrabold text-primary leading-none mt-1">{formatILS(tier.price)}</div>
-              <div className="text-[11px] text-muted-foreground mt-1">{tier.label}</div>
-            </div>
-            <div className="text-center bg-success/10 px-3 py-2 rounded-2xl">
-              <TrendingDown className="h-5 w-5 mx-auto text-success" />
-              <div className="text-lg font-extrabold text-success leading-none mt-1">{savings}%</div>
-              <div className="text-[10px] text-success">חיסכון</div>
-            </div>
-          </div>
-
-          <div className="pt-3 border-t border-border">
-            <div className="flex items-center justify-between text-xs mb-2">
-              <span className="text-muted-foreground inline-flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                {deal.paidParticipants} שילמו פיקדון · {deal.joinedParticipants} הצטרפו
-              </span>
-              {next && (
-                <span className="font-bold text-primary">
-                  עוד {next.minParticipants - deal.paidParticipants} לדרגה הבאה
-                </span>
-              )}
-            </div>
-            <ProgressBar value={deal.paidParticipants} max={next ? next.minParticipants : deal.paidParticipants} />
-          </div>
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">המחיר הנוכחי</div>
+          <div className="text-2xl font-extrabold text-primary leading-tight">{display.headline}</div>
+          {display.savings && (
+            <div className="text-xs font-bold text-success mt-1">{display.savings}</div>
+          )}
+          <p className="text-[11px] text-muted-foreground mt-2">
+            ככל שיותר דיירים מצטרפים — ההנחה גדלה
+          </p>
         </div>
       </div>
 
       {/* Tiers */}
-      <section className="px-5 mb-5">
-        <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-gold" />
-          דרגות מחיר
-        </h2>
-        <div className="space-y-2">
-          {deal.tiers.map((t) => {
-            const active = t.minParticipants === tier.minParticipants;
-            const reached = deal.paidParticipants >= t.minParticipants;
-            const range = t.maxParticipants ? `${t.minParticipants}–${t.maxParticipants}` : `${t.minParticipants}+`;
-            return (
-              <div
-                key={t.minParticipants}
-                className={cn(
-                  "rounded-2xl p-3 flex items-center justify-between border-2 transition-smooth",
-                  active ? "border-gold bg-gradient-to-l from-gold/10 to-transparent" : "border-border bg-card"
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "h-10 w-10 rounded-xl flex items-center justify-center font-bold text-sm",
-                    active ? "bg-gradient-gold text-primary" : reached ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground"
-                  )}>
-                    {reached ? <Check className="h-5 w-5" /> : range}
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-foreground">{t.label}</div>
-                    <div className="text-[11px] text-muted-foreground">{range} משתתפים</div>
+      {tiers.length > 0 && (
+        <section className="px-5 mb-5">
+          <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-gold" />
+            מדרגות מחיר
+          </h2>
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <div className="grid grid-cols-2 gap-1 px-3 py-2 bg-muted/60 text-[10px] font-bold text-muted-foreground">
+              <span>מצטרפים</span>
+              <span className="text-left">הנחה / מחיר</span>
+            </div>
+            {tiers.map((t, idx) => {
+              const td = describeTier(offerType, t);
+              const isActive = activeTier && t.minParticipants === activeTier.minParticipants;
+              return (
+                <div
+                  key={idx}
+                  className={cn(
+                    "grid grid-cols-2 gap-1 px-3 py-3 text-[12px] border-t border-border",
+                    isActive ? "bg-gold/10" : "",
+                  )}
+                >
+                  <span className="font-bold text-foreground">{tierRange(t)}</span>
+                  <div className="text-left">
+                    <div className="font-extrabold text-primary">{td.headline}</div>
+                    {td.savings && <div className="text-[10px] text-success font-bold">{td.savings}</div>}
+                    {isActive && <div className="text-[10px] gb-gold-text font-bold mt-0.5">פעיל עכשיו</div>}
                   </div>
                 </div>
-                <div className="text-left">
-                  <div className="font-extrabold text-primary">{formatILS(t.price)}</div>
-                  {active && <div className="text-[10px] gb-gold-text font-bold">פעיל עכשיו</div>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Supplier */}
-      <section className="px-5 mb-5">
-        <h2 className="text-sm font-bold text-foreground mb-3">הספק</h2>
-        <div className="gb-card p-4 flex items-center gap-3">
-          <SupplierLogo name={supplier?.businessName} size="lg" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <h3 className="font-bold text-foreground truncate">{supplier?.businessName}</h3>
-              {supplier?.verified && <Shield className="h-4 w-4 text-gold" />}
-            </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              {dbSupplierId ? (
-                <SupplierRatingBadge supplierId={dbSupplierId} />
-              ) : (
-                <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <Star className="h-3 w-3 text-muted" /> אין דירוגים עדיין
-                </span>
-              )}
-            </div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">אזור שירות: {supplier?.serviceArea}</div>
+              );
+            })}
           </div>
-        </div>
-      </section>
-
-      {/* Reviews — only after deal completed, only for paying participants */}
-      {dbSupplierId && (
-        <section className="px-5 mb-24">
-          <ReviewForm
-            supplierId={dbSupplierId}
-            dealId={deal.id}
-            dealCompleted={deal.status === "closed"}
-          />
         </section>
       )}
 
-      {/* Action sticky */}
+      {/* Supplier */}
+      {supplier && (
+        <section className="px-5 mb-24">
+          <h2 className="text-sm font-bold text-foreground mb-3">הספק</h2>
+          <Link to={`/suppliers/${supplier.id}`} className="gb-card p-4 flex items-center gap-3 hover:border-gold/40 transition-smooth">
+            <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="lg" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <h3 className="font-bold text-foreground truncate">{supplier.business_name}</h3>
+                {supplier.approval_status === "approved" && <Shield className="h-4 w-4 text-gold" />}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                <SupplierRatingBadge supplierId={supplier.id} showEmpty />
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">
+                <ShieldCheck className="h-3 w-3 text-gold" /> ספק מאומת
+              </div>
+            </div>
+            <Star className="h-4 w-4 text-gold" />
+          </Link>
+        </section>
+      )}
+
+      {/* CTA */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
         <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0">
-          <div className="gb-card p-3 flex items-center gap-2 shadow-elevated mb-2">
-            {paidByMe ? (
-              <Button disabled className="w-full h-12 rounded-2xl bg-success text-success-foreground font-bold">
-                <Check className="h-5 w-5 ml-2" /> הפיקדון שלך התקבל
-              </Button>
-            ) : interested ? (
-              <div className="w-full space-y-2">
-                <div className="text-center text-xs font-bold text-success bg-success/10 rounded-xl py-2">
-                  ✓ רשמנו את התעניינותך — נחזור אליך בקרוב
-                </div>
-                <Button onClick={handleDeposit} disabled={paying} className="w-full h-12 rounded-2xl bg-gradient-gold hover:opacity-90 text-primary font-bold shadow-gold">
-                  {paying ? <Loader2 className="h-5 w-5 animate-spin" /> : `אופציונלי: שלמו פיקדון ${formatILS(deal.depositAmount)}`}
-                </Button>
+          <div className="gb-card p-3 shadow-elevated">
+            {interested ? (
+              <div className="text-center text-xs font-bold text-success bg-success/10 rounded-xl py-3">
+                ✓ רשמנו את התעניינותך — נחזור אליך בקרוב
               </div>
             ) : (
-              <Button onClick={handleInterest} disabled={submittingInterest} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold">
+              <Button
+                onClick={handleInterest}
+                disabled={submittingInterest}
+                className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold"
+              >
                 {submittingInterest ? <Loader2 className="h-5 w-5 animate-spin" /> : "אני מעוניין להצטרף"}
               </Button>
             )}
           </div>
-          <div className="text-center text-[10px] text-muted-foreground inline-flex items-center gap-1 w-full justify-center">
-            <Clock className="h-3 w-3" /> נסגר בתאריך {new Date(deal.endsAt).toLocaleDateString("he-IL")}
-          </div>
         </div>
       </div>
+      <BottomNav role="resident" />
     </MobileShell>
   );
 }
