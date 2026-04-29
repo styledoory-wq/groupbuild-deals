@@ -5,13 +5,14 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, UserPlus, Building2 } from "lucide-react";
+import { Plus, UserPlus, Building2, Pencil, Trash2 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 type Resident = {
   id: string;
@@ -20,6 +21,8 @@ type Resident = {
   phone: string | null;
   city: string | null;
   project_id: string | null;
+  is_active?: boolean;
+  address?: string | null;
 };
 
 export default function AdminResidents() {
@@ -29,7 +32,7 @@ export default function AdminResidents() {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // form
+  // create form
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,11 +43,21 @@ export default function AdminResidents() {
   const [newProjectCity, setNewProjectCity] = useState("");
   const [createNewProject, setCreateNewProject] = useState(false);
 
+  // edit dialog
+  const [editOpen, setEditOpen] = useState(false);
+  const [editing, setEditing] = useState<Resident | null>(null);
+  const [eName, setEName] = useState("");
+  const [ePhone, setEPhone] = useState("");
+  const [eCity, setECity] = useState("");
+  const [eAddress, setEAddress] = useState("");
+  const [eProjectId, setEProjectId] = useState("");
+  const [eActive, setEActive] = useState(true);
+
   const loadResidents = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, full_name, email, phone, city, project_id")
+      .select("id, full_name, email, phone, city, project_id, is_active, address")
       .eq("user_type", "resident")
       .order("created_at", { ascending: false });
     if (error) {
@@ -62,6 +75,66 @@ export default function AdminResidents() {
     setProjectId(""); setNewProjectName(""); setNewProjectCity(""); setCreateNewProject(false);
   };
 
+  const openEdit = (r: Resident) => {
+    setEditing(r);
+    setEName(r.full_name ?? "");
+    setEPhone(r.phone ?? "");
+    setECity(r.city ?? "");
+    setEAddress(r.address ?? "");
+    setEProjectId(r.project_id ?? "");
+    setEActive(r.is_active ?? true);
+    setEditOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editing) return;
+    if (!eName.trim()) {
+      toast.error("שם חובה");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: eName.trim(),
+          phone: ePhone.trim() || null,
+          city: eCity.trim() || null,
+          address: eAddress.trim() || null,
+          project_id: eProjectId || null,
+          is_active: eActive,
+        })
+        .eq("id", editing.id);
+      if (error) throw error;
+      toast.success("הדייר עודכן");
+      setEditOpen(false);
+      setEditing(null);
+      await loadResidents();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editing) return;
+    if (!confirm(`למחוק את ${editing.full_name || editing.email}? פעולה זו אינה הפיכה.`)) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("profiles").delete().eq("id", editing.id);
+      if (error) throw error;
+      toast.success("הדייר נמחק");
+      setEditOpen(false);
+      setEditing(null);
+      await loadResidents();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "מחיקה נכשלה");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleCreate = async () => {
     if (!fullName.trim() || !email.trim() || password.length < 6) {
       toast.error("מלאו שם, אימייל וסיסמה (לפחות 6 תווים)");
@@ -71,7 +144,6 @@ export default function AdminResidents() {
     try {
       let finalProjectId = projectId;
 
-      // Create new project locally if requested
       if (createNewProject) {
         if (!newProjectName.trim() || !newProjectCity.trim()) {
           toast.error("מלאו שם ועיר לפרויקט החדש");
@@ -92,7 +164,6 @@ export default function AdminResidents() {
 
       const effectiveCity = city || (createNewProject ? newProjectCity : "");
 
-      // Use admin edge function so the admin session is not affected
       const { data, error } = await supabase.functions.invoke("admin-create-resident", {
         body: {
           full_name: fullName.trim(),
@@ -151,11 +222,19 @@ export default function AdminResidents() {
                   {project?.name || "ללא פרויקט"}{r.city ? ` · ${r.city}` : ""}{r.phone ? ` · ${r.phone}` : ""}
                 </p>
               </div>
+              <button
+                onClick={() => openEdit(r)}
+                className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                aria-label="עריכה"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
             </div>
           );
         })}
       </div>
 
+      {/* Create dialog */}
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
         <DialogContent dir="rtl" className="max-w-md">
           <DialogHeader>
@@ -230,6 +309,69 @@ export default function AdminResidents() {
             <Button variant="outline" onClick={() => setOpen(false)} disabled={saving} className="flex-1">ביטול</Button>
             <Button onClick={handleCreate} disabled={saving} className="flex-1">
               {saving ? "מוסיף…" : (<><Plus className="h-4 w-4 ml-1" /> הוספה</>)}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit dialog */}
+      <Dialog open={editOpen} onOpenChange={(o) => { setEditOpen(o); if (!o) setEditing(null); }}>
+        <DialogContent dir="rtl" className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-right">עריכת דייר</DialogTitle>
+          </DialogHeader>
+          {editing && (
+            <div className="space-y-3 mt-2 max-h-[70vh] overflow-y-auto pl-1">
+              <div>
+                <Label className="text-xs">אימייל</Label>
+                <Input value={editing.email ?? ""} disabled dir="ltr" className="bg-muted" />
+              </div>
+              <div>
+                <Label className="text-xs">שם מלא *</Label>
+                <Input value={eName} onChange={(e) => setEName(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">טלפון</Label>
+                  <Input dir="ltr" value={ePhone} onChange={(e) => setEPhone(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">עיר</Label>
+                  <Input value={eCity} onChange={(e) => setECity(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">כתובת</Label>
+                <Input value={eAddress} onChange={(e) => setEAddress(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs flex items-center gap-1.5">
+                  <Building2 className="h-3.5 w-3.5 text-gold" /> פרויקט
+                </Label>
+                <select
+                  value={eProjectId}
+                  onChange={(e) => setEProjectId(e.target.value)}
+                  className="flex h-11 w-full rounded-xl border border-border bg-card px-3 text-sm"
+                >
+                  <option value="">ללא פרויקט</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name} — {p.city}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center justify-between border-t border-border pt-3">
+                <Label className="text-sm">חשבון פעיל</Label>
+                <Switch checked={eActive} onCheckedChange={setEActive} />
+              </div>
+            </div>
+          )}
+          <DialogFooter className="mt-4 gap-2 sm:gap-2 flex-row">
+            <Button variant="destructive" onClick={handleDelete} disabled={saving} className="px-3">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" onClick={() => setEditOpen(false)} disabled={saving} className="flex-1">ביטול</Button>
+            <Button onClick={handleSaveEdit} disabled={saving} className="flex-1">
+              {saving ? "שומר…" : "שמירה"}
             </Button>
           </DialogFooter>
         </DialogContent>
