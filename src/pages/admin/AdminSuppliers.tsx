@@ -345,13 +345,14 @@ export default function AdminSuppliers() {
               />
             </div>
 
-            <div>
-              <Label className="text-xs">איזור שירות</Label>
-              <Input
-                value={form.serviceArea}
-                onChange={(e) => setForm({ ...form, serviceArea: e.target.value })}
-                placeholder="מרכז / ארצי / צפון..."
-              />
+            <div className="rounded-xl border border-gold/30 bg-gold/5 p-3">
+              <Label className="text-xs font-bold flex items-center gap-1.5 mb-1">
+                <MapPin className="h-3.5 w-3.5 text-gold" /> אזורי שירות
+              </Label>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                בחירת אזורים וערים מתבצעת במסך נפרד לאחר שמירת הספק — לחצו על
+                כפתור <span className="font-bold text-foreground">"אזורים"</span> בכרטיס הספק כדי לבחור מתוך רשימת האזורים והערים המובנית.
+              </p>
             </div>
 
             {/* Links + Catalog */}
