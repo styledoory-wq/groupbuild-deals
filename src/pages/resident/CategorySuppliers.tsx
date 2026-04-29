@@ -244,16 +244,6 @@ export default function CategorySuppliers() {
             ))}
           </div>
 
-          <div className="relative mb-3">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="חיפוש לפי ספק, קטגוריה או עיר"
-              className="h-11 w-full rounded-xl bg-card border border-border pr-9 pl-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-gold focus:outline-none transition-smooth"
-            />
-          </div>
-
           <div className="flex items-center gap-1.5 mb-3">
             <MapPin className="h-3.5 w-3.5 text-gold" />
             <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
@@ -310,7 +300,7 @@ export default function CategorySuppliers() {
             </p>
             <button
               type="button"
-              onClick={() => { setRegionId("all"); setCityId("all"); setSearchTerm(""); }}
+              onClick={() => { setRegionId("all"); setCityId("all"); }}
               className="mt-4 h-10 px-4 rounded-xl bg-gradient-gold text-primary text-xs font-bold shadow-gold"
             >
               שנה אזור
