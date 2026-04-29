@@ -106,6 +106,68 @@ export type Database = {
         }
         Relationships: []
       }
+      deals: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          deposit_amount: number
+          description: string | null
+          ends_at: string | null
+          highlights: Json
+          id: string
+          is_demo: boolean
+          original_price: number
+          project_id: string | null
+          status: string
+          supplier_id: string
+          tiers: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          deposit_amount?: number
+          description?: string | null
+          ends_at?: string | null
+          highlights?: Json
+          id?: string
+          is_demo?: boolean
+          original_price?: number
+          project_id?: string | null
+          status?: string
+          supplier_id: string
+          tiers?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          deposit_amount?: number
+          description?: string | null
+          ends_at?: string | null
+          highlights?: Json
+          id?: string
+          is_demo?: boolean
+          original_price?: number
+          project_id?: string | null
+          status?: string
+          supplier_id?: string
+          tiers?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deposits: {
         Row: {
           amount: number

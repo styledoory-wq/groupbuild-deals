@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Save, AlertCircle, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -8,23 +8,30 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/store/AppStore";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { Deal, PricingTier } from "@/types";
+import type { PricingTier } from "@/types";
+
+type SupplierLite = {
+  id: string;
+  business_name: string;
+  approval_status: string;
+  categories: string[] | null;
+};
 
 export default function OfferEditor() {
   const navigate = useNavigate();
-  const { categories, projects, suppliers, deals, setDeals, user } = useApp();
-  const supplier = suppliers.find((s) => s.ownerName === user?.name) || suppliers[0];
+  const { categories } = useApp();
 
-  const safeCategoryId = categories[0]?.id ?? "";
-  const safeProjectId = projects[0]?.id ?? "";
+  const [bootLoading, setBootLoading] = useState(true);
+  const [bootError, setBootError] = useState<string | null>(null);
+  const [supplier, setSupplier] = useState<SupplierLite | null>(null);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState(safeCategoryId);
-  const [projectId, setProjectId] = useState(safeProjectId);
-  const [originalPrice, setOriginalPrice] = useState(50000);
-  const [depositAmount, setDepositAmount] = useState(1000);
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [originalPrice, setOriginalPrice] = useState<number>(50000);
+  const [depositAmount, setDepositAmount] = useState<number>(1000);
   const [saving, setSaving] = useState(false);
   const [tiers, setTiers] = useState<PricingTier[]>([
     { minParticipants: 1, maxParticipants: 4, price: 45000, label: "מחיר מחירון" },
@@ -33,70 +40,176 @@ export default function OfferEditor() {
     { minParticipants: 20, maxParticipants: null, price: 30000, label: "המחיר הטוב ביותר" },
   ]);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const session = sessionData.session;
+        if (!session) {
+          if (!cancelled) {
+            setBootError("יש להתחבר כספק כדי ליצור הצעה.");
+            setBootLoading(false);
+          }
+          return;
+        }
+
+        const email = session.user.email ?? "";
+        const byUser = await supabase
+          .from("suppliers")
+          .select("id, business_name, approval_status, categories")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        let s: SupplierLite | null = (byUser.data as SupplierLite | null) ?? null;
+        if (!s && email) {
+          const byEmail = await supabase
+            .from("suppliers")
+            .select("id, business_name, approval_status, categories")
+            .ilike("email", email)
+            .maybeSingle();
+          s = (byEmail.data as SupplierLite | null) ?? null;
+        }
+
+        if (!cancelled) {
+          setSupplier(s);
+          // pre-select first matching category if supplier has one
+          if (s?.categories?.length && categories.find((c) => c.id === s!.categories![0])) {
+            setCategoryId(s.categories[0]);
+          } else if (categories.length) {
+            setCategoryId(categories[0].id);
+          }
+          setBootLoading(false);
+        }
+      } catch (e) {
+        console.error("[OfferEditor] boot error", e);
+        if (!cancelled) {
+          setBootError(e instanceof Error ? e.message : "שגיאה בטעינה");
+          setBootLoading(false);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [categories]);
+
   const updateTier = (i: number, patch: Partial<PricingTier>) => {
     setTiers((prev) => prev.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
   };
 
   const save = async () => {
     if (saving) return;
+    if (!supplier?.id) {
+      toast.error("לא נמצא פרופיל ספק. השלם את פרטי הספק לפני יצירת הצעה.");
+      return;
+    }
+    if (supplier.approval_status !== "approved" && supplier.approval_status !== "active") {
+      toast.error("ניתן לפרסם הצעות רק לאחר אישור הספק על ידי מנהל המערכת.");
+      return;
+    }
+    if (!title.trim()) {
+      toast.error("יש להזין שם להצעה");
+      return;
+    }
+    if (!categoryId) {
+      toast.error("יש לבחור קטגוריה");
+      return;
+    }
+
     setSaving(true);
     try {
-      if (!supplier?.id) {
-        toast.error("לא נמצא פרופיל ספק פעיל. השלם את פרטי הספק לפני יצירת הצעה.");
-        setSaving(false);
-        return;
-      }
-      if (!categoryId) {
-        toast.error("יש לבחור קטגוריה");
-        setSaving(false);
-        return;
-      }
-      if (!projectId) {
-        toast.error("יש לבחור פרויקט");
-        setSaving(false);
-        return;
-      }
-      if (!title.trim()) {
-        toast.error("יש להזין שם להצעה");
-        setSaving(false);
+      const payload = {
+        supplier_id: supplier.id,
+        title: title.trim(),
+        description: description.trim() || null,
+        category_id: categoryId,
+        original_price: originalPrice,
+        deposit_amount: depositAmount,
+        tiers: tiers as unknown as object,
+        highlights: ["מחיר מיוחד", "התקנה כלולה", "אחריות מלאה"] as unknown as object,
+        status: "active",
+        ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
+      };
+
+      const { error } = await supabase.from("deals" as never).insert(payload as never);
+      if (error) {
+        console.error("[OfferEditor] insert error", error);
+        const msg = error.message?.includes("row-level")
+          ? "אין הרשאה ליצור הצעה. ודא שהספק אושר על ידי מנהל המערכת."
+          : `שמירת ההצעה נכשלה: ${error.message}`;
+        toast.error(msg);
         return;
       }
 
-      const newDeal: Deal = {
-        id: `d_${Date.now()}`,
-        title: title.trim(),
-        categoryId,
-        projectId,
-        supplierId: supplier.id,
-        description: description.trim() || "תיאור ההצעה",
-        originalPrice,
-        tiers,
-        paidParticipants: 0,
-        joinedParticipants: 0,
-        status: "active",
-        depositAmount,
-        endsAt: new Date(Date.now() + 30 * 86400000).toISOString(),
-        highlights: ["מחיר מיוחד", "התקנה כלולה", "אחריות מלאה"],
-      };
-      setDeals([newDeal, ...deals]);
       toast.success("ההצעה נשמרה בהצלחה!");
-      navigate("/supplier", { replace: true });
-    } catch (err: any) {
-      console.error("OfferEditor save error", err);
+      navigate("/supplier/offers", { replace: true });
+    } catch (err: unknown) {
+      console.error("[OfferEditor] save exception", err);
       toast.error("אירעה שגיאה בשמירת ההצעה. נסה שוב.");
     } finally {
       setSaving(false);
     }
   };
 
-  // Empty-state guard so the page never crashes if mock data is missing
-  if (!categories.length || !projects.length) {
+  if (bootLoading) {
+    return (
+      <MobileShell>
+        <PageHeader title="הצעה חדשה" subtitle="טוען…" back />
+        <div className="px-5 mt-10 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+        <BottomNav role="supplier" />
+      </MobileShell>
+    );
+  }
+
+  if (bootError) {
+    return (
+      <MobileShell>
+        <PageHeader title="הצעה חדשה" back />
+        <div className="px-5 mt-6">
+          <div className="gb-card p-6 text-center">
+            <div className="h-12 w-12 mx-auto rounded-full bg-destructive/10 flex items-center justify-center mb-3">
+              <AlertCircle className="h-6 w-6 text-destructive" />
+            </div>
+            <h2 className="font-bold text-base mb-1">שגיאה</h2>
+            <p className="text-xs text-muted-foreground mb-4">{bootError}</p>
+            <Button onClick={() => navigate("/supplier", { replace: true })} className="w-full h-11 rounded-xl">
+              חזרה לדשבורד
+            </Button>
+          </div>
+        </div>
+        <BottomNav role="supplier" />
+      </MobileShell>
+    );
+  }
+
+  if (!supplier) {
+    return (
+      <MobileShell>
+        <PageHeader title="הצעה חדשה" back />
+        <div className="px-5 mt-6">
+          <div className="gb-card p-6 text-center">
+            <h2 className="font-bold text-base mb-2">חסר פרופיל ספק</h2>
+            <p className="text-xs text-muted-foreground mb-4">
+              לא נמצא פרופיל ספק עבור החשבון שלך. השלם את הפרטים כדי להתחיל לפרסם הצעות.
+            </p>
+            <Button onClick={() => navigate("/supplier/profile/edit")} className="w-full h-11 rounded-xl">
+              השלמת פרטי ספק
+            </Button>
+          </div>
+        </div>
+        <BottomNav role="supplier" />
+      </MobileShell>
+    );
+  }
+
+  if (!categories.length) {
     return (
       <MobileShell>
         <PageHeader title="הצעה חדשה" subtitle="לא ניתן ליצור הצעה כרגע" back />
         <div className="px-5 mt-6 space-y-3">
-          <div className="gb-card p-4 text-sm text-muted-foreground">
-            חסרים נתוני קטגוריות או פרויקטים. פנה למנהל המערכת.
+          <div className="gb-card p-4 text-sm text-muted-foreground text-center">
+            חסרות קטגוריות במערכת. פנה למנהל המערכת.
           </div>
           <Button onClick={() => navigate("/supplier", { replace: true })} className="w-full h-12 rounded-2xl">
             חזרה לדשבורד הספק
@@ -109,7 +222,7 @@ export default function OfferEditor() {
 
   return (
     <MobileShell>
-      <PageHeader title="הצעה חדשה" subtitle="הגדירו פרטים ודרגות מחיר דינמיות" />
+      <PageHeader title="הצעה חדשה" subtitle="הגדירו פרטים ודרגות מחיר דינמיות" back />
 
       <div className="px-5 -mt-4 relative z-10 space-y-4">
         <div className="gb-card p-4 space-y-3">
@@ -119,18 +232,11 @@ export default function OfferEditor() {
           <Field label="תיאור">
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="תארו את ההצעה..." className="rounded-xl min-h-[80px]" />
           </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="קטגוריה">
-              <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="h-11 w-full rounded-xl border border-input bg-card px-3 text-sm">
-                {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-              </select>
-            </Field>
-            <Field label="פרויקט">
-              <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="h-11 w-full rounded-xl border border-input bg-card px-3 text-sm">
-                {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
-            </Field>
-          </div>
+          <Field label="קטגוריה">
+            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="h-11 w-full rounded-xl border border-input bg-card px-3 text-sm">
+              {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+            </select>
+          </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="מחיר מחירון (₪)">
               <Input type="number" value={originalPrice} onChange={(e) => setOriginalPrice(+e.target.value)} className="h-11 rounded-xl" />
@@ -179,7 +285,8 @@ export default function OfferEditor() {
         </div>
 
         <Button onClick={save} disabled={saving} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card">
-          <Save className="h-4 w-4 ml-2" /> {saving ? "שומר..." : "שמירת ההצעה"}
+          {saving ? <Loader2 className="h-4 w-4 ml-2 animate-spin" /> : <Save className="h-4 w-4 ml-2" />}
+          {saving ? "שומר..." : "שמירת ההצעה"}
         </Button>
       </div>
 
