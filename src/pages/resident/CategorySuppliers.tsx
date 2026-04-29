@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronLeft, MapPin, Sparkles, Star, UserPlus } from "lucide-react";
+import { ArrowRight, ChevronLeft, MapPin, Search, Sparkles, Star, UserPlus, X } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -39,6 +39,7 @@ export default function CategorySuppliers() {
 
   const [regionId, setRegionId] = useState<string>("all");
   const [cityId, setCityId] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
   const [supplierCityIds, setSupplierCityIds] = useState<Record<string, string[]>>({});
 
@@ -176,10 +177,19 @@ export default function CategorySuppliers() {
       ? suppliers
       : suppliers.filter((s) => (s.categories ?? []).includes(activeCategoryId));
 
-    const byArea = byCategory.filter(matchesArea);
+    const q = searchQuery.trim().toLowerCase();
+    const bySearch = q
+      ? byCategory.filter((s) =>
+          s.business_name.toLowerCase().includes(q) ||
+          (s.short_description ?? "").toLowerCase().includes(q) ||
+          (s.description ?? "").toLowerCase().includes(q),
+        )
+      : byCategory;
+
+    const byArea = bySearch.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
-    return byCategory.filter(isNationalSupplier);
-  }, [suppliers, activeCategoryId, regionId, cityId, supplierRegionIds, supplierCityIds, regions, cities]);
+    return bySearch.filter(isNationalSupplier);
+  }, [suppliers, activeCategoryId, searchQuery, regionId, cityId, supplierRegionIds, supplierCityIds, regions, cities]);
 
   const areaLabel =
     cityId !== "all"
