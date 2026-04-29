@@ -41,16 +41,37 @@ export default function SupplierDashboard() {
           return;
         }
 
-        // Try to find an existing supplier record for this user
-        const { data: existing, error: fetchErr } = await supabase
+        const email = session.user.email ?? "";
+
+        // Try to find an existing supplier record for this user.
+        // If an admin created/approved the supplier before signup, it may only match by email.
+        let { data: existing, error: fetchErr } = await supabase
           .from("suppliers")
-          .select("id, business_name, approval_status, is_active")
+          .select("id, business_name, approval_status, is_active, user_id, email")
           .eq("user_id", session.user.id)
           .maybeSingle();
+
+        if (!existing && email) {
+          const byEmail = await supabase
+            .from("suppliers")
+            .select("id, business_name, approval_status, is_active, user_id, email")
+            .ilike("email", email)
+            .order("updated_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          existing = byEmail.data;
+          fetchErr = byEmail.error;
+        }
 
         if (fetchErr) throw fetchErr;
 
         if (existing) {
+          if (!existing.user_id || !existing.email) {
+            await supabase
+              .from("suppliers")
+              .update({ user_id: session.user.id, email: email || existing.email })
+              .eq("id", existing.id);
+          }
           if (!cancelled) setDbSupplier(existing as DbSupplier);
         } else {
           // Auto-create a pending supplier so the dashboard never breaks
