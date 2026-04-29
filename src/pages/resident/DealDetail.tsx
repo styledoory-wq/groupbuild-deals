@@ -10,6 +10,7 @@ import { formatILS, getActiveTier, getNextTier, useApp } from "@/store/AppStore"
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 
 export default function DealDetail() {
   const { dealId } = useParams();
@@ -218,7 +219,7 @@ export default function DealDetail() {
       <section className="px-5 mb-5">
         <h2 className="text-sm font-bold text-foreground mb-3">הספק</h2>
         <div className="gb-card p-4 flex items-center gap-3">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-hero flex items-center justify-center text-2xl">{supplier?.logoEmoji}</div>
+          <SupplierLogo name={supplier?.businessName} size="lg" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-0.5">
               <h3 className="font-bold text-foreground truncate">{supplier?.businessName}</h3>
