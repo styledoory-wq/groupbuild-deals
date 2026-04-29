@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, ImageIcon, ShieldCheck, Loader2, ExternalLink, Plus, Trash2, Search, CheckCircle2, XCircle } from "lucide-react";
+import { MapPin, ImageIcon, ShieldCheck, Loader2, ExternalLink, Plus, Trash2, Search, CheckCircle2, XCircle, Pencil } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -102,6 +102,160 @@ export default function AdminDbSuppliers() {
   });
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCatalog, setUploadingCatalog] = useState(false);
+
+  // ---- Edit state ----
+  const [editOpen, setEditOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<NewForm>(emptyForm);
+  const [editAreas, setEditAreas] = useState<AreasComboboxValue>({
+    servesAllCountry: false,
+    regionIds: [],
+    cityIds: [],
+  });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [uploadingEditLogo, setUploadingEditLogo] = useState(false);
+  const [uploadingEditCatalog, setUploadingEditCatalog] = useState(false);
+
+  const uploadEditFile = async (
+    file: File,
+    bucket: "supplier-logos" | "supplier-catalogs",
+    setBusy: (v: boolean) => void,
+    field: "logo_url" | "catalog_url",
+  ) => {
+    setBusy(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "bin";
+      const path = `admin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from(bucket).upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type || undefined,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      setEditForm((f) => ({ ...f, [field]: data.publicUrl }));
+      toast.success("הקובץ הועלה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openEdit = async (supplierId: string) => {
+    setEditId(supplierId);
+    setEditOpen(true);
+    setEditLoading(true);
+    try {
+      const [{ data: s, error }, { data: sregs }, { data: scits }] = await Promise.all([
+        supabase
+          .from("suppliers")
+          .select("*")
+          .eq("id", supplierId)
+          .single(),
+        supabase.from("supplier_regions").select("region_id").eq("supplier_id", supplierId),
+        supabase.from("supplier_cities").select("city_id").eq("supplier_id", supplierId),
+      ]);
+      if (error || !s) throw error ?? new Error("לא נמצא ספק");
+      setEditForm({
+        business_name: s.business_name ?? "",
+        contact_name: s.contact_name ?? "",
+        phone: s.phone ?? "",
+        email: s.email ?? "",
+        short_description: s.short_description ?? "",
+        description: s.description ?? "",
+        website_url: s.website_url ?? "",
+        whatsapp_url: s.whatsapp_url ?? "",
+        instagram_url: s.instagram_url ?? "",
+        facebook_url: s.facebook_url ?? "",
+        logo_url: s.logo_url ?? "",
+        catalog_url: s.catalog_url ?? "",
+        approval_status: (s.approval_status as NewForm["approval_status"]) ?? "pending",
+        is_active: !!s.is_active,
+        categoryIds: s.categories ?? [],
+      });
+      setEditAreas({
+        servesAllCountry: !!s.serves_all_country,
+        regionIds: (sregs ?? []).map((r) => r.region_id as string),
+        cityIds: (scits ?? []).map((c) => c.city_id as string),
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "טעינת הספק נכשלה");
+      setEditOpen(false);
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!editId) return;
+    if (!editForm.business_name.trim()) {
+      toast.error("שם עסק הוא שדה חובה");
+      return;
+    }
+    if (editForm.categoryIds.length === 0) {
+      toast.error("יש לבחור לפחות קטגוריה אחת");
+      return;
+    }
+    if (!editAreas.servesAllCountry && editAreas.regionIds.length === 0 && editAreas.cityIds.length === 0) {
+      toast.error("יש לבחור אזורי שירות (או 'כל הארץ')");
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const { error } = await supabase
+        .from("suppliers")
+        .update({
+          business_name: editForm.business_name.trim(),
+          contact_name: editForm.contact_name.trim() || null,
+          phone: editForm.phone.trim() || null,
+          email: editForm.email.trim() || null,
+          short_description: editForm.short_description.trim() || null,
+          description: editForm.description.trim() || null,
+          website_url: editForm.website_url.trim() || null,
+          whatsapp_url: editForm.whatsapp_url.trim() || null,
+          instagram_url: editForm.instagram_url.trim() || null,
+          facebook_url: editForm.facebook_url.trim() || null,
+          logo_url: editForm.logo_url.trim() || null,
+          catalog_url: editForm.catalog_url.trim() || null,
+          serves_all_country: editAreas.servesAllCountry,
+          service_areas: editAreas.servesAllCountry ? ["כל הארץ"] : [],
+          approval_status: editForm.approval_status,
+          is_active: editForm.is_active,
+          categories: editForm.categoryIds,
+        })
+        .eq("id", editId);
+      if (error) throw error;
+
+      // Replace region/city links
+      await Promise.all([
+        supabase.from("supplier_regions").delete().eq("supplier_id", editId),
+        supabase.from("supplier_cities").delete().eq("supplier_id", editId),
+      ]);
+      if (!editAreas.servesAllCountry) {
+        if (editAreas.regionIds.length > 0) {
+          await supabase.from("supplier_regions").insert(
+            editAreas.regionIds.map((region_id) => ({ supplier_id: editId, region_id })),
+          );
+        }
+        if (editAreas.cityIds.length > 0) {
+          await supabase.from("supplier_cities").insert(
+            editAreas.cityIds.map((city_id) => ({ supplier_id: editId, city_id })),
+          );
+        }
+      }
+      toast.success("הספק עודכן בהצלחה");
+      setEditOpen(false);
+      setEditId(null);
+      await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "עדכון נכשל");
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
 
   const uploadFile = async (
     file: File,
@@ -407,6 +561,12 @@ export default function AdminDbSuppliers() {
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
+              <button
+                onClick={() => openEdit(r.id)}
+                className="w-full h-10 rounded-xl bg-gradient-gold text-primary text-sm font-bold flex items-center justify-center gap-1.5 shadow-gold"
+              >
+                <Pencil className="h-4 w-4" /> עריכת ספק
+              </button>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => navigate(`/admin/suppliers/${r.id}/media`)}
@@ -622,6 +782,195 @@ export default function AdminDbSuppliers() {
             <Button variant="outline" onClick={() => setOpen(false)}>ביטול</Button>
             <Button onClick={handleCreate} disabled={saving} className="bg-gradient-gold text-primary font-bold">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "צור ספק"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit supplier dialog */}
+      <Dialog open={editOpen} onOpenChange={(o) => { setEditOpen(o); if (!o) setEditId(null); }}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>עריכת ספק</DialogTitle>
+          </DialogHeader>
+          {editLoading ? (
+            <div className="py-12 flex items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <Label>שם עסק *</Label>
+                <Input value={editForm.business_name} onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label>שם בעל העסק</Label>
+                  <Input value={editForm.contact_name} onChange={(e) => setEditForm({ ...editForm, contact_name: e.target.value })} />
+                </div>
+                <div>
+                  <Label>טלפון</Label>
+                  <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <Label>אימייל</Label>
+                <Input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+              </div>
+              <div>
+                <Label>תיאור קצר</Label>
+                <Textarea rows={2} value={editForm.short_description} onChange={(e) => setEditForm({ ...editForm, short_description: e.target.value })} />
+              </div>
+              <div>
+                <Label>תיאור מלא</Label>
+                <Textarea rows={4} value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+              </div>
+
+              {/* Logo */}
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-bold">לוגו</Label>
+                <div className="flex items-center gap-3 mt-1.5">
+                  {editForm.logo_url ? (
+                    <img src={editForm.logo_url} alt="לוגו" className="h-14 w-14 rounded-xl object-cover border border-border" />
+                  ) : (
+                    <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center text-[10px] text-muted-foreground">אין</div>
+                  )}
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) uploadEditFile(f, "supplier-logos", setUploadingEditLogo, "logo_url");
+                      }}
+                      className="text-xs"
+                      disabled={uploadingEditLogo}
+                    />
+                    {editForm.logo_url && (
+                      <button type="button" onClick={() => setEditForm((f) => ({ ...f, logo_url: "" }))} className="text-[11px] text-destructive underline">
+                        הסר לוגו
+                      </button>
+                    )}
+                    {uploadingEditLogo && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Catalog */}
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-bold">קטלוג (PDF)</Label>
+                <div className="space-y-1.5 mt-1.5">
+                  <input
+                    type="file"
+                    accept="application/pdf,image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) uploadEditFile(f, "supplier-catalogs", setUploadingEditCatalog, "catalog_url");
+                    }}
+                    className="text-xs"
+                    disabled={uploadingEditCatalog}
+                  />
+                  {editForm.catalog_url && (
+                    <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted">
+                      <a href={editForm.catalog_url} target="_blank" rel="noreferrer noopener" className="text-[11px] text-primary underline truncate">
+                        צפייה בקטלוג שהועלה
+                      </a>
+                      <button type="button" onClick={() => setEditForm((f) => ({ ...f, catalog_url: "" }))} className="text-[11px] text-destructive underline shrink-0">
+                        הסר
+                      </button>
+                    </div>
+                  )}
+                  {uploadingEditCatalog && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+                </div>
+              </div>
+
+              {/* Links */}
+              <div className="pt-2 border-t space-y-2">
+                <Label className="text-sm font-bold">קישורים</Label>
+                <div>
+                  <Label className="text-xs">אתר אינטרנט</Label>
+                  <Input dir="ltr" placeholder="https://" value={editForm.website_url} onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">וואטסאפ</Label>
+                  <Input dir="ltr" placeholder="https://wa.me/972..." value={editForm.whatsapp_url} onChange={(e) => setEditForm({ ...editForm, whatsapp_url: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">אינסטגרם</Label>
+                  <Input dir="ltr" placeholder="https://instagram.com/..." value={editForm.instagram_url} onChange={(e) => setEditForm({ ...editForm, instagram_url: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">פייסבוק</Label>
+                  <Input dir="ltr" placeholder="https://facebook.com/..." value={editForm.facebook_url} onChange={(e) => setEditForm({ ...editForm, facebook_url: e.target.value })} />
+                </div>
+              </div>
+
+              {/* Categories */}
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-bold">קטגוריות *</Label>
+                <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto mt-2">
+                  {categories.map((c) => {
+                    const active = editForm.categoryIds.includes(c.id);
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setEditForm((f) => ({
+                          ...f,
+                          categoryIds: active
+                            ? f.categoryIds.filter((x) => x !== c.id)
+                            : [...f.categoryIds, c.id],
+                        }))}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${
+                          active ? "bg-gold text-primary border-gold font-bold" : "bg-card border-border text-foreground hover:border-gold/50"
+                        }`}
+                      >
+                        {c.icon} {c.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Areas */}
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-bold">אזורי שירות *</Label>
+                <div className="mt-2">
+                  <AreasCombobox value={editAreas} onChange={setEditAreas} />
+                </div>
+              </div>
+
+              <label className="flex items-center gap-2 text-sm pt-2 border-t">
+                <input
+                  type="checkbox"
+                  checked={editForm.is_active}
+                  onChange={(e) => setEditForm({ ...editForm, is_active: e.target.checked })}
+                  className="h-4 w-4 accent-primary"
+                />
+                פעיל
+              </label>
+              <div>
+                <Label>סטטוס אישור</Label>
+                <select
+                  value={editForm.approval_status}
+                  onChange={(e) => setEditForm({ ...editForm, approval_status: e.target.value as NewForm["approval_status"] })}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="approved">מאושר</option>
+                  <option value="pending">ממתין</option>
+                  <option value="rejected">נדחה</option>
+                </select>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground pt-2 border-t">
+                💡 לניהול גלריית תמונות, סגרו את החלון ובחרו "מדיה" בכרטיס הספק.
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>ביטול</Button>
+            <Button onClick={handleEditSave} disabled={editSaving || editLoading} className="bg-gradient-gold text-primary font-bold">
+              {editSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "שמור שינויים"}
             </Button>
           </DialogFooter>
         </DialogContent>
