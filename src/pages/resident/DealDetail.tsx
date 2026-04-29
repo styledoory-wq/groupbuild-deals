@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag } from "lucide-react";
+import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +23,10 @@ import {
   describeOffer,
   describeTier,
   getActiveTier,
+  getNextTier,
+  ils,
   tierRange,
+  tierShortValue,
   type OfferTier,
   type OfferType,
 } from "@/lib/offerPricing";
@@ -34,6 +45,8 @@ interface DealRow {
   base_price: number | null;
   tiers: OfferTier[] | null;
   ends_at: string | null;
+  deposit_required: boolean | null;
+  deposit_amount: number | null;
 }
 
 interface SupplierRow {
@@ -54,6 +67,16 @@ export default function DealDetail() {
   const [supplier, setSupplier] = useState<SupplierRow | null>(null);
   const [interested, setInterested] = useState(false);
   const [submittingInterest, setSubmittingInterest] = useState(false);
+  const [participantCount, setParticipantCount] = useState<number>(0);
+
+  // Deposit modal state
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  const loadParticipantCount = async (id: string) => {
+    const { data, error: rpcErr } = await supabase.rpc("get_deal_interest_count", { _deal_id: id });
+    if (!rpcErr && typeof data === "number") setParticipantCount(data);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -65,7 +88,7 @@ export default function DealDetail() {
         const { data: dealData, error: dErr } = await supabase
           .from("deals")
           .select(
-            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at",
+            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount",
           )
           .eq("id", dealId)
           .maybeSingle();
@@ -86,6 +109,8 @@ export default function DealDetail() {
           .eq("id", d.supplier_id)
           .maybeSingle();
         if (!cancelled) setSupplier((supData as SupplierRow | null) ?? null);
+
+        await loadParticipantCount(d.id);
 
         const { data: session } = await supabase.auth.getSession();
         if (session.session) {
@@ -109,31 +134,56 @@ export default function DealDetail() {
     };
   }, [dealId]);
 
-  const handleInterest = async () => {
+  const handleJoinClick = async () => {
     if (!deal) return;
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
-      toast.error("יש להתחבר כדי להביע עניין בעסקה");
+      toast.error("יש להתחבר כדי להצטרף להצעה");
+      return;
+    }
+    if (deal.deposit_required) {
+      setAcceptedTerms(false);
+      setShowDepositModal(true);
+      return;
+    }
+    await commitInterest(false);
+  };
+
+  const commitInterest = async (withDeposit: boolean) => {
+    if (!deal) return;
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      toast.error("יש להתחבר כדי להצטרף להצעה");
       return;
     }
     setSubmittingInterest(true);
     try {
-      const { error: insErr } = await supabase.from("deal_interests").insert({
+      const payload = {
         user_id: session.session.user.id,
         deal_id: deal.id,
-        status: "interested",
-      });
+        status: withDeposit ? "committed" : "interested",
+        deposit_required: withDeposit,
+        deposit_amount: withDeposit ? Number(deal.deposit_amount ?? 0) : 0,
+        deposit_status: withDeposit ? "committed" : "none",
+      };
+      const { error: insErr } = await supabase.from("deal_interests").insert(payload);
       if (insErr && !insErr.message.toLowerCase().includes("duplicate")) throw insErr;
       setInterested(true);
-      toast.success("רישמנו את התעניינותך! נחזור אליך עם פרטים נוספים.");
+      setShowDepositModal(false);
+      toast.success(
+        withDeposit ? "נרשמת להצעה — התחייבות לפיקדון נקלטה" : "נרשמת בהצלחה להצעה",
+      );
+      await loadParticipantCount(deal.id);
       supabase.functions
         .invoke("notify-admin", {
           body: {
             event: "deal_interest",
-            title: "מתעניין חדש בעסקה",
+            title: withDeposit ? "הצטרפות להצעה (התחייבות לפיקדון)" : "מתעניין חדש בעסקה",
             details: {
               deal_id: deal.id,
               deal_title: deal.title,
+              deposit_required: withDeposit,
+              deposit_amount: withDeposit ? Number(deal.deposit_amount ?? 0) : 0,
               user_id: session.session.user.id,
               user_email: session.session.user.email,
             },
@@ -190,10 +240,13 @@ export default function DealDetail() {
       base_price: deal.base_price,
       tiers,
     },
-    0,
+    participantCount,
   );
-  const activeTier = tiers.length > 0 ? getActiveTier(tiers, 0) : null;
+  const activeTier = tiers.length > 0 ? getActiveTier(tiers, participantCount) : null;
+  const nextTier = tiers.length > 0 ? getNextTier(tiers, participantCount) : null;
+  const peopleNeeded = nextTier ? Math.max(0, nextTier.minParticipants - participantCount) : 0;
   const category = categories.find((c) => c.id === deal.category_id);
+  const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
 
   return (
     <MobileShell>
@@ -222,18 +275,54 @@ export default function DealDetail() {
       </div>
 
       {/* Pricing card */}
-      <div className="px-5 -mt-6 relative z-10 mb-5">
+      <div className="px-5 -mt-6 relative z-10 mb-4">
         <div className="gb-card p-5 bg-gradient-card">
-          <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">המחיר הנוכחי</div>
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">המחיר/הנחה הנוכחיים</div>
           <div className="text-2xl font-extrabold text-primary leading-tight">{display.headline}</div>
-          {display.savings && (
-            <div className="text-xs font-bold text-success mt-1">{display.savings}</div>
-          )}
           <p className="text-[11px] text-muted-foreground mt-2">
             ככל שיותר דיירים מצטרפים — ההנחה גדלה
           </p>
         </div>
       </div>
+
+      {/* Live progress */}
+      <div className="px-5 mb-4">
+        <div className="gb-card p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+              <Users className="h-4 w-4 text-gold" />
+              כמות מצטרפים כרגע
+            </div>
+            <div className="text-lg font-extrabold text-primary">{participantCount}</div>
+          </div>
+          {nextTier ? (
+            <div className="rounded-xl bg-gold/10 border border-gold/30 px-3 py-2 flex items-start gap-2">
+              <TrendingUp className="h-4 w-4 text-gold mt-0.5 shrink-0" />
+              <div className="text-[12px] text-foreground leading-relaxed">
+                עוד <span className="font-extrabold text-primary">{peopleNeeded}</span>{" "}
+                {peopleNeeded === 1 ? "דייר" : "דיירים"} וההנחה עולה ל-
+                <span className="font-extrabold text-primary">{tierShortValue(offerType, nextTier)}</span>
+              </div>
+            </div>
+          ) : tiers.length > 0 ? (
+            <div className="rounded-xl bg-success/10 border border-success/30 px-3 py-2 text-[12px] font-bold text-success">
+              ✓ הגעתם למדרגה הטובה ביותר
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Deposit notice */}
+      {depositRequired && (
+        <div className="px-5 mb-4">
+          <div className="rounded-2xl border border-gold/40 bg-gold/5 px-4 py-3 text-[12px] text-foreground">
+            <div className="font-bold mb-0.5">נדרש פיקדון להצטרפות: {ils(Number(deal.deposit_amount))}</div>
+            <div className="text-muted-foreground">
+              הפיקדון מהווה התחייבות בלבד — בשלב זה לא תתבצע גבייה בפועל.
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tiers */}
       {tiers.length > 0 && (
@@ -261,7 +350,6 @@ export default function DealDetail() {
                   <span className="font-bold text-foreground">{tierRange(t)}</span>
                   <div className="text-left">
                     <div className="font-extrabold text-primary">{td.headline}</div>
-                    {td.savings && <div className="text-[10px] text-success font-bold">{td.savings}</div>}
                     {isActive && <div className="text-[10px] gb-gold-text font-bold mt-0.5">פעיל עכשיו</div>}
                   </div>
                 </div>
@@ -273,7 +361,7 @@ export default function DealDetail() {
 
       {/* Supplier */}
       {supplier && (
-        <section className="px-5 mb-24">
+        <section className="px-5 mb-28">
           <h2 className="text-sm font-bold text-foreground mb-3">הספק</h2>
           <Link to={`/suppliers/${supplier.id}`} className="gb-card p-4 flex items-center gap-3 hover:border-gold/40 transition-smooth">
             <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="lg" />
@@ -300,20 +388,71 @@ export default function DealDetail() {
           <div className="gb-card p-3 shadow-elevated">
             {interested ? (
               <div className="text-center text-xs font-bold text-success bg-success/10 rounded-xl py-3">
-                ✓ רשמנו את התעניינותך — נחזור אליך בקרוב
+                ✓ כבר הצטרפת להצעה — נחזור אליך עם פרטים
               </div>
             ) : (
               <Button
-                onClick={handleInterest}
+                onClick={handleJoinClick}
                 disabled={submittingInterest}
                 className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold"
               >
-                {submittingInterest ? <Loader2 className="h-5 w-5 animate-spin" /> : "אני מעוניין להצטרף"}
+                {submittingInterest ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : depositRequired ? (
+                  `הצטרף להצעה · פיקדון ${ils(Number(deal.deposit_amount))}`
+                ) : (
+                  "אני מעוניין להצטרף"
+                )}
               </Button>
             )}
           </div>
         </div>
       </div>
+
+      {/* Deposit modal */}
+      <Dialog open={showDepositModal} onOpenChange={setShowDepositModal}>
+        <DialogContent dir="rtl" className="text-right">
+          <DialogHeader>
+            <DialogTitle>תשלום פיקדון: {ils(Number(deal.deposit_amount ?? 0))}</DialogTitle>
+            <DialogDescription className="text-right leading-relaxed">
+              הפיקדון מהווה התחייבות להצטרפות להצעה.
+              <br />
+              <span className="text-foreground font-semibold">בשלב זה לא מתבצעת גבייה בפועל.</span>
+            </DialogDescription>
+          </DialogHeader>
+
+          <label className="flex items-start gap-2 cursor-pointer mt-2">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="h-4 w-4 mt-0.5 accent-primary shrink-0"
+            />
+            <span className="text-[13px] text-foreground leading-relaxed">
+              אני מאשר את תנאי ההצעה והתחייבות לפיקדון
+            </span>
+          </label>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowDepositModal(false)}
+              className="rounded-xl"
+              disabled={submittingInterest}
+            >
+              ביטול
+            </Button>
+            <Button
+              onClick={() => commitInterest(true)}
+              disabled={!acceptedTerms || submittingInterest}
+              className="rounded-xl bg-gradient-gold text-primary font-bold"
+            >
+              {submittingInterest ? <Loader2 className="h-4 w-4 animate-spin" /> : "אשר הצטרפות"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <BottomNav role="resident" />
     </MobileShell>
   );
