@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
-import { ShieldCheck, Star, Check, X, Plus, Pencil, Trash2, AlertCircle, MapPin } from "lucide-react";
+import { ShieldCheck, Star, Check, X, Plus, Pencil, Trash2, AlertCircle, MapPin, Upload, Globe, FileText, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import type { Supplier } from "@/types";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { uploadSupplierLogo, uploadSupplierCatalog } from "@/lib/supplierUploads";
 
 type FormState = {
   id?: string;
@@ -28,6 +30,12 @@ type FormState = {
   reviewsCount: string;
   commissionPercent: string;
   logoEmoji: string;
+  logoUrl: string | null;
+  websiteUrl: string;
+  whatsappUrl: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  catalogUrl: string;
   verified: boolean;
   featured: boolean;
   approvalStatus: "approved" | "pending" | "rejected";
@@ -42,6 +50,12 @@ const emptyForm: FormState = {
   reviewsCount: "",
   commissionPercent: "",
   logoEmoji: "🏷️",
+  logoUrl: null,
+  websiteUrl: "",
+  whatsappUrl: "",
+  instagramUrl: "",
+  facebookUrl: "",
+  catalogUrl: "",
   verified: false,
   featured: false,
   approvalStatus: "pending",
@@ -66,6 +80,42 @@ export default function AdminSuppliers() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [newCatOpen, setNewCatOpen] = useState(false);
   const [newCat, setNewCat] = useState({ name: "", icon: "🏷️" });
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingCatalog, setUploadingCatalog] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const catalogInputRef = useRef<HTMLInputElement>(null);
+
+  const onLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const url = await uploadSupplierLogo(file);
+      setForm((f) => ({ ...f, logoUrl: url }));
+      toast.success("הלוגו הועלה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setUploadingLogo(false);
+      if (logoInputRef.current) logoInputRef.current.value = "";
+    }
+  };
+
+  const onCatalogUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCatalog(true);
+    try {
+      const url = await uploadSupplierCatalog(file);
+      setForm((f) => ({ ...f, catalogUrl: url }));
+      toast.success("הקטלוג הועלה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally {
+      setUploadingCatalog(false);
+      if (catalogInputRef.current) catalogInputRef.current.value = "";
+    }
+  };
 
   const addCategory = () => {
     const name = newCat.name.trim();
@@ -99,6 +149,12 @@ export default function AdminSuppliers() {
       reviewsCount: s.reviewsCount ? String(s.reviewsCount) : "",
       commissionPercent: s.commissionPercent ? String(s.commissionPercent) : "",
       logoEmoji: s.logoEmoji ?? "🏷️",
+      logoUrl: s.logoUrl ?? null,
+      websiteUrl: s.websiteUrl ?? "",
+      whatsappUrl: s.whatsappUrl ?? "",
+      instagramUrl: s.instagramUrl ?? "",
+      facebookUrl: s.facebookUrl ?? "",
+      catalogUrl: s.catalogUrl ?? "",
       verified: !!s.verified,
       featured: !!s.featured,
       approvalStatus: s.approvalStatus ?? "pending",
@@ -133,6 +189,12 @@ export default function AdminSuppliers() {
       commissionPercent: parseFloat(form.commissionPercent) || 0,
       approvalStatus: form.approvalStatus,
       logoEmoji: form.logoEmoji || "🏷️",
+      logoUrl: form.logoUrl,
+      websiteUrl: form.websiteUrl.trim() || null,
+      whatsappUrl: form.whatsappUrl.trim() || null,
+      instagramUrl: form.instagramUrl.trim() || null,
+      facebookUrl: form.facebookUrl.trim() || null,
+      catalogUrl: form.catalogUrl.trim() || null,
     };
     if (form.id) {
       setSuppliers(suppliers.map((s) => (s.id === form.id ? payload : s)));
@@ -167,7 +229,7 @@ export default function AdminSuppliers() {
           return (
             <div key={s.id} className="gb-card p-4">
               <div className="flex items-start gap-3">
-                <SupplierLogo name={s.businessName} size="md" />
+                <SupplierLogo name={s.businessName} logoUrl={s.logoUrl ?? null} size="md" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1 mb-0.5">
                     <h3 className="font-bold truncate">{s.businessName || <span className="text-destructive">— ללא שם עסק —</span>}</h3>
@@ -248,24 +310,35 @@ export default function AdminSuppliers() {
           </DialogHeader>
 
           <div className="space-y-3 mt-2">
-            <div className="grid grid-cols-[80px_1fr] gap-3">
-              <div>
-                <Label className="text-xs">אימוג׳י</Label>
-                <Input
-                  value={form.logoEmoji}
-                  onChange={(e) => setForm({ ...form, logoEmoji: e.target.value })}
-                  className="text-center text-2xl"
-                  maxLength={4}
-                />
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <SupplierLogo name={form.businessName} logoUrl={form.logoUrl} size="lg" />
+              <div className="flex-1 space-y-1.5">
+                <Label className="text-xs">לוגו העסק</Label>
+                <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={onLogoUpload} />
+                <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo} className="h-9 rounded-xl text-xs w-full">
+                  <Upload className="h-3.5 w-3.5 ml-1" />
+                  {uploadingLogo ? "מעלה..." : form.logoUrl ? "החלפת לוגו" : "העלאת לוגו"}
+                </Button>
+                {form.logoUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, logoUrl: null })}
+                    className="text-[11px] text-destructive font-bold"
+                  >
+                    הסרת לוגו
+                  </button>
+                )}
               </div>
-              <div>
-                <Label className="text-xs">שם העסק *</Label>
-                <Input
-                  value={form.businessName}
-                  onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-                  placeholder="לדוגמה: מטבחי רויאל"
-                />
-              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs">שם העסק *</Label>
+              <Input
+                value={form.businessName}
+                onChange={(e) => setForm({ ...form, businessName: e.target.value })}
+                placeholder="לדוגמה: מטבחי רויאל"
+              />
             </div>
 
             <div>
@@ -284,6 +357,34 @@ export default function AdminSuppliers() {
                 onChange={(e) => setForm({ ...form, serviceArea: e.target.value })}
                 placeholder="מרכז / ארצי / צפון..."
               />
+            </div>
+
+            {/* Links + Catalog */}
+            <div className="space-y-2 pt-2 border-t border-border">
+              <Label className="text-xs font-bold flex items-center gap-1.5">
+                <LinkIcon className="h-3.5 w-3.5 text-gold" /> קישורים
+              </Label>
+              <Input dir="ltr" value={form.websiteUrl} onChange={(e) => setForm({ ...form, websiteUrl: e.target.value })} placeholder="https://example.com (אתר)" className="h-10 rounded-xl text-sm" maxLength={500} />
+              <Input dir="ltr" value={form.whatsappUrl} onChange={(e) => setForm({ ...form, whatsappUrl: e.target.value })} placeholder="https://wa.me/972500000000" className="h-10 rounded-xl text-sm" maxLength={500} />
+              <Input dir="ltr" value={form.instagramUrl} onChange={(e) => setForm({ ...form, instagramUrl: e.target.value })} placeholder="https://instagram.com/..." className="h-10 rounded-xl text-sm" maxLength={500} />
+              <Input dir="ltr" value={form.facebookUrl} onChange={(e) => setForm({ ...form, facebookUrl: e.target.value })} placeholder="https://facebook.com/..." className="h-10 rounded-xl text-sm" maxLength={500} />
+            </div>
+
+            <div className="space-y-2 pt-2 border-t border-border">
+              <Label className="text-xs font-bold flex items-center gap-1.5">
+                <FileText className="h-3.5 w-3.5 text-gold" /> קטלוג (PDF)
+              </Label>
+              <Input dir="ltr" value={form.catalogUrl} onChange={(e) => setForm({ ...form, catalogUrl: e.target.value })} placeholder="קישור לקטלוג חיצוני" className="h-10 rounded-xl text-sm" maxLength={500} />
+              <input ref={catalogInputRef} type="file" accept="application/pdf" className="hidden" onChange={onCatalogUpload} />
+              <Button type="button" variant="outline" onClick={() => catalogInputRef.current?.click()} disabled={uploadingCatalog} className="h-9 rounded-xl text-xs w-full">
+                <Upload className="h-3.5 w-3.5 ml-1" />
+                {uploadingCatalog ? "מעלה..." : "או העלאת PDF"}
+              </Button>
+              {form.catalogUrl && (
+                <a href={form.catalogUrl} target="_blank" rel="noreferrer" className="block text-[11px] text-gold underline truncate" dir="ltr">
+                  {form.catalogUrl}
+                </a>
+              )}
             </div>
 
             <div>
