@@ -295,6 +295,22 @@ export default function SupplierProfile() {
           )}
         </section>
 
+        {/* Active offers from this supplier */}
+        <section className="gb-card p-4">
+          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <Tag className="h-3.5 w-3.5 text-gold" /> ההצעות הפעילות
+          </h2>
+          {deals.length === 0 ? (
+            <p className="text-sm text-muted-foreground">אין עדיין הצעות פעילות מהספק הזה.</p>
+          ) : (
+            <div className="space-y-3">
+              {deals.map((d) => (
+                <RealDealCard key={d.id} deal={d} />
+              ))}
+            </div>
+          )}
+        </section>
+
         {/* Gallery */}
         {gallery.length > 0 && (
           <section className="gb-card p-4">
