@@ -229,7 +229,7 @@ export default function AdminSuppliers() {
           return (
             <div key={s.id} className="gb-card p-4">
               <div className="flex items-start gap-3">
-                <SupplierLogo name={s.businessName} size="md" />
+                <SupplierLogo name={s.businessName} logoUrl={s.logoUrl ?? null} size="md" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1 mb-0.5">
                     <h3 className="font-bold truncate">{s.businessName || <span className="text-destructive">— ללא שם עסק —</span>}</h3>
