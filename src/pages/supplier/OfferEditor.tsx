@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { PricingTier } from "@/types";
+
 
 type SupplierLite = {
   id: string;
@@ -30,15 +30,15 @@ export default function OfferEditor() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
-  const [originalPrice, setOriginalPrice] = useState<number>(50000);
   const [depositAmount, setDepositAmount] = useState<number>(1000);
   const [saving, setSaving] = useState(false);
-  const [tiers, setTiers] = useState<PricingTier[]>([
-    { minParticipants: 1, maxParticipants: 4, price: 45000, label: "מחיר מחירון" },
-    { minParticipants: 5, maxParticipants: 9, price: 40000, label: "הנחה ראשונה" },
-    { minParticipants: 10, maxParticipants: 19, price: 35000, label: "הנחה שנייה" },
-    { minParticipants: 20, maxParticipants: null, price: 30000, label: "המחיר הטוב ביותר" },
-  ]);
+
+  // New offer-type model
+  const [offerType, setOfferType] = useState<"percentage" | "price_comparison">("percentage");
+  const [discountPercentage, setDiscountPercentage] = useState<string>("20");
+  const [basePrice, setBasePrice] = useState<string>("");
+  const [originalPrice, setOriginalPrice] = useState<string>("");
+  const [discountedPrice, setDiscountedPrice] = useState<string>("");
 
   useEffect(() => {
     let cancelled = false;
@@ -92,9 +92,6 @@ export default function OfferEditor() {
     return () => { cancelled = true; };
   }, [categories]);
 
-  const updateTier = (i: number, patch: Partial<PricingTier>) => {
-    setTiers((prev) => prev.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
-  };
 
   const save = async () => {
     if (saving) return;
@@ -115,22 +112,73 @@ export default function OfferEditor() {
       return;
     }
 
-    setSaving(true);
-    try {
-      const payload = {
+    // Validate by offer type
+    const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
+    let payload: Record<string, unknown>;
+
+    if (offerType === "percentage") {
+      const pct = num(discountPercentage);
+      if (!Number.isFinite(pct) || pct < 1 || pct > 100) {
+        toast.error("אחוז ההנחה חייב להיות בין 1 ל-100");
+        return;
+      }
+      const base = basePrice.trim() === "" ? null : num(basePrice);
+      if (base !== null && (!Number.isFinite(base) || base <= 0)) {
+        toast.error("מחיר בסיס חייב להיות מספר חיובי");
+        return;
+      }
+      payload = {
         supplier_id: supplier.id,
         title: title.trim(),
         description: description.trim() || null,
         category_id: categoryId,
-        original_price: originalPrice,
+        offer_type: "percentage",
+        discount_percentage: pct,
+        base_price: base,
+        original_price: base ?? 0,
+        discounted_price: base ? Math.round(base * (1 - pct / 100)) : null,
         deposit_amount: depositAmount,
-        tiers: tiers as unknown as import("@/integrations/supabase/types").Json,
-        highlights: ["מחיר מיוחד", "התקנה כלולה", "אחריות מלאה"] as unknown as import("@/integrations/supabase/types").Json,
+        tiers: [] as unknown as import("@/integrations/supabase/types").Json,
+        highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as import("@/integrations/supabase/types").Json,
         status: "active",
         ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
       };
+    } else {
+      const before = num(originalPrice);
+      const after = num(discountedPrice);
+      if (!Number.isFinite(before) || before <= 0) {
+        toast.error("יש להזין מחיר לפני הנחה תקין");
+        return;
+      }
+      if (!Number.isFinite(after) || after <= 0) {
+        toast.error("יש להזין מחיר אחרי הנחה תקין");
+        return;
+      }
+      if (after >= before) {
+        toast.error("המחיר אחרי הנחה חייב להיות קטן מהמחיר לפני");
+        return;
+      }
+      payload = {
+        supplier_id: supplier.id,
+        title: title.trim(),
+        description: description.trim() || null,
+        category_id: categoryId,
+        offer_type: "price_comparison",
+        original_price: before,
+        discounted_price: after,
+        discount_percentage: Math.round(((before - after) / before) * 100),
+        base_price: null,
+        deposit_amount: depositAmount,
+        tiers: [] as unknown as import("@/integrations/supabase/types").Json,
+        highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as import("@/integrations/supabase/types").Json,
+        status: "active",
+        ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
+      };
+    }
 
-      const { error } = await supabase.from("deals").insert([payload]);
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("deals").insert([payload as never]);
       if (error) {
         console.error("[OfferEditor] insert error", error);
         const msg = error.message?.includes("row-level")
@@ -222,7 +270,7 @@ export default function OfferEditor() {
 
   return (
     <MobileShell>
-      <PageHeader title="הצעה חדשה" subtitle="הגדירו פרטים ודרגות מחיר דינמיות" back />
+      <PageHeader title="הצעה חדשה" subtitle="בחרו סוג הצעה והגדירו את התנאים" back />
 
       <div className="px-5 -mt-4 relative z-10 space-y-4">
         <div className="gb-card p-4 space-y-3">
@@ -237,51 +285,92 @@ export default function OfferEditor() {
               {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
             </select>
           </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="מחיר מחירון (₪)">
-              <Input type="number" value={originalPrice} onChange={(e) => setOriginalPrice(+e.target.value)} className="h-11 rounded-xl" />
-            </Field>
-            <Field label="פיקדון (₪)">
-              <Input type="number" value={depositAmount} onChange={(e) => setDepositAmount(+e.target.value)} className="h-11 rounded-xl" />
-            </Field>
-          </div>
+          <Field label="פיקדון (₪)">
+            <Input type="number" value={depositAmount} onChange={(e) => setDepositAmount(+e.target.value)} className="h-11 rounded-xl" />
+          </Field>
         </div>
 
-        <div className="gb-card p-4">
-          <h3 className="font-bold text-sm mb-3">דרגות מחיר דינמיות</h3>
-          <div className="space-y-2">
-            {tiers.map((t, i) => (
-              <div key={i} className="rounded-2xl border-2 border-border bg-muted/40 p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <Input
-                    value={t.label}
-                    onChange={(e) => updateTier(i, { label: e.target.value })}
-                    className="h-9 rounded-lg flex-1 ml-2 bg-card text-sm font-bold"
-                  />
-                  <span className="text-[11px] text-muted-foreground shrink-0">
-                    {t.minParticipants}{t.maxParticipants ? `-${t.maxParticipants}` : "+"} משתתפים
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <Mini label="מינ׳">
-                    <Input type="number" value={t.minParticipants} onChange={(e) => updateTier(i, { minParticipants: +e.target.value })} className="h-9 rounded-lg" />
-                  </Mini>
-                  <Mini label="מקס׳">
-                    <Input
-                      type="number"
-                      value={t.maxParticipants ?? ""}
-                      placeholder="∞"
-                      onChange={(e) => updateTier(i, { maxParticipants: e.target.value ? +e.target.value : null })}
-                      className="h-9 rounded-lg"
-                    />
-                  </Mini>
-                  <Mini label="מחיר ₪">
-                    <Input type="number" value={t.price} onChange={(e) => updateTier(i, { price: +e.target.value })} className="h-9 rounded-lg" />
-                  </Mini>
-                </div>
-              </div>
-            ))}
+        {/* Offer type selector */}
+        <div className="gb-card p-4 space-y-3">
+          <h3 className="font-bold text-sm">סוג הצעה</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setOfferType("percentage")}
+              className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
+                offerType === "percentage"
+                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
+                  : "border-border bg-card text-muted-foreground"
+              }`}
+            >
+              אחוז הנחה
+            </button>
+            <button
+              type="button"
+              onClick={() => setOfferType("price_comparison")}
+              className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
+                offerType === "price_comparison"
+                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
+                  : "border-border bg-card text-muted-foreground"
+              }`}
+            >
+              מחיר לפני ואחרי
+            </button>
           </div>
+
+          {offerType === "percentage" ? (
+            <div className="space-y-3 pt-1">
+              <Field label="אחוז הנחה (1-100)">
+                <Input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={discountPercentage}
+                  onChange={(e) => setDiscountPercentage(e.target.value)}
+                  placeholder="20"
+                  className="h-11 rounded-xl"
+                />
+              </Field>
+              <Field label="מחיר בסיס (אופציונלי, ₪)">
+                <Input
+                  type="number"
+                  value={basePrice}
+                  onChange={(e) => setBasePrice(e.target.value)}
+                  placeholder="לדוגמה: 5000"
+                  className="h-11 rounded-xl"
+                />
+              </Field>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                ככל שיותר דיירים מצטרפים — המחיר משתפר.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3 pt-1">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="מחיר לפני (₪)">
+                  <Input
+                    type="number"
+                    value={originalPrice}
+                    onChange={(e) => setOriginalPrice(e.target.value)}
+                    placeholder="5000"
+                    className="h-11 rounded-xl"
+                  />
+                </Field>
+                <Field label="מחיר אחרי (₪)">
+                  <Input
+                    type="number"
+                    value={discountedPrice}
+                    onChange={(e) => setDiscountedPrice(e.target.value)}
+                    placeholder="4200"
+                    className="h-11 rounded-xl"
+                  />
+                </Field>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                המחיר אחרי חייב להיות נמוך מהמחיר לפני.
+              </p>
+            </div>
+          )}
         </div>
 
         <Button onClick={save} disabled={saving} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card">

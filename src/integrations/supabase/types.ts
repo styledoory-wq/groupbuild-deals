@@ -108,14 +108,18 @@ export type Database = {
       }
       deals: {
         Row: {
+          base_price: number | null
           category_id: string | null
           created_at: string
           deposit_amount: number
           description: string | null
+          discount_percentage: number | null
+          discounted_price: number | null
           ends_at: string | null
           highlights: Json
           id: string
           is_demo: boolean
+          offer_type: string
           original_price: number
           project_id: string | null
           status: string
@@ -125,14 +129,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          base_price?: number | null
           category_id?: string | null
           created_at?: string
           deposit_amount?: number
           description?: string | null
+          discount_percentage?: number | null
+          discounted_price?: number | null
           ends_at?: string | null
           highlights?: Json
           id?: string
           is_demo?: boolean
+          offer_type?: string
           original_price?: number
           project_id?: string | null
           status?: string
@@ -142,14 +150,18 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          base_price?: number | null
           category_id?: string | null
           created_at?: string
           deposit_amount?: number
           description?: string | null
+          discount_percentage?: number | null
+          discounted_price?: number | null
           ends_at?: string | null
           highlights?: Json
           id?: string
           is_demo?: boolean
+          offer_type?: string
           original_price?: number
           project_id?: string | null
           status?: string
