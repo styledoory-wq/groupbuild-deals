@@ -45,6 +45,22 @@ export default function SupplierProfileEdit() {
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
 
+  // Media + links
+  const [shortDescription, setShortDescription] = useState("");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [whatsappUrl, setWhatsappUrl] = useState("");
+  const [instagramUrl, setInstagramUrl] = useState("");
+  const [facebookUrl, setFacebookUrl] = useState("");
+  const [catalogUrl, setCatalogUrl] = useState<string | null>(null);
+  const [gallery, setGallery] = useState<{ id?: string; image_url: string; caption: string | null }[]>([]);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [uploadingCatalog, setUploadingCatalog] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const catalogInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     (async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -71,13 +87,22 @@ export default function SupplierProfileEdit() {
         setSelectedCategories(existing.categories ?? []);
         setServesAll(existing.serves_all_country);
         setIsActive(existing.is_active);
+        setShortDescription(existing.short_description ?? "");
+        setLogoUrl(existing.logo_url ?? null);
+        setWebsiteUrl(existing.website_url ?? "");
+        setWhatsappUrl(existing.whatsapp_url ?? "");
+        setInstagramUrl(existing.instagram_url ?? "");
+        setFacebookUrl(existing.facebook_url ?? "");
+        setCatalogUrl(existing.catalog_url ?? null);
 
-        const [{ data: regs }, { data: cits }] = await Promise.all([
+        const [{ data: regs }, { data: cits }, { data: gal }] = await Promise.all([
           supabase.from("supplier_regions").select("region_id").eq("supplier_id", existing.id),
           supabase.from("supplier_cities").select("city_id").eq("supplier_id", existing.id),
+          supabase.from("supplier_gallery").select("id,image_url,caption,display_order").eq("supplier_id", existing.id).order("display_order"),
         ]);
         setSelectedRegions((regs ?? []).map((r) => r.region_id));
         setSelectedCities((cits ?? []).map((c) => c.city_id));
+        setGallery((gal ?? []).map((g) => ({ id: g.id, image_url: g.image_url, caption: g.caption })));
       } else {
         setBusinessName(profile?.business_name ?? "");
         setContactName(profile?.full_name ?? "");
