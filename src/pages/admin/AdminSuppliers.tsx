@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import type { Supplier } from "@/types";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { uploadSupplierLogo, uploadSupplierCatalog } from "@/lib/supplierUploads";
+import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
+import { useRegions } from "@/hooks/useRegions";
 
 type FormState = {
   id?: string;
