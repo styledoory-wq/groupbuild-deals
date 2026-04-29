@@ -99,7 +99,7 @@ export default function AdminDbSuppliers() {
           phone: form.phone.trim() || null,
           email: form.email.trim() || null,
           short_description: form.short_description.trim() || null,
-          serves_all_country: form.serves_all_country,
+          serves_all_country: areas.servesAllCountry,
           approval_status: form.approval_status,
           is_active: form.is_active,
           categories: [],
@@ -108,24 +108,23 @@ export default function AdminDbSuppliers() {
         .single();
       if (error) throw error;
       const newId = data?.id;
-      // Save selected regions/cities
-      if (newId && !form.serves_all_country) {
-        if (selectedRegions.size > 0) {
+      // Save selected regions/cities (only if not nationwide)
+      if (newId && !areas.servesAllCountry) {
+        if (areas.regionIds.length > 0) {
           await supabase.from("supplier_regions").insert(
-            [...selectedRegions].map((region_id) => ({ supplier_id: newId, region_id }))
+            areas.regionIds.map((region_id) => ({ supplier_id: newId, region_id }))
           );
         }
-        if (selectedCities.size > 0) {
+        if (areas.cityIds.length > 0) {
           await supabase.from("supplier_cities").insert(
-            [...selectedCities].map((city_id) => ({ supplier_id: newId, city_id }))
+            areas.cityIds.map((city_id) => ({ supplier_id: newId, city_id }))
           );
         }
       }
       toast.success("הספק נוצר בהצלחה");
       setOpen(false);
       setForm(emptyForm);
-      setSelectedRegions(new Set());
-      setSelectedCities(new Set());
+      setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] });
       await load();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "יצירה נכשלה");
