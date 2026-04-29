@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Save, AlertCircle, Loader2 } from "lucide-react";
+import { Save, AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
+import type { OfferTier, OfferType } from "@/lib/offerPricing";
 
 type SupplierLite = {
   id: string;
@@ -18,6 +18,39 @@ type SupplierLite = {
   approval_status: string;
   categories: string[] | null;
 };
+
+// UI-side tier rows (strings so empty inputs are easy to manage)
+type TierRow = {
+  minParticipants: string;
+  maxParticipants: string;
+  discount_percentage: string;
+  original_price: string;
+  discounted_price: string;
+  label: string;
+};
+
+const emptyTier = (overrides: Partial<TierRow> = {}): TierRow => ({
+  minParticipants: "",
+  maxParticipants: "",
+  discount_percentage: "",
+  original_price: "",
+  discounted_price: "",
+  label: "",
+  ...overrides,
+});
+
+const defaultPercentageTiers = (): TierRow[] => [
+  emptyTier({ minParticipants: "1", maxParticipants: "4", discount_percentage: "5", label: "מדרגה ראשונה" }),
+  emptyTier({ minParticipants: "5", maxParticipants: "9", discount_percentage: "10", label: "מדרגה שנייה" }),
+  emptyTier({ minParticipants: "10", maxParticipants: "19", discount_percentage: "15", label: "מדרגה שלישית" }),
+  emptyTier({ minParticipants: "20", maxParticipants: "", discount_percentage: "20", label: "המחיר הטוב ביותר" }),
+];
+
+const defaultPriceTiers = (): TierRow[] => [
+  emptyTier({ minParticipants: "1", maxParticipants: "4", original_price: "5000", discounted_price: "4750", label: "מדרגה ראשונה" }),
+  emptyTier({ minParticipants: "5", maxParticipants: "9", original_price: "5000", discounted_price: "4500", label: "מדרגה שנייה" }),
+  emptyTier({ minParticipants: "10", maxParticipants: "", original_price: "5000", discounted_price: "4200", label: "המחיר הטוב ביותר" }),
+];
 
 export default function OfferEditor() {
   const navigate = useNavigate();
@@ -33,12 +66,15 @@ export default function OfferEditor() {
   const [depositAmount, setDepositAmount] = useState<number>(1000);
   const [saving, setSaving] = useState(false);
 
-  // New offer-type model
-  const [offerType, setOfferType] = useState<"percentage" | "price_comparison">("percentage");
-  const [discountPercentage, setDiscountPercentage] = useState<string>("20");
-  const [basePrice, setBasePrice] = useState<string>("");
-  const [originalPrice, setOriginalPrice] = useState<string>("");
-  const [discountedPrice, setDiscountedPrice] = useState<string>("");
+  const [offerType, setOfferType] = useState<OfferType>("percentage");
+  const [tiers, setTiers] = useState<TierRow[]>(defaultPercentageTiers());
+
+  // When offer type changes, swap to sensible defaults if user hasn't customized.
+  const switchOfferType = (next: OfferType) => {
+    if (next === offerType) return;
+    setOfferType(next);
+    setTiers(next === "percentage" ? defaultPercentageTiers() : defaultPriceTiers());
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -73,7 +109,6 @@ export default function OfferEditor() {
 
         if (!cancelled) {
           setSupplier(s);
-          // pre-select first matching category if supplier has one
           if (s?.categories?.length && categories.find((c) => c.id === s!.categories![0])) {
             setCategoryId(s.categories[0]);
           } else if (categories.length) {
@@ -92,6 +127,17 @@ export default function OfferEditor() {
     return () => { cancelled = true; };
   }, [categories]);
 
+  const updateTier = (i: number, patch: Partial<TierRow>) => {
+    setTiers((prev) => prev.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
+  };
+  const addTier = () => {
+    const last = tiers[tiers.length - 1];
+    const nextMin = last?.maxParticipants ? String(Number(last.maxParticipants) + 1) : "";
+    setTiers((prev) => [...prev, emptyTier({ minParticipants: nextMin, label: `מדרגה ${prev.length + 1}` })]);
+  };
+  const removeTier = (i: number) => {
+    setTiers((prev) => (prev.length <= 1 ? prev : prev.filter((_, idx) => idx !== i)));
+  };
 
   const save = async () => {
     if (saving) return;
@@ -111,69 +157,100 @@ export default function OfferEditor() {
       toast.error("יש לבחור קטגוריה");
       return;
     }
+    if (!tiers.length) {
+      toast.error("יש להוסיף לפחות מדרגה אחת");
+      return;
+    }
 
-    // Validate by offer type
+    // Validate & build tier payload
     const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
-    let payload: Record<string, unknown>;
+    const cleanTiers: OfferTier[] = [];
+    for (let i = 0; i < tiers.length; i++) {
+      const t = tiers[i];
+      const min = num(t.minParticipants);
+      if (!Number.isFinite(min) || min < 1) {
+        toast.error(`מדרגה ${i + 1}: מינימום מצטרפים חייב להיות 1 ומעלה`);
+        return;
+      }
+      let max: number | null = null;
+      if (t.maxParticipants.trim() !== "") {
+        const m = num(t.maxParticipants);
+        if (!Number.isFinite(m) || m < min) {
+          toast.error(`מדרגה ${i + 1}: מקסימום מצטרפים חייב להיות גדול או שווה למינימום`);
+          return;
+        }
+        max = m;
+      }
 
+      if (offerType === "percentage") {
+        const pct = num(t.discount_percentage);
+        if (!Number.isFinite(pct) || pct < 1 || pct > 100) {
+          toast.error(`מדרגה ${i + 1}: אחוז הנחה חייב להיות בין 1 ל-100`);
+          return;
+        }
+        cleanTiers.push({
+          minParticipants: min,
+          maxParticipants: max,
+          discount_percentage: pct,
+          label: t.label.trim() || null,
+        });
+      } else {
+        const before = num(t.original_price);
+        const after = num(t.discounted_price);
+        if (!Number.isFinite(before) || before <= 0) {
+          toast.error(`מדרגה ${i + 1}: מחיר לפני חייב להיות מספר חיובי`);
+          return;
+        }
+        if (!Number.isFinite(after) || after <= 0) {
+          toast.error(`מדרגה ${i + 1}: מחיר אחרי חייב להיות מספר חיובי`);
+          return;
+        }
+        if (after >= before) {
+          toast.error(`מדרגה ${i + 1}: המחיר אחרי חייב להיות קטן מהמחיר לפני`);
+          return;
+        }
+        cleanTiers.push({
+          minParticipants: min,
+          maxParticipants: max,
+          original_price: before,
+          discounted_price: after,
+          label: t.label.trim() || null,
+        });
+      }
+    }
+
+    // Sort by min, ensure at least the lowest is for new offers
+    cleanTiers.sort((a, b) => a.minParticipants - b.minParticipants);
+    const firstTier = cleanTiers[0];
+
+    type Json = import("@/integrations/supabase/types").Json;
+    const payload: Record<string, unknown> = {
+      supplier_id: supplier.id,
+      title: title.trim(),
+      description: description.trim() || null,
+      category_id: categoryId,
+      offer_type: offerType,
+      deposit_amount: depositAmount,
+      tiers: cleanTiers as unknown as Json,
+      highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as Json,
+      status: "active",
+      ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
+    };
+
+    // Mirror first-tier values into top-level fields for backward compatibility & sorting.
     if (offerType === "percentage") {
-      const pct = num(discountPercentage);
-      if (!Number.isFinite(pct) || pct < 1 || pct > 100) {
-        toast.error("אחוז ההנחה חייב להיות בין 1 ל-100");
-        return;
-      }
-      const base = basePrice.trim() === "" ? null : num(basePrice);
-      if (base !== null && (!Number.isFinite(base) || base <= 0)) {
-        toast.error("מחיר בסיס חייב להיות מספר חיובי");
-        return;
-      }
-      payload = {
-        supplier_id: supplier.id,
-        title: title.trim(),
-        description: description.trim() || null,
-        category_id: categoryId,
-        offer_type: "percentage",
-        discount_percentage: pct,
-        base_price: base,
-        original_price: base ?? 0,
-        discounted_price: base ? Math.round(base * (1 - pct / 100)) : null,
-        deposit_amount: depositAmount,
-        tiers: [] as unknown as import("@/integrations/supabase/types").Json,
-        highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as import("@/integrations/supabase/types").Json,
-        status: "active",
-        ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
-      };
+      payload.discount_percentage = firstTier.discount_percentage ?? null;
+      payload.base_price = null;
+      payload.original_price = 0;
+      payload.discounted_price = null;
     } else {
-      const before = num(originalPrice);
-      const after = num(discountedPrice);
-      if (!Number.isFinite(before) || before <= 0) {
-        toast.error("יש להזין מחיר לפני הנחה תקין");
-        return;
-      }
-      if (!Number.isFinite(after) || after <= 0) {
-        toast.error("יש להזין מחיר אחרי הנחה תקין");
-        return;
-      }
-      if (after >= before) {
-        toast.error("המחיר אחרי הנחה חייב להיות קטן מהמחיר לפני");
-        return;
-      }
-      payload = {
-        supplier_id: supplier.id,
-        title: title.trim(),
-        description: description.trim() || null,
-        category_id: categoryId,
-        offer_type: "price_comparison",
-        original_price: before,
-        discounted_price: after,
-        discount_percentage: Math.round(((before - after) / before) * 100),
-        base_price: null,
-        deposit_amount: depositAmount,
-        tiers: [] as unknown as import("@/integrations/supabase/types").Json,
-        highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as import("@/integrations/supabase/types").Json,
-        status: "active",
-        ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
-      };
+      payload.original_price = firstTier.original_price ?? 0;
+      payload.discounted_price = firstTier.discounted_price ?? null;
+      payload.discount_percentage =
+        firstTier.original_price && firstTier.discounted_price
+          ? Math.round(((firstTier.original_price - firstTier.discounted_price) / firstTier.original_price) * 100)
+          : null;
+      payload.base_price = null;
     }
 
     setSaving(true);
@@ -187,7 +264,6 @@ export default function OfferEditor() {
         toast.error(msg);
         return;
       }
-
       toast.success("ההצעה נשמרה בהצלחה!");
       navigate("/supplier/offers", { replace: true });
     } catch (err: unknown) {
@@ -270,7 +346,7 @@ export default function OfferEditor() {
 
   return (
     <MobileShell>
-      <PageHeader title="הצעה חדשה" subtitle="בחרו סוג הצעה והגדירו את התנאים" back />
+      <PageHeader title="הצעה חדשה" subtitle="הגדירו מדרגות הנחה לפי כמות מצטרפים" back />
 
       <div className="px-5 -mt-4 relative z-10 space-y-4">
         <div className="gb-card p-4 space-y-3">
@@ -296,7 +372,7 @@ export default function OfferEditor() {
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => setOfferType("percentage")}
+              onClick={() => switchOfferType("percentage")}
               className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
                 offerType === "percentage"
                   ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
@@ -307,7 +383,7 @@ export default function OfferEditor() {
             </button>
             <button
               type="button"
-              onClick={() => setOfferType("price_comparison")}
+              onClick={() => switchOfferType("price_comparison")}
               className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
                 offerType === "price_comparison"
                   ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
@@ -317,60 +393,107 @@ export default function OfferEditor() {
               מחיר לפני ואחרי
             </button>
           </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            ככל שיותר דיירים מצטרפים — ההנחה גדלה.
+          </p>
+        </div>
 
-          {offerType === "percentage" ? (
-            <div className="space-y-3 pt-1">
-              <Field label="אחוז הנחה (1-100)">
-                <Input
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={discountPercentage}
-                  onChange={(e) => setDiscountPercentage(e.target.value)}
-                  placeholder="20"
-                  className="h-11 rounded-xl"
-                />
-              </Field>
-              <Field label="מחיר בסיס (אופציונלי, ₪)">
-                <Input
-                  type="number"
-                  value={basePrice}
-                  onChange={(e) => setBasePrice(e.target.value)}
-                  placeholder="לדוגמה: 5000"
-                  className="h-11 rounded-xl"
-                />
-              </Field>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                ככל שיותר דיירים מצטרפים — המחיר משתפר.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3 pt-1">
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="מחיר לפני (₪)">
+        {/* Tiers builder */}
+        <div className="gb-card p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-sm">מדרגות לפי כמות מצטרפים</h3>
+            <span className="text-[10px] text-muted-foreground">{tiers.length} מדרגות</span>
+          </div>
+
+          <div className="space-y-3">
+            {tiers.map((t, i) => (
+              <div key={i} className="rounded-2xl border-2 border-border bg-muted/40 p-3">
+                <div className="flex items-center justify-between mb-2 gap-2">
                   <Input
-                    type="number"
-                    value={originalPrice}
-                    onChange={(e) => setOriginalPrice(e.target.value)}
-                    placeholder="5000"
-                    className="h-11 rounded-xl"
+                    value={t.label}
+                    onChange={(e) => updateTier(i, { label: e.target.value })}
+                    placeholder={`מדרגה ${i + 1}`}
+                    className="h-9 rounded-lg flex-1 bg-card text-sm font-bold"
                   />
-                </Field>
-                <Field label="מחיר אחרי (₪)">
-                  <Input
-                    type="number"
-                    value={discountedPrice}
-                    onChange={(e) => setDiscountedPrice(e.target.value)}
-                    placeholder="4200"
-                    className="h-11 rounded-xl"
-                  />
-                </Field>
+                  <button
+                    type="button"
+                    onClick={() => removeTier(i)}
+                    disabled={tiers.length <= 1}
+                    className="h-9 w-9 shrink-0 rounded-lg bg-card border border-border flex items-center justify-center text-destructive disabled:opacity-30"
+                    aria-label="הסר מדרגה"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <Mini label="מינ׳ מצטרפים">
+                    <Input
+                      type="number"
+                      value={t.minParticipants}
+                      onChange={(e) => updateTier(i, { minParticipants: e.target.value })}
+                      className="h-9 rounded-lg"
+                      placeholder="1"
+                    />
+                  </Mini>
+                  <Mini label="מקס׳ מצטרפים (אופציונלי)">
+                    <Input
+                      type="number"
+                      value={t.maxParticipants}
+                      placeholder="∞"
+                      onChange={(e) => updateTier(i, { maxParticipants: e.target.value })}
+                      className="h-9 rounded-lg"
+                    />
+                  </Mini>
+                </div>
+
+                {offerType === "percentage" ? (
+                  <Mini label="אחוז הנחה (1-100)">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={t.discount_percentage}
+                      onChange={(e) => updateTier(i, { discount_percentage: e.target.value })}
+                      className="h-9 rounded-lg"
+                      placeholder="10"
+                    />
+                  </Mini>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Mini label="מחיר לפני (₪)">
+                      <Input
+                        type="number"
+                        value={t.original_price}
+                        onChange={(e) => updateTier(i, { original_price: e.target.value })}
+                        className="h-9 rounded-lg"
+                        placeholder="5000"
+                      />
+                    </Mini>
+                    <Mini label="מחיר אחרי (₪)">
+                      <Input
+                        type="number"
+                        value={t.discounted_price}
+                        onChange={(e) => updateTier(i, { discounted_price: e.target.value })}
+                        className="h-9 rounded-lg"
+                        placeholder="4500"
+                      />
+                    </Mini>
+                  </div>
+                )}
               </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                המחיר אחרי חייב להיות נמוך מהמחיר לפני.
-              </p>
-            </div>
-          )}
+            ))}
+          </div>
+
+          <Button
+            type="button"
+            onClick={addTier}
+            variant="outline"
+            className="w-full h-11 rounded-xl border-dashed border-2"
+          >
+            <Plus className="h-4 w-4 ml-2" />
+            הוסף מדרגה
+          </Button>
         </div>
 
         <Button onClick={save} disabled={saving} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card">
