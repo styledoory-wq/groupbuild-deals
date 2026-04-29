@@ -313,38 +313,32 @@ export default function Landing() {
                   <Label className="text-xs font-bold flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5 gb-gold-text" /> אזור
                   </Label>
-                  <Select
+                  <select
                     value={regionId}
-                    onValueChange={(v) => { setRegionId(v); setCityId(""); }}
+                    onChange={(e) => { setRegionId(e.target.value); setCityId(""); }}
+                    className="h-12 w-full rounded-2xl bg-card border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold"
                   >
-                    <SelectTrigger className="h-12 rounded-2xl bg-card border-border">
-                      <SelectValue placeholder="בחר אזור" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {regions.map((r) => (
-                        <SelectItem key={r.id} value={r.id}>{r.name_he}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <option value="">בחר אזור</option>
+                    {regions.map((r) => (
+                      <option key={r.id} value={r.id}>{r.name_he}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5 gb-gold-text" /> עיר / יישוב
                   </Label>
-                  <Select
+                  <select
                     value={cityId}
-                    onValueChange={setCityId}
+                    onChange={(e) => setCityId(e.target.value)}
                     disabled={!regionId}
+                    className="h-12 w-full rounded-2xl bg-card border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold disabled:opacity-50"
                   >
-                    <SelectTrigger className="h-12 rounded-2xl bg-card border-border">
-                      <SelectValue placeholder={regionId ? "בחר עיר" : "בחר אזור קודם"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredCities.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.name_he}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <option value="">{regionId ? "בחר עיר" : "בחר אזור קודם"}</option>
+                    {filteredCities.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name_he}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex items-center gap-1.5">
