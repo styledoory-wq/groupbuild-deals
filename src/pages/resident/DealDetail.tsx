@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star, Shield, Clock, TrendingDown, Users, Check, Sparkles, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
 
 export default function DealDetail() {
   const { dealId } = useParams();
@@ -19,6 +21,21 @@ export default function DealDetail() {
   const [interested, setInterested] = useState(false);
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [dbSupplierId, setDbSupplierId] = useState<string | null>(null);
+
+  // Resolve mock supplier -> DB supplier UUID by business name (best effort)
+  useEffect(() => {
+    const sup = suppliers.find((s) => s.id === deal?.supplierId);
+    if (!sup?.businessName) return;
+    (async () => {
+      const { data } = await supabase
+        .from("suppliers")
+        .select("id")
+        .eq("business_name", sup.businessName)
+        .maybeSingle();
+      if (data?.id) setDbSupplierId(data.id);
+    })();
+  }, [deal?.supplierId, suppliers]);
 
   // Load existing interest from DB
   useState(() => {
@@ -226,14 +243,29 @@ export default function DealDetail() {
               {supplier?.verified && <Shield className="h-4 w-4 text-gold" />}
             </div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Star className="h-3.5 w-3.5 fill-gold text-gold" />
-              <span className="font-bold text-foreground">{supplier?.rating}</span>
-              <span>· {supplier?.reviewsCount} ביקורות</span>
+              {dbSupplierId ? (
+                <SupplierRatingBadge supplierId={dbSupplierId} />
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Star className="h-3 w-3 text-muted" /> אין דירוגים עדיין
+                </span>
+              )}
             </div>
             <div className="text-[11px] text-muted-foreground mt-0.5">אזור שירות: {supplier?.serviceArea}</div>
           </div>
         </div>
       </section>
+
+      {/* Reviews — only after deal completed, only for paying participants */}
+      {dbSupplierId && (
+        <section className="px-5 mb-24">
+          <ReviewForm
+            supplierId={dbSupplierId}
+            dealId={deal.id}
+            dealCompleted={deal.status === "closed"}
+          />
+        </section>
+      )}
 
       {/* Action sticky */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
