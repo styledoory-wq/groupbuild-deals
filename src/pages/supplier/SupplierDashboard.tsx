@@ -45,25 +45,25 @@ export default function SupplierDashboard() {
 
         const email = session.user.email ?? "";
 
-        // Try to find an existing supplier record for this user.
-        // If an admin created/approved the supplier before signup, it may only match by email.
-        let { data: existing, error: fetchErr } = await supabase
+        // Try to find existing supplier records for this user.
+        // If an admin created/approved a supplier before signup, it may match by email only.
+        const byUser = await supabase
           .from("suppliers")
           .select("id, business_name, approval_status, is_active, user_id, email")
           .eq("user_id", session.user.id)
-          .maybeSingle();
+          .order("updated_at", { ascending: false });
 
-        if (!existing && email) {
-          const byEmail = await supabase
+        const byEmail = email
+          ? await supabase
             .from("suppliers")
             .select("id, business_name, approval_status, is_active, user_id, email")
             .ilike("email", email)
             .order("updated_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          existing = byEmail.data;
-          fetchErr = byEmail.error;
-        }
+          : { data: [], error: null };
+
+        const fetchErr = byUser.error ?? byEmail.error;
+        const candidates = [...(byUser.data ?? []), ...(byEmail.data ?? [])];
+        const existing = candidates.find((s) => ["approved", "active"].includes(s.approval_status)) ?? candidates[0] ?? null;
 
         if (fetchErr) throw fetchErr;
 
