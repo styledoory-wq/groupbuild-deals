@@ -1,10 +1,23 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, ImageIcon, ShieldCheck, Loader2, ExternalLink } from "lucide-react";
+import { MapPin, ImageIcon, ShieldCheck, Loader2, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface Row {
   id: string;
@@ -13,23 +26,103 @@ interface Row {
   is_active: boolean;
   logo_url: string | null;
   serves_all_country: boolean;
+  short_description: string | null;
+  phone: string | null;
+  email: string | null;
 }
+
+interface NewForm {
+  business_name: string;
+  contact_name: string;
+  phone: string;
+  email: string;
+  short_description: string;
+  serves_all_country: boolean;
+  approval_status: "approved" | "pending" | "rejected";
+  is_active: boolean;
+}
+
+const emptyForm: NewForm = {
+  business_name: "",
+  contact_name: "",
+  phone: "",
+  email: "",
+  short_description: "",
+  serves_all_country: false,
+  approval_status: "approved",
+  is_active: true,
+};
 
 export default function AdminDbSuppliers() {
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<NewForm>(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const load = async () => {
+    const { data, error } = await supabase
+      .from("suppliers")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,short_description,phone,email")
+      .order("business_name");
+    if (error) toast.error("שגיאה בטעינת ספקים");
+    setRows((data as Row[]) ?? []);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("suppliers")
-        .select("id,business_name,approval_status,is_active,logo_url,serves_all_country")
-        .order("business_name");
-      setRows((data as Row[]) ?? []);
-      setLoading(false);
-    })();
+    load();
   }, []);
+
+  const handleCreate = async () => {
+    if (!form.business_name.trim()) {
+      toast.error("שם עסק הוא שדה חובה");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { data, error } = await supabase
+        .from("suppliers")
+        .insert({
+          business_name: form.business_name.trim(),
+          contact_name: form.contact_name.trim() || null,
+          phone: form.phone.trim() || null,
+          email: form.email.trim() || null,
+          short_description: form.short_description.trim() || null,
+          serves_all_country: form.serves_all_country,
+          approval_status: form.approval_status,
+          is_active: form.is_active,
+          categories: [],
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      toast.success("הספק נוצר! עכשיו הגדר אזורי שירות");
+      setOpen(false);
+      setForm(emptyForm);
+      await load();
+      if (data?.id && !form.serves_all_country) {
+        navigate(`/admin/suppliers/${data.id}/areas`);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "יצירה נכשלה");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const { error } = await supabase.from("suppliers").delete().eq("id", deleteId);
+    if (error) toast.error("מחיקה נכשלה");
+    else {
+      toast.success("הספק נמחק");
+      await load();
+    }
+    setDeleteId(null);
+  };
 
   if (loading) {
     return (
@@ -43,10 +136,22 @@ export default function AdminDbSuppliers() {
 
   return (
     <MobileShell>
-      <PageHeader title="ספקים (מסד נתונים)" subtitle={`${rows.length} ספקים רשומים`} back />
-      <div className="px-5 -mt-2 space-y-3 pb-8">
+      <PageHeader title="ניהול ספקים" subtitle={`${rows.length} ספקים רשומים`} back />
+
+      <div className="px-5 -mt-2 mb-4">
+        <Button
+          onClick={() => { setForm(emptyForm); setOpen(true); }}
+          className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold"
+        >
+          <Plus className="h-4 w-4 ml-1.5" /> הוסף ספק חדש
+        </Button>
+      </div>
+
+      <div className="px-5 space-y-3 pb-24">
         {rows.length === 0 && (
-          <div className="gb-card p-6 text-center text-sm text-muted-foreground">אין ספקים רשומים עדיין</div>
+          <div className="gb-card p-6 text-center text-sm text-muted-foreground">
+            אין ספקים רשומים עדיין. הוסף ספק חדש כדי להתחיל.
+          </div>
         )}
         {rows.map((r) => (
           <div key={r.id} className="gb-card p-4 space-y-3">
@@ -60,7 +165,17 @@ export default function AdminDbSuppliers() {
                 <p className="text-[11px] text-muted-foreground mt-0.5">
                   {r.serves_all_country ? "כל הארץ" : "אזורים נבחרים"} · {r.is_active ? "פעיל" : "לא פעיל"}
                 </p>
+                {r.short_description && (
+                  <p className="text-[11px] text-muted-foreground mt-1 line-clamp-1">{r.short_description}</p>
+                )}
               </div>
+              <button
+                onClick={() => setDeleteId(r.id)}
+                className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center"
+                aria-label="מחק"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
             </div>
             <div className="grid grid-cols-3 gap-2">
               <button
@@ -85,6 +200,97 @@ export default function AdminDbSuppliers() {
           </div>
         ))}
       </div>
+
+      {/* Create dialog */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>ספק חדש</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>שם עסק *</Label>
+              <Input value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>איש קשר</Label>
+                <Input value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
+              </div>
+              <div>
+                <Label>טלפון</Label>
+                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <Label>אימייל</Label>
+              <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </div>
+            <div>
+              <Label>תיאור קצר</Label>
+              <Textarea rows={2} value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.serves_all_country}
+                onChange={(e) => setForm({ ...form, serves_all_country: e.target.checked })}
+                className="h-4 w-4 accent-primary"
+              />
+              משרת את כל הארץ
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.is_active}
+                onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+                className="h-4 w-4 accent-primary"
+              />
+              פעיל
+            </label>
+            <div>
+              <Label>סטטוס אישור</Label>
+              <select
+                value={form.approval_status}
+                onChange={(e) => setForm({ ...form, approval_status: e.target.value as NewForm["approval_status"] })}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="approved">מאושר</option>
+                <option value="pending">ממתין</option>
+                <option value="rejected">נדחה</option>
+              </select>
+            </div>
+            {!form.serves_all_country && (
+              <p className="text-[11px] text-muted-foreground">
+                לאחר היצירה תועבר למסך אזורי השירות לבחירת ערים/אזורים.
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>ביטול</Button>
+            <Button onClick={handleCreate} disabled={saving} className="bg-gradient-gold text-primary font-bold">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "צור ספק"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>למחוק את הספק?</AlertDialogTitle>
+            <AlertDialogDescription>פעולה זו לא ניתנת לביטול.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>ביטול</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+              מחק
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <BottomNav role="admin" />
     </MobileShell>
   );
 }
