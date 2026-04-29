@@ -71,56 +71,67 @@ export default function CategorySuppliers() {
   }, [regions, cities]);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       setLoading(true);
       setLoadError(null);
-      try {
-        await supabase.auth.getSession();
-        const timedOut = new Promise<never>((_, reject) => {
-          window.setTimeout(() => reject(new Error("supplier-load-timeout")), 12000);
-        });
-        const [suppliersResult, regionsResult, citiesResult] = await Promise.race([
-          Promise.all([
-            supabase
-              .from("suppliers")
-              .select("id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status")
-              .eq("is_active", true)
-              .in("approval_status", ["approved", "active"])
-              .order("business_name"),
-            supabase.from("supplier_regions").select("supplier_id,region_id"),
-            supabase.from("supplier_cities").select("supplier_id,city_id"),
-          ]),
-          timedOut,
-        ]);
 
+      // Hard safety timeout — never get stuck on the spinner
+      const safety = window.setTimeout(() => {
+        if (!cancelled) setLoading(false);
+      }, 8000);
+
+      try {
+        // Primary query — must succeed for the screen to be useful
+        const suppliersResult = await supabase
+          .from("suppliers")
+          .select(
+            "id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status",
+          )
+          .eq("is_active", true)
+          .in("approval_status", ["approved", "active"])
+          .order("business_name");
+
+        if (cancelled) return;
         if (suppliersResult.error) throw suppliersResult.error;
+
+        const list = ((suppliersResult.data ?? []) as DbSupplier[]).map((s) => ({
+          ...s,
+          categories: s.categories ?? [],
+          service_areas: s.service_areas ?? [],
+        }));
+        setSuppliers(list);
+        setLoading(false); // Show suppliers immediately
+
+        // Secondary queries — non-blocking, used for richer area filtering
+        const [regionsResult, citiesResult] = await Promise.all([
+          supabase.from("supplier_regions").select("supplier_id,region_id"),
+          supabase.from("supplier_cities").select("supplier_id,city_id"),
+        ]);
+        if (cancelled) return;
 
         const regionMap: Record<string, string[]> = {};
         (regionsResult.data ?? []).forEach((row: { supplier_id: string; region_id: string }) => {
           regionMap[row.supplier_id] = [...(regionMap[row.supplier_id] ?? []), row.region_id];
         });
-
         const cityMap: Record<string, string[]> = {};
         (citiesResult.data ?? []).forEach((row: { supplier_id: string; city_id: string }) => {
           cityMap[row.supplier_id] = [...(cityMap[row.supplier_id] ?? []), row.city_id];
         });
-
         setSupplierRegionIds(regionMap);
         setSupplierCityIds(cityMap);
-        setSuppliers(((suppliersResult.data ?? []) as DbSupplier[]).map((s) => ({
-          ...s,
-          categories: s.categories ?? [],
-          service_areas: s.service_areas ?? [],
-        })));
-      } catch {
-        setLoadError("שגיאה בטעינה");
+      } catch (err) {
+        if (cancelled) return;
+        setLoadError(err instanceof Error ? err.message : "שגיאה בטעינה");
         setSuppliers([]);
-        setSupplierRegionIds({});
-        setSupplierCityIds({});
       } finally {
-        setLoading(false);
+        window.clearTimeout(safety);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredCities = useMemo(

@@ -6,9 +6,9 @@ import { toast } from "sonner";
 
 /**
  * Server-verified admin guard.
- * - Sets up onAuthStateChange listener BEFORE getSession (Supabase best practice)
- * - Has a 6-second hard timeout — never stays on "checking" forever
- * - Allows access ONLY when session.user.email matches the hardcoded admin email
+ * - Resolves on the FIRST signal (getSession or onAuthStateChange — whichever first)
+ * - Hard 4-second timeout — never stays on "checking" forever
+ * - No re-check on navigation (mounts once per Admin layout)
  */
 export function RequireAdmin({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -18,72 +18,76 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
   const [errorMsg, setErrorMsg] = useState<string>("");
 
   useEffect(() => {
-    let active = true;
     let resolved = false;
 
-    const resolve = (next: "allowed" | "denied" | "anon" | "error", msg = "") => {
-      if (!active || resolved) return;
+    const finish = (next: "allowed" | "denied" | "anon" | "error", msg = "") => {
+      if (resolved) return;
       resolved = true;
       if (msg) setErrorMsg(msg);
       setState(next);
     };
 
-    const handleSession = (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
+    const handleSession = (
+      session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"],
+    ) => {
       if (!session) {
         setAdminSession(false);
-        resolve("anon");
+        finish("anon");
         return;
       }
       if (isAdminEmail(session.user.email)) {
         setAdminSession(true);
-        resolve("allowed");
+        finish("allowed");
       } else {
         setAdminSession(false);
         toast.error("אין לך הרשאה לגשת לאזור זה");
-        resolve("denied");
+        finish("denied");
       }
     };
 
-    // 1. Listen first
+    // Listen first so INITIAL_SESSION is captured
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       handleSession(session);
     });
 
-    // 2. Then read current session
+    // Also explicitly read once
     supabase.auth
       .getSession()
       .then(({ data, error }) => {
         if (error) {
-          resolve("error", error.message || "שגיאה בטעינת ההזדהות");
+          finish("error", error.message || "שגיאה בטעינת ההזדהות");
           return;
         }
         handleSession(data.session);
       })
       .catch((err) => {
-        resolve("error", err instanceof Error ? err.message : "שגיאה בטעינת ההזדהות");
+        finish("error", err instanceof Error ? err.message : "שגיאה בטעינת ההזדהות");
       });
 
-    // 3. Hard timeout — never get stuck
+    // Hard timeout — if nothing resolved in 4s, treat as anonymous (send to login)
     const timeoutId = window.setTimeout(() => {
       if (!resolved) {
-        resolve("error", "הבדיקה נמשכה זמן רב מדי. נסה להתחבר מחדש.");
+        setAdminSession(false);
+        finish("anon");
       }
-    }, 6000);
+    }, 4000);
 
     return () => {
-      active = false;
       window.clearTimeout(timeoutId);
       sub.subscription.unsubscribe();
     };
-  }, [location.pathname]);
+    // Mount once — don't re-run on navigation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (state === "loading") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-3 px-6 text-center">
+        <div className="h-8 w-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
         <div className="text-muted-foreground text-sm">בודק הרשאות…</div>
         <button
           onClick={() => (window.location.href = "/admin/login")}
-          className="text-xs text-primary underline"
+          className="text-xs text-primary underline mt-2"
         >
           תקוע? לחץ כאן לכניסה מחדש
         </button>
