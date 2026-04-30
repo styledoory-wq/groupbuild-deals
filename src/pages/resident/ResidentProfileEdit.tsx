@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { Save, ArrowRight, Mail, Phone, User as UserIcon, MapPin, Building2, Bell, Tag } from "lucide-react";
+import { Save, ArrowRight, Mail, Phone, User as UserIcon, MapPin, Building2, Bell } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ const profileSchema = z.object({
 
 export default function ResidentProfileEdit() {
   const navigate = useNavigate();
-  const { user, setUser, categories, projects } = useApp();
+  const { user, setUser, projects } = useApp();
   const { regions, citiesByRegion } = useRegions();
 
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,6 @@ export default function ResidentProfileEdit() {
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [projectId, setProjectId] = useState("");
-  const [interests, setInterests] = useState<string[]>([]);
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifPush, setNotifPush] = useState(true);
   const [notifSms, setNotifSms] = useState(false);
@@ -62,7 +61,6 @@ export default function ResidentProfileEdit() {
         setCity(data.city ?? "");
         setAddress(data.address ?? "");
         setProjectId(data.project_id ?? "");
-        setInterests((data.interest_categories as string[] | null) ?? []);
         const np = (data.notification_prefs as { email?: boolean; push?: boolean; sms?: boolean } | null) ?? {};
         setNotifEmail(np.email ?? true);
         setNotifPush(np.push ?? true);
@@ -71,10 +69,6 @@ export default function ResidentProfileEdit() {
       setLoading(false);
     })();
   }, [navigate]);
-
-  const toggleInterest = (id: string) => {
-    setInterests((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +99,6 @@ export default function ResidentProfileEdit() {
           region: regionSlug || null,
           address: address.trim() || null,
           project_id: projectId || null,
-          interest_categories: interests,
           notification_prefs: { email: notifEmail, push: notifPush, sms: notifSms },
         })
         .eq("id", uid);
@@ -212,31 +205,6 @@ export default function ResidentProfileEdit() {
               ))}
             </select>
           </Field>
-        </section>
-
-        {/* Interests */}
-        <section className="gb-card p-4 space-y-3">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Tag className="h-3.5 w-3.5 text-gold" /> תחומי עניין
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((c) => {
-              const on = interests.includes(c.id);
-              return (
-                <button
-                  type="button"
-                  key={c.id}
-                  onClick={() => toggleInterest(c.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs border transition-smooth ${
-                    on ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"
-                  }`}
-                >
-                  <span className="ml-1">{c.icon}</span>
-                  {c.name}
-                </button>
-              );
-            })}
-          </div>
         </section>
 
         {/* Notifications */}
