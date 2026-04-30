@@ -1,11 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Sparkles, ArrowLeft, Search, X } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
+
+// Stage → category IDs mapping (matches dashboard)
+const STAGE_CATEGORIES: Record<string, { title: string; ids: string[] }> = {
+  planning: { title: "תכנון ועיצוב", ids: ["architect", "interior-designer", "consultant"] },
+  structure: { title: "שלד ובנייה", ids: ["contractor", "skeleton", "gypsum"] },
+  systems: { title: "מערכות הבית", ids: ["electric", "plumbing", "ac", "smart-home"] },
+  finishes: {
+    title: "גמרים",
+    ids: [
+      "windows", "doors", "security-door",
+      "flooring", "cladding", "painting",
+      "kitchen", "bath", "showers", "sanitary",
+      "carpentry", "closets", "lighting",
+    ],
+  },
+  outdoor: { title: "חוץ ופיתוח", ids: ["garden", "pergola", "cleaning"] },
+};
 
 interface SupplierLite {
   id: string;
