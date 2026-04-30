@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail } from "lucide-react";
+import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { ils } from "@/lib/offerPricing";
+import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 
 type DealLite = { id: string; title: string };
 type InterestRow = {
@@ -145,36 +146,75 @@ export default function SupplierLeads() {
             </div>
             {interests.map((i) => {
               const p = profiles[i.user_id];
+              const name = i.full_name?.trim() || p?.full_name?.trim() || "דייר";
+              const phone = i.phone?.trim() || p?.phone?.trim() || null;
+              const email = p?.email ?? null;
+              const wa = normalizeWhatsappUrl(phone);
               const committed = i.deposit_required && i.deposit_status === "committed";
               return (
                 <div key={i.id} className="gb-card p-4">
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="min-w-0">
-                      <h4 className="font-bold text-sm text-foreground truncate">
-                        {p?.full_name?.trim() || "דייר"}
-                      </h4>
+                      <h4 className="font-bold text-sm text-foreground truncate">{name}</h4>
                       <p className="text-[11px] text-muted-foreground truncate">{dealTitle(i.deal_id)}</p>
                     </div>
                     {committed && (
                       <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gold/10 text-primary border border-gold/30 shrink-0">
                         <BadgeCheck className="h-3 w-3" />
-                        התחייב לפיקדון {ils(Number(i.deposit_amount))}
+                        התחייב {ils(Number(i.deposit_amount))}
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-                    {p?.phone && (
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground mb-2">
+                    {phone && (
                       <span className="inline-flex items-center gap-1">
-                        <Phone className="h-3 w-3" /> {p.phone}
+                        <Phone className="h-3 w-3" /> {phone}
                       </span>
                     )}
-                    {p?.email && (
+                    {email && (
                       <span className="inline-flex items-center gap-1 truncate">
-                        <Mail className="h-3 w-3" /> {p.email}
+                        <Mail className="h-3 w-3" /> {email}
+                      </span>
+                    )}
+                    {i.city && (
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {i.city}
+                      </span>
+                    )}
+                    {i.project_name && (
+                      <span className="inline-flex items-center gap-1">
+                        <Building2 className="h-3 w-3" /> {i.project_name}
                       </span>
                     )}
                     <span>נרשם: {new Date(i.created_at).toLocaleDateString("he-IL")}</span>
                   </div>
+                  {i.notes && (
+                    <p className="text-[11px] text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">
+                      {i.notes}
+                    </p>
+                  )}
+                  {(phone || wa) && (
+                    <div className="flex gap-2">
+                      {phone && (
+                        <a
+                          href={`tel:${phone}`}
+                          className="flex-1 text-center text-[11px] font-bold py-2 rounded-lg bg-primary text-primary-foreground"
+                        >
+                          חיוג
+                        </a>
+                      )}
+                      {wa && (
+                        <a
+                          href={wa}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex-1 text-center text-[11px] font-bold py-2 rounded-lg bg-success/10 text-success border border-success/30 inline-flex items-center justify-center gap-1"
+                        >
+                          <MessageCircle className="h-3 w-3" /> וואטסאפ
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
