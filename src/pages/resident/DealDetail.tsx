@@ -222,11 +222,13 @@ export default function DealDetail() {
       const { error: insErr } = await supabase.from("deal_interests").insert(payload);
       if (insErr && !insErr.message.toLowerCase().includes("duplicate")) throw insErr;
       setInterested(true);
+      setInterestStatus(depositRequired ? "pending_deposit" : "interested");
+      setInterestDepositStatus(depositRequired ? "pending" : "none");
       setShowJoinModal(false);
       toast.success(
         depositRequired
-          ? "נקלטה הצטרפות — סטטוס פיקדון: ממתין"
-          : "נרשמת בהצלחה להצעה",
+          ? "נקלטה הצטרפות — נדרש תשלום פיקדון כדי להבטיח מקום"
+          : "נרשמת בהצלחה! הספק יצור איתך קשר בהקדם.",
       );
       await loadParticipantCount(deal.id);
       supabase.functions
