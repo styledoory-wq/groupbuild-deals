@@ -72,6 +72,8 @@ export default function DealDetail() {
   const [deal, setDeal] = useState<DealRow | null>(null);
   const [supplier, setSupplier] = useState<SupplierRow | null>(null);
   const [interested, setInterested] = useState(false);
+  const [interestStatus, setInterestStatus] = useState<string | null>(null);
+  const [interestDepositStatus, setInterestDepositStatus] = useState<string>("none");
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [participantCount, setParticipantCount] = useState<number>(0);
 
