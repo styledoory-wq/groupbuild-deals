@@ -166,7 +166,7 @@ export default function MyDocuments() {
 
   return (
     <MobileShell>
-      <PageHeader title="המסמכים שלי" subtitle="ניהול קבצים ומסמכים" back="/resident/profile" />
+      <PageHeader title="המסמכים שלי" subtitle="ניהול קבצים ומסמכים" />
 
       <div className="px-4 -mt-4 relative z-10 space-y-4 pb-24" dir="rtl">
         {/* Upload section */}
