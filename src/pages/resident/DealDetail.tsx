@@ -58,6 +58,8 @@ interface SupplierRow {
   logo_url: string | null;
   approval_status: string;
   service_areas: string[] | null;
+  phone: string | null;
+  whatsapp_url: string | null;
 }
 
 export default function DealDetail() {
