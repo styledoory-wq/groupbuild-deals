@@ -25,7 +25,7 @@ const profileSchema = z.object({
 export default function ResidentProfileEdit() {
   const navigate = useNavigate();
   const { user, setUser, projects } = useApp();
-  const { regions, citiesByRegion } = useRegions();
+  const { regions, cities, citiesByRegion } = useRegions();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
