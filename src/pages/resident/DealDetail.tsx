@@ -5,6 +5,9 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -69,9 +72,17 @@ export default function DealDetail() {
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [participantCount, setParticipantCount] = useState<number>(0);
 
-  // Deposit modal state
-  const [showDepositModal, setShowDepositModal] = useState(false);
+  // Join modal state
+  const [showJoinModal, setShowJoinModal] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [joinForm, setJoinForm] = useState({
+    full_name: "",
+    phone: "",
+    city: "",
+    project_name: "",
+    notes: "",
+    estimated_quantity: "",
+  });
 
   const loadParticipantCount = async (id: string) => {
     const { data, error: rpcErr } = await supabase.rpc("get_deal_interest_count", { _deal_id: id });
@@ -91,6 +102,7 @@ export default function DealDetail() {
             "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount",
           )
           .eq("id", dealId)
+          .eq("is_deleted", false)
           .maybeSingle();
         if (dErr) throw dErr;
         if (!dealData) {
@@ -119,8 +131,24 @@ export default function DealDetail() {
             .select("id")
             .eq("user_id", session.session.user.id)
             .eq("deal_id", d.id)
+            .eq("is_deleted", false)
             .maybeSingle();
           if (!cancelled && interest) setInterested(true);
+
+          // Prefill form from profile
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("full_name,phone,city")
+            .eq("id", session.session.user.id)
+            .maybeSingle();
+          if (!cancelled && prof) {
+            setJoinForm((f) => ({
+              ...f,
+              full_name: f.full_name || (prof.full_name ?? ""),
+              phone: f.phone || (prof.phone ?? ""),
+              city: f.city || (prof.city ?? ""),
+            }));
+          }
         }
       } catch (e) {
         console.error("[DealDetail] load error", e);
@@ -141,51 +169,73 @@ export default function DealDetail() {
       toast.error("יש להתחבר כדי להצטרף להצעה");
       return;
     }
-    if (deal.deposit_required) {
-      setAcceptedTerms(false);
-      setShowDepositModal(true);
-      return;
-    }
-    await commitInterest(false);
+    setAcceptedTerms(false);
+    setShowJoinModal(true);
   };
 
-  const commitInterest = async (withDeposit: boolean) => {
+  const submitJoin = async () => {
     if (!deal) return;
+    if (!joinForm.full_name.trim() || !joinForm.phone.trim()) {
+      toast.error("נא למלא שם וטלפון");
+      return;
+    }
+    if (!acceptedTerms) {
+      toast.error("יש לאשר את התקנון ותנאי השימוש");
+      return;
+    }
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
       toast.error("יש להתחבר כדי להצטרף להצעה");
       return;
     }
+    const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
     setSubmittingInterest(true);
     try {
+      const qty = joinForm.estimated_quantity.trim()
+        ? Number(joinForm.estimated_quantity)
+        : null;
       const payload = {
         user_id: session.session.user.id,
         deal_id: deal.id,
-        status: withDeposit ? "committed" : "interested",
-        deposit_required: withDeposit,
-        deposit_amount: withDeposit ? Number(deal.deposit_amount ?? 0) : 0,
-        deposit_status: withDeposit ? "committed" : "none",
+        status: depositRequired ? "pending_deposit" : "interested",
+        deposit_required: depositRequired,
+        deposit_amount: depositRequired ? Number(deal.deposit_amount ?? 0) : 0,
+        deposit_status: depositRequired ? "pending" : "none",
+        full_name: joinForm.full_name.trim(),
+        phone: joinForm.phone.trim(),
+        city: joinForm.city.trim() || null,
+        project_name: joinForm.project_name.trim() || null,
+        notes: joinForm.notes.trim() || null,
+        estimated_quantity: qty && !Number.isNaN(qty) ? qty : null,
+        terms_accepted_at: new Date().toISOString(),
+        lead_status: "new",
       };
       const { error: insErr } = await supabase.from("deal_interests").insert(payload);
       if (insErr && !insErr.message.toLowerCase().includes("duplicate")) throw insErr;
       setInterested(true);
-      setShowDepositModal(false);
+      setShowJoinModal(false);
       toast.success(
-        withDeposit ? "נרשמת להצעה — התחייבות לפיקדון נקלטה" : "נרשמת בהצלחה להצעה",
+        depositRequired
+          ? "נקלטה הצטרפות — סטטוס פיקדון: ממתין"
+          : "נרשמת בהצלחה להצעה",
       );
       await loadParticipantCount(deal.id);
       supabase.functions
         .invoke("notify-admin", {
           body: {
             event: "deal_interest",
-            title: withDeposit ? "הצטרפות להצעה (התחייבות לפיקדון)" : "מתעניין חדש בעסקה",
+            title: depositRequired ? "הצטרפות להצעה (ממתין לפיקדון)" : "מתעניין חדש בעסקה",
             details: {
               deal_id: deal.id,
               deal_title: deal.title,
-              deposit_required: withDeposit,
-              deposit_amount: withDeposit ? Number(deal.deposit_amount ?? 0) : 0,
+              deposit_required: depositRequired,
+              deposit_amount: depositRequired ? Number(deal.deposit_amount ?? 0) : 0,
               user_id: session.session.user.id,
               user_email: session.session.user.email,
+              full_name: payload.full_name,
+              phone: payload.phone,
+              city: payload.city,
+              project_name: payload.project_name,
             },
           },
         })
@@ -409,45 +459,120 @@ export default function DealDetail() {
         </div>
       </div>
 
-      {/* Deposit modal */}
-      <Dialog open={showDepositModal} onOpenChange={setShowDepositModal}>
-        <DialogContent dir="rtl" className="text-right">
+      {/* Join modal */}
+      <Dialog open={showJoinModal} onOpenChange={setShowJoinModal}>
+        <DialogContent dir="rtl" className="text-right max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>תשלום פיקדון: {ils(Number(deal.deposit_amount ?? 0))}</DialogTitle>
+            <DialogTitle>הצטרפות להצעה</DialogTitle>
             <DialogDescription className="text-right leading-relaxed">
-              הפיקדון מהווה התחייבות להצטרפות להצעה.
-              <br />
-              <span className="text-foreground font-semibold">בשלב זה לא מתבצעת גבייה בפועל.</span>
+              <span className="block font-bold text-foreground">{deal.title}</span>
+              {supplier?.business_name && (
+                <span className="block text-[12px] text-muted-foreground mt-0.5">{supplier.business_name}</span>
+              )}
             </DialogDescription>
           </DialogHeader>
 
-          <label className="flex items-start gap-2 cursor-pointer mt-2">
-            <input
-              type="checkbox"
-              checked={acceptedTerms}
-              onChange={(e) => setAcceptedTerms(e.target.checked)}
-              className="h-4 w-4 mt-0.5 accent-primary shrink-0"
-            />
-            <span className="text-[13px] text-foreground leading-relaxed">
-              אני מאשר את תנאי ההצעה והתחייבות לפיקדון
-            </span>
-          </label>
+          <div className="space-y-3 mt-2">
+            <div>
+              <Label className="text-[12px] mb-1 block">שם מלא *</Label>
+              <Input
+                value={joinForm.full_name}
+                onChange={(e) => setJoinForm({ ...joinForm, full_name: e.target.value })}
+                placeholder="ישראל ישראלי"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-[12px] mb-1 block">טלפון *</Label>
+                <Input
+                  type="tel"
+                  value={joinForm.phone}
+                  onChange={(e) => setJoinForm({ ...joinForm, phone: e.target.value })}
+                  placeholder="0501234567"
+                />
+              </div>
+              <div>
+                <Label className="text-[12px] mb-1 block">עיר</Label>
+                <Input
+                  value={joinForm.city}
+                  onChange={(e) => setJoinForm({ ...joinForm, city: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-[12px] mb-1 block">פרויקט</Label>
+                <Input
+                  value={joinForm.project_name}
+                  onChange={(e) => setJoinForm({ ...joinForm, project_name: e.target.value })}
+                  placeholder="שם הפרויקט"
+                />
+              </div>
+              <div>
+                <Label className="text-[12px] mb-1 block">כמות משוערת</Label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={joinForm.estimated_quantity}
+                  onChange={(e) => setJoinForm({ ...joinForm, estimated_quantity: e.target.value })}
+                  placeholder="לדוגמה 8"
+                />
+              </div>
+            </div>
+            <div>
+              <Label className="text-[12px] mb-1 block">הערות / מה אני צריך</Label>
+              <Textarea
+                rows={3}
+                value={joinForm.notes}
+                onChange={(e) => setJoinForm({ ...joinForm, notes: e.target.value })}
+                placeholder="פרטים נוספים שיעזרו לספק להכין הצעת מחיר אישית"
+              />
+            </div>
 
-          <DialogFooter className="gap-2 sm:gap-2">
+            {depositRequired && (
+              <div className="rounded-xl border border-gold/40 bg-gold/5 px-3 py-2 text-[12px] text-foreground">
+                <div className="font-bold mb-0.5">פיקדון נדרש: {ils(Number(deal.deposit_amount ?? 0))}</div>
+                <div className="text-muted-foreground">
+                  ההצטרפות תישמר עם סטטוס פיקדון "ממתין". בשלב זה לא מתבצעת גבייה בפועל.
+                </div>
+              </div>
+            )}
+
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="h-4 w-4 mt-0.5 accent-primary shrink-0"
+              />
+              <span className="text-[12px] text-foreground leading-relaxed">
+                אני מאשר/ת קריאת התקנון ותנאי השימוש, ויצירת קשר מצד הספק או מנהל המערכת.
+                ההצטרפות אינה מחייבת רכישה — המחיר הסופי, האחריות והאספקה ייקבעו ישירות מול הספק.
+              </span>
+            </label>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2 mt-2">
             <Button
               variant="outline"
-              onClick={() => setShowDepositModal(false)}
+              onClick={() => setShowJoinModal(false)}
               className="rounded-xl"
               disabled={submittingInterest}
             >
               ביטול
             </Button>
             <Button
-              onClick={() => commitInterest(true)}
+              onClick={submitJoin}
               disabled={!acceptedTerms || submittingInterest}
               className="rounded-xl bg-gradient-gold text-primary font-bold"
             >
-              {submittingInterest ? <Loader2 className="h-4 w-4 animate-spin" /> : "אשר הצטרפות"}
+              {submittingInterest ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : depositRequired ? (
+                "אישור הצטרפות + שמירת פיקדון"
+              ) : (
+                "אשר הצטרפות"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
