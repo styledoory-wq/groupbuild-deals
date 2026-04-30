@@ -119,7 +119,7 @@ export default function DealDetail() {
 
         const { data: supData } = await supabase
           .from("suppliers")
-          .select("id,business_name,logo_url,approval_status,service_areas")
+          .select("id,business_name,logo_url,approval_status,service_areas,phone,whatsapp_url")
           .eq("id", d.supplier_id)
           .maybeSingle();
         if (!cancelled) setSupplier((supData as SupplierRow | null) ?? null);
