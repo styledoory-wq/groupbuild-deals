@@ -75,8 +75,9 @@ export default function SupplierLeads() {
         const dealIds = ds.map((d) => d.id);
         const { data: ints, error: iErr } = await supabase
           .from("deal_interests")
-          .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at")
+          .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo")
           .in("deal_id", dealIds)
+          .eq("is_demo", false)
           .order("created_at", { ascending: false });
         if (iErr) throw iErr;
         const list = (ints ?? []) as InterestRow[];
