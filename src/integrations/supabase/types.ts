@@ -75,41 +75,68 @@ export type Database = {
       }
       deal_interests: {
         Row: {
+          city: string | null
           created_at: string
           deal_id: string
+          deleted_at: string | null
           deposit_amount: number
           deposit_required: boolean
           deposit_status: string
+          estimated_quantity: number | null
+          full_name: string | null
           id: string
+          is_deleted: boolean
           is_demo: boolean
+          lead_status: string
           notes: string | null
+          phone: string | null
+          project_name: string | null
           status: string
+          terms_accepted_at: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          city?: string | null
           created_at?: string
           deal_id: string
+          deleted_at?: string | null
           deposit_amount?: number
           deposit_required?: boolean
           deposit_status?: string
+          estimated_quantity?: number | null
+          full_name?: string | null
           id?: string
+          is_deleted?: boolean
           is_demo?: boolean
+          lead_status?: string
           notes?: string | null
+          phone?: string | null
+          project_name?: string | null
           status?: string
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          city?: string | null
           created_at?: string
           deal_id?: string
+          deleted_at?: string | null
           deposit_amount?: number
           deposit_required?: boolean
           deposit_status?: string
+          estimated_quantity?: number | null
+          full_name?: string | null
           id?: string
+          is_deleted?: boolean
           is_demo?: boolean
+          lead_status?: string
           notes?: string | null
+          phone?: string | null
+          project_name?: string | null
           status?: string
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -120,6 +147,7 @@ export type Database = {
           base_price: number | null
           category_id: string | null
           created_at: string
+          deleted_at: string | null
           deposit_amount: number
           deposit_required: boolean
           description: string | null
@@ -128,6 +156,7 @@ export type Database = {
           ends_at: string | null
           highlights: Json
           id: string
+          is_deleted: boolean
           is_demo: boolean
           offer_type: string
           original_price: number
@@ -142,6 +171,7 @@ export type Database = {
           base_price?: number | null
           category_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           deposit_amount?: number
           deposit_required?: boolean
           description?: string | null
@@ -150,6 +180,7 @@ export type Database = {
           ends_at?: string | null
           highlights?: Json
           id?: string
+          is_deleted?: boolean
           is_demo?: boolean
           offer_type?: string
           original_price?: number
@@ -164,6 +195,7 @@ export type Database = {
           base_price?: number | null
           category_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           deposit_amount?: number
           deposit_required?: boolean
           description?: string | null
@@ -172,6 +204,7 @@ export type Database = {
           ends_at?: string | null
           highlights?: Json
           id?: string
+          is_deleted?: boolean
           is_demo?: boolean
           offer_type?: string
           original_price?: number
@@ -198,7 +231,9 @@ export type Database = {
           created_at: string
           currency: string
           deal_id: string
+          deleted_at: string | null
           id: string
+          is_deleted: boolean
           is_demo: boolean
           metadata: Json | null
           paid_at: string | null
@@ -214,7 +249,9 @@ export type Database = {
           created_at?: string
           currency?: string
           deal_id: string
+          deleted_at?: string | null
           id?: string
+          is_deleted?: boolean
           is_demo?: boolean
           metadata?: Json | null
           paid_at?: string | null
@@ -230,7 +267,9 @@ export type Database = {
           created_at?: string
           currency?: string
           deal_id?: string
+          deleted_at?: string | null
           id?: string
+          is_deleted?: boolean
           is_demo?: boolean
           metadata?: Json | null
           paid_at?: string | null
@@ -247,7 +286,9 @@ export type Database = {
         Row: {
           body: string | null
           created_at: string
+          deleted_at: string | null
           id: string
+          is_deleted: boolean
           is_read: boolean
           link: string | null
           metadata: Json
@@ -259,7 +300,9 @@ export type Database = {
         Insert: {
           body?: string | null
           created_at?: string
+          deleted_at?: string | null
           id?: string
+          is_deleted?: boolean
           is_read?: boolean
           link?: string | null
           metadata?: Json
@@ -271,7 +314,9 @@ export type Database = {
         Update: {
           body?: string | null
           created_at?: string
+          deleted_at?: string | null
           id?: string
+          is_deleted?: boolean
           is_read?: boolean
           link?: string | null
           metadata?: Json
@@ -290,11 +335,13 @@ export type Database = {
           city: string | null
           city_id: string | null
           created_at: string
+          deleted_at: string | null
           email: string | null
           full_name: string | null
           id: string
           interest_categories: string[]
           is_active: boolean
+          is_deleted: boolean
           is_demo: boolean
           notification_prefs: Json
           phone: string | null
@@ -311,11 +358,13 @@ export type Database = {
           city?: string | null
           city_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           full_name?: string | null
           id: string
           interest_categories?: string[]
           is_active?: boolean
+          is_deleted?: boolean
           is_demo?: boolean
           notification_prefs?: Json
           phone?: string | null
@@ -332,11 +381,13 @@ export type Database = {
           city?: string | null
           city_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           interest_categories?: string[]
           is_active?: boolean
+          is_deleted?: boolean
           is_demo?: boolean
           notification_prefs?: Json
           phone?: string | null
@@ -392,7 +443,9 @@ export type Database = {
           comment: string | null
           created_at: string
           deal_id: string
+          deleted_at: string | null
           id: string
+          is_deleted: boolean
           rating: number
           supplier_id: string
           user_id: string
@@ -401,7 +454,9 @@ export type Database = {
           comment?: string | null
           created_at?: string
           deal_id: string
+          deleted_at?: string | null
           id?: string
+          is_deleted?: boolean
           rating: number
           supplier_id: string
           user_id: string
@@ -410,7 +465,9 @@ export type Database = {
           comment?: string | null
           created_at?: string
           deal_id?: string
+          deleted_at?: string | null
           id?: string
+          is_deleted?: boolean
           rating?: number
           supplier_id?: string
           user_id?: string
@@ -520,12 +577,14 @@ export type Database = {
           categories: string[]
           contact_name: string | null
           created_at: string
+          deleted_at: string | null
           description: string | null
           email: string | null
           facebook_url: string | null
           id: string
           instagram_url: string | null
           is_active: boolean
+          is_deleted: boolean
           is_demo: boolean
           logo_url: string | null
           phone: string | null
@@ -544,12 +603,14 @@ export type Database = {
           categories?: string[]
           contact_name?: string | null
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           email?: string | null
           facebook_url?: string | null
           id?: string
           instagram_url?: string | null
           is_active?: boolean
+          is_deleted?: boolean
           is_demo?: boolean
           logo_url?: string | null
           phone?: string | null
@@ -568,12 +629,14 @@ export type Database = {
           categories?: string[]
           contact_name?: string | null
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           email?: string | null
           facebook_url?: string | null
           id?: string
           instagram_url?: string | null
           is_active?: boolean
+          is_deleted?: boolean
           is_demo?: boolean
           logo_url?: string | null
           phone?: string | null
