@@ -1,11 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Sparkles, ArrowLeft, Search, X } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
+
+// Stage → category IDs mapping (matches dashboard)
+const STAGE_CATEGORIES: Record<string, { title: string; ids: string[] }> = {
+  planning: { title: "תכנון ועיצוב", ids: ["architect", "interior-designer", "consultant"] },
+  structure: { title: "שלד ובנייה", ids: ["contractor", "skeleton", "gypsum"] },
+  systems: { title: "מערכות הבית", ids: ["electric", "plumbing", "ac", "smart-home"] },
+  finishes: {
+    title: "גמרים",
+    ids: [
+      "windows", "doors", "security-door",
+      "flooring", "cladding", "painting",
+      "kitchen", "bath", "showers", "sanitary",
+      "carpentry", "closets", "lighting",
+    ],
+  },
+  outdoor: { title: "חוץ ופיתוח", ids: ["garden", "pergola", "cleaning"] },
+};
 
 interface SupplierLite {
   id: string;
@@ -19,6 +36,16 @@ interface SupplierLite {
 export default function CategoriesList() {
   const { categories } = useApp();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const stageId = searchParams.get("stage") || "";
+  const stage = stageId ? STAGE_CATEGORIES[stageId] : null;
+
+  const visibleCategories = useMemo(() => {
+    if (!stage) return categories;
+    const allowed = new Set(stage.ids);
+    return categories.filter((c) => allowed.has(c.id));
+  }, [categories, stage]);
+
   const [suppliers, setSuppliers] = useState<SupplierLite[]>([]);
   const [search, setSearch] = useState("");
 
@@ -28,6 +55,7 @@ export default function CategoriesList() {
         .from("suppliers")
         .select("id,business_name,short_description,logo_url,categories,service_areas")
         .eq("is_active", true)
+        .eq("is_deleted", false)
         .in("approval_status", ["approved", "active"])
         .order("business_name");
       setSuppliers((data as SupplierLite[]) ?? []);
@@ -85,13 +113,23 @@ export default function CategoriesList() {
           </div>
 
           <h1 className="text-[28px] leading-[1.15] font-extrabold mb-3">
-            תחומי <span className="gb-gold-text">השדרוג</span>
-            <br />
-            לדירה שלך
+            {stage ? (
+              <>
+                {stage.title}
+                <br />
+                <span className="gb-gold-text">תחומי השלב</span>
+              </>
+            ) : (
+              <>
+                תחומי <span className="gb-gold-text">השדרוג</span>
+                <br />
+                לדירה שלך
+              </>
+            )}
           </h1>
           <div className="gb-divider-gold mb-4" />
           <p className="text-primary-foreground/75 text-[13px] leading-relaxed">
-            בחר תחום, או חפש ספק לפי שם, קטגוריה או אזור.
+            {stage ? "בחרו תחום כדי לראות את הספקים שמשרתים אותו." : "בחרו תחום, או חפשו ספק לפי שם, קטגוריה או אזור."}
           </p>
         </div>
       </header>
@@ -186,7 +224,7 @@ export default function CategoriesList() {
       {/* Categories grid */}
       {!q && (
         <div className="px-5 grid grid-cols-2 gap-3 pb-6">
-          {categories.map((c, idx) => {
+          {visibleCategories.map((c, idx) => {
             const count = counts[c.id] ?? 0;
             const hasSuppliers = count > 0;
             return (

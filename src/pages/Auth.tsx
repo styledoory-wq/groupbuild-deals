@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Briefcase, Mail, Sparkles, ArrowRight, ArrowLeft, User as UserIcon, MapPin, Lock } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,11 @@ type Mode = "signin" | "signup";
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { loginDemo, setUser, projects } = useApp();
   const [role, setRole] = useState<Exclude<Role, "admin">>("resident");
-  const [mode, setMode] = useState<Mode>("signin");
+  const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [loading, setLoading] = useState(false);
 
   // Form fields
