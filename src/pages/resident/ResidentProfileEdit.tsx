@@ -132,6 +132,8 @@ export default function ResidentProfileEdit() {
 
   const currentRegion = regions.find((r) => r.slug === regionSlug);
   const cityOptions = currentRegion ? citiesByRegion(currentRegion.id) : [];
+  const { cities } = useRegions();
+  const allCityNames = cities.map((c) => c.name_he).sort();
 
   if (loading) {
     return (
