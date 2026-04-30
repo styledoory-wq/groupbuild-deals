@@ -86,6 +86,7 @@ export default function ResidentDashboard() {
               "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at",
             )
             .eq("status", "active")
+            .eq("is_deleted", false)
             .in("supplier_id", allowedSupplierIds)
             .order("created_at", { ascending: false });
           const list = (deals ?? []).map((d) => {
@@ -105,7 +106,8 @@ export default function ResidentDashboard() {
         const { data: interests } = await supabase
           .from("deal_interests")
           .select("deal_id")
-          .eq("user_id", uid);
+          .eq("user_id", uid)
+          .eq("is_deleted", false);
         const joinedIds = Array.from(new Set((interests ?? []).map((i) => i.deal_id as string)));
         if (joinedIds.length) {
           const { data: jdeals } = await supabase
