@@ -36,6 +36,16 @@ interface SupplierLite {
 export default function CategoriesList() {
   const { categories } = useApp();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const stageId = searchParams.get("stage") || "";
+  const stage = stageId ? STAGE_CATEGORIES[stageId] : null;
+
+  const visibleCategories = useMemo(() => {
+    if (!stage) return categories;
+    const allowed = new Set(stage.ids);
+    return categories.filter((c) => allowed.has(c.id));
+  }, [categories, stage]);
+
   const [suppliers, setSuppliers] = useState<SupplierLite[]>([]);
   const [search, setSearch] = useState("");
 
@@ -45,6 +55,7 @@ export default function CategoriesList() {
         .from("suppliers")
         .select("id,business_name,short_description,logo_url,categories,service_areas")
         .eq("is_active", true)
+        .eq("is_deleted", false)
         .in("approval_status", ["approved", "active"])
         .order("business_name");
       setSuppliers((data as SupplierLite[]) ?? []);
