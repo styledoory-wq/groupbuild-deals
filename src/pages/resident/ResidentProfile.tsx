@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, Building2, Phone, Mail, History, Pencil } from "lucide-react";
+import { LogOut, Building2, Phone, Mail, History, Pencil, FileText } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
