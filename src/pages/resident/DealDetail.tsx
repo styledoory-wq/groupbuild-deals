@@ -438,7 +438,7 @@ export default function DealDetail() {
       {/* CTA */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
         <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0">
-          <div className="gb-card p-3 shadow-elevated">
+          <div className="gb-card p-3 shadow-elevated space-y-2">
             {interested ? (
               <div className="text-center text-xs font-bold text-success bg-success/10 rounded-xl py-3">
                 ✓ כבר הצטרפת להצעה — נחזור אליך עם פרטים
@@ -454,10 +454,39 @@ export default function DealDetail() {
                 ) : depositRequired ? (
                   `הצטרף להצעה · פיקדון ${ils(Number(deal.deposit_amount))}`
                 ) : (
-                  "אני מעוניין להצטרף"
+                  "אני מעוניין להצטרף להצעה"
                 )}
               </Button>
             )}
+            {supplier && (() => {
+              const wa = normalizeWhatsappUrl(supplier.whatsapp_url || supplier.phone);
+              const tel = supplier.phone ? `tel:${supplier.phone.replace(/\s+/g, "")}` : null;
+              if (!wa && !tel) return null;
+              return (
+                <div className="grid grid-cols-2 gap-2">
+                  {wa ? (
+                    <a
+                      href={wa}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="h-10 rounded-xl border border-border bg-card text-foreground text-xs font-bold flex items-center justify-center gap-1.5 hover:border-gold/40 transition-smooth"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5 text-gold" />
+                      וואטסאפ
+                    </a>
+                  ) : <div />}
+                  {tel ? (
+                    <a
+                      href={tel}
+                      className="h-10 rounded-xl border border-border bg-card text-foreground text-xs font-bold flex items-center justify-center gap-1.5 hover:border-gold/40 transition-smooth"
+                    >
+                      <Phone className="h-3.5 w-3.5 text-gold" />
+                      התקשר לספק
+                    </a>
+                  ) : <div />}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
