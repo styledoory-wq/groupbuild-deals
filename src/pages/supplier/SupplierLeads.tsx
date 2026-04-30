@@ -16,6 +16,13 @@ type InterestRow = {
   deposit_amount: number;
   deposit_status: string;
   created_at: string;
+  full_name: string | null;
+  phone: string | null;
+  city: string | null;
+  project_name: string | null;
+  estimated_quantity: number | null;
+  lead_status: string | null;
+  notes: string | null;
 };
 type ProfileLite = { id: string; full_name: string | null; phone: string | null; email: string | null };
 
