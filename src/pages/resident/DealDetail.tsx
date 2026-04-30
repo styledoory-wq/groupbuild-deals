@@ -133,12 +133,16 @@ export default function DealDetail() {
         if (session.session) {
           const { data: interest } = await supabase
             .from("deal_interests")
-            .select("id")
+            .select("id,status,deposit_status")
             .eq("user_id", session.session.user.id)
             .eq("deal_id", d.id)
             .eq("is_deleted", false)
             .maybeSingle();
-          if (!cancelled && interest) setInterested(true);
+          if (!cancelled && interest) {
+            setInterested(true);
+            setInterestStatus(interest.status);
+            setInterestDepositStatus(interest.deposit_status ?? "none");
+          }
 
           // Prefill form from profile
           const { data: prof } = await supabase
