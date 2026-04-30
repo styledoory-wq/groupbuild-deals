@@ -72,9 +72,17 @@ export default function DealDetail() {
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [participantCount, setParticipantCount] = useState<number>(0);
 
-  // Deposit modal state
-  const [showDepositModal, setShowDepositModal] = useState(false);
+  // Join modal state
+  const [showJoinModal, setShowJoinModal] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [joinForm, setJoinForm] = useState({
+    full_name: "",
+    phone: "",
+    city: "",
+    project_name: "",
+    notes: "",
+    estimated_quantity: "",
+  });
 
   const loadParticipantCount = async (id: string) => {
     const { data, error: rpcErr } = await supabase.rpc("get_deal_interest_count", { _deal_id: id });
@@ -94,6 +102,7 @@ export default function DealDetail() {
             "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount",
           )
           .eq("id", dealId)
+          .eq("is_deleted", false)
           .maybeSingle();
         if (dErr) throw dErr;
         if (!dealData) {
@@ -122,8 +131,24 @@ export default function DealDetail() {
             .select("id")
             .eq("user_id", session.session.user.id)
             .eq("deal_id", d.id)
+            .eq("is_deleted", false)
             .maybeSingle();
           if (!cancelled && interest) setInterested(true);
+
+          // Prefill form from profile
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("full_name,phone,city")
+            .eq("id", session.session.user.id)
+            .maybeSingle();
+          if (!cancelled && prof) {
+            setJoinForm((f) => ({
+              ...f,
+              full_name: f.full_name || (prof.full_name ?? ""),
+              phone: f.phone || (prof.phone ?? ""),
+              city: f.city || (prof.city ?? ""),
+            }));
+          }
         }
       } catch (e) {
         console.error("[DealDetail] load error", e);
@@ -144,51 +169,73 @@ export default function DealDetail() {
       toast.error("יש להתחבר כדי להצטרף להצעה");
       return;
     }
-    if (deal.deposit_required) {
-      setAcceptedTerms(false);
-      setShowDepositModal(true);
-      return;
-    }
-    await commitInterest(false);
+    setAcceptedTerms(false);
+    setShowJoinModal(true);
   };
 
-  const commitInterest = async (withDeposit: boolean) => {
+  const submitJoin = async () => {
     if (!deal) return;
+    if (!joinForm.full_name.trim() || !joinForm.phone.trim()) {
+      toast.error("נא למלא שם וטלפון");
+      return;
+    }
+    if (!acceptedTerms) {
+      toast.error("יש לאשר את התקנון ותנאי השימוש");
+      return;
+    }
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
       toast.error("יש להתחבר כדי להצטרף להצעה");
       return;
     }
+    const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
     setSubmittingInterest(true);
     try {
+      const qty = joinForm.estimated_quantity.trim()
+        ? Number(joinForm.estimated_quantity)
+        : null;
       const payload = {
         user_id: session.session.user.id,
         deal_id: deal.id,
-        status: withDeposit ? "committed" : "interested",
-        deposit_required: withDeposit,
-        deposit_amount: withDeposit ? Number(deal.deposit_amount ?? 0) : 0,
-        deposit_status: withDeposit ? "committed" : "none",
+        status: depositRequired ? "pending_deposit" : "interested",
+        deposit_required: depositRequired,
+        deposit_amount: depositRequired ? Number(deal.deposit_amount ?? 0) : 0,
+        deposit_status: depositRequired ? "pending" : "none",
+        full_name: joinForm.full_name.trim(),
+        phone: joinForm.phone.trim(),
+        city: joinForm.city.trim() || null,
+        project_name: joinForm.project_name.trim() || null,
+        notes: joinForm.notes.trim() || null,
+        estimated_quantity: qty && !Number.isNaN(qty) ? qty : null,
+        terms_accepted_at: new Date().toISOString(),
+        lead_status: "new",
       };
       const { error: insErr } = await supabase.from("deal_interests").insert(payload);
       if (insErr && !insErr.message.toLowerCase().includes("duplicate")) throw insErr;
       setInterested(true);
-      setShowDepositModal(false);
+      setShowJoinModal(false);
       toast.success(
-        withDeposit ? "נרשמת להצעה — התחייבות לפיקדון נקלטה" : "נרשמת בהצלחה להצעה",
+        depositRequired
+          ? "נקלטה הצטרפות — סטטוס פיקדון: ממתין"
+          : "נרשמת בהצלחה להצעה",
       );
       await loadParticipantCount(deal.id);
       supabase.functions
         .invoke("notify-admin", {
           body: {
             event: "deal_interest",
-            title: withDeposit ? "הצטרפות להצעה (התחייבות לפיקדון)" : "מתעניין חדש בעסקה",
+            title: depositRequired ? "הצטרפות להצעה (ממתין לפיקדון)" : "מתעניין חדש בעסקה",
             details: {
               deal_id: deal.id,
               deal_title: deal.title,
-              deposit_required: withDeposit,
-              deposit_amount: withDeposit ? Number(deal.deposit_amount ?? 0) : 0,
+              deposit_required: depositRequired,
+              deposit_amount: depositRequired ? Number(deal.deposit_amount ?? 0) : 0,
               user_id: session.session.user.id,
               user_email: session.session.user.email,
+              full_name: payload.full_name,
+              phone: payload.phone,
+              city: payload.city,
+              project_name: payload.project_name,
             },
           },
         })
