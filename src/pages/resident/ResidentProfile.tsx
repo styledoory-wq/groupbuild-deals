@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, Building2, Phone, Mail, History, Pencil } from "lucide-react";
+import { LogOut, Building2, Phone, Mail, History, Pencil, FileText } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -92,6 +92,9 @@ export default function ResidentProfile() {
       <div className="px-5 space-y-2">
         <Button onClick={() => navigate("/resident/profile/edit")} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground">
           <Pencil className="h-4 w-4 ml-2" /> עריכת פרופיל
+        </Button>
+        <Button onClick={() => navigate("/resident/documents")} variant="outline" className="w-full h-12 rounded-2xl border-secondary text-secondary">
+          <FileText className="h-4 w-4 ml-2" /> המסמכים שלי
         </Button>
         <Button onClick={handleLogout} variant="outline" className="w-full h-12 rounded-2xl border-border">
           <LogOut className="h-4 w-4 ml-2" /> התנתקות
