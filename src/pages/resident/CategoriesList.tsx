@@ -224,7 +224,7 @@ export default function CategoriesList() {
       {/* Categories grid */}
       {!q && (
         <div className="px-5 grid grid-cols-2 gap-3 pb-6">
-          {categories.map((c, idx) => {
+          {visibleCategories.map((c, idx) => {
             const count = counts[c.id] ?? 0;
             const hasSuppliers = count > 0;
             return (
