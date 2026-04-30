@@ -448,23 +448,34 @@ export default function DealDetail() {
         <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0">
           <div className="gb-card p-3 shadow-elevated space-y-2">
             {interested ? (
-              <div className="text-center text-xs font-bold text-success bg-success/10 rounded-xl py-3">
-                ✓ כבר הצטרפת להצעה — נחזור אליך עם פרטים
-              </div>
-            ) : (
-              <Button
-                onClick={handleJoinClick}
-                disabled={submittingInterest}
-                className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold"
-              >
-                {submittingInterest ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : depositRequired ? (
-                  `הצטרף להצעה · פיקדון ${ils(Number(deal.deposit_amount))}`
-                ) : (
-                  "אני מעוניין להצטרף להצעה"
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-bold text-success bg-success/10 rounded-xl py-3 px-4">
+                  <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
+                  <span>הצטרפת להצעה בהצלחה</span>
+                </div>
+                {interestStatus === "pending_deposit" && interestDepositStatus !== "paid" && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-foreground bg-gold/10 border border-gold/30 rounded-xl py-3 px-4">
+                      <Clock className="h-4 w-4 text-gold shrink-0" />
+                      <span>פיקדון טרם שולם — שלמו כדי להבטיח מקום</span>
+                    </div>
+                    <Button
+                      onClick={() => toast.info("מערכת התשלום תחובר בקרוב. צרו קשר עם הספק לתיאום תשלום.")}
+                      className="w-full h-11 rounded-2xl bg-primary text-primary-foreground font-bold"
+                    >
+                      <CreditCard className="h-4 w-4 ml-2" />
+                      שלם פיקדון · {ils(Number(deal.deposit_amount ?? 0))}
+                    </Button>
+                  </div>
                 )}
-              </Button>
+                {interestDepositStatus === "paid" && (
+                  <div className="flex items-center gap-2 text-xs font-bold text-success bg-success/10 rounded-xl py-2.5 px-4">
+                    <CreditCard className="h-4 w-4 text-success shrink-0" />
+                    <span>פיקדון שולם — המקום שלך מובטח ✨</span>
+                  </div>
+                )}
+                <p className="text-[11px] text-muted-foreground text-center">הספק יצור איתך קשר בהקדם לתיאום פרטים</p>
+              </div>
             )}
             {supplier && (() => {
               const wa = normalizeWhatsappUrl(supplier.whatsapp_url || supplier.phone);
