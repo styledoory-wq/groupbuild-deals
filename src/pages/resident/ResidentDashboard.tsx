@@ -21,6 +21,7 @@ export default function ResidentDashboard() {
   const [profileRegion, setProfileRegion] = useState("");
   const [areaDeals, setAreaDeals] = useState<DbDeal[]>([]);
   const [joinedDeals, setJoinedDeals] = useState<DbDeal[]>([]);
+  const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -73,10 +74,12 @@ export default function ResidentDashboard() {
           .from("suppliers")
           .select("id,business_name,logo_url")
           .eq("is_active", true)
+          .eq("is_deleted", false)
           .in("approval_status", ["approved", "active"])
           .or(orParts.join(","));
         const supplierMap = new Map((sups ?? []).map((s) => [s.id as string, s]));
         const allowedSupplierIds = (sups ?? []).map((s) => s.id as string);
+        if (!cancelled) setAreaSuppliersCount(allowedSupplierIds.length);
 
         // Active deals from those suppliers
         if (allowedSupplierIds.length) {
@@ -209,12 +212,12 @@ export default function ResidentDashboard() {
               <div className="text-[10px] text-muted-foreground mt-1">הצעות באזור</div>
             </div>
             <div className="text-center border-x border-border">
-              <div className="text-base font-semibold text-primary">{joinedDeals.length}</div>
-              <div className="text-[10px] text-muted-foreground mt-1">הצטרפת</div>
+              <div className="text-base font-semibold text-primary">{areaSuppliersCount}</div>
+              <div className="text-[10px] text-muted-foreground mt-1">ספקים זמינים</div>
             </div>
             <div className="text-center">
-              <div className="text-base font-semibold gb-gold-text">{categories.length}</div>
-              <div className="text-[10px] text-muted-foreground mt-1">קטגוריות</div>
+              <div className="text-base font-semibold gb-gold-text">{joinedDeals.length}</div>
+              <div className="text-[10px] text-muted-foreground mt-1">הצטרפת</div>
             </div>
           </div>
         </div>
