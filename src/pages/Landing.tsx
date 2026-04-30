@@ -1,28 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Sparkles, ArrowLeft, Building2, Briefcase, Users, TrendingDown,
-  ShieldCheck, MapPin, Phone, User as UserIcon, CheckCircle2, Layers,
-  Handshake, BarChart3, Home, Store,
+  Sparkles, ArrowLeft, Building2, CheckCircle2, Home, Store, LogIn, UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/auth";
-import { toast } from "sonner";
-
-type LeadType = "resident" | "supplier";
-type Region = { id: string; name_he: string };
-type City = { id: string; name_he: string; region_id: string };
 
 export default function Landing() {
   const navigate = useNavigate();
-  const formRef = useRef<HTMLDivElement>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [userEmail, setUserEmail] = useState<string>("");
   const [userType, setUserType] = useState<"resident" | "supplier">("resident");
@@ -56,110 +42,13 @@ export default function Landing() {
   }, []);
 
   const goToDashboard = () => {
-    if (!isAuthed) {
-      navigate("/auth");
-      return;
-    }
-    if (isAdminEmail(userEmail)) {
-      navigate("/admin");
-      return;
-    }
+    if (!isAuthed) { navigate("/auth"); return; }
+    if (isAdminEmail(userEmail)) { navigate("/admin"); return; }
     navigate(userType === "supplier" ? "/supplier" : "/resident");
   };
 
-  const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  // Waitlist form
-  const [leadType, setLeadType] = useState<LeadType>("resident");
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [regionId, setRegionId] = useState("");
-  const [cityId, setCityId] = useState("");
-  const [projectName, setProjectName] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [supplierRegionId, setSupplierRegionId] = useState("");
-  const [category, setCategory] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  // Real regions & cities from DB
-  const [regions, setRegions] = useState<Region[]>([]);
-  const [cities, setCities] = useState<City[]>([]);
-  useEffect(() => {
-    (async () => {
-      const [r, c] = await Promise.all([
-        supabase.from("regions").select("id,name_he").order("display_order"),
-        supabase.from("cities").select("id,name_he,region_id").order("name_he"),
-      ]);
-      if (r.data) setRegions(r.data as Region[]);
-      if (c.data) setCities(c.data as City[]);
-    })();
-  }, []);
-
-  const filteredCities = regionId
-    ? cities.filter((c) => c.region_id === regionId)
-    : [];
-
-  const submitLead = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fullName.trim() || !phone.trim()) {
-      toast.error("נא למלא שם וטלפון");
-      return;
-    }
-    if (leadType === "resident" && (!regionId || !cityId)) {
-      toast.error("נא לבחור אזור ועיר מהרשימה");
-      return;
-    }
-    if (leadType === "supplier" && !supplierRegionId) {
-      toast.error("נא לבחור אזור שירות מהרשימה");
-      return;
-    }
-
-    // Resolve names from selected IDs (only real values can be saved)
-    const selectedRegion = regions.find((r) => r.id === regionId);
-    const selectedCity = cities.find((c) => c.id === cityId);
-    const selectedSupplierRegion = regions.find((r) => r.id === supplierRegionId);
-
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.from("waitlist_leads").insert({
-        lead_type: leadType,
-        full_name: fullName.trim(),
-        phone: phone.trim(),
-        city: leadType === "resident" ? selectedCity?.name_he ?? null : null,
-        project_name: leadType === "resident" ? projectName.trim() || null : null,
-        business_name: leadType === "supplier" ? businessName.trim() || null : null,
-        service_areas: leadType === "supplier" ? selectedSupplierRegion?.name_he ?? null : null,
-        category: leadType === "supplier" ? category.trim() || null : null,
-      });
-      if (error) throw error;
-      // Notify admin (best effort, don't block on failure)
-      supabase.functions.invoke("notify-admin", {
-        body: {
-          event: "waitlist_lead",
-          title: leadType === "resident" ? "דייר חדש ברשימת המתנה" : "ספק חדש ברשימת המתנה",
-          details: {
-            full_name: fullName.trim(),
-            phone: phone.trim(),
-            lead_type: leadType,
-            city: selectedCity?.name_he,
-            region: selectedRegion?.name_he,
-            business_name: businessName,
-            category,
-          },
-        },
-      }).catch(() => { /* ignore */ });
-      setFullName(""); setPhone(""); setRegionId(""); setCityId(""); setProjectName("");
-      setBusinessName(""); setSupplierRegionId(""); setCategory("");
-      navigate("/thank-you");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "שליחה נכשלה, נסו שוב");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
+  const goSignup = () => navigate("/auth?mode=signup");
+  const goLogin = () => navigate("/auth?mode=signin");
 
   return (
     <div className="min-h-screen bg-primary text-primary-foreground flex justify-center">
@@ -176,21 +65,33 @@ export default function Landing() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                onClick={goToDashboard}
-                variant="ghost"
-                className="h-9 px-3 rounded-xl text-primary-foreground hover:text-gold hover:bg-white/5 font-bold text-xs"
-              >
-                {isAuthed ? "המשך לדשבורד" : "כניסה לחשבון"}
-              </Button>
-              <Button
-                type="button"
-                onClick={scrollToForm}
-                className="h-9 px-4 rounded-xl bg-gradient-gold text-primary hover:opacity-90 font-bold text-xs shadow-gold"
-              >
-                הצטרף לרשימה
-              </Button>
+              {isAuthed ? (
+                <Button
+                  type="button"
+                  onClick={goToDashboard}
+                  className="h-9 px-4 rounded-xl bg-gradient-gold text-primary hover:opacity-90 font-bold text-xs shadow-gold"
+                >
+                  המשך לדשבורד
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    onClick={goLogin}
+                    variant="ghost"
+                    className="h-9 px-3 rounded-xl text-primary-foreground hover:text-gold hover:bg-white/5 font-bold text-xs"
+                  >
+                    התחברות
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={goSignup}
+                    className="h-9 px-4 rounded-xl bg-gradient-gold text-primary hover:opacity-90 font-bold text-xs shadow-gold"
+                  >
+                    הרשמה
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </header>
@@ -216,218 +117,44 @@ export default function Landing() {
             </h1>
             <div className="gb-divider-gold mb-5" />
             <p className="text-primary-foreground/75 text-[15px] leading-relaxed mb-8">
-              פלטפורמת רכישה קבוצתית לדיירי פרויקטים חדשים. הצטרף לשכנים שלך,
-              אסוף כוח קנייה — וקבל מחירים שאי אפשר לקבל לבד.
+              פלטפורמת רכישה קבוצתית לדיירי פרויקטים חדשים. הצטרפו לשכנים שלכם,
+              אספו כוח קנייה — וקבלו מחירים שאי אפשר לקבל לבד.
             </p>
 
             <div className="flex flex-col gap-3">
-              <Button
-                onClick={scrollToForm}
-                className="h-13 py-3 rounded-2xl bg-gradient-gold text-primary hover:opacity-90 font-bold shadow-gold flex items-center justify-center gap-2"
-              >
-                הצטרף לרשימה
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <button
-                type="button"
-                onClick={goToDashboard}
-                className="text-xs text-primary-foreground/70 hover:text-gold underline-offset-4 hover:underline transition-smooth"
-              >
-                {isAuthed ? "המשך לדשבורד שלך ←" : "כבר יש לך חשבון? התחבר"}
-              </button>
+              {isAuthed ? (
+                <Button
+                  onClick={goToDashboard}
+                  className="h-13 py-3 rounded-2xl bg-gradient-gold text-primary hover:opacity-90 font-bold shadow-gold flex items-center justify-center gap-2"
+                >
+                  המשך לדשבורד שלך
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    onClick={goSignup}
+                    className="h-13 py-3 rounded-2xl bg-gradient-gold text-primary hover:opacity-90 font-bold shadow-gold flex items-center justify-center gap-2"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    הרשמה
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={goLogin}
+                    className="text-sm text-primary-foreground/85 hover:text-gold underline-offset-4 hover:underline transition-smooth inline-flex items-center justify-center gap-1.5"
+                  >
+                    <LogIn className="h-3.5 w-3.5" />
+                    כבר רשום? התחבר
+                  </button>
+                </>
+              )}
             </div>
           </div>
-        </section>
-
-        {/* WAITLIST FORM */}
-        <section
-          ref={formRef}
-          className="bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-10 -mt-2 relative [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground"
-        >
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/15 text-foreground mb-3">
-              <Sparkles className="h-3 w-3 text-secondary" />
-              <span className="text-[11px] font-bold">הרשמה מהירה</span>
-            </div>
-            <h2 className="text-2xl font-extrabold mb-2">שמור לי מקום ברשימה</h2>
-            <p className="text-sm text-muted-foreground">
-              ללא עלות. ללא התחייבות. תקבל עדכון ראשון.
-            </p>
-          </div>
-
-          {/* Lead type toggle */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-muted rounded-2xl mb-5">
-            {([
-              { id: "resident" as const, label: "אני דייר", icon: Home },
-              { id: "supplier" as const, label: "אני ספק", icon: Store },
-            ]).map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setLeadType(id)}
-                className={cn(
-                  "flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold transition-smooth",
-                  leadType === id
-                    ? "bg-card shadow-soft text-primary"
-                    : "text-muted-foreground"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            ))}
-          </div>
-
-          <form onSubmit={submitLead} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold flex items-center gap-1.5">
-                <UserIcon className="h-3.5 w-3.5 gb-gold-text" /> שם מלא
-              </Label>
-              <Input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="ישראל ישראלי"
-                required
-                className="h-12 rounded-2xl bg-card border-border"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold flex items-center gap-1.5">
-                <Phone className="h-3.5 w-3.5 gb-gold-text" /> מספר טלפון
-              </Label>
-              <Input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="050-0000000"
-                dir="ltr"
-                required
-                className="h-12 rounded-2xl bg-card border-border"
-              />
-            </div>
-
-            {leadType === "resident" ? (
-              <>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 gb-gold-text" /> אזור
-                  </Label>
-                  <select
-                    value={regionId}
-                    onChange={(e) => { setRegionId(e.target.value); setCityId(""); }}
-                    className="h-12 w-full rounded-2xl bg-card border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold"
-                  >
-                    <option value="">בחר אזור</option>
-                    {regions.map((r) => (
-                      <option key={r.id} value={r.id}>{r.name_he}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 gb-gold-text" /> עיר / יישוב
-                  </Label>
-                  <select
-                    value={cityId}
-                    onChange={(e) => setCityId(e.target.value)}
-                    disabled={!regionId}
-                    className="h-12 w-full rounded-2xl bg-card border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold disabled:opacity-50"
-                  >
-                    <option value="">{regionId ? "בחר עיר" : "בחר אזור קודם"}</option>
-                    {filteredCities.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name_he}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold flex items-center gap-1.5">
-                    <Building2 className="h-3.5 w-3.5 gb-gold-text" /> שם הפרויקט / הבניין
-                  </Label>
-                  <Input
-                    value={projectName}
-                    onChange={(e) => setProjectName(e.target.value)}
-                    placeholder="לדוגמה: מגדלי הים"
-                    className="h-12 rounded-2xl bg-card border-border"
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold flex items-center gap-1.5">
-                    <Briefcase className="h-3.5 w-3.5 gb-gold-text" /> שם העסק
-                  </Label>
-                  <Input
-                    value={businessName}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="לדוגמה: מטבחי רויאל"
-                    className="h-12 rounded-2xl bg-card border-border"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 gb-gold-text" /> אזור שירות
-                  </Label>
-                  <select
-                    value={supplierRegionId}
-                    onChange={(e) => setSupplierRegionId(e.target.value)}
-                    className="h-12 w-full rounded-2xl bg-card border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold"
-                  >
-                    <option value="">בחר אזור שירות</option>
-                    {regions.map((r) => (
-                      <option key={r.id} value={r.id}>{r.name_he}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold flex items-center gap-1.5">
-                    <Layers className="h-3.5 w-3.5 gb-gold-text" /> קטגוריית שירות
-                  </Label>
-                  <Input
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    placeholder="מטבחים / מזגנים / פרקטים…"
-                    className="h-12 rounded-2xl bg-card border-border"
-                  />
-                </div>
-              </>
-            )}
-
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="w-full h-13 py-3 rounded-2xl bg-gradient-gold text-primary hover:opacity-90 font-bold shadow-gold flex items-center justify-center gap-2"
-            >
-              {submitting ? "שולח…" : "שמור לי מקום ברשימה"}
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-
-            <p className="text-center text-[11px] text-muted-foreground">
-              אין עלות · ללא התחייבות · תקבל עדכון ראשון
-            </p>
-
-            <div className="pt-3 border-t border-border space-y-2 text-center">
-              <button
-                type="button"
-                onClick={() => navigate("/auth")}
-                className="block w-full text-sm font-bold text-primary hover:gb-gold-text transition-smooth"
-              >
-                צור חשבון מלא ←
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate("/auth")}
-                className="block w-full text-xs text-muted-foreground hover:text-primary transition-smooth"
-              >
-                כבר יש לך חשבון? התחבר
-              </button>
-            </div>
-          </form>
         </section>
 
         {/* STATS */}
-        <section className="bg-background text-foreground px-6 pb-10">
+        <section className="bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-10 -mt-2 [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground">
           <div className="grid grid-cols-2 gap-3">
             {[
               { v: "+240", l: "דירות בפרויקט הדגמה" },
@@ -435,10 +162,7 @@ export default function Landing() {
               { v: "+5", l: "קטגוריות פעילות" },
               { v: "29%", l: "הנחה קבוצתית ממוצעת" },
             ].map((s, i) => (
-              <div
-                key={i}
-                className="gb-card p-4 text-center"
-              >
+              <div key={i} className="gb-card p-4 text-center">
                 <div className="text-xl font-extrabold gb-gold-text mb-1">{s.v}</div>
                 <div className="text-[11px] text-muted-foreground leading-tight">{s.l}</div>
               </div>
@@ -456,26 +180,10 @@ export default function Landing() {
 
           <div className="space-y-3">
             {[
-              {
-                n: "01",
-                t: "הצטרף לפרויקט שלך",
-                d: "חפש את שם הבניין או הפרויקט שרכשת בו דירה והצטרף לקהילת הדיירים.",
-              },
-              {
-                n: "02",
-                t: "בחר ספקים ועסקאות",
-                d: "עיין בספקים מאומתים לפי קטגוריה ואזור, ראה מחיר נוכחי לפי כמות — והצטרף לעסקה.",
-              },
-              {
-                n: "03",
-                t: "המחיר יורד אוטומטית",
-                d: "כל שכן שמצטרף מוריד את המחיר לכולם. ככל שיותר מצטרפים — כך כולם חוסכים.",
-              },
-              {
-                n: "04",
-                t: "סגור עסקה בביטחון",
-                d: "שוחח עם הספק, עקוב אחרי ההתקדמות, ושלם פיקדון מאובטח כשמערכת התשלומים פעילה.",
-              },
+              { n: "01", t: "הצטרפו לפרויקט שלכם", d: "חפשו את שם הבניין או הפרויקט שרכשתם בו דירה והצטרפו לקהילת הדיירים." },
+              { n: "02", t: "בחרו ספקים ועסקאות", d: "עיינו בספקים מאומתים לפי קטגוריה ואזור, וראו מחיר נוכחי לפי כמות מצטרפים." },
+              { n: "03", t: "המחיר יורד אוטומטית", d: "כל שכן שמצטרף מוריד את המחיר לכולם. ככל שיותר מצטרפים — כך כולם חוסכים." },
+              { n: "04", t: "סגרו עסקה בביטחון", d: "שוחחו עם הספק, עקבו אחרי ההתקדמות, ושלמו פיקדון מאובטח כשמערכת התשלומים פעילה." },
             ].map((step) => (
               <div key={step.n} className="gb-card p-4 flex gap-3">
                 <div className="shrink-0 h-10 w-10 rounded-xl bg-primary text-gold flex items-center justify-center font-extrabold text-sm">
@@ -547,17 +255,28 @@ export default function Landing() {
           <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-64 w-64 rounded-full bg-gold/10 blur-3xl pointer-events-none" />
           <div className="relative">
             <div className="gb-divider-gold mx-auto mb-4" />
-            <h2 className="text-2xl font-extrabold mb-2">מוכן להתחיל לחסוך?</h2>
+            <h2 className="text-2xl font-extrabold mb-2">מוכנים להתחיל לחסוך?</h2>
             <p className="text-sm text-primary-foreground/75 mb-6 max-w-xs mx-auto">
-              הצטרף עכשיו לרשימת הממתינים — נחזור אליך עם פרטי הפרויקט שלך.
+              צרו חשבון בחינם והתחילו לראות עסקאות באזור שלכם תוך דקה.
             </p>
-            <Button
-              onClick={scrollToForm}
-              className="h-12 px-8 rounded-2xl bg-gradient-gold text-primary hover:opacity-90 font-bold shadow-gold inline-flex items-center gap-2"
-            >
-              הצטרף עכשיו
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
+            <div className="flex flex-col gap-3 max-w-xs mx-auto">
+              <Button
+                onClick={isAuthed ? goToDashboard : goSignup}
+                className="h-12 px-8 rounded-2xl bg-gradient-gold text-primary hover:opacity-90 font-bold shadow-gold inline-flex items-center justify-center gap-2"
+              >
+                {isAuthed ? "המשך לדשבורד" : "הרשמה חינם"}
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              {!isAuthed && (
+                <button
+                  type="button"
+                  onClick={goLogin}
+                  className="text-xs text-primary-foreground/80 hover:text-gold underline-offset-4 hover:underline"
+                >
+                  כבר רשום? התחבר
+                </button>
+              )}
+            </div>
           </div>
         </section>
 
