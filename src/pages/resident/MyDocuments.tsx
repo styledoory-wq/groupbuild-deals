@@ -94,12 +94,6 @@ export default function MyDocuments() {
         .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
       if (uploadErr) throw uploadErr;
 
-      // Get signed URL (private bucket)
-      const { data: signedData } = await supabase.storage
-        .from("resident-documents")
-        .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
-
-      const fileUrl = signedData?.signedUrl || path;
 
       const { error: insertErr } = await supabase.from("documents").insert({
         user_id: uid,
