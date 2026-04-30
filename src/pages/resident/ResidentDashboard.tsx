@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, TrendingUp } from "lucide-react";
+import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
@@ -12,21 +12,18 @@ interface DbDeal extends RealDealCardData {
   is_demo?: boolean | null;
 }
 
-// Construction-flow stage groups (matches order in mockData.ts)
-const STAGE_GROUPS: { title: string; ids: string[] }[] = [
-  { title: "תכנון ועיצוב", ids: ["architect", "interior-designer", "consultant"] },
-  { title: "שלד ובנייה", ids: ["contractor", "skeleton", "gypsum"] },
-  { title: "מערכות הבית", ids: ["electric", "plumbing", "ac", "smart-home"] },
-  { title: "פתחים ובידוד", ids: ["windows", "doors", "security-door"] },
-  { title: "ריצוף וחיפויים", ids: ["flooring", "cladding", "painting"] },
-  { title: "מטבח ואמבט", ids: ["kitchen", "bath", "showers", "sanitary"] },
-  { title: "נגרות וגימורים", ids: ["carpentry", "closets", "lighting"] },
-  { title: "חוץ ופיתוח", ids: ["garden", "pergola", "cleaning"] },
+// Top-level construction stages — clicking opens the stage's categories
+const STAGES: { id: string; title: string; icon: string; desc: string }[] = [
+  { id: "planning", title: "תכנון ועיצוב", icon: "📐", desc: "אדריכלות, עיצוב פנים, יועצים" },
+  { id: "structure", title: "שלד ובנייה", icon: "🏗️", desc: "קבלן ראשי, שלד, גבס" },
+  { id: "systems", title: "מערכות הבית", icon: "⚡", desc: "חשמל, אינסטלציה, מיזוג, חכם" },
+  { id: "finishes", title: "גמרים", icon: "🎨", desc: "ריצוף, צבע, מטבח, אמבט, נגרות" },
+  { id: "outdoor", title: "חוץ ופיתוח", icon: "🌿", desc: "גינון, פרגולות, ניקיון לאחר בנייה" },
 ];
 
 export default function ResidentDashboard() {
   const navigate = useNavigate();
-  const { user, categories } = useApp();
+  const { user } = useApp();
   const { regions, cities } = useRegions();
 
   const [profileCity, setProfileCity] = useState("");
@@ -101,7 +98,8 @@ export default function ResidentDashboard() {
             .eq("status", "active")
             .eq("is_deleted", false)
             .in("supplier_id", allowedSupplierIds)
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .limit(20);
           const list = (deals ?? []).map((d) => {
             const sup = supplierMap.get(d.supplier_id as string);
             return {
@@ -164,30 +162,12 @@ export default function ResidentDashboard() {
   const areaLabel = profileCity || regions.find((r) => r.slug === profileRegion)?.name_he || "";
   const noAreaDeals = hasArea && !loading && areaDeals.length === 0;
 
-  // Group categories by construction stages, preserving any extras at the end
-  const stageSections = useMemo(() => {
-    const byId = new Map(categories.map((c) => [c.id, c]));
-    const used = new Set<string>();
-    const sections = STAGE_GROUPS.map((g) => ({
-      title: g.title,
-      items: g.ids
-        .map((id) => {
-          const c = byId.get(id);
-          if (c) used.add(id);
-          return c;
-        })
-        .filter((c): c is NonNullable<typeof c> => !!c),
-    })).filter((s) => s.items.length > 0);
-    const extras = categories.filter((c) => !used.has(c.id));
-    if (extras.length) sections.push({ title: "נוספים", items: extras });
-    return sections;
-  }, [categories]);
-
   return (
     <MobileShell>
       {/* Hero */}
-      <header className="bg-gradient-hero text-primary-foreground px-5 pt-8 pb-12 rounded-b-[28px] relative overflow-hidden">
+      <header className="bg-gradient-hero text-primary-foreground px-5 pt-8 pb-14 rounded-b-[28px] relative overflow-hidden">
         <div className="absolute -top-16 -left-16 h-48 w-48 rounded-full bg-gold/10 blur-3xl" />
+        <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-gold/5 blur-3xl" />
         <div className="flex items-center justify-between mb-6 relative">
           <div>
             <p className="text-primary-foreground/55 text-[11px] uppercase tracking-wider">שלום</p>
@@ -201,19 +181,31 @@ export default function ResidentDashboard() {
             {user?.name?.charAt(0) || "ד"}
           </button>
         </div>
-        <button
-          onClick={() => navigate("/resident/profile/edit")}
-          className="w-full bg-white/[0.06] backdrop-blur border border-white/10 rounded-2xl px-4 py-3 text-right hover:bg-white/[0.10] transition-smooth flex items-center justify-between"
-        >
-          <div>
-            <div className="flex items-center gap-1.5 text-[10px] text-gold uppercase tracking-wider mb-0.5">
-              <MapPin className="h-3 w-3" strokeWidth={1.75} />
-              <span>האזור שלך</span>
+
+        {/* Area chip + Primary CTA */}
+        <div className="relative space-y-3">
+          <button
+            onClick={() => navigate("/resident/profile/edit")}
+            className="w-full bg-white/[0.06] backdrop-blur border border-white/10 rounded-2xl px-4 py-3 text-right hover:bg-white/[0.10] transition-smooth flex items-center justify-between"
+          >
+            <div>
+              <div className="flex items-center gap-1.5 text-[10px] text-gold uppercase tracking-wider mb-0.5">
+                <MapPin className="h-3 w-3" strokeWidth={1.75} />
+                <span>האזור שלך</span>
+              </div>
+              <div className="font-semibold text-[15px]">{areaLabel || "הגדר אזור"}</div>
             </div>
-            <div className="font-semibold text-[15px]">{areaLabel || "הגדר אזור"}</div>
-          </div>
-          <ChevronLeft className="h-4 w-4 text-gold" strokeWidth={1.75} />
-        </button>
+            <ChevronLeft className="h-4 w-4 text-gold" strokeWidth={1.75} />
+          </button>
+
+          <button
+            onClick={() => navigate("/resident/categories")}
+            className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold flex items-center justify-center gap-2"
+          >
+            <Search className="h-4 w-4" />
+            מצא ספקים באזור שלי
+          </button>
+        </div>
       </header>
 
       {/* Status card */}
@@ -251,7 +243,7 @@ export default function ResidentDashboard() {
         </div>
       </div>
 
-      {/* My joined offers */}
+      {/* My joined offers (top 2) */}
       {joinedDeals.length > 0 && (
         <section className="px-5 space-y-3 mb-6">
           <div className="flex items-center justify-between">
@@ -269,16 +261,16 @@ export default function ResidentDashboard() {
         </section>
       )}
 
-      {/* Recommended deals in your area */}
+      {/* Recommended deals (max 3) */}
       <section className="px-5 space-y-3 mb-6">
         <div className="flex items-center justify-between">
           <h2 className="text-[14px] font-semibold text-foreground flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
-            מומלץ באזור שלך
+            הצעות מומלצות
           </h2>
-          {hasArea && areaLabel && (
-            <span className="text-[11px] text-muted-foreground">{areaLabel}</span>
-          )}
+          <Link to="/resident/deals" className="text-[11px] gb-gold-text font-semibold flex items-center gap-1">
+            ראה הכל <ArrowLeft className="h-3 w-3" strokeWidth={2} />
+          </Link>
         </div>
 
         {loading ? (
@@ -312,62 +304,36 @@ export default function ResidentDashboard() {
             </Link>
           </div>
         ) : (
-          <>
-            {areaDeals.slice(0, 3).map((d) => (
-              <RealDealCard key={d.id} deal={d} />
-            ))}
-            {areaDeals.length > 3 && (
-              <Link
-                to="/resident/deals"
-                className="block text-center text-[12px] gb-gold-text font-semibold py-2"
-              >
-                לכל ההצעות באזור ({areaDeals.length}) →
-              </Link>
-            )}
-          </>
+          areaDeals.slice(0, 3).map((d) => <RealDealCard key={d.id} deal={d} />)
         )}
       </section>
 
-      {/* Categories by construction stage */}
+      {/* Construction stages — top-level only */}
       <section className="px-5 pb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[14px] font-semibold text-foreground flex items-center gap-1.5">
-            <TrendingUp className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
-            תחומים לפי שלבי בנייה
-          </h2>
-          <Link to="/resident/categories" className="text-[11px] gb-gold-text font-semibold flex items-center gap-1">
-            הכל <ArrowLeft className="h-3 w-3" strokeWidth={2} />
-          </Link>
+          <h2 className="text-[14px] font-semibold text-foreground">שלבי בנייה</h2>
+          <span className="text-[11px] text-muted-foreground">בחרו שלב לראות תחומים</span>
         </div>
 
-        <div className="space-y-4">
-          {stageSections.map((section, idx) => (
-            <div key={section.title} className="gb-card p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                  {idx + 1}
+        <div className="space-y-2.5">
+          {STAGES.map((s, idx) => (
+            <button
+              key={s.id}
+              onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
+              className="w-full gb-card p-4 text-right flex items-center gap-3 hover:border-gold/40 hover:shadow-elevated transition-smooth group"
+            >
+              <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-2xl shadow-soft border border-gold/20 shrink-0">
+                {s.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[10px] font-bold gb-gold-text">שלב {idx + 1}</span>
                 </div>
-                <h3 className="text-[12px] font-semibold text-foreground tracking-tight">
-                  {section.title}
-                </h3>
-                <div className="flex-1 h-px bg-border" />
-                <span className="text-[10px] text-muted-foreground">{section.items.length}</span>
+                <h3 className="text-[14px] font-bold text-foreground leading-tight">{s.title}</h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{s.desc}</p>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                {section.items.map((c) => (
-                  <Link
-                    key={c.id}
-                    to={`/resident/categories/${c.id}`}
-                    className="flex flex-col items-center gap-1.5 p-2 rounded-xl border border-border bg-background hover:border-gold/50 hover:bg-gold/5 transition-smooth"
-                  >
-                    <span className="text-[20px] leading-none">{c.icon}</span>
-                    <span className="text-[10px] text-center text-foreground leading-tight line-clamp-2">
-                      {c.name}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
+              <ChevronLeft className="h-4 w-4 text-gold opacity-50 group-hover:opacity-100 transition-smooth shrink-0" />
+            </button>
           ))}
         </div>
       </section>
