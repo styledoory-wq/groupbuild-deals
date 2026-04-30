@@ -113,13 +113,23 @@ export default function CategoriesList() {
           </div>
 
           <h1 className="text-[28px] leading-[1.15] font-extrabold mb-3">
-            תחומי <span className="gb-gold-text">השדרוג</span>
-            <br />
-            לדירה שלך
+            {stage ? (
+              <>
+                {stage.title}
+                <br />
+                <span className="gb-gold-text">תחומי השלב</span>
+              </>
+            ) : (
+              <>
+                תחומי <span className="gb-gold-text">השדרוג</span>
+                <br />
+                לדירה שלך
+              </>
+            )}
           </h1>
           <div className="gb-divider-gold mb-4" />
           <p className="text-primary-foreground/75 text-[13px] leading-relaxed">
-            בחר תחום, או חפש ספק לפי שם, קטגוריה או אזור.
+            {stage ? "בחרו תחום כדי לראות את הספקים שמשרתים אותו." : "בחרו תחום, או חפשו ספק לפי שם, קטגוריה או אזור."}
           </p>
         </div>
       </header>
