@@ -476,6 +476,20 @@ export default function DealDetail() {
                 )}
                 <p className="text-[11px] text-muted-foreground text-center">הספק יצור איתך קשר בהקדם לתיאום פרטים</p>
               </div>
+            ) : (
+              <Button
+                onClick={handleJoinClick}
+                disabled={submittingInterest}
+                className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold"
+              >
+                {submittingInterest ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : depositRequired ? (
+                  `הצטרף להצעה · פיקדון ${ils(Number(deal.deposit_amount))}`
+                ) : (
+                  "אני מעוניין להצטרף להצעה"
+                )}
+              </Button>
             )}
             {supplier && (() => {
               const wa = normalizeWhatsappUrl(supplier.whatsapp_url || supplier.phone);
