@@ -81,6 +81,7 @@ const App = () => (
             <Route path="/resident/profile/edit" element={<ResidentProfileEdit />} />
             <Route path="/resident/notifications" element={<Notifications />} />
             <Route path="/resident/my-offers" element={<MyOffers />} />
+            <Route path="/resident/documents" element={<MyDocuments />} />
 
             {/* Supplier */}
             <Route path="/supplier" element={<SupplierDashboard />} />
