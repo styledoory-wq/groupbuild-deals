@@ -282,6 +282,45 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          category: string
+          created_at: string
+          deleted_at: string | null
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          is_deleted: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          deleted_at?: string | null
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          is_deleted?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          deleted_at?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          is_deleted?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
