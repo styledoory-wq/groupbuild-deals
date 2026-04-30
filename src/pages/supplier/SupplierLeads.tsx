@@ -63,7 +63,8 @@ export default function SupplierLeads() {
         const { data: dealsData } = await supabase
           .from("deals")
           .select("id,title")
-          .eq("supplier_id", sup.id);
+          .eq("supplier_id", sup.id)
+          .eq("is_deleted", false);
         const ds = (dealsData ?? []) as DealLite[];
         if (!cancelled) setDeals(ds);
 
@@ -75,9 +76,10 @@ export default function SupplierLeads() {
         const dealIds = ds.map((d) => d.id);
         const { data: ints, error: iErr } = await supabase
           .from("deal_interests")
-          .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo")
+          .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes")
           .in("deal_id", dealIds)
           .eq("is_demo", false)
+          .eq("is_deleted", false)
           .order("created_at", { ascending: false });
         if (iErr) throw iErr;
         const list = (ints ?? []) as InterestRow[];

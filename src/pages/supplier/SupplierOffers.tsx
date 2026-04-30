@@ -67,6 +67,7 @@ export default function SupplierOffers() {
           .from("deals")
           .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, tiers, created_at")
           .eq("supplier_id", sid)
+          .eq("is_deleted", false)
           .order("created_at", { ascending: false });
 
         if (dErr) throw dErr;
