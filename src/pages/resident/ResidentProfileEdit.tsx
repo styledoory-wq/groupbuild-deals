@@ -25,7 +25,7 @@ const profileSchema = z.object({
 export default function ResidentProfileEdit() {
   const navigate = useNavigate();
   const { user, setUser, projects } = useApp();
-  const { regions, citiesByRegion } = useRegions();
+  const { regions, cities, citiesByRegion } = useRegions();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -132,6 +132,7 @@ export default function ResidentProfileEdit() {
 
   const currentRegion = regions.find((r) => r.slug === regionSlug);
   const cityOptions = currentRegion ? citiesByRegion(currentRegion.id) : [];
+  const allCityNames = cities.map((c) => c.name_he).sort();
 
   if (loading) {
     return (
@@ -182,17 +183,18 @@ export default function ResidentProfileEdit() {
             </select>
           </Field>
           <Field label="עיר / יישוב" icon={MapPin}>
-            <select
+            <input
+              list="city-options"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="flex h-11 w-full rounded-xl border border-border bg-card px-3 text-sm"
-              disabled={!regionSlug}
-            >
-              <option value="">{regionSlug ? "בחרו עיר" : "בחרו אזור קודם"}</option>
-              {cityOptions.map((c) => (
-                <option key={c.id} value={c.name_he}>{c.name_he}</option>
+              placeholder="הקלידו או בחרו עיר"
+              className="flex h-11 w-full rounded-xl border border-border bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40"
+            />
+            <datalist id="city-options">
+              {(cityOptions.length > 0 ? cityOptions.map(c => c.name_he) : allCityNames).map((name) => (
+                <option key={name} value={name} />
               ))}
-            </select>
+            </datalist>
           </Field>
           <Field label="כתובת (אופציונלי)" icon={MapPin}>
             <Input value={address} onChange={(e) => setAddress(e.target.value)} maxLength={120} className="h-11 rounded-xl" />

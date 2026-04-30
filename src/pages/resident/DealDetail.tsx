@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, MessageCircle, Phone } from "lucide-react";
+import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, MessageCircle, Phone, CheckCircle2, CreditCard, Clock } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -72,6 +72,8 @@ export default function DealDetail() {
   const [deal, setDeal] = useState<DealRow | null>(null);
   const [supplier, setSupplier] = useState<SupplierRow | null>(null);
   const [interested, setInterested] = useState(false);
+  const [interestStatus, setInterestStatus] = useState<string | null>(null);
+  const [interestDepositStatus, setInterestDepositStatus] = useState<string>("none");
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [participantCount, setParticipantCount] = useState<number>(0);
 
@@ -131,12 +133,16 @@ export default function DealDetail() {
         if (session.session) {
           const { data: interest } = await supabase
             .from("deal_interests")
-            .select("id")
+            .select("id,status,deposit_status")
             .eq("user_id", session.session.user.id)
             .eq("deal_id", d.id)
             .eq("is_deleted", false)
             .maybeSingle();
-          if (!cancelled && interest) setInterested(true);
+          if (!cancelled && interest) {
+            setInterested(true);
+            setInterestStatus(interest.status);
+            setInterestDepositStatus(interest.deposit_status ?? "none");
+          }
 
           // Prefill form from profile
           const { data: prof } = await supabase
@@ -216,11 +222,13 @@ export default function DealDetail() {
       const { error: insErr } = await supabase.from("deal_interests").insert(payload);
       if (insErr && !insErr.message.toLowerCase().includes("duplicate")) throw insErr;
       setInterested(true);
+      setInterestStatus(depositRequired ? "pending_deposit" : "interested");
+      setInterestDepositStatus(depositRequired ? "pending" : "none");
       setShowJoinModal(false);
       toast.success(
         depositRequired
-          ? "נקלטה הצטרפות — סטטוס פיקדון: ממתין"
-          : "נרשמת בהצלחה להצעה",
+          ? "נקלטה הצטרפות — נדרש תשלום פיקדון כדי להבטיח מקום"
+          : "נרשמת בהצלחה! הספק יצור איתך קשר בהקדם.",
       );
       await loadParticipantCount(deal.id);
       supabase.functions
@@ -440,8 +448,33 @@ export default function DealDetail() {
         <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0">
           <div className="gb-card p-3 shadow-elevated space-y-2">
             {interested ? (
-              <div className="text-center text-xs font-bold text-success bg-success/10 rounded-xl py-3">
-                ✓ כבר הצטרפת להצעה — נחזור אליך עם פרטים
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-bold text-success bg-success/10 rounded-xl py-3 px-4">
+                  <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
+                  <span>הצטרפת להצעה בהצלחה</span>
+                </div>
+                {interestStatus === "pending_deposit" && interestDepositStatus !== "paid" && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-foreground bg-gold/10 border border-gold/30 rounded-xl py-3 px-4">
+                      <Clock className="h-4 w-4 text-gold shrink-0" />
+                      <span>פיקדון טרם שולם — שלמו כדי להבטיח מקום</span>
+                    </div>
+                    <Button
+                      onClick={() => toast.info("מערכת התשלום תחובר בקרוב. צרו קשר עם הספק לתיאום תשלום.")}
+                      className="w-full h-11 rounded-2xl bg-primary text-primary-foreground font-bold"
+                    >
+                      <CreditCard className="h-4 w-4 ml-2" />
+                      שלם פיקדון · {ils(Number(deal.deposit_amount ?? 0))}
+                    </Button>
+                  </div>
+                )}
+                {interestDepositStatus === "paid" && (
+                  <div className="flex items-center gap-2 text-xs font-bold text-success bg-success/10 rounded-xl py-2.5 px-4">
+                    <CreditCard className="h-4 w-4 text-success shrink-0" />
+                    <span>פיקדון שולם — המקום שלך מובטח ✨</span>
+                  </div>
+                )}
+                <p className="text-[11px] text-muted-foreground text-center">הספק יצור איתך קשר בהקדם לתיאום פרטים</p>
               </div>
             ) : (
               <Button

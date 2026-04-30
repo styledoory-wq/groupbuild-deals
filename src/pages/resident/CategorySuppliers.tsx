@@ -232,29 +232,6 @@ export default function CategorySuppliers() {
       <div className="px-5 -mt-10 relative z-10 space-y-3 pb-6">
         {/* Marketplace controls */}
         <div className="gb-card p-4 animate-fade-up">
-          <div className="flex gap-2 overflow-x-auto pb-3 mb-3 -mx-1 px-1 scrollbar-hide">
-            <button
-              type="button"
-              onClick={() => setActiveCategoryId("all")}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-xs border font-bold transition-smooth ${
-                activeCategoryId === "all" ? "bg-gold text-primary border-gold" : "bg-card border-border text-foreground"
-              }`}
-            >
-              כל התחומים
-            </button>
-            {categories.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setActiveCategoryId(c.id)}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-xs border font-bold transition-smooth ${
-                  activeCategoryId === c.id ? "bg-gold text-primary border-gold" : "bg-card border-border text-foreground"
-                }`}
-              >
-                <span className="ml-1">{c.icon}</span>{c.name}
-              </button>
-            ))}
-          </div>
 
           <div className="flex items-center gap-1.5 mb-3">
             <MapPin className="h-3.5 w-3.5 text-gold" />
