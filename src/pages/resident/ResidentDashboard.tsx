@@ -243,10 +243,10 @@ export default function ResidentDashboard() {
         </div>
       </div>
 
-      {/* My joined offers (top 2) */}
+      {/* My joined offers — compact horizontal scroll */}
       {joinedDeals.length > 0 && (
-        <section className="px-5 space-y-3 mb-6">
-          <div className="flex items-center justify-between">
+        <section className="mb-6">
+          <div className="flex items-center justify-between px-5 mb-2">
             <h2 className="text-[14px] font-semibold text-foreground flex items-center gap-1.5">
               <Heart className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
               ההצעות שלך
@@ -255,13 +255,17 @@ export default function ResidentDashboard() {
               הכל <ArrowLeft className="h-3 w-3" strokeWidth={2} />
             </Link>
           </div>
-          {joinedDeals.slice(0, 2).map((d) => (
-            <RealDealCard key={d.id} deal={d} />
-          ))}
+          <div className="flex gap-3 overflow-x-auto px-5 pb-1 snap-x snap-mandatory no-scrollbar">
+            {joinedDeals.slice(0, 5).map((d) => (
+              <div key={d.id} className="snap-start shrink-0 w-[78%]">
+                <RealDealCard deal={d} />
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
-      {/* Recommended deals (max 3) */}
+      {/* Recommended deals — only 2, full width */}
       <section className="px-5 space-y-3 mb-6">
         <div className="flex items-center justify-between">
           <h2 className="text-[14px] font-semibold text-foreground flex items-center gap-1.5">
@@ -304,7 +308,10 @@ export default function ResidentDashboard() {
             </Link>
           </div>
         ) : (
-          areaDeals.slice(0, 3).map((d) => <RealDealCard key={d.id} deal={d} />)
+          areaDeals
+            .filter((d) => !joinedDeals.some((jd) => jd.id === d.id))
+            .slice(0, 2)
+            .map((d) => <RealDealCard key={d.id} deal={d} />)
         )}
       </section>
 
