@@ -443,9 +443,9 @@ export default function DealDetail() {
         </section>
       )}
 
-      {/* CTA */}
-      <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0">
+      {/* CTA — sits above BottomNav (which is ~64px tall) */}
+      <div className="fixed bottom-16 inset-x-0 z-40 flex justify-center pointer-events-none">
+        <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-3 pt-3 bg-gradient-to-t from-background via-background to-background/0">
           <div className="gb-card p-3 shadow-elevated space-y-2">
             {interested ? (
               <div className="space-y-2">
