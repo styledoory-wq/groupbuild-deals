@@ -158,6 +158,17 @@ export default function AdminResidents() {
           apartmentCount: 0,
           status: "planning" as const,
         };
+        const { error: projectError } = await supabase.from("projects").insert({
+          id: newProj.id,
+          name: newProj.name,
+          city: newProj.city,
+          building_count: newProj.buildingCount,
+          apartment_count: newProj.apartmentCount,
+          status: newProj.status,
+          is_active: true,
+          is_deleted: false,
+        });
+        if (projectError) throw projectError;
         setProjects([newProj, ...projects]);
         finalProjectId = newProj.id;
       }
