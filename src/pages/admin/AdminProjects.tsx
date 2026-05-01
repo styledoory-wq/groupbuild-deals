@@ -3,6 +3,7 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
+import { supabase } from "@/integrations/supabase/client";
 import { Building2, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -38,6 +39,7 @@ export default function AdminProjects() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const openCreate = () => { setForm(emptyForm); setOpen(true); };
   const openEdit = (p: Project) => {
@@ -52,7 +54,7 @@ export default function AdminProjects() {
     setOpen(true);
   };
 
-  const save = () => {
+  const save = async () => {
     if (!form.name.trim() || !form.city.trim()) {
       toast.error("יש למלא שם פרויקט ועיר");
       return;
@@ -65,21 +67,53 @@ export default function AdminProjects() {
       apartmentCount: parseInt(form.apartmentCount) || 0,
       status: form.status,
     };
-    if (form.id) {
-      setProjects(projects.map((p) => (p.id === form.id ? payload : p)));
-      toast.success("הפרויקט עודכן");
-    } else {
-      setProjects([payload, ...projects]);
-      toast.success("פרויקט חדש נוסף");
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("projects").upsert({
+        id: payload.id,
+        name: payload.name,
+        city: payload.city,
+        building_count: payload.buildingCount,
+        apartment_count: payload.apartmentCount,
+        status: payload.status,
+        is_active: true,
+        is_deleted: false,
+        deleted_at: null,
+      });
+      if (error) throw error;
+
+      if (form.id) {
+        setProjects(projects.map((p) => (p.id === form.id ? payload : p)));
+        toast.success("הפרויקט נשמר במערכת");
+      } else {
+        setProjects([payload, ...projects]);
+        toast.success("פרויקט חדש נשמר במערכת");
+      }
+      setOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "שמירת הפרויקט נכשלה");
+    } finally {
+      setSaving(false);
     }
-    setOpen(false);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
-    setProjects(projects.filter((p) => p.id !== deleteId));
-    toast.success("הפרויקט נמחק");
-    setDeleteId(null);
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({ is_deleted: true, is_active: false, deleted_at: new Date().toISOString() })
+        .eq("id", deleteId);
+      if (error) throw error;
+      setProjects(projects.filter((p) => p.id !== deleteId));
+      toast.success("הפרויקט הוסר מהרשימה ונשמר כסגור");
+      setDeleteId(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "מחיקת הפרויקט נכשלה");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -176,9 +210,9 @@ export default function AdminProjects() {
             </div>
           </div>
           <DialogFooter className="mt-4 gap-2 sm:gap-2">
-            <button onClick={() => setOpen(false)} className="h-10 px-4 rounded-xl bg-muted text-foreground text-sm font-bold flex-1">ביטול</button>
-            <button onClick={save} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex-1">
-              {form.id ? "שמירה" : "הוספה"}
+            <button onClick={() => setOpen(false)} disabled={saving} className="h-10 px-4 rounded-xl bg-muted text-foreground text-sm font-bold flex-1 disabled:opacity-50">ביטול</button>
+            <button onClick={save} disabled={saving} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex-1 disabled:opacity-50">
+              {saving ? "שומר…" : form.id ? "שמירה" : "הוספה"}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -188,11 +222,11 @@ export default function AdminProjects() {
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-right">מחיקת פרויקט</AlertDialogTitle>
-            <AlertDialogDescription className="text-right">פעולה זו תמחק את הפרויקט לצמיתות. האם להמשיך?</AlertDialogDescription>
+            <AlertDialogDescription className="text-right">הפרויקט יוסר מהרשימות הפעילות אך הנתונים יישמרו במערכת.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>ביטול</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">מחיקה</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} disabled={saving} className="bg-destructive text-destructive-foreground">הסרה</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -453,6 +453,48 @@ export type Database = {
           },
         ]
       }
+      projects: {
+        Row: {
+          apartment_count: number
+          building_count: number
+          city: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_active: boolean
+          is_deleted: boolean
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          apartment_count?: number
+          building_count?: number
+          city: string
+          created_at?: string
+          deleted_at?: string | null
+          id: string
+          is_active?: boolean
+          is_deleted?: boolean
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          apartment_count?: number
+          building_count?: number
+          city?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_active?: boolean
+          is_deleted?: boolean
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       regions: {
         Row: {
           created_at: string
