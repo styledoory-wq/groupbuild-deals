@@ -443,9 +443,12 @@ export default function DealDetail() {
         </section>
       )}
 
-      {/* CTA — sits above BottomNav (which is ~64px tall) */}
-      <div className="fixed bottom-16 inset-x-0 z-40 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-3 pt-3 bg-gradient-to-t from-background via-background to-background/0">
+      {/* Spacer so page content is not hidden behind the fixed CTA + BottomNav */}
+      <div aria-hidden className="h-40" />
+
+      {/* CTA — sits above BottomNav (~80px tall incl. safe-area) */}
+      <div className="fixed bottom-20 inset-x-0 z-50 flex justify-center pointer-events-none">
+        <div className="pointer-events-auto w-full max-w-[480px] px-4 pt-4 pb-2 bg-gradient-to-t from-background via-background to-background/0">
           <div className="gb-card p-3 shadow-elevated space-y-2">
             {interested ? (
               <div className="space-y-2">
