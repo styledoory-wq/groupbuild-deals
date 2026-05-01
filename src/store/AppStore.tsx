@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type {
   AppNotification, Category, Deal, Deposit, Project, Review, Supplier, User,
 } from "@/types";
@@ -7,11 +7,11 @@ import {
   deals as seedDeals,
   deposits as seedDeposits,
   notifications as seedNotifications,
-  projects as seedProjects,
   reviews as seedReviews,
   suppliers as seedSuppliers,
   demoUsers,
 } from "@/data/mockData";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AppState {
   user: User | null;
@@ -41,7 +41,7 @@ const Ctx = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [projects, setProjects] = useState<Project[]>(seedProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [categories, setCategories] = useState<Category[]>(seedCategories);
   const [suppliers, setSuppliers] = useState<Supplier[]>(seedSuppliers);
   const [deals, setDeals] = useState<Deal[]>(seedDeals);
@@ -54,6 +54,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUser(u);
     return u;
   };
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("id,name,city,building_count,apartment_count,status")
+        .eq("is_active", true)
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false });
+
+      if (!active) return;
+      if (error) {
+        console.error("[AppStore] projects load failed", error);
+        return;
+      }
+
+      setProjects((data ?? []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        city: p.city,
+        buildingCount: p.building_count ?? 0,
+        apartmentCount: p.apartment_count ?? 0,
+        status: (p.status as Project["status"]) ?? "planning",
+      })));
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const logout = () => setUser(null);
 
