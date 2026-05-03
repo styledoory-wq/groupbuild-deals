@@ -261,6 +261,36 @@ export type Database = {
           },
         ]
       }
+      deposit_attempt_logs: {
+        Row: {
+          attempted_amount: number | null
+          created_at: string
+          deal_id: string | null
+          id: string
+          metadata: Json
+          reason: string
+          user_id: string | null
+        }
+        Insert: {
+          attempted_amount?: number | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          metadata?: Json
+          reason: string
+          user_id?: string | null
+        }
+        Update: {
+          attempted_amount?: number | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          metadata?: Json
+          reason?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       deposits: {
         Row: {
           amount: number
