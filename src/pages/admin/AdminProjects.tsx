@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
-import { Building2, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
+import { Building2, Check, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import type { Project, ProjectStatus } from "@/types";
 
 const statusLabel: Record<ProjectStatus, string> = {
@@ -184,18 +185,11 @@ export default function AdminProjects() {
             </div>
             <div>
               <Label className="text-xs">עיר *</Label>
-              <Input
-                list="admin-project-cities"
+              <CityCombobox
                 value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
-                placeholder="הקלידו או בחרו עיר"
-                autoComplete="off"
+                cities={cityNames}
+                onChange={(city) => setForm({ ...form, city })}
               />
-              <datalist id="admin-project-cities">
-                {cityNames.map((n) => (
-                  <option key={n} value={n} />
-                ))}
-              </datalist>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -250,6 +244,62 @@ export default function AdminProjects() {
 
       <BottomNav role="admin" />
     </MobileShell>
+  );
+}
+
+function CityCombobox({ value, cities, onChange }: { value: string; cities: string[]; onChange: (city: string) => void }) {
+  const [open, setOpen] = useState(false);
+
+  const filteredCities = useMemo(() => {
+    const q = value.trim().toLocaleLowerCase("he");
+    const list = q ? cities.filter((city) => city.toLocaleLowerCase("he").includes(q)) : cities;
+    return list.slice(0, 60);
+  }, [cities, value]);
+
+  const selectCity = (city: string) => {
+    onChange(city);
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <Input
+        value={value}
+        onFocus={() => setOpen(true)}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setOpen(true);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+        }}
+        placeholder="הקלידו עיר לבחירה"
+        autoComplete="off"
+        role="combobox"
+        aria-expanded={open}
+        aria-autocomplete="list"
+      />
+      {open && (
+        <div className="absolute right-0 left-0 top-[calc(100%+0.25rem)] z-[80] max-h-56 overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-lg">
+          {filteredCities.length > 0 ? (
+            filteredCities.map((city) => (
+              <button
+                key={city}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => selectCity(city)}
+                className="flex min-h-10 w-full items-center justify-between px-3 py-2 text-right text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
+              >
+                <span>{city}</span>
+                <Check className={cn("h-4 w-4", value === city ? "opacity-100" : "opacity-0")} />
+              </button>
+            ))
+          ) : (
+            <div className="px-3 py-3 text-center text-sm text-muted-foreground">לא נמצאו ערים</div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
