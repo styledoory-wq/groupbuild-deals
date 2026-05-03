@@ -222,13 +222,38 @@ export default function DealDetail() {
       };
       const { error: insErr } = await supabase.from("deal_interests").insert(payload);
       if (insErr && !insErr.message.toLowerCase().includes("duplicate")) throw insErr;
+
+      // Create a real pending deposit row (only if one doesn't already exist for this user+deal).
+      if (depositRequired) {
+        const { data: existingDep } = await supabase
+          .from("deposits")
+          .select("id,status")
+          .eq("user_id", session.session.user.id)
+          .eq("deal_id", deal.id)
+          .eq("is_deleted", false)
+          .in("status", ["pending", "paid"])
+          .maybeSingle();
+        if (!existingDep) {
+          const { error: depErr } = await supabase.from("deposits").insert({
+            user_id: session.session.user.id,
+            deal_id: deal.id,
+            amount: Number(deal.deposit_amount ?? 0),
+            currency: "ILS",
+            payment_provider: "grow",
+            status: "pending",
+            metadata: { source: "resident_join", deal_title: deal.title },
+          });
+          if (depErr) throw depErr;
+        }
+      }
+
       setInterested(true);
       setInterestStatus(depositRequired ? "pending_deposit" : "interested");
       setInterestDepositStatus(depositRequired ? "pending" : "none");
       setShowJoinModal(false);
       toast.success(
         depositRequired
-          ? "נקלטה הצטרפות — נדרש תשלום פיקדון כדי להבטיח מקום"
+          ? "בקשת ההצטרפות נקלטה, ממתינה לאישור פיקדון"
           : "נרשמת בהצלחה! הספק יצור איתך קשר בהקדם.",
       );
       await loadParticipantCount(deal.id);
