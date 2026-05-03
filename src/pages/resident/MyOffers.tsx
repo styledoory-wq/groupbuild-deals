@@ -68,7 +68,7 @@ export default function MyOffers() {
         const counts: Record<string, number> = {};
         await Promise.all(
           dealIds.map(async (id) => {
-            const { data } = await supabase.rpc("get_deal_interest_count", { _deal_id: id });
+            const { data } = await supabase.rpc("get_deal_paid_count", { _deal_id: id });
             counts[id] = typeof data === "number" ? data : 0;
           }),
         );
