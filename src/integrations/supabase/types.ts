@@ -44,6 +44,42 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          display_order: number
+          icon: string
+          id: string
+          is_active: boolean
+          is_deleted: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          display_order?: number
+          icon?: string
+          id: string
+          is_active?: boolean
+          is_deleted?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          display_order?: number
+          icon?: string
+          id?: string
+          is_active?: boolean
+          is_deleted?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           created_at: string
@@ -785,8 +821,10 @@ export type Database = {
           category: string | null
           city: string | null
           created_at: string
+          deleted_at: string | null
           full_name: string
           id: string
+          is_deleted: boolean
           is_demo: boolean
           lead_type: string
           phone: string
@@ -798,8 +836,10 @@ export type Database = {
           category?: string | null
           city?: string | null
           created_at?: string
+          deleted_at?: string | null
           full_name: string
           id?: string
+          is_deleted?: boolean
           is_demo?: boolean
           lead_type: string
           phone: string
@@ -811,8 +851,10 @@ export type Database = {
           category?: string | null
           city?: string | null
           created_at?: string
+          deleted_at?: string | null
           full_name?: string
           id?: string
+          is_deleted?: boolean
           is_demo?: boolean
           lead_type?: string
           phone?: string
@@ -841,6 +883,27 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      notify_admins: {
+        Args: {
+          _body: string
+          _link?: string
+          _metadata?: Json
+          _title: string
+          _type: string
+        }
+        Returns: undefined
+      }
+      notify_user: {
+        Args: {
+          _body: string
+          _link?: string
+          _metadata?: Json
+          _title: string
+          _type: string
+          _user_id: string
+        }
+        Returns: undefined
       }
       refresh_supplier_service_areas: {
         Args: { _supplier_id: string }
