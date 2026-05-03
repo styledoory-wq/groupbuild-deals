@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
-import { Building2, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
+import { Building2, Check, ChevronsUpDown, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import type { Project, ProjectStatus } from "@/types";
 
 const statusLabel: Record<ProjectStatus, string> = {
@@ -184,18 +187,11 @@ export default function AdminProjects() {
             </div>
             <div>
               <Label className="text-xs">עיר *</Label>
-              <Input
-                list="admin-project-cities"
+              <CityCombobox
                 value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
-                placeholder="הקלידו או בחרו עיר"
-                autoComplete="off"
+                cities={cityNames}
+                onChange={(city) => setForm({ ...form, city })}
               />
-              <datalist id="admin-project-cities">
-                {cityNames.map((n) => (
-                  <option key={n} value={n} />
-                ))}
-              </datalist>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -250,6 +246,75 @@ export default function AdminProjects() {
 
       <BottomNav role="admin" />
     </MobileShell>
+  );
+}
+
+function CityCombobox({ value, cities, onChange }: { value: string; cities: string[]; onChange: (city: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState(value);
+
+  const filteredCities = useMemo(() => {
+    const q = search.trim().toLocaleLowerCase("he");
+    const list = q ? cities.filter((city) => city.toLocaleLowerCase("he").includes(q)) : cities;
+    return list.slice(0, 80);
+  }, [cities, search]);
+
+  const selectCity = (city: string) => {
+    onChange(city);
+    setSearch(city);
+    setOpen(false);
+  };
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+        if (nextOpen) setSearch(value);
+      }}
+    >
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          role="combobox"
+          aria-expanded={open}
+          className={cn(
+            "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:text-sm",
+            !value && "text-muted-foreground",
+          )}
+        >
+          <span className="truncate text-right">{value || "הקלידו או בחרו עיר"}</span>
+          <ChevronsUpDown className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" dir="rtl">
+        <Command shouldFilter={false}>
+          <CommandInput
+            value={search}
+            onValueChange={setSearch}
+            placeholder="חיפוש עיר..."
+            className="text-right"
+            autoFocus
+          />
+          <CommandList className="max-h-64">
+            <CommandEmpty>לא נמצאו ערים</CommandEmpty>
+            <CommandGroup>
+              {filteredCities.map((city) => (
+                <CommandItem
+                  key={city}
+                  value={city}
+                  onSelect={() => selectCity(city)}
+                  className="cursor-pointer justify-between"
+                >
+                  <span>{city}</span>
+                  <Check className={cn("h-4 w-4", value === city ? "opacity-100" : "opacity-0")} />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 
