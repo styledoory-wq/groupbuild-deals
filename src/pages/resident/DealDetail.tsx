@@ -343,6 +343,12 @@ export default function DealDetail() {
   const activeTier = tiers.length > 0 ? getActiveTier(tiers, participantCount) : null;
   const nextTier = tiers.length > 0 ? getNextTier(tiers, participantCount) : null;
   const peopleNeeded = nextTier ? Math.max(0, nextTier.minParticipants - participantCount) : 0;
+  // Progress target: next tier's threshold, or the highest tier's min if maxed out.
+  const progressTarget = nextTier
+    ? nextTier.minParticipants
+    : tiers.length > 0
+      ? Math.max(...tiers.map((t) => t.minParticipants))
+      : 0;
   const category = categories.find((c) => c.id === deal.category_id);
   const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
 
