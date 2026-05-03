@@ -234,16 +234,27 @@ export default function DealDetail() {
           .in("status", ["pending", "paid"])
           .maybeSingle();
         if (!existingDep) {
+          // amount + status are enforced server-side by the integrity trigger.
           const { error: depErr } = await supabase.from("deposits").insert({
             user_id: session.session.user.id,
             deal_id: deal.id,
-            amount: Number(deal.deposit_amount ?? 0),
+            amount: 0, // overridden by trigger from deals.deposit_amount
             currency: "ILS",
             payment_provider: "grow",
             status: "pending",
             metadata: { source: "resident_join", deal_title: deal.title },
           });
-          if (depErr) throw depErr;
+          if (depErr) {
+            console.error("[deposit_insert_failed]", depErr);
+            await supabase.from("deposit_attempt_logs").insert({
+              user_id: session.session.user.id,
+              deal_id: deal.id,
+              attempted_amount: Number(deal.deposit_amount ?? 0),
+              reason: depErr.message ?? "unknown",
+              metadata: { code: depErr.code ?? null, source: "resident_join" },
+            });
+            throw depErr;
+          }
         }
       }
 
