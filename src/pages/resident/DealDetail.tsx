@@ -90,7 +90,8 @@ export default function DealDetail() {
   });
 
   const loadParticipantCount = async (id: string) => {
-    const { data, error: rpcErr } = await supabase.rpc("get_deal_interest_count", { _deal_id: id });
+    // Pricing tier is driven by PAID deposits only — pending interests do not count.
+    const { data, error: rpcErr } = await supabase.rpc("get_deal_paid_count", { _deal_id: id });
     if (!rpcErr && typeof data === "number") setParticipantCount(data);
   };
 
