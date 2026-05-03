@@ -78,9 +78,9 @@ export default function Landing() {
                   <Button
                     type="button"
                     onClick={goLogin}
-                    variant="ghost"
-                    className="h-9 px-3 rounded-xl text-primary-foreground hover:text-gold hover:bg-white/5 font-bold text-xs"
+                    className="h-9 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-primary-foreground border border-white/25 font-bold text-xs"
                   >
+                    <LogIn className="h-3.5 w-3.5" />
                     התחברות
                   </Button>
                   <Button
@@ -139,14 +139,15 @@ export default function Landing() {
                     <UserPlus className="h-4 w-4" />
                     הרשמה
                   </Button>
-                  <button
+                  <Button
                     type="button"
                     onClick={goLogin}
-                    className="text-sm text-primary-foreground/85 hover:text-gold underline-offset-4 hover:underline transition-smooth inline-flex items-center justify-center gap-1.5"
+                    variant="outline"
+                    className="h-12 rounded-2xl bg-white/10 hover:bg-white/20 text-primary-foreground border-2 border-gold/60 font-bold flex items-center justify-center gap-2"
                   >
-                    <LogIn className="h-3.5 w-3.5" />
+                    <LogIn className="h-4 w-4" />
                     כבר רשום? התחבר
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
