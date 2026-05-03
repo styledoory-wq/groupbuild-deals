@@ -377,29 +377,55 @@ export default function DealDetail() {
         <div className="gb-card p-5 bg-gradient-card">
           <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">המחיר/הנחה הנוכחיים</div>
           <div className="text-2xl font-extrabold text-primary leading-tight">{display.headline}</div>
+          {display.savings && (
+            <div className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold text-success bg-success/10 border border-success/30 rounded-full px-3 py-1">
+              <TrendingUp className="h-3.5 w-3.5" />
+              {display.savings}
+            </div>
+          )}
           <p className="text-[11px] text-muted-foreground mt-2">
             ככל שיותר דיירים מצטרפים — ההנחה גדלה
           </p>
         </div>
       </div>
 
-      {/* Live progress */}
+      {/* Live progress + momentum */}
       <div className="px-5 mb-4">
         <div className="gb-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-bold text-foreground">
               <Users className="h-4 w-4 text-gold" />
-              כמות מצטרפים כרגע
+              {progressTarget > 0
+                ? `${participantCount} מתוך ${progressTarget} הצטרפו`
+                : "כמות מצטרפים כרגע"}
             </div>
             <div className="text-lg font-extrabold text-primary">{participantCount}</div>
           </div>
+          {progressTarget > 0 && (
+            <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full bg-gradient-gold rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(100, Math.round((participantCount / progressTarget) * 100))}%` }}
+              />
+            </div>
+          )}
           {nextTier ? (
             <div className="rounded-xl bg-gold/10 border border-gold/30 px-3 py-2 flex items-start gap-2">
               <TrendingUp className="h-4 w-4 text-gold mt-0.5 shrink-0" />
               <div className="text-[12px] text-foreground leading-relaxed">
-                עוד <span className="font-extrabold text-primary">{peopleNeeded}</span>{" "}
-                {peopleNeeded === 1 ? "דייר" : "דיירים"} וההנחה עולה ל-
-                <span className="font-extrabold text-primary">{tierShortValue(offerType, nextTier)}</span>
+                {peopleNeeded <= 3 && peopleNeeded > 0 ? (
+                  <>
+                    עוד <span className="font-extrabold text-primary">{peopleNeeded}</span>{" "}
+                    {peopleNeeded === 1 ? "אדם" : "אנשים"} והמחיר יורד ל-
+                    <span className="font-extrabold text-primary">{tierShortValue(offerType, nextTier)}</span>!
+                  </>
+                ) : (
+                  <>
+                    עוד <span className="font-extrabold text-primary">{peopleNeeded}</span>{" "}
+                    {peopleNeeded === 1 ? "דייר" : "דיירים"} וההנחה עולה ל-
+                    <span className="font-extrabold text-primary">{tierShortValue(offerType, nextTier)}</span>
+                  </>
+                )}
               </div>
             </div>
           ) : tiers.length > 0 ? (
