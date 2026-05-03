@@ -9,11 +9,13 @@ import { cn } from "@/lib/utils";
 const iconFor = { deal: Tag, deposit: Wallet, system: Info } as const;
 
 export default function Notifications() {
-  const { notifications, markNotificationsRead } = useApp();
+  const { notifications, refreshNotifications, markNotificationsRead } = useApp();
 
   useEffect(() => {
-    const t = setTimeout(markNotificationsRead, 800);
+    void refreshNotifications();
+    const t = setTimeout(() => { void markNotificationsRead(); }, 800);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -27,7 +29,7 @@ export default function Notifications() {
           </div>
         )}
         {notifications.map((n) => {
-          const Icon = iconFor[n.type];
+          const Icon = iconFor[n.type] ?? Info;
           return (
             <div
               key={n.id}

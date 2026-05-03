@@ -1,16 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type {
-  AppNotification, Category, Deal, Deposit, Project, Review, Supplier, User,
-} from "@/types";
-import {
-  categories as seedCategories,
-  deals as seedDeals,
-  deposits as seedDeposits,
-  notifications as seedNotifications,
-  reviews as seedReviews,
-  suppliers as seedSuppliers,
-  demoUsers,
-} from "@/data/mockData";
+import type { AppNotification, Category, Project, User } from "@/types";
+import { demoUsers } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
 
 interface AppState {
@@ -23,31 +13,35 @@ interface AppState {
   setProjects: (p: Project[]) => void;
   categories: Category[];
   setCategories: (c: Category[]) => void;
-  suppliers: Supplier[];
-  setSuppliers: (s: Supplier[]) => void;
-  deals: Deal[];
-  setDeals: (d: Deal[]) => void;
-  deposits: Deposit[];
-  setDeposits: (d: Deposit[]) => void;
-  reviews: Review[];
-  notifications: AppNotification[];
-  markNotificationsRead: () => void;
 
-  joinDeal: (dealId: string) => void;
-  payDeposit: (dealId: string) => void;
+  notifications: AppNotification[];
+  unreadCount: number;
+  refreshNotifications: () => Promise<void>;
+  markNotificationsRead: () => Promise<void>;
 }
 
 const Ctx = createContext<AppState | null>(null);
 
+type DbCategoryRow = {
+  id: string;
+  name: string;
+  icon: string | null;
+};
+
+type DbNotificationRow = {
+  id: string;
+  title: string;
+  body: string | null;
+  type: string | null;
+  is_read: boolean | null;
+  created_at: string;
+};
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [categories, setCategories] = useState<Category[]>(seedCategories);
-  const [suppliers, setSuppliers] = useState<Supplier[]>(seedSuppliers);
-  const [deals, setDeals] = useState<Deal[]>(seedDeals);
-  const [deposits, setDeposits] = useState<Deposit[]>(seedDeposits);
-  const [reviews] = useState<Review[]>(seedReviews);
-  const [notifications, setNotifications] = useState<AppNotification[]>(seedNotifications);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   const loginDemo = (role: "resident" | "supplier" | "admin") => {
     const u = demoUsers[role];
@@ -55,6 +49,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return u;
   };
 
+  const logout = () => setUser(null);
+
+  // Load projects (active, not deleted) once on mount
   useEffect(() => {
     let active = true;
     (async () => {
@@ -80,55 +77,97 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: (p.status as Project["status"]) ?? "planning",
       })));
     })();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
-  const logout = () => setUser(null);
+  // Load categories from Supabase
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id,name,icon")
+        .eq("is_active", true)
+        .eq("is_deleted", false)
+        .order("display_order", { ascending: true });
 
-  const markNotificationsRead = () =>
+      if (!active) return;
+      if (error) {
+        console.error("[AppStore] categories load failed", error);
+        return;
+      }
+      setCategories(((data ?? []) as DbCategoryRow[]).map((c) => ({
+        id: c.id,
+        name: c.name,
+        icon: c.icon ?? "📦",
+      })));
+    })();
+    return () => { active = false; };
+  }, []);
+
+  // Load notifications for current authenticated user (and refresh on auth change)
+  const refreshNotifications = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const uid = sessionData.session?.user?.id;
+    if (!uid) {
+      setNotifications([]);
+      return;
+    }
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("id,title,body,type,is_read,created_at")
+      .eq("user_id", uid)
+      .eq("is_deleted", false)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) {
+      console.error("[AppStore] notifications load failed", error);
+      return;
+    }
+    setNotifications(((data ?? []) as DbNotificationRow[]).map((n) => ({
+      id: n.id,
+      title: n.title,
+      body: n.body ?? "",
+      type: ((n.type as AppNotification["type"]) ?? "system"),
+      unread: !n.is_read,
+      createdAt: n.created_at,
+    })));
+  };
+
+  useEffect(() => {
+    void refreshNotifications();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      void refreshNotifications();
+    });
+    return () => { sub.subscription.unsubscribe(); };
+  }, []);
+
+  const markNotificationsRead = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const uid = sessionData.session?.user?.id;
+    if (!uid) return;
+    const { error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("user_id", uid)
+      .eq("is_read", false);
+    if (error) {
+      console.error("[AppStore] mark read failed", error);
+      return;
+    }
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
-
-  const joinDeal = (dealId: string) => {
-    setDeals((prev) =>
-      prev.map((d) => (d.id === dealId ? { ...d, joinedParticipants: d.joinedParticipants + 1 } : d))
-    );
   };
 
-  const payDeposit = (dealId: string) => {
-    if (!user) return;
-    const deal = deals.find((d) => d.id === dealId);
-    if (!deal) return;
-    const dep: Deposit = {
-      id: `dp_${Date.now()}`,
-      userId: user.id,
-      dealId,
-      amount: deal.depositAmount,
-      status: "paid",
-      createdAt: new Date().toISOString(),
-    };
-    setDeposits((prev) => [dep, ...prev]);
-    setDeals((prev) =>
-      prev.map((d) =>
-        d.id === dealId ? { ...d, paidParticipants: d.paidParticipants + 1, joinedParticipants: Math.max(d.joinedParticipants, d.paidParticipants + 1) } : d
-      )
-    );
-  };
+  const unreadCount = notifications.filter((n) => n.unread).length;
 
   const value = useMemo<AppState>(
     () => ({
       user, setUser, loginDemo, logout,
       projects, setProjects,
       categories, setCategories,
-      suppliers, setSuppliers,
-      deals, setDeals,
-      deposits, setDeposits,
-      reviews,
-      notifications, markNotificationsRead,
-      joinDeal, payDeposit,
+      notifications, unreadCount, refreshNotifications, markNotificationsRead,
     }),
-    [user, projects, categories, suppliers, deals, deposits, reviews, notifications]
+    [user, projects, categories, notifications, unreadCount]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -138,25 +177,6 @@ export function useApp() {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error("useApp must be used inside AppProvider");
   return ctx;
-}
-
-// Pricing helpers
-export function getActiveTier(deal: Deal) {
-  const paid = deal.paidParticipants;
-  const sorted = [...deal.tiers].sort((a, b) => a.minParticipants - b.minParticipants);
-  let active = sorted[0];
-  for (const t of sorted) {
-    const inRange = paid >= t.minParticipants && (t.maxParticipants === null || paid <= t.maxParticipants);
-    if (inRange) { active = t; break; }
-    if (paid >= t.minParticipants) active = t;
-  }
-  return active;
-}
-
-export function getNextTier(deal: Deal) {
-  const paid = deal.paidParticipants;
-  const sorted = [...deal.tiers].sort((a, b) => a.minParticipants - b.minParticipants);
-  return sorted.find((t) => t.minParticipants > paid) || null;
 }
 
 export function formatILS(n: number) {
