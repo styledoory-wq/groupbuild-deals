@@ -88,6 +88,32 @@ export default function AdminCategories() {
     }
   };
 
+  const move = async (id: string, direction: "up" | "down") => {
+    const idx = list.findIndex((c) => c.id === id);
+    if (idx < 0) return;
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= list.length) return;
+    const a = list[idx];
+    const b = list[swapIdx];
+    // Optimistic UI swap
+    const next = [...list];
+    next[idx] = { ...b, display_order: a.display_order };
+    next[swapIdx] = { ...a, display_order: b.display_order };
+    setList(next);
+    setBusy(true);
+    try {
+      const r1 = await supabase.from("categories").update({ display_order: b.display_order }).eq("id", a.id);
+      const r2 = await supabase.from("categories").update({ display_order: a.display_order }).eq("id", b.id);
+      if (r1.error || r2.error) throw r1.error ?? r2.error;
+      setCategories(next.map((r) => ({ id: r.id, name: r.name, icon: r.icon })));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "שינוי הסדר נכשל");
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <MobileShell>
       <PageHeader title="ניהול קטגוריות" subtitle={`${list.length} קטגוריות`} />
