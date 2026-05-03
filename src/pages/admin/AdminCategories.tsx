@@ -3,7 +3,7 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
-import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2, ArrowUp, ArrowDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -88,6 +88,32 @@ export default function AdminCategories() {
     }
   };
 
+  const move = async (id: string, direction: "up" | "down") => {
+    const idx = list.findIndex((c) => c.id === id);
+    if (idx < 0) return;
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= list.length) return;
+    const a = list[idx];
+    const b = list[swapIdx];
+    // Optimistic UI swap
+    const next = [...list];
+    next[idx] = { ...b, display_order: a.display_order };
+    next[swapIdx] = { ...a, display_order: b.display_order };
+    setList(next);
+    setBusy(true);
+    try {
+      const r1 = await supabase.from("categories").update({ display_order: b.display_order }).eq("id", a.id);
+      const r2 = await supabase.from("categories").update({ display_order: a.display_order }).eq("id", b.id);
+      if (r1.error || r2.error) throw r1.error ?? r2.error;
+      setCategories(next.map((r) => ({ id: r.id, name: r.name, icon: r.icon })));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "שינוי הסדר נכשל");
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <MobileShell>
       <PageHeader title="ניהול קטגוריות" subtitle={`${list.length} קטגוריות`} />
@@ -106,9 +132,27 @@ export default function AdminCategories() {
           <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" /> טוען…
         </div>
       ) : (
-        <div className="px-5 grid grid-cols-2 gap-2">
-          {list.map((c) => (
+        <div className="px-5 space-y-2">
+          {list.map((c, idx) => (
             <div key={c.id} className="gb-card p-3 flex items-center gap-2">
+              <div className="flex flex-col">
+                <button
+                  onClick={() => move(c.id, "up")}
+                  disabled={busy || idx === 0}
+                  className="h-5 w-6 rounded-md hover:bg-muted disabled:opacity-30 flex items-center justify-center"
+                  aria-label="העלה למעלה"
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => move(c.id, "down")}
+                  disabled={busy || idx === list.length - 1}
+                  className="h-5 w-6 rounded-md hover:bg-muted disabled:opacity-30 flex items-center justify-center"
+                  aria-label="הורד למטה"
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </button>
+              </div>
               <div className="text-xl">{c.icon}</div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-bold truncate">{c.name}</div>

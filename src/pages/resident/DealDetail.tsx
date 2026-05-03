@@ -172,6 +172,20 @@ export default function DealDetail() {
     };
   }, [dealId]);
 
+  // Realtime: refresh paid count whenever a deposit row for this deal changes.
+  useEffect(() => {
+    if (!dealId) return;
+    const channel = supabase
+      .channel(`deal-deposits-${dealId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "deposits", filter: `deal_id=eq.${dealId}` },
+        () => { void loadParticipantCount(dealId); },
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [dealId]);
+
   const handleJoinClick = async () => {
     if (!deal) return;
     const { data: session } = await supabase.auth.getSession();
@@ -343,6 +357,12 @@ export default function DealDetail() {
   const activeTier = tiers.length > 0 ? getActiveTier(tiers, participantCount) : null;
   const nextTier = tiers.length > 0 ? getNextTier(tiers, participantCount) : null;
   const peopleNeeded = nextTier ? Math.max(0, nextTier.minParticipants - participantCount) : 0;
+  // Progress target: next tier's threshold, or the highest tier's min if maxed out.
+  const progressTarget = nextTier
+    ? nextTier.minParticipants
+    : tiers.length > 0
+      ? Math.max(...tiers.map((t) => t.minParticipants))
+      : 0;
   const category = categories.find((c) => c.id === deal.category_id);
   const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
 
@@ -377,29 +397,55 @@ export default function DealDetail() {
         <div className="gb-card p-5 bg-gradient-card">
           <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">המחיר/הנחה הנוכחיים</div>
           <div className="text-2xl font-extrabold text-primary leading-tight">{display.headline}</div>
+          {display.savings && (
+            <div className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold text-success bg-success/10 border border-success/30 rounded-full px-3 py-1">
+              <TrendingUp className="h-3.5 w-3.5" />
+              {display.savings}
+            </div>
+          )}
           <p className="text-[11px] text-muted-foreground mt-2">
             ככל שיותר דיירים מצטרפים — ההנחה גדלה
           </p>
         </div>
       </div>
 
-      {/* Live progress */}
+      {/* Live progress + momentum */}
       <div className="px-5 mb-4">
         <div className="gb-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-bold text-foreground">
               <Users className="h-4 w-4 text-gold" />
-              כמות מצטרפים כרגע
+              {progressTarget > 0
+                ? `${participantCount} מתוך ${progressTarget} הצטרפו`
+                : "כמות מצטרפים כרגע"}
             </div>
             <div className="text-lg font-extrabold text-primary">{participantCount}</div>
           </div>
+          {progressTarget > 0 && (
+            <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full bg-gradient-gold rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(100, Math.round((participantCount / progressTarget) * 100))}%` }}
+              />
+            </div>
+          )}
           {nextTier ? (
             <div className="rounded-xl bg-gold/10 border border-gold/30 px-3 py-2 flex items-start gap-2">
               <TrendingUp className="h-4 w-4 text-gold mt-0.5 shrink-0" />
               <div className="text-[12px] text-foreground leading-relaxed">
-                עוד <span className="font-extrabold text-primary">{peopleNeeded}</span>{" "}
-                {peopleNeeded === 1 ? "דייר" : "דיירים"} וההנחה עולה ל-
-                <span className="font-extrabold text-primary">{tierShortValue(offerType, nextTier)}</span>
+                {peopleNeeded <= 3 && peopleNeeded > 0 ? (
+                  <>
+                    עוד <span className="font-extrabold text-primary">{peopleNeeded}</span>{" "}
+                    {peopleNeeded === 1 ? "אדם" : "אנשים"} והמחיר יורד ל-
+                    <span className="font-extrabold text-primary">{tierShortValue(offerType, nextTier)}</span>!
+                  </>
+                ) : (
+                  <>
+                    עוד <span className="font-extrabold text-primary">{peopleNeeded}</span>{" "}
+                    {peopleNeeded === 1 ? "דייר" : "דיירים"} וההנחה עולה ל-
+                    <span className="font-extrabold text-primary">{tierShortValue(offerType, nextTier)}</span>
+                  </>
+                )}
               </div>
             </div>
           ) : tiers.length > 0 ? (
@@ -416,7 +462,7 @@ export default function DealDetail() {
           <div className="rounded-2xl border border-gold/40 bg-gold/5 px-4 py-3 text-[12px] text-foreground">
             <div className="font-bold mb-0.5">נדרש פיקדון להצטרפות: {ils(Number(deal.deposit_amount))}</div>
             <div className="text-muted-foreground">
-              הפיקדון מהווה התחייבות בלבד — בשלב זה לא תתבצע גבייה בפועל.
+              הצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת.
             </div>
           </div>
         </div>
@@ -494,18 +540,11 @@ export default function DealDetail() {
                   <span>הצטרפת להצעה בהצלחה</span>
                 </div>
                 {interestStatus === "pending_deposit" && interestDepositStatus !== "paid" && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-bold text-foreground bg-gold/10 border border-gold/30 rounded-xl py-3 px-4">
-                      <Clock className="h-4 w-4 text-gold shrink-0" />
-                      <span>פיקדון טרם שולם — שלמו כדי להבטיח מקום</span>
-                    </div>
-                    <Button
-                      onClick={() => toast.info("מערכת התשלום תחובר בקרוב. צרו קשר עם הספק לתיאום תשלום.")}
-                      className="w-full h-11 rounded-2xl bg-primary text-primary-foreground font-bold"
-                    >
-                      <CreditCard className="h-4 w-4 ml-2" />
-                      שלם פיקדון · {ils(Number(deal.deposit_amount ?? 0))}
-                    </Button>
+                  <div className="flex items-start gap-2 text-xs font-bold text-foreground bg-gold/10 border border-gold/30 rounded-xl py-3 px-4">
+                    <Clock className="h-4 w-4 text-gold shrink-0 mt-0.5" />
+                    <span className="leading-relaxed">
+                      הצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת
+                    </span>
                   </div>
                 )}
                 {interestDepositStatus === "paid" && (
@@ -638,7 +677,7 @@ export default function DealDetail() {
               <div className="rounded-xl border border-gold/40 bg-gold/5 px-3 py-2 text-[12px] text-foreground">
                 <div className="font-bold mb-0.5">פיקדון נדרש: {ils(Number(deal.deposit_amount ?? 0))}</div>
                 <div className="text-muted-foreground">
-                  ההצטרפות תישמר עם סטטוס פיקדון "ממתין". בשלב זה לא מתבצעת גבייה בפועל.
+                  הצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת.
                 </div>
               </div>
             )}

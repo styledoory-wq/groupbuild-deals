@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
+import { useRegions } from "@/hooks/useRegions";
 import { Building2, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -36,6 +37,11 @@ const emptyForm: FormState = {
 
 export default function AdminProjects() {
   const { projects, setProjects } = useApp();
+  const { cities } = useRegions();
+  const cityNames = useMemo(
+    () => Array.from(new Set(cities.map((c) => c.name_he))).sort((a, b) => a.localeCompare(b, "he")),
+    [cities],
+  );
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -178,7 +184,18 @@ export default function AdminProjects() {
             </div>
             <div>
               <Label className="text-xs">עיר *</Label>
-              <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="תל אביב" />
+              <Input
+                list="admin-project-cities"
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                placeholder="הקלידו או בחרו עיר"
+                autoComplete="off"
+              />
+              <datalist id="admin-project-cities">
+                {cityNames.map((n) => (
+                  <option key={n} value={n} />
+                ))}
+              </datalist>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
