@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
-import { Building2, Check, ChevronsUpDown, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
+import { Building2, Check, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import type { Project, ProjectStatus } from "@/types";
 
@@ -251,70 +249,57 @@ export default function AdminProjects() {
 
 function CityCombobox({ value, cities, onChange }: { value: string; cities: string[]; onChange: (city: string) => void }) {
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState(value);
 
   const filteredCities = useMemo(() => {
-    const q = search.trim().toLocaleLowerCase("he");
+    const q = value.trim().toLocaleLowerCase("he");
     const list = q ? cities.filter((city) => city.toLocaleLowerCase("he").includes(q)) : cities;
-    return list.slice(0, 80);
-  }, [cities, search]);
+    return list.slice(0, 60);
+  }, [cities, value]);
 
   const selectCity = (city: string) => {
     onChange(city);
-    setSearch(city);
     setOpen(false);
   };
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={(nextOpen) => {
-        setOpen(nextOpen);
-        if (nextOpen) setSearch(value);
-      }}
-    >
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          role="combobox"
-          aria-expanded={open}
-          className={cn(
-            "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:text-sm",
-            !value && "text-muted-foreground",
+    <div className="relative">
+      <Input
+        value={value}
+        onFocus={() => setOpen(true)}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setOpen(true);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+        }}
+        placeholder="הקלידו עיר לבחירה"
+        autoComplete="off"
+        role="combobox"
+        aria-expanded={open}
+        aria-autocomplete="list"
+      />
+      {open && (
+        <div className="absolute right-0 left-0 top-[calc(100%+0.25rem)] z-[80] max-h-56 overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-lg">
+          {filteredCities.length > 0 ? (
+            filteredCities.map((city) => (
+              <button
+                key={city}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => selectCity(city)}
+                className="flex min-h-10 w-full items-center justify-between px-3 py-2 text-right text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
+              >
+                <span>{city}</span>
+                <Check className={cn("h-4 w-4", value === city ? "opacity-100" : "opacity-0")} />
+              </button>
+            ))
+          ) : (
+            <div className="px-3 py-3 text-center text-sm text-muted-foreground">לא נמצאו ערים</div>
           )}
-        >
-          <span className="truncate text-right">{value || "הקלידו או בחרו עיר"}</span>
-          <ChevronsUpDown className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" dir="rtl">
-        <Command shouldFilter={false}>
-          <CommandInput
-            value={search}
-            onValueChange={setSearch}
-            placeholder="חיפוש עיר..."
-            className="text-right"
-            autoFocus
-          />
-          <CommandList className="max-h-64">
-            <CommandEmpty>לא נמצאו ערים</CommandEmpty>
-            <CommandGroup>
-              {filteredCities.map((city) => (
-                <CommandItem
-                  key={city}
-                  value={city}
-                  onSelect={() => selectCity(city)}
-                  className="cursor-pointer justify-between"
-                >
-                  <span>{city}</span>
-                  <Check className={cn("h-4 w-4", value === city ? "opacity-100" : "opacity-0")} />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+        </div>
+      )}
+    </div>
   );
 }
 
