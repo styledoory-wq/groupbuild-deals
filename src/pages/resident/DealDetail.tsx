@@ -416,7 +416,7 @@ export default function DealDetail() {
           <div className="rounded-2xl border border-gold/40 bg-gold/5 px-4 py-3 text-[12px] text-foreground">
             <div className="font-bold mb-0.5">נדרש פיקדון להצטרפות: {ils(Number(deal.deposit_amount))}</div>
             <div className="text-muted-foreground">
-              הפיקדון מהווה התחייבות בלבד — בשלב זה לא תתבצע גבייה בפועל.
+              הצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת.
             </div>
           </div>
         </div>
@@ -631,7 +631,7 @@ export default function DealDetail() {
               <div className="rounded-xl border border-gold/40 bg-gold/5 px-3 py-2 text-[12px] text-foreground">
                 <div className="font-bold mb-0.5">פיקדון נדרש: {ils(Number(deal.deposit_amount ?? 0))}</div>
                 <div className="text-muted-foreground">
-                  ההצטרפות תישמר עם סטטוס פיקדון "ממתין". בשלב זה לא מתבצעת גבייה בפועל.
+                  הצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת.
                 </div>
               </div>
             )}
