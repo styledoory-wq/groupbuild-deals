@@ -35,7 +35,6 @@ import SupplierReviews from "./pages/supplier/SupplierReviews";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProjects from "./pages/admin/AdminProjects";
-import AdminSuppliers from "./pages/admin/AdminSuppliers";
 import AdminResidents from "./pages/admin/AdminResidents";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminDeals from "./pages/admin/AdminDeals";
@@ -98,7 +97,7 @@ const App = () => (
             <Route path="/admin" element={adminRoute(<AdminDashboard />)} />
             <Route path="/admin/projects" element={adminRoute(<AdminProjects />)} />
             <Route path="/admin/suppliers" element={adminRoute(<AdminDbSuppliers />)} />
-            <Route path="/admin/suppliers-mock" element={adminRoute(<AdminSuppliers />)} />
+            <Route path="/admin/suppliers-mock" element={<Navigate to="/admin/suppliers" replace />} />
             <Route path="/admin/residents" element={adminRoute(<AdminResidents />)} />
             <Route path="/admin/categories" element={adminRoute(<AdminCategories />)} />
             <Route path="/admin/deals" element={adminRoute(<AdminDeals />)} />

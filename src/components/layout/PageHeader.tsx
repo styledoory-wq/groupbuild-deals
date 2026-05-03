@@ -14,8 +14,7 @@ interface Props {
 
 export function PageHeader({ title, subtitle, back = true, showBell = false, variant = "navy", rightSlot }: Props) {
   const navigate = useNavigate();
-  const { notifications } = useApp();
-  const unread = notifications.filter((n) => n.unread).length;
+  const { unreadCount } = useApp();
 
   const isNavy = variant === "navy";
 
@@ -54,7 +53,7 @@ export function PageHeader({ title, subtitle, back = true, showBell = false, var
               aria-label="התראות"
             >
               <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
-              {unread > 0 && (
+              {unreadCount > 0 && (
                 <span className="absolute top-2 left-2 h-2 w-2 rounded-full bg-gold" />
               )}
             </button>

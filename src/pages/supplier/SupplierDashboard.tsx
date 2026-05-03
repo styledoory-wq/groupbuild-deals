@@ -5,7 +5,7 @@ import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
-import { formatILS, getActiveTier, useApp } from "@/store/AppStore";
+import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -18,18 +18,29 @@ type DbSupplier = {
   email?: string | null;
 };
 
+type DbDeal = {
+  id: string;
+  title: string;
+  status: string;
+  original_price: number | null;
+  discounted_price: number | null;
+  discount_percentage: number | null;
+  base_price: number | null;
+  offer_type: string | null;
+};
+
 export default function SupplierDashboard() {
   const navigate = useNavigate();
-  const { user, deals, logout } = useApp();
+  const { user, logout } = useApp();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dbSupplier, setDbSupplier] = useState<DbSupplier | null>(null);
+  const [myDeals, setMyDeals] = useState<DbDeal[]>([]);
+  const [counts, setCounts] = useState<Record<string, { interests: number; paid: number }>>({});
 
   useEffect(() => {
     let cancelled = false;
-    const safety = window.setTimeout(() => {
-      if (!cancelled) setLoading(false);
-    }, 8000);
+    const safety = window.setTimeout(() => { if (!cancelled) setLoading(false); }, 8000);
 
     (async () => {
       try {
@@ -44,9 +55,6 @@ export default function SupplierDashboard() {
         }
 
         const email = session.user.email ?? "";
-
-        // Try to find existing supplier records for this user.
-        // If an admin created/approved a supplier before signup, it may match by email only.
         const byUser = await supabase
           .from("suppliers")
           .select("id, business_name, approval_status, is_active, user_id, email")
@@ -64,26 +72,16 @@ export default function SupplierDashboard() {
         const fetchErr = byUser.error ?? byEmail.error;
         const candidates = [...(byUser.data ?? []), ...(byEmail.data ?? [])];
         const existing = candidates.find((s) => ["approved", "active"].includes(s.approval_status)) ?? candidates[0] ?? null;
-
         if (fetchErr) throw fetchErr;
 
-        if (existing) {
-          if (!existing.user_id || !existing.email) {
-            await supabase
-              .from("suppliers")
-              .update({ user_id: session.user.id, email: email || existing.email })
-              .eq("id", existing.id);
+        let supplierRow = existing as DbSupplier | null;
+        if (supplierRow) {
+          if (!supplierRow.user_id || !supplierRow.email) {
+            await supabase.from("suppliers").update({ user_id: session.user.id, email: email || supplierRow.email }).eq("id", supplierRow.id);
           }
-          if (!cancelled) setDbSupplier(existing as DbSupplier);
         } else {
-          // Auto-create a pending supplier so the dashboard never breaks
           const meta = (session.user.user_metadata ?? {}) as Record<string, string>;
-          const businessName =
-            meta.business_name?.trim() ||
-            meta.full_name?.trim() ||
-            session.user.email ||
-            "ספק חדש";
-
+          const businessName = meta.business_name?.trim() || meta.full_name?.trim() || session.user.email || "ספק חדש";
           const { data: created, error: insertErr } = await supabase
             .from("suppliers")
             .insert({
@@ -95,11 +93,37 @@ export default function SupplierDashboard() {
               approval_status: "pending",
               is_active: true,
             })
-            .select("id, business_name, approval_status, is_active")
+            .select("id, business_name, approval_status, is_active, user_id, email")
             .maybeSingle();
-
           if (insertErr) throw insertErr;
-          if (!cancelled && created) setDbSupplier(created as DbSupplier);
+          supplierRow = created as DbSupplier;
+        }
+
+        if (cancelled) return;
+        setDbSupplier(supplierRow);
+
+        // load my deals + counts
+        if (supplierRow?.id && (supplierRow.approval_status === "approved" || supplierRow.approval_status === "active")) {
+          const { data: dealRows, error: dealsErr } = await supabase
+            .from("deals")
+            .select("id,title,status,original_price,discounted_price,discount_percentage,base_price,offer_type")
+            .eq("supplier_id", supplierRow.id)
+            .eq("is_deleted", false)
+            .order("created_at", { ascending: false });
+          if (dealsErr) throw dealsErr;
+          const list = (dealRows ?? []) as DbDeal[];
+          if (cancelled) return;
+          setMyDeals(list);
+
+          const cMap: Record<string, { interests: number; paid: number }> = {};
+          await Promise.all(list.map(async (d) => {
+            const [{ count: interests }, { count: paid }] = await Promise.all([
+              supabase.from("deal_interests").select("id", { count: "exact", head: true }).eq("deal_id", d.id).eq("is_deleted", false),
+              supabase.from("deposits").select("id", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "paid").eq("is_deleted", false),
+            ]);
+            cMap[d.id] = { interests: interests ?? 0, paid: paid ?? 0 };
+          }));
+          if (!cancelled) setCounts(cMap);
         }
       } catch (e) {
         console.error("[SupplierDashboard] load error", e);
@@ -110,10 +134,7 @@ export default function SupplierDashboard() {
       }
     })();
 
-    return () => {
-      cancelled = true;
-      window.clearTimeout(safety);
-    };
+    return () => { cancelled = true; window.clearTimeout(safety); };
   }, [navigate]);
 
   const handleLogout = async () => {
@@ -121,6 +142,14 @@ export default function SupplierDashboard() {
     logout();
     toast.success("התנתקת בהצלחה");
     navigate("/", { replace: true });
+  };
+
+  const priceFor = (d: DbDeal): number => {
+    if (d.offer_type === "price_comparison" && d.discounted_price != null) return Number(d.discounted_price);
+    if (d.offer_type === "percentage" && d.original_price != null && d.discount_percentage != null) {
+      return Number(d.original_price) * (1 - Number(d.discount_percentage) / 100);
+    }
+    return Number(d.base_price ?? d.original_price ?? 0);
   };
 
   if (loading) {
@@ -159,7 +188,6 @@ export default function SupplierDashboard() {
   const isRejected = dbSupplier?.approval_status === "rejected";
   const businessName = dbSupplier?.business_name || user?.name || "החשבון שלי";
 
-  // Pending / rejected — show clear state, do NOT render mock-dependent dashboard
   if (!dbSupplier || isPending || isRejected) {
     return (
       <MobileShell>
@@ -192,11 +220,7 @@ export default function SupplierDashboard() {
                 ? "לצערנו ההרשמה לא אושרה כרגע. ניתן לפנות לתמיכה לפרטים נוספים."
                 : "החשבון שלך ממתין לאישור מנהל. נעדכן אותך לאחר האישור ותוכל להתחיל לפרסם הצעות."}
             </p>
-            <Button
-              onClick={() => navigate("/supplier/profile/edit")}
-              variant="outline"
-              className="w-full h-11 rounded-xl border-border"
-            >
+            <Button onClick={() => navigate("/supplier/profile/edit")} variant="outline" className="w-full h-11 rounded-xl border-border">
               <Pencil className="h-4 w-4 ml-2" /> השלמת פרטי הספק
             </Button>
           </div>
@@ -207,11 +231,9 @@ export default function SupplierDashboard() {
     );
   }
 
-  // Approved — render the rich dashboard. Guard against missing mock data.
-  const myDeals = deals.filter((d) => d.supplierId === dbSupplier.id);
-  const totalLeads = myDeals.reduce((s, d) => s + d.joinedParticipants, 0);
-  const totalPaid = myDeals.reduce((s, d) => s + d.paidParticipants, 0);
-  const revenue = myDeals.reduce((s, d) => s + d.paidParticipants * getActiveTier(d).price, 0);
+  const totalLeads = Object.values(counts).reduce((s, c) => s + c.interests, 0);
+  const totalPaid = Object.values(counts).reduce((s, c) => s + c.paid, 0);
+  const revenue = myDeals.reduce((s, d) => s + (counts[d.id]?.paid ?? 0) * priceFor(d), 0);
   const conversion = totalLeads ? Math.round((totalPaid / totalLeads) * 100) : 0;
 
   return (
@@ -243,17 +265,10 @@ export default function SupplierDashboard() {
       </header>
 
       <div className="px-5 -mt-8 relative z-10 mb-6 space-y-2">
-        <Button
-          onClick={() => navigate("/supplier/offers/new")}
-          className="w-full h-12 rounded-xl bg-primary hover:bg-primary-soft text-primary-foreground font-semibold shadow-soft"
-        >
+        <Button onClick={() => navigate("/supplier/offers/new")} className="w-full h-12 rounded-xl bg-primary hover:bg-primary-soft text-primary-foreground font-semibold shadow-soft">
           <Plus className="h-4 w-4 ml-2" strokeWidth={2} /> צרו הצעה חדשה
         </Button>
-        <Button
-          onClick={() => navigate("/supplier/profile/edit")}
-          variant="outline"
-          className="w-full h-11 rounded-xl border-border"
-        >
+        <Button onClick={() => navigate("/supplier/profile/edit")} variant="outline" className="w-full h-11 rounded-xl border-border">
           <Pencil className="h-4 w-4 ml-2" /> עריכת פרופיל ואזורי שירות
         </Button>
       </div>
@@ -268,22 +283,22 @@ export default function SupplierDashboard() {
           </div>
         )}
         {myDeals.map((d) => {
-          const tier = getActiveTier(d);
+          const c = counts[d.id] ?? { interests: 0, paid: 0 };
           return (
             <div key={d.id} className="gb-card p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-sm truncate">{d.title}</h3>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">{tier.label}</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">{d.status}</div>
                 </div>
                 <div className="text-left">
-                  <div className="font-semibold text-primary text-sm">{formatILS(tier.price)}</div>
-                  <div className="text-[10px] text-success font-medium mt-0.5">{d.paidParticipants} שילמו</div>
+                  <div className="font-semibold text-primary text-sm">{formatILS(priceFor(d))}</div>
+                  <div className="text-[10px] text-success font-medium mt-0.5">{c.paid} שילמו</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-[11px] pt-3 border-t border-border">
-                <span className="px-2.5 py-1 rounded-full bg-muted/60 text-foreground border border-border">{d.joinedParticipants} לידים</span>
-                <span className="px-2.5 py-1 rounded-full bg-success/10 text-success">{d.paidParticipants} פיקדונות</span>
+                <span className="px-2.5 py-1 rounded-full bg-muted/60 text-foreground border border-border">{c.interests} לידים</span>
+                <span className="px-2.5 py-1 rounded-full bg-success/10 text-success">{c.paid} פיקדונות</span>
               </div>
             </div>
           );

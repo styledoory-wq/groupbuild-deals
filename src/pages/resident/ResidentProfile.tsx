@@ -1,25 +1,61 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Building2, Phone, Mail, History, Pencil, FileText } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
-import { formatILS, getActiveTier, useApp } from "@/store/AppStore";
+import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+type DbDeposit = {
+  id: string;
+  deal_id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+};
+
+type DealMap = Record<string, { title: string }>;
+
 export default function ResidentProfile() {
   const navigate = useNavigate();
-  const { user, logout, deposits, deals, projects } = useApp();
-  const myDeposits = deposits.filter((d) => d.userId === user?.id);
+  const { user, logout, projects } = useApp();
   const project = projects.find((p) => p.id === user?.projectId);
+  const [myDeposits, setMyDeposits] = useState<DbDeposit[]>([]);
+  const [deals, setDeals] = useState<DealMap>({});
+
+  useEffect(() => {
+    (async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const uid = sessionData.session?.user?.id;
+      if (!uid) return;
+
+      const { data, error } = await supabase
+        .from("deposits")
+        .select("id,deal_id,amount,status,created_at")
+        .eq("user_id", uid)
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false });
+      if (error) {
+        console.error("[ResidentProfile] deposits", error);
+        return;
+      }
+      const list = (data ?? []) as DbDeposit[];
+      setMyDeposits(list);
+      const dealIds = Array.from(new Set(list.map((d) => d.deal_id)));
+      if (dealIds.length) {
+        const { data: dealRows } = await supabase.from("deals").select("id,title").in("id", dealIds);
+        const m: DealMap = {};
+        (dealRows ?? []).forEach((d: { id: string; title: string }) => { m[d.id] = { title: d.title }; });
+        setDeals(m);
+      }
+    })();
+  }, []);
 
   const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {
-      console.warn("supabase signOut failed", e);
-    }
+    try { await supabase.auth.signOut(); } catch (e) { console.warn("supabase signOut failed", e); }
     logout();
     toast.success("התנתקת בהצלחה");
     navigate("/", { replace: true });
@@ -35,7 +71,7 @@ export default function ResidentProfile() {
             {user?.name?.charAt(0)}
           </div>
           <h2 className="font-bold text-lg mt-3">{user?.name}</h2>
-          <div className="text-xs text-muted-foreground">דייר · {project?.name}</div>
+          <div className="text-xs text-muted-foreground">דייר{project ? ` · ${project.name}` : ""}</div>
 
           <div className="mt-4 grid grid-cols-1 gap-2 text-sm">
             {user?.phone && (
@@ -48,9 +84,9 @@ export default function ResidentProfile() {
                 <Mail className="h-4 w-4 text-gold" /> {user.email}
               </div>
             )}
-            {project && (
+            {project && user?.apartment && (
               <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                <Building2 className="h-4 w-4 text-gold" /> דירה {user?.apartment}
+                <Building2 className="h-4 w-4 text-gold" /> דירה {user.apartment}
               </div>
             )}
           </div>
@@ -69,19 +105,19 @@ export default function ResidentProfile() {
             </div>
           )}
           {myDeposits.map((dep) => {
-            const deal = deals.find((d) => d.id === dep.dealId);
-            if (!deal) return null;
-            const tier = getActiveTier(deal);
+            const dealTitle = deals[dep.deal_id]?.title ?? "הצעה";
+            const isPaid = dep.status === "paid";
             return (
               <div key={dep.id} className="gb-card p-4 flex items-center gap-3">
                 <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-xl shrink-0">🛒</div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm truncate">{deal.title}</div>
-                  <div className="text-[11px] text-muted-foreground">פיקדון {formatILS(dep.amount)} · {new Date(dep.createdAt).toLocaleDateString("he-IL")}</div>
+                  <div className="font-bold text-sm truncate">{dealTitle}</div>
+                  <div className="text-[11px] text-muted-foreground">פיקדון {formatILS(Number(dep.amount))} · {new Date(dep.created_at).toLocaleDateString("he-IL")}</div>
                 </div>
                 <div className="text-left">
-                  <div className="text-xs font-bold text-success px-2 py-1 rounded-full bg-success/10">שולם</div>
-                  <div className="text-[11px] text-primary font-bold mt-1">{formatILS(tier.price)}</div>
+                  <div className={"text-xs font-bold px-2 py-1 rounded-full " + (isPaid ? "text-success bg-success/10" : "text-primary bg-gold/15")}>
+                    {isPaid ? "שולם" : dep.status === "refunded" ? "הוחזר" : "ממתין"}
+                  </div>
                 </div>
               </div>
             );
