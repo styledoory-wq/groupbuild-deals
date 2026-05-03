@@ -78,9 +78,9 @@ export default function Landing() {
                   <Button
                     type="button"
                     onClick={goLogin}
-                    variant="ghost"
-                    className="h-9 px-3 rounded-xl text-primary-foreground hover:text-gold hover:bg-white/5 font-bold text-xs"
+                    className="h-9 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-primary-foreground border border-white/25 font-bold text-xs"
                   >
+                    <LogIn className="h-3.5 w-3.5" />
                     התחברות
                   </Button>
                   <Button
