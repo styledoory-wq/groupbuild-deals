@@ -172,6 +172,20 @@ export default function DealDetail() {
     };
   }, [dealId]);
 
+  // Realtime: refresh paid count whenever a deposit row for this deal changes.
+  useEffect(() => {
+    if (!dealId) return;
+    const channel = supabase
+      .channel(`deal-deposits-${dealId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "deposits", filter: `deal_id=eq.${dealId}` },
+        () => { void loadParticipantCount(dealId); },
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [dealId]);
+
   const handleJoinClick = async () => {
     if (!deal) return;
     const { data: session } = await supabase.auth.getSession();
