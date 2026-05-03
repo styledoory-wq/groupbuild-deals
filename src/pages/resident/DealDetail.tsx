@@ -494,18 +494,11 @@ export default function DealDetail() {
                   <span>הצטרפת להצעה בהצלחה</span>
                 </div>
                 {interestStatus === "pending_deposit" && interestDepositStatus !== "paid" && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-bold text-foreground bg-gold/10 border border-gold/30 rounded-xl py-3 px-4">
-                      <Clock className="h-4 w-4 text-gold shrink-0" />
-                      <span>פיקדון טרם שולם — שלמו כדי להבטיח מקום</span>
-                    </div>
-                    <Button
-                      onClick={() => toast.info("מערכת התשלום תחובר בקרוב. צרו קשר עם הספק לתיאום תשלום.")}
-                      className="w-full h-11 rounded-2xl bg-primary text-primary-foreground font-bold"
-                    >
-                      <CreditCard className="h-4 w-4 ml-2" />
-                      שלם פיקדון · {ils(Number(deal.deposit_amount ?? 0))}
-                    </Button>
+                  <div className="flex items-start gap-2 text-xs font-bold text-foreground bg-gold/10 border border-gold/30 rounded-xl py-3 px-4">
+                    <Clock className="h-4 w-4 text-gold shrink-0 mt-0.5" />
+                    <span className="leading-relaxed">
+                      הצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת
+                    </span>
                   </div>
                 )}
                 {interestDepositStatus === "paid" && (
