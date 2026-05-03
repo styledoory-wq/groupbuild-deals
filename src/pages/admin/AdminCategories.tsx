@@ -132,9 +132,27 @@ export default function AdminCategories() {
           <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" /> טוען…
         </div>
       ) : (
-        <div className="px-5 grid grid-cols-2 gap-2">
-          {list.map((c) => (
+        <div className="px-5 space-y-2">
+          {list.map((c, idx) => (
             <div key={c.id} className="gb-card p-3 flex items-center gap-2">
+              <div className="flex flex-col">
+                <button
+                  onClick={() => move(c.id, "up")}
+                  disabled={busy || idx === 0}
+                  className="h-5 w-6 rounded-md hover:bg-muted disabled:opacity-30 flex items-center justify-center"
+                  aria-label="העלה למעלה"
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => move(c.id, "down")}
+                  disabled={busy || idx === list.length - 1}
+                  className="h-5 w-6 rounded-md hover:bg-muted disabled:opacity-30 flex items-center justify-center"
+                  aria-label="הורד למטה"
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </button>
+              </div>
               <div className="text-xl">{c.icon}</div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-bold truncate">{c.name}</div>
