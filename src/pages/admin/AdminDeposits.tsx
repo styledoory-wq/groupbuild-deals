@@ -61,9 +61,10 @@ export default function AdminDeposits() {
   const updateStatus = async (id: string, status: "paid" | "refunded") => {
     setBusyId(id);
     try {
-      const patch: Record<string, unknown> = { status };
-      if (status === "paid") patch.paid_at = new Date().toISOString();
-      if (status === "refunded") patch.refunded_at = new Date().toISOString();
+      const nowIso = new Date().toISOString();
+      const patch = status === "paid"
+        ? { status, paid_at: nowIso }
+        : { status, refunded_at: nowIso };
 
       const { error } = await supabase.from("deposits").update(patch).eq("id", id);
       if (error) throw error;
