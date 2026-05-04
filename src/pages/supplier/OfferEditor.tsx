@@ -226,6 +226,11 @@ export default function OfferEditor() {
     cleanTiers.sort((a, b) => a.minParticipants - b.minParticipants);
     const firstTier = cleanTiers[0];
 
+    if (visibilityType === "project_only" && !visibilityProjectId) {
+      toast.error("בחר פרויקט שאליו ההצעה מיועדת");
+      return;
+    }
+
     type Json = import("@/integrations/supabase/types").Json;
     const payload: Record<string, unknown> = {
       supplier_id: supplier.id,
@@ -239,6 +244,8 @@ export default function OfferEditor() {
       highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as Json,
       status: "active",
       ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
+      visibility_type: visibilityType,
+      visibility_project_id: visibilityType === "project_only" ? visibilityProjectId : null,
     };
 
     // Mirror first-tier values into top-level fields for backward compatibility & sorting.
