@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Building2, Phone, Mail, History, Pencil, FileText } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -26,33 +26,52 @@ export default function ResidentProfile() {
   const [myDeposits, setMyDeposits] = useState<DbDeposit[]>([]);
   const [deals, setDeals] = useState<DealMap>({});
 
+  const loadDeposits = useCallback(async (uid: string) => {
+    const { data, error } = await supabase
+      .from("deposits")
+      .select("id,deal_id,amount,status,created_at")
+      .eq("user_id", uid)
+      .eq("is_deleted", false)
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("[ResidentProfile] deposits", error);
+      return;
+    }
+    const list = (data ?? []) as DbDeposit[];
+    setMyDeposits(list);
+    const dealIds = Array.from(new Set(list.map((d) => d.deal_id)));
+    if (dealIds.length) {
+      const { data: dealRows } = await supabase.from("deals").select("id,title").in("id", dealIds);
+      const m: DealMap = {};
+      (dealRows ?? []).forEach((d: { id: string; title: string }) => { m[d.id] = { title: d.title }; });
+      setDeals(m);
+    } else {
+      setDeals({});
+    }
+  }, []);
+
   useEffect(() => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
     (async () => {
       const { data: sessionData } = await supabase.auth.getSession();
       const uid = sessionData.session?.user?.id;
       if (!uid) return;
 
-      const { data, error } = await supabase
-        .from("deposits")
-        .select("id,deal_id,amount,status,created_at")
-        .eq("user_id", uid)
-        .eq("is_deleted", false)
-        .order("created_at", { ascending: false });
-      if (error) {
-        console.error("[ResidentProfile] deposits", error);
-        return;
-      }
-      const list = (data ?? []) as DbDeposit[];
-      setMyDeposits(list);
-      const dealIds = Array.from(new Set(list.map((d) => d.deal_id)));
-      if (dealIds.length) {
-        const { data: dealRows } = await supabase.from("deals").select("id,title").in("id", dealIds);
-        const m: DealMap = {};
-        (dealRows ?? []).forEach((d: { id: string; title: string }) => { m[d.id] = { title: d.title }; });
-        setDeals(m);
-      }
+      await loadDeposits(uid);
+
+      channel = supabase
+        .channel(`resident-deposits-${uid}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "deposits", filter: `user_id=eq.${uid}` },
+          () => { void loadDeposits(uid); }
+        )
+        .subscribe();
     })();
-  }, []);
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [loadDeposits]);
 
   const handleLogout = async () => {
     try { await supabase.auth.signOut(); } catch (e) { console.warn("supabase signOut failed", e); }
