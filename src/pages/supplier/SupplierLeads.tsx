@@ -84,6 +84,11 @@ export default function SupplierLeads() {
         .update({ status: "paid", paid_at: new Date().toISOString() })
         .eq("id", pending.id);
       if (uErr) throw uErr;
+      setInterests((prev) => prev.map((i) => (
+        i.user_id === userId && i.deal_id === dealId
+          ? { ...i, status: "paid", lead_status: "approved", deposit_status: "paid" }
+          : i
+      )));
       toast.success("הפיקדון סומן כשולם");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "עדכון נכשל");
