@@ -27,7 +27,7 @@ export default function DealsList() {
         let query = supabase
           .from("deals")
           .select(
-            "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,suppliers!inner(business_name,logo_url,is_active,approval_status)",
+            "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,visibility_type,visibility_project_id,suppliers!inner(business_name,logo_url,is_active,approval_status)",
           )
           .eq("status", "active")
           .order("created_at", { ascending: false });
@@ -62,6 +62,8 @@ export default function DealsList() {
               base_price: (r.base_price as number | null) ?? null,
               tiers: (Array.isArray(r.tiers) ? (r.tiers as OfferTier[]) : []) as OfferTier[],
               ends_at: (r.ends_at as string | null) ?? null,
+              visibility_type: (r.visibility_type as string | null) ?? "public",
+              visibility_project_id: (r.visibility_project_id as string | null) ?? null,
             };
           });
         setDeals(mapped);
