@@ -177,12 +177,29 @@ export default function DealDetail() {
   // Realtime: refresh paid count whenever a deposit row for this deal changes.
   useEffect(() => {
     if (!dealId) return;
+    const refreshDepositState = async () => {
+      await loadParticipantCount(dealId);
+      const { data: session } = await supabase.auth.getSession();
+      const uid = session.session?.user?.id;
+      if (!uid) return;
+      const { data: interest } = await supabase
+        .from("deal_interests")
+        .select("status,deposit_status")
+        .eq("user_id", uid)
+        .eq("deal_id", dealId)
+        .eq("is_deleted", false)
+        .maybeSingle();
+      if (interest) {
+        setInterestStatus(interest.status);
+        setInterestDepositStatus(interest.deposit_status ?? "none");
+      }
+    };
     const channel = supabase
       .channel(`deal-deposits-${dealId}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "deposits", filter: `deal_id=eq.${dealId}` },
-        () => { void loadParticipantCount(dealId); },
+        () => { void refreshDepositState(); },
       )
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
