@@ -312,7 +312,11 @@ export default function Landing() {
                         </div>
                       </div>
                       <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-1.5">
-                        <span>{d.paid_count} מתוך {target} הצטרפו</span>
+                        {d.paid_count === 0 ? (
+                          <span className="text-primary font-bold">הצעה חדשה — היה הראשון להצטרף</span>
+                        ) : (
+                          <span>{d.paid_count} מתוך {target} הצטרפו</span>
+                        )}
                         {display.savings && (
                           <span className="text-success font-bold inline-flex items-center gap-1">
                             <TrendingDown className="h-3 w-3" />
