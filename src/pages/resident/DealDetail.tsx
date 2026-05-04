@@ -76,6 +76,7 @@ export default function DealDetail() {
   const [interestDepositStatus, setInterestDepositStatus] = useState<string>("none");
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [participantCount, setParticipantCount] = useState<number>(0);
+  const [isGuest, setIsGuest] = useState<boolean>(false);
 
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
@@ -131,6 +132,7 @@ export default function DealDetail() {
         await loadParticipantCount(d.id);
 
         const { data: session } = await supabase.auth.getSession();
+        if (!cancelled) setIsGuest(!session.session);
         if (session.session) {
           const { data: interest } = await supabase
             .from("deal_interests")
@@ -568,6 +570,8 @@ export default function DealDetail() {
               >
                 {submittingInterest ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
+                ) : isGuest ? (
+                  "התחבר כדי להצטרף"
                 ) : depositRequired ? (
                   `הצטרף להצעה · פיקדון ${ils(Number(deal.deposit_amount))}`
                 ) : (
