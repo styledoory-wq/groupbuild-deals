@@ -1,11 +1,38 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Sparkles, ArrowLeft, Building2, CheckCircle2, Home, Store, LogIn, UserPlus,
+  ShieldCheck, Users, TrendingDown, Wallet, Tag as TagIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/auth";
+import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
+import logoIcon from "@/assets/logo-icon.png";
+
+type LandingStats = {
+  residents_count: number;
+  suppliers_count: number;
+  active_deals_count: number;
+  paid_deposits_count: number;
+  total_savings: number;
+};
+
+type HotDeal = {
+  id: string;
+  title: string;
+  supplier_name: string | null;
+  offer_type: string | null;
+  original_price: number | null;
+  discounted_price: number | null;
+  discount_percentage: number | null;
+  base_price: number | null;
+  tiers: OfferTier[] | null;
+  paid_count: number;
+  next_threshold: number | null;
+};
+
+const fmtNum = (n: number) => new Intl.NumberFormat("he-IL").format(n);
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -13,7 +40,9 @@ export default function Landing() {
   const [userEmail, setUserEmail] = useState<string>("");
   const [userType, setUserType] = useState<"resident" | "supplier">("resident");
 
-  // Detect session WITHOUT auto-redirecting. Landing always renders.
+  const [stats, setStats] = useState<LandingStats | null>(null);
+  const [hotDeals, setHotDeals] = useState<HotDeal[]>([]);
+
   useEffect(() => {
     let cancelled = false;
     const load = async (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
@@ -41,6 +70,59 @@ export default function Landing() {
     };
   }, []);
 
+  // Load real DB stats + 3 hot deals
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: statsRow } = await supabase.rpc("get_landing_stats");
+        if (!cancelled && statsRow && Array.isArray(statsRow) && statsRow[0]) {
+          setStats(statsRow[0] as LandingStats);
+        }
+
+        const { data: deals } = await supabase
+          .from("deals")
+          .select("id,title,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,suppliers!inner(business_name,is_active,approval_status)")
+          .eq("status", "active")
+          .eq("visibility_type", "public")
+          .limit(6);
+
+        if (cancelled || !deals) return;
+
+        const visible = deals.filter((d: { suppliers?: { is_active?: boolean; approval_status?: string } | null }) => {
+          const s = d.suppliers;
+          return s?.is_active === true && (s.approval_status === "approved" || s.approval_status === "active");
+        });
+
+        const enriched = await Promise.all(
+          visible.slice(0, 3).map(async (d) => {
+            const { data: paidCount } = await supabase.rpc("get_deal_paid_count", { _deal_id: String(d.id) });
+            const tiers = Array.isArray(d.tiers) ? (d.tiers as OfferTier[]) : [];
+            const sortedThresholds = tiers.map((t) => t.minParticipants).sort((a, b) => a - b);
+            const next = sortedThresholds.find((m) => m > (paidCount ?? 0)) ?? sortedThresholds[sortedThresholds.length - 1] ?? null;
+            return {
+              id: String(d.id),
+              title: String(d.title ?? ""),
+              supplier_name: (d.suppliers as { business_name?: string } | null)?.business_name ?? null,
+              offer_type: (d.offer_type as string | null) ?? "percentage",
+              original_price: d.original_price as number | null,
+              discounted_price: d.discounted_price as number | null,
+              discount_percentage: d.discount_percentage as number | null,
+              base_price: d.base_price as number | null,
+              tiers,
+              paid_count: typeof paidCount === "number" ? paidCount : 0,
+              next_threshold: next,
+            } as HotDeal;
+          }),
+        );
+        if (!cancelled) setHotDeals(enriched);
+      } catch (e) {
+        console.error("[Landing] stats load failed", e);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const goToDashboard = () => {
     if (!isAuthed) { navigate("/auth"); return; }
     if (isAdminEmail(userEmail)) { navigate("/admin"); return; }
@@ -50,6 +132,15 @@ export default function Landing() {
   const goSignup = () => navigate("/auth?mode=signup");
   const goLogin = () => navigate("/auth?mode=signin");
 
+  // Savings copy logic
+  const hasMeaningfulSavings = stats && Number(stats.total_savings) > 0;
+  const savingsPrimary = hasMeaningfulSavings
+    ? `דיירים כבר חסכו ₪${fmtNum(Math.round(Number(stats!.total_savings)))}`
+    : "צפי חיסכון לדייר: ₪300–₪1,200 לכל מוצר";
+  const savingsSecondary = hasMeaningfulSavings
+    ? "וצפי חיסכון של עד 25%"
+    : "חיסכון של עד 25% בזכות רכישה קבוצתית";
+
   return (
     <div className="min-h-screen bg-primary text-primary-foreground flex justify-center">
       <div className="w-full max-w-[480px] relative">
@@ -57,9 +148,7 @@ export default function Landing() {
         <header className="sticky top-0 z-40 bg-primary/95 backdrop-blur border-b border-white/5">
           <div className="flex items-center justify-between px-5 h-14">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-xl bg-gradient-gold flex items-center justify-center">
-                <Building2 className="h-4 w-4 text-primary" />
-              </div>
+              <img src={logoIcon} alt="GroupBuild" width={32} height={32} className="h-8 w-8" />
               <span className="font-extrabold text-base">
                 <span className="gb-gold-text">Group</span>Build
               </span>
@@ -109,16 +198,17 @@ export default function Landing() {
               </span>
             </div>
 
-            <h1 className="text-[34px] leading-[1.15] font-extrabold mb-4">
-              קנה את הדירה שלך
+            <h1 className="text-[34px] leading-[1.1] font-extrabold mb-4">
+              קונים יחד —
               <br />
-              במחיר{" "}
-              <span className="gb-gold-text">קבוצתי</span>
+              משלמים <span className="gb-gold-text">פחות</span>
             </h1>
             <div className="gb-divider-gold mb-5" />
-            <p className="text-primary-foreground/75 text-[15px] leading-relaxed mb-8">
-              פלטפורמת רכישה קבוצתית לדיירי פרויקטים חדשים. הצטרפו לשכנים שלכם,
-              אספו כוח קנייה — וקבלו מחירים שאי אפשר לקבל לבד.
+            <p className="text-primary-foreground/75 text-[15px] leading-relaxed mb-3">
+              GroupBuild מחברת דיירים בפרויקטים חדשים לספקים מאומתים, ויוצרת כוח קנייה קבוצתי שמוריד מחירים.
+            </p>
+            <p className="text-gold/90 text-sm font-bold mb-8">
+              {savingsPrimary} · {savingsSecondary}
             </p>
 
             <div className="flex flex-col gap-3">
@@ -154,22 +244,99 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* STATS */}
-        <section className="bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-10 -mt-2 [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground">
+        {/* LIVE STATS */}
+        <section className="bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-8 -mt-2 [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground">
+          <div className="text-center mb-5">
+            <div className="gb-divider-gold mx-auto mb-3" />
+            <h2 className="text-xl font-extrabold mb-1">המספרים שלנו, בזמן אמת</h2>
+            {!stats && (
+              <p className="text-[11px] text-muted-foreground">הנתונים יתעדכנו עם הצטרפות משתמשים</p>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3">
-            {[
-              { v: "+240", l: "דירות בפרויקט הדגמה" },
-              { v: "₪34K", l: "חיסכון ממוצע לדירה" },
-              { v: "+5", l: "קטגוריות פעילות" },
-              { v: "29%", l: "הנחה קבוצתית ממוצעת" },
-            ].map((s, i) => (
-              <div key={i} className="gb-card p-4 text-center">
-                <div className="text-xl font-extrabold gb-gold-text mb-1">{s.v}</div>
-                <div className="text-[11px] text-muted-foreground leading-tight">{s.l}</div>
-              </div>
-            ))}
+            <StatCard
+              icon={<Wallet className="h-4 w-4" />}
+              value={stats && stats.total_savings > 0 ? `₪${fmtNum(Math.round(Number(stats.total_savings)))}` : "₪0"}
+              label="נחסכו לדיירים"
+              accent
+            />
+            <StatCard
+              icon={<Users className="h-4 w-4" />}
+              value={stats ? fmtNum(stats.residents_count) : "0"}
+              label="דיירים רשומים"
+            />
+            <StatCard
+              icon={<ShieldCheck className="h-4 w-4" />}
+              value={stats ? fmtNum(stats.suppliers_count) : "0"}
+              label="ספקים מאושרים"
+            />
+            <StatCard
+              icon={<TagIcon className="h-4 w-4" />}
+              value={stats ? fmtNum(stats.active_deals_count) : "0"}
+              label="עסקאות פעילות"
+            />
           </div>
         </section>
+
+        {/* HOT DEALS */}
+        {hotDeals.length > 0 && (
+          <section className="bg-background text-foreground px-6 pb-10 [&_h2]:text-foreground [&_h3]:text-foreground">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-extrabold mb-1">עסקאות חמות עכשיו</h2>
+              <p className="text-xs text-muted-foreground">לחצו לצפייה ולהצטרפות</p>
+            </div>
+            <div className="space-y-3">
+              {hotDeals.map((d) => {
+                const display = describeOffer(
+                  {
+                    offer_type: (d.offer_type ?? "percentage") as OfferType,
+                    original_price: d.original_price,
+                    discounted_price: d.discounted_price,
+                    discount_percentage: d.discount_percentage,
+                    base_price: d.base_price,
+                    tiers: d.tiers ?? [],
+                  },
+                  d.paid_count,
+                );
+                const target = d.next_threshold ?? Math.max(d.paid_count, 1);
+                const pct = Math.min(100, Math.round((d.paid_count / Math.max(target, 1)) * 100));
+                return (
+                  <Link key={d.id} to={`/resident/deals/${d.id}`} className="block">
+                    <article className="gb-card p-4 hover:border-gold/40 transition-smooth">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-sm text-foreground truncate">{d.title}</h3>
+                          {d.supplier_name && (
+                            <p className="text-[11px] text-muted-foreground inline-flex items-center gap-1 mt-0.5">
+                              <ShieldCheck className="h-3 w-3 text-gold" />
+                              {d.supplier_name}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-base font-extrabold text-primary shrink-0">
+                          {display.headline}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-1.5">
+                        <span>{d.paid_count} מתוך {target} הצטרפו</span>
+                        {display.savings && (
+                          <span className="text-success font-bold inline-flex items-center gap-1">
+                            <TrendingDown className="h-3 w-3" />
+                            {display.savings}
+                          </span>
+                        )}
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-2">
+                        <div className="h-full bg-gradient-gold rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                      </div>
+                      <div className="text-[11px] font-bold gb-gold-text text-left">צפה בהצעה ←</div>
+                    </article>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* HOW IT WORKS */}
         <section className="bg-background text-foreground px-6 pb-10 [&_h2]:text-foreground [&_h3]:text-foreground">
@@ -181,10 +348,10 @@ export default function Landing() {
 
           <div className="space-y-3">
             {[
-              { n: "01", t: "הצטרפו לפרויקט שלכם", d: "חפשו את שם הבניין או הפרויקט שרכשתם בו דירה והצטרפו לקהילת הדיירים." },
-              { n: "02", t: "בחרו ספקים ועסקאות", d: "עיינו בספקים מאומתים לפי קטגוריה ואזור, וראו מחיר נוכחי לפי כמות מצטרפים." },
-              { n: "03", t: "המחיר יורד אוטומטית", d: "כל שכן שמצטרף מוריד את המחיר לכולם. ככל שיותר מצטרפים — כך כולם חוסכים." },
-              { n: "04", t: "סגרו עסקה בביטחון", d: "ההצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת לפני שהמקום נסגר." },
+              { n: "01", t: "נרשמים לפי פרויקט/אזור", d: "חפשו את שם הבניין או הפרויקט שרכשתם בו דירה והצטרפו לקהילת הדיירים." },
+              { n: "02", t: "מצטרפים להצעות רלוונטיות", d: "עיינו בספקים מאומתים לפי קטגוריה ואזור, וראו מחיר נוכחי לפי כמות מצטרפים." },
+              { n: "03", t: "ככל שיותר דיירים מצטרפים — המחיר משתפר", d: "כל שכן שמצטרף מוריד את המחיר לכולם. ככל שיותר מצטרפים — כך כולם חוסכים." },
+              { n: "04", t: "סגרו עסקה בביטחון", d: "הצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת לפני שהמקום נסגר." },
             ].map((step) => (
               <div key={step.n} className="gb-card p-4 flex gap-3">
                 <div className="shrink-0 h-10 w-10 rounded-xl bg-primary text-gold flex items-center justify-center font-extrabold text-sm">
@@ -196,6 +363,31 @@ export default function Landing() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* TRUST */}
+        <section className="bg-background text-foreground px-6 pb-10 [&_h2]:text-foreground [&_h3]:text-foreground">
+          <div className="gb-card p-5 bg-gradient-card">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-gold/15 flex items-center justify-center">
+                <ShieldCheck className="h-4 w-4 text-secondary" />
+              </div>
+              <h2 className="text-lg font-extrabold">אמון ושקיפות</h2>
+            </div>
+            <ul className="space-y-2.5">
+              {[
+                "ספקים מאומתים בלבד",
+                "פיקדון מאושר ידנית על ידי מנהל המערכת",
+                "נתונים אמיתיים בלבד — בלי דמו",
+                "שקיפות במחיר ובמדרגות ההנחה",
+              ].map((b) => (
+                <li key={b} className="flex items-start gap-2 text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-secondary shrink-0 mt-0.5" />
+                  <span className="text-foreground/85">{b}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
@@ -214,7 +406,6 @@ export default function Landing() {
                 "ספקים לפי אזור מגורים",
                 "מחירים שמתעדכנים לפי מצטרפים אמיתיים",
                 "פחות כאב ראש מול ספקים",
-                "שקיפות במחיר ובמדרגות ההנחה",
               ].map((b) => (
                 <li key={b} className="flex items-start gap-2 text-sm">
                   <CheckCircle2 className="h-4 w-4 text-secondary shrink-0 mt-0.5" />
@@ -240,7 +431,6 @@ export default function Landing() {
                 "לקוחות לפי אזור שירות",
                 "עסקאות בכמות במקום לקוח בודד",
                 "ניהול הצעות ומבצעים ממקום אחד",
-                "חשיפה לקהילות דיירים רלוונטיות",
               ].map((b) => (
                 <li key={b} className="flex items-start gap-2 text-sm">
                   <CheckCircle2 className="h-4 w-4 text-secondary shrink-0 mt-0.5" />
@@ -265,17 +455,19 @@ export default function Landing() {
                 onClick={isAuthed ? goToDashboard : goSignup}
                 className="h-12 px-8 rounded-2xl bg-gradient-gold text-primary hover:opacity-90 font-bold shadow-gold inline-flex items-center justify-center gap-2"
               >
-                {isAuthed ? "המשך לדשבורד" : "הרשמה חינם"}
+                {isAuthed ? "המשך לדשבורד" : "הרשמה"}
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               {!isAuthed && (
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={goLogin}
-                  className="text-xs text-primary-foreground/80 hover:text-gold underline-offset-4 hover:underline"
+                  className="h-12 rounded-2xl bg-transparent border-2 border-gold/60 text-primary-foreground hover:bg-white/10 font-bold inline-flex items-center justify-center gap-2"
                 >
+                  <LogIn className="h-4 w-4" />
                   כבר רשום? התחבר
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -285,6 +477,18 @@ export default function Landing() {
           © {new Date().getFullYear()} GroupBuild · רכש קבוצתי לדיירי בנייה חדשה
         </footer>
       </div>
+    </div>
+  );
+}
+
+function StatCard({ icon, value, label, accent }: { icon: React.ReactNode; value: string; label: string; accent?: boolean }) {
+  return (
+    <div className={"gb-card p-4 text-center " + (accent ? "bg-gradient-card" : "")}>
+      <div className="h-8 w-8 rounded-xl bg-gold/15 mx-auto flex items-center justify-center text-secondary mb-2">
+        {icon}
+      </div>
+      <div className={"text-lg font-extrabold mb-0.5 " + (accent ? "gb-gold-text" : "text-foreground")}>{value}</div>
+      <div className="text-[11px] text-muted-foreground leading-tight">{label}</div>
     </div>
   );
 }
