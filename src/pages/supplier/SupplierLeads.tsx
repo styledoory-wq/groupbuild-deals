@@ -252,6 +252,15 @@ export default function SupplierLeads() {
                       )}
                     </div>
                   )}
+                  {isAdmin && i.deposit_required && i.deposit_status !== "paid" && (
+                    <button
+                      onClick={() => markDepositPaid(i.user_id, i.deal_id)}
+                      disabled={busyKey === i.user_id + i.deal_id}
+                      className="mt-2 w-full text-[11px] font-bold py-2 rounded-lg bg-gold/15 text-primary border border-gold/40 inline-flex items-center justify-center gap-1 disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="h-3 w-3" /> סמן פיקדון כשולם (אדמין)
+                    </button>
+                  )}
                 </div>
               );
             })}
