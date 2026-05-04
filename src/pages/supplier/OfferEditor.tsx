@@ -432,6 +432,53 @@ export default function OfferEditor() {
           </p>
         </div>
 
+        {/* Visibility */}
+        <div className="gb-card p-4 space-y-3">
+          <h3 className="font-bold text-sm">למי ההצעה מיועדת?</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setVisibilityType("public")}
+              className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
+                visibilityType === "public"
+                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
+                  : "border-border bg-card text-muted-foreground"
+              }`}
+            >
+              לכל הדיירים
+            </button>
+            <button
+              type="button"
+              onClick={() => setVisibilityType("project_only")}
+              className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
+                visibilityType === "project_only"
+                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
+                  : "border-border bg-card text-muted-foreground"
+              }`}
+            >
+              לפרויקט מסוים
+            </button>
+          </div>
+          {visibilityType === "project_only" && (
+            <div>
+              <div className="text-[11px] font-bold text-muted-foreground mb-1">בחר פרויקט</div>
+              <select
+                value={visibilityProjectId}
+                onChange={(e) => setVisibilityProjectId(e.target.value)}
+                className="h-11 w-full rounded-xl border border-input bg-card px-3 text-sm"
+              >
+                <option value="">— בחר פרויקט —</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name} · {p.city}</option>
+                ))}
+              </select>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                רק דיירים המשויכים לפרויקט זה יראו את ההצעה.
+              </p>
+            </div>
+          )}
+        </div>
+
         {/* Tiers builder */}
         <div className="gb-card p-4 space-y-3">
           <div className="flex items-center justify-between">
