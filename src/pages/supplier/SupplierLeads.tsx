@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2 } from "lucide-react";
+import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { ils } from "@/lib/offerPricing";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
+import { isAdminEmail } from "@/lib/auth";
 
 type DealLite = { id: string; title: string };
 type InterestRow = {
@@ -33,6 +35,40 @@ export default function SupplierLeads() {
   const [deals, setDeals] = useState<DealLite[]>([]);
   const [interests, setInterests] = useState<InterestRow[]>([]);
   const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+
+  const markDepositPaid = async (userId: string, dealId: string) => {
+    const key = userId + dealId;
+    setBusyKey(key);
+    try {
+      const { data: pending, error: pErr } = await supabase
+        .from("deposits")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("deal_id", dealId)
+        .eq("status", "pending")
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (pErr) throw pErr;
+      if (!pending) {
+        toast.message("אין פיקדון ממתין לאישור");
+        return;
+      }
+      const { error: uErr } = await supabase
+        .from("deposits")
+        .update({ status: "paid", paid_at: new Date().toISOString() })
+        .eq("id", pending.id);
+      if (uErr) throw uErr;
+      toast.success("הפיקדון סומן כשולם");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "עדכון נכשל");
+    } finally {
+      setBusyKey(null);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -48,6 +84,7 @@ export default function SupplierLeads() {
         }
         const userId = session.session.user.id;
         const email = session.session.user.email ?? "";
+        if (!cancelled) setIsAdmin(isAdminEmail(email));
 
         // Find supplier id
         let { data: sup } = await supabase
@@ -214,6 +251,15 @@ export default function SupplierLeads() {
                         </a>
                       )}
                     </div>
+                  )}
+                  {isAdmin && i.deposit_required && i.deposit_status !== "paid" && (
+                    <button
+                      onClick={() => markDepositPaid(i.user_id, i.deal_id)}
+                      disabled={busyKey === i.user_id + i.deal_id}
+                      className="mt-2 w-full text-[11px] font-bold py-2 rounded-lg bg-gold/15 text-primary border border-gold/40 inline-flex items-center justify-center gap-1 disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="h-3 w-3" /> סמן פיקדון כשולם (אדמין)
+                    </button>
                   )}
                 </div>
               );
