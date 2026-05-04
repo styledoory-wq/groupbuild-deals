@@ -190,7 +190,7 @@ export default function DealDetail() {
     if (!deal) return;
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
-      toast.error("יש להתחבר כדי להצטרף להצעה");
+      window.location.href = `/auth?redirect=/resident/deals/${deal.id}`;
       return;
     }
     setAcceptedTerms(false);
