@@ -202,6 +202,8 @@ export type Database = {
           tiers: Json
           title: string
           updated_at: string
+          visibility_project_id: string | null
+          visibility_type: string
         }
         Insert: {
           base_price?: number | null
@@ -226,6 +228,8 @@ export type Database = {
           tiers?: Json
           title: string
           updated_at?: string
+          visibility_project_id?: string | null
+          visibility_type?: string
         }
         Update: {
           base_price?: number | null
@@ -250,6 +254,8 @@ export type Database = {
           tiers?: Json
           title?: string
           updated_at?: string
+          visibility_project_id?: string | null
+          visibility_type?: string
         }
         Relationships: [
           {
@@ -900,6 +906,16 @@ export type Database = {
     Functions: {
       get_deal_interest_count: { Args: { _deal_id: string }; Returns: number }
       get_deal_paid_count: { Args: { _deal_id: string }; Returns: number }
+      get_landing_stats: {
+        Args: never
+        Returns: {
+          active_deals_count: number
+          paid_deposits_count: number
+          residents_count: number
+          suppliers_count: number
+          total_savings: number
+        }[]
+      }
       get_supplier_rating: {
         Args: { _supplier_id: string }
         Returns: {
