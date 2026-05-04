@@ -54,7 +54,9 @@ const defaultPriceTiers = (): TierRow[] => [
 
 export default function OfferEditor() {
   const navigate = useNavigate();
-  const { categories } = useApp();
+  const { categories, projects } = useApp();
+  const [visibilityType, setVisibilityType] = useState<"public" | "project_only">("public");
+  const [visibilityProjectId, setVisibilityProjectId] = useState<string>("");
 
   const [bootLoading, setBootLoading] = useState(true);
   const [bootError, setBootError] = useState<string | null>(null);
