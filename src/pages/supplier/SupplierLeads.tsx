@@ -37,7 +37,24 @@ export default function SupplierLeads() {
   const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [statusBusy, setStatusBusy] = useState<string | null>(null);
 
+  const updateLeadStatus = async (interestId: string, status: "approved" | "rejected") => {
+    setStatusBusy(interestId);
+    try {
+      const { error } = await supabase
+        .from("deal_interests")
+        .update({ lead_status: status })
+        .eq("id", interestId);
+      if (error) throw error;
+      setInterests((prev) => prev.map((i) => (i.id === interestId ? { ...i, lead_status: status } : i)));
+      toast.success(status === "approved" ? "הליד אושר" : "הליד סומן כלא רלוונטי");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "עדכון נכשל");
+    } finally {
+      setStatusBusy(null);
+    }
+  };
   const markDepositPaid = async (userId: string, dealId: string) => {
     const key = userId + dealId;
     setBusyKey(key);
