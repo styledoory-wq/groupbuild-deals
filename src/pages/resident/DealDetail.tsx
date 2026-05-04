@@ -396,14 +396,19 @@ export default function DealDetail() {
       <div className="px-5 -mt-6 relative z-10 mb-4">
         <div className="gb-card p-5 bg-gradient-card">
           <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">המחיר/הנחה הנוכחיים</div>
-          <div className="text-2xl font-extrabold text-primary leading-tight">{display.headline}</div>
-          {display.savings && (
-            <div className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-bold text-success bg-success/10 border border-success/30 rounded-full px-3 py-1">
-              <TrendingUp className="h-3.5 w-3.5" />
-              {display.savings}
+          <div className="text-3xl font-extrabold text-primary leading-tight">{display.headline}</div>
+          {display.savings ? (
+            <div className="mt-3 inline-flex items-center gap-1.5 text-sm font-extrabold text-success bg-success/10 border border-success/30 rounded-full px-3 py-1.5">
+              <TrendingUp className="h-4 w-4" />
+              {display.savings.startsWith("חיסכון") ? `חסכת ${display.savings.replace("חיסכון:", "").trim()}` : display.savings}
             </div>
-          )}
-          <p className="text-[11px] text-muted-foreground mt-2">
+          ) : display.discountPercent ? (
+            <div className="mt-3 inline-flex items-center gap-1.5 text-sm font-extrabold text-success bg-success/10 border border-success/30 rounded-full px-3 py-1.5">
+              <TrendingUp className="h-4 w-4" />
+              חוסכים {display.discountPercent}% מול מחיר אישי
+            </div>
+          ) : null}
+          <p className="text-[11px] text-muted-foreground mt-3">
             ככל שיותר דיירים מצטרפים — ההנחה גדלה
           </p>
         </div>
