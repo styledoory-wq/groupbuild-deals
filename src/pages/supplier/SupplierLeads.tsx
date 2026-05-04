@@ -241,12 +241,40 @@ export default function SupplierLeads() {
                       </span>
                     )}
                     <span>נרשם: {new Date(i.created_at).toLocaleDateString("he-IL")}</span>
+                    {i.lead_status && i.lead_status !== "new" && (
+                      <span className={
+                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold " +
+                        (i.lead_status === "approved"
+                          ? "bg-success/10 text-success border border-success/30"
+                          : i.lead_status === "rejected"
+                          ? "bg-muted text-muted-foreground border border-border"
+                          : "bg-gold/10 text-primary border border-gold/30")
+                      }>
+                        {i.lead_status === "approved" ? "מאושר" : i.lead_status === "rejected" ? "לא רלוונטי" : i.lead_status}
+                      </span>
+                    )}
                   </div>
                   {i.notes && (
                     <p className="text-[11px] text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">
                       {i.notes}
                     </p>
                   )}
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <button
+                      onClick={() => updateLeadStatus(i.id, "approved")}
+                      disabled={statusBusy === i.id || i.lead_status === "approved"}
+                      className="h-8 rounded-lg bg-success text-success-foreground text-[11px] font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                    >
+                      <Check className="h-3 w-3" /> מאושר
+                    </button>
+                    <button
+                      onClick={() => updateLeadStatus(i.id, "rejected")}
+                      disabled={statusBusy === i.id || i.lead_status === "rejected"}
+                      className="h-8 rounded-lg bg-muted text-foreground text-[11px] font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                    >
+                      <X className="h-3 w-3" /> לא רלוונטי
+                    </button>
+                  </div>
                   {(phone || wa) && (
                     <div className="flex gap-2">
                       {phone && (
