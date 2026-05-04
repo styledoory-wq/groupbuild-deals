@@ -35,6 +35,40 @@ export default function SupplierLeads() {
   const [deals, setDeals] = useState<DealLite[]>([]);
   const [interests, setInterests] = useState<InterestRow[]>([]);
   const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+
+  const markDepositPaid = async (userId: string, dealId: string) => {
+    const key = userId + dealId;
+    setBusyKey(key);
+    try {
+      const { data: pending, error: pErr } = await supabase
+        .from("deposits")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("deal_id", dealId)
+        .eq("status", "pending")
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (pErr) throw pErr;
+      if (!pending) {
+        toast.message("אין פיקדון ממתין לאישור");
+        return;
+      }
+      const { error: uErr } = await supabase
+        .from("deposits")
+        .update({ status: "paid", paid_at: new Date().toISOString() })
+        .eq("id", pending.id);
+      if (uErr) throw uErr;
+      toast.success("הפיקדון סומן כשולם");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "עדכון נכשל");
+    } finally {
+      setBusyKey(null);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
