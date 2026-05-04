@@ -84,6 +84,7 @@ export default function SupplierLeads() {
         }
         const userId = session.session.user.id;
         const email = session.session.user.email ?? "";
+        if (!cancelled) setIsAdmin(isAdminEmail(email));
 
         // Find supplier id
         let { data: sup } = await supabase
