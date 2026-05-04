@@ -244,38 +244,32 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* LIVE STATS */}
+        {/* LIVE STATS — only show meaningful (>0) numbers; otherwise show trust copy */}
         <section className="bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-8 -mt-2 [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground">
           <div className="text-center mb-5">
             <div className="gb-divider-gold mx-auto mb-3" />
             <h2 className="text-xl font-extrabold mb-1">המספרים שלנו, בזמן אמת</h2>
-            {!stats && (
-              <p className="text-[11px] text-muted-foreground">הנתונים יתעדכנו עם הצטרפות משתמשים</p>
-            )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <StatCard
-              icon={<Wallet className="h-4 w-4" />}
-              value={stats && stats.total_savings > 0 ? `₪${fmtNum(Math.round(Number(stats.total_savings)))}` : "₪0"}
-              label="נחסכו לדיירים"
-              accent
-            />
-            <StatCard
-              icon={<Users className="h-4 w-4" />}
-              value={stats ? fmtNum(stats.residents_count) : "0"}
-              label="דיירים רשומים"
-            />
-            <StatCard
-              icon={<ShieldCheck className="h-4 w-4" />}
-              value={stats ? fmtNum(stats.suppliers_count) : "0"}
-              label="ספקים מאושרים"
-            />
-            <StatCard
-              icon={<TagIcon className="h-4 w-4" />}
-              value={stats ? fmtNum(stats.active_deals_count) : "0"}
-              label="עסקאות פעילות"
-            />
-          </div>
+          {(() => {
+            const cards: { icon: JSX.Element; value: string; label: string; accent?: boolean }[] = [];
+            if (stats && stats.total_savings > 0) cards.push({ icon: <Wallet className="h-4 w-4" />, value: `₪${fmtNum(Math.round(Number(stats.total_savings)))}`, label: "נחסכו לדיירים", accent: true });
+            if (stats && stats.residents_count > 0) cards.push({ icon: <Users className="h-4 w-4" />, value: fmtNum(stats.residents_count), label: "דיירים רשומים" });
+            if (stats && stats.suppliers_count > 0) cards.push({ icon: <ShieldCheck className="h-4 w-4" />, value: fmtNum(stats.suppliers_count), label: "ספקים מאושרים" });
+            if (stats && stats.active_deals_count > 0) cards.push({ icon: <TagIcon className="h-4 w-4" />, value: fmtNum(stats.active_deals_count), label: "עסקאות פעילות" });
+            if (cards.length === 0) {
+              return (
+                <div className="gb-card p-5 text-center bg-gradient-card">
+                  <p className="text-sm font-bold mb-1">צפי חיסכון לדייר: <span className="gb-gold-text">₪300–₪1,200</span> לכל מוצר</p>
+                  <p className="text-xs text-muted-foreground">עד 25% חיסכון בזכות רכישה קבוצתית · ככל שיותר דיירים מצטרפים — המחיר יורד</p>
+                </div>
+              );
+            }
+            return (
+              <div className={cards.length === 1 ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-3"}>
+                {cards.map((c, i) => (<StatCard key={i} icon={c.icon} value={c.value} label={c.label} accent={c.accent} />))}
+              </div>
+            );
+          })()}
         </section>
 
         {/* HOT DEALS */}
