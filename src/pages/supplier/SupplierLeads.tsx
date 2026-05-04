@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2 } from "lucide-react";
+import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { ils } from "@/lib/offerPricing";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
+import { isAdminEmail } from "@/lib/auth";
 
 type DealLite = { id: string; title: string };
 type InterestRow = {
