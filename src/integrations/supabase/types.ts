@@ -904,6 +904,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_lead_and_deposit: {
+        Args: { _interest_id: string; _lead_status: string }
+        Returns: undefined
+      }
       get_deal_interest_count: { Args: { _deal_id: string }; Returns: number }
       get_deal_paid_count: { Args: { _deal_id: string }; Returns: number }
       get_landing_stats: {

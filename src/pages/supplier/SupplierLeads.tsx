@@ -42,13 +42,18 @@ export default function SupplierLeads() {
   const updateLeadStatus = async (interestId: string, status: "approved" | "rejected") => {
     setStatusBusy(interestId);
     try {
-      const { error } = await supabase
-        .from("deal_interests")
-        .update({ lead_status: status })
-        .eq("id", interestId);
+      const { error } = await supabase.rpc("approve_lead_and_deposit", {
+        _interest_id: interestId,
+        _lead_status: status,
+      });
       if (error) throw error;
-      setInterests((prev) => prev.map((i) => (i.id === interestId ? { ...i, lead_status: status } : i)));
-      toast.success(status === "approved" ? "הליד אושר" : "הליד סומן כלא רלוונטי");
+      setInterests((prev) => prev.map((i) => (i.id === interestId ? {
+        ...i,
+        lead_status: status,
+        status: status === "approved" ? (i.deposit_required ? "paid" : "approved") : "rejected",
+        deposit_status: status === "approved" && i.deposit_required ? "paid" : i.deposit_status,
+      } : i)));
+      toast.success(status === "approved" ? "הליד אושר והפיקדון סומן כשולם" : "הליד סומן כלא רלוונטי");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "עדכון נכשל");
     } finally {
@@ -79,6 +84,11 @@ export default function SupplierLeads() {
         .update({ status: "paid", paid_at: new Date().toISOString() })
         .eq("id", pending.id);
       if (uErr) throw uErr;
+      setInterests((prev) => prev.map((i) => (
+        i.user_id === userId && i.deal_id === dealId
+          ? { ...i, status: "paid", lead_status: "approved", deposit_status: "paid" }
+          : i
+      )));
       toast.success("הפיקדון סומן כשולם");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "עדכון נכשל");
@@ -204,7 +214,7 @@ export default function SupplierLeads() {
               const phone = i.phone?.trim() || p?.phone?.trim() || null;
               const email = p?.email ?? null;
               const wa = normalizeWhatsappUrl(phone);
-              const committed = i.deposit_required && i.deposit_status === "committed";
+              const committed = i.deposit_required && ["committed", "paid"].includes(i.deposit_status);
               return (
                 <div key={i.id} className="gb-card p-4">
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -215,7 +225,7 @@ export default function SupplierLeads() {
                     {committed && (
                       <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gold/10 text-primary border border-gold/30 shrink-0">
                         <BadgeCheck className="h-3 w-3" />
-                        התחייב {ils(Number(i.deposit_amount))}
+                        {i.deposit_status === "paid" ? "פיקדון שולם" : `התחייב ${ils(Number(i.deposit_amount))}`}
                       </span>
                     )}
                   </div>
