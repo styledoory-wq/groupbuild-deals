@@ -62,6 +62,8 @@ export default function DealsList() {
               base_price: (r.base_price as number | null) ?? null,
               tiers: (Array.isArray(r.tiers) ? (r.tiers as OfferTier[]) : []) as OfferTier[],
               ends_at: (r.ends_at as string | null) ?? null,
+              visibility_type: (r.visibility_type as string | null) ?? "public",
+              visibility_project_id: (r.visibility_project_id as string | null) ?? null,
             };
           });
         setDeals(mapped);
