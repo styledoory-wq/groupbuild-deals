@@ -803,6 +803,63 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_inquiries: {
+        Row: {
+          category_id: string | null
+          city: string | null
+          created_at: string
+          deleted_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          is_deleted: boolean
+          message: string | null
+          phone: string | null
+          project_name: string | null
+          source: string
+          status: string
+          supplier_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category_id?: string | null
+          city?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_deleted?: boolean
+          message?: string | null
+          phone?: string | null
+          project_name?: string | null
+          source?: string
+          status?: string
+          supplier_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string | null
+          city?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_deleted?: boolean
+          message?: string | null
+          phone?: string | null
+          project_name?: string | null
+          source?: string
+          status?: string
+          supplier_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       supplier_regions: {
         Row: {
           region_id: string
