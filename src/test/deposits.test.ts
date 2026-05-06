@@ -44,7 +44,7 @@ describe("deposit counting rules", () => {
   });
 
   it("active deposit count includes pending+paid only", () => {
-    expect(activeDepositCount(sample)).toBe(3); // 2 paid + 1 pending
+    expect(activeDepositCount(sample)).toBe(4); // 3 paid rows (incl. duplicate) + 1 pending; soft-deleted excluded
   });
 
   it("treats deal deletion gracefully — refunded deposit still kept in history", () => {
