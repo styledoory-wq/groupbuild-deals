@@ -7,16 +7,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/auth";
-import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
+import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import logoIcon from "@/assets/logo-icon.png";
-
-type LandingStats = {
-  residents_count: number;
-  suppliers_count: number;
-  active_deals_count: number;
-  paid_deposits_count: number;
-  total_savings: number;
-};
 
 type HotDeal = {
   id: string;
@@ -32,15 +24,11 @@ type HotDeal = {
   next_threshold: number | null;
 };
 
-const fmtNum = (n: number) => new Intl.NumberFormat("he-IL").format(n);
-
 export default function Landing() {
   const navigate = useNavigate();
   const [isAuthed, setIsAuthed] = useState(false);
   const [userEmail, setUserEmail] = useState<string>("");
   const [userType, setUserType] = useState<"resident" | "supplier">("resident");
-
-  const [stats, setStats] = useState<LandingStats | null>(null);
   const [hotDeals, setHotDeals] = useState<HotDeal[]>([]);
 
   useEffect(() => {
@@ -70,16 +58,11 @@ export default function Landing() {
     };
   }, []);
 
-  // Load real DB stats + 3 hot deals
+  // Load 3 hot deals only (no system stats)
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const { data: statsRow } = await supabase.rpc("get_landing_stats");
-        if (!cancelled && statsRow && Array.isArray(statsRow) && statsRow[0]) {
-          setStats(statsRow[0] as LandingStats);
-        }
-
         const { data: deals } = await supabase
           .from("deals")
           .select("id,title,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,suppliers!inner(business_name,is_active,approval_status)")
@@ -117,7 +100,7 @@ export default function Landing() {
         );
         if (!cancelled) setHotDeals(enriched);
       } catch (e) {
-        console.error("[Landing] stats load failed", e);
+        console.error("[Landing] deals load failed", e);
       }
     })();
     return () => { cancelled = true; };
@@ -132,14 +115,9 @@ export default function Landing() {
   const goSignup = () => navigate("/auth?mode=signup");
   const goLogin = () => navigate("/auth?mode=signin");
 
-  // Savings copy logic
-  const hasMeaningfulSavings = stats && Number(stats.total_savings) > 0;
-  const savingsPrimary = hasMeaningfulSavings
-    ? `דיירים כבר חסכו ₪${fmtNum(Math.round(Number(stats!.total_savings)))}`
-    : "צפי חיסכון לדייר: ₪300–₪1,200 לכל מוצר";
-  const savingsSecondary = hasMeaningfulSavings
-    ? "וצפי חיסכון של עד 25%"
-    : "חיסכון של עד 25% בזכות רכישה קבוצתית";
+  // Fixed marketing copy — no live stats during launch
+  const savingsPrimary = "צפי חיסכון לדייר: ₪500–₪2,500+ לכל מוצר";
+  const savingsSecondary = "עד 25% הנחה ברכישה קבוצתית";
 
   return (
     <div className="min-h-screen bg-primary text-primary-foreground flex justify-center">
