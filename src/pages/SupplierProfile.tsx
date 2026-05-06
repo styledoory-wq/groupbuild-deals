@@ -132,20 +132,32 @@ export default function SupplierProfile() {
     if (!supplier) return;
     setSubmitting(true);
     try {
-      await supabase.functions.invoke("notify-admin", {
-        body: {
-          event: "supplier_interest",
-          title: "מתעניין חדש בספק",
-          details: {
-            supplier_id: supplier.id,
-            supplier_name: supplier.business_name,
-            user_id: session.session.user.id,
-            user_email: session.session.user.email,
-          },
-        },
-      }).catch(() => {});
+      const userId = session.session.user.id;
+      const userEmail = session.session.user.email ?? null;
+      // Pull profile contact details so the supplier sees a real lead
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("full_name,phone,city,project_id")
+        .eq("id", userId)
+        .maybeSingle();
+      const { error: insErr } = await supabase.from("supplier_inquiries").insert({
+        supplier_id: supplier.id,
+        user_id: userId,
+        full_name: prof?.full_name ?? null,
+        phone: prof?.phone ?? null,
+        email: userEmail,
+        city: prof?.city ?? null,
+        project_name: prof?.project_id ?? null,
+        category_id: supplier.categories?.[0] ?? null,
+        message: `התעניינות בשירותים של ${supplier.business_name}`,
+        source: deals.length > 0 ? "supplier_with_deals" : "general",
+        status: "new",
+      });
+      if (insErr) throw insErr;
       setInterested(true);
-      toast.success("רישמנו את ההתעניינות שלך — נחזור אליך בהקדם");
+      toast.success("רישמנו את ההתעניינות שלך — הספק יקבל את הפנייה");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "שליחת ההתעניינות נכשלה");
     } finally {
       setSubmitting(false);
     }
