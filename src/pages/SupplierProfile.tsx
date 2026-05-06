@@ -224,24 +224,8 @@ export default function SupplierProfile() {
           </div>
         )}
 
-        {/* Catalog */}
-        {supplier.catalog_url && (
-          <a
-            href={supplier.catalog_url}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="gb-card p-4 flex items-center gap-3 hover:border-gold/40 transition-smooth"
-          >
-            <div className="h-11 w-11 rounded-xl bg-gold/10 flex items-center justify-center">
-              <FileText className="h-5 w-5 text-gold" />
-            </div>
-            <div className="flex-1">
-              <div className="text-sm font-bold">צפייה בקטלוג</div>
-              <div className="text-[11px] text-muted-foreground">PDF · ייפתח בכרטיסיה חדשה</div>
-            </div>
-            <ExternalLink className="h-4 w-4 text-muted-foreground" />
-          </a>
-        )}
+        {/* Catalogs */}
+        <SupplierCatalogsList supplierId={supplier.id} legacyUrl={supplier.catalog_url} />
 
         {/* Description */}
         {supplier.description && (
