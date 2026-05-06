@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { describeOffer, describeTier, tierRange, type OfferTier, type OfferType } from "@/lib/offerPricing";
+import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
 
 type DealRow = {
   id: string;
@@ -26,6 +27,17 @@ export default function SupplierOffers() {
   const [error, setError] = useState<string | null>(null);
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [deals, setDeals] = useState<DealRow[]>([]);
+
+  const loadDeals = useCallback(async (sid: string) => {
+    const { data, error: dErr } = await supabase
+      .from("deals")
+      .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, tiers, created_at")
+      .eq("supplier_id", sid)
+      .eq("is_deleted", false)
+      .order("created_at", { ascending: false });
+    if (dErr) throw dErr;
+    setDeals(((data ?? []) as unknown) as DealRow[]);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,15 +75,7 @@ export default function SupplierOffers() {
           return;
         }
 
-        const { data, error: dErr } = await supabase
-          .from("deals")
-          .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, tiers, created_at")
-          .eq("supplier_id", sid)
-          .eq("is_deleted", false)
-          .order("created_at", { ascending: false });
-
-        if (dErr) throw dErr;
-        if (!cancelled) setDeals(((data ?? []) as unknown) as DealRow[]);
+        await loadDeals(sid);
       } catch (e) {
         console.error("[SupplierOffers] load error", e);
         if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינה");
@@ -80,7 +84,11 @@ export default function SupplierOffers() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [loadDeals]);
+
+  const refresh = useCallback(() => {
+    if (supplierId) loadDeals(supplierId).catch((e) => console.error(e));
+  }, [supplierId, loadDeals]);
 
   return (
     <MobileShell>
@@ -139,16 +147,17 @@ export default function SupplierOffers() {
           }, 0);
           return (
             <div key={d.id} className="gb-card p-4">
-              <div className="flex items-start justify-between mb-2">
+              <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-sm truncate">{d.title}</h3>
                   <p className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-gold" /> ספק מאומת
                   </p>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-success/10 text-success">
-                  {d.status === "active" ? "פעילה" : d.status}
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap ${d.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                  {d.status === "active" ? "פעילה" : "מושבתת"}
                 </span>
+                <DealActionsMenu dealId={d.id} status={d.status} onChanged={refresh} />
               </div>
 
               <div className="pt-2 border-t border-border mt-2">

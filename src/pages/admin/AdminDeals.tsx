@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -6,6 +6,9 @@ import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 type DbDeal = {
   id: string;
@@ -28,51 +31,51 @@ export default function AdminDeals() {
   const [suppliers, setSuppliers] = useState<SupplierMap>({});
   const [counts, setCounts] = useState<Record<string, { interests: number; paid: number }>>({});
   const [loading, setLoading] = useState(true);
+  const [showInactive, setShowInactive] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { data, error } = await supabase
-          .from("deals")
-          .select("id,title,status,category_id,supplier_id,original_price,discounted_price,discount_percentage,base_price,offer_type")
-          .eq("is_deleted", false)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        const list = (data ?? []) as DbDeal[];
-        if (cancelled) return;
-        setDeals(list);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("deals")
+        .select("id,title,status,category_id,supplier_id,original_price,discounted_price,discount_percentage,base_price,offer_type")
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const list = (data ?? []) as DbDeal[];
+      setDeals(list);
 
-        const supplierIds = Array.from(new Set(list.map((d) => d.supplier_id))).filter(Boolean);
-        if (supplierIds.length) {
-          const { data: srows } = await supabase
-            .from("suppliers")
-            .select("id,business_name")
-            .in("id", supplierIds);
-          const m: SupplierMap = {};
-          (srows ?? []).forEach((s: { id: string; business_name: string }) => { m[s.id] = { business_name: s.business_name }; });
-          if (!cancelled) setSuppliers(m);
-        }
-
-        // counts
-        const cMap: Record<string, { interests: number; paid: number }> = {};
-        await Promise.all(list.map(async (d) => {
-          const [{ count: interests }, { count: paid }] = await Promise.all([
-            supabase.from("deal_interests").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("is_deleted", false),
-            supabase.from("deposits").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "paid").eq("is_deleted", false),
-          ]);
-          cMap[d.id] = { interests: interests ?? 0, paid: paid ?? 0 };
-        }));
-        if (!cancelled) setCounts(cMap);
-      } catch (err) {
-        console.error("[AdminDeals]", err);
-        toast.error(err instanceof Error ? err.message : "טעינת ההצעות נכשלה");
-      } finally {
-        if (!cancelled) setLoading(false);
+      const supplierIds = Array.from(new Set(list.map((d) => d.supplier_id))).filter(Boolean);
+      if (supplierIds.length) {
+        const { data: srows } = await supabase
+          .from("suppliers")
+          .select("id,business_name")
+          .in("id", supplierIds);
+        const m: SupplierMap = {};
+        (srows ?? []).forEach((s: { id: string; business_name: string }) => { m[s.id] = { business_name: s.business_name }; });
+        setSuppliers(m);
       }
-    })();
-    return () => { cancelled = true; };
+
+      const cMap: Record<string, { interests: number; paid: number }> = {};
+      await Promise.all(list.map(async (d) => {
+        const [{ count: interests }, { count: paid }] = await Promise.all([
+          supabase.from("deal_interests").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("is_deleted", false),
+          supabase.from("deposits").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "paid").eq("is_deleted", false),
+        ]);
+        cMap[d.id] = { interests: interests ?? 0, paid: paid ?? 0 };
+      }));
+      setCounts(cMap);
+    } catch (err) {
+      console.error("[AdminDeals]", err);
+      toast.error(err instanceof Error ? err.message : "טעינת ההצעות נכשלה");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const visibleDeals = showInactive ? deals : deals.filter((d) => d.status === "active");
 
   const priceFor = (d: DbDeal): number => {
     if (d.offer_type === "price_comparison" && d.discounted_price != null) return Number(d.discounted_price);
@@ -84,28 +87,39 @@ export default function AdminDeals() {
 
   return (
     <MobileShell>
-      <PageHeader title="ניהול עסקאות" subtitle={`${deals.length} עסקאות במערכת`} back={false} />
+      <PageHeader title="ניהול עסקאות" subtitle={`${visibleDeals.length} מוצגות מתוך ${deals.length}`} back={false} />
+      <div className="px-5 -mt-2 mb-3 flex items-center justify-end gap-2">
+        <Label htmlFor="show-inactive" className="text-xs text-muted-foreground">הצג מושבתות</Label>
+        <Switch id="show-inactive" checked={showInactive} onCheckedChange={setShowInactive} />
+      </div>
       {loading ? (
         <div className="px-5 py-12 text-center text-sm text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" /> טוען…
         </div>
       ) : (
-        <div className="px-5 -mt-4 relative z-10 space-y-3">
-          {deals.length === 0 && (
-            <div className="gb-card p-8 text-center text-sm text-muted-foreground">אין הצעות עדיין</div>
+        <div className="px-5 relative z-10 space-y-3">
+          {visibleDeals.length === 0 && (
+            <div className="gb-card p-8 text-center text-sm text-muted-foreground">אין הצעות להצגה</div>
           )}
-          {deals.map((d) => {
+          {visibleDeals.map((d) => {
             const supplier = suppliers[d.supplier_id];
             const category = categories.find((c) => c.id === d.category_id);
             const cnt = counts[d.id] ?? { interests: 0, paid: 0 };
+            const isActive = d.status === "active";
             return (
               <div key={d.id} className="gb-card p-4">
                 <div className="flex items-start gap-3 mb-2">
                   <div className="h-10 w-10 rounded-xl bg-gradient-hero flex items-center justify-center text-lg">{category?.icon ?? "🏷️"}</div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-sm truncate">{d.title}</h3>
-                    <p className="text-[11px] text-muted-foreground truncate">{supplier?.business_name ?? "—"} · {d.status}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                        {isActive ? "פעילה" : "מושבתת"}
+                      </span>
+                      <p className="text-[11px] text-muted-foreground truncate">{supplier?.business_name ?? "—"}</p>
+                    </div>
                   </div>
+                  <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border text-center text-[11px]">
                   <div>
