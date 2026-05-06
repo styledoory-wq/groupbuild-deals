@@ -108,31 +108,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Load notifications for current authenticated user (and refresh on auth change)
   const refreshNotifications = async () => {
-    const { data: sessionData } = await withTimeout(supabase.auth.getSession(), "בדיקת התחברות");
-    const uid = sessionData.session?.user?.id;
-    if (!uid) {
-      setNotifications([]);
-      return;
-    }
-    const { data, error } = await withTimeout(supabase
-      .from("notifications")
-      .select("id,title,body,type,is_read,created_at")
-      .eq("user_id", uid)
-      .eq("is_deleted", false)
-      .order("created_at", { ascending: false })
-      .limit(50), "טעינת התראות");
-    if (error) {
+    try {
+      const { data: sessionData } = await withTimeout(supabase.auth.getSession(), "בדיקת התחברות");
+      const uid = sessionData.session?.user?.id;
+      if (!uid) {
+        setNotifications([]);
+        return;
+      }
+      const { data, error } = await withTimeout(supabase
+        .from("notifications")
+        .select("id,title,body,type,is_read,created_at")
+        .eq("user_id", uid)
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false })
+        .limit(50), "טעינת התראות");
+      if (error) {
+        console.error("[AppStore] notifications load failed", error);
+        return;
+      }
+      setNotifications(((data ?? []) as DbNotificationRow[]).map((n) => ({
+        id: n.id,
+        title: n.title,
+        body: n.body ?? "",
+        type: ((n.type as AppNotification["type"]) ?? "system"),
+        unread: !n.is_read,
+        createdAt: n.created_at,
+      })));
+    } catch (error) {
       console.error("[AppStore] notifications load failed", error);
-      return;
     }
-    setNotifications(((data ?? []) as DbNotificationRow[]).map((n) => ({
-      id: n.id,
-      title: n.title,
-      body: n.body ?? "",
-      type: ((n.type as AppNotification["type"]) ?? "system"),
-      unread: !n.is_read,
-      createdAt: n.created_at,
-    })));
   };
 
   useEffect(() => {
