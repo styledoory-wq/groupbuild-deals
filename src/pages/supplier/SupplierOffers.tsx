@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { describeOffer, describeTier, tierRange, type OfferTier, type OfferType } from "@/lib/offerPricing";
+import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
 
 type DealRow = {
   id: string;
