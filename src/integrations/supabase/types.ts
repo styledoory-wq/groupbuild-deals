@@ -531,6 +531,9 @@ export type Database = {
           project_id: string | null
           region: string | null
           region_id: string | null
+          terms_accepted: boolean
+          terms_accepted_at: string | null
+          terms_version: string | null
           updated_at: string
           user_type: string
         }
@@ -554,6 +557,9 @@ export type Database = {
           project_id?: string | null
           region?: string | null
           region_id?: string | null
+          terms_accepted?: boolean
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           updated_at?: string
           user_type?: string
         }
@@ -577,6 +583,9 @@ export type Database = {
           project_id?: string | null
           region?: string | null
           region_id?: string | null
+          terms_accepted?: boolean
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           updated_at?: string
           user_type?: string
         }
