@@ -126,7 +126,7 @@ export default function Landing() {
         <header className="sticky top-0 z-40 bg-primary/95 backdrop-blur">
           <div className="flex items-center justify-between px-5 h-20">
             <Link to="/" className="flex items-center" aria-label="GroupBuild">
-              <BrandLogo variant="light" size="lg" className="h-14 sm:h-16" />
+              <BrandLogo variant="light" className="h-16 sm:h-20 w-auto" />
             </Link>
             <div className="flex items-center gap-2">
               {isAuthed ? (
