@@ -1056,13 +1056,16 @@ export default function AdminDbSuppliers() {
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
-            <AlertDialogTitle>למחוק את הספק?</AlertDialogTitle>
-            <AlertDialogDescription>פעולה זו לא ניתנת לביטול.</AlertDialogDescription>
+            <AlertDialogTitle>מחיקה מלאה של הספק?</AlertDialogTitle>
+            <AlertDialogDescription>
+              האם אתה בטוח? פעולה זו תמחק את הספק לצמיתות — כולל החשבון, הפרופיל, הקטלוגים, הגלריה וקבצי האחסון.
+              האימייל ישוחרר ויהיה ניתן להירשם איתו מחדש. עסקאות והיסטוריית פיקדונות יישמרו לצורך audit.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>ביטול</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              מחק
+              מחיקה מלאה
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
