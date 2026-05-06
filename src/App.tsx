@@ -12,6 +12,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound.tsx";
 import ThankYou from "./pages/ThankYou";
 import SupplierProfile from "./pages/SupplierProfile";
+import NotificationSettings from "./pages/NotificationSettings";
 
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
 import ProjectsList from "./pages/resident/ProjectsList";
@@ -88,6 +89,7 @@ const App = () => (
             <Route path="/supplier/profile/edit" element={<SupplierProfileEdit />} />
             <Route path="/supplier/offers" element={<SupplierOffers />} />
             <Route path="/supplier/offers/new" element={<OfferEditor />} />
+            <Route path="/settings/notifications" element={<NotificationSettings />} />
             <Route path="/supplier/leads" element={<SupplierLeads />} />
             <Route path="/supplier/reviews" element={<SupplierReviews />} />
 
