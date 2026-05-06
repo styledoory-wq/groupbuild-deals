@@ -386,15 +386,50 @@ export default function AdminDbSuppliers() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
+      // Ensure caller is authenticated before invoking — the function requires
+      // an admin JWT and will return 401 otherwise.
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session) {
+        toast.error("נדרשת התחברות מחדש כאדמין");
+        setDeleteId(null);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("delete-supplier", {
         body: { supplier_id: deleteId },
       });
-      if (error) throw error;
-      if (data && (data as { error?: string }).error) throw new Error((data as { error: string }).error);
+
+      // Network / FunctionsHttpError: try to read the JSON body from the response
+      if (error) {
+        let serverMessage = error.message || "מחיקה נכשלה";
+        const ctx = (error as unknown as { context?: Response }).context;
+        if (ctx && typeof ctx.text === "function") {
+          try {
+            const text = await ctx.text();
+            if (text) {
+              try {
+                const parsed = JSON.parse(text) as { error?: string };
+                if (parsed?.error) serverMessage = parsed.error;
+              } catch {
+                serverMessage = text;
+              }
+            }
+          } catch {
+            /* ignore */
+          }
+        }
+        throw new Error(serverMessage);
+      }
+
+      if (data && (data as { error?: string }).error) {
+        throw new Error((data as { error: string }).error);
+      }
       toast.success("הספק נמחק לצמיתות");
       await load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "מחיקה נכשלה");
+      const msg = err instanceof Error ? err.message : "מחיקה נכשלה";
+      console.error("[delete-supplier] failed:", err);
+      toast.error(`מחיקה נכשלה: ${msg}`);
     } finally {
       setDeleteId(null);
     }
