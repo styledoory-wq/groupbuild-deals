@@ -13,6 +13,9 @@ import NotFound from "./pages/NotFound.tsx";
 import ThankYou from "./pages/ThankYou";
 import SupplierProfile from "./pages/SupplierProfile";
 import NotificationSettings from "./pages/NotificationSettings";
+import TermsResidents from "./pages/TermsResidents";
+import TermsSuppliers from "./pages/TermsSuppliers";
+import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
 import ProjectsList from "./pages/resident/ProjectsList";
@@ -63,12 +66,15 @@ const App = () => (
         <Toaster />
         <Sonner position="top-center" dir="rtl" />
         <BrowserRouter>
+          <TermsAcceptanceGate>
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/thank-you" element={<ThankYou />} />
+            <Route path="/terms/residents" element={<TermsResidents />} />
+            <Route path="/terms/suppliers" element={<TermsSuppliers />} />
             <Route path="/suppliers/:supplierId" element={<SupplierProfile />} />
 
             {/* Resident */}
@@ -119,6 +125,7 @@ const App = () => (
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </TermsAcceptanceGate>
         </BrowserRouter>
       </TooltipProvider>
     </AppProvider>

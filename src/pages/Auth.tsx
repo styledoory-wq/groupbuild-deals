@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import type { Role } from "@/types";
 import { BrandLogo } from "@/components/BrandLogo";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
+import { CURRENT_TERMS_VERSION } from "@/lib/terms";
+import { Link } from "react-router-dom";
 
 type Mode = "signin" | "signup";
 
@@ -32,8 +34,8 @@ export default function Auth() {
   const [city, setCity] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [projectId, setProjectId] = useState<string>("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
-  
 
   // If already logged in → redirect by role
   useEffect(() => {
@@ -141,10 +143,14 @@ export default function Auth() {
     if (!fullName.trim()) return;
     if (role === "resident" && !city.trim()) return;
     if (role === "supplier" && !businessName.trim()) return;
+    if (!termsAccepted) {
+      toast.error("יש לאשר את תנאי השימוש כדי להמשיך");
+      return;
+    }
     setLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -159,6 +165,15 @@ export default function Auth() {
         },
       });
       if (error) throw error;
+      // Persist terms acceptance on profile (best-effort, after trigger creates profile)
+      const newUserId = data.user?.id;
+      if (newUserId) {
+        supabase.from("profiles").update({
+          terms_accepted: true,
+          terms_accepted_at: new Date().toISOString(),
+          terms_version: CURRENT_TERMS_VERSION,
+        }).eq("id", newUserId).then(() => { /* ignore */ });
+      }
       // Notify admin about new signup (best effort)
       supabase.functions.invoke("notify-admin", {
         body: {
@@ -355,7 +370,26 @@ export default function Auth() {
                   className="h-12 rounded-2xl bg-card border-border" />
               </div>
 
-              <Button type="submit" disabled={loading}
+              <label className="flex items-start gap-2 text-xs cursor-pointer pt-1">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-primary"
+                />
+                <span>
+                  קראתי ואני מאשר את{" "}
+                  <Link
+                    to={role === "supplier" ? "/terms/suppliers" : "/terms/residents"}
+                    target="_blank"
+                    className="font-bold gb-gold-text underline-offset-2 hover:underline"
+                  >
+                    תנאי השימוש
+                  </Link>
+                </span>
+              </label>
+
+              <Button type="submit" disabled={loading || !termsAccepted}
                 className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold mt-2">
                 {loading ? "נרשם…" : "צרו חשבון"}
               </Button>
