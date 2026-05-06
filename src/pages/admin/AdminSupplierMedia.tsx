@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
-import { uploadSupplierLogo, uploadSupplierGalleryImage, uploadSupplierCatalog } from "@/lib/supplierUploads";
+import { uploadSupplierLogo, uploadSupplierGalleryImage } from "@/lib/supplierUploads";
+import { SupplierCatalogsManager } from "@/components/suppliers/SupplierCatalogsManager";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
