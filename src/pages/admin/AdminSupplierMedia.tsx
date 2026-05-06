@@ -88,7 +88,6 @@ export default function AdminSupplierMedia() {
         whatsapp_url: whatsappUrl.trim() || null,
         instagram_url: instagramUrl.trim() || null,
         facebook_url: facebookUrl.trim() || null,
-        catalog_url: catalogUrl,
       }).eq("id", supplierId);
       if (uErr) throw uErr;
       await supabase.from("supplier_gallery").delete().eq("supplier_id", supplierId);
