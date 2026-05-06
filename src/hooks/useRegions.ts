@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { withTimeout } from "@/lib/safeAsync";
 
 export interface Region {
   id: string;
@@ -53,8 +54,8 @@ export function useRegions() {
     (async () => {
       try {
         const [r, c] = await Promise.all([
-          supabase.from("regions").select("*").order("display_order"),
-          supabase.from("cities").select("*").order("name_he"),
+          withTimeout(supabase.from("regions").select("*").order("display_order"), "טעינת אזורים"),
+          withTimeout(supabase.from("cities").select("*").order("name_he"), "טעינת ערים"),
         ]);
         if (!active) return;
         const dbRegions = ((r.data ?? []) as Region[]).filter(Boolean);

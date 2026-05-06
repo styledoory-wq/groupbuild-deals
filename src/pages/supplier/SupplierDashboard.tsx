@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getFriendlyLoadError } from "@/lib/safeAsync";
 
 type DbSupplier = {
   id: string;
@@ -127,7 +128,7 @@ export default function SupplierDashboard() {
         }
       } catch (e) {
         console.error("[SupplierDashboard] load error", e);
-        if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינת פרופיל הספק");
+        if (!cancelled) setError(getFriendlyLoadError(e, "שגיאה בטעינת פרופיל הספק"));
       } finally {
         if (!cancelled) setLoading(false);
         window.clearTimeout(safety);

@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Role } from "@/types";
 import { BrandLogo } from "@/components/BrandLogo";
+import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 
 type Mode = "signin" | "signup";
 
@@ -22,6 +23,7 @@ export default function Auth() {
   const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
   const [mode, setMode] = useState<Mode>(initialMode);
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // Form fields
   const [email, setEmail] = useState("");
@@ -35,15 +37,18 @@ export default function Auth() {
 
   // If already logged in → redirect by role
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    withTimeout(supabase.auth.getSession(), "בדיקת התחברות").then(async ({ data: { session } }) => {
       if (!session) return;
       await routeForUser(session.user.id, session.user.email ?? "");
-    });
+    }).catch((error) => setAuthError(getFriendlyLoadError(error, "לא הצלחנו לבדוק את מצב ההתחברות.")));
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         // Defer to avoid recursion
-        setTimeout(() => routeForUser(session.user.id, session.user.email ?? ""), 0);
+        setTimeout(() => {
+          routeForUser(session.user.id, session.user.email ?? "")
+            .catch((error) => setAuthError(getFriendlyLoadError(error, "לא הצלחנו לטעון את החשבון.")));
+        }, 0);
       }
     });
     return () => sub.subscription.unsubscribe();
@@ -53,10 +58,11 @@ export default function Auth() {
   const routeForUser = async (userId: string, userEmail: string) => {
     // Load profile + roles + supplier record in parallel.
     // user_roles is the source of truth for role; profile.user_type is fallback only.
+    setAuthError(null);
     const [{ data: profile }, { data: roles }, { data: supplierRow }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("suppliers").select("id").eq("user_id", userId).maybeSingle(),
+      withTimeout(supabase.from("profiles").select("*").eq("id", userId).maybeSingle(), "טעינת פרופיל"),
+      withTimeout(supabase.from("user_roles").select("role").eq("user_id", userId), "טעינת הרשאות"),
+      withTimeout(supabase.from("suppliers").select("id").eq("user_id", userId).maybeSingle(), "טעינת ספק"),
     ]);
 
     // Admin access is granted ONLY by verified email match.
@@ -227,6 +233,12 @@ export default function Auth() {
               </button>
             ))}
           </div>
+
+          {authError && (
+            <div className="mb-4 rounded-2xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive leading-relaxed">
+              {authError}
+            </div>
+          )}
 
           {mode === "signin" ? (
             <form onSubmit={handleSignIn} className="space-y-4 animate-fade-up">

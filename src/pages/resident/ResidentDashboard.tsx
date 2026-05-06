@@ -32,11 +32,19 @@ export default function ResidentDashboard() {
   const [joinedDeals, setJoinedDeals] = useState<DbDeal[]>([]);
   const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const safety = window.setTimeout(() => {
+      if (!cancelled) {
+        setError("טעינת הנתונים נמשכת יותר מדי זמן. נסו לרענן את המסך.");
+        setLoading(false);
+      }
+    }, 12000);
     (async () => {
       try {
+        setError(null);
         const { data: session } = await supabase.auth.getSession();
         const uid = session.session?.user?.id;
         if (!uid) {
@@ -149,12 +157,15 @@ export default function ResidentDashboard() {
         }
       } catch (e) {
         console.error("[ResidentDashboard] load error", e);
+        if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינת הדשבורד");
       } finally {
+        window.clearTimeout(safety);
         if (!cancelled) setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
+      window.clearTimeout(safety);
     };
   }, [regions, cities]);
 
@@ -210,6 +221,11 @@ export default function ResidentDashboard() {
 
       {/* Status card */}
       <div className="px-5 -mt-7 relative z-10 mb-5">
+        {error && (
+          <div className="gb-card p-4 mb-3 border-destructive/30 bg-destructive/10 text-sm text-destructive leading-relaxed">
+            {error}
+          </div>
+        )}
         <div className="gb-card overflow-hidden">
           <div className="px-5 py-4 bg-gradient-to-l from-card via-card to-gold/5 border-b border-border">
             <div className="flex items-center justify-between">

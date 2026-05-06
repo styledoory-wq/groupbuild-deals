@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ils } from "@/lib/offerPricing";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 import { isAdminEmail } from "@/lib/auth";
+import { getFriendlyLoadError } from "@/lib/safeAsync";
 
 type DealLite = { id: string; title: string };
 type InterestRow = {
@@ -114,6 +115,12 @@ export default function SupplierLeads() {
 
   useEffect(() => {
     let cancelled = false;
+    const safety = window.setTimeout(() => {
+      if (!cancelled) {
+        setError("טעינת הלידים נמשכת יותר מדי זמן. נסו לרענן את המסך.");
+        setLoading(false);
+      }
+    }, 12000);
     (async () => {
       try {
         const { data: session } = await supabase.auth.getSession();
@@ -191,12 +198,13 @@ export default function SupplierLeads() {
         }
       } catch (e) {
         console.error("[SupplierLeads] load error", e);
-        if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינה");
+        if (!cancelled) setError(getFriendlyLoadError(e, "שגיאה בטעינת הלידים"));
       } finally {
+        window.clearTimeout(safety);
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; window.clearTimeout(safety); };
   }, []);
 
   const dealTitle = (id: string) => deals.find((d) => d.id === id)?.title ?? "עסקה שנמחקה";
