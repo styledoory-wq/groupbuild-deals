@@ -34,8 +34,8 @@ export default function Auth() {
   const [city, setCity] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [projectId, setProjectId] = useState<string>("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
-  
 
   // If already logged in → redirect by role
   useEffect(() => {
