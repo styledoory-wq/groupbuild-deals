@@ -159,16 +159,12 @@ export default function AdminSupplierMedia() {
           <Input dir="ltr" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="Facebook" className="h-10 rounded-xl text-sm" maxLength={500} />
         </section>
 
-        {/* Catalog */}
+        {/* Catalogs */}
         <section className="gb-card p-4 space-y-2">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <FileText className="h-3.5 w-3.5 text-gold" /> קטלוג
+            <FileText className="h-3.5 w-3.5 text-gold" /> קטלוגים
           </h3>
-          <Input dir="ltr" value={catalogUrl ?? ""} onChange={(e) => setCatalogUrl(e.target.value || null)} placeholder="קישור חיצוני" className="h-10 rounded-xl text-sm" maxLength={500} />
-          <input ref={catalogRef} type="file" accept="application/pdf" className="hidden" onChange={handleCatalog} />
-          <Button type="button" variant="outline" onClick={() => catalogRef.current?.click()} disabled={uploadingCatalog} className="h-9 rounded-xl text-xs w-full">
-            {uploadingCatalog ? "מעלה..." : "או העלאת PDF"}
-          </Button>
+          {supplierId && <SupplierCatalogsManager supplierId={supplierId} />}
         </section>
 
         {/* Gallery */}
