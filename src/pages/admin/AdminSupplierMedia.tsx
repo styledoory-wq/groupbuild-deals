@@ -75,13 +75,6 @@ export default function AdminSupplierMedia() {
     } catch (err) { toast.error(err instanceof Error ? err.message : "העלאה נכשלה"); }
     finally { setUploadingGallery(false); if (galleryRef.current) galleryRef.current.value = ""; }
   };
-  const handleCatalog = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]; if (!f) return;
-    setUploadingCatalog(true);
-    try { setCatalogUrl(await uploadSupplierCatalog(f)); toast.success("הקטלוג הועלה"); }
-    catch (err) { toast.error(err instanceof Error ? err.message : "העלאה נכשלה"); }
-    finally { setUploadingCatalog(false); if (catalogRef.current) catalogRef.current.value = ""; }
-  };
 
   const handleSave = async () => {
     if (!supplierId) return;
