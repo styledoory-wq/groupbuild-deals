@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { SupplierCatalogsManager } from "@/components/suppliers/SupplierCatalogsManager";
 import { uploadSupplierLogo, uploadSupplierGalleryImage, uploadSupplierCatalog } from "@/lib/supplierUploads";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
