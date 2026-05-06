@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -6,6 +6,9 @@ import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 type DbDeal = {
   id: string;
