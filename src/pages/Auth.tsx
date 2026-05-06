@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import type { Role } from "@/types";
 import { BrandLogo } from "@/components/BrandLogo";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
+import { CURRENT_TERMS_VERSION } from "@/lib/terms";
+import { Link } from "react-router-dom";
 
 type Mode = "signin" | "signup";
 
