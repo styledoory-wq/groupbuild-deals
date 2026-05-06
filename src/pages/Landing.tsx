@@ -123,7 +123,7 @@ export default function Landing() {
     <div className="min-h-screen bg-primary text-primary-foreground flex justify-center">
       <div className="w-full max-w-[480px] relative">
         {/* Sticky header */}
-        <header className="sticky top-0 z-40 bg-primary/95 backdrop-blur border-b border-white/5">
+        <header className="sticky top-0 z-40 bg-primary/95 backdrop-blur">
           <div className="flex items-center justify-between px-5 h-14">
             <Link to="/" className="flex items-center" aria-label="GroupBuild">
               <BrandLogo variant="light" size="sm" />
@@ -339,7 +339,6 @@ export default function Landing() {
               {[
                 "ספקים מאומתים בלבד",
                 "פיקדון מאושר ידנית על ידי מנהל המערכת",
-                "נתונים אמיתיים בלבד — בלי דמו",
                 "שקיפות במחיר ובמדרגות ההנחה",
               ].map((b) => (
                 <li key={b} className="flex items-start gap-2 text-sm">
