@@ -177,7 +177,7 @@ export default function SupplierLeads() {
     return () => { cancelled = true; };
   }, []);
 
-  const dealTitle = (id: string) => deals.find((d) => d.id === id)?.title ?? "הצעה";
+  const dealTitle = (id: string) => deals.find((d) => d.id === id)?.title ?? "עסקה שנמחקה";
 
   return (
     <MobileShell>
