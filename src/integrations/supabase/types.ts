@@ -643,6 +643,7 @@ export type Database = {
           file_size: number | null
           file_url: string
           id: string
+          kind: string
           name: string
           supplier_id: string
           updated_at: string
@@ -654,6 +655,7 @@ export type Database = {
           file_size?: number | null
           file_url: string
           id?: string
+          kind?: string
           name: string
           supplier_id: string
           updated_at?: string
@@ -665,6 +667,7 @@ export type Database = {
           file_size?: number | null
           file_url?: string
           id?: string
+          kind?: string
           name?: string
           supplier_id?: string
           updated_at?: string
