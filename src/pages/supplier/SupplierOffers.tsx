@@ -28,6 +28,17 @@ export default function SupplierOffers() {
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [deals, setDeals] = useState<DealRow[]>([]);
 
+  const loadDeals = useCallback(async (sid: string) => {
+    const { data, error: dErr } = await supabase
+      .from("deals")
+      .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, tiers, created_at")
+      .eq("supplier_id", sid)
+      .eq("is_deleted", false)
+      .order("created_at", { ascending: false });
+    if (dErr) throw dErr;
+    setDeals(((data ?? []) as unknown) as DealRow[]);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -64,15 +75,7 @@ export default function SupplierOffers() {
           return;
         }
 
-        const { data, error: dErr } = await supabase
-          .from("deals")
-          .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, tiers, created_at")
-          .eq("supplier_id", sid)
-          .eq("is_deleted", false)
-          .order("created_at", { ascending: false });
-
-        if (dErr) throw dErr;
-        if (!cancelled) setDeals(((data ?? []) as unknown) as DealRow[]);
+        await loadDeals(sid);
       } catch (e) {
         console.error("[SupplierOffers] load error", e);
         if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינה");
@@ -81,7 +84,11 @@ export default function SupplierOffers() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [loadDeals]);
+
+  const refresh = useCallback(() => {
+    if (supplierId) loadDeals(supplierId).catch((e) => console.error(e));
+  }, [supplierId, loadDeals]);
 
   return (
     <MobileShell>
