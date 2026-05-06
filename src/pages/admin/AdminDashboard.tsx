@@ -33,7 +33,7 @@ export default function AdminDashboard() {
           supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false).eq("approval_status", "pending"),
           supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["active", "closing-soon"]),
-          supabase.from("deposits").select("id", { count: "exact", head: true }).eq("is_deleted", false),
+          supabase.from("deposits").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["pending", "paid"]),
           supabase.from("deposits").select("amount").eq("status", "paid").eq("is_deleted", false),
         ]);
 
