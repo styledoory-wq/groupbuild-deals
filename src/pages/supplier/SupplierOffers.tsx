@@ -147,16 +147,17 @@ export default function SupplierOffers() {
           }, 0);
           return (
             <div key={d.id} className="gb-card p-4">
-              <div className="flex items-start justify-between mb-2">
+              <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-sm truncate">{d.title}</h3>
                   <p className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-gold" /> ספק מאומת
                   </p>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-success/10 text-success">
-                  {d.status === "active" ? "פעילה" : d.status}
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap ${d.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                  {d.status === "active" ? "פעילה" : "מושבתת"}
                 </span>
+                <DealActionsMenu dealId={d.id} status={d.status} onChanged={refresh} />
               </div>
 
               <div className="pt-2 border-t border-border mt-2">
