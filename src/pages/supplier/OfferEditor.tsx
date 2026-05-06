@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { verifyAdminFromSession } from "@/lib/auth";
 import { Save, AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -54,6 +55,8 @@ const defaultPriceTiers = (): TierRow[] => [
 
 export default function OfferEditor() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const adminTargetSupplierId = searchParams.get("supplierId");
   const { categories, projects } = useApp();
   const [visibilityType, setVisibilityType] = useState<"public" | "project_only">("public");
   const [visibilityProjectId, setVisibilityProjectId] = useState<string>("");
@@ -93,21 +96,40 @@ export default function OfferEditor() {
           return;
         }
 
-        const email = session.user.email ?? "";
-        const byUser = await supabase
-          .from("suppliers")
-          .select("id, business_name, approval_status, categories")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
+        let s: SupplierLite | null = null;
 
-        let s: SupplierLite | null = (byUser.data as SupplierLite | null) ?? null;
-        if (!s && email) {
-          const byEmail = await supabase
+        // Admin path: explicit supplierId query param overrides current-user lookup.
+        if (adminTargetSupplierId) {
+          const isAdmin = await verifyAdminFromSession();
+          if (!isAdmin) {
+            if (!cancelled) {
+              setBootError("רק אדמין יכול ליצור הצעה לספק אחר.");
+              setBootLoading(false);
+            }
+            return;
+          }
+          const r = await supabase
             .from("suppliers")
             .select("id, business_name, approval_status, categories")
-            .ilike("email", email)
+            .eq("id", adminTargetSupplierId)
             .maybeSingle();
-          s = (byEmail.data as SupplierLite | null) ?? null;
+          s = (r.data as SupplierLite | null) ?? null;
+        } else {
+          const email = session.user.email ?? "";
+          const byUser = await supabase
+            .from("suppliers")
+            .select("id, business_name, approval_status, categories")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+          s = (byUser.data as SupplierLite | null) ?? null;
+          if (!s && email) {
+            const byEmail = await supabase
+              .from("suppliers")
+              .select("id, business_name, approval_status, categories")
+              .ilike("email", email)
+              .maybeSingle();
+            s = (byEmail.data as SupplierLite | null) ?? null;
+          }
         }
 
         if (!cancelled) {
