@@ -87,28 +87,39 @@ export default function AdminDeals() {
 
   return (
     <MobileShell>
-      <PageHeader title="ניהול עסקאות" subtitle={`${deals.length} עסקאות במערכת`} back={false} />
+      <PageHeader title="ניהול עסקאות" subtitle={`${visibleDeals.length} מוצגות מתוך ${deals.length}`} back={false} />
+      <div className="px-5 -mt-2 mb-3 flex items-center justify-end gap-2">
+        <Label htmlFor="show-inactive" className="text-xs text-muted-foreground">הצג מושבתות</Label>
+        <Switch id="show-inactive" checked={showInactive} onCheckedChange={setShowInactive} />
+      </div>
       {loading ? (
         <div className="px-5 py-12 text-center text-sm text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" /> טוען…
         </div>
       ) : (
-        <div className="px-5 -mt-4 relative z-10 space-y-3">
-          {deals.length === 0 && (
-            <div className="gb-card p-8 text-center text-sm text-muted-foreground">אין הצעות עדיין</div>
+        <div className="px-5 relative z-10 space-y-3">
+          {visibleDeals.length === 0 && (
+            <div className="gb-card p-8 text-center text-sm text-muted-foreground">אין הצעות להצגה</div>
           )}
-          {deals.map((d) => {
+          {visibleDeals.map((d) => {
             const supplier = suppliers[d.supplier_id];
             const category = categories.find((c) => c.id === d.category_id);
             const cnt = counts[d.id] ?? { interests: 0, paid: 0 };
+            const isActive = d.status === "active";
             return (
               <div key={d.id} className="gb-card p-4">
                 <div className="flex items-start gap-3 mb-2">
                   <div className="h-10 w-10 rounded-xl bg-gradient-hero flex items-center justify-center text-lg">{category?.icon ?? "🏷️"}</div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-sm truncate">{d.title}</h3>
-                    <p className="text-[11px] text-muted-foreground truncate">{supplier?.business_name ?? "—"} · {d.status}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                        {isActive ? "פעילה" : "מושבתת"}
+                      </span>
+                      <p className="text-[11px] text-muted-foreground truncate">{supplier?.business_name ?? "—"}</p>
+                    </div>
                   </div>
+                  <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border text-center text-[11px]">
                   <div>
