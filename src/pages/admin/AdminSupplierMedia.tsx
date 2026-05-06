@@ -50,7 +50,6 @@ export default function AdminSupplierMedia() {
         setWhatsappUrl(s.whatsapp_url ?? "");
         setInstagramUrl(s.instagram_url ?? "");
         setFacebookUrl(s.facebook_url ?? "");
-        setCatalogUrl(s.catalog_url ?? null);
       }
       setGallery((g ?? []).map((x) => ({ id: x.id, image_url: x.image_url, caption: x.caption })));
       setLoading(false);
