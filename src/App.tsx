@@ -13,6 +13,9 @@ import NotFound from "./pages/NotFound.tsx";
 import ThankYou from "./pages/ThankYou";
 import SupplierProfile from "./pages/SupplierProfile";
 import NotificationSettings from "./pages/NotificationSettings";
+import TermsResidents from "./pages/TermsResidents";
+import TermsSuppliers from "./pages/TermsSuppliers";
+import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
 import ProjectsList from "./pages/resident/ProjectsList";
