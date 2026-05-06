@@ -131,21 +131,21 @@ export default function SupplierLeads() {
           return;
         }
 
-        // Get supplier deals
+        // Get ALL supplier deals (including deleted) so historical leads still resolve a title.
         const { data: dealsData } = await supabase
           .from("deals")
-          .select("id,title")
-          .eq("supplier_id", sup.id)
-          .eq("is_deleted", false);
-        const ds = (dealsData ?? []) as DealLite[];
-        if (!cancelled) setDeals(ds);
+          .select("id,title,is_deleted")
+          .eq("supplier_id", sup.id);
+        const allDeals = (dealsData ?? []) as Array<DealLite & { is_deleted?: boolean }>;
+        const ds = allDeals.filter((d) => !d.is_deleted);
+        if (!cancelled) setDeals(allDeals);
 
-        if (!ds.length) {
+        if (!allDeals.length) {
           if (!cancelled) setLoading(false);
           return;
         }
 
-        const dealIds = ds.map((d) => d.id);
+        const dealIds = allDeals.map((d) => d.id);
         const { data: ints, error: iErr } = await supabase
           .from("deal_interests")
           .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes")
@@ -177,7 +177,7 @@ export default function SupplierLeads() {
     return () => { cancelled = true; };
   }, []);
 
-  const dealTitle = (id: string) => deals.find((d) => d.id === id)?.title ?? "הצעה";
+  const dealTitle = (id: string) => deals.find((d) => d.id === id)?.title ?? "עסקה שנמחקה";
 
   return (
     <MobileShell>
