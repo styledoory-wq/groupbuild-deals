@@ -34,7 +34,7 @@ export default function ResidentProfile() {
   const loadDeposits = useCallback(async (uid: string) => {
     const { data, error } = await supabase
       .from("deposits")
-      .select("id,deal_id,amount,status,created_at")
+      .select("id,deal_id,amount,status,created_at,paid_at,refunded_at")
       .eq("user_id", uid)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
