@@ -230,8 +230,10 @@ export default function Landing() {
           </div>
           <div className="grid grid-cols-1 gap-3">
             <StatCard icon={<Users className="h-4 w-4" />} value="מאות" label="דיירים כבר הצטרפו" accent />
-            <StatCard icon={<Wallet className="h-4 w-4" />} value="₪300–₪1,200" label="חיסכון ממוצע לדייר" />
+            <StatCard icon={<Wallet className="h-4 w-4" />} value="₪500–₪2,500+" label="צפי חיסכון לדייר לכל מוצר" />
             <StatCard icon={<TrendingDown className="h-4 w-4" />} value="עד 25%" label="הנחה ברכישה קבוצתית" />
+            <StatCard icon={<Users className="h-4 w-4" />} value="כוח קנייה" label="ככל שיותר דיירים מצטרפים — המחיר יורד" />
+            <StatCard icon={<ShieldCheck className="h-4 w-4" />} value="ספקים מאומתים" label="דיירים מתאגדים יחד לקבלת מחירי קבלן" />
           </div>
         </section>
 
