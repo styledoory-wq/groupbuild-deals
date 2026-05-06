@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/auth";
 import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricing";
-import logoIcon from "@/assets/logo-icon.png";
+import { BrandLogo } from "@/components/BrandLogo";
 
 type HotDeal = {
   id: string;
@@ -125,11 +125,8 @@ export default function Landing() {
         {/* Sticky header */}
         <header className="sticky top-0 z-40 bg-primary/95 backdrop-blur border-b border-white/5">
           <div className="flex items-center justify-between px-5 h-14">
-            <Link to="/" className="flex flex-col items-center leading-none gap-0.5">
-              <img src={logoIcon} alt="GroupBuild" width={28} height={28} className="h-7 w-7" />
-              <span className="font-extrabold text-[10px] tracking-wide">
-                <span className="gb-gold-text">Group</span>Build
-              </span>
+            <Link to="/" className="flex items-center" aria-label="GroupBuild">
+              <BrandLogo variant="light" size="sm" />
             </Link>
             <div className="flex items-center gap-2">
               {isAuthed ? (
