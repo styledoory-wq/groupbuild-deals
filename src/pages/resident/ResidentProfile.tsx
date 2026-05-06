@@ -15,9 +15,14 @@ type DbDeposit = {
   amount: number;
   status: string;
   created_at: string;
+  paid_at: string | null;
+  refunded_at: string | null;
 };
 
 type DealMap = Record<string, { title: string }>;
+
+const ACTIVE_STATUSES = new Set(["pending", "paid"]);
+const HISTORY_STATUSES = new Set(["refunded", "cancelled", "failed"]);
 
 export default function ResidentProfile() {
   const navigate = useNavigate();
