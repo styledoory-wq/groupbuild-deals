@@ -45,7 +45,10 @@ export default function Auth() {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         // Defer to avoid recursion
-        setTimeout(() => routeForUser(session.user.id, session.user.email ?? ""), 0);
+        setTimeout(() => {
+          routeForUser(session.user.id, session.user.email ?? "")
+            .catch((error) => setAuthError(getFriendlyLoadError(error, "לא הצלחנו לטעון את החשבון.")));
+        }, 0);
       }
     });
     return () => sub.subscription.unsubscribe();
@@ -230,6 +233,12 @@ export default function Auth() {
               </button>
             ))}
           </div>
+
+          {authError && (
+            <div className="mb-4 rounded-2xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive leading-relaxed">
+              {authError}
+            </div>
+          )}
 
           {mode === "signin" ? (
             <form onSubmit={handleSignIn} className="space-y-4 animate-fade-up">
