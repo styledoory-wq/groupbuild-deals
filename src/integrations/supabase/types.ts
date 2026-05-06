@@ -393,6 +393,78 @@ export type Database = {
         }
         Relationships: []
       }
+      email_outbox: {
+        Row: {
+          body_preview: string | null
+          created_at: string
+          email_type: string
+          error_message: string | null
+          id: string
+          metadata: Json
+          recipient_email: string
+          recipient_user_id: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          body_preview?: string | null
+          created_at?: string
+          email_type: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          recipient_email: string
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          body_preview?: string | null
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          recipient_email?: string
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
+      notification_settings: {
+        Row: {
+          approval_email_enabled: boolean
+          created_at: string
+          email_notifications_enabled: boolean
+          new_lead_email_enabled: boolean
+          system_email_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approval_email_enabled?: boolean
+          created_at?: string
+          email_notifications_enabled?: boolean
+          new_lead_email_enabled?: boolean
+          system_email_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approval_email_enabled?: boolean
+          created_at?: string
+          email_notifications_enabled?: boolean
+          new_lead_email_enabled?: boolean
+          system_email_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
