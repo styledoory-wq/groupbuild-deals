@@ -339,3 +339,67 @@ export default function SupplierProfile() {
     </MobileShell>
   );
 }
+
+function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; legacyUrl: string | null }) {
+  const [rows, setRows] = useState<Array<{ id: string; name: string; description: string | null; file_url: string }>>([]);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("supplier_catalogs")
+        .select("id,name,description,file_url,display_order,created_at")
+        .eq("supplier_id", supplierId)
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: false });
+      setRows((data ?? []) as Array<{ id: string; name: string; description: string | null; file_url: string }>);
+    })();
+  }, [supplierId]);
+
+  if (rows.length === 0 && !legacyUrl) return null;
+
+  return (
+    <section className="gb-card p-4 space-y-2">
+      <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <FileText className="h-3.5 w-3.5 text-gold" /> קטלוגים
+      </h2>
+      <div className="space-y-1.5">
+        {rows.map((r) => (
+          <a
+            key={r.id}
+            href={r.file_url}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="flex items-center gap-3 p-2.5 rounded-xl border border-border hover:border-gold/40 transition-smooth"
+          >
+            <div className="h-10 w-10 rounded-lg bg-gold/10 flex items-center justify-center shrink-0">
+              <FileText className="h-4 w-4 text-gold" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-bold truncate">{r.name}</div>
+              {r.description && (
+                <div className="text-[11px] text-muted-foreground line-clamp-1">{r.description}</div>
+              )}
+            </div>
+            <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+          </a>
+        ))}
+        {rows.length === 0 && legacyUrl && (
+          <a
+            href={legacyUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="flex items-center gap-3 p-2.5 rounded-xl border border-border hover:border-gold/40 transition-smooth"
+          >
+            <div className="h-10 w-10 rounded-lg bg-gold/10 flex items-center justify-center shrink-0">
+              <FileText className="h-4 w-4 text-gold" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-bold truncate">צפייה בקטלוג</div>
+              <div className="text-[11px] text-muted-foreground">PDF · ייפתח בכרטיסיה חדשה</div>
+            </div>
+            <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+          </a>
+        )}
+      </div>
+    </section>
+  );
+}
