@@ -28,12 +28,27 @@ type InterestRow = {
   notes: string | null;
 };
 type ProfileLite = { id: string; full_name: string | null; phone: string | null; email: string | null };
+type InquiryRow = {
+  id: string;
+  user_id: string;
+  full_name: string | null;
+  phone: string | null;
+  email: string | null;
+  city: string | null;
+  project_name: string | null;
+  category_id: string | null;
+  message: string | null;
+  source: string;
+  status: string;
+  created_at: string;
+};
 
 export default function SupplierLeads() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deals, setDeals] = useState<DealLite[]>([]);
   const [interests, setInterests] = useState<InterestRow[]>([]);
+  const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
   const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
