@@ -23,6 +23,7 @@ import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
+import { getFriendlyLoadError } from "@/lib/safeAsync";
 import {
   describeOffer,
   describeTier,
@@ -99,6 +100,12 @@ export default function DealDetail() {
   useEffect(() => {
     let cancelled = false;
     if (!dealId) return;
+    const safety = window.setTimeout(() => {
+      if (!cancelled) {
+        setError("טעינת העסקה נמשכת יותר מדי זמן. נסו לרענן את המסך.");
+        setLoading(false);
+      }
+    }, 12000);
     (async () => {
       setLoading(true);
       setError(null);
@@ -164,13 +171,15 @@ export default function DealDetail() {
         }
       } catch (e) {
         console.error("[DealDetail] load error", e);
-        if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינה");
+        if (!cancelled) setError(getFriendlyLoadError(e, "שגיאה בטעינת העסקה"));
       } finally {
+        window.clearTimeout(safety);
         if (!cancelled) setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
+      window.clearTimeout(safety);
     };
   }, [dealId]);
 
