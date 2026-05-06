@@ -31,51 +31,51 @@ export default function AdminDeals() {
   const [suppliers, setSuppliers] = useState<SupplierMap>({});
   const [counts, setCounts] = useState<Record<string, { interests: number; paid: number }>>({});
   const [loading, setLoading] = useState(true);
+  const [showInactive, setShowInactive] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { data, error } = await supabase
-          .from("deals")
-          .select("id,title,status,category_id,supplier_id,original_price,discounted_price,discount_percentage,base_price,offer_type")
-          .eq("is_deleted", false)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        const list = (data ?? []) as DbDeal[];
-        if (cancelled) return;
-        setDeals(list);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("deals")
+        .select("id,title,status,category_id,supplier_id,original_price,discounted_price,discount_percentage,base_price,offer_type")
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const list = (data ?? []) as DbDeal[];
+      setDeals(list);
 
-        const supplierIds = Array.from(new Set(list.map((d) => d.supplier_id))).filter(Boolean);
-        if (supplierIds.length) {
-          const { data: srows } = await supabase
-            .from("suppliers")
-            .select("id,business_name")
-            .in("id", supplierIds);
-          const m: SupplierMap = {};
-          (srows ?? []).forEach((s: { id: string; business_name: string }) => { m[s.id] = { business_name: s.business_name }; });
-          if (!cancelled) setSuppliers(m);
-        }
-
-        // counts
-        const cMap: Record<string, { interests: number; paid: number }> = {};
-        await Promise.all(list.map(async (d) => {
-          const [{ count: interests }, { count: paid }] = await Promise.all([
-            supabase.from("deal_interests").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("is_deleted", false),
-            supabase.from("deposits").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "paid").eq("is_deleted", false),
-          ]);
-          cMap[d.id] = { interests: interests ?? 0, paid: paid ?? 0 };
-        }));
-        if (!cancelled) setCounts(cMap);
-      } catch (err) {
-        console.error("[AdminDeals]", err);
-        toast.error(err instanceof Error ? err.message : "טעינת ההצעות נכשלה");
-      } finally {
-        if (!cancelled) setLoading(false);
+      const supplierIds = Array.from(new Set(list.map((d) => d.supplier_id))).filter(Boolean);
+      if (supplierIds.length) {
+        const { data: srows } = await supabase
+          .from("suppliers")
+          .select("id,business_name")
+          .in("id", supplierIds);
+        const m: SupplierMap = {};
+        (srows ?? []).forEach((s: { id: string; business_name: string }) => { m[s.id] = { business_name: s.business_name }; });
+        setSuppliers(m);
       }
-    })();
-    return () => { cancelled = true; };
+
+      const cMap: Record<string, { interests: number; paid: number }> = {};
+      await Promise.all(list.map(async (d) => {
+        const [{ count: interests }, { count: paid }] = await Promise.all([
+          supabase.from("deal_interests").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("is_deleted", false),
+          supabase.from("deposits").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "paid").eq("is_deleted", false),
+        ]);
+        cMap[d.id] = { interests: interests ?? 0, paid: paid ?? 0 };
+      }));
+      setCounts(cMap);
+    } catch (err) {
+      console.error("[AdminDeals]", err);
+      toast.error(err instanceof Error ? err.message : "טעינת ההצעות נכשלה");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const visibleDeals = showInactive ? deals : deals.filter((d) => d.status === "active");
 
   const priceFor = (d: DbDeal): number => {
     if (d.offer_type === "price_comparison" && d.discounted_price != null) return Number(d.discounted_price);
