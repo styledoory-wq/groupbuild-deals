@@ -385,13 +385,19 @@ export default function AdminDbSuppliers() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    const { error } = await supabase.from("suppliers").delete().eq("id", deleteId);
-    if (error) toast.error("מחיקה נכשלה");
-    else {
-      toast.success("הספק נמחק");
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-supplier", {
+        body: { supplier_id: deleteId },
+      });
+      if (error) throw error;
+      if (data && (data as { error?: string }).error) throw new Error((data as { error: string }).error);
+      toast.success("הספק נמחק לצמיתות");
       await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "מחיקה נכשלה");
+    } finally {
+      setDeleteId(null);
     }
-    setDeleteId(null);
   };
 
   // ---- Match checker ----
@@ -1050,13 +1056,16 @@ export default function AdminDbSuppliers() {
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
-            <AlertDialogTitle>למחוק את הספק?</AlertDialogTitle>
-            <AlertDialogDescription>פעולה זו לא ניתנת לביטול.</AlertDialogDescription>
+            <AlertDialogTitle>מחיקה מלאה של הספק?</AlertDialogTitle>
+            <AlertDialogDescription>
+              האם אתה בטוח? פעולה זו תמחק את הספק לצמיתות — כולל החשבון, הפרופיל, הקטלוגים, הגלריה וקבצי האחסון.
+              האימייל ישוחרר ויהיה ניתן להירשם איתו מחדש. עסקאות והיסטוריית פיקדונות יישמרו לצורך audit.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>ביטול</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              מחק
+              מחיקה מלאה
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { SupplierCatalogsManager } from "@/components/suppliers/SupplierCatalogsManager";
 import { uploadSupplierLogo, uploadSupplierGalleryImage, uploadSupplierCatalog } from "@/lib/supplierUploads";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
@@ -348,20 +349,15 @@ export default function SupplierProfileEdit() {
             <Input dir="ltr" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/..." className="h-10 rounded-xl text-sm" maxLength={500} />
           </div>
 
-          {/* Catalog */}
+          {/* Catalogs */}
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5 text-gold" /> קטלוג
+              <FileText className="h-3.5 w-3.5 text-gold" /> קטלוגים
             </Label>
-            <Input dir="ltr" value={catalogUrl ?? ""} onChange={(e) => setCatalogUrl(e.target.value || null)} placeholder="קישור לקטלוג חיצוני" className="h-10 rounded-xl text-sm" maxLength={500} />
-            <input ref={catalogInputRef} type="file" accept="application/pdf" className="hidden" onChange={handleCatalogUpload} />
-            <Button type="button" variant="outline" onClick={() => catalogInputRef.current?.click()} disabled={uploadingCatalog} className="h-9 rounded-xl text-xs w-full">
-              {uploadingCatalog ? "מעלה..." : "או העלאת PDF"}
-            </Button>
-            {catalogUrl && (
-              <a href={catalogUrl} target="_blank" rel="noreferrer" className="block text-[11px] text-gold underline truncate" dir="ltr">
-                {catalogUrl}
-              </a>
+            {supplierId ? (
+              <SupplierCatalogsManager supplierId={supplierId} />
+            ) : (
+              <p className="text-[11px] text-muted-foreground">שמור את הפרופיל כדי להוסיף קטלוגים.</p>
             )}
           </div>
 

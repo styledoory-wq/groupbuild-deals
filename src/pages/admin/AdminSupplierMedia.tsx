@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
-import { uploadSupplierLogo, uploadSupplierGalleryImage, uploadSupplierCatalog } from "@/lib/supplierUploads";
+import { uploadSupplierLogo, uploadSupplierGalleryImage } from "@/lib/supplierUploads";
+import { SupplierCatalogsManager } from "@/components/suppliers/SupplierCatalogsManager";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -26,15 +27,12 @@ export default function AdminSupplierMedia() {
   const [whatsappUrl, setWhatsappUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
   const [facebookUrl, setFacebookUrl] = useState("");
-  const [catalogUrl, setCatalogUrl] = useState<string | null>(null);
   const [gallery, setGallery] = useState<{ id?: string; image_url: string; caption: string | null }[]>([]);
 
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
-  const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const logoRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
-  const catalogRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!supplierId) return;
@@ -52,7 +50,6 @@ export default function AdminSupplierMedia() {
         setWhatsappUrl(s.whatsapp_url ?? "");
         setInstagramUrl(s.instagram_url ?? "");
         setFacebookUrl(s.facebook_url ?? "");
-        setCatalogUrl(s.catalog_url ?? null);
       }
       setGallery((g ?? []).map((x) => ({ id: x.id, image_url: x.image_url, caption: x.caption })));
       setLoading(false);
@@ -78,13 +75,6 @@ export default function AdminSupplierMedia() {
     } catch (err) { toast.error(err instanceof Error ? err.message : "העלאה נכשלה"); }
     finally { setUploadingGallery(false); if (galleryRef.current) galleryRef.current.value = ""; }
   };
-  const handleCatalog = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]; if (!f) return;
-    setUploadingCatalog(true);
-    try { setCatalogUrl(await uploadSupplierCatalog(f)); toast.success("הקטלוג הועלה"); }
-    catch (err) { toast.error(err instanceof Error ? err.message : "העלאה נכשלה"); }
-    finally { setUploadingCatalog(false); if (catalogRef.current) catalogRef.current.value = ""; }
-  };
 
   const handleSave = async () => {
     if (!supplierId) return;
@@ -98,7 +88,6 @@ export default function AdminSupplierMedia() {
         whatsapp_url: whatsappUrl.trim() || null,
         instagram_url: instagramUrl.trim() || null,
         facebook_url: facebookUrl.trim() || null,
-        catalog_url: catalogUrl,
       }).eq("id", supplierId);
       if (uErr) throw uErr;
       await supabase.from("supplier_gallery").delete().eq("supplier_id", supplierId);
@@ -170,16 +159,12 @@ export default function AdminSupplierMedia() {
           <Input dir="ltr" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="Facebook" className="h-10 rounded-xl text-sm" maxLength={500} />
         </section>
 
-        {/* Catalog */}
+        {/* Catalogs */}
         <section className="gb-card p-4 space-y-2">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <FileText className="h-3.5 w-3.5 text-gold" /> קטלוג
+            <FileText className="h-3.5 w-3.5 text-gold" /> קטלוגים
           </h3>
-          <Input dir="ltr" value={catalogUrl ?? ""} onChange={(e) => setCatalogUrl(e.target.value || null)} placeholder="קישור חיצוני" className="h-10 rounded-xl text-sm" maxLength={500} />
-          <input ref={catalogRef} type="file" accept="application/pdf" className="hidden" onChange={handleCatalog} />
-          <Button type="button" variant="outline" onClick={() => catalogRef.current?.click()} disabled={uploadingCatalog} className="h-9 rounded-xl text-xs w-full">
-            {uploadingCatalog ? "מעלה..." : "או העלאת PDF"}
-          </Button>
+          {supplierId && <SupplierCatalogsManager supplierId={supplierId} />}
         </section>
 
         {/* Gallery */}
