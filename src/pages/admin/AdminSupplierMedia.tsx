@@ -27,15 +27,12 @@ export default function AdminSupplierMedia() {
   const [whatsappUrl, setWhatsappUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
   const [facebookUrl, setFacebookUrl] = useState("");
-  const [catalogUrl, setCatalogUrl] = useState<string | null>(null);
   const [gallery, setGallery] = useState<{ id?: string; image_url: string; caption: string | null }[]>([]);
 
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
-  const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const logoRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
-  const catalogRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!supplierId) return;
