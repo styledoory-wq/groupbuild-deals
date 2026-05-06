@@ -20,7 +20,7 @@ export default function AdminStats() {
         supabase.from("deals").select("id,category_id,original_price,discounted_price,discount_percentage,base_price,offer_type").eq("is_deleted", false),
         supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false),
         supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("approval_status", ["approved", "active"]),
-        supabase.from("deposits").select("id", { count: "exact", head: true }).eq("is_deleted", false),
+        supabase.from("deposits").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["pending", "paid"]),
         supabase.from("deposits").select("deal_id,amount").eq("status", "paid").eq("is_deleted", false),
       ]);
 

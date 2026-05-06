@@ -15,9 +15,14 @@ type DbDeposit = {
   amount: number;
   status: string;
   created_at: string;
+  paid_at: string | null;
+  refunded_at: string | null;
 };
 
 type DealMap = Record<string, { title: string }>;
+
+const ACTIVE_STATUSES = new Set(["pending", "paid"]);
+const HISTORY_STATUSES = new Set(["refunded", "cancelled", "failed"]);
 
 export default function ResidentProfile() {
   const navigate = useNavigate();
@@ -29,7 +34,7 @@ export default function ResidentProfile() {
   const loadDeposits = useCallback(async (uid: string) => {
     const { data, error } = await supabase
       .from("deposits")
-      .select("id,deal_id,amount,status,created_at")
+      .select("id,deal_id,amount,status,created_at,paid_at,refunded_at")
       .eq("user_id", uid)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
@@ -112,37 +117,72 @@ export default function ResidentProfile() {
         </div>
       </div>
 
-      <section className="px-5 mb-5">
-        <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-          <History className="h-4 w-4 text-gold" />
-          היסטוריית עסקאות
-        </h2>
-        <div className="space-y-2">
-          {myDeposits.length === 0 && (
-            <div className="gb-card p-6 text-center text-sm text-muted-foreground">
-              עדיין לא הצטרפת לעסקאות.
-            </div>
-          )}
-          {myDeposits.map((dep) => {
-            const dealTitle = deals[dep.deal_id]?.title ?? "הצעה";
-            const isPaid = dep.status === "paid";
-            return (
-              <div key={dep.id} className="gb-card p-4 flex items-center gap-3">
-                <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-xl shrink-0">🛒</div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm truncate">{dealTitle}</div>
-                  <div className="text-[11px] text-muted-foreground">פיקדון {formatILS(Number(dep.amount))} · {new Date(dep.created_at).toLocaleDateString("he-IL")}</div>
-                </div>
-                <div className="text-left">
-                  <div className={"text-xs font-bold px-2 py-1 rounded-full " + (isPaid ? "text-success bg-success/10" : "text-primary bg-gold/15")}>
-                    {isPaid ? "שולם" : dep.status === "refunded" ? "הוחזר" : "ממתין"}
-                  </div>
+      {(() => {
+        const activeDeposits = myDeposits.filter((d) => ACTIVE_STATUSES.has(d.status));
+        const historyDeposits = myDeposits.filter((d) => HISTORY_STATUSES.has(d.status));
+
+        const renderItem = (dep: DbDeposit) => {
+          const dealMissing = !deals[dep.deal_id];
+          const dealTitle = deals[dep.deal_id]?.title ?? "עסקה שנמחקה";
+          const status = dep.status;
+          const meta: { label: string; cls: string } =
+            status === "paid" ? { label: "שולם", cls: "text-success bg-success/10" }
+            : status === "pending" ? { label: "ממתין", cls: "text-primary bg-gold/15" }
+            : status === "refunded" ? { label: "פיקדון הוחזר", cls: "text-muted-foreground bg-muted" }
+            : status === "cancelled" ? { label: "בוטל", cls: "text-muted-foreground bg-muted" }
+            : status === "failed" ? { label: "נכשל", cls: "text-destructive bg-destructive/10" }
+            : { label: status, cls: "text-muted-foreground bg-muted" };
+          const stampDate = status === "refunded" && dep.refunded_at
+            ? new Date(dep.refunded_at).toLocaleDateString("he-IL")
+            : status === "paid" && dep.paid_at
+            ? new Date(dep.paid_at).toLocaleDateString("he-IL")
+            : new Date(dep.created_at).toLocaleDateString("he-IL");
+          return (
+            <div key={dep.id} className="gb-card p-4 flex items-center gap-3">
+              <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-xl shrink-0">🛒</div>
+              <div className="flex-1 min-w-0">
+                <div className={"font-bold text-sm truncate " + (dealMissing ? "text-muted-foreground italic" : "")}>{dealTitle}</div>
+                <div className="text-[11px] text-muted-foreground">
+                  פיקדון {formatILS(Number(dep.amount))} · {stampDate}
+                  {status === "refunded" && dep.refunded_at ? " · הוחזר" : ""}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </section>
+              <div className="text-left">
+                <div className={"text-xs font-bold px-2 py-1 rounded-full " + meta.cls}>{meta.label}</div>
+              </div>
+            </div>
+          );
+        };
+
+        return (
+          <>
+            <section className="px-5 mb-5">
+              <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                <History className="h-4 w-4 text-gold" />
+                פיקדונות פעילים
+              </h2>
+              <div className="space-y-2">
+                {activeDeposits.length === 0 && (
+                  <div className="gb-card p-6 text-center text-sm text-muted-foreground">
+                    אין פיקדונות פעילים.
+                  </div>
+                )}
+                {activeDeposits.map(renderItem)}
+              </div>
+            </section>
+
+            {historyDeposits.length > 0 && (
+              <section className="px-5 mb-5">
+                <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                  <History className="h-4 w-4 text-muted-foreground" />
+                  היסטוריית פיקדונות
+                </h2>
+                <div className="space-y-2">{historyDeposits.map(renderItem)}</div>
+              </section>
+            )}
+          </>
+        );
+      })()}
 
       <div className="px-5 space-y-2">
         <Button onClick={() => navigate("/resident/profile/edit")} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground">
