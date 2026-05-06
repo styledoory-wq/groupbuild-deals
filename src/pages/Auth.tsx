@@ -10,6 +10,7 @@ import { isAdminEmail, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Role } from "@/types";
+import { BrandLogo } from "@/components/BrandLogo";
 
 type Mode = "signin" | "signup";
 
