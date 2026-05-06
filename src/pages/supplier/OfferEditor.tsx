@@ -150,7 +150,7 @@ export default function OfferEditor() {
       }
     })();
     return () => { cancelled = true; };
-  }, [categories]);
+  }, [categories, adminTargetSupplierId]);
 
   const updateTier = (i: number, patch: Partial<TierRow>) => {
     setTiers((prev) => prev.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
