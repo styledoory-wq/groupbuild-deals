@@ -301,6 +301,43 @@ export default function DealDetail() {
           : "נרשמת בהצלחה! הספק יצור איתך קשר בהקדם.",
       );
       await loadParticipantCount(deal.id);
+
+      // In-app notification to the supplier (best-effort, don't break the flow).
+      try {
+        const { data: supRow } = await supabase
+          .from("suppliers")
+          .select("user_id,business_name")
+          .eq("id", deal.supplier_id)
+          .maybeSingle();
+        if (supRow?.user_id) {
+          const detailsLine = [
+            payload.full_name,
+            payload.phone,
+            payload.city,
+            payload.project_name,
+          ].filter(Boolean).join(" · ");
+          await supabase.from("notifications").insert({
+            user_id: supRow.user_id,
+            type: "lead",
+            title: `ליד חדש להצעה: ${deal.title}`,
+            body: detailsLine || "דייר חדש הביע עניין בהצעה",
+            link: "/supplier/leads",
+            metadata: {
+              deal_id: deal.id,
+              deal_title: deal.title,
+              full_name: payload.full_name,
+              phone: payload.phone,
+              city: payload.city,
+              project_name: payload.project_name,
+              estimated_quantity: payload.estimated_quantity,
+              category_id: deal.category_id,
+            },
+          });
+        }
+      } catch (notifyErr) {
+        console.warn("[supplier_notification_failed]", notifyErr);
+      }
+
       supabase.functions
         .invoke("notify-admin", {
           body: {
