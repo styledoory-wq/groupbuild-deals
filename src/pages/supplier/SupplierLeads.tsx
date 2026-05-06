@@ -152,27 +152,34 @@ export default function SupplierLeads() {
           .select("id,title,is_deleted")
           .eq("supplier_id", sup.id);
         const allDeals = (dealsData ?? []) as Array<DealLite & { is_deleted?: boolean }>;
-        const ds = allDeals.filter((d) => !d.is_deleted);
         if (!cancelled) setDeals(allDeals);
 
-        if (!allDeals.length) {
-          if (!cancelled) setLoading(false);
-          return;
-        }
-
-        const dealIds = allDeals.map((d) => d.id);
-        const { data: ints, error: iErr } = await supabase
-          .from("deal_interests")
-          .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes")
-          .in("deal_id", dealIds)
-          .eq("is_demo", false)
+        // Always load general inquiries (they don't require a deal)
+        const { data: inqData } = await supabase
+          .from("supplier_inquiries")
+          .select("id,user_id,full_name,phone,email,city,project_name,category_id,message,source,status,created_at")
+          .eq("supplier_id", sup.id)
           .eq("is_deleted", false)
           .order("created_at", { ascending: false });
-        if (iErr) throw iErr;
-        const list = (ints ?? []) as InterestRow[];
-        if (!cancelled) setInterests(list);
+        const inqList = (inqData ?? []) as InquiryRow[];
+        if (!cancelled) setInquiries(inqList);
 
-        const userIds = Array.from(new Set(list.map((i) => i.user_id)));
+        let list: InterestRow[] = [];
+        if (allDeals.length) {
+          const dealIds = allDeals.map((d) => d.id);
+          const { data: ints, error: iErr } = await supabase
+            .from("deal_interests")
+            .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes")
+            .in("deal_id", dealIds)
+            .eq("is_demo", false)
+            .eq("is_deleted", false)
+            .order("created_at", { ascending: false });
+          if (iErr) throw iErr;
+          list = (ints ?? []) as InterestRow[];
+          if (!cancelled) setInterests(list);
+        }
+
+        const userIds = Array.from(new Set([...list.map((i) => i.user_id), ...inqList.map((i) => i.user_id)]));
         if (userIds.length) {
           const { data: profs } = await supabase
             .from("profiles")
