@@ -143,10 +143,14 @@ export default function Auth() {
     if (!fullName.trim()) return;
     if (role === "resident" && !city.trim()) return;
     if (role === "supplier" && !businessName.trim()) return;
+    if (!termsAccepted) {
+      toast.error("יש לאשר את תנאי השימוש כדי להמשיך");
+      return;
+    }
     setLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -161,6 +165,15 @@ export default function Auth() {
         },
       });
       if (error) throw error;
+      // Persist terms acceptance on profile (best-effort, after trigger creates profile)
+      const newUserId = data.user?.id;
+      if (newUserId) {
+        supabase.from("profiles").update({
+          terms_accepted: true,
+          terms_accepted_at: new Date().toISOString(),
+          terms_version: CURRENT_TERMS_VERSION,
+        }).eq("id", newUserId).then(() => { /* ignore */ });
+      }
       // Notify admin about new signup (best effort)
       supabase.functions.invoke("notify-admin", {
         body: {
