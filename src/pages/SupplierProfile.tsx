@@ -341,16 +341,16 @@ export default function SupplierProfile() {
 }
 
 function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; legacyUrl: string | null }) {
-  const [rows, setRows] = useState<Array<{ id: string; name: string; description: string | null; file_url: string }>>([]);
+  const [rows, setRows] = useState<Array<{ id: string; name: string; description: string | null; file_url: string; kind: "pdf" | "link" }>>([]);
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("supplier_catalogs")
-        .select("id,name,description,file_url,display_order,created_at")
+        .select("id,name,description,file_url,display_order,created_at,kind")
         .eq("supplier_id", supplierId)
         .order("display_order", { ascending: true })
         .order("created_at", { ascending: false });
-      setRows((data ?? []) as Array<{ id: string; name: string; description: string | null; file_url: string }>);
+      setRows((data ?? []) as Array<{ id: string; name: string; description: string | null; file_url: string; kind: "pdf" | "link" }>);
     })();
   }, [supplierId]);
 
@@ -362,26 +362,37 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
         <FileText className="h-3.5 w-3.5 text-gold" /> קטלוגים
       </h2>
       <div className="space-y-1.5">
-        {rows.map((r) => (
-          <a
-            key={r.id}
-            href={r.file_url}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="flex items-center gap-3 p-2.5 rounded-xl border border-border hover:border-gold/40 transition-smooth"
-          >
-            <div className="h-10 w-10 rounded-lg bg-gold/10 flex items-center justify-center shrink-0">
-              <FileText className="h-4 w-4 text-gold" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold truncate">{r.name}</div>
-              {r.description && (
-                <div className="text-[11px] text-muted-foreground line-clamp-1">{r.description}</div>
-              )}
-            </div>
-            <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
-          </a>
-        ))}
+        {rows.map((r) => {
+          const isLink = r.kind === "link";
+          return (
+            <a
+              key={r.id}
+              href={r.file_url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="flex items-center gap-3 p-2.5 rounded-xl border border-border hover:border-gold/40 transition-smooth"
+            >
+              <div className="h-10 w-10 rounded-lg bg-gold/10 flex items-center justify-center shrink-0">
+                <FileText className="h-4 w-4 text-gold" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-bold truncate flex items-center gap-1.5">
+                  <span className="truncate">{r.name}</span>
+                  <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
+                    {isLink ? "קישור" : "PDF"}
+                  </span>
+                </div>
+                {r.description && (
+                  <div className="text-[11px] text-muted-foreground line-clamp-1">{r.description}</div>
+                )}
+                <div className="text-[11px] text-gold font-bold mt-0.5">
+                  {isLink ? "צפייה בקטלוג ↗" : "צפייה בקטלוג"}
+                </div>
+              </div>
+              <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+            </a>
+          );
+        })}
         {rows.length === 0 && legacyUrl && (
           <a
             href={legacyUrl}
