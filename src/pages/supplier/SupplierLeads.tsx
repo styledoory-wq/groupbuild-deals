@@ -28,12 +28,27 @@ type InterestRow = {
   notes: string | null;
 };
 type ProfileLite = { id: string; full_name: string | null; phone: string | null; email: string | null };
+type InquiryRow = {
+  id: string;
+  user_id: string;
+  full_name: string | null;
+  phone: string | null;
+  email: string | null;
+  city: string | null;
+  project_name: string | null;
+  category_id: string | null;
+  message: string | null;
+  source: string;
+  status: string;
+  created_at: string;
+};
 
 export default function SupplierLeads() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deals, setDeals] = useState<DealLite[]>([]);
   const [interests, setInterests] = useState<InterestRow[]>([]);
+  const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
   const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -137,27 +152,34 @@ export default function SupplierLeads() {
           .select("id,title,is_deleted")
           .eq("supplier_id", sup.id);
         const allDeals = (dealsData ?? []) as Array<DealLite & { is_deleted?: boolean }>;
-        const ds = allDeals.filter((d) => !d.is_deleted);
         if (!cancelled) setDeals(allDeals);
 
-        if (!allDeals.length) {
-          if (!cancelled) setLoading(false);
-          return;
-        }
-
-        const dealIds = allDeals.map((d) => d.id);
-        const { data: ints, error: iErr } = await supabase
-          .from("deal_interests")
-          .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes")
-          .in("deal_id", dealIds)
-          .eq("is_demo", false)
+        // Always load general inquiries (they don't require a deal)
+        const { data: inqData } = await supabase
+          .from("supplier_inquiries")
+          .select("id,user_id,full_name,phone,email,city,project_name,category_id,message,source,status,created_at")
+          .eq("supplier_id", sup.id)
           .eq("is_deleted", false)
           .order("created_at", { ascending: false });
-        if (iErr) throw iErr;
-        const list = (ints ?? []) as InterestRow[];
-        if (!cancelled) setInterests(list);
+        const inqList = (inqData ?? []) as InquiryRow[];
+        if (!cancelled) setInquiries(inqList);
 
-        const userIds = Array.from(new Set(list.map((i) => i.user_id)));
+        let list: InterestRow[] = [];
+        if (allDeals.length) {
+          const dealIds = allDeals.map((d) => d.id);
+          const { data: ints, error: iErr } = await supabase
+            .from("deal_interests")
+            .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes")
+            .in("deal_id", dealIds)
+            .eq("is_demo", false)
+            .eq("is_deleted", false)
+            .order("created_at", { ascending: false });
+          if (iErr) throw iErr;
+          list = (ints ?? []) as InterestRow[];
+          if (!cancelled) setInterests(list);
+        }
+
+        const userIds = Array.from(new Set([...list.map((i) => i.user_id), ...inqList.map((i) => i.user_id)]));
         if (userIds.length) {
           const { data: profs } = await supabase
             .from("profiles")
@@ -192,22 +214,69 @@ export default function SupplierLeads() {
           <div className="gb-card p-6 text-center">
             <p className="text-sm text-destructive font-bold">{error}</p>
           </div>
-        ) : interests.length === 0 ? (
+        ) : interests.length === 0 && inquiries.length === 0 ? (
           <div className="gb-card p-8 flex flex-col items-center text-center">
             <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mb-3">
               <Inbox className="h-7 w-7 text-muted-foreground" />
             </div>
             <h3 className="font-bold text-base mb-1">אין לידים עדיין</h3>
             <p className="text-xs text-muted-foreground max-w-xs">
-              כשדיירים יביעו עניין בהצעות שלך — הם יופיעו כאן עם פרטי ההתחייבות לפיקדון.
+              כשדיירים יביעו עניין בהצעות או בשירותים שלך — הם יופיעו כאן.
             </p>
           </div>
         ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Users className="h-4 w-4 text-gold" />
-              סה"כ {interests.length} מתעניינים ב-{deals.length} הצעות
+              סה"כ {interests.length + inquiries.length} פניות{deals.length ? ` · ${deals.length} הצעות` : " · אין הצעות פעילות"}
             </div>
+            {inquiries.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold text-muted-foreground mt-2">פניות כלליות (ללא הצעה)</h3>
+                {inquiries.map((q) => {
+                  const p = profiles[q.user_id];
+                  const name = q.full_name?.trim() || p?.full_name?.trim() || "דייר";
+                  const phone = q.phone?.trim() || p?.phone?.trim() || null;
+                  const email = q.email || p?.email || null;
+                  const wa = normalizeWhatsappUrl(phone);
+                  return (
+                    <div key={q.id} className="gb-card p-4 border-r-4 border-gold/40">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-sm text-foreground truncate">{name}</h4>
+                          <p className="text-[11px] text-muted-foreground truncate">{q.message ?? "פנייה כללית"}</p>
+                        </div>
+                        <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gold/10 text-primary border border-gold/30 shrink-0">
+                          פנייה חדשה
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground mb-2">
+                        {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
+                        {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
+                        {q.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {q.city}</span>}
+                        {q.project_name && <span className="inline-flex items-center gap-1"><Building2 className="h-3 w-3" /> {q.project_name}</span>}
+                        <span>נרשם: {new Date(q.created_at).toLocaleDateString("he-IL")}</span>
+                      </div>
+                      {(phone || wa) && (
+                        <div className="flex gap-2">
+                          {phone && (
+                            <a href={`tel:${phone}`} className="flex-1 text-center text-[11px] font-bold py-2 rounded-lg bg-primary text-primary-foreground">חיוג</a>
+                          )}
+                          {wa && (
+                            <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-[11px] font-bold py-2 rounded-lg bg-success/10 text-success border border-success/30 inline-flex items-center justify-center gap-1">
+                              <MessageCircle className="h-3 w-3" /> וואטסאפ
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {interests.length > 0 && (
+              <h3 className="text-xs font-bold text-muted-foreground mt-3">לידים על הצעות פעילות</h3>
+            )}
             {interests.map((i) => {
               const p = profiles[i.user_id];
               const name = i.full_name?.trim() || p?.full_name?.trim() || "דייר";
