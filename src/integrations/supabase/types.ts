@@ -635,6 +635,42 @@ export type Database = {
           },
         ]
       }
+      supplier_catalogs: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          file_size: number | null
+          file_url: string
+          id: string
+          name: string
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          file_size?: number | null
+          file_url: string
+          id?: string
+          name: string
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          name?: string
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       supplier_cities: {
         Row: {
           city_id: string
