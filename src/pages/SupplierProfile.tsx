@@ -12,6 +12,7 @@ import { useApp } from "@/store/AppStore";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
 import type { OfferTier } from "@/lib/offerPricing";
+import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 
 interface DbSupplier {
   id: string;
@@ -59,22 +60,33 @@ export default function SupplierProfile() {
   const [submitting, setSubmitting] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [deals, setDeals] = useState<RealDealCardData[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!supplierId) return;
+    let cancelled = false;
+    const safety = window.setTimeout(() => {
+      if (!cancelled) {
+        setLoadError("טעינת הספק נמשכת יותר מדי זמן. נסו לרענן את המסך.");
+        setLoading(false);
+      }
+    }, 12000);
     (async () => {
-      const [{ data: s }, { data: g }, { data: sregs }, { data: scits }, { data: dealsData }] = await Promise.all([
-        supabase.from("suppliers").select("*").eq("id", supplierId).maybeSingle(),
-        supabase.from("supplier_gallery").select("id,image_url,caption").eq("supplier_id", supplierId).order("display_order"),
-        supabase.from("supplier_regions").select("region_id, regions(name_he)").eq("supplier_id", supplierId),
-        supabase.from("supplier_cities").select("city_id, cities(name_he)").eq("supplier_id", supplierId),
-        supabase
-          .from("deals")
-          .select("id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at")
-          .eq("supplier_id", supplierId)
-          .eq("status", "active")
-          .order("created_at", { ascending: false }),
-      ]);
+      try {
+        setLoadError(null);
+        const [{ data: s }, { data: g }, { data: sregs }, { data: scits }, { data: dealsData }] = await Promise.all([
+          withTimeout(supabase.from("suppliers").select("*").eq("id", supplierId).maybeSingle(), "טעינת ספק"),
+          withTimeout(supabase.from("supplier_gallery").select("id,image_url,caption").eq("supplier_id", supplierId).order("display_order"), "טעינת גלריה"),
+          withTimeout(supabase.from("supplier_regions").select("region_id, regions(name_he)").eq("supplier_id", supplierId), "טעינת אזורי שירות"),
+          withTimeout(supabase.from("supplier_cities").select("city_id, cities(name_he)").eq("supplier_id", supplierId), "טעינת ערי שירות"),
+          withTimeout(supabase
+            .from("deals")
+            .select("id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at")
+            .eq("supplier_id", supplierId)
+            .eq("status", "active")
+            .order("created_at", { ascending: false }), "טעינת הצעות"),
+        ]);
+        if (cancelled) return;
       const sup = (s as DbSupplier | null) ?? null;
       setSupplier(sup);
       setGallery((g as GalleryItem[] | null) ?? []);
@@ -106,8 +118,14 @@ export default function SupplierProfile() {
         })),
       );
 
-      setLoading(false);
+      } catch (error) {
+        if (!cancelled) setLoadError(getFriendlyLoadError(error, "שגיאה בטעינת הספק"));
+      } finally {
+        window.clearTimeout(safety);
+        if (!cancelled) setLoading(false);
+      }
     })();
+    return () => { cancelled = true; window.clearTimeout(safety); };
   }, [supplierId]);
 
   const supplierCategories = useMemo(() => {
@@ -173,11 +191,12 @@ export default function SupplierProfile() {
     );
   }
 
-  if (!supplier) {
+  if (loadError || !supplier) {
     return (
       <MobileShell>
-        <PageHeader title="ספק לא נמצא" back />
+        <PageHeader title={loadError ? "שגיאה בטעינת ספק" : "ספק לא נמצא"} back />
         <div className="px-5 mt-6">
+          {loadError && <div className="gb-card p-4 mb-4 text-sm text-destructive text-center">{loadError}</div>}
           <Button onClick={() => navigate(-1)} variant="outline" className="w-full">
             <ArrowRight className="h-4 w-4 ml-2" /> חזרה
           </Button>
