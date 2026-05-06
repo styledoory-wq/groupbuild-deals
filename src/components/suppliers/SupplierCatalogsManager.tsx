@@ -126,7 +126,7 @@ export function SupplierCatalogsManager({ supplierId }: Props) {
     if (!editingId) return;
     const trimmed = editName.trim();
     if (!trimmed) { toast.error("שם הקטלוג חובה"); return; }
-    const patch: Record<string, unknown> = {
+    const patch: { name: string; description: string | null; file_url?: string } = {
       name: trimmed.slice(0, 120),
       description: editDesc.trim() || null,
     };
