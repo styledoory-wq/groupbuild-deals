@@ -633,6 +633,12 @@ export default function AdminDbSuppliers() {
                 >
                   <ExternalLink className="h-3.5 w-3.5" /> תצוגה
                 </button>
+                <button
+                  onClick={() => navigate(`/supplier/offers/new?supplierId=${r.id}`)}
+                  className="col-span-2 h-9 rounded-xl bg-gradient-gold text-primary text-xs font-bold flex items-center justify-center gap-1 shadow-gold"
+                >
+                  <Plus className="h-3.5 w-3.5" /> צור הצעה לספק זה
+                </button>
               </div>
             </div>
           );

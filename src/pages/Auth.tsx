@@ -10,6 +10,7 @@ import { isAdminEmail, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Role } from "@/types";
+import { BrandLogo } from "@/components/BrandLogo";
 
 type Mode = "signin" | "signup";
 
@@ -189,16 +190,16 @@ export default function Auth() {
           <div className="absolute -bottom-10 -right-10 h-48 w-48 rounded-full bg-gold/5 blur-2xl" />
 
           <div className="relative animate-fade-up">
+            <div className="mb-5 flex">
+              <BrandLogo variant="light" size="lg" />
+            </div>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 mb-6">
               <Sparkles className="h-3.5 w-3.5 text-gold" />
               <span className="text-xs font-medium">רכש קבוצתי לדיירי בנייה חדשה</span>
             </div>
 
             <h1 className="text-4xl font-extrabold leading-tight mb-3">
-              ברוכים הבאים ל-
-              <span className="block gb-gold-text mt-1" aria-label="GroupBuild">
-                GroupBuild
-              </span>
+              ברוכים הבאים
             </h1>
             <div className="gb-divider-gold mb-4" />
             <p className="text-primary-foreground/70 text-sm leading-relaxed max-w-sm">

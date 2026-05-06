@@ -5,10 +5,11 @@
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#0F1E35",
-  "background_color": "#F8F6F1",
+  "background_color": "#0F1E35",
   "lang": "he",
   "dir": "rtl",
   "icons": [
-    { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/logo-light.png", "sizes": "any", "type": "image/png", "purpose": "any" }
   ]
 }
