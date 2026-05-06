@@ -385,13 +385,19 @@ export default function AdminDbSuppliers() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    const { error } = await supabase.from("suppliers").delete().eq("id", deleteId);
-    if (error) toast.error("מחיקה נכשלה");
-    else {
-      toast.success("הספק נמחק");
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-supplier", {
+        body: { supplier_id: deleteId },
+      });
+      if (error) throw error;
+      if (data && (data as { error?: string }).error) throw new Error((data as { error: string }).error);
+      toast.success("הספק נמחק לצמיתות");
       await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "מחיקה נכשלה");
+    } finally {
+      setDeleteId(null);
     }
-    setDeleteId(null);
   };
 
   // ---- Match checker ----
