@@ -370,7 +370,26 @@ export default function Auth() {
                   className="h-12 rounded-2xl bg-card border-border" />
               </div>
 
-              <Button type="submit" disabled={loading}
+              <label className="flex items-start gap-2 text-xs cursor-pointer pt-1">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-primary"
+                />
+                <span>
+                  קראתי ואני מאשר את{" "}
+                  <Link
+                    to={role === "supplier" ? "/terms/suppliers" : "/terms/residents"}
+                    target="_blank"
+                    className="font-bold gb-gold-text underline-offset-2 hover:underline"
+                  >
+                    תנאי השימוש
+                  </Link>
+                </span>
+              </label>
+
+              <Button type="submit" disabled={loading || !termsAccepted}
                 className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold mt-2">
                 {loading ? "נרשם…" : "צרו חשבון"}
               </Button>
