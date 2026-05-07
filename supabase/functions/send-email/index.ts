@@ -77,124 +77,90 @@ Deno.serve(async (req) => {
     const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
     const auth = req.headers.get("Authorization") ?? "";
-    if (!auth) return json({ error: "unauthorized" }, 401);
+    if (!auth) return json({ success: false, error: "unauthorized" }, 200);
 
     const userClient = createClient(SUPABASE_URL, ANON, { global: { headers: { Authorization: auth } } });
     const { data: u } = await userClient.auth.getUser();
-    if (!u.user) return json({ error: "unauthorized" }, 401);
+    if (!u.user) return json({ success: false, error: "unauthorized" }, 200);
 
     const admin = createClient(SUPABASE_URL, SERVICE);
     const body = (await req.json()) as Payload;
 
     const isAdmin = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", u.user.id)
-      .eq("role", "admin")
-      .maybeSingle()
-      .then((r) => !!r.data);
+      .from("user_roles").select("role")
+      .eq("user_id", u.user.id).eq("role", "admin")
+      .maybeSingle().then((r) => !!r.data);
 
-    // Helper: respect user notification preferences
     async function prefAllows(userId: string | null, kind: "approval" | "lead"): Promise<boolean> {
       if (!userId) return true;
       const { data } = await admin
         .from("notification_settings")
         .select("email_notifications_enabled, approval_email_enabled, new_lead_email_enabled")
-        .eq("user_id", userId)
-        .maybeSingle();
+        .eq("user_id", userId).maybeSingle();
       if (!data) return true;
       if (!data.email_notifications_enabled) return false;
       return kind === "approval" ? data.approval_email_enabled : data.new_lead_email_enabled;
     }
 
     if (body.type === "supplier_approved") {
-      if (!isAdmin) return json({ error: "forbidden" }, 403);
-      const { data: sup } = await admin
-        .from("suppliers")
-        .select("email, business_name, user_id")
-        .eq("id", body.supplier_id)
-        .maybeSingle();
-      if (!sup?.email) return json({ skipped: "no_email" });
-      if (!(await prefAllows(sup.user_id, "approval"))) return json({ skipped: "user_pref" });
-      const html = wrap(
-        "החשבון שלך אושר 🎉",
-        `<p>שלום ${sup.business_name ?? ""},</p>
-         <p>החשבון שלך במערכת <b>GroupBuild</b> אושר ופעיל.</p>
-         <p>תוכלו כעת להתחבר, להעלות הצעות ולקבל פניות מדיירים.</p>`,
-        "https://groupbuild.co.il/auth",
-        "כניסה למערכת",
-      );
-      const r = await sendResend(sup.email, "החשבון שלך אושר במערכת GroupBuild", html);
-      console.log("[email] supplier_approved", sup.email, r);
-      return json({ ok: true });
+      if (!isAdmin) return json({ success: false, error: "forbidden" }, 200);
+      const { data: sup } = await admin.from("suppliers")
+        .select("email, business_name, user_id").eq("id", body.supplier_id).maybeSingle();
+      if (!sup?.email) return json({ success: false, error: "לספק אין כתובת מייל" }, 200);
+      if (!(await prefAllows(sup.user_id, "approval"))) return json({ success: true, skipped: "user_pref" });
+      const html = wrap("החשבון שלך אושר 🎉",
+        `<p>שלום ${sup.business_name ?? ""},</p><p>החשבון שלך במערכת <b>GroupBuild</b> אושר ופעיל.</p>`,
+        "https://groupbuild.co.il/auth", "כניסה למערכת");
+      await sendResend(sup.email, "החשבון שלך אושר במערכת GroupBuild", html);
+      return json({ success: true });
     }
 
     if (body.type === "resident_approved") {
-      if (!isAdmin) return json({ error: "forbidden" }, 403);
-      const { data: prof } = await admin
-        .from("profiles")
-        .select("email, full_name")
-        .eq("id", body.user_id)
-        .maybeSingle();
-      if (!prof?.email) return json({ skipped: "no_email" });
-      if (!(await prefAllows(body.user_id, "approval"))) return json({ skipped: "user_pref" });
-      const html = wrap(
-        "החשבון שלך אושר 🎉",
-        `<p>שלום ${prof.full_name ?? ""},</p>
-         <p>החשבון שלך במערכת <b>GroupBuild</b> אושר ומוכן לשימוש.</p>
-         <p>היכנסו לאתר כדי לראות הצעות קבוצתיות בפרויקט שלכם.</p>`,
-        "https://groupbuild.co.il/auth",
-        "כניסה למערכת",
-      );
-      const r = await sendResend(prof.email, "החשבון שלך אושר במערכת GroupBuild", html);
-      console.log("[email] resident_approved", prof.email, r);
-      return json({ ok: true });
+      if (!isAdmin) return json({ success: false, error: "forbidden" }, 200);
+      const { data: prof } = await admin.from("profiles")
+        .select("email, full_name").eq("id", body.user_id).maybeSingle();
+      if (!prof?.email) return json({ success: false, error: "למשתמש אין כתובת מייל" }, 200);
+      if (!(await prefAllows(body.user_id, "approval"))) return json({ success: true, skipped: "user_pref" });
+      const html = wrap("החשבון שלך אושר 🎉",
+        `<p>שלום ${prof.full_name ?? ""},</p><p>החשבון שלך במערכת <b>GroupBuild</b> אושר ומוכן לשימוש.</p>`,
+        "https://groupbuild.co.il/auth", "כניסה למערכת");
+      await sendResend(prof.email, "החשבון שלך אושר במערכת GroupBuild", html);
+      return json({ success: true });
     }
 
     if (body.type === "new_lead") {
-      const { data: sup } = await admin
-        .from("suppliers")
-        .select("email, business_name, user_id")
-        .eq("id", body.supplier_id)
-        .maybeSingle();
-      if (!sup?.email) return json({ skipped: "no_email" });
-      if (!(await prefAllows(sup.user_id, "lead"))) return json({ skipped: "user_pref" });
+      const { data: sup } = await admin.from("suppliers")
+        .select("email, business_name, user_id").eq("id", body.supplier_id).maybeSingle();
+      if (!sup?.email) return json({ success: false, error: "לספק אין כתובת מייל" }, 200);
+      if (!(await prefAllows(sup.user_id, "lead"))) return json({ success: true, skipped: "user_pref" });
       const details = [
         body.lead_name && `שם: ${body.lead_name}`,
         body.lead_phone && `טלפון: ${body.lead_phone}`,
         body.lead_city && `עיר: ${body.lead_city}`,
         body.project_name && `פרויקט: ${body.project_name}`,
       ].filter(Boolean).join("<br>");
-      const html = wrap(
-        "ליד חדש בהצעה שלך",
-        `<p>שלום ${sup.business_name ?? ""},</p>
-         <p>דייר חדש הביע עניין בהצעה: <b>${body.deal_title ?? ""}</b></p>
+      const html = wrap("ליד חדש בהצעה שלך",
+        `<p>שלום ${sup.business_name ?? ""},</p><p>דייר חדש הביע עניין בהצעה: <b>${body.deal_title ?? ""}</b></p>
          ${details ? `<div style="background:#F5F1EA;padding:14px;border-radius:10px;margin-top:10px">${details}</div>` : ""}`,
-        "https://groupbuild.co.il/supplier/leads",
-        "צפייה בליד",
-      );
-      const r = await sendResend(sup.email, `ליד חדש: ${body.deal_title ?? "הצעה שלך"}`, html);
-      console.log("[email] new_lead", sup.email, r);
-      return json({ ok: true });
+        "https://groupbuild.co.il/supplier/leads", "צפייה בליד");
+      await sendResend(sup.email, `ליד חדש: ${body.deal_title ?? "הצעה שלך"}`, html);
+      return json({ success: true });
     }
 
     if (body.type === "test") {
-      if (!isAdmin) return json({ error: "forbidden" }, 403);
-      const html = wrap(
-        "בדיקת מערכת מיילים ✅",
+      if (!isAdmin) return json({ success: false, error: "forbidden" }, 200);
+      const html = wrap("בדיקת מערכת מיילים ✅",
         `<p>שלום,</p><p>זהו מייל בדיקה ממערכת <b>GroupBuild</b>.</p>
          <p>אם הגיע אליך – שליחת המיילים דרך Resend פעילה ותקינה.</p>`,
-        "https://groupbuild.co.il",
-        "לאתר",
-      );
-      const r = await sendResend(body.to, "בדיקת מיילים — GroupBuild", html);
-      console.log("[email] test", body.to, r);
-      return json({ ok: true });
+        "https://groupbuild.co.il", "לאתר");
+      await sendResend(body.to, "בדיקת מיילים — GroupBuild", html);
+      return json({ success: true });
     }
 
-    return json({ error: "unknown_type" }, 400);
+    return json({ success: false, error: "unknown_type" }, 200);
   } catch (e) {
-    console.error("[send-email] error", e);
-    return json({ error: e instanceof Error ? e.message : "unknown" }, 500);
+    const msg = e instanceof Error ? e.message : "unknown";
+    console.error("[send-email] error", msg);
+    return json({ success: false, error: msg }, 200);
   }
 });
