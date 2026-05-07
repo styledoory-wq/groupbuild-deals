@@ -107,6 +107,12 @@ export default function AdminResidents() {
         .eq("id", editing.id);
       if (error) throw error;
       toast.success("הדייר עודכן");
+      // Send approval email if activating a previously inactive resident
+      if (eActive && editing.is_active === false) {
+        supabase.functions
+          .invoke("send-email", { body: { type: "resident_approved", user_id: editing.id } })
+          .catch((e) => console.warn("[email] resident_approved failed", e));
+      }
       setEditOpen(false);
       setEditing(null);
       await loadResidents();
