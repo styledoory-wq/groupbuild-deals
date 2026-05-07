@@ -173,13 +173,10 @@ export default function AdminDbSuppliers() {
         logo_url: s.logo_url ?? "",
         catalog_url: s.catalog_url ?? "",
         approval_status: (s.approval_status as NewForm["approval_status"]) ?? "pending",
-      });
-      setEditPrevApproval((s.approval_status as string) ?? "pending");
-      setEditForm((prev) => ({ ...prev }));
-      // Re-set with full form below; the line above kept compiler happy with closing brace shift
         is_active: !!s.is_active,
         categoryIds: s.categories ?? [],
       });
+      setEditPrevApproval((s.approval_status as string) ?? "pending");
       setEditAreas({
         servesAllCountry: !!s.serves_all_country,
         regionIds: (sregs ?? []).map((r) => r.region_id as string),
