@@ -23,7 +23,8 @@ type Payload =
       lead_phone?: string;
       lead_city?: string;
       project_name?: string;
-    };
+    }
+  | { type: "test"; to: string };
 
 function wrap(title: string, bodyHtml: string, ctaUrl?: string, ctaText?: string) {
   return `<!doctype html>
@@ -164,6 +165,20 @@ Deno.serve(async (req) => {
       );
       const r = await sendResend(sup.email, `ליד חדש: ${body.deal_title ?? "הצעה שלך"}`, html);
       console.log("[email] new_lead", sup.email, r);
+      return json({ ok: true });
+    }
+
+    if (body.type === "test") {
+      if (!isAdmin) return json({ error: "forbidden" }, 403);
+      const html = wrap(
+        "בדיקת מערכת מיילים ✅",
+        `<p>שלום,</p><p>זהו מייל בדיקה ממערכת <b>GroupBuild</b>.</p>
+         <p>אם הגיע אליך – שליחת המיילים דרך Resend פעילה ותקינה.</p>`,
+        "https://groupbuild.co.il",
+        "לאתר",
+      );
+      const r = await sendResend(body.to, "בדיקת מיילים — GroupBuild", html);
+      console.log("[email] test", body.to, r);
       return json({ ok: true });
     }
 

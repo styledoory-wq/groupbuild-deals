@@ -21,6 +21,26 @@ export default function AdminSettings() {
   const [settings, setSettings] = useState<AdminSettingsRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [sendingTest, setSendingTest] = useState(false);
+
+  const sendTest = async () => {
+    const to = testEmail.trim();
+    if (!to) { toast.error("נא להזין אימייל לבדיקה"); return; }
+    setSendingTest(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-email", {
+        body: { type: "test", to },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("מייל הבדיקה נשלח");
+    } catch (err) {
+      toast.error(`שליחה נכשלה: ${err instanceof Error ? err.message : "שגיאה"}`);
+    } finally {
+      setSendingTest(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -123,6 +143,35 @@ export default function AdminSettings() {
           <Save className="h-4 w-4" />
           {saving ? "שומר…" : "שמירת הגדרות"}
         </Button>
+
+        <div className="gb-card p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Mail className="h-4 w-4 text-gold" />
+            <h3 className="font-bold text-sm">בדיקת שליחת מיילים</h3>
+          </div>
+          <div>
+            <Label className="text-xs">אימייל לבדיקה</Label>
+            <Input
+              type="email"
+              dir="ltr"
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+              placeholder="test@example.co.il"
+            />
+            <p className="text-[11px] text-muted-foreground mt-1.5">
+              נשלח דרך Resend מ-notifications@groupbuild.co.il
+            </p>
+          </div>
+          <Button
+            onClick={sendTest}
+            disabled={sendingTest}
+            variant="outline"
+            className="w-full h-11 rounded-2xl"
+          >
+            <Mail className="h-4 w-4 ml-2" />
+            {sendingTest ? "שולח…" : "שליחת מייל בדיקה"}
+          </Button>
+        </div>
       </div>
 
       <BottomNav role="admin" />
