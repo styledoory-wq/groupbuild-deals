@@ -367,6 +367,23 @@ export default function DealDetail() {
           },
         })
         .catch(() => {});
+
+      // Send Resend email to supplier about new lead
+      if (deal.supplier_id) {
+        supabase.functions
+          .invoke("send-email", {
+            body: {
+              type: "new_lead",
+              supplier_id: deal.supplier_id,
+              deal_title: deal.title,
+              lead_name: payload.full_name,
+              lead_phone: payload.phone,
+              lead_city: payload.city,
+              project_name: payload.project_name,
+            },
+          })
+          .catch((e) => console.warn("[email] new_lead failed", e));
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
     } finally {

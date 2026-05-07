@@ -107,6 +107,7 @@ export default function AdminDbSuppliers() {
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<NewForm>(emptyForm);
+  const [editPrevApproval, setEditPrevApproval] = useState<string>("pending");
   const [editAreas, setEditAreas] = useState<AreasComboboxValue>({
     servesAllCountry: false,
     regionIds: [],
@@ -175,6 +176,7 @@ export default function AdminDbSuppliers() {
         is_active: !!s.is_active,
         categoryIds: s.categories ?? [],
       });
+      setEditPrevApproval((s.approval_status as string) ?? "pending");
       setEditAreas({
         servesAllCountry: !!s.serves_all_country,
         regionIds: (sregs ?? []).map((r) => r.region_id as string),
@@ -246,6 +248,12 @@ export default function AdminDbSuppliers() {
         }
       }
       toast.success("הספק עודכן בהצלחה");
+      // Send approval email if status transitioned to approved
+      if (editPrevApproval !== "approved" && editForm.approval_status === "approved") {
+        supabase.functions
+          .invoke("send-email", { body: { type: "supplier_approved", supplier_id: editId } })
+          .catch((e) => console.warn("[email] supplier_approved failed", e));
+      }
       setEditOpen(false);
       setEditId(null);
       await load();
