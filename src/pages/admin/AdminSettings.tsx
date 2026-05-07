@@ -33,10 +33,10 @@ export default function AdminSettings() {
         body: { type: "test", to },
       });
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (data && data.success === false) throw new Error(data.error || "שליחה נכשלה");
       toast.success("מייל הבדיקה נשלח");
     } catch (err) {
-      toast.error(`שליחה נכשלה: ${err instanceof Error ? err.message : "שגיאה"}`);
+      toast.error(`שליחה נכשלה: ${err instanceof Error ? err.message : "שגיאה"}`, { duration: 10000 });
     } finally {
       setSendingTest(false);
     }
