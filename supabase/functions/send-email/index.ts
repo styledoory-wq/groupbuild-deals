@@ -46,14 +46,24 @@ function wrap(title: string, bodyHtml: string, ctaUrl?: string, ctaText?: string
 
 async function sendResend(to: string, subject: string, html: string) {
   const key = Deno.env.get("RESEND_API_KEY");
-  if (!key) throw new Error("RESEND_API_KEY missing");
+  console.log("[send-email] RESEND_API_KEY exists:", !!key);
+  console.log("[send-email] from:", FROM, "to:", to, "subject:", subject);
+  if (!key) throw new Error("RESEND_API_KEY חסר בהגדרות השרת");
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({ from: FROM, to: [to], subject, html }),
   });
   const text = await res.text();
-  if (!res.ok) throw new Error(`Resend ${res.status}: ${text}`);
+  console.log("[send-email] Resend status:", res.status, "body:", text);
+  if (!res.ok) {
+    let detail = text;
+    try {
+      const j = JSON.parse(text);
+      detail = j.message || j.error || text;
+    } catch { /* keep raw */ }
+    throw new Error(`Resend ${res.status}: ${detail}`);
+  }
   return text;
 }
 
