@@ -107,6 +107,7 @@ export default function AdminDbSuppliers() {
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<NewForm>(emptyForm);
+  const [editPrevApproval, setEditPrevApproval] = useState<string>("pending");
   const [editAreas, setEditAreas] = useState<AreasComboboxValue>({
     servesAllCountry: false,
     regionIds: [],
