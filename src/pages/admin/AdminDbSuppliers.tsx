@@ -248,6 +248,12 @@ export default function AdminDbSuppliers() {
         }
       }
       toast.success("הספק עודכן בהצלחה");
+      // Send approval email if status transitioned to approved
+      if (editPrevApproval !== "approved" && editForm.approval_status === "approved") {
+        supabase.functions
+          .invoke("send-email", { body: { type: "supplier_approved", supplier_id: editId } })
+          .catch((e) => console.warn("[email] supplier_approved failed", e));
+      }
       setEditOpen(false);
       setEditId(null);
       await load();
