@@ -23,7 +23,8 @@ type Payload =
       lead_phone?: string;
       lead_city?: string;
       project_name?: string;
-    };
+    }
+  | { type: "test"; to: string };
 
 function wrap(title: string, bodyHtml: string, ctaUrl?: string, ctaText?: string) {
   return `<!doctype html>
