@@ -21,6 +21,26 @@ export default function AdminSettings() {
   const [settings, setSettings] = useState<AdminSettingsRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [sendingTest, setSendingTest] = useState(false);
+
+  const sendTest = async () => {
+    const to = testEmail.trim();
+    if (!to) { toast.error("נא להזין אימייל לבדיקה"); return; }
+    setSendingTest(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-email", {
+        body: { type: "test", to },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("מייל הבדיקה נשלח");
+    } catch (err) {
+      toast.error(`שליחה נכשלה: ${err instanceof Error ? err.message : "שגיאה"}`);
+    } finally {
+      setSendingTest(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
