@@ -168,6 +168,20 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    if (body.type === "test") {
+      if (!isAdmin) return json({ error: "forbidden" }, 403);
+      const html = wrap(
+        "בדיקת מערכת מיילים ✅",
+        `<p>שלום,</p><p>זהו מייל בדיקה ממערכת <b>GroupBuild</b>.</p>
+         <p>אם הגיע אליך – שליחת המיילים דרך Resend פעילה ותקינה.</p>`,
+        "https://groupbuild.co.il",
+        "לאתר",
+      );
+      const r = await sendResend(body.to, "בדיקת מיילים — GroupBuild", html);
+      console.log("[email] test", body.to, r);
+      return json({ ok: true });
+    }
+
     return json({ error: "unknown_type" }, 400);
   } catch (e) {
     console.error("[send-email] error", e);
