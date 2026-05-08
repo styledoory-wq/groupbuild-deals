@@ -1,14 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { AppNotification, Category, Project, User } from "@/types";
+import type { AppNotification, Category, Project, Role, User } from "@/types";
 import { demoUsers } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
 import { withTimeout } from "@/lib/safeAsync";
+import { isAdminEmail, setAdminSession } from "@/lib/auth";
 
 interface AppState {
   user: User | null;
   setUser: (u: User | null) => void;
   loginDemo: (role: "resident" | "supplier" | "admin") => User;
-  logout: () => void;
+  logout: () => Promise<void>;
+  authReady: boolean;
 
   projects: Project[];
   setProjects: (p: Project[]) => void;
