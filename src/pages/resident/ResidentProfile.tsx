@@ -31,11 +31,13 @@ export default function ResidentProfile() {
   const project = projects.find((p) => p.id === user?.projectId);
   const [myDeposits, setMyDeposits] = useState<DbDeposit[]>([]);
   const [deals, setDeals] = useState<DealMap>({});
+  const [showHidden, setShowHidden] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const loadDeposits = useCallback(async (uid: string) => {
     const { data, error } = await supabase
       .from("deposits")
-      .select("id,deal_id,amount,status,created_at,paid_at,refunded_at")
+      .select("id,deal_id,amount,status,created_at,paid_at,refunded_at,is_hidden")
       .eq("user_id", uid)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
@@ -54,6 +56,21 @@ export default function ResidentProfile() {
     } else {
       setDeals({});
     }
+  }, []);
+
+  const toggleHidden = async (id: string, currentlyHidden: boolean) => {
+    setBusyId(id);
+    try {
+      const { error } = await supabase.from("deposits").update({ is_hidden: !currentlyHidden }).eq("id", id);
+      if (error) throw error;
+      toast.success(currentlyHidden ? "הוחזר לתצוגה" : "הוסתר מהתצוגה");
+      const { data: sessionData } = await supabase.auth.getSession();
+      const uid = sessionData.session?.user?.id;
+      if (uid) await loadDeposits(uid);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "פעולה נכשלה");
+    }
+    setBusyId(null);
   }, []);
 
   useEffect(() => {
