@@ -265,7 +265,7 @@ export default function DealDetail() {
         terms_accepted_at: new Date().toISOString(),
         lead_status: "new",
         join_condition: joinCondition,
-        min_tier_locked: joinCondition === "conditional" && activeTier ? activeTier.minParticipants : null,
+        min_tier_locked: joinCondition === "conditional" && activeTierNow ? activeTierNow.minParticipants : null,
         conditional_status: "ok",
       };
       const { error: insErr } = await supabase.from("deal_interests").insert(payload);
