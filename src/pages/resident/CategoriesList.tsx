@@ -99,36 +99,39 @@ export default function CategoriesList() {
 
   return (
     <MobileShell>
-      {/* Luxury hero */}
-      <header className="bg-gradient-hero text-primary-foreground px-6 pt-10 pb-16 rounded-b-[28px] relative overflow-hidden">
-        <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-gold/5 blur-3xl pointer-events-none" />
+      {/* Cinematic hero */}
+      <header className="gb-aurora text-primary-foreground px-6 pt-10 pb-16 rounded-b-[32px] relative overflow-hidden">
+        <span aria-hidden className="gb-particle gb-particle-1 h-1 w-1 top-16 left-10" />
+        <span aria-hidden className="gb-particle gb-particle-2 h-1.5 w-1.5 top-28 right-14" />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage: "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+            maskImage: "radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)",
+            WebkitMaskImage: "radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)",
+          }}
+        />
 
         <div className="relative animate-fade-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/8 border border-white/12 mb-5">
-            <Sparkles className="h-3.5 w-3.5 text-gold" />
-            <span className="text-[11px] font-medium text-primary-foreground/90">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 mb-5">
+            <span className="gb-live-dot" />
+            <Sparkles className="h-3 w-3 text-gold" strokeWidth={2.5} />
+            <span className="text-[10px] font-semibold tracking-wider uppercase">
               {totalSuppliers > 0 ? `${totalSuppliers} ספקים מאושרים` : "ספקים נבחרים בקפידה"}
             </span>
           </div>
 
-          <h1 className="text-[28px] leading-[1.15] font-extrabold mb-3">
+          <h1 className="text-[30px] leading-[1.1] font-extrabold mb-3 tracking-tight">
             {stage ? (
-              <>
-                {stage.title}
-                <br />
-                <span className="gb-gold-text">תחומי השלב</span>
-              </>
+              <>{stage.title}<br /><span className="gb-text-gold">תחומי השלב</span></>
             ) : (
-              <>
-                תחומי <span className="gb-gold-text">השדרוג</span>
-                <br />
-                לדירה שלך
-              </>
+              <>תחומי <span className="gb-text-gold">השדרוג</span><br />לדירה שלך</>
             )}
           </h1>
-          <div className="gb-divider-gold mb-4" />
-          <p className="text-primary-foreground/75 text-[13px] leading-relaxed">
+          <div className="gb-divider-gold gb-glow-gold mb-3" />
+          <p className="text-primary-foreground/70 text-[13px] leading-relaxed max-w-[88%]">
             {stage ? "בחרו תחום כדי לראות את הספקים שמשרתים אותו." : "בחרו תחום, או חפשו ספק לפי שם, קטגוריה או אזור."}
           </p>
         </div>
@@ -231,32 +234,31 @@ export default function CategoriesList() {
               <Link
                 key={c.id}
                 to={`/resident/categories/${c.id}`}
-                className="gb-card p-4 hover:shadow-elevated hover:-translate-y-0.5 transition-smooth group relative overflow-hidden animate-fade-up"
+                className="gb-card-premium p-4 group relative animate-fade-up active:scale-[0.98] transition-transform"
                 style={{ animationDelay: `${idx * 30}ms` }}
               >
-                <div className="absolute -top-8 -left-8 h-16 w-16 rounded-full bg-gold/10 blur-2xl group-hover:bg-gold/20 transition-smooth pointer-events-none" />
-
                 <div className="flex items-start justify-between mb-3 relative">
-                  <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-2xl shadow-soft border border-gold/20">
-                    {c.icon}
+                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary-soft flex items-center justify-center text-2xl border border-gold/25 shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.15),0_8px_20px_-10px_hsl(217_56%_13%_/_0.4)] group-hover:scale-105 transition-transform">
+                    <span className="drop-shadow-[0_0_8px_hsl(44_53%_54%_/_0.4)]">{c.icon}</span>
                   </div>
                   {hasSuppliers ? (
-                    <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-gold/15 text-primary border border-gold/20">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 inline-flex items-center gap-1">
+                      <span className="gb-live-dot" />
                       {count}
                     </span>
                   ) : (
-                    <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-muted/60 text-muted-foreground">
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
                       בקרוב
                     </span>
                   )}
                 </div>
-                <h3 className="font-bold text-foreground text-sm leading-tight relative">{c.name}</h3>
+                <h3 className="font-bold text-foreground text-[14px] leading-tight relative tracking-tight">{c.name}</h3>
                 <div className="flex items-center justify-between mt-2 relative">
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-[10px] text-muted-foreground">
                     {hasSuppliers ? "צפו בספקים" : "אין ספקים זמינים"}
                   </p>
                   {hasSuppliers && (
-                    <ArrowLeft className="h-3 w-3 text-gold opacity-0 group-hover:opacity-100 transition-smooth" strokeWidth={2} />
+                    <ArrowLeft className="h-3 w-3 text-gold opacity-60 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-all" strokeWidth={2.5} />
                   )}
                 </div>
               </Link>

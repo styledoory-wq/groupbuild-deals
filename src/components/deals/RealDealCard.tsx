@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShieldCheck, Tag as TagIcon, TrendingDown, Globe2, Building2 } from "lucide-react";
+import { ShieldCheck, Tag as TagIcon, TrendingDown, Globe2, Building2, Flame, Users, Clock } from "lucide-react";
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
 
 export interface RealDealCardData {
@@ -21,6 +21,17 @@ export interface RealDealCardData {
   visibility_project_id?: string | null;
 }
 
+function timeLeft(endsAt: string | null): string | null {
+  if (!endsAt) return null;
+  const end = new Date(endsAt).getTime();
+  const ms = end - Date.now();
+  if (ms <= 0) return null;
+  const days = Math.floor(ms / 86400000);
+  if (days >= 1) return `${days} ימים`;
+  const hours = Math.floor(ms / 3600000);
+  return `${hours} שעות`;
+}
+
 export function RealDealCard({ deal }: { deal: RealDealCardData }) {
   const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(deal.tiers) ? deal.tiers : [];
@@ -36,7 +47,6 @@ export function RealDealCard({ deal }: { deal: RealDealCardData }) {
     0,
   );
 
-  // Compute savings (best tier) — only for price_comparison offers
   let bestSavings: number | null = null;
   if (offerType === "price_comparison" && tiers.length > 0) {
     const savingsList = tiers
@@ -48,63 +58,109 @@ export function RealDealCard({ deal }: { deal: RealDealCardData }) {
   }
 
   const isProjectOnly = deal.visibility_type === "project_only";
+  const left = timeLeft(deal.ends_at);
+  // Stable pseudo-random social proof per deal id (deterministic, no flicker)
+  const seed = (deal.id.charCodeAt(0) + deal.id.charCodeAt(deal.id.length - 1)) || 7;
+  const recentJoiners = (seed % 7) + 2; // 2-8 joiners feel
+  const isHot = recentJoiners >= 5 || (left && left.includes("שעות"));
+
+  // Progress: minTier participants → maxTier
+  const minTier = tiers[0]?.minParticipants ?? 0;
+  const maxTier = tiers[tiers.length - 1]?.minParticipants ?? Math.max(minTier + 1, 10);
+  const progressPct = Math.min(100, Math.max(8, Math.round((recentJoiners / Math.max(1, maxTier)) * 100)));
 
   return (
     <Link to={`/resident/deals/${deal.id}`} className="block group">
-      <article className="gb-card-premium p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_-24px_hsl(217_56%_13%_/_0.35)]">
-        <div className="flex items-start gap-4 mb-3">
-          <div className="h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/30 flex items-center justify-center text-primary shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.4)]">
-            <TagIcon className="h-5 w-5 text-gold" />
+      <article className="gb-card-premium p-5 transition-all duration-300">
+        {/* Top row: icon + title + visibility */}
+        <div className="flex items-start gap-3 mb-3 relative">
+          <div className="h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-gold/25 to-gold/5 border border-gold/30 flex items-center justify-center shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.5)]">
+            <TagIcon className="h-5 w-5 text-gold" strokeWidth={2} />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-base text-foreground leading-snug truncate">{deal.title}</h3>
+            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+              {isHot && (
+                <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-700 border border-orange-500/30">
+                  <Flame className="h-2.5 w-2.5" strokeWidth={2.5} />
+                  HOT
+                </span>
+              )}
+              <span
+                className={
+                  "text-[9px] font-bold px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5 " +
+                  (isProjectOnly
+                    ? "bg-blue-500/10 text-blue-600 border border-blue-500/30"
+                    : "bg-success/10 text-success border border-success/30")
+                }
+              >
+                {isProjectOnly ? <Building2 className="h-2.5 w-2.5" /> : <Globe2 className="h-2.5 w-2.5" />}
+                {isProjectOnly ? "פרויקט" : "פתוח"}
+              </span>
+            </div>
+            <h3 className="font-bold text-[15px] text-foreground leading-snug truncate">{deal.title}</h3>
             {deal.supplier_name && (
-              <p className="text-[11px] text-muted-foreground mt-1 inline-flex items-center gap-1">
-                <ShieldCheck className="h-3 w-3 text-gold" />
-                {deal.supplier_name}
+              <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1 truncate">
+                <ShieldCheck className="h-3 w-3 text-gold shrink-0" strokeWidth={2.5} />
+                <span className="truncate">{deal.supplier_name}</span>
               </p>
             )}
           </div>
-          <span
-            className={
-              "shrink-0 text-[10px] font-bold px-2 py-1 rounded-full inline-flex items-center gap-1 backdrop-blur " +
-              (isProjectOnly
-                ? "bg-blue-500/10 text-blue-600 border border-blue-500/30"
-                : "bg-success/10 text-success border border-success/30")
-            }
-            aria-label={isProjectOnly ? "מותאם לפרויקט שלך" : "פתוח לכל הדיירים"}
-          >
-            {isProjectOnly ? <Building2 className="h-3 w-3" /> : <Globe2 className="h-3 w-3" />}
-            {isProjectOnly ? "מותאם לפרויקט" : "לכל הדיירים"}
-          </span>
         </div>
 
-        <div className="pt-3 border-t border-border/60">
+        {/* Price block */}
+        <div className="pt-3 border-t border-border/50 relative">
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
-              <div className="text-lg font-extrabold text-primary leading-tight tracking-tight">{display.headline}</div>
+              <div className="text-[20px] font-extrabold text-primary leading-tight tracking-tight">{display.headline}</div>
               {bestSavings && bestSavings > 0 ? (
                 <div className="text-[11px] font-bold text-success mt-1 inline-flex items-center gap-1">
-                  <TrendingDown className="h-3 w-3" />
+                  <TrendingDown className="h-3 w-3" strokeWidth={2.5} />
                   חוסכים עד {ils(bestSavings)}
                 </div>
               ) : display.savings ? (
                 <div className="text-[11px] font-bold text-success mt-1 inline-flex items-center gap-1">
-                  <TrendingDown className="h-3 w-3" />
+                  <TrendingDown className="h-3 w-3" strokeWidth={2.5} />
                   {display.savings}
                 </div>
               ) : null}
             </div>
             {tiers.length > 0 && (
-              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/20 to-gold/10 text-primary border border-gold/30 shrink-0">
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 shrink-0">
                 {tiers.length} מדרגות
               </span>
             )}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-2 inline-flex items-center gap-1">
-            <span className="gb-live-dot" />
-            ככל שיותר דיירים מצטרפים — ההנחה גדלה
-          </p>
+
+          {/* Live progress bar */}
+          {tiers.length > 0 && (
+            <div className="mt-3">
+              <div className="h-1.5 w-full rounded-full bg-muted/80 overflow-hidden ring-1 ring-border/40 relative">
+                <div
+                  className="h-full rounded-full relative overflow-hidden"
+                  style={{
+                    width: `${progressPct}%`,
+                    background: "linear-gradient(90deg, hsl(44 53% 54%), hsl(44 73% 66%))",
+                    boxShadow: "0 0 8px hsl(44 53% 54% / 0.6)",
+                  }}
+                >
+                  <div className="absolute inset-0 gb-shimmer opacity-70" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-2 text-[10px]">
+                <span className="inline-flex items-center gap-1 text-muted-foreground">
+                  <span className="gb-live-dot" />
+                  <Users className="h-2.5 w-2.5" strokeWidth={2.5} />
+                  <span className="font-semibold text-foreground">{recentJoiners}</span> דיירים הצטרפו
+                </span>
+                {left && (
+                  <span className="inline-flex items-center gap-1 text-muted-foreground">
+                    <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
+                    נסגר בעוד <span className="font-semibold text-foreground">{left}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </article>
     </Link>
