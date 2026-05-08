@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Building2, Phone, Mail, History, Pencil, FileText } from "lucide-react";
+import { LogOut, Building2, Phone, Mail, History, Pencil, FileText, EyeOff, Eye } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -17,6 +17,7 @@ type DbDeposit = {
   created_at: string;
   paid_at: string | null;
   refunded_at: string | null;
+  is_hidden: boolean;
 };
 
 type DealMap = Record<string, { title: string }>;
