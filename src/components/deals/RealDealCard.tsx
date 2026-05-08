@@ -51,13 +51,13 @@ export function RealDealCard({ deal }: { deal: RealDealCardData }) {
 
   return (
     <Link to={`/resident/deals/${deal.id}`} className="block group">
-      <article className="gb-card p-5 transition-smooth hover:border-gold/40">
+      <article className="gb-card-premium p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_-24px_hsl(217_56%_13%_/_0.35)]">
         <div className="flex items-start gap-4 mb-3">
-          <div className="h-11 w-11 shrink-0 rounded-xl bg-muted/60 border border-border flex items-center justify-center text-primary">
-            <TagIcon className="h-4 w-4" />
+          <div className="h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/30 flex items-center justify-center text-primary shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.4)]">
+            <TagIcon className="h-5 w-5 text-gold" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base text-foreground leading-snug truncate">{deal.title}</h3>
+            <h3 className="font-bold text-base text-foreground leading-snug truncate">{deal.title}</h3>
             {deal.supplier_name && (
               <p className="text-[11px] text-muted-foreground mt-1 inline-flex items-center gap-1">
                 <ShieldCheck className="h-3 w-3 text-gold" />
@@ -67,7 +67,7 @@ export function RealDealCard({ deal }: { deal: RealDealCardData }) {
           </div>
           <span
             className={
-              "shrink-0 text-[10px] font-bold px-2 py-1 rounded-full inline-flex items-center gap-1 " +
+              "shrink-0 text-[10px] font-bold px-2 py-1 rounded-full inline-flex items-center gap-1 backdrop-blur " +
               (isProjectOnly
                 ? "bg-blue-500/10 text-blue-600 border border-blue-500/30"
                 : "bg-success/10 text-success border border-success/30")
@@ -79,29 +79,30 @@ export function RealDealCard({ deal }: { deal: RealDealCardData }) {
           </span>
         </div>
 
-        <div className="pt-3 border-t border-border">
+        <div className="pt-3 border-t border-border/60">
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
-              <div className="text-base font-extrabold text-primary leading-tight">{display.headline}</div>
+              <div className="text-lg font-extrabold text-primary leading-tight tracking-tight">{display.headline}</div>
               {bestSavings && bestSavings > 0 ? (
-                <div className="text-[11px] font-bold text-success mt-0.5 inline-flex items-center gap-1">
+                <div className="text-[11px] font-bold text-success mt-1 inline-flex items-center gap-1">
                   <TrendingDown className="h-3 w-3" />
                   חוסכים עד {ils(bestSavings)}
                 </div>
               ) : display.savings ? (
-                <div className="text-[11px] font-bold text-success mt-0.5 inline-flex items-center gap-1">
+                <div className="text-[11px] font-bold text-success mt-1 inline-flex items-center gap-1">
                   <TrendingDown className="h-3 w-3" />
                   {display.savings}
                 </div>
               ) : null}
             </div>
             {tiers.length > 0 && (
-              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-gold/10 text-primary border border-gold/30 shrink-0">
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/20 to-gold/10 text-primary border border-gold/30 shrink-0">
                 {tiers.length} מדרגות
               </span>
             )}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-2">
+          <p className="text-[10px] text-muted-foreground mt-2 inline-flex items-center gap-1">
+            <span className="gb-live-dot" />
             ככל שיותר דיירים מצטרפים — ההנחה גדלה
           </p>
         </div>

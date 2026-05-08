@@ -92,7 +92,11 @@
 @layer components {
   .gb-card {
     @apply bg-card rounded-2xl border border-border;
-    box-shadow: var(--shadow-soft);
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+  }
+  .gb-card:hover {
+    box-shadow: var(--shadow-elevated);
   }
 
   .gb-card-flat {

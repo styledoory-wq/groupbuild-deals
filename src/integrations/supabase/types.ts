@@ -112,6 +112,7 @@ export type Database = {
       deal_interests: {
         Row: {
           city: string | null
+          conditional_status: string
           created_at: string
           deal_id: string
           deleted_at: string | null
@@ -123,7 +124,9 @@ export type Database = {
           id: string
           is_deleted: boolean
           is_demo: boolean
+          join_condition: string
           lead_status: string
+          min_tier_locked: number | null
           notes: string | null
           phone: string | null
           project_name: string | null
@@ -134,6 +137,7 @@ export type Database = {
         }
         Insert: {
           city?: string | null
+          conditional_status?: string
           created_at?: string
           deal_id: string
           deleted_at?: string | null
@@ -145,7 +149,9 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           is_demo?: boolean
+          join_condition?: string
           lead_status?: string
+          min_tier_locked?: number | null
           notes?: string | null
           phone?: string | null
           project_name?: string | null
@@ -156,6 +162,7 @@ export type Database = {
         }
         Update: {
           city?: string | null
+          conditional_status?: string
           created_at?: string
           deal_id?: string
           deleted_at?: string | null
@@ -167,7 +174,9 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           is_demo?: boolean
+          join_condition?: string
           lead_status?: string
+          min_tier_locked?: number | null
           notes?: string | null
           phone?: string | null
           project_name?: string | null
@@ -1131,6 +1140,10 @@ export type Database = {
     Functions: {
       approve_lead_and_deposit: {
         Args: { _interest_id: string; _lead_status: string }
+        Returns: undefined
+      }
+      evaluate_conditional_joiners: {
+        Args: { _deal_id: string }
         Returns: undefined
       }
       get_deal_interest_count: { Args: { _deal_id: string }; Returns: number }
