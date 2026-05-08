@@ -262,6 +262,9 @@ export default function DealDetail() {
         estimated_quantity: qty && !Number.isNaN(qty) ? qty : null,
         terms_accepted_at: new Date().toISOString(),
         lead_status: "new",
+        join_condition: joinCondition,
+        min_tier_locked: joinCondition === "conditional" && activeTier ? activeTier.minParticipants : null,
+        conditional_status: "ok",
       };
       const { error: insErr } = await supabase.from("deal_interests").insert(payload);
       if (insErr && !insErr.message.toLowerCase().includes("duplicate")) throw insErr;
