@@ -44,7 +44,7 @@ export default function AdminDeposits() {
   const [profiles, setProfiles] = useState<ProfileMap>({});
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>("all");
+  const [view, setView] = useState<string>("active");
   const [query, setQuery] = useState("");
 
   const load = async () => {
@@ -52,7 +52,7 @@ export default function AdminDeposits() {
     try {
       const { data, error } = await supabase
         .from("deposits")
-        .select("id,user_id,deal_id,amount,status,payment_provider,created_at,paid_at,refunded_at")
+        .select("id,user_id,deal_id,amount,status,payment_provider,created_at,paid_at,refunded_at,is_hidden")
         .eq("is_deleted", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -106,23 +106,42 @@ export default function AdminDeposits() {
     }
   };
 
+  const toggleHidden = async (id: string, currentlyHidden: boolean) => {
+    setBusyId(id);
+    try {
+      const { error } = await supabase
+        .from("deposits")
+        .update({ is_hidden: !currentlyHidden })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success(currentlyHidden ? "הפיקדון הוחזר לתצוגה" : "הפיקדון הוסתר מהתצוגה");
+      await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "פעולה נכשלה");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return deposits.filter((d) => {
-      if (filter !== "all" && d.status !== filter) return false;
+      if (view === "active" && (d.is_hidden || d.status === "refunded" || d.status === "cancelled" || d.status === "failed")) return false;
+      if (view === "refunded" && (d.is_hidden || d.status !== "refunded")) return false;
+      if (view === "hidden" && !d.is_hidden) return false;
+      // "all" → no filter
       if (!q) return true;
       const dealTitle = (deals[d.deal_id]?.title ?? "").toLowerCase();
       const prof = profiles[d.user_id];
       const userBlob = `${prof?.name ?? ""} ${prof?.email ?? ""} ${prof?.phone ?? ""}`.toLowerCase();
       return dealTitle.includes(q) || userBlob.includes(q) || d.id.includes(q);
     });
-  }, [deposits, deals, profiles, filter, query]);
+  }, [deposits, deals, profiles, view, query]);
 
-  // Counts shown ignore terminal states (refunded/cancelled/failed)
   const activeTotal = deposits
-    .filter((d) => d.status === "pending" || d.status === "paid")
+    .filter((d) => !d.is_hidden && (d.status === "pending" || d.status === "paid"))
     .reduce((s, d) => s + Number(d.amount || 0), 0);
-  const activeCount = deposits.filter((d) => d.status === "pending" || d.status === "paid").length;
+  const activeCount = deposits.filter((d) => !d.is_hidden && (d.status === "pending" || d.status === "paid")).length;
 
   return (
     <MobileShell>
