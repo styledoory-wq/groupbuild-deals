@@ -234,32 +234,31 @@ export default function CategoriesList() {
               <Link
                 key={c.id}
                 to={`/resident/categories/${c.id}`}
-                className="gb-card p-4 hover:shadow-elevated hover:-translate-y-0.5 transition-smooth group relative overflow-hidden animate-fade-up"
+                className="gb-card-premium p-4 group relative animate-fade-up active:scale-[0.98] transition-transform"
                 style={{ animationDelay: `${idx * 30}ms` }}
               >
-                <div className="absolute -top-8 -left-8 h-16 w-16 rounded-full bg-gold/10 blur-2xl group-hover:bg-gold/20 transition-smooth pointer-events-none" />
-
                 <div className="flex items-start justify-between mb-3 relative">
-                  <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-2xl shadow-soft border border-gold/20">
-                    {c.icon}
+                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary-soft flex items-center justify-center text-2xl border border-gold/25 shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.15),0_8px_20px_-10px_hsl(217_56%_13%_/_0.4)] group-hover:scale-105 transition-transform">
+                    <span className="drop-shadow-[0_0_8px_hsl(44_53%_54%_/_0.4)]">{c.icon}</span>
                   </div>
                   {hasSuppliers ? (
-                    <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-gold/15 text-primary border border-gold/20">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 inline-flex items-center gap-1">
+                      <span className="gb-live-dot" />
                       {count}
                     </span>
                   ) : (
-                    <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-muted/60 text-muted-foreground">
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
                       בקרוב
                     </span>
                   )}
                 </div>
-                <h3 className="font-bold text-foreground text-sm leading-tight relative">{c.name}</h3>
+                <h3 className="font-bold text-foreground text-[14px] leading-tight relative tracking-tight">{c.name}</h3>
                 <div className="flex items-center justify-between mt-2 relative">
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-[10px] text-muted-foreground">
                     {hasSuppliers ? "צפו בספקים" : "אין ספקים זמינים"}
                   </p>
                   {hasSuppliers && (
-                    <ArrowLeft className="h-3 w-3 text-gold opacity-0 group-hover:opacity-100 transition-smooth" strokeWidth={2} />
+                    <ArrowLeft className="h-3 w-3 text-gold opacity-60 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-all" strokeWidth={2.5} />
                   )}
                 </div>
               </Link>
