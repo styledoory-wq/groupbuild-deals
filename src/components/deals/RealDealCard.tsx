@@ -34,7 +34,7 @@ function timeLeft(endsAt: string | null): string | null {
   return `${hours} שעות`;
 }
 
-export function RealDealCard({ deal }: { deal: RealDealCardData }) {
+export function RealDealCard({ deal, joinersCount = 0 }: { deal: RealDealCardData; joinersCount?: number }) {
   const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(deal.tiers) ? deal.tiers : [];
   const display = describeOffer(
@@ -61,15 +61,15 @@ export function RealDealCard({ deal }: { deal: RealDealCardData }) {
 
   const isProjectOnly = deal.visibility_type === "project_only";
   const left = timeLeft(deal.ends_at);
-  // Stable pseudo-random social proof per deal id (deterministic, no flicker)
-  const seed = (deal.id.charCodeAt(0) + deal.id.charCodeAt(deal.id.length - 1)) || 7;
-  const recentJoiners = (seed % 7) + 2; // 2-8 joiners feel
-  const isHot = recentJoiners >= 5 || (left && left.includes("שעות"));
+  const realJoiners = Math.max(0, joinersCount);
+  const isHot = realJoiners >= 5 || (left !== null && left.includes("שעות"));
 
-  // Progress: minTier participants → maxTier
+  // Progress: real joiners → maxTier
   const minTier = tiers[0]?.minParticipants ?? 0;
   const maxTier = tiers[tiers.length - 1]?.minParticipants ?? Math.max(minTier + 1, 10);
-  const progressPct = Math.min(100, Math.max(8, Math.round((recentJoiners / Math.max(1, maxTier)) * 100)));
+  const progressPct = realJoiners > 0
+    ? Math.min(100, Math.max(4, Math.round((realJoiners / Math.max(1, maxTier)) * 100)))
+    : 0;
 
   const cover = deal.cover_image_url ?? null;
   const galleryCount = Array.isArray(deal.gallery_images) ? deal.gallery_images.length : 0;
@@ -206,7 +206,11 @@ export function RealDealCard({ deal }: { deal: RealDealCardData }) {
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
                   <span className="gb-live-dot" />
                   <Users className="h-2.5 w-2.5" strokeWidth={2.5} />
-                  <span className="font-semibold text-foreground">{recentJoiners}</span> דיירים הצטרפו
+                  {realJoiners > 0 ? (
+                    <><span className="font-semibold text-foreground">{realJoiners}</span> דיירים הצטרפו</>
+                  ) : (
+                    <span className="font-semibold text-foreground">היו הראשונים להצטרף</span>
+                  )}
                 </span>
                 {left && (
                   <span className="inline-flex items-center gap-1 text-muted-foreground">
