@@ -37,6 +37,10 @@ interface Row {
   service_areas: string[];
   regionCount?: number;
   cityCount?: number;
+  commission_percent?: number | null;
+  monthly_subscription?: number | null;
+  billing_status?: string | null;
+  billing_notes?: string | null;
 }
 
 interface NewForm {
@@ -55,6 +59,10 @@ interface NewForm {
   approval_status: "approved" | "pending" | "rejected";
   is_active: boolean;
   categoryIds: string[];
+  commission_percent: string;
+  monthly_subscription: string;
+  billing_status: "none" | "active" | "trial" | "suspended";
+  billing_notes: string;
 }
 
 const emptyForm: NewForm = {
@@ -73,6 +81,10 @@ const emptyForm: NewForm = {
   approval_status: "approved",
   is_active: true,
   categoryIds: [],
+  commission_percent: "",
+  monthly_subscription: "",
+  billing_status: "none",
+  billing_notes: "",
 };
 
 interface MatchProfile {
