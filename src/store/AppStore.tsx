@@ -250,12 +250,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AppState>(
     () => ({
-      user, setUser, loginDemo, logout,
+      user, setUser, loginDemo, logout, authReady,
       projects, setProjects,
       categories, setCategories,
       notifications, unreadCount, refreshNotifications, markNotificationsRead,
     }),
-    [user, projects, categories, notifications, unreadCount]
+    [user, authReady, projects, categories, notifications, unreadCount]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
