@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import { Wallet, Check, RefreshCw, Loader2, Search } from "lucide-react";
+import { Wallet, Check, RefreshCw, Loader2, Search, EyeOff, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 type DbDeposit = {
@@ -17,6 +17,7 @@ type DbDeposit = {
   created_at: string;
   paid_at: string | null;
   refunded_at: string | null;
+  is_hidden: boolean;
 };
 
 type DealMap = Record<string, { title: string }>;
@@ -30,13 +31,11 @@ const STATUS_META: Record<string, { label: string; cls: string }> = {
   failed: { label: "נכשל", cls: "bg-destructive/10 text-destructive" },
 };
 
-const STATUS_FILTERS: Array<{ key: string; label: string }> = [
+const VIEW_FILTERS: Array<{ key: string; label: string }> = [
+  { key: "active", label: "פעילים" },
+  { key: "refunded", label: "מוחזרים" },
+  { key: "hidden", label: "מוסתרים" },
   { key: "all", label: "הכול" },
-  { key: "pending", label: "ממתין" },
-  { key: "paid", label: "שולם" },
-  { key: "refunded", label: "הוחזר" },
-  { key: "cancelled", label: "בוטל" },
-  { key: "failed", label: "נכשל" },
 ];
 
 export default function AdminDeposits() {
