@@ -42,6 +42,7 @@ type DbNotificationRow = {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -52,7 +53,87 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return u;
   };
 
-  const logout = () => setUser(null);
+  const logout = async () => {
+    try { await supabase.auth.signOut(); } catch (e) { console.warn("[AppStore] signOut", e); }
+    setAdminSession(false);
+    setUser(null);
+    setNotifications([]);
+  };
+
+  // Hydrate user from existing Supabase session (with timeout + safe fallback)
+  useEffect(() => {
+    let cancelled = false;
+
+    const hydrate = async (uid: string, email: string) => {
+      try {
+        const [profileRes, rolesRes, supplierRes] = await Promise.all([
+          withTimeout(supabase.from("profiles").select("id,full_name,business_name,phone,email,project_id,user_type").eq("id", uid).maybeSingle(), "טעינת פרופיל", 8000),
+          withTimeout(supabase.from("user_roles").select("role").eq("user_id", uid), "טעינת הרשאות", 8000),
+          withTimeout(supabase.from("suppliers").select("id").eq("user_id", uid).maybeSingle(), "טעינת ספק", 8000),
+        ]);
+
+        const profile = profileRes.data as { full_name?: string | null; business_name?: string | null; phone?: string | null; email?: string | null; project_id?: string | null; user_type?: string | null } | null;
+        const roles = (rolesRes.data ?? []) as { role: string }[];
+        const supplierRow = supplierRes.data as { id?: string } | null;
+
+        let resolvedRole: Role = "resident";
+        if (isAdminEmail(email)) resolvedRole = "admin";
+        else if (roles.some((r) => r.role === "supplier")) resolvedRole = "supplier";
+        else if (profile?.user_type === "supplier") resolvedRole = "supplier";
+        else if (supplierRow?.id) resolvedRole = "supplier";
+
+        if (cancelled) return;
+        setUser({
+          id: uid,
+          role: resolvedRole,
+          name: profile?.full_name ?? profile?.business_name ?? email,
+          phone: profile?.phone ?? "",
+          email: profile?.email ?? email,
+          projectId: profile?.project_id ?? undefined,
+        });
+        if (resolvedRole === "admin") setAdminSession(true);
+      } catch (err) {
+        console.error("[AppStore] hydrate failed", err);
+        if (cancelled) return;
+        // Fallback: set a minimal user so UI isn't stuck and logout button works
+        setUser({
+          id: uid,
+          role: isAdminEmail(email) ? "admin" : "resident",
+          name: email,
+          phone: "",
+          email,
+        });
+      } finally {
+        if (!cancelled) setAuthReady(true);
+      }
+    };
+
+    void (async () => {
+      try {
+        const { data } = await withTimeout(supabase.auth.getSession(), "בדיקת התחברות", 6000);
+        const session = data.session;
+        if (!session) {
+          if (!cancelled) { setUser(null); setAuthReady(true); }
+          return;
+        }
+        await hydrate(session.user.id, session.user.email ?? "");
+      } catch (err) {
+        console.error("[AppStore] session check failed", err);
+        if (!cancelled) { setUser(null); setAuthReady(true); }
+      }
+    })();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        setUser(null);
+        setAdminSession(false);
+        setAuthReady(true);
+        return;
+      }
+      void hydrate(session.user.id, session.user.email ?? "");
+    });
+    return () => { cancelled = true; sub.subscription.unsubscribe(); };
+  }, []);
 
   // Load projects (active, not deleted) once on mount
   useEffect(() => {
