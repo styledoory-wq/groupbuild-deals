@@ -1,10 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Building2, Phone, Mail, History, Pencil, FileText, EyeOff, Eye } from "lucide-react";
+import { LogOut, Building2, Phone, Mail, History, Pencil, FileText, Eye, Trash2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -33,6 +37,9 @@ export default function ResidentProfile() {
   const [deals, setDeals] = useState<DealMap>({});
   const [showHidden, setShowHidden] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [swipeId, setSwipeId] = useState<string | null>(null);
+  const touchStartX = useRef<number>(0);
 
   const loadDeposits = useCallback(async (uid: string) => {
     const { data, error } = await supabase
@@ -157,7 +164,26 @@ export default function ResidentProfile() {
             ? new Date(dep.paid_at).toLocaleDateString("he-IL")
             : new Date(dep.created_at).toLocaleDateString("he-IL");
           return (
-            <div key={dep.id} className={"gb-card p-4 " + (dep.is_hidden ? "opacity-60" : "")}>
+            <div
+              key={dep.id}
+              className={"gb-card p-4 relative overflow-hidden transition-transform " + (dep.is_hidden ? "opacity-60" : "")}
+              style={swipeId === dep.id ? { transform: "translateX(-72px)" } : undefined}
+              onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+              onTouchEnd={(e) => {
+                const dx = e.changedTouches[0].clientX - touchStartX.current;
+                if (dx < -60) setSwipeId(dep.id);
+                else if (dx > 30) setSwipeId(null);
+              }}
+            >
+              {swipeId === dep.id && (
+                <button
+                  onClick={() => setConfirmDeleteId(dep.id)}
+                  className="absolute top-0 bottom-0 -left-16 w-16 bg-destructive text-destructive-foreground flex items-center justify-center"
+                  aria-label="מחק"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              )}
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-xl shrink-0">🛒</div>
                 <div className="flex-1 min-w-0">
@@ -171,13 +197,25 @@ export default function ResidentProfile() {
                   <div className={"text-xs font-bold px-2 py-1 rounded-full " + meta.cls}>{meta.label}</div>
                 </div>
               </div>
-              <button
-                onClick={() => toggleHidden(dep.id, dep.is_hidden)}
-                disabled={busyId === dep.id}
-                className="mt-2 w-full h-7 rounded-lg text-[11px] text-muted-foreground hover:text-primary hover:bg-muted/40 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50"
-              >
-                {dep.is_hidden ? <><Eye className="h-3 w-3" /> החזר לתצוגה</> : <><EyeOff className="h-3 w-3" /> הסתר מהתצוגה</>}
-              </button>
+              <div className="mt-2 flex items-center gap-2">
+                {dep.is_hidden ? (
+                  <button
+                    onClick={() => toggleHidden(dep.id, dep.is_hidden)}
+                    disabled={busyId === dep.id}
+                    className="flex-1 h-7 rounded-lg text-[11px] text-muted-foreground hover:text-primary hover:bg-muted/40 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50"
+                  >
+                    <Eye className="h-3 w-3" /> החזר לתצוגה
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setConfirmDeleteId(dep.id)}
+                    disabled={busyId === dep.id}
+                    className="flex-1 h-7 rounded-lg text-[11px] text-destructive hover:bg-destructive/10 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50"
+                  >
+                    <Trash2 className="h-3 w-3" /> מחק מההיסטוריה
+                  </button>
+                )}
+              </div>
             </div>
           );
         };
