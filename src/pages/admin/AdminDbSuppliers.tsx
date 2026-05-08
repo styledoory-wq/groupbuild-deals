@@ -689,6 +689,8 @@ export default function AdminDbSuppliers() {
           );
         })}
       </div>
+        );
+      })()}
 
       {/* Create dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
