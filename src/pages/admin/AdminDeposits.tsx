@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import { Wallet, Check, RefreshCw, Loader2, Search } from "lucide-react";
+import { Wallet, Check, RefreshCw, Loader2, Search, EyeOff, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 type DbDeposit = {
@@ -17,6 +17,7 @@ type DbDeposit = {
   created_at: string;
   paid_at: string | null;
   refunded_at: string | null;
+  is_hidden: boolean;
 };
 
 type DealMap = Record<string, { title: string }>;
@@ -30,13 +31,11 @@ const STATUS_META: Record<string, { label: string; cls: string }> = {
   failed: { label: "נכשל", cls: "bg-destructive/10 text-destructive" },
 };
 
-const STATUS_FILTERS: Array<{ key: string; label: string }> = [
+const VIEW_FILTERS: Array<{ key: string; label: string }> = [
+  { key: "active", label: "פעילים" },
+  { key: "refunded", label: "מוחזרים" },
+  { key: "hidden", label: "מוסתרים" },
   { key: "all", label: "הכול" },
-  { key: "pending", label: "ממתין" },
-  { key: "paid", label: "שולם" },
-  { key: "refunded", label: "הוחזר" },
-  { key: "cancelled", label: "בוטל" },
-  { key: "failed", label: "נכשל" },
 ];
 
 export default function AdminDeposits() {
@@ -45,7 +44,7 @@ export default function AdminDeposits() {
   const [profiles, setProfiles] = useState<ProfileMap>({});
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>("all");
+  const [view, setView] = useState<string>("active");
   const [query, setQuery] = useState("");
 
   const load = async () => {
@@ -53,7 +52,7 @@ export default function AdminDeposits() {
     try {
       const { data, error } = await supabase
         .from("deposits")
-        .select("id,user_id,deal_id,amount,status,payment_provider,created_at,paid_at,refunded_at")
+        .select("id,user_id,deal_id,amount,status,payment_provider,created_at,paid_at,refunded_at,is_hidden")
         .eq("is_deleted", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -107,23 +106,42 @@ export default function AdminDeposits() {
     }
   };
 
+  const toggleHidden = async (id: string, currentlyHidden: boolean) => {
+    setBusyId(id);
+    try {
+      const { error } = await supabase
+        .from("deposits")
+        .update({ is_hidden: !currentlyHidden })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success(currentlyHidden ? "הפיקדון הוחזר לתצוגה" : "הפיקדון הוסתר מהתצוגה");
+      await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "פעולה נכשלה");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return deposits.filter((d) => {
-      if (filter !== "all" && d.status !== filter) return false;
+      if (view === "active" && (d.is_hidden || d.status === "refunded" || d.status === "cancelled" || d.status === "failed")) return false;
+      if (view === "refunded" && (d.is_hidden || d.status !== "refunded")) return false;
+      if (view === "hidden" && !d.is_hidden) return false;
+      // "all" → no filter
       if (!q) return true;
       const dealTitle = (deals[d.deal_id]?.title ?? "").toLowerCase();
       const prof = profiles[d.user_id];
       const userBlob = `${prof?.name ?? ""} ${prof?.email ?? ""} ${prof?.phone ?? ""}`.toLowerCase();
       return dealTitle.includes(q) || userBlob.includes(q) || d.id.includes(q);
     });
-  }, [deposits, deals, profiles, filter, query]);
+  }, [deposits, deals, profiles, view, query]);
 
-  // Counts shown ignore terminal states (refunded/cancelled/failed)
   const activeTotal = deposits
-    .filter((d) => d.status === "pending" || d.status === "paid")
+    .filter((d) => !d.is_hidden && (d.status === "pending" || d.status === "paid"))
     .reduce((s, d) => s + Number(d.amount || 0), 0);
-  const activeCount = deposits.filter((d) => d.status === "pending" || d.status === "paid").length;
+  const activeCount = deposits.filter((d) => !d.is_hidden && (d.status === "pending" || d.status === "paid")).length;
 
   return (
     <MobileShell>
@@ -141,13 +159,13 @@ export default function AdminDeposits() {
             />
           </div>
           <div className="flex flex-wrap gap-1.5 mt-3">
-            {STATUS_FILTERS.map((f) => (
+            {VIEW_FILTERS.map((f) => (
               <button
                 key={f.key}
-                onClick={() => setFilter(f.key)}
+                onClick={() => setView(f.key)}
                 className={
                   "px-3 h-7 rounded-full text-[11px] font-bold transition-smooth " +
-                  (filter === f.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70")
+                  (view === f.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70")
                 }
               >
                 {f.label}
@@ -232,6 +250,15 @@ export default function AdminDeposits() {
                       </button>
                     </div>
                   )}
+                  <div className="mt-2 pt-2 border-t border-dashed border-border/60">
+                    <button
+                      onClick={() => toggleHidden(dep.id, dep.is_hidden)}
+                      disabled={busyId === dep.id}
+                      className="w-full h-8 rounded-lg text-[11px] text-muted-foreground hover:text-primary hover:bg-muted/40 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50"
+                    >
+                      {dep.is_hidden ? <><Eye className="h-3 w-3" /> החזר לתצוגה</> : <><EyeOff className="h-3 w-3" /> הסתר מהתצוגה</>}
+                    </button>
+                  </div>
                 </div>
               );
             })}
