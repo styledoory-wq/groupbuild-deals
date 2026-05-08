@@ -33,8 +33,8 @@ export function BottomNav({ role }: { role: Role }) {
       dir="rtl"
       className="fixed bottom-0 inset-x-0 z-40 flex justify-center pointer-events-none"
     >
-      <div className="pointer-events-auto w-full max-w-[480px] px-3 pb-3 safe-bottom">
-        <div className="bg-card/80 backdrop-blur-xl border border-white/40 shadow-[0_12px_40px_-12px_hsl(217_56%_13%_/_0.25)] rounded-3xl px-1.5 py-1.5 flex items-center justify-between ring-1 ring-gold/10">
+      <div className="pointer-events-auto w-full max-w-[440px] px-3 pb-3 safe-bottom">
+        <div className="gb-dock rounded-[28px] px-2 py-2 flex items-center justify-between">
           {items[role].map(({ to, label, icon: Icon }) => {
             const active = location.pathname === to || (to !== `/${role}` && location.pathname.startsWith(to));
             return (
@@ -42,12 +42,24 @@ export function BottomNav({ role }: { role: Role }) {
                 key={to}
                 to={to}
                 className={cn(
-                  "flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl transition-smooth relative",
-                  active ? "text-primary bg-gradient-to-b from-gold/15 to-transparent" : "text-muted-foreground hover:text-foreground"
+                  "flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl transition-all duration-300 relative group",
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Icon className={cn("h-[18px] w-[18px]", active && "text-gold drop-shadow-[0_0_6px_hsl(44_53%_54%_/_0.5)]")} strokeWidth={active ? 2.25 : 1.75} />
-                <span className={cn("text-[10px] leading-none", active ? "font-bold" : "font-normal")}>{label}</span>
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-1.5 inset-y-1 rounded-2xl bg-gradient-to-b from-gold/25 via-gold/10 to-transparent ring-1 ring-gold/40 shadow-[0_8px_20px_-8px_hsl(44_53%_54%_/_0.45)]"
+                  />
+                )}
+                <Icon
+                  className={cn(
+                    "h-[19px] w-[19px] relative transition-transform duration-300",
+                    active && "text-gold drop-shadow-[0_0_8px_hsl(44_53%_54%_/_0.6)] scale-110"
+                  )}
+                  strokeWidth={active ? 2.4 : 1.75}
+                />
+                <span className={cn("text-[10px] leading-none relative", active ? "font-bold" : "font-normal")}>{label}</span>
               </NavLink>
             );
           })}
