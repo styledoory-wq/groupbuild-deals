@@ -121,6 +121,71 @@
   /* Hide scrollbar but keep scroll for category strip */
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Premium hero with layered glow */
+  .gb-hero-premium {
+    background:
+      radial-gradient(120% 80% at 90% 0%, hsl(44 53% 54% / 0.18) 0%, transparent 55%),
+      radial-gradient(100% 70% at 0% 100%, hsl(217 80% 40% / 0.25) 0%, transparent 55%),
+      var(--gradient-hero);
+    @apply text-primary-foreground relative overflow-hidden;
+  }
+
+  /* Frosted glass card on dark backgrounds */
+  .gb-glass {
+    background: linear-gradient(180deg, hsl(0 0% 100% / 0.10), hsl(0 0% 100% / 0.04));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    @apply rounded-2xl border border-white/15;
+  }
+
+  /* Premium pricing card */
+  .gb-card-premium {
+    @apply rounded-3xl border border-border bg-card relative overflow-hidden;
+    box-shadow: var(--shadow-elevated), 0 0 0 1px hsl(44 53% 54% / 0.08);
+  }
+  .gb-card-premium::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(80% 60% at 100% 0%, hsl(44 53% 54% / 0.08), transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Live pulsing dot */
+  .gb-live-dot {
+    @apply relative inline-flex h-2 w-2 rounded-full bg-success;
+  }
+  .gb-live-dot::after {
+    content: "";
+    position: absolute; inset: 0; border-radius: 9999px;
+    background: hsl(var(--success));
+    animation: gb-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+    opacity: 0.7;
+  }
+
+  /* Subtle floating animation */
+  .gb-float-shadow {
+    box-shadow: 0 24px 48px -24px hsl(217 56% 13% / 0.35);
+  }
+}
+
+@keyframes gb-ping {
+  0% { transform: scale(1); opacity: 0.7; }
+  75%, 100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes gb-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.gb-shimmer {
+  background: linear-gradient(90deg,
+    hsl(44 53% 54% / 0) 0%,
+    hsl(44 73% 66% / 0.45) 50%,
+    hsl(44 53% 54% / 0) 100%);
+  background-size: 200% 100%;
+  animation: gb-shimmer 2.4s linear infinite;
 }
 
 @layer utilities {
