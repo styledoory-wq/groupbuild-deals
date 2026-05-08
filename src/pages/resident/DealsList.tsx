@@ -106,13 +106,6 @@ export default function DealsList() {
 
         {!loading && !error && deals.length === 0 && (
           <div className="gb-card p-8 text-center md:col-span-2 lg:col-span-3">
-            <p className="text-sm font-bold text-foreground">שגיאה בטעינה</p>
-            <p className="text-xs text-muted-foreground mt-1">{error}</p>
-          </div>
-        )}
-
-        {!loading && !error && deals.length === 0 && (
-          <div className="gb-card p-8 text-center">
             <Tag className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
             <p className="text-muted-foreground text-sm">אין עדיין עסקאות פעילות{cat ? ` בקטגוריה ${cat.name}` : ""}.</p>
           </div>
