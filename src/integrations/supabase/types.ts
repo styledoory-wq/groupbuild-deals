@@ -297,6 +297,33 @@ export type Database = {
         }
         Relationships: []
       }
+      deposit_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          deposit_id: string
+          id: string
+          metadata: Json
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          deposit_id: string
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          deposit_id?: string
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       deposits: {
         Row: {
           amount: number
@@ -304,9 +331,12 @@ export type Database = {
           currency: string
           deal_id: string
           deleted_at: string | null
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           is_deleted: boolean
           is_demo: boolean
+          is_hidden: boolean
           metadata: Json | null
           paid_at: string | null
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
@@ -322,9 +352,12 @@ export type Database = {
           currency?: string
           deal_id: string
           deleted_at?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           is_deleted?: boolean
           is_demo?: boolean
+          is_hidden?: boolean
           metadata?: Json | null
           paid_at?: string | null
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
@@ -340,9 +373,12 @@ export type Database = {
           currency?: string
           deal_id?: string
           deleted_at?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           is_deleted?: boolean
           is_demo?: boolean
+          is_hidden?: boolean
           metadata?: Json | null
           paid_at?: string | null
           payment_provider?: Database["public"]["Enums"]["payment_provider_enum"]
@@ -902,9 +938,12 @@ export type Database = {
       suppliers: {
         Row: {
           approval_status: string
+          billing_notes: string | null
+          billing_status: string
           business_name: string
           catalog_url: string | null
           categories: string[]
+          commission_percent: number
           contact_name: string | null
           created_at: string
           deleted_at: string | null
@@ -917,6 +956,7 @@ export type Database = {
           is_deleted: boolean
           is_demo: boolean
           logo_url: string | null
+          monthly_subscription: number
           phone: string | null
           serves_all_country: boolean
           service_areas: string[]
@@ -928,9 +968,12 @@ export type Database = {
         }
         Insert: {
           approval_status?: string
+          billing_notes?: string | null
+          billing_status?: string
           business_name: string
           catalog_url?: string | null
           categories?: string[]
+          commission_percent?: number
           contact_name?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -943,6 +986,7 @@ export type Database = {
           is_deleted?: boolean
           is_demo?: boolean
           logo_url?: string | null
+          monthly_subscription?: number
           phone?: string | null
           serves_all_country?: boolean
           service_areas?: string[]
@@ -954,9 +998,12 @@ export type Database = {
         }
         Update: {
           approval_status?: string
+          billing_notes?: string | null
+          billing_status?: string
           business_name?: string
           catalog_url?: string | null
           categories?: string[]
+          commission_percent?: number
           contact_name?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -969,6 +1016,7 @@ export type Database = {
           is_deleted?: boolean
           is_demo?: boolean
           logo_url?: string | null
+          monthly_subscription?: number
           phone?: string | null
           serves_all_country?: boolean
           service_areas?: string[]
