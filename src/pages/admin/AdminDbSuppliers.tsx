@@ -1063,6 +1063,52 @@ export default function AdminDbSuppliers() {
                 </select>
               </div>
 
+              <div className="pt-2 border-t space-y-2">
+                <Label className="text-sm font-bold">חיוב ועמלות</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">עמלה (%)</Label>
+                    <Input
+                      type="number" min="0" max="100" step="0.1"
+                      value={editForm.commission_percent}
+                      onChange={(e) => setEditForm({ ...editForm, commission_percent: e.target.value })}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">מנוי חודשי (₪)</Label>
+                    <Input
+                      type="number" min="0" step="1"
+                      value={editForm.monthly_subscription}
+                      onChange={(e) => setEditForm({ ...editForm, monthly_subscription: e.target.value })}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs">סטטוס חיוב</Label>
+                  <select
+                    value={editForm.billing_status}
+                    onChange={(e) => setEditForm({ ...editForm, billing_status: e.target.value as NewForm["billing_status"] })}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="none">ללא</option>
+                    <option value="trial">תקופת ניסיון</option>
+                    <option value="active">פעיל</option>
+                    <option value="suspended">מושהה</option>
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-xs">הערות חיוב</Label>
+                  <Textarea
+                    rows={2}
+                    value={editForm.billing_notes}
+                    onChange={(e) => setEditForm({ ...editForm, billing_notes: e.target.value })}
+                    placeholder="הערות פנימיות לאדמין"
+                  />
+                </div>
+              </div>
+
               <p className="text-[11px] text-muted-foreground pt-2 border-t">
                 💡 לניהול גלריית תמונות, סגרו את החלון ובחרו "מדיה" בכרטיס הספק.
               </p>
