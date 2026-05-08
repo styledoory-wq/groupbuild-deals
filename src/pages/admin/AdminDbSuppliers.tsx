@@ -647,6 +647,13 @@ export default function AdminDbSuppliers() {
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
+              {(Number(r.commission_percent ?? 0) > 0 || Number(r.monthly_subscription ?? 0) > 0 || (r.billing_status && r.billing_status !== "none")) && (
+                <div className="rounded-xl bg-gold/5 border border-gold/20 px-3 py-2 text-[11px] flex flex-wrap gap-x-3 gap-y-1">
+                  <span><b className="text-primary">עמלה:</b> {Number(r.commission_percent ?? 0)}%</span>
+                  <span><b className="text-primary">מנוי:</b> ₪{Number(r.monthly_subscription ?? 0)}</span>
+                  <span><b className="text-primary">חיוב:</b> {r.billing_status ?? "none"}</span>
+                </div>
+              )}
               <button
                 onClick={() => openEdit(r.id)}
                 className="w-full h-10 rounded-xl bg-gradient-gold text-primary text-sm font-bold flex items-center justify-center gap-1.5 shadow-gold"
