@@ -159,7 +159,7 @@ export default function AdminSettings() {
               placeholder="test@example.co.il"
             />
             <p className="text-[11px] text-muted-foreground mt-1.5">
-              נשלח דרך Resend מ-notifications@groupbuild.co.il
+              נשלח דרך Resend מ-onboarding@resend.dev (זמני עד אימות הדומיין)
             </p>
           </div>
           <Button
