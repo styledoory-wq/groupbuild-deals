@@ -458,8 +458,18 @@ export default function DealDetail() {
 
   return (
     <MobileShell>
-      {/* HERO — premium gradient with glow & live badges */}
-      <div className="gb-hero-premium px-5 pt-6 pb-12 rounded-b-[36px]">
+      {/* HERO — premium gradient with glow & live badges (cover image overlay if present) */}
+      <div className="gb-hero-premium relative px-5 pt-6 pb-12 rounded-b-[36px] overflow-hidden">
+        {deal.cover_image_url && (
+          <>
+            <img
+              src={deal.cover_image_url}
+              alt={deal.title}
+              className="absolute inset-0 w-full h-full object-cover opacity-35"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/85 to-primary" />
+          </>
+        )}
         <div className="absolute -top-16 -left-16 h-56 w-56 rounded-full bg-gold/15 blur-3xl pointer-events-none" />
         <div className="absolute top-10 -right-10 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl pointer-events-none" />
 
