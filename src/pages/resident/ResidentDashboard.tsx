@@ -175,14 +175,31 @@ export default function ResidentDashboard() {
 
   return (
     <MobileShell>
-      {/* Hero */}
-      <header className="bg-gradient-hero text-primary-foreground px-5 pt-8 pb-14 rounded-b-[28px] relative overflow-hidden">
-        <div className="absolute -top-16 -left-16 h-48 w-48 rounded-full bg-gold/10 blur-3xl" />
-        <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-gold/5 blur-3xl" />
-        <div className="flex items-center justify-between mb-6 relative">
+      {/* Cinematic hero */}
+      <header className="gb-aurora text-primary-foreground px-5 pt-8 pb-16 rounded-b-[32px] relative overflow-hidden">
+        <span aria-hidden className="gb-particle gb-particle-1 h-1 w-1 top-20 left-12" />
+        <span aria-hidden className="gb-particle gb-particle-2 h-1.5 w-1.5 top-32 right-16" />
+        <span aria-hidden className="gb-particle gb-particle-3 h-1 w-1 top-12 right-1/3" />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{
+            backgroundImage: "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+            maskImage: "radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)",
+            WebkitMaskImage: "radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)",
+          }}
+        />
+
+        <div className="flex items-center justify-between mb-7 relative">
           <div className="min-w-0">
-            <p className="text-primary-foreground/55 text-[11px] uppercase tracking-wider">שלום</p>
-            <h1 className="text-[24px] font-semibold mt-0.5 tracking-tight truncate">{user?.name || "דייר"}</h1>
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="gb-live-dot" />
+              <p className="text-primary-foreground/60 text-[10px] uppercase tracking-[0.18em] font-medium">פלטפורמה פעילה</p>
+            </div>
+            <h1 className="text-[26px] font-extrabold leading-tight tracking-tight truncate">
+              שלום, <span className="gb-text-gold">{user?.name?.split(" ")[0] || "דייר"}</span>
+            </h1>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -191,15 +208,14 @@ export default function ResidentDashboard() {
                 toast.success("התנתקת");
                 navigate("/", { replace: true });
               }}
-              className="h-11 w-11 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-primary-foreground transition-smooth hover:bg-white/15"
+              className="h-10 w-10 rounded-full bg-white/[0.08] border border-white/15 flex items-center justify-center transition-smooth hover:bg-white/15 backdrop-blur"
               aria-label="התנתקות"
-              title="התנתקות"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" strokeWidth={1.75} />
             </button>
             <button
               onClick={() => navigate("/resident/profile")}
-              className="h-11 w-11 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-primary-foreground font-semibold transition-smooth hover:bg-white/15"
+              className="h-10 w-10 rounded-full bg-gradient-to-br from-gold/30 to-gold/10 border border-gold/40 flex items-center justify-center font-bold text-sm transition-smooth hover:from-gold/40 backdrop-blur"
               aria-label="פרופיל"
             >
               {user?.name?.charAt(0) || "ד"}
@@ -207,85 +223,66 @@ export default function ResidentDashboard() {
           </div>
         </div>
 
-        {/* Area chip + Primary CTA */}
         <div className="relative space-y-3">
           <button
             onClick={() => navigate("/resident/profile/edit")}
-            className="w-full bg-white/[0.06] backdrop-blur border border-white/10 rounded-2xl px-4 py-3 text-right hover:bg-white/[0.10] transition-smooth flex items-center justify-between"
+            className="w-full bg-white/[0.06] backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3 text-right hover:bg-white/[0.10] transition-smooth flex items-center justify-between"
           >
             <div>
-              <div className="flex items-center gap-1.5 text-[10px] text-gold uppercase tracking-wider mb-0.5">
-                <MapPin className="h-3 w-3" strokeWidth={1.75} />
+              <div className="flex items-center gap-1.5 text-[10px] gb-text-gold uppercase tracking-[0.15em] mb-0.5 font-bold">
+                <MapPin className="h-3 w-3" strokeWidth={2} />
                 <span>האזור שלך</span>
               </div>
               <div className="font-semibold text-[15px]">{areaLabel || "הגדר אזור"}</div>
             </div>
-            <ChevronLeft className="h-4 w-4 text-gold" strokeWidth={1.75} />
+            <ChevronLeft className="h-4 w-4 text-gold" strokeWidth={2} />
           </button>
 
           <button
             onClick={() => navigate("/resident/categories")}
-            className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold flex items-center justify-center gap-2"
+            className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold gb-pulse-glow flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform"
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-4 w-4" strokeWidth={2.5} />
             מצא ספקים באזור שלי
           </button>
         </div>
-      </header>
 
-      {/* Status card */}
-      <div className="px-5 -mt-7 relative z-10 mb-5">
-        {error && (
-          <div className="gb-card p-4 mb-3 border-destructive/30 bg-destructive/10 text-sm text-destructive leading-relaxed">
-            {error}
+        <div className="grid grid-cols-3 gap-2 mt-5 relative">
+          <div className="gb-stat-pill">
+            <div className="text-[18px] font-extrabold leading-none">{areaDeals.length}</div>
+            <div className="text-[9px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצעות</div>
           </div>
-        )}
-        <div className="gb-card overflow-hidden">
-          <div className="px-5 py-4 bg-gradient-to-l from-card via-card to-gold/5 border-b border-border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">הסטטוס שלך</p>
-                <p className="text-[13px] font-semibold text-primary mt-0.5">
-                  {joinedDeals.length > 0
-                    ? `הצטרפת ל-${joinedDeals.length} ${joinedDeals.length === 1 ? "הצעה" : "הצעות"}`
-                    : "עדיין לא הצטרפת להצעות"}
-                </p>
-              </div>
-              <div className="h-10 w-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center">
-                <Heart className="h-[18px] w-[18px] text-gold" strokeWidth={2} />
-              </div>
-            </div>
+          <div className="gb-stat-pill">
+            <div className="text-[18px] font-extrabold leading-none">{areaSuppliersCount}</div>
+            <div className="text-[9px] text-primary-foreground/65 mt-1 uppercase tracking-wider">ספקים</div>
           </div>
-          <div className="grid grid-cols-3 divide-x divide-x-reverse divide-border">
-            <div className="px-3 py-3 text-center">
-              <div className="text-[20px] font-semibold text-primary leading-none">{areaDeals.length}</div>
-              <div className="text-[10px] text-muted-foreground mt-1.5">הצעות באזור</div>
-            </div>
-            <div className="px-3 py-3 text-center">
-              <div className="text-[20px] font-semibold text-primary leading-none">{areaSuppliersCount}</div>
-              <div className="text-[10px] text-muted-foreground mt-1.5">ספקים זמינים</div>
-            </div>
-            <div className="px-3 py-3 text-center">
-              <div className="text-[20px] font-semibold gb-gold-text leading-none">{joinedDeals.length}</div>
-              <div className="text-[10px] text-muted-foreground mt-1.5">הצטרפת</div>
-            </div>
+          <div className="gb-stat-pill">
+            <div className="text-[18px] font-extrabold leading-none gb-text-gold">{joinedDeals.length}</div>
+            <div className="text-[9px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצטרפת</div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* My joined offers — compact horizontal scroll */}
+      {error && (
+        <div className="px-5 mt-4">
+          <div className="gb-card p-4 border-destructive/30 bg-destructive/10 text-sm text-destructive leading-relaxed">
+            {error}
+          </div>
+        </div>
+      )}
+
       {joinedDeals.length > 0 && (
-        <section className="mb-6">
-          <div className="flex items-center justify-between px-5 mb-2">
-            <h2 className="text-[14px] font-semibold text-foreground flex items-center gap-1.5">
-              <Heart className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
+        <section className="mt-7 mb-7">
+          <div className="flex items-center justify-between px-5 mb-3">
+            <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+              <Heart className="h-3.5 w-3.5 text-gold fill-gold" strokeWidth={2} />
               ההצעות שלך
             </h2>
-            <Link to="/resident/my-offers" className="text-[11px] gb-gold-text font-semibold flex items-center gap-1">
-              הכל <ArrowLeft className="h-3 w-3" strokeWidth={2} />
+            <Link to="/resident/my-offers" className="text-[11px] gb-gold-text font-bold flex items-center gap-1 hover:gap-1.5 transition-all">
+              הכל <ArrowLeft className="h-3 w-3" strokeWidth={2.5} />
             </Link>
           </div>
-          <div className="flex gap-3 overflow-x-auto px-5 pb-1 snap-x snap-mandatory no-scrollbar">
+          <div className="flex gap-3 overflow-x-auto px-5 pb-2 snap-x snap-mandatory no-scrollbar">
             {joinedDeals.slice(0, 5).map((d) => (
               <div key={d.id} className="snap-start shrink-0 w-[78%]">
                 <RealDealCard deal={d} />
@@ -295,15 +292,14 @@ export default function ResidentDashboard() {
         </section>
       )}
 
-      {/* Recommended deals — only 2, full width */}
-      <section className="px-5 space-y-3 mb-6">
+      <section className="px-5 space-y-3 mt-7 mb-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-[14px] font-semibold text-foreground flex items-center gap-1.5">
+          <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
             <Sparkles className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
             הצעות מומלצות
           </h2>
-          <Link to="/resident/deals" className="text-[11px] gb-gold-text font-semibold flex items-center gap-1">
-            ראה הכל <ArrowLeft className="h-3 w-3" strokeWidth={2} />
+          <Link to="/resident/deals" className="text-[11px] gb-gold-text font-bold flex items-center gap-1 hover:gap-1.5 transition-all">
+            הכל <ArrowLeft className="h-3 w-3" strokeWidth={2.5} />
           </Link>
         </div>
 
@@ -312,28 +308,31 @@ export default function ResidentDashboard() {
         ) : !hasArea ? (
           <button
             onClick={() => navigate("/resident/profile/edit")}
-            className="w-full gb-card p-5 text-right hover:border-gold/40 transition-smooth"
+            className="w-full gb-tile-dark p-5 text-right group"
           >
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center shrink-0">
-                <MapPin className="h-4 w-4 text-gold" />
+            <div className="flex items-start gap-3 relative">
+              <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-gold/30 to-gold/10 border border-gold/40 flex items-center justify-center shrink-0 shadow-[0_0_16px_hsl(44_53%_54%_/_0.3)]">
+                <MapPin className="h-[18px] w-[18px] text-gold" strokeWidth={2} />
               </div>
               <div className="flex-1">
-                <p className="text-[13px] font-semibold text-foreground">הגדירו את האזור שלכם</p>
-                <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                <p className="text-[14px] font-bold">הגדירו את האזור שלכם</p>
+                <p className="text-[11px] text-primary-foreground/65 mt-1 leading-relaxed">
                   כדי שנציג לכם הצעות מותאמות מהספקים שמשרתים את האזור.
                 </p>
               </div>
-              <ChevronLeft className="h-4 w-4 text-gold mt-1" />
+              <ChevronLeft className="h-4 w-4 text-gold mt-1 group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
             </div>
           </button>
         ) : noAreaDeals ? (
-          <div className="gb-card p-5 text-center">
-            <p className="text-[13px] font-semibold text-foreground">אין כרגע הצעות פעילות באזור שלך</p>
+          <div className="gb-card p-6 text-center">
+            <div className="h-12 w-12 mx-auto rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 border border-gold/25 flex items-center justify-center mb-3">
+              <Tag className="h-5 w-5 text-gold" strokeWidth={2} />
+            </div>
+            <p className="text-[13px] font-bold text-foreground">אין כרגע הצעות פעילות באזור שלך</p>
             <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
               נעדכן אותך כשיתווספו הצעות חדשות באזור {areaLabel}.
             </p>
-            <Link to="/resident/categories" className="inline-block mt-3 text-[11px] gb-gold-text font-semibold">
+            <Link to="/resident/categories" className="inline-block mt-3 text-[11px] gb-gold-text font-bold">
               עיין בקטגוריות →
             </Link>
           </div>
@@ -345,33 +344,38 @@ export default function ResidentDashboard() {
         )}
       </section>
 
-      {/* Construction stages — top-level only */}
-      <section className="px-5 pb-6">
+      <section className="px-5 pb-8">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[14px] font-semibold text-foreground">שלבי בנייה</h2>
-          <span className="text-[11px] text-muted-foreground">בחרו שלב לראות תחומים</span>
+          <h2 className="text-[13px] font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Compass className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
+            שלבי בנייה
+          </h2>
+          <span className="text-[10px] text-muted-foreground">בחרו שלב</span>
         </div>
 
         <div className="space-y-2.5">
-          {STAGES.map((s, idx) => (
-            <button
-              key={s.id}
-              onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
-              className="w-full gb-card p-4 text-right flex items-center gap-3 hover:border-gold/40 hover:shadow-elevated transition-smooth group"
-            >
-              <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-2xl shadow-soft border border-gold/20 shrink-0">
-                {s.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[10px] font-bold gb-gold-text">שלב {idx + 1}</span>
+          {STAGES.map((s, idx) => {
+            const Icon = s.icon;
+            return (
+              <button
+                key={s.id}
+                onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
+                className="w-full gb-tile-dark p-4 text-right flex items-center gap-3 group"
+              >
+                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-gold/25 to-gold/5 border border-gold/30 flex items-center justify-center shrink-0 shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.15)]">
+                  <Icon className="h-5 w-5 text-gold" strokeWidth={1.75} />
                 </div>
-                <h3 className="text-[14px] font-bold text-foreground leading-tight">{s.title}</h3>
-                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{s.desc}</p>
-              </div>
-              <ChevronLeft className="h-4 w-4 text-gold opacity-50 group-hover:opacity-100 transition-smooth shrink-0" />
-            </button>
-          ))}
+                <div className="flex-1 min-w-0 relative">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[9px] font-bold gb-text-gold uppercase tracking-[0.15em]">שלב {idx + 1}</span>
+                  </div>
+                  <h3 className="text-[14px] font-bold leading-tight">{s.title}</h3>
+                  <p className="text-[11px] text-primary-foreground/55 mt-0.5 truncate">{s.desc}</p>
+                </div>
+                <ChevronLeft className="h-4 w-4 text-gold opacity-50 group-hover:opacity-100 group-hover:-translate-x-1 transition-all shrink-0" strokeWidth={2} />
+              </button>
+            );
+          })}
         </div>
       </section>
 
