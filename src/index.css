@@ -276,7 +276,6 @@
 .gb-particle-1 { animation: gb-particle-float 8s ease-in-out infinite; }
 .gb-particle-2 { animation: gb-particle-float 10s ease-in-out infinite 1.5s; }
 .gb-particle-3 { animation: gb-particle-float 12s ease-in-out infinite 3s; }
-}
 
 @keyframes gb-float {
   0%, 100% { transform: translateY(0); }
