@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const FROM = "GroupBuild <notifications@groupbuild.co.il>";
+const FROM = "GroupBuild <onboarding@resend.dev>";
 const BRAND_NAVY = "#0E2A47";
 const BRAND_GOLD = "#C9A24B";
 
