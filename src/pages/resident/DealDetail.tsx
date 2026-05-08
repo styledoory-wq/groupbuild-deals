@@ -524,6 +524,27 @@ export default function DealDetail() {
         </div>
       </div>
 
+      {/* GALLERY — premium scroll strip */}
+      {Array.isArray(deal.gallery_images) && deal.gallery_images.length > 0 && (
+        <div className="px-5 mt-4">
+          <h2 className="text-[12px] font-extrabold text-foreground mb-2">גלריה</h2>
+          <div className="flex gap-2 overflow-x-auto -mx-5 px-5 pb-1 snap-x snap-mandatory">
+            {deal.gallery_images.map((url, i) => (
+              <a
+                key={url + i}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative shrink-0 w-40 h-28 rounded-2xl overflow-hidden border border-border snap-start group"
+              >
+                <img src={url} alt={`gallery-${i}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* PRICING — big number, savings, FOMO */}
       <div className="px-5 -mt-8 relative z-10 mb-4">
         <div className="gb-card-premium p-5 gb-float-shadow">
