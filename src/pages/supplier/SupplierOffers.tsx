@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
+import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck, Pencil } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -193,8 +193,16 @@ export default function SupplierOffers() {
                   </div>
                 )}
 
-                <div className="text-left text-[10px] text-muted-foreground mt-2">
-                  {new Date(d.created_at).toLocaleDateString("he-IL")}
+                <div className="flex items-center justify-between mt-3 pt-2 border-t border-border">
+                  <Link
+                    to={`/supplier/offers/${d.id}/marketing`}
+                    className="inline-flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-xl bg-gold/10 text-primary border border-gold/30 hover:bg-gold/20 transition-smooth"
+                  >
+                    <Pencil className="h-3.5 w-3.5" /> עריכה שיווקית
+                  </Link>
+                  <div className="text-[10px] text-muted-foreground">
+                    {new Date(d.created_at).toLocaleDateString("he-IL")}
+                  </div>
                 </div>
               </div>
             </div>
