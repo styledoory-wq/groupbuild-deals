@@ -65,8 +65,8 @@ export function RealDealCard({ deal }: { deal: RealDealCardData }) {
   const isHot = recentJoiners >= 5 || (left && left.includes("שעות"));
 
   // Progress: minTier participants → maxTier
-  const minTier = tiers[0]?.min_quantity ?? 0;
-  const maxTier = tiers[tiers.length - 1]?.min_quantity ?? Math.max(minTier + 1, 10);
+  const minTier = tiers[0]?.minParticipants ?? 0;
+  const maxTier = tiers[tiers.length - 1]?.minParticipants ?? Math.max(minTier + 1, 10);
   const progressPct = Math.min(100, Math.max(8, Math.round((recentJoiners / Math.max(1, maxTier)) * 100)));
 
   return (
