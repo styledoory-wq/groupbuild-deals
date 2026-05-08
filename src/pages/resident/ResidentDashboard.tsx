@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search, LogOut } from "lucide-react";
+import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search, LogOut, Compass, Hammer, Plug, Palette, Trees, PencilRuler, Tag } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
@@ -13,13 +13,12 @@ interface DbDeal extends RealDealCardData {
   is_demo?: boolean | null;
 }
 
-// Top-level construction stages — clicking opens the stage's categories
-const STAGES: { id: string; title: string; icon: string; desc: string }[] = [
-  { id: "planning", title: "תכנון ועיצוב", icon: "📐", desc: "אדריכלות, עיצוב פנים, יועצים" },
-  { id: "structure", title: "שלד ובנייה", icon: "🏗️", desc: "קבלן ראשי, שלד, גבס" },
-  { id: "systems", title: "מערכות הבית", icon: "⚡", desc: "חשמל, אינסטלציה, מיזוג, חכם" },
-  { id: "finishes", title: "גמרים", icon: "🎨", desc: "ריצוף, צבע, מטבח, אמבט, נגרות" },
-  { id: "outdoor", title: "חוץ ופיתוח", icon: "🌿", desc: "גינון, פרגולות, ניקיון לאחר בנייה" },
+const STAGES: { id: string; title: string; icon: typeof Compass; desc: string }[] = [
+  { id: "planning", title: "תכנון ועיצוב", icon: PencilRuler, desc: "אדריכלות, עיצוב פנים, יועצים" },
+  { id: "structure", title: "שלד ובנייה", icon: Hammer, desc: "קבלן ראשי, שלד, גבס" },
+  { id: "systems", title: "מערכות הבית", icon: Plug, desc: "חשמל, אינסטלציה, מיזוג" },
+  { id: "finishes", title: "גמרים", icon: Palette, desc: "ריצוף, צבע, מטבח, נגרות" },
+  { id: "outdoor", title: "חוץ ופיתוח", icon: Trees, desc: "גינון, פרגולות, ניקיון" },
 ];
 
 export default function ResidentDashboard() {
