@@ -187,6 +187,10 @@ export default function AdminDbSuppliers() {
         approval_status: (s.approval_status as NewForm["approval_status"]) ?? "pending",
         is_active: !!s.is_active,
         categoryIds: s.categories ?? [],
+        commission_percent: s.commission_percent != null ? String(s.commission_percent) : "",
+        monthly_subscription: s.monthly_subscription != null ? String(s.monthly_subscription) : "",
+        billing_status: ((s.billing_status as NewForm["billing_status"]) ?? "none"),
+        billing_notes: s.billing_notes ?? "",
       });
       setEditPrevApproval((s.approval_status as string) ?? "pending");
       setEditAreas({
@@ -238,6 +242,10 @@ export default function AdminDbSuppliers() {
           approval_status: editForm.approval_status,
           is_active: editForm.is_active,
           categories: editForm.categoryIds,
+          commission_percent: editForm.commission_percent.trim() === "" ? 0 : Number(editForm.commission_percent),
+          monthly_subscription: editForm.monthly_subscription.trim() === "" ? 0 : Number(editForm.monthly_subscription),
+          billing_status: editForm.billing_status,
+          billing_notes: editForm.billing_notes.trim() || null,
         })
         .eq("id", editId);
       if (error) throw error;
@@ -317,7 +325,7 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories,commission_percent,monthly_subscription,billing_status,billing_notes")
       .order("business_name");
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
