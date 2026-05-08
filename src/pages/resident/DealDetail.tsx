@@ -925,7 +925,7 @@ export default function DealDetail() {
                   <div className="font-bold text-foreground">הצטרפות מותנית</div>
                   <div className="text-muted-foreground">
                     אני מצטרף רק אם המדרגה הנוכחית
-                    {activeTier ? ` (${describeTier({ offer_type: offerType }, activeTier)})` : ""}
+                    {activeTier ? ` (${describeTier(offerType, activeTier)})` : ""}
                     {" "}נשמרת או עולה. אם תרד — אעבור ל״ממתין לאישור מחדש״.
                   </div>
                 </div>
