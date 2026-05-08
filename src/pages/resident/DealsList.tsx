@@ -94,18 +94,18 @@ export default function DealsList() {
         title={cat ? `${cat.icon}  ${cat.name}` : "כל העסקאות"}
         subtitle={loading ? "טוען עסקאות..." : `${deals.length} עסקאות פעילות`}
       />
-      <div className="px-5 -mt-4 relative z-10 space-y-3">
+      <div className="px-5 md:px-8 lg:px-10 -mt-4 md:-mt-8 relative z-10 space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
         {loading && <DealCardSkeletonList count={4} />}
 
         {!loading && error && (
-          <div className="gb-card p-6 text-center">
+          <div className="gb-card p-6 text-center md:col-span-2 lg:col-span-3">
             <p className="text-sm font-bold text-foreground">שגיאה בטעינה</p>
             <p className="text-xs text-muted-foreground mt-1">{error}</p>
           </div>
         )}
 
         {!loading && !error && deals.length === 0 && (
-          <div className="gb-card p-8 text-center">
+          <div className="gb-card p-8 text-center md:col-span-2 lg:col-span-3">
             <Tag className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
             <p className="text-muted-foreground text-sm">אין עדיין עסקאות פעילות{cat ? ` בקטגוריה ${cat.name}` : ""}.</p>
           </div>
