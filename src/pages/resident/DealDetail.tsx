@@ -82,6 +82,7 @@ export default function DealDetail() {
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [joinCondition, setJoinCondition] = useState<"flexible" | "conditional">("flexible");
   const [joinForm, setJoinForm] = useState({
     full_name: "",
     phone: "",
