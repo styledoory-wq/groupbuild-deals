@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search } from "lucide-react";
+import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search, LogOut } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { useRegions } from "@/hooks/useRegions";
 
 interface DbDeal extends RealDealCardData {
@@ -23,7 +24,7 @@ const STAGES: { id: string; title: string; icon: string; desc: string }[] = [
 
 export default function ResidentDashboard() {
   const navigate = useNavigate();
-  const { user } = useApp();
+  const { user, logout } = useApp();
   const { regions, cities } = useRegions();
 
   const [profileCity, setProfileCity] = useState("");
@@ -180,17 +181,31 @@ export default function ResidentDashboard() {
         <div className="absolute -top-16 -left-16 h-48 w-48 rounded-full bg-gold/10 blur-3xl" />
         <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-gold/5 blur-3xl" />
         <div className="flex items-center justify-between mb-6 relative">
-          <div>
+          <div className="min-w-0">
             <p className="text-primary-foreground/55 text-[11px] uppercase tracking-wider">שלום</p>
-            <h1 className="text-[24px] font-semibold mt-0.5 tracking-tight">{user?.name || "דייר"}</h1>
+            <h1 className="text-[24px] font-semibold mt-0.5 tracking-tight truncate">{user?.name || "דייר"}</h1>
           </div>
-          <button
-            onClick={() => navigate("/resident/profile")}
-            className="h-11 w-11 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-primary-foreground font-semibold transition-smooth hover:bg-white/15"
-            aria-label="פרופיל"
-          >
-            {user?.name?.charAt(0) || "ד"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={async () => {
+                await logout();
+                toast.success("התנתקת");
+                navigate("/", { replace: true });
+              }}
+              className="h-11 w-11 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-primary-foreground transition-smooth hover:bg-white/15"
+              aria-label="התנתקות"
+              title="התנתקות"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => navigate("/resident/profile")}
+              className="h-11 w-11 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-primary-foreground font-semibold transition-smooth hover:bg-white/15"
+              aria-label="פרופיל"
+            >
+              {user?.name?.charAt(0) || "ד"}
+            </button>
+          </div>
         </div>
 
         {/* Area chip + Primary CTA */}
