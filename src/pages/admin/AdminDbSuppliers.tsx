@@ -37,6 +37,10 @@ interface Row {
   service_areas: string[];
   regionCount?: number;
   cityCount?: number;
+  commission_percent?: number | null;
+  monthly_subscription?: number | null;
+  billing_status?: string | null;
+  billing_notes?: string | null;
 }
 
 interface NewForm {
@@ -55,6 +59,10 @@ interface NewForm {
   approval_status: "approved" | "pending" | "rejected";
   is_active: boolean;
   categoryIds: string[];
+  commission_percent: string;
+  monthly_subscription: string;
+  billing_status: "none" | "active" | "trial" | "suspended";
+  billing_notes: string;
 }
 
 const emptyForm: NewForm = {
@@ -73,6 +81,10 @@ const emptyForm: NewForm = {
   approval_status: "approved",
   is_active: true,
   categoryIds: [],
+  commission_percent: "",
+  monthly_subscription: "",
+  billing_status: "none",
+  billing_notes: "",
 };
 
 interface MatchProfile {
@@ -91,6 +103,7 @@ export default function AdminDbSuppliers() {
   const { regions, cities } = useRegions();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [supplierSearch, setSupplierSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<NewForm>(emptyForm);
   const [saving, setSaving] = useState(false);
@@ -175,6 +188,10 @@ export default function AdminDbSuppliers() {
         approval_status: (s.approval_status as NewForm["approval_status"]) ?? "pending",
         is_active: !!s.is_active,
         categoryIds: s.categories ?? [],
+        commission_percent: s.commission_percent != null ? String(s.commission_percent) : "",
+        monthly_subscription: s.monthly_subscription != null ? String(s.monthly_subscription) : "",
+        billing_status: ((s.billing_status as NewForm["billing_status"]) ?? "none"),
+        billing_notes: s.billing_notes ?? "",
       });
       setEditPrevApproval((s.approval_status as string) ?? "pending");
       setEditAreas({
@@ -226,6 +243,10 @@ export default function AdminDbSuppliers() {
           approval_status: editForm.approval_status,
           is_active: editForm.is_active,
           categories: editForm.categoryIds,
+          commission_percent: editForm.commission_percent.trim() === "" ? 0 : Number(editForm.commission_percent),
+          monthly_subscription: editForm.monthly_subscription.trim() === "" ? 0 : Number(editForm.monthly_subscription),
+          billing_status: editForm.billing_status,
+          billing_notes: editForm.billing_notes.trim() || null,
         })
         .eq("id", editId);
       if (error) throw error;
@@ -305,7 +326,7 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories,commission_percent,monthly_subscription,billing_status,billing_notes")
       .order("business_name");
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
@@ -553,22 +574,38 @@ export default function AdminDbSuppliers() {
     <MobileShell>
       <PageHeader title="ניהול ספקים" subtitle={`${rows.length} ספקים רשומים`} back />
 
-      <div className="px-5 -mt-2 mb-4">
+      <div className="px-5 -mt-2 mb-4 space-y-3">
         <Button
           onClick={() => { setForm(emptyForm); setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] }); setOpen(true); }}
           className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold"
         >
           <Plus className="h-4 w-4 ml-1.5" /> הוסף ספק חדש
         </Button>
+        <div className="relative">
+          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Input
+            value={supplierSearch}
+            onChange={(e) => setSupplierSearch(e.target.value)}
+            placeholder="חיפוש ספק לפי שם, אימייל, טלפון או קטגוריה"
+            className="h-10 pr-9 text-sm"
+          />
+        </div>
       </div>
 
+      {(() => {
+        const q = supplierSearch.trim().toLowerCase();
+        const filteredRows = !q ? rows : rows.filter((r) => {
+          const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name ?? "").join(" ") ?? "";
+          return [r.business_name, r.email, r.phone, catNames].some((v) => (v ?? "").toLowerCase().includes(q));
+        });
+        return (
       <div className="px-5 space-y-3 pb-24">
-        {rows.length === 0 && (
+        {filteredRows.length === 0 && (
           <div className="gb-card p-6 text-center text-sm text-muted-foreground">
-            אין ספקים רשומים עדיין. הוסף ספק חדש כדי להתחיל.
+            {rows.length === 0 ? "אין ספקים רשומים עדיין. הוסף ספק חדש כדי להתחיל." : "לא נמצאו ספקים תואמים לחיפוש"}
           </div>
         )}
-        {rows.map((r) => {
+        {filteredRows.map((r) => {
           const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name).filter(Boolean) ?? [];
           const isNational = r.serves_all_country || r.service_areas?.includes("כל הארץ") || ((r.regionCount ?? 0) === 0 && (r.cityCount ?? 0) === 0);
           const noAreas = false;
@@ -610,6 +647,13 @@ export default function AdminDbSuppliers() {
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
+              {(Number(r.commission_percent ?? 0) > 0 || Number(r.monthly_subscription ?? 0) > 0 || (r.billing_status && r.billing_status !== "none")) && (
+                <div className="rounded-xl bg-gold/5 border border-gold/20 px-3 py-2 text-[11px] flex flex-wrap gap-x-3 gap-y-1">
+                  <span><b className="text-primary">עמלה:</b> {Number(r.commission_percent ?? 0)}%</span>
+                  <span><b className="text-primary">מנוי:</b> ₪{Number(r.monthly_subscription ?? 0)}</span>
+                  <span><b className="text-primary">חיוב:</b> {r.billing_status ?? "none"}</span>
+                </div>
+              )}
               <button
                 onClick={() => openEdit(r.id)}
                 className="w-full h-10 rounded-xl bg-gradient-gold text-primary text-sm font-bold flex items-center justify-center gap-1.5 shadow-gold"
@@ -652,6 +696,8 @@ export default function AdminDbSuppliers() {
           );
         })}
       </div>
+        );
+      })()}
 
       {/* Create dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -1015,6 +1061,52 @@ export default function AdminDbSuppliers() {
                   <option value="pending">ממתין</option>
                   <option value="rejected">נדחה</option>
                 </select>
+              </div>
+
+              <div className="pt-2 border-t space-y-2">
+                <Label className="text-sm font-bold">חיוב ועמלות</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">עמלה (%)</Label>
+                    <Input
+                      type="number" min="0" max="100" step="0.1"
+                      value={editForm.commission_percent}
+                      onChange={(e) => setEditForm({ ...editForm, commission_percent: e.target.value })}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">מנוי חודשי (₪)</Label>
+                    <Input
+                      type="number" min="0" step="1"
+                      value={editForm.monthly_subscription}
+                      onChange={(e) => setEditForm({ ...editForm, monthly_subscription: e.target.value })}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs">סטטוס חיוב</Label>
+                  <select
+                    value={editForm.billing_status}
+                    onChange={(e) => setEditForm({ ...editForm, billing_status: e.target.value as NewForm["billing_status"] })}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="none">ללא</option>
+                    <option value="trial">תקופת ניסיון</option>
+                    <option value="active">פעיל</option>
+                    <option value="suspended">מושהה</option>
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-xs">הערות חיוב</Label>
+                  <Textarea
+                    rows={2}
+                    value={editForm.billing_notes}
+                    onChange={(e) => setEditForm({ ...editForm, billing_notes: e.target.value })}
+                    placeholder="הערות פנימיות לאדמין"
+                  />
+                </div>
               </div>
 
               <p className="text-[11px] text-muted-foreground pt-2 border-t">

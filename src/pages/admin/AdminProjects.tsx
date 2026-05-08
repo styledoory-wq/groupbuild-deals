@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
-import { Building2, Check, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
+import { Building2, Check, MapPin, Plus, Pencil, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -47,6 +47,15 @@ export default function AdminProjects() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const filteredProjects = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return projects;
+    return projects.filter((p) =>
+      [p.name, p.city, statusLabel[p.status]].some((v) => (v ?? "").toLowerCase().includes(q)),
+    );
+  }, [projects, query]);
 
   const openCreate = () => { setForm(emptyForm); setOpen(true); };
   const openEdit = (p: Project) => {
@@ -134,8 +143,24 @@ export default function AdminProjects() {
           <Plus className="h-5 w-5" /> הוספת פרויקט
         </button>
       </div>
+      <div className="px-5 mb-3">
+        <div className="relative">
+          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="חיפוש לפי שם פרויקט, עיר או סטטוס"
+            className="h-10 pr-9 text-sm"
+          />
+        </div>
+      </div>
       <div className="px-5 space-y-3">
-        {projects.map((p) => (
+        {filteredProjects.length === 0 && (
+          <div className="gb-card p-6 text-center text-sm text-muted-foreground">
+            לא נמצאו פרויקטים
+          </div>
+        )}
+        {filteredProjects.map((p) => (
           <div key={p.id} className="gb-card p-4">
             <div className="flex items-start gap-3">
               <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center shrink-0">

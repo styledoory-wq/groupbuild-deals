@@ -1,4 +1,4 @@
-const DEFAULT_TIMEOUT_MS = 12000;
+const DEFAULT_TIMEOUT_MS = 25000;
 
 export function withTimeout<T>(promise: PromiseLike<T>, label = "טעינה", ms = DEFAULT_TIMEOUT_MS): Promise<T> {
   return new Promise<T>((resolve, reject) => {
