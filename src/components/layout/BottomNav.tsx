@@ -33,8 +33,8 @@ export function BottomNav({ role }: { role: Role }) {
       dir="rtl"
       className="fixed bottom-0 inset-x-0 z-40 flex justify-center pointer-events-none"
     >
-      <div className="pointer-events-auto w-full max-w-[440px] px-3 pb-3 safe-bottom">
-        <div className="gb-dock rounded-[28px] px-2 py-2 flex items-center justify-between">
+      <div className="pointer-events-auto w-full max-w-[440px] md:max-w-xl lg:max-w-2xl px-3 pb-3 md:pb-5 safe-bottom">
+        <div className="gb-dock rounded-[28px] px-2 md:px-3 py-2 md:py-2.5 flex items-center justify-between">
           {items[role].map(({ to, label, icon: Icon }) => {
             const active = location.pathname === to || (to !== `/${role}` && location.pathname.startsWith(to));
             return (
