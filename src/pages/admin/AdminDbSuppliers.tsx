@@ -103,6 +103,7 @@ export default function AdminDbSuppliers() {
   const { regions, cities } = useRegions();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [supplierSearch, setSupplierSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<NewForm>(emptyForm);
   const [saving, setSaving] = useState(false);
