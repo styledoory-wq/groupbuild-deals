@@ -12,6 +12,7 @@ import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { OfferTier, OfferType } from "@/lib/offerPricing";
+import { DealImagesEditor } from "@/components/deals/DealImagesEditor";
 
 type SupplierLite = {
   id: string;
@@ -74,6 +75,8 @@ export default function OfferEditor() {
 
   const [offerType, setOfferType] = useState<OfferType>("percentage");
   const [tiers, setTiers] = useState<TierRow[]>(defaultPercentageTiers());
+  const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
   // When offer type changes, swap to sensible defaults if user hasn't customized.
   const switchOfferType = (next: OfferType) => {
@@ -268,6 +271,8 @@ export default function OfferEditor() {
       ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
       visibility_type: visibilityType,
       visibility_project_id: visibilityType === "project_only" ? visibilityProjectId : null,
+      cover_image_url: coverImage,
+      gallery_images: galleryImages as unknown as Json,
     };
 
     // Mirror first-tier values into top-level fields for backward compatibility & sorting.
@@ -420,6 +425,22 @@ export default function OfferEditor() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Images */}
+        <div className="gb-card p-4">
+          <h3 className="font-bold text-sm mb-3">תמונות ההצעה</h3>
+          <DealImagesEditor
+            cover={coverImage}
+            gallery={galleryImages}
+            onChange={({ cover, gallery }) => {
+              setCoverImage(cover);
+              setGalleryImages(gallery);
+            }}
+          />
+          <p className="text-[11px] text-muted-foreground mt-3 leading-relaxed">
+            הצעות עם תמונות נראות פרימיום ומגדילות משמעותית את ההצטרפויות.
+          </p>
         </div>
 
         {/* Offer type selector */}
