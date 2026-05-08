@@ -52,6 +52,8 @@ interface DealRow {
   ends_at: string | null;
   deposit_required: boolean | null;
   deposit_amount: number | null;
+  cover_image_url: string | null;
+  gallery_images: string[] | null;
 }
 
 interface SupplierRow {
@@ -114,7 +116,7 @@ export default function DealDetail() {
         const { data: dealData, error: dErr } = await supabase
           .from("deals")
           .select(
-            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount",
+            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images",
           )
           .eq("id", dealId)
           .eq("is_deleted", false)
