@@ -242,6 +242,8 @@ export default function DealDetail() {
       return;
     }
     const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
+    const tiersNow = Array.isArray(deal.tiers) ? deal.tiers : [];
+    const activeTierNow = tiersNow.length > 0 ? getActiveTier(tiersNow, participantCount) : null;
     setSubmittingInterest(true);
     try {
       const qty = joinForm.estimated_quantity.trim()
