@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { DealImagesEditor } from "@/components/deals/DealImagesEditor";
 
 /**
  * Supplier-restricted offer editor: only marketing fields.
@@ -24,13 +25,15 @@ export default function SupplierOfferMarketingEdit() {
   const [description, setDescription] = useState("");
   const [highlights, setHighlights] = useState<string[]>([]);
   const [newHl, setNewHl] = useState("");
+  const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (!dealId) return;
     (async () => {
       const { data, error } = await supabase
         .from("deals")
-        .select("title,description,highlights")
+        .select("title,description,highlights,cover_image_url,gallery_images")
         .eq("id", dealId)
         .maybeSingle();
       if (error) {
@@ -42,6 +45,9 @@ export default function SupplierOfferMarketingEdit() {
         setTitle(data.title ?? "");
         setDescription(data.description ?? "");
         setHighlights(Array.isArray(data.highlights) ? (data.highlights as string[]) : []);
+        setCoverImage((data as { cover_image_url?: string | null }).cover_image_url ?? null);
+        const g = (data as { gallery_images?: unknown }).gallery_images;
+        setGalleryImages(Array.isArray(g) ? (g as string[]) : []);
       }
       setLoading(false);
     })();
@@ -72,6 +78,8 @@ export default function SupplierOfferMarketingEdit() {
           title: title.trim(),
           description: description.trim() || null,
           highlights: highlights as never,
+          cover_image_url: coverImage,
+          gallery_images: galleryImages as never,
         })
         .eq("id", dealId);
       if (error) throw error;
@@ -135,6 +143,19 @@ export default function SupplierOfferMarketingEdit() {
               placeholder="ספר על ההצעה — מה מיוחד בה, מה כלול..."
             />
           </div>
+        </section>
+
+        {/* Images */}
+        <section className="gb-card p-4 space-y-3">
+          <Label className="text-xs font-bold">תמונות ההצעה</Label>
+          <DealImagesEditor
+            cover={coverImage}
+            gallery={galleryImages}
+            onChange={({ cover, gallery }) => {
+              setCoverImage(cover);
+              setGalleryImages(gallery);
+            }}
+          />
         </section>
 
         {/* Highlights */}

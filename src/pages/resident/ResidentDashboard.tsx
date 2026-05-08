@@ -101,7 +101,7 @@ export default function ResidentDashboard() {
           const { data: deals } = await supabase
             .from("deals")
             .select(
-              "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at",
+              "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images",
             )
             .eq("status", "active")
             .eq("is_deleted", false)
@@ -131,7 +131,7 @@ export default function ResidentDashboard() {
           const { data: jdeals } = await supabase
             .from("deals")
             .select(
-              "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at",
+              "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images",
             )
             .in("id", joinedIds);
           const jSupIds = Array.from(new Set((jdeals ?? []).map((d) => d.supplier_id as string)));

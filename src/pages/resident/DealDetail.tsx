@@ -52,6 +52,8 @@ interface DealRow {
   ends_at: string | null;
   deposit_required: boolean | null;
   deposit_amount: number | null;
+  cover_image_url: string | null;
+  gallery_images: string[] | null;
 }
 
 interface SupplierRow {
@@ -114,7 +116,7 @@ export default function DealDetail() {
         const { data: dealData, error: dErr } = await supabase
           .from("deals")
           .select(
-            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount",
+            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images",
           )
           .eq("id", dealId)
           .eq("is_deleted", false)
@@ -456,8 +458,18 @@ export default function DealDetail() {
 
   return (
     <MobileShell>
-      {/* HERO — premium gradient with glow & live badges */}
-      <div className="gb-hero-premium px-5 pt-6 pb-12 rounded-b-[36px]">
+      {/* HERO — premium gradient with glow & live badges (cover image overlay if present) */}
+      <div className="gb-hero-premium relative px-5 pt-6 pb-12 rounded-b-[36px] overflow-hidden">
+        {deal.cover_image_url && (
+          <>
+            <img
+              src={deal.cover_image_url}
+              alt={deal.title}
+              className="absolute inset-0 w-full h-full object-cover opacity-35"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/85 to-primary" />
+          </>
+        )}
         <div className="absolute -top-16 -left-16 h-56 w-56 rounded-full bg-gold/15 blur-3xl pointer-events-none" />
         <div className="absolute top-10 -right-10 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl pointer-events-none" />
 
@@ -511,6 +523,27 @@ export default function DealDetail() {
           </div>
         </div>
       </div>
+
+      {/* GALLERY — premium scroll strip */}
+      {Array.isArray(deal.gallery_images) && deal.gallery_images.length > 0 && (
+        <div className="px-5 mt-4">
+          <h2 className="text-[12px] font-extrabold text-foreground mb-2">גלריה</h2>
+          <div className="flex gap-2 overflow-x-auto -mx-5 px-5 pb-1 snap-x snap-mandatory">
+            {deal.gallery_images.map((url, i) => (
+              <a
+                key={url + i}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative shrink-0 w-40 h-28 rounded-2xl overflow-hidden border border-border snap-start group"
+              >
+                <img src={url} alt={`gallery-${i}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* PRICING — big number, savings, FOMO */}
       <div className="px-5 -mt-8 relative z-10 mb-4">

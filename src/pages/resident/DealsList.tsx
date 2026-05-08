@@ -27,7 +27,7 @@ export default function DealsList() {
         let query = supabase
           .from("deals")
           .select(
-            "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,visibility_type,visibility_project_id,suppliers!inner(business_name,logo_url,is_active,approval_status)",
+            "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images,visibility_type,visibility_project_id,suppliers!inner(business_name,logo_url,is_active,approval_status)",
           )
           .eq("status", "active")
           .order("created_at", { ascending: false });
