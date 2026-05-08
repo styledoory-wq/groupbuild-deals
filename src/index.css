@@ -220,7 +220,62 @@
   .gb-section-fade {
     background: linear-gradient(180deg, transparent, hsl(42 33% 96% / 0.6) 50%, transparent);
   }
+
+  /* Animated aurora gradient for premium hero backgrounds */
+  .gb-aurora {
+    background:
+      radial-gradient(60% 50% at 20% 20%, hsl(44 73% 66% / 0.35) 0%, transparent 60%),
+      radial-gradient(50% 40% at 80% 30%, hsl(217 90% 60% / 0.28) 0%, transparent 60%),
+      radial-gradient(70% 50% at 50% 100%, hsl(44 53% 54% / 0.25) 0%, transparent 60%),
+      var(--gradient-hero);
+    background-size: 200% 200%;
+    animation: gb-aurora 18s ease-in-out infinite;
+  }
+
+  /* Premium dark tile (used for navigation tiles, stage cards) */
+  .gb-tile-dark {
+    background:
+      radial-gradient(80% 60% at 100% 0%, hsl(44 53% 54% / 0.18), transparent 60%),
+      linear-gradient(160deg, hsl(217 56% 14%) 0%, hsl(217 50% 19%) 100%);
+    @apply text-primary-foreground rounded-2xl border border-white/10 relative overflow-hidden;
+    box-shadow: 0 12px 32px -16px hsl(217 56% 13% / 0.55), inset 0 1px 0 hsl(0 0% 100% / 0.08);
+    transition: var(--transition-smooth);
+  }
+  .gb-tile-dark:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -16px hsl(217 56% 13% / 0.65), inset 0 1px 0 hsl(0 0% 100% / 0.10), 0 0 0 1px hsl(44 53% 54% / 0.25);
+  }
+
+  /* Inline stat pill — premium minimal */
+  .gb-stat-pill {
+    @apply rounded-2xl px-3 py-2.5 flex flex-col items-center justify-center;
+    background: linear-gradient(180deg, hsl(0 0% 100% / 0.08), hsl(0 0% 100% / 0.02));
+    border: 1px solid hsl(0 0% 100% / 0.10);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Floating particle dot */
+  .gb-particle {
+    @apply absolute rounded-full pointer-events-none;
+    background: hsl(44 73% 66%);
+    box-shadow: 0 0 10px hsl(44 53% 54% / 0.8);
+  }
 }
+
+@keyframes gb-aurora {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes gb-particle-float {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10%, 90% { opacity: 0.7; }
+  100% { transform: translate3d(20px, -60px, 0); opacity: 0; }
+}
+
+.gb-particle-1 { animation: gb-particle-float 8s ease-in-out infinite; }
+.gb-particle-2 { animation: gb-particle-float 10s ease-in-out infinite 1.5s; }
+.gb-particle-3 { animation: gb-particle-float 12s ease-in-out infinite 3s; }
 
 @keyframes gb-float {
   0%, 100% { transform: translateY(0); }
