@@ -574,22 +574,38 @@ export default function AdminDbSuppliers() {
     <MobileShell>
       <PageHeader title="ניהול ספקים" subtitle={`${rows.length} ספקים רשומים`} back />
 
-      <div className="px-5 -mt-2 mb-4">
+      <div className="px-5 -mt-2 mb-4 space-y-3">
         <Button
           onClick={() => { setForm(emptyForm); setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] }); setOpen(true); }}
           className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold"
         >
           <Plus className="h-4 w-4 ml-1.5" /> הוסף ספק חדש
         </Button>
+        <div className="relative">
+          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Input
+            value={supplierSearch}
+            onChange={(e) => setSupplierSearch(e.target.value)}
+            placeholder="חיפוש ספק לפי שם, אימייל, טלפון או קטגוריה"
+            className="h-10 pr-9 text-sm"
+          />
+        </div>
       </div>
 
+      {(() => {
+        const q = supplierSearch.trim().toLowerCase();
+        const filteredRows = !q ? rows : rows.filter((r) => {
+          const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name ?? "").join(" ") ?? "";
+          return [r.business_name, r.email, r.phone, catNames].some((v) => (v ?? "").toLowerCase().includes(q));
+        });
+        return (
       <div className="px-5 space-y-3 pb-24">
-        {rows.length === 0 && (
+        {filteredRows.length === 0 && (
           <div className="gb-card p-6 text-center text-sm text-muted-foreground">
-            אין ספקים רשומים עדיין. הוסף ספק חדש כדי להתחיל.
+            {rows.length === 0 ? "אין ספקים רשומים עדיין. הוסף ספק חדש כדי להתחיל." : "לא נמצאו ספקים תואמים לחיפוש"}
           </div>
         )}
-        {rows.map((r) => {
+        {filteredRows.map((r) => {
           const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name).filter(Boolean) ?? [];
           const isNational = r.serves_all_country || r.service_areas?.includes("כל הארץ") || ((r.regionCount ?? 0) === 0 && (r.cityCount ?? 0) === 0);
           const noAreas = false;
