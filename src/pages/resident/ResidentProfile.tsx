@@ -272,6 +272,32 @@ export default function ResidentProfile() {
         </Button>
       </div>
 
+      <AlertDialog open={!!confirmDeleteId} onOpenChange={(o) => !o && setConfirmDeleteId(null)}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>למחוק את הפיקדון מההיסטוריה?</AlertDialogTitle>
+            <AlertDialogDescription>
+              הפיקדון יוסתר מהתצוגה שלך. הנתונים נשמרים במערכת לצורך תיעוד ואפשר לשחזר דרך מנהל המערכת.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>ביטול</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async (e) => {
+                e.preventDefault();
+                if (!confirmDeleteId) return;
+                await toggleHidden(confirmDeleteId, false);
+                setConfirmDeleteId(null);
+                setSwipeId(null);
+              }}
+            >
+              מחק מההיסטוריה
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <BottomNav role="resident" />
     </MobileShell>
   );
