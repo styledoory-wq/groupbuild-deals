@@ -24,7 +24,7 @@ const STAGES: { id: string; title: string; icon: string; desc: string }[] = [
 
 export default function ResidentDashboard() {
   const navigate = useNavigate();
-  const { user } = useApp();
+  const { user, logout, authReady } = useApp();
   const { regions, cities } = useRegions();
 
   const [profileCity, setProfileCity] = useState("");
