@@ -55,13 +55,17 @@
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 100%) 100%);
     --gradient-navy-deep: linear-gradient(160deg, hsl(217 60% 10%) 0%, hsl(217 50% 16%) 100%);
 
-    /* Shadows — whisper-soft */
-    --shadow-soft: 0 1px 2px hsl(217 56% 13% / 0.03), 0 2px 8px -4px hsl(217 56% 13% / 0.04);
-    --shadow-card: 0 1px 3px hsl(217 56% 13% / 0.04), 0 4px 16px -8px hsl(217 56% 13% / 0.06);
-    --shadow-elevated: 0 8px 28px -12px hsl(217 56% 13% / 0.12);
-    --shadow-gold: 0 4px 16px -8px hsl(44 53% 54% / 0.25);
+    /* Shadows — layered, premium */
+    --shadow-soft: 0 1px 2px hsl(217 56% 13% / 0.04), 0 2px 8px -4px hsl(217 56% 13% / 0.06);
+    --shadow-card: 0 1px 2px hsl(217 56% 13% / 0.04), 0 8px 24px -10px hsl(217 56% 13% / 0.10), 0 2px 6px -3px hsl(217 56% 13% / 0.06);
+    --shadow-elevated: 0 18px 48px -20px hsl(217 56% 13% / 0.28), 0 6px 16px -8px hsl(217 56% 13% / 0.10);
+    --shadow-floating: 0 30px 60px -24px hsl(217 56% 13% / 0.35), 0 12px 28px -14px hsl(217 56% 13% / 0.18);
+    --shadow-gold: 0 8px 24px -10px hsl(44 53% 54% / 0.35), 0 0 0 1px hsl(44 53% 54% / 0.12);
+    --glow-gold: 0 0 24px hsl(44 53% 54% / 0.35);
+    --glow-navy: 0 0 32px hsl(217 60% 22% / 0.45);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }
 
