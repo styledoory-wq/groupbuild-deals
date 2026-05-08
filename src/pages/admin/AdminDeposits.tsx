@@ -250,6 +250,15 @@ export default function AdminDeposits() {
                       </button>
                     </div>
                   )}
+                  <div className="mt-2 pt-2 border-t border-dashed border-border/60">
+                    <button
+                      onClick={() => toggleHidden(dep.id, dep.is_hidden)}
+                      disabled={busyId === dep.id}
+                      className="w-full h-8 rounded-lg text-[11px] text-muted-foreground hover:text-primary hover:bg-muted/40 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50"
+                    >
+                      {dep.is_hidden ? <><Eye className="h-3 w-3" /> החזר לתצוגה</> : <><EyeOff className="h-3 w-3" /> הסתר מהתצוגה</>}
+                    </button>
+                  </div>
                 </div>
               );
             })}
