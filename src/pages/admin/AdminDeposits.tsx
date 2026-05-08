@@ -159,13 +159,13 @@ export default function AdminDeposits() {
             />
           </div>
           <div className="flex flex-wrap gap-1.5 mt-3">
-            {STATUS_FILTERS.map((f) => (
+            {VIEW_FILTERS.map((f) => (
               <button
                 key={f.key}
-                onClick={() => setFilter(f.key)}
+                onClick={() => setView(f.key)}
                 className={
                   "px-3 h-7 rounded-full text-[11px] font-bold transition-smooth " +
-                  (filter === f.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70")
+                  (view === f.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70")
                 }
               >
                 {f.label}
