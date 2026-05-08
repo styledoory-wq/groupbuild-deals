@@ -135,8 +135,10 @@ export default function ResidentProfile() {
       </div>
 
       {(() => {
-        const activeDeposits = myDeposits.filter((d) => ACTIVE_STATUSES.has(d.status));
-        const historyDeposits = myDeposits.filter((d) => HISTORY_STATUSES.has(d.status));
+        const visibleDeposits = myDeposits.filter((d) => showHidden || !d.is_hidden);
+        const activeDeposits = visibleDeposits.filter((d) => ACTIVE_STATUSES.has(d.status));
+        const historyDeposits = visibleDeposits.filter((d) => HISTORY_STATUSES.has(d.status));
+        const hiddenCount = myDeposits.filter((d) => d.is_hidden).length;
 
         const renderItem = (dep: DbDeposit) => {
           const dealMissing = !deals[dep.deal_id];
@@ -155,18 +157,27 @@ export default function ResidentProfile() {
             ? new Date(dep.paid_at).toLocaleDateString("he-IL")
             : new Date(dep.created_at).toLocaleDateString("he-IL");
           return (
-            <div key={dep.id} className="gb-card p-4 flex items-center gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-xl shrink-0">🛒</div>
-              <div className="flex-1 min-w-0">
-                <div className={"font-bold text-sm truncate " + (dealMissing ? "text-muted-foreground italic" : "")}>{dealTitle}</div>
-                <div className="text-[11px] text-muted-foreground">
-                  פיקדון {formatILS(Number(dep.amount))} · {stampDate}
-                  {status === "refunded" && dep.refunded_at ? " · הוחזר" : ""}
+            <div key={dep.id} className={"gb-card p-4 " + (dep.is_hidden ? "opacity-60" : "")}>
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-xl shrink-0">🛒</div>
+                <div className="flex-1 min-w-0">
+                  <div className={"font-bold text-sm truncate " + (dealMissing ? "text-muted-foreground italic" : "")}>{dealTitle}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    פיקדון {formatILS(Number(dep.amount))} · {stampDate}
+                    {status === "refunded" && dep.refunded_at ? " · הוחזר" : ""}
+                  </div>
+                </div>
+                <div className="text-left">
+                  <div className={"text-xs font-bold px-2 py-1 rounded-full " + meta.cls}>{meta.label}</div>
                 </div>
               </div>
-              <div className="text-left">
-                <div className={"text-xs font-bold px-2 py-1 rounded-full " + meta.cls}>{meta.label}</div>
-              </div>
+              <button
+                onClick={() => toggleHidden(dep.id, dep.is_hidden)}
+                disabled={busyId === dep.id}
+                className="mt-2 w-full h-7 rounded-lg text-[11px] text-muted-foreground hover:text-primary hover:bg-muted/40 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50"
+              >
+                {dep.is_hidden ? <><Eye className="h-3 w-3" /> החזר לתצוגה</> : <><EyeOff className="h-3 w-3" /> הסתר מהתצוגה</>}
+              </button>
             </div>
           );
         };
@@ -174,10 +185,20 @@ export default function ResidentProfile() {
         return (
           <>
             <section className="px-5 mb-5">
-              <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-                <History className="h-4 w-4 text-gold" />
-                פיקדונות פעילים
-              </h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <History className="h-4 w-4 text-gold" />
+                  פיקדונות פעילים
+                </h2>
+                {hiddenCount > 0 && (
+                  <button
+                    onClick={() => setShowHidden((v) => !v)}
+                    className="text-[11px] text-muted-foreground hover:text-primary"
+                  >
+                    {showHidden ? `הסתר מוסתרים (${hiddenCount})` : `הצג מוסתרים (${hiddenCount})`}
+                  </button>
+                )}
+              </div>
               <div className="space-y-2">
                 {activeDeposits.length === 0 && (
                   <div className="gb-card p-6 text-center text-sm text-muted-foreground">
