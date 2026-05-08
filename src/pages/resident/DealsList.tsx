@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Loader2, Tag } from "lucide-react";
+import { Tag } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
+import { DealCardSkeletonList } from "@/components/deals/DealCardSkeleton";
+import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import type { OfferTier } from "@/lib/offerPricing";
 
 type DealWithSupplier = RealDealCardData;
