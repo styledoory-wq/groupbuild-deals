@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 type DbDeal = {
   id: string;
@@ -32,6 +33,7 @@ export default function AdminDeals() {
   const [counts, setCounts] = useState<Record<string, { interests: number; paid: number }>>({});
   const [loading, setLoading] = useState(true);
   const [showInactive, setShowInactive] = useState(true);
+  const [query, setQuery] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -75,7 +77,16 @@ export default function AdminDeals() {
 
   useEffect(() => { load(); }, [load]);
 
-  const visibleDeals = showInactive ? deals : deals.filter((d) => d.status === "active");
+  const visibleDeals = useMemo(() => {
+    const base = showInactive ? deals : deals.filter((d) => d.status === "active");
+    const q = query.trim().toLowerCase();
+    if (!q) return base;
+    return base.filter((d) => {
+      const supplier = suppliers[d.supplier_id]?.business_name ?? "";
+      const category = categories.find((c) => c.id === d.category_id)?.name ?? "";
+      return [d.title, supplier, category].some((s) => (s ?? "").toLowerCase().includes(q));
+    });
+  }, [deals, showInactive, query, suppliers, categories]);
 
   const priceFor = (d: DbDeal): number => {
     if (d.offer_type === "price_comparison" && d.discounted_price != null) return Number(d.discounted_price);
@@ -88,9 +99,20 @@ export default function AdminDeals() {
   return (
     <MobileShell>
       <PageHeader title="ניהול עסקאות" subtitle={`${visibleDeals.length} מוצגות מתוך ${deals.length}`} back={false} />
-      <div className="px-5 -mt-2 mb-3 flex items-center justify-end gap-2">
-        <Label htmlFor="show-inactive" className="text-xs text-muted-foreground">הצג מושבתות</Label>
-        <Switch id="show-inactive" checked={showInactive} onCheckedChange={setShowInactive} />
+      <div className="px-5 -mt-2 mb-3 space-y-2">
+        <div className="relative">
+          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="חיפוש לפי שם הצעה, ספק או קטגוריה"
+            className="h-10 pr-9 text-sm"
+          />
+        </div>
+        <div className="flex items-center justify-end gap-2">
+          <Label htmlFor="show-inactive" className="text-xs text-muted-foreground">הצג מושבתות</Label>
+          <Switch id="show-inactive" checked={showInactive} onCheckedChange={setShowInactive} />
+        </div>
       </div>
       {loading ? (
         <div className="px-5 py-12 text-center text-sm text-muted-foreground">
