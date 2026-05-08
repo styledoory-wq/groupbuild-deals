@@ -71,7 +71,7 @@ export default function ResidentProfile() {
       toast.error(err instanceof Error ? err.message : "פעולה נכשלה");
     }
     setBusyId(null);
-  }, []);
+  };
 
   useEffect(() => {
     let channel: ReturnType<typeof supabase.channel> | null = null;
