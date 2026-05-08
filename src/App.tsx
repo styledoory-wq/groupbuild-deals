@@ -33,6 +33,7 @@ import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import SupplierProfileEdit from "./pages/supplier/SupplierProfileEdit";
 import SupplierOffers from "./pages/supplier/SupplierOffers";
 import OfferEditor from "./pages/supplier/OfferEditor";
+import SupplierOfferMarketingEdit from "./pages/supplier/SupplierOfferMarketingEdit";
 import SupplierLeads from "./pages/supplier/SupplierLeads";
 import SupplierReviews from "./pages/supplier/SupplierReviews";
 
@@ -95,6 +96,7 @@ const App = () => (
             <Route path="/supplier/profile/edit" element={<SupplierProfileEdit />} />
             <Route path="/supplier/offers" element={<SupplierOffers />} />
             <Route path="/supplier/offers/new" element={<OfferEditor />} />
+            <Route path="/supplier/offers/:dealId/marketing" element={<SupplierOfferMarketingEdit />} />
             <Route path="/settings/notifications" element={<NotificationSettings />} />
             <Route path="/supplier/leads" element={<SupplierLeads />} />
             <Route path="/supplier/reviews" element={<SupplierReviews />} />
