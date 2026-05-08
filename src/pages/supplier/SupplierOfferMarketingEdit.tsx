@@ -145,6 +145,19 @@ export default function SupplierOfferMarketingEdit() {
           </div>
         </section>
 
+        {/* Images */}
+        <section className="gb-card p-4 space-y-3">
+          <Label className="text-xs font-bold">תמונות ההצעה</Label>
+          <DealImagesEditor
+            cover={coverImage}
+            gallery={galleryImages}
+            onChange={({ cover, gallery }) => {
+              setCoverImage(cover);
+              setGalleryImages(gallery);
+            }}
+          />
+        </section>
+
         {/* Highlights */}
         <section className="gb-card p-4 space-y-3">
           <Label className="text-xs font-bold">נקודות מפתח (Highlights)</Label>
