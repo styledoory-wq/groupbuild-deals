@@ -70,7 +70,9 @@ export default {
         'soft': 'var(--shadow-soft)',
         'card': 'var(--shadow-card)',
         'elevated': 'var(--shadow-elevated)',
+        'floating': 'var(--shadow-floating)',
         'gold': 'var(--shadow-gold)',
+        'glow-gold': 'var(--glow-gold)',
       },
       borderRadius: {
         lg: "var(--radius)",
