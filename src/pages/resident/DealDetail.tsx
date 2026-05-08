@@ -891,6 +891,51 @@ export default function DealDetail() {
               </div>
             )}
 
+            {/* Join condition */}
+            <div className="rounded-2xl border border-border bg-muted/40 p-3 space-y-2">
+              <div className="text-[12px] font-extrabold text-foreground">תנאי ההצטרפות שלי</div>
+              <label className={cn(
+                "flex items-start gap-2 p-2.5 rounded-xl border cursor-pointer transition-smooth",
+                joinCondition === "flexible" ? "border-gold bg-gold/5" : "border-border bg-card"
+              )}>
+                <input
+                  type="radio"
+                  name="join-condition"
+                  className="mt-0.5 accent-primary"
+                  checked={joinCondition === "flexible"}
+                  onChange={() => setJoinCondition("flexible")}
+                />
+                <div className="text-[12px] leading-relaxed">
+                  <div className="font-bold text-foreground">הצטרפות גמישה</div>
+                  <div className="text-muted-foreground">אני מצטרף בכל מצב, גם אם מדרגת ההנחה תרד בהמשך.</div>
+                </div>
+              </label>
+              <label className={cn(
+                "flex items-start gap-2 p-2.5 rounded-xl border cursor-pointer transition-smooth",
+                joinCondition === "conditional" ? "border-gold bg-gold/5" : "border-border bg-card"
+              )}>
+                <input
+                  type="radio"
+                  name="join-condition"
+                  className="mt-0.5 accent-primary"
+                  checked={joinCondition === "conditional"}
+                  onChange={() => setJoinCondition("conditional")}
+                />
+                <div className="text-[12px] leading-relaxed">
+                  <div className="font-bold text-foreground">הצטרפות מותנית</div>
+                  <div className="text-muted-foreground">
+                    אני מצטרף רק אם המדרגה הנוכחית
+                    {activeTier ? ` (${describeTier({ offer_type: offerType }, activeTier)})` : ""}
+                    {" "}נשמרת או עולה. אם תרד — אעבור ל״ממתין לאישור מחדש״.
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div className="rounded-xl bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground leading-relaxed">
+              💡 המחיר הסופי נקבע לפי מספר המשתתפים הפעילים בעת סגירת הקבוצה.
+            </div>
+
             <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
