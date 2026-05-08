@@ -99,36 +99,39 @@ export default function CategoriesList() {
 
   return (
     <MobileShell>
-      {/* Luxury hero */}
-      <header className="bg-gradient-hero text-primary-foreground px-6 pt-10 pb-16 rounded-b-[28px] relative overflow-hidden">
-        <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-gold/5 blur-3xl pointer-events-none" />
+      {/* Cinematic hero */}
+      <header className="gb-aurora text-primary-foreground px-6 pt-10 pb-16 rounded-b-[32px] relative overflow-hidden">
+        <span aria-hidden className="gb-particle gb-particle-1 h-1 w-1 top-16 left-10" />
+        <span aria-hidden className="gb-particle gb-particle-2 h-1.5 w-1.5 top-28 right-14" />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage: "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+            maskImage: "radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)",
+            WebkitMaskImage: "radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)",
+          }}
+        />
 
         <div className="relative animate-fade-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/8 border border-white/12 mb-5">
-            <Sparkles className="h-3.5 w-3.5 text-gold" />
-            <span className="text-[11px] font-medium text-primary-foreground/90">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 mb-5">
+            <span className="gb-live-dot" />
+            <Sparkles className="h-3 w-3 text-gold" strokeWidth={2.5} />
+            <span className="text-[10px] font-semibold tracking-wider uppercase">
               {totalSuppliers > 0 ? `${totalSuppliers} ספקים מאושרים` : "ספקים נבחרים בקפידה"}
             </span>
           </div>
 
-          <h1 className="text-[28px] leading-[1.15] font-extrabold mb-3">
+          <h1 className="text-[30px] leading-[1.1] font-extrabold mb-3 tracking-tight">
             {stage ? (
-              <>
-                {stage.title}
-                <br />
-                <span className="gb-gold-text">תחומי השלב</span>
-              </>
+              <>{stage.title}<br /><span className="gb-text-gold">תחומי השלב</span></>
             ) : (
-              <>
-                תחומי <span className="gb-gold-text">השדרוג</span>
-                <br />
-                לדירה שלך
-              </>
+              <>תחומי <span className="gb-text-gold">השדרוג</span><br />לדירה שלך</>
             )}
           </h1>
-          <div className="gb-divider-gold mb-4" />
-          <p className="text-primary-foreground/75 text-[13px] leading-relaxed">
+          <div className="gb-divider-gold gb-glow-gold mb-3" />
+          <p className="text-primary-foreground/70 text-[13px] leading-relaxed max-w-[88%]">
             {stage ? "בחרו תחום כדי לראות את הספקים שמשרתים אותו." : "בחרו תחום, או חפשו ספק לפי שם, קטגוריה או אזור."}
           </p>
         </div>
