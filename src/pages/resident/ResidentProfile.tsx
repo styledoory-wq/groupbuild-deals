@@ -79,8 +79,7 @@ export default function ResidentProfile() {
   }, [loadDeposits]);
 
   const handleLogout = async () => {
-    try { await supabase.auth.signOut(); } catch (e) { console.warn("supabase signOut failed", e); }
-    logout();
+    await logout();
     toast.success("התנתקת בהצלחה");
     navigate("/", { replace: true });
   };
