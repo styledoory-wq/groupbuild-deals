@@ -191,6 +191,7 @@ export type Database = {
         Row: {
           base_price: number | null
           category_id: string | null
+          cover_image_url: string | null
           created_at: string
           deleted_at: string | null
           deposit_amount: number
@@ -199,6 +200,7 @@ export type Database = {
           discount_percentage: number | null
           discounted_price: number | null
           ends_at: string | null
+          gallery_images: Json
           highlights: Json
           id: string
           is_deleted: boolean
@@ -217,6 +219,7 @@ export type Database = {
         Insert: {
           base_price?: number | null
           category_id?: string | null
+          cover_image_url?: string | null
           created_at?: string
           deleted_at?: string | null
           deposit_amount?: number
@@ -225,6 +228,7 @@ export type Database = {
           discount_percentage?: number | null
           discounted_price?: number | null
           ends_at?: string | null
+          gallery_images?: Json
           highlights?: Json
           id?: string
           is_deleted?: boolean
@@ -243,6 +247,7 @@ export type Database = {
         Update: {
           base_price?: number | null
           category_id?: string | null
+          cover_image_url?: string | null
           created_at?: string
           deleted_at?: string | null
           deposit_amount?: number
@@ -251,6 +256,7 @@ export type Database = {
           discount_percentage?: number | null
           discounted_price?: number | null
           ends_at?: string | null
+          gallery_images?: Json
           highlights?: Json
           id?: string
           is_deleted?: boolean
