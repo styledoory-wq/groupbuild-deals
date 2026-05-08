@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Loader2, Tag } from "lucide-react";
+import { Tag } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
+import { DealCardSkeletonList } from "@/components/deals/DealCardSkeleton";
+import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import type { OfferTier } from "@/lib/offerPricing";
 
 type DealWithSupplier = RealDealCardData;
@@ -15,6 +17,7 @@ export default function DealsList() {
   const { categoryId } = useParams();
   const { categories } = useApp();
   const [deals, setDeals] = useState<DealWithSupplier[]>([]);
+  const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +70,10 @@ export default function DealsList() {
             };
           });
         setDeals(mapped);
+        if (mapped.length) {
+          const c = await fetchDealJoinerCounts(mapped.map((d) => d.id));
+          if (!cancelled) setCounts(c);
+        }
       } catch (e) {
         console.error("[DealsList] load error", e);
         if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינה");
@@ -88,11 +95,7 @@ export default function DealsList() {
         subtitle={loading ? "טוען עסקאות..." : `${deals.length} עסקאות פעילות`}
       />
       <div className="px-5 -mt-4 relative z-10 space-y-3">
-        {loading && (
-          <div className="flex items-center justify-center py-10">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        )}
+        {loading && <DealCardSkeletonList count={4} />}
 
         {!loading && error && (
           <div className="gb-card p-6 text-center">
@@ -108,7 +111,9 @@ export default function DealsList() {
           </div>
         )}
 
-        {!loading && !error && deals.map((d) => <RealDealCard key={d.id} deal={d} />)}
+        {!loading && !error && deals.map((d) => (
+          <RealDealCard key={d.id} deal={d} joinersCount={counts[d.id] ?? 0} />
+        ))}
       </div>
       <BottomNav role="resident" />
     </MobileShell>
