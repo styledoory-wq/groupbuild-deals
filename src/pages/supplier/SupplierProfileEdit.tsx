@@ -210,7 +210,9 @@ export default function SupplierProfileEdit() {
         categories: selectedCategories,
         serves_all_country: servesAll,
         is_active: isActive,
-        supplier_kind: supplierKind || null,
+        supplier_kind: offersServices && !offersProducts ? "service" : !offersServices && offersProducts ? "product" : null,
+        offers_services: offersServices,
+        offers_products: offersProducts,
       };
 
       let sid = supplierId;
