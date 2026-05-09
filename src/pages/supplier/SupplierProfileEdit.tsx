@@ -208,7 +208,7 @@ export default function SupplierProfileEdit() {
         serves_all_country: servesAll,
         is_active: isActive,
         supplier_kind: supplierKind || null,
-      } as typeof payload & { supplier_kind: string | null };
+      };
 
       let sid = supplierId;
       if (sid) {
