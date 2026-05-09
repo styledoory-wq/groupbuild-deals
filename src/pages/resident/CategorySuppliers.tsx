@@ -21,6 +21,8 @@ interface DbSupplier {
   is_active: boolean;
   approval_status: string;
   supplier_kind: "service" | "product" | null;
+  offers_services: boolean | null;
+  offers_products: boolean | null;
 }
 
 const NORTH_REGION_NAMES = new Set(["צפון", "כל הצפון", "גליל עליון", "גליל תחתון", "רמת הגולן", "עמקים", "חיפה והקריות"]);
