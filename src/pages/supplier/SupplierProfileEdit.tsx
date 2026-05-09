@@ -35,7 +35,8 @@ export default function SupplierProfileEdit() {
   const [supplierId, setSupplierId] = useState<string | null>(null);
 
   const [businessName, setBusinessName] = useState("");
-  const [supplierKind, setSupplierKind] = useState<"service" | "product" | "">("");
+  const [offersServices, setOffersServices] = useState(false);
+  const [offersProducts, setOffersProducts] = useState(false);
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
