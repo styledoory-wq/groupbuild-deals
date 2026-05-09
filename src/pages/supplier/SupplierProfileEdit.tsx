@@ -83,6 +83,7 @@ export default function SupplierProfileEdit() {
       if (existing) {
         setSupplierId(existing.id);
         setBusinessName(existing.business_name ?? "");
+        setSupplierKind(((existing as { supplier_kind?: string }).supplier_kind as "service" | "product" | null) ?? "");
         setContactName(existing.contact_name ?? "");
         setPhone(existing.phone ?? "");
         setDescription(existing.description ?? "");
