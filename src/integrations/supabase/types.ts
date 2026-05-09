@@ -976,6 +976,7 @@ export type Database = {
           serves_all_country: boolean
           service_areas: string[]
           short_description: string | null
+          supplier_kind: string | null
           updated_at: string
           user_id: string | null
           website_url: string | null
@@ -1006,6 +1007,7 @@ export type Database = {
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
+          supplier_kind?: string | null
           updated_at?: string
           user_id?: string | null
           website_url?: string | null
@@ -1036,6 +1038,7 @@ export type Database = {
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
+          supplier_kind?: string | null
           updated_at?: string
           user_id?: string | null
           website_url?: string | null
