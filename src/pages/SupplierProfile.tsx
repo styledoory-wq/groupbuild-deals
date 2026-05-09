@@ -225,8 +225,18 @@ export default function SupplierProfile() {
               <h1 className="text-xl font-extrabold truncate">{supplier.business_name}</h1>
               {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-gold shrink-0" />}
             </div>
-            <div className="mb-1">
+            <div className="mb-1 flex items-center gap-1.5 flex-wrap">
               <SupplierRatingBadge supplierId={supplier.id} className="text-[11px] text-primary-foreground/90 [&>b]:text-gold [&>span]:text-primary-foreground/70" />
+              {supplier.supplier_kind === "service" && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-400/20 text-blue-100 border border-blue-300/30">
+                  בעל מקצוע
+                </span>
+              )}
+              {supplier.supplier_kind === "product" && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-100 border border-emerald-300/30">
+                  ספק מוצרים
+                </span>
+              )}
             </div>
             {supplier.short_description && (
               <p className="text-primary-foreground/80 text-xs leading-relaxed line-clamp-2">{supplier.short_description}</p>
