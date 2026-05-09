@@ -35,6 +35,7 @@ export default function SupplierProfileEdit() {
   const [supplierId, setSupplierId] = useState<string | null>(null);
 
   const [businessName, setBusinessName] = useState("");
+  const [supplierKind, setSupplierKind] = useState<"service" | "product" | "">("");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -82,6 +83,7 @@ export default function SupplierProfileEdit() {
       if (existing) {
         setSupplierId(existing.id);
         setBusinessName(existing.business_name ?? "");
+        setSupplierKind(((existing as { supplier_kind?: string }).supplier_kind as "service" | "product" | null) ?? "");
         setContactName(existing.contact_name ?? "");
         setPhone(existing.phone ?? "");
         setDescription(existing.description ?? "");
@@ -205,14 +207,15 @@ export default function SupplierProfileEdit() {
         categories: selectedCategories,
         serves_all_country: servesAll,
         is_active: isActive,
+        supplier_kind: supplierKind || null,
       };
 
       let sid = supplierId;
       if (sid) {
-        const { error } = await supabase.from("suppliers").update(payload).eq("id", sid);
+        const { error } = await supabase.from("suppliers").update(payload as never).eq("id", sid);
         if (error) throw error;
       } else {
-        const { data: ins, error } = await supabase.from("suppliers").insert(payload).select("id").single();
+        const { data: ins, error } = await supabase.from("suppliers").insert(payload as never).select("id").single();
         if (error) throw error;
         sid = ins.id;
         setSupplierId(sid);
@@ -292,6 +295,41 @@ export default function SupplierProfileEdit() {
           <Field label="שם העסק" icon={Briefcase}>
             <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} required className="h-11 rounded-xl" />
           </Field>
+
+          {/* Supplier kind selector */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold flex items-center gap-1.5">
+              <Tag className="h-3.5 w-3.5 text-gold" /> סוג הספק
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: "service", label: "בעל מקצוע", sub: "נותן שירות / קבלן / מתקין" },
+                { value: "product", label: "ספק מוצרים", sub: "חנות / יבואן / משווק" },
+              ].map((opt) => {
+                const active = supplierKind === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSupplierKind(opt.value as "service" | "product")}
+                    className={
+                      "rounded-2xl border p-3 text-right transition-all " +
+                      (active
+                        ? "border-gold bg-gradient-to-br from-gold/15 to-gold/5 shadow-[0_0_0_3px_hsl(var(--gold)/0.18)]"
+                        : "border-border bg-card hover:border-gold/40")
+                    }
+                  >
+                    <div className={"text-sm font-bold " + (active ? "text-primary" : "text-foreground")}>{opt.label}</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{opt.sub}</div>
+                  </button>
+                );
+              })}
+            </div>
+            {!supplierKind && (
+              <p className="text-[10px] text-muted-foreground">בחירת סוג מאפשרת לדיירים לסנן ולמצוא אותך מהר יותר.</p>
+            )}
+          </div>
+
           <Field label="שם איש קשר" icon={UserIcon}>
             <Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={60} className="h-11 rounded-xl" />
           </Field>

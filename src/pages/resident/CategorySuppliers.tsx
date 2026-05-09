@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronLeft, MapPin, Sparkles, Star, UserPlus } from "lucide-react";
+import { ArrowRight, ChevronLeft, MapPin, Sparkles, Star, UserPlus, Wrench, Package } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -20,6 +20,7 @@ interface DbSupplier {
   serves_all_country: boolean;
   is_active: boolean;
   approval_status: string;
+  supplier_kind: "service" | "product" | null;
 }
 
 const NORTH_REGION_NAMES = new Set(["צפון", "כל הצפון", "גליל עליון", "גליל תחתון", "רמת הגולן", "עמקים", "חיפה והקריות"]);
@@ -39,6 +40,7 @@ export default function CategorySuppliers() {
 
   const [regionId, setRegionId] = useState<string>("all");
   const [cityId, setCityId] = useState<string>("all");
+  const [kindFilter, setKindFilter] = useState<"all" | "service" | "product">("all");
   // search removed per UX request
   const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
   const [supplierCityIds, setSupplierCityIds] = useState<Record<string, string[]>>({});
@@ -87,7 +89,7 @@ export default function CategorySuppliers() {
         const suppliersResult = await supabase
           .from("suppliers")
           .select(
-            "id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status",
+            "id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status,supplier_kind",
           )
           .eq("is_active", true)
           .in("approval_status", ["approved", "active"])
@@ -177,10 +179,14 @@ export default function CategorySuppliers() {
       ? suppliers
       : suppliers.filter((s) => (s.categories ?? []).includes(activeCategoryId));
 
-    const byArea = byCategory.filter(matchesArea);
+    const byKind = kindFilter === "all"
+      ? byCategory
+      : byCategory.filter((s) => s.supplier_kind === kindFilter);
+
+    const byArea = byKind.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
-    return byCategory.filter(isNationalSupplier);
-  }, [suppliers, activeCategoryId, regionId, cityId, supplierRegionIds, supplierCityIds, regions, cities]);
+    return byKind.filter(isNationalSupplier);
+  }, [suppliers, activeCategoryId, regionId, cityId, kindFilter, supplierRegionIds, supplierCityIds, regions, cities]);
 
   const areaLabel =
     cityId !== "all"
@@ -231,9 +237,40 @@ export default function CategorySuppliers() {
 
       <div className="px-5 -mt-10 relative z-10 space-y-3 pb-6">
         {/* Marketplace controls */}
-        <div className="gb-card p-4 animate-fade-up">
+        <div className="gb-card p-4 animate-fade-up space-y-3">
+          {/* Kind filter */}
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">סוג ספק</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { v: "all", label: "הכול", Icon: Sparkles },
+                { v: "service", label: "בעלי מקצוע", Icon: Wrench },
+                { v: "product", label: "ספקי מוצרים", Icon: Package },
+              ].map(({ v, label, Icon }) => {
+                const active = kindFilter === v;
+                return (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setKindFilter(v as typeof kindFilter)}
+                    className={
+                      "h-10 rounded-xl text-[11px] font-bold inline-flex items-center justify-center gap-1.5 border transition-all " +
+                      (active
+                        ? "bg-gradient-to-br from-gold/20 to-gold/5 text-primary border-gold shadow-[0_0_0_2px_hsl(var(--gold)/0.15)]"
+                        : "bg-card text-muted-foreground border-border hover:border-gold/40")
+                    }
+                  >
+                    <Icon className="h-3 w-3" />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-          <div className="flex items-center gap-1.5 mb-3">
+          <div className="flex items-center gap-1.5 pt-1">
             <MapPin className="h-3.5 w-3.5 text-gold" />
             <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
               סינון לפי אזור
@@ -314,6 +351,16 @@ export default function CategorySuppliers() {
                 )}
                 <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                   <SupplierRatingBadge supplierId={s.id} showEmpty={false} />
+                  {s.supplier_kind === "service" && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/30 inline-flex items-center gap-1">
+                      <Wrench className="h-2.5 w-2.5" /> בעל מקצוע
+                    </span>
+                  )}
+                  {s.supplier_kind === "product" && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 inline-flex items-center gap-1">
+                      <Package className="h-2.5 w-2.5" /> ספק מוצרים
+                    </span>
+                  )}
                   {s.serves_all_country && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-primary border border-gold/20">
                       ארצי
