@@ -179,10 +179,14 @@ export default function CategorySuppliers() {
       ? suppliers
       : suppliers.filter((s) => (s.categories ?? []).includes(activeCategoryId));
 
-    const byArea = byCategory.filter(matchesArea);
+    const byKind = kindFilter === "all"
+      ? byCategory
+      : byCategory.filter((s) => s.supplier_kind === kindFilter);
+
+    const byArea = byKind.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
-    return byCategory.filter(isNationalSupplier);
-  }, [suppliers, activeCategoryId, regionId, cityId, supplierRegionIds, supplierCityIds, regions, cities]);
+    return byKind.filter(isNationalSupplier);
+  }, [suppliers, activeCategoryId, regionId, cityId, kindFilter, supplierRegionIds, supplierCityIds, regions, cities]);
 
   const areaLabel =
     cityId !== "all"
