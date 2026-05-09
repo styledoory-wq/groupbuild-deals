@@ -181,9 +181,13 @@ export default function CategorySuppliers() {
       ? suppliers
       : suppliers.filter((s) => (s.categories ?? []).includes(activeCategoryId));
 
+    const supplierOffers = (s: DbSupplier) => ({
+      service: Boolean(s.offers_services) || s.supplier_kind === "service",
+      product: Boolean(s.offers_products) || s.supplier_kind === "product",
+    });
     const byKind = kindFilter === "all"
       ? byCategory
-      : byCategory.filter((s) => s.supplier_kind === kindFilter);
+      : byCategory.filter((s) => supplierOffers(s)[kindFilter]);
 
     const byArea = byKind.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
