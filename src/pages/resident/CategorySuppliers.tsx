@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronLeft, MapPin, Sparkles, Star, UserPlus } from "lucide-react";
+import { ArrowRight, ChevronLeft, MapPin, Sparkles, Star, UserPlus, Wrench, Package } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
