@@ -237,9 +237,40 @@ export default function CategorySuppliers() {
 
       <div className="px-5 -mt-10 relative z-10 space-y-3 pb-6">
         {/* Marketplace controls */}
-        <div className="gb-card p-4 animate-fade-up">
+        <div className="gb-card p-4 animate-fade-up space-y-3">
+          {/* Kind filter */}
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">סוג ספק</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { v: "all", label: "הכול", Icon: Sparkles },
+                { v: "service", label: "בעלי מקצוע", Icon: Wrench },
+                { v: "product", label: "ספקי מוצרים", Icon: Package },
+              ].map(({ v, label, Icon }) => {
+                const active = kindFilter === v;
+                return (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setKindFilter(v as typeof kindFilter)}
+                    className={
+                      "h-10 rounded-xl text-[11px] font-bold inline-flex items-center justify-center gap-1.5 border transition-all " +
+                      (active
+                        ? "bg-gradient-to-br from-gold/20 to-gold/5 text-primary border-gold shadow-[0_0_0_2px_hsl(var(--gold)/0.15)]"
+                        : "bg-card text-muted-foreground border-border hover:border-gold/40")
+                    }
+                  >
+                    <Icon className="h-3 w-3" />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-          <div className="flex items-center gap-1.5 mb-3">
+          <div className="flex items-center gap-1.5 pt-1">
             <MapPin className="h-3.5 w-3.5 text-gold" />
             <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
               סינון לפי אזור
