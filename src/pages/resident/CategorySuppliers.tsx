@@ -40,6 +40,7 @@ export default function CategorySuppliers() {
 
   const [regionId, setRegionId] = useState<string>("all");
   const [cityId, setCityId] = useState<string>("all");
+  const [kindFilter, setKindFilter] = useState<"all" | "service" | "product">("all");
   // search removed per UX request
   const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
   const [supplierCityIds, setSupplierCityIds] = useState<Record<string, string[]>>({});
