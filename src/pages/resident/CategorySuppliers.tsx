@@ -351,6 +351,16 @@ export default function CategorySuppliers() {
                 )}
                 <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                   <SupplierRatingBadge supplierId={s.id} showEmpty={false} />
+                  {s.supplier_kind === "service" && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/30 inline-flex items-center gap-1">
+                      <Wrench className="h-2.5 w-2.5" /> בעל מקצוע
+                    </span>
+                  )}
+                  {s.supplier_kind === "product" && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 inline-flex items-center gap-1">
+                      <Package className="h-2.5 w-2.5" /> ספק מוצרים
+                    </span>
+                  )}
                   {s.serves_all_country && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-primary border border-gold/20">
                       ארצי
