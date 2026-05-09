@@ -21,6 +21,8 @@ interface DbSupplier {
   is_active: boolean;
   approval_status: string;
   supplier_kind: "service" | "product" | null;
+  offers_services: boolean | null;
+  offers_products: boolean | null;
 }
 
 const NORTH_REGION_NAMES = new Set(["צפון", "כל הצפון", "גליל עליון", "גליל תחתון", "רמת הגולן", "עמקים", "חיפה והקריות"]);
@@ -89,7 +91,7 @@ export default function CategorySuppliers() {
         const suppliersResult = await supabase
           .from("suppliers")
           .select(
-            "id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status,supplier_kind",
+            "id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status,supplier_kind,offers_services,offers_products",
           )
           .eq("is_active", true)
           .in("approval_status", ["approved", "active"])
@@ -179,9 +181,13 @@ export default function CategorySuppliers() {
       ? suppliers
       : suppliers.filter((s) => (s.categories ?? []).includes(activeCategoryId));
 
+    const supplierOffers = (s: DbSupplier) => ({
+      service: Boolean(s.offers_services) || s.supplier_kind === "service",
+      product: Boolean(s.offers_products) || s.supplier_kind === "product",
+    });
     const byKind = kindFilter === "all"
       ? byCategory
-      : byCategory.filter((s) => s.supplier_kind === kindFilter);
+      : byCategory.filter((s) => supplierOffers(s)[kindFilter]);
 
     const byArea = byKind.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
@@ -351,16 +357,26 @@ export default function CategorySuppliers() {
                 )}
                 <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                   <SupplierRatingBadge supplierId={s.id} showEmpty={false} />
-                  {s.supplier_kind === "service" && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/30 inline-flex items-center gap-1">
-                      <Wrench className="h-2.5 w-2.5" /> בעל מקצוע
-                    </span>
-                  )}
-                  {s.supplier_kind === "product" && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 inline-flex items-center gap-1">
-                      <Package className="h-2.5 w-2.5" /> ספק מוצרים
-                    </span>
-                  )}
+                  {(() => {
+                    const isSvc = Boolean(s.offers_services) || s.supplier_kind === "service";
+                    const isProd = Boolean(s.offers_products) || s.supplier_kind === "product";
+                    if (isSvc && isProd) return (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-500/15 to-emerald-500/15 text-primary border border-gold/30 inline-flex items-center gap-1">
+                        <Sparkles className="h-2.5 w-2.5 text-gold" /> שירות + מוצרים
+                      </span>
+                    );
+                    if (isSvc) return (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/30 inline-flex items-center gap-1">
+                        <Wrench className="h-2.5 w-2.5" /> בעל מקצוע
+                      </span>
+                    );
+                    if (isProd) return (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 inline-flex items-center gap-1">
+                        <Package className="h-2.5 w-2.5" /> ספק מוצרים
+                      </span>
+                    );
+                    return null;
+                  })()}
                   {s.serves_all_country && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-primary border border-gold/20">
                       ארצי

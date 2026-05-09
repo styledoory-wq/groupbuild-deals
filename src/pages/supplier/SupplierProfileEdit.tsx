@@ -35,7 +35,8 @@ export default function SupplierProfileEdit() {
   const [supplierId, setSupplierId] = useState<string | null>(null);
 
   const [businessName, setBusinessName] = useState("");
-  const [supplierKind, setSupplierKind] = useState<"service" | "product" | "">("");
+  const [offersServices, setOffersServices] = useState(false);
+  const [offersProducts, setOffersProducts] = useState(false);
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -83,7 +84,9 @@ export default function SupplierProfileEdit() {
       if (existing) {
         setSupplierId(existing.id);
         setBusinessName(existing.business_name ?? "");
-        setSupplierKind(((existing as { supplier_kind?: string }).supplier_kind as "service" | "product" | null) ?? "");
+        const ex = existing as { supplier_kind?: string | null; offers_services?: boolean | null; offers_products?: boolean | null };
+        setOffersServices(Boolean(ex.offers_services) || ex.supplier_kind === "service");
+        setOffersProducts(Boolean(ex.offers_products) || ex.supplier_kind === "product");
         setContactName(existing.contact_name ?? "");
         setPhone(existing.phone ?? "");
         setDescription(existing.description ?? "");
@@ -207,7 +210,9 @@ export default function SupplierProfileEdit() {
         categories: selectedCategories,
         serves_all_country: servesAll,
         is_active: isActive,
-        supplier_kind: supplierKind || null,
+        supplier_kind: offersServices && !offersProducts ? "service" : !offersServices && offersProducts ? "product" : null,
+        offers_services: offersServices,
+        offers_products: offersProducts,
       };
 
       let sid = supplierId;
@@ -296,38 +301,37 @@ export default function SupplierProfileEdit() {
             <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} required className="h-11 rounded-xl" />
           </Field>
 
-          {/* Supplier kind selector */}
+          {/* Supplier kind: services / products / both (two checkboxes) */}
           <div className="space-y-1.5">
             <Label className="text-xs font-bold flex items-center gap-1.5">
               <Tag className="h-3.5 w-3.5 text-gold" /> סוג הספק
             </Label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { value: "service", label: "בעל מקצוע", sub: "נותן שירות / קבלן / מתקין" },
-                { value: "product", label: "ספק מוצרים", sub: "חנות / יבואן / משווק" },
-              ].map((opt) => {
-                const active = supplierKind === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSupplierKind(opt.value as "service" | "product")}
-                    className={
-                      "rounded-2xl border p-3 text-right transition-all " +
-                      (active
-                        ? "border-gold bg-gradient-to-br from-gold/15 to-gold/5 shadow-[0_0_0_3px_hsl(var(--gold)/0.18)]"
-                        : "border-border bg-card hover:border-gold/40")
-                    }
-                  >
-                    <div className={"text-sm font-bold " + (active ? "text-primary" : "text-foreground")}>{opt.label}</div>
-                    <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{opt.sub}</div>
-                  </button>
-                );
-              })}
+                { value: "service" as const, label: "בעל מקצוע", sub: "שירות / קבלן / מתקין", checked: offersServices, set: setOffersServices },
+                { value: "product" as const, label: "ספק מוצרים", sub: "חנות / יבואן / משווק", checked: offersProducts, set: setOffersProducts },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => opt.set(!opt.checked)}
+                  aria-pressed={opt.checked}
+                  className={
+                    "rounded-2xl border p-3 text-right transition-all relative " +
+                    (opt.checked
+                      ? "border-gold bg-gradient-to-br from-gold/15 to-gold/5 shadow-[0_0_0_3px_hsl(var(--gold)/0.18)]"
+                      : "border-border bg-card hover:border-gold/40")
+                  }
+                >
+                  <div className={"text-sm font-bold " + (opt.checked ? "text-primary" : "text-foreground")}>{opt.label}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{opt.sub}</div>
+                  <span className={"absolute top-2 left-2 h-4 w-4 rounded-md border flex items-center justify-center text-[10px] " + (opt.checked ? "bg-gold border-gold text-gold-foreground" : "border-border")}>{opt.checked ? "✓" : ""}</span>
+                </button>
+              ))}
             </div>
-            {!supplierKind && (
-              <p className="text-[10px] text-muted-foreground">בחירת סוג מאפשרת לדיירים לסנן ולמצוא אותך מהר יותר.</p>
-            )}
+            <p className="text-[10px] text-muted-foreground">
+              {offersServices && offersProducts ? "ספק 'גם וגם' — תופיע בשני הסינונים" : !offersServices && !offersProducts ? "בחרו לפחות אפשרות אחת כדי להופיע לדיירים." : "ניתן לסמן את שתי האפשרויות אם אתם גם נותני שירות וגם מוכרי מוצרים."}
+            </p>
           </div>
 
           <Field label="שם איש קשר" icon={UserIcon}>

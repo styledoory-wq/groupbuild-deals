@@ -972,6 +972,8 @@ export type Database = {
           is_demo: boolean
           logo_url: string | null
           monthly_subscription: number
+          offers_products: boolean
+          offers_services: boolean
           phone: string | null
           serves_all_country: boolean
           service_areas: string[]
@@ -1003,6 +1005,8 @@ export type Database = {
           is_demo?: boolean
           logo_url?: string | null
           monthly_subscription?: number
+          offers_products?: boolean
+          offers_services?: boolean
           phone?: string | null
           serves_all_country?: boolean
           service_areas?: string[]
@@ -1034,6 +1038,8 @@ export type Database = {
           is_demo?: boolean
           logo_url?: string | null
           monthly_subscription?: number
+          offers_products?: boolean
+          offers_services?: boolean
           phone?: string | null
           serves_all_country?: boolean
           service_areas?: string[]
