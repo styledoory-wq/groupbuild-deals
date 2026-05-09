@@ -35,6 +35,8 @@ interface DbSupplier {
   catalog_url: string | null;
   service_areas: string[] | null;
   supplier_kind: "service" | "product" | null;
+  offers_services: boolean | null;
+  offers_products: boolean | null;
 }
 
 interface GalleryItem {
