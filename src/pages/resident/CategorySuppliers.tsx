@@ -91,7 +91,7 @@ export default function CategorySuppliers() {
         const suppliersResult = await supabase
           .from("suppliers")
           .select(
-            "id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status,supplier_kind",
+            "id,business_name,short_description,description,logo_url,categories,service_areas,serves_all_country,is_active,approval_status,supplier_kind,offers_services,offers_products",
           )
           .eq("is_active", true)
           .in("approval_status", ["approved", "active"])
