@@ -84,7 +84,9 @@ export default function SupplierProfileEdit() {
       if (existing) {
         setSupplierId(existing.id);
         setBusinessName(existing.business_name ?? "");
-        setSupplierKind(((existing as { supplier_kind?: string }).supplier_kind as "service" | "product" | null) ?? "");
+        const ex = existing as { supplier_kind?: string | null; offers_services?: boolean | null; offers_products?: boolean | null };
+        setOffersServices(Boolean(ex.offers_services) || ex.supplier_kind === "service");
+        setOffersProducts(Boolean(ex.offers_products) || ex.supplier_kind === "product");
         setContactName(existing.contact_name ?? "");
         setPhone(existing.phone ?? "");
         setDescription(existing.description ?? "");
