@@ -34,6 +34,7 @@ interface DbSupplier {
   facebook_url: string | null;
   catalog_url: string | null;
   service_areas: string[] | null;
+  supplier_kind: "service" | "product" | null;
 }
 
 interface GalleryItem {
