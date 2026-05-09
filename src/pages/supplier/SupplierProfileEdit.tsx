@@ -212,10 +212,10 @@ export default function SupplierProfileEdit() {
 
       let sid = supplierId;
       if (sid) {
-        const { error } = await supabase.from("suppliers").update(payload).eq("id", sid);
+        const { error } = await supabase.from("suppliers").update(payload as never).eq("id", sid);
         if (error) throw error;
       } else {
-        const { data: ins, error } = await supabase.from("suppliers").insert(payload).select("id").single();
+        const { data: ins, error } = await supabase.from("suppliers").insert(payload as never).select("id").single();
         if (error) throw error;
         sid = ins.id;
         setSupplierId(sid);
