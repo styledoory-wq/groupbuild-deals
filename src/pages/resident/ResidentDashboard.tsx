@@ -24,7 +24,7 @@ const STAGES: { id: string; title: string; icon: typeof Compass; desc: string }[
 export default function ResidentDashboard() {
   const navigate = useNavigate();
   const { user, logout } = useApp();
-  const { regions, cities } = useRegions();
+  const { regions, cities, loading: regionsLoading } = useRegions();
 
   const [profileCity, setProfileCity] = useState("");
   const [profileRegion, setProfileRegion] = useState("");
