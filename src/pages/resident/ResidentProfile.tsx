@@ -38,6 +38,7 @@ export default function ResidentProfile() {
   const project = projects.find((p) => p.id === user?.projectId);
   const [myDeposits, setMyDeposits] = useState<DbDeposit[]>([]);
   const [deals, setDeals] = useState<DealMap>({});
+  const [depositsLoading, setDepositsLoading] = useState(true);
   const [showHidden, setShowHidden] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -53,19 +54,26 @@ export default function ResidentProfile() {
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[ResidentProfile] deposits", error);
+      setDepositsLoading(false);
       return;
     }
     const list = (data ?? []) as DbDeposit[];
     setMyDeposits(list);
     const dealIds = Array.from(new Set(list.map((d) => d.deal_id)));
     if (dealIds.length) {
-      const { data: dealRows } = await supabase.from("deals").select("id,title").in("id", dealIds);
+      const { data: dealRows } = await supabase
+        .from("deals")
+        .select("id,title,status,is_deleted")
+        .in("id", dealIds);
       const m: DealMap = {};
-      (dealRows ?? []).forEach((d: { id: string; title: string }) => { m[d.id] = { title: d.title }; });
+      (dealRows ?? []).forEach((d: { id: string; title: string; status: string; is_deleted: boolean }) => {
+        m[d.id] = { title: d.title, status: d.status, is_deleted: !!d.is_deleted };
+      });
       setDeals(m);
     } else {
       setDeals({});
     }
+    setDepositsLoading(false);
   }, []);
 
   const toggleHidden = async (id: string, currentlyHidden: boolean) => {
