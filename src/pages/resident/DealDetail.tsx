@@ -144,17 +144,42 @@ export default function DealDetail() {
         const { data: session } = await supabase.auth.getSession();
         if (!cancelled) setIsGuest(!session.session);
         if (session.session) {
-          const { data: interest } = await supabase
+          // Only consider ACTIVE interest statuses as "already joined".
+          // rejected / cancelled / refunded / withdrawn → user can re-join.
+          const ACTIVE_INTEREST = ["interested", "committed", "paid", "pending_deposit", "joined", "approved"];
+          const { data: interestRows } = await supabase
             .from("deal_interests")
-            .select("id,status,deposit_status")
+            .select("id,status,deposit_status,lead_status,created_at")
             .eq("user_id", session.session.user.id)
             .eq("deal_id", d.id)
             .eq("is_deleted", false)
-            .maybeSingle();
-          if (!cancelled && interest) {
-            setInterested(true);
-            setInterestStatus(interest.status);
-            setInterestDepositStatus(interest.deposit_status ?? "none");
+            .order("created_at", { ascending: false })
+            .limit(5);
+          const activeInterest = (interestRows ?? []).find((r) =>
+            ACTIVE_INTEREST.includes(r.status) && r.lead_status !== "rejected"
+          );
+          if (!cancelled && activeInterest) {
+            // For pending_deposit, double-check a real deposit row exists; if not, allow re-join.
+            if (activeInterest.status === "pending_deposit") {
+              const { data: dep } = await supabase
+                .from("deposits")
+                .select("id,status")
+                .eq("user_id", session.session.user.id)
+                .eq("deal_id", d.id)
+                .eq("is_deleted", false)
+                .in("status", ["pending", "paid"])
+                .maybeSingle();
+              if (dep) {
+                setInterested(true);
+                setInterestStatus(activeInterest.status);
+                setInterestDepositStatus(dep.status ?? activeInterest.deposit_status ?? "pending");
+              }
+              // else: stale pending_deposit without deposit row → treat as not joined
+            } else {
+              setInterested(true);
+              setInterestStatus(activeInterest.status);
+              setInterestDepositStatus(activeInterest.deposit_status ?? "none");
+            }
           }
 
           // Prefill form from profile
