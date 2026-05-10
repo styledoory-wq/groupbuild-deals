@@ -1212,6 +1212,10 @@ export type Database = {
         Args: { _supplier_id: string }
         Returns: undefined
       }
+      set_deposit_hidden: {
+        Args: { _deposit_id: string; _hidden: boolean }
+        Returns: undefined
+      }
       user_can_review: {
         Args: { _deal_id: string; _user_id: string }
         Returns: boolean
