@@ -24,10 +24,13 @@ type DbDeposit = {
   is_hidden: boolean;
 };
 
-type DealMap = Record<string, { title: string }>;
+type DealMap = Record<string, { title: string; status: string; is_deleted: boolean }>;
 
+// Active = currently open & relevant
 const ACTIVE_STATUSES = new Set(["pending", "paid"]);
-const HISTORY_STATUSES = new Set(["refunded", "cancelled", "failed"]);
+// History = completed lifecycle (refund). Cancelled/failed are hidden as "irrelevant".
+const HISTORY_STATUSES = new Set(["refunded"]);
+const IRRELEVANT_STATUSES = new Set(["cancelled", "failed", "expired"]);
 
 export default function ResidentProfile() {
   const navigate = useNavigate();
