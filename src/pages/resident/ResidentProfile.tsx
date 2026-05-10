@@ -266,16 +266,22 @@ export default function ResidentProfile() {
                 )}
               </div>
               <div className="space-y-2">
-                {activeDeposits.length === 0 && (
+                {depositsLoading ? (
+                  <>
+                    <div className="gb-skeleton h-20 rounded-2xl" />
+                    <div className="gb-skeleton h-20 rounded-2xl" />
+                  </>
+                ) : activeDeposits.length === 0 ? (
                   <div className="gb-card p-6 text-center text-sm text-muted-foreground">
                     אין פיקדונות פעילים.
                   </div>
+                ) : (
+                  activeDeposits.map(renderItem)
                 )}
-                {activeDeposits.map(renderItem)}
               </div>
             </section>
 
-            {historyDeposits.length > 0 && (
+            {!depositsLoading && historyDeposits.length > 0 && (
               <section className="px-5 mb-5">
                 <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
                   <History className="h-4 w-4 text-muted-foreground" />
@@ -284,6 +290,17 @@ export default function ResidentProfile() {
                 <div className="space-y-2">{historyDeposits.map(renderItem)}</div>
               </section>
             )}
+
+            {!depositsLoading && showHidden && irrelevantDeposits.length > 0 && (
+              <section className="px-5 mb-5">
+                <h2 className="text-sm font-bold text-muted-foreground mb-3 flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  פיקדונות לא רלוונטיים
+                </h2>
+                <div className="space-y-2 opacity-80">{irrelevantDeposits.map(renderItem)}</div>
+              </section>
+            )}
+
           </>
         );
       })()}
