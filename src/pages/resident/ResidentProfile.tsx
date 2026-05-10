@@ -24,10 +24,13 @@ type DbDeposit = {
   is_hidden: boolean;
 };
 
-type DealMap = Record<string, { title: string }>;
+type DealMap = Record<string, { title: string; status: string; is_deleted: boolean }>;
 
+// Active = currently open & relevant
 const ACTIVE_STATUSES = new Set(["pending", "paid"]);
-const HISTORY_STATUSES = new Set(["refunded", "cancelled", "failed"]);
+// History = completed lifecycle (refund). Cancelled/failed are hidden as "irrelevant".
+const HISTORY_STATUSES = new Set(["refunded"]);
+const IRRELEVANT_STATUSES = new Set(["cancelled", "failed", "expired"]);
 
 export default function ResidentProfile() {
   const navigate = useNavigate();
@@ -35,6 +38,7 @@ export default function ResidentProfile() {
   const project = projects.find((p) => p.id === user?.projectId);
   const [myDeposits, setMyDeposits] = useState<DbDeposit[]>([]);
   const [deals, setDeals] = useState<DealMap>({});
+  const [depositsLoading, setDepositsLoading] = useState(true);
   const [showHidden, setShowHidden] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -50,19 +54,26 @@ export default function ResidentProfile() {
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[ResidentProfile] deposits", error);
+      setDepositsLoading(false);
       return;
     }
     const list = (data ?? []) as DbDeposit[];
     setMyDeposits(list);
     const dealIds = Array.from(new Set(list.map((d) => d.deal_id)));
     if (dealIds.length) {
-      const { data: dealRows } = await supabase.from("deals").select("id,title").in("id", dealIds);
+      const { data: dealRows } = await supabase
+        .from("deals")
+        .select("id,title,status,is_deleted")
+        .in("id", dealIds);
       const m: DealMap = {};
-      (dealRows ?? []).forEach((d: { id: string; title: string }) => { m[d.id] = { title: d.title }; });
+      (dealRows ?? []).forEach((d: { id: string; title: string; status: string; is_deleted: boolean }) => {
+        m[d.id] = { title: d.title, status: d.status, is_deleted: !!d.is_deleted };
+      });
       setDeals(m);
     } else {
       setDeals({});
     }
+    setDepositsLoading(false);
   }, []);
 
   const toggleHidden = async (id: string, currentlyHidden: boolean) => {
@@ -142,10 +153,27 @@ export default function ResidentProfile() {
       </div>
 
       {(() => {
+        // Relevance: deposit must reference an existing, non-deleted, active deal.
+        // Pending/paid on a closed/deleted deal => irrelevant (hidden by default unless user opts in).
+        const isRelevant = (d: DbDeposit) => {
+          const deal = deals[d.deal_id];
+          if (!deal) return false;
+          if (deal.is_deleted) return false;
+          // For pending/paid deposits the underlying deal must still be active.
+          if (ACTIVE_STATUSES.has(d.status) && deal.status !== "active") return false;
+          return true;
+        };
+        const isIrrelevant = (d: DbDeposit) => IRRELEVANT_STATUSES.has(d.status) || !isRelevant(d);
+
         const visibleDeposits = myDeposits.filter((d) => showHidden || !d.is_hidden);
-        const activeDeposits = visibleDeposits.filter((d) => ACTIVE_STATUSES.has(d.status));
+        const activeDeposits = visibleDeposits.filter(
+          (d) => ACTIVE_STATUSES.has(d.status) && isRelevant(d),
+        );
         const historyDeposits = visibleDeposits.filter((d) => HISTORY_STATUSES.has(d.status));
+        // Hidden by default: cancelled/failed/expired and orphaned/closed-deal deposits.
+        const irrelevantDeposits = visibleDeposits.filter(isIrrelevant);
         const hiddenCount = myDeposits.filter((d) => d.is_hidden).length;
+
 
         const renderItem = (dep: DbDeposit) => {
           const dealMissing = !deals[dep.deal_id];
@@ -238,16 +266,22 @@ export default function ResidentProfile() {
                 )}
               </div>
               <div className="space-y-2">
-                {activeDeposits.length === 0 && (
+                {depositsLoading ? (
+                  <>
+                    <div className="gb-skeleton h-20 rounded-2xl" />
+                    <div className="gb-skeleton h-20 rounded-2xl" />
+                  </>
+                ) : activeDeposits.length === 0 ? (
                   <div className="gb-card p-6 text-center text-sm text-muted-foreground">
                     אין פיקדונות פעילים.
                   </div>
+                ) : (
+                  activeDeposits.map(renderItem)
                 )}
-                {activeDeposits.map(renderItem)}
               </div>
             </section>
 
-            {historyDeposits.length > 0 && (
+            {!depositsLoading && historyDeposits.length > 0 && (
               <section className="px-5 mb-5">
                 <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
                   <History className="h-4 w-4 text-muted-foreground" />
@@ -256,6 +290,17 @@ export default function ResidentProfile() {
                 <div className="space-y-2">{historyDeposits.map(renderItem)}</div>
               </section>
             )}
+
+            {!depositsLoading && showHidden && irrelevantDeposits.length > 0 && (
+              <section className="px-5 mb-5">
+                <h2 className="text-sm font-bold text-muted-foreground mb-3 flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  פיקדונות לא רלוונטיים
+                </h2>
+                <div className="space-y-2 opacity-80">{irrelevantDeposits.map(renderItem)}</div>
+              </section>
+            )}
+
           </>
         );
       })()}

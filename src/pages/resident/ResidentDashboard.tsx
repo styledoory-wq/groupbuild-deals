@@ -24,7 +24,7 @@ const STAGES: { id: string; title: string; icon: typeof Compass; desc: string }[
 export default function ResidentDashboard() {
   const navigate = useNavigate();
   const { user, logout } = useApp();
-  const { regions, cities } = useRegions();
+  const { regions, cities, loading: regionsLoading } = useRegions();
 
   const [profileCity, setProfileCity] = useState("");
   const [profileRegion, setProfileRegion] = useState("");
@@ -35,6 +35,8 @@ export default function ResidentDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Wait for regions/cities to resolve so we don't double-fetch (causes a visible flash).
+    if (regionsLoading) return;
     let cancelled = false;
     const safety = window.setTimeout(() => {
       if (!cancelled) {
@@ -167,7 +169,7 @@ export default function ResidentDashboard() {
       cancelled = true;
       window.clearTimeout(safety);
     };
-  }, [regions, cities]);
+  }, [regions, cities, regionsLoading]);
 
   const hasArea = !!(profileCity || profileRegion);
   const areaLabel = profileCity || regions.find((r) => r.slug === profileRegion)?.name_he || "";
