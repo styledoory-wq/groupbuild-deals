@@ -153,10 +153,27 @@ export default function ResidentProfile() {
       </div>
 
       {(() => {
+        // Relevance: deposit must reference an existing, non-deleted, active deal.
+        // Pending/paid on a closed/deleted deal => irrelevant (hidden by default unless user opts in).
+        const isRelevant = (d: DbDeposit) => {
+          const deal = deals[d.deal_id];
+          if (!deal) return false;
+          if (deal.is_deleted) return false;
+          // For pending/paid deposits the underlying deal must still be active.
+          if (ACTIVE_STATUSES.has(d.status) && deal.status !== "active") return false;
+          return true;
+        };
+        const isIrrelevant = (d: DbDeposit) => IRRELEVANT_STATUSES.has(d.status) || !isRelevant(d);
+
         const visibleDeposits = myDeposits.filter((d) => showHidden || !d.is_hidden);
-        const activeDeposits = visibleDeposits.filter((d) => ACTIVE_STATUSES.has(d.status));
+        const activeDeposits = visibleDeposits.filter(
+          (d) => ACTIVE_STATUSES.has(d.status) && isRelevant(d),
+        );
         const historyDeposits = visibleDeposits.filter((d) => HISTORY_STATUSES.has(d.status));
+        // Hidden by default: cancelled/failed/expired and orphaned/closed-deal deposits.
+        const irrelevantDeposits = visibleDeposits.filter(isIrrelevant);
         const hiddenCount = myDeposits.filter((d) => d.is_hidden).length;
+
 
         const renderItem = (dep: DbDeposit) => {
           const dealMissing = !deals[dep.deal_id];
