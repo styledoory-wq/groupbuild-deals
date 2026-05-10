@@ -169,7 +169,7 @@ export default function ResidentDashboard() {
       cancelled = true;
       window.clearTimeout(safety);
     };
-  }, [regions, cities]);
+  }, [regions, cities, regionsLoading]);
 
   const hasArea = !!(profileCity || profileRegion);
   const areaLabel = profileCity || regions.find((r) => r.slug === profileRegion)?.name_he || "";
