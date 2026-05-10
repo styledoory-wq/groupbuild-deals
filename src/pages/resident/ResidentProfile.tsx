@@ -79,7 +79,10 @@ export default function ResidentProfile() {
   const toggleHidden = async (id: string, currentlyHidden: boolean) => {
     setBusyId(id);
     try {
-      const { error } = await supabase.from("deposits").update({ is_hidden: !currentlyHidden }).eq("id", id);
+      const { error } = await supabase.rpc("set_deposit_hidden", {
+        _deposit_id: id,
+        _hidden: !currentlyHidden,
+      });
       if (error) throw error;
       toast.success(currentlyHidden ? "הוחזר לתצוגה" : "הוסתר מהתצוגה");
       const { data: sessionData } = await supabase.auth.getSession();
