@@ -35,6 +35,8 @@ export default function ResidentDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Wait for regions/cities to resolve so we don't double-fetch (causes a visible flash).
+    if (regionsLoading) return;
     let cancelled = false;
     const safety = window.setTimeout(() => {
       if (!cancelled) {
