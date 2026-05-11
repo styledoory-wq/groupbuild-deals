@@ -115,13 +115,22 @@ export default function MyOffers() {
         (deals ?? []).forEach((d) => { dealsMap[(d as DealRow).id] = d as DealRow; });
       }
 
+      // Batch paid-count fetch (was N+1 RPC calls before)
       const counts: Record<string, number> = {};
-      await Promise.all(
-        dealIds.map(async (id) => {
-          const { data } = await supabase.rpc("get_deal_paid_count", { _deal_id: id });
-          counts[id] = typeof data === "number" ? data : 0;
-        }),
-      );
+      if (dealIds.length) {
+        const { data: paidRows } = await supabase
+          .from("deposits")
+          .select("deal_id,user_id")
+          .in("deal_id", dealIds)
+          .eq("status", "paid")
+          .eq("is_deleted", false);
+        const seen: Record<string, Set<string>> = {};
+        (paidRows ?? []).forEach((r: { deal_id: string; user_id: string }) => {
+          if (!seen[r.deal_id]) seen[r.deal_id] = new Set();
+          seen[r.deal_id].add(r.user_id);
+        });
+        dealIds.forEach((id) => { counts[id] = seen[id]?.size ?? 0; });
+      }
 
       setItems(
         list.map((interest) => ({
