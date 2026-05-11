@@ -47,6 +47,55 @@ type DbNotificationRow = {
   created_at: string;
 };
 
+const loadProjectsOnce = async () => {
+  if (projectsCache && Date.now() - projectsCache.at < CACHE_TTL) return projectsCache.data;
+  if (projectsInflight) return projectsInflight;
+  projectsInflight = (async () => {
+    const { data, error } = await withTimeout(supabase
+      .from("projects")
+      .select("id,name,city,building_count,apartment_count,status")
+      .eq("is_active", true)
+      .eq("is_deleted", false)
+      .order("created_at", { ascending: false }), "טעינת פרויקטים");
+    if (error) throw error;
+    const mapped = (data ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      city: p.city,
+      buildingCount: p.building_count ?? 0,
+      apartmentCount: p.apartment_count ?? 0,
+      status: (p.status as Project["status"]) ?? "planning",
+    }));
+    projectsCache = { data: mapped, at: Date.now() };
+    projectsInflight = null;
+    return mapped;
+  })().catch((err) => { projectsInflight = null; throw err; });
+  return projectsInflight;
+};
+
+const loadCategoriesOnce = async () => {
+  if (categoriesCache && Date.now() - categoriesCache.at < CACHE_TTL) return categoriesCache.data;
+  if (categoriesInflight) return categoriesInflight;
+  categoriesInflight = (async () => {
+    const { data, error } = await withTimeout(supabase
+      .from("categories")
+      .select("id,name,icon")
+      .eq("is_active", true)
+      .eq("is_deleted", false)
+      .order("display_order", { ascending: true }), "טעינת תחומים");
+    if (error) throw error;
+    const mapped = ((data ?? []) as DbCategoryRow[]).map((c) => ({
+      id: c.id,
+      name: c.name,
+      icon: c.icon ?? "📦",
+    }));
+    categoriesCache = { data: mapped, at: Date.now() };
+    categoriesInflight = null;
+    return mapped;
+  })().catch((err) => { categoriesInflight = null; throw err; });
+  return categoriesInflight;
+};
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const hydratingUserRef = useRef<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
