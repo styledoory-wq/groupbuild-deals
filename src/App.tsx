@@ -8,6 +8,7 @@ import { AppProvider, useApp } from "@/store/AppStore";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
 import { RouteTransition } from "@/components/layout/RouteTransition";
 import { MobileShell } from "@/components/layout/MobileShell";
+import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -18,7 +19,6 @@ const SupplierProfile = lazy(() => import("./pages/SupplierProfile"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 const TermsResidents = lazy(() => import("./pages/TermsResidents"));
 const TermsSuppliers = lazy(() => import("./pages/TermsSuppliers"));
-import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 
 const ResidentDashboard = lazy(() => import("./pages/resident/ResidentDashboard"));
 const ProjectsList = lazy(() => import("./pages/resident/ProjectsList"));
