@@ -10,23 +10,27 @@ import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDeal
 import { DealCardSkeletonList } from "@/components/deals/DealCardSkeleton";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import type { OfferTier } from "@/lib/offerPricing";
+import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
 type DealWithSupplier = RealDealCardData;
 
 export default function DealsList() {
   const { categoryId } = useParams();
   const { categories } = useApp();
-  const [deals, setDeals] = useState<DealWithSupplier[]>([]);
-  const [counts, setCounts] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
+  const cacheKey = `deals-list:${categoryId ?? "all"}`;
+  const cached = getCachedValue<{ deals: DealWithSupplier[]; counts: Record<string, number> }>(cacheKey, 60_000);
+  const [deals, setDeals] = useState<DealWithSupplier[]>(() => cached?.deals ?? []);
+  const [counts, setCounts] = useState<Record<string, number>>(() => cached?.counts ?? {});
+  const [loading, setLoading] = useState(() => !cached);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setLoading(true);
+      if (!cached) setLoading(true);
       setError(null);
       try {
+        const result = await cachedQuery(cacheKey, async () => {
         let query = supabase
           .from("deals")
           .select(
@@ -67,12 +71,19 @@ export default function DealsList() {
               ends_at: (r.ends_at as string | null) ?? null,
               visibility_type: (r.visibility_type as string | null) ?? "public",
               visibility_project_id: (r.visibility_project_id as string | null) ?? null,
+              cover_image_url: (r.cover_image_url as string | null) ?? null,
+              gallery_images: (Array.isArray(r.gallery_images) ? (r.gallery_images as string[]) : []) as string[],
             };
           });
-        setDeals(mapped);
+        let nextCounts: Record<string, number> = {};
         if (mapped.length) {
-          const c = await fetchDealJoinerCounts(mapped.map((d) => d.id));
-          if (!cancelled) setCounts(c);
+          nextCounts = await fetchDealJoinerCounts(mapped.map((d) => d.id));
+        }
+        return { deals: mapped, counts: nextCounts };
+        }, 60_000);
+        if (!cancelled) {
+          setDeals(result.deals);
+          setCounts(result.counts);
         }
       } catch (e) {
         console.error("[DealsList] load error", e);
@@ -84,7 +95,7 @@ export default function DealsList() {
     return () => {
       cancelled = true;
     };
-  }, [categoryId]);
+  }, [categoryId, cacheKey]);
 
   const cat = categories.find((c) => c.id === categoryId);
 
