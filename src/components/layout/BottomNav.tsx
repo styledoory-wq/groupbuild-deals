@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Home, LayoutGrid, Tag, User, Bell, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
