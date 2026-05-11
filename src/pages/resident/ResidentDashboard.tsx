@@ -51,7 +51,11 @@ export default function ResidentDashboard() {
   );
 
   useEffect(() => {
-    if (!authReady || !user?.id) return;
+    if (!authReady) return;
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
     // Wait for regions/cities to resolve so we don't double-fetch (causes a visible flash).
     if (regionsLoading) return;
     let cancelled = false;
