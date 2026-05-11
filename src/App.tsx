@@ -4,7 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppProvider } from "@/store/AppStore";
+import { AppProvider, useApp } from "@/store/AppStore";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
 import { RouteTransition } from "@/components/layout/RouteTransition";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -95,6 +95,21 @@ const SuspenseFallback = () => (
   </MobileShell>
 );
 
+const PreloadImportantRoutes = () => {
+  const { user, authReady } = useApp();
+
+  useEffect(() => {
+    if (!authReady || !user) return;
+    const run = user.role === "supplier" ? preloadSupplierRoutes : preloadResidentRoutes;
+    const idle = window.requestIdleCallback ?? ((cb: IdleRequestCallback) => window.setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 }), 1200));
+    const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout;
+    const id = idle(run);
+    return () => cancelIdle(id as never);
+  }, [authReady, user?.role]);
+
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AppProvider>
@@ -102,6 +117,7 @@ const App = () => (
         <Toaster />
         <Sonner position="top-center" dir="rtl" />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <PreloadImportantRoutes />
           <TermsAcceptanceGate>
             <RouteTransition>
               <Suspense fallback={<SuspenseFallback />}>
