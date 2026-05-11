@@ -93,8 +93,13 @@ const adminRoute = (el: React.ReactNode) => <RequireAdmin>{el}</RequireAdmin>;
 
 const SuspenseFallback = () => (
   <MobileShell>
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="h-8 w-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
+    <div className="px-5 pt-8 space-y-5 min-h-screen">
+      <div className="h-36 rounded-b-[32px] gb-skeleton" />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="h-28 gb-skeleton" />
+        <div className="h-28 gb-skeleton" />
+      </div>
+      <div className="h-32 gb-skeleton" />
     </div>
   </MobileShell>
 );
