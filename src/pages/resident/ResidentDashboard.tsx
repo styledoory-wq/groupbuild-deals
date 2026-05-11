@@ -288,6 +288,34 @@ export default function ResidentDashboard() {
         </div>
       </header>
 
+      {loading && (
+        <div aria-hidden className="px-5 pt-7 pb-8 space-y-7">
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="h-4 w-28 gb-skeleton" />
+              <div className="h-3 w-10 gb-skeleton" />
+            </div>
+            <div className="h-[104px] gb-skeleton" />
+          </section>
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="h-4 w-24 gb-skeleton" />
+              <div className="h-3 w-10 gb-skeleton" />
+            </div>
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+          </section>
+          <section className="space-y-3">
+            <div className="h-4 w-20 gb-skeleton" />
+            <div className="h-[72px] gb-skeleton" />
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="h-[132px] gb-skeleton" />
+              <div className="h-[132px] gb-skeleton" />
+            </div>
+          </section>
+        </div>
+      )}
+
       {error && (
         <div className="px-5 mt-4">
           <div className="gb-card p-4 border-destructive/30 bg-destructive/10 text-sm text-destructive leading-relaxed">
@@ -296,7 +324,7 @@ export default function ResidentDashboard() {
         </div>
       )}
 
-      {joinedDeals.length > 0 && (
+      {!loading && joinedDeals.length > 0 && (
         <section className="mt-7 mb-7">
           <div className="flex items-center justify-between px-5 mb-3">
             <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
@@ -317,7 +345,7 @@ export default function ResidentDashboard() {
         </section>
       )}
 
-      <section className="px-5 space-y-3 mt-7 mb-8">
+      {!loading && <section className="px-5 space-y-3 mt-7 mb-8">
         <div className="flex items-center justify-between">
           <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
             <Sparkles className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
@@ -328,12 +356,7 @@ export default function ResidentDashboard() {
           </Link>
         </div>
 
-        {loading ? (
-          <div className="space-y-3">
-            <DealCardSkeleton />
-            <DealCardSkeleton />
-          </div>
-        ) : !hasArea ? (
+        {!hasArea ? (
           <button
             onClick={() => navigate("/resident/profile/edit")}
             className="w-full gb-tile-dark p-5 text-right group"
@@ -370,9 +393,9 @@ export default function ResidentDashboard() {
             .slice(0, 2)
             .map((d) => <RealDealCard key={d.id} deal={d} />)
         )}
-      </section>
+      </section>}
 
-      <section className="px-5 pb-8">
+      {!loading && <section className="px-5 pb-8">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-[13px] font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
             <Compass className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
@@ -412,7 +435,7 @@ export default function ResidentDashboard() {
             );
           })}
         </div>
-      </section>
+      </section>}
 
       <BottomNav role="resident" />
     </MobileShell>
