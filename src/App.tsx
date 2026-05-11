@@ -8,45 +8,49 @@ import { AppProvider, useApp } from "@/store/AppStore";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
 import { RouteTransition } from "@/components/layout/RouteTransition";
 import { MobileShell } from "@/components/layout/MobileShell";
-
-import Landing from "./pages/Landing";
-import Auth from "./pages/Auth";
-import ResetPassword from "./pages/ResetPassword";
-import NotFound from "./pages/NotFound.tsx";
-import ThankYou from "./pages/ThankYou";
-import SupplierProfile from "./pages/SupplierProfile";
-import NotificationSettings from "./pages/NotificationSettings";
-import TermsResidents from "./pages/TermsResidents";
-import TermsSuppliers from "./pages/TermsSuppliers";
 import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 
-import ResidentDashboard from "./pages/resident/ResidentDashboard";
-import ProjectsList from "./pages/resident/ProjectsList";
-import CategoriesList from "./pages/resident/CategoriesList";
-import DealsList from "./pages/resident/DealsList";
-import CategorySuppliers from "./pages/resident/CategorySuppliers";
-import DealDetail from "./pages/resident/DealDetail";
-import ResidentProfile from "./pages/resident/ResidentProfile";
-import ResidentProfileEdit from "./pages/resident/ResidentProfileEdit";
-import Notifications from "./pages/resident/Notifications";
-import MyOffers from "./pages/resident/MyOffers";
-import MyDocuments from "./pages/resident/MyDocuments";
+const Landing = lazy(() => import("./pages/Landing"));
+const Auth = lazy(() => import("./pages/Auth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const ThankYou = lazy(() => import("./pages/ThankYou"));
+const SupplierProfile = lazy(() => import("./pages/SupplierProfile"));
+const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
+const TermsResidents = lazy(() => import("./pages/TermsResidents"));
+const TermsSuppliers = lazy(() => import("./pages/TermsSuppliers"));
 
-import SupplierDashboard from "./pages/supplier/SupplierDashboard";
-import SupplierProfileEdit from "./pages/supplier/SupplierProfileEdit";
-import SupplierOffers from "./pages/supplier/SupplierOffers";
-import OfferEditor from "./pages/supplier/OfferEditor";
-import SupplierOfferMarketingEdit from "./pages/supplier/SupplierOfferMarketingEdit";
-import SupplierLeads from "./pages/supplier/SupplierLeads";
-import SupplierReviews from "./pages/supplier/SupplierReviews";
+const ResidentDashboard = lazy(() => import("./pages/resident/ResidentDashboard"));
+const ProjectsList = lazy(() => import("./pages/resident/ProjectsList"));
+const CategoriesList = lazy(() => import("./pages/resident/CategoriesList"));
+const DealsList = lazy(() => import("./pages/resident/DealsList"));
+const CategorySuppliers = lazy(() => import("./pages/resident/CategorySuppliers"));
+const DealDetail = lazy(() => import("./pages/resident/DealDetail"));
+const ResidentProfile = lazy(() => import("./pages/resident/ResidentProfile"));
+const ResidentProfileEdit = lazy(() => import("./pages/resident/ResidentProfileEdit"));
+const Notifications = lazy(() => import("./pages/resident/Notifications"));
+const MyOffers = lazy(() => import("./pages/resident/MyOffers"));
+const MyDocuments = lazy(() => import("./pages/resident/MyDocuments"));
+
+const SupplierDashboard = lazy(() => import("./pages/supplier/SupplierDashboard"));
+const SupplierProfileEdit = lazy(() => import("./pages/supplier/SupplierProfileEdit"));
+const SupplierOffers = lazy(() => import("./pages/supplier/SupplierOffers"));
+const OfferEditor = lazy(() => import("./pages/supplier/OfferEditor"));
+const SupplierOfferMarketingEdit = lazy(() => import("./pages/supplier/SupplierOfferMarketingEdit"));
+const SupplierLeads = lazy(() => import("./pages/supplier/SupplierLeads"));
+const SupplierReviews = lazy(() => import("./pages/supplier/SupplierReviews"));
 
 const preloadResidentRoutes = () => {
+  void import("./pages/resident/ResidentDashboard");
   void import("./pages/resident/DealDetail");
   void import("./pages/resident/DealsList");
   void import("./pages/resident/MyOffers");
+  void import("./pages/resident/CategoriesList");
+  void import("./pages/resident/CategorySuppliers");
 };
 
 const preloadSupplierRoutes = () => {
+  void import("./pages/supplier/SupplierDashboard");
   void import("./pages/supplier/SupplierLeads");
   void import("./pages/supplier/SupplierOffers");
 };
@@ -68,8 +72,8 @@ const AdminSupplierAreas = lazy(() => import("./pages/admin/AdminSupplierAreas")
 const AdminSupplierMedia = lazy(() => import("./pages/admin/AdminSupplierMedia"));
 const AdminDbSuppliers = lazy(() => import("./pages/admin/AdminDbSuppliers"));
 
-import PaymentSuccess from "./pages/payment/PaymentSuccess";
-import PaymentCancel from "./pages/payment/PaymentCancel";
+const PaymentSuccess = lazy(() => import("./pages/payment/PaymentSuccess"));
+const PaymentCancel = lazy(() => import("./pages/payment/PaymentCancel"));
 
 // React Query — sensible defaults to eliminate flicker between pages.
 // Cached data is reused immediately, then refetched silently in the background.
@@ -89,8 +93,13 @@ const adminRoute = (el: React.ReactNode) => <RequireAdmin>{el}</RequireAdmin>;
 
 const SuspenseFallback = () => (
   <MobileShell>
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="h-8 w-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
+    <div className="px-5 pt-8 space-y-5 min-h-screen">
+      <div className="h-36 rounded-b-[32px] gb-skeleton" />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="h-28 gb-skeleton" />
+        <div className="h-28 gb-skeleton" />
+      </div>
+      <div className="h-32 gb-skeleton" />
     </div>
   </MobileShell>
 );

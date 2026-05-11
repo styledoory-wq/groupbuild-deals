@@ -5,6 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { withTimeout } from "@/lib/safeAsync";
 import { isAdminEmail, setAdminSession } from "@/lib/auth";
 
+const CACHE_TTL = 5 * 60_000;
+let projectsCache: { data: Project[]; at: number } | null = null;
+let categoriesCache: { data: Category[]; at: number } | null = null;
+let projectsInflight: Promise<Project[]> | null = null;
+let categoriesInflight: Promise<Category[]> | null = null;
+let notificationsCache: Record<string, { data: AppNotification[]; at: number }> = {};
+
 interface AppState {
   user: User | null;
   setUser: (u: User | null) => void;
@@ -40,12 +47,61 @@ type DbNotificationRow = {
   created_at: string;
 };
 
+const loadProjectsOnce = async () => {
+  if (projectsCache && Date.now() - projectsCache.at < CACHE_TTL) return projectsCache.data;
+  if (projectsInflight) return projectsInflight;
+  projectsInflight = (async () => {
+    const { data, error } = await withTimeout(supabase
+      .from("projects")
+      .select("id,name,city,building_count,apartment_count,status")
+      .eq("is_active", true)
+      .eq("is_deleted", false)
+      .order("created_at", { ascending: false }), "טעינת פרויקטים");
+    if (error) throw error;
+    const mapped = (data ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      city: p.city,
+      buildingCount: p.building_count ?? 0,
+      apartmentCount: p.apartment_count ?? 0,
+      status: (p.status as Project["status"]) ?? "planning",
+    }));
+    projectsCache = { data: mapped, at: Date.now() };
+    projectsInflight = null;
+    return mapped;
+  })().catch((err) => { projectsInflight = null; throw err; });
+  return projectsInflight;
+};
+
+const loadCategoriesOnce = async () => {
+  if (categoriesCache && Date.now() - categoriesCache.at < CACHE_TTL) return categoriesCache.data;
+  if (categoriesInflight) return categoriesInflight;
+  categoriesInflight = (async () => {
+    const { data, error } = await withTimeout(supabase
+      .from("categories")
+      .select("id,name,icon")
+      .eq("is_active", true)
+      .eq("is_deleted", false)
+      .order("display_order", { ascending: true }), "טעינת תחומים");
+    if (error) throw error;
+    const mapped = ((data ?? []) as DbCategoryRow[]).map((c) => ({
+      id: c.id,
+      name: c.name,
+      icon: c.icon ?? "📦",
+    }));
+    categoriesCache = { data: mapped, at: Date.now() };
+    categoriesInflight = null;
+    return mapped;
+  })().catch((err) => { categoriesInflight = null; throw err; });
+  return categoriesInflight;
+};
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const hydratingUserRef = useRef<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [projects, setProjects] = useState<Project[]>(() => projectsCache?.data ?? []);
+  const [categories, setCategories] = useState<Category[]>(() => categoriesCache?.data ?? []);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   const loginDemo = (role: "resident" | "supplier" | "admin") => {
@@ -144,27 +200,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     (async () => {
-      const { data, error } = await withTimeout(supabase
-        .from("projects")
-        .select("id,name,city,building_count,apartment_count,status")
-        .eq("is_active", true)
-        .eq("is_deleted", false)
-        .order("created_at", { ascending: false }), "טעינת פרויקטים");
-
-      if (!active) return;
-      if (error) {
+      try {
+        const data = await loadProjectsOnce();
+        if (active) setProjects(data);
+      } catch (error) {
         console.error("[AppStore] projects load failed", error);
-        return;
       }
-
-      setProjects((data ?? []).map((p) => ({
-        id: p.id,
-        name: p.name,
-        city: p.city,
-        buildingCount: p.building_count ?? 0,
-        apartmentCount: p.apartment_count ?? 0,
-        status: (p.status as Project["status"]) ?? "planning",
-      })));
     })();
     return () => { active = false; };
   }, []);
@@ -173,23 +214,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     (async () => {
-      const { data, error } = await withTimeout(supabase
-        .from("categories")
-        .select("id,name,icon")
-        .eq("is_active", true)
-        .eq("is_deleted", false)
-        .order("display_order", { ascending: true }), "טעינת תחומים");
-
-      if (!active) return;
-      if (error) {
+      try {
+        const data = await loadCategoriesOnce();
+        if (active) setCategories(data);
+      } catch (error) {
         console.error("[AppStore] categories load failed", error);
-        return;
       }
-      setCategories(((data ?? []) as DbCategoryRow[]).map((c) => ({
-        id: c.id,
-        name: c.name,
-        icon: c.icon ?? "📦",
-      })));
     })();
     return () => { active = false; };
   }, []);
@@ -200,6 +230,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const uid = user?.id;
       if (!uid) {
         setNotifications([]);
+        return;
+      }
+      const cached = notificationsCache[uid];
+      if (cached && Date.now() - cached.at < 45_000) {
+        setNotifications(cached.data);
         return;
       }
       const { data, error } = await withTimeout(supabase
@@ -213,14 +248,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.error("[AppStore] notifications load failed", error);
         return;
       }
-      setNotifications(((data ?? []) as DbNotificationRow[]).map((n) => ({
+      const mapped = ((data ?? []) as DbNotificationRow[]).map((n) => ({
         id: n.id,
         title: n.title,
         body: n.body ?? "",
         type: ((n.type as AppNotification["type"]) ?? "system"),
         unread: !n.is_read,
         createdAt: n.created_at,
-      })));
+      }));
+      notificationsCache[uid] = { data: mapped, at: Date.now() };
+      setNotifications(mapped);
     } catch (error) {
       console.error("[AppStore] notifications load failed", error);
     }
@@ -245,6 +282,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+    if (notificationsCache[uid]) {
+      notificationsCache[uid] = { data: notificationsCache[uid].data.map((n) => ({ ...n, unread: false })), at: Date.now() };
+    }
   };
 
   const unreadCount = notifications.filter((n) => n.unread).length;

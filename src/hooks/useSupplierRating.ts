@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
 export interface SupplierRating {
   avg: number;
@@ -13,7 +14,13 @@ export interface SupplierRating {
  * NEVER set manually.
  */
 export function useSupplierRating(supplierId?: string | null): SupplierRating {
-  const [state, setState] = useState<SupplierRating>({ avg: 0, count: 0, loading: true });
+  const cacheKey = supplierId ? `supplier-rating:${supplierId}` : "";
+  const [state, setState] = useState<SupplierRating>(() => {
+    if (!supplierId) return { avg: 0, count: 0, loading: false };
+    return getCachedValue<Omit<SupplierRating, "loading">>(cacheKey, 5 * 60_000)
+      ? { ...getCachedValue<Omit<SupplierRating, "loading">>(cacheKey, 5 * 60_000)!, loading: false }
+      : { avg: 0, count: 0, loading: true };
+  });
 
   useEffect(() => {
     if (!supplierId) {
@@ -22,23 +29,20 @@ export function useSupplierRating(supplierId?: string | null): SupplierRating {
     }
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase.rpc("get_supplier_rating", { _supplier_id: supplierId });
-      if (cancelled) return;
-      if (error || !data || data.length === 0) {
-        setState({ avg: 0, count: 0, loading: false });
-        return;
-      }
-      const row = data[0] as { avg_rating: number | string; review_count: number };
-      setState({
-        avg: Number(row.avg_rating) || 0,
-        count: Number(row.review_count) || 0,
-        loading: false,
+      const rating = await cachedQuery(cacheKey, async () => {
+        const { data, error } = await supabase.rpc("get_supplier_rating", { _supplier_id: supplierId });
+        if (error || !data || data.length === 0) return { avg: 0, count: 0 };
+        const row = data[0] as { avg_rating: number | string; review_count: number };
+        return { avg: Number(row.avg_rating) || 0, count: Number(row.review_count) || 0 };
+      }, 5 * 60_000);
+      if (!cancelled) setState({ ...rating, loading: false });
+    })().catch(() => {
+      if (!cancelled) setState({ avg: 0, count: 0, loading: false });
       });
-    })();
     return () => {
       cancelled = true;
     };
-  }, [supplierId]);
+  }, [supplierId, cacheKey]);
 
   return state;
 }
