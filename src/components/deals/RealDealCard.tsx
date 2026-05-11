@@ -228,3 +228,6 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
     </Link>
   );
 }
+
+export const RealDealCard = memo(RealDealCardImpl);
+
