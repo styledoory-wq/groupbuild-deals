@@ -35,7 +35,7 @@ function timeLeft(endsAt: string | null): string | null {
   return `${hours} שעות`;
 }
 
-export function RealDealCard({ deal, joinersCount = 0 }: { deal: RealDealCardData; joinersCount?: number }) {
+function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; joinersCount?: number }) {
   const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(deal.tiers) ? deal.tiers : [];
   const display = describeOffer(
