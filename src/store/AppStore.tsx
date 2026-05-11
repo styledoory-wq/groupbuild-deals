@@ -5,6 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { withTimeout } from "@/lib/safeAsync";
 import { isAdminEmail, setAdminSession } from "@/lib/auth";
 
+const CACHE_TTL = 5 * 60_000;
+let projectsCache: { data: Project[]; at: number } | null = null;
+let categoriesCache: { data: Category[]; at: number } | null = null;
+let projectsInflight: Promise<Project[]> | null = null;
+let categoriesInflight: Promise<Category[]> | null = null;
+let notificationsCache: Record<string, { data: AppNotification[]; at: number }> = {};
+
 interface AppState {
   user: User | null;
   setUser: (u: User | null) => void;
