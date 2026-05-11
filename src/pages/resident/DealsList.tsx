@@ -43,7 +43,6 @@ export default function DealsList() {
 
         const { data, error: dErr } = await query;
         if (dErr) throw dErr;
-        if (cancelled) return;
 
         const rows = (data ?? []) as Array<Record<string, unknown>>;
         const mapped: DealWithSupplier[] = rows
