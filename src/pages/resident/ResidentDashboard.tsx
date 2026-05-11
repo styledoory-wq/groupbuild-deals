@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search, LogOut, Compass, Hammer, Plug, Palette, Trees, PencilRuler, Tag } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -44,13 +44,13 @@ export default function ResidentDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const applyDashboard = (data: DashboardData) => {
+  const applyDashboard = useCallback((data: DashboardData) => {
     setProfileCity(data.profileCity);
     setProfileRegion(data.profileRegion);
     setAreaDeals(data.areaDeals);
     setJoinedDeals(data.joinedDeals);
     setAreaSuppliersCount(data.areaSuppliersCount);
-  };
+  }, []);
 
   useEffect(() => {
     // Wait for regions/cities to resolve so we don't double-fetch (causes a visible flash).
@@ -190,7 +190,7 @@ export default function ResidentDashboard() {
       cancelled = true;
       window.clearTimeout(safety);
     };
-  }, [regions, cities, regionsLoading]);
+  }, [regions, cities, regionsLoading, user?.id, applyDashboard]);
 
   const hasArea = !!(profileCity || profileRegion);
   const areaLabel = profileCity || regions.find((r) => r.slug === profileRegion)?.name_he || "";
