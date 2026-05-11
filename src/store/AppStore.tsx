@@ -232,6 +232,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setNotifications([]);
         return;
       }
+      const cached = notificationsCache[uid];
+      if (cached && Date.now() - cached.at < 45_000) {
+        setNotifications(cached.data);
+        return;
+      }
       const { data, error } = await withTimeout(supabase
         .from("notifications")
         .select("id,title,body,type,is_read,created_at")
@@ -243,14 +248,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.error("[AppStore] notifications load failed", error);
         return;
       }
-      setNotifications(((data ?? []) as DbNotificationRow[]).map((n) => ({
+      const mapped = ((data ?? []) as DbNotificationRow[]).map((n) => ({
         id: n.id,
         title: n.title,
         body: n.body ?? "",
         type: ((n.type as AppNotification["type"]) ?? "system"),
         unread: !n.is_read,
         createdAt: n.created_at,
-      })));
+      }));
+      notificationsCache[uid] = { data: mapped, at: Date.now() };
+      setNotifications(mapped);
     } catch (error) {
       console.error("[AppStore] notifications load failed", error);
     }
@@ -275,6 +282,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+    if (notificationsCache[uid]) {
+      notificationsCache[uid] = { data: notificationsCache[uid].data.map((n) => ({ ...n, unread: false })), at: Date.now() };
+    }
   };
 
   const unreadCount = notifications.filter((n) => n.unread).length;
