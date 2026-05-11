@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Tag as TagIcon, TrendingDown, Globe2, Building2, Flame, Users, Clock, Image as ImageIcon } from "lucide-react";
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
