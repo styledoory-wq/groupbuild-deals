@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search, LogOut, Compass, Hammer, Plug, Palette, Trees, PencilRuler, Tag } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -33,7 +33,7 @@ const STAGES: { id: string; title: string; icon: typeof Compass; desc: string }[
 
 export default function ResidentDashboard() {
   const navigate = useNavigate();
-  const { user, logout } = useApp();
+  const { user, authReady, logout } = useApp();
   const { regions, cities, loading: regionsLoading } = useRegions();
 
   const [profileCity, setProfileCity] = useState("");
@@ -44,22 +44,27 @@ export default function ResidentDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const applyDashboard = useCallback((data: DashboardData) => {
-    setProfileCity(data.profileCity);
-    setProfileRegion(data.profileRegion);
-    setAreaDeals(data.areaDeals);
-    setJoinedDeals(data.joinedDeals);
-    setAreaSuppliersCount(data.areaSuppliersCount);
-  }, []);
+  const dashboardCacheKey = authReady && user?.id ? `resident-dashboard:${user.id}` : "";
+  const cachedDashboard = useMemo(
+    () => (dashboardCacheKey ? getCachedValue<DashboardData>(dashboardCacheKey, 60_000) : null),
+    [dashboardCacheKey],
+  );
 
   useEffect(() => {
+    if (!authReady) return;
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
     // Wait for regions/cities to resolve so we don't double-fetch (causes a visible flash).
     if (regionsLoading) return;
     let cancelled = false;
-    const cacheKey = user?.id ? `resident-dashboard:${user.id}` : "";
-    const cached = cacheKey ? getCachedValue<DashboardData>(cacheKey, 60_000) : null;
-    if (cached) {
-      applyDashboard(cached);
+    if (cachedDashboard) {
+      setProfileCity(cachedDashboard.profileCity);
+      setProfileRegion(cachedDashboard.profileRegion);
+      setAreaDeals(cachedDashboard.areaDeals);
+      setJoinedDeals(cachedDashboard.joinedDeals);
+      setAreaSuppliersCount(cachedDashboard.areaSuppliersCount);
       setLoading(false);
     } else {
       setLoading(true);
@@ -73,13 +78,8 @@ export default function ResidentDashboard() {
     (async () => {
       try {
         setError(null);
-        const { data: session } = await supabase.auth.getSession();
-        const uid = session.session?.user?.id;
-        if (!uid) {
-          if (!cancelled) setLoading(false);
-          return;
-        }
-        const data = await cachedQuery(`resident-dashboard:${uid}`, async (): Promise<DashboardData> => {
+        const uid = user.id;
+        const data = await cachedQuery(dashboardCacheKey, async (): Promise<DashboardData> => {
 
         const { data: prof } = await supabase
           .from("profiles")
@@ -177,7 +177,13 @@ export default function ResidentDashboard() {
         }
           return { profileCity: city, profileRegion: region, areaDeals: nextAreaDeals, joinedDeals: nextJoinedDeals, areaSuppliersCount: allowedSupplierIds.length };
         }, 60_000);
-        if (!cancelled) applyDashboard(data);
+        if (!cancelled) {
+          setProfileCity(data.profileCity);
+          setProfileRegion(data.profileRegion);
+          setAreaDeals(data.areaDeals);
+          setJoinedDeals(data.joinedDeals);
+          setAreaSuppliersCount(data.areaSuppliersCount);
+        }
       } catch (e) {
         console.error("[ResidentDashboard] load error", e);
         if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינת הדשבורד");
@@ -190,7 +196,7 @@ export default function ResidentDashboard() {
       cancelled = true;
       window.clearTimeout(safety);
     };
-  }, [regions, cities, regionsLoading, user?.id, applyDashboard]);
+  }, [authReady, regions, cities, regionsLoading, user?.id, dashboardCacheKey, cachedDashboard]);
 
   const hasArea = !!(profileCity || profileRegion);
   const areaLabel = profileCity || regions.find((r) => r.slug === profileRegion)?.name_he || "";
@@ -286,6 +292,34 @@ export default function ResidentDashboard() {
         </div>
       </header>
 
+      {loading && (
+        <div aria-hidden className="px-5 pt-7 pb-8 space-y-7">
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="h-4 w-28 gb-skeleton" />
+              <div className="h-3 w-10 gb-skeleton" />
+            </div>
+            <div className="h-[104px] gb-skeleton" />
+          </section>
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="h-4 w-24 gb-skeleton" />
+              <div className="h-3 w-10 gb-skeleton" />
+            </div>
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+          </section>
+          <section className="space-y-3">
+            <div className="h-4 w-20 gb-skeleton" />
+            <div className="h-[72px] gb-skeleton" />
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="h-[132px] gb-skeleton" />
+              <div className="h-[132px] gb-skeleton" />
+            </div>
+          </section>
+        </div>
+      )}
+
       {error && (
         <div className="px-5 mt-4">
           <div className="gb-card p-4 border-destructive/30 bg-destructive/10 text-sm text-destructive leading-relaxed">
@@ -294,7 +328,7 @@ export default function ResidentDashboard() {
         </div>
       )}
 
-      {joinedDeals.length > 0 && (
+      {!loading && joinedDeals.length > 0 && (
         <section className="mt-7 mb-7">
           <div className="flex items-center justify-between px-5 mb-3">
             <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
@@ -315,7 +349,7 @@ export default function ResidentDashboard() {
         </section>
       )}
 
-      <section className="px-5 space-y-3 mt-7 mb-8">
+      {!loading && <section className="px-5 space-y-3 mt-7 mb-8">
         <div className="flex items-center justify-between">
           <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
             <Sparkles className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
@@ -326,12 +360,7 @@ export default function ResidentDashboard() {
           </Link>
         </div>
 
-        {loading ? (
-          <div className="space-y-3">
-            <DealCardSkeleton />
-            <DealCardSkeleton />
-          </div>
-        ) : !hasArea ? (
+        {!hasArea ? (
           <button
             onClick={() => navigate("/resident/profile/edit")}
             className="w-full gb-tile-dark p-5 text-right group"
@@ -368,9 +397,9 @@ export default function ResidentDashboard() {
             .slice(0, 2)
             .map((d) => <RealDealCard key={d.id} deal={d} />)
         )}
-      </section>
+      </section>}
 
-      <section className="px-5 pb-8">
+      {!loading && <section className="px-5 pb-8">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-[13px] font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
             <Compass className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
@@ -410,7 +439,7 @@ export default function ResidentDashboard() {
             );
           })}
         </div>
-      </section>
+      </section>}
 
       <BottomNav role="resident" />
     </MobileShell>
