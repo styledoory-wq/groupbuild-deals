@@ -307,7 +307,10 @@ export default function ResidentDashboard() {
         </div>
 
         {loading ? (
-          <div className="gb-card p-6 text-center text-[13px] text-muted-foreground">טוען הצעות…</div>
+          <div className="space-y-3">
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+          </div>
         ) : !hasArea ? (
           <button
             onClick={() => navigate("/resident/profile/edit")}
