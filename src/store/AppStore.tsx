@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { AppNotification, Category, Project, Role, User } from "@/types";
 import { demoUsers } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +41,7 @@ type DbNotificationRow = {
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const hydratingUserRef = useRef<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -56,6 +57,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try { await supabase.auth.signOut(); } catch (e) { console.warn("[AppStore] signOut", e); }
     setAdminSession(false);
+    hydratingUserRef.current = null;
     setUser(null);
     setNotifications([]);
   };
@@ -65,6 +67,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     const hydrate = async (uid: string, email: string) => {
+      if (hydratingUserRef.current === uid) return;
+      hydratingUserRef.current = uid;
       try {
         const [profileRes, rolesRes, supplierRes] = await Promise.all([
           withTimeout(supabase.from("profiles").select("id,full_name,business_name,phone,email,project_id,user_type").eq("id", uid).maybeSingle(), "טעינת פרופיל", 8000),
@@ -125,6 +129,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
+        hydratingUserRef.current = null;
         setUser(null);
         setAdminSession(false);
         setAuthReady(true);
@@ -190,10 +195,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Load notifications for current authenticated user (and refresh on auth change)
-  const refreshNotifications = async () => {
+  const refreshNotifications = useCallback(async () => {
     try {
-      const { data: sessionData } = await withTimeout(supabase.auth.getSession(), "בדיקת התחברות");
-      const uid = sessionData.session?.user?.id;
+      const uid = user?.id;
       if (!uid) {
         setNotifications([]);
         return;
@@ -220,15 +224,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("[AppStore] notifications load failed", error);
     }
-  };
+  }, [user?.id]);
 
   useEffect(() => {
+    if (!authReady) return;
     void refreshNotifications();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => {
-      void refreshNotifications();
-    });
-    return () => { sub.subscription.unsubscribe(); };
-  }, []);
+  }, [authReady, refreshNotifications]);
 
   const markNotificationsRead = async () => {
     const { data: sessionData } = await supabase.auth.getSession();

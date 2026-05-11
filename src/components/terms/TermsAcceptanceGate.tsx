@@ -4,8 +4,10 @@ import { CURRENT_TERMS_VERSION, type TermsAudience } from "@/lib/terms";
 import { TermsContent } from "@/components/terms/TermsContent";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useApp } from "@/store/AppStore";
 
 export function TermsAcceptanceGate({ children }: { children: React.ReactNode }) {
+  const { user, authReady } = useApp();
   const [needsAccept, setNeedsAccept] = useState(false);
   const [audience, setAudience] = useState<TermsAudience>("resident");
   const [submitting, setSubmitting] = useState(false);
@@ -15,27 +17,26 @@ export function TermsAcceptanceGate({ children }: { children: React.ReactNode })
   useEffect(() => {
     let active = true;
     const check = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      if (!authReady) return;
+      if (!user) {
         if (active) { setNeedsAccept(false); setUserId(null); }
         return;
       }
       const { data: profile } = await supabase
         .from("profiles")
         .select("user_type, terms_accepted, terms_version")
-        .eq("id", session.user.id)
+        .eq("id", user.id)
         .maybeSingle();
       if (!active) return;
-      setUserId(session.user.id);
-      const aud: TermsAudience = profile?.user_type === "supplier" ? "supplier" : "resident";
+      setUserId(user.id);
+      const aud: TermsAudience = profile?.user_type === "supplier" || user.role === "supplier" ? "supplier" : "resident";
       setAudience(aud);
       const ok = !!profile?.terms_accepted && profile?.terms_version === CURRENT_TERMS_VERSION;
       setNeedsAccept(!ok);
     };
-    check();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => { check(); });
-    return () => { active = false; sub.subscription.unsubscribe(); };
-  }, []);
+    void check();
+    return () => { active = false; };
+  }, [authReady, user?.id, user?.role]);
 
   const handleAccept = async () => {
     if (!userId || !checked) return;

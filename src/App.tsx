@@ -1,10 +1,10 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppProvider } from "@/store/AppStore";
+import { AppProvider, useApp } from "@/store/AppStore";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
 import { RouteTransition } from "@/components/layout/RouteTransition";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -39,6 +39,17 @@ import OfferEditor from "./pages/supplier/OfferEditor";
 import SupplierOfferMarketingEdit from "./pages/supplier/SupplierOfferMarketingEdit";
 import SupplierLeads from "./pages/supplier/SupplierLeads";
 import SupplierReviews from "./pages/supplier/SupplierReviews";
+
+const preloadResidentRoutes = () => {
+  void import("./pages/resident/DealDetail");
+  void import("./pages/resident/DealsList");
+  void import("./pages/resident/MyOffers");
+};
+
+const preloadSupplierRoutes = () => {
+  void import("./pages/supplier/SupplierLeads");
+  void import("./pages/supplier/SupplierOffers");
+};
 
 // Admin routes — lazy loaded (rarely used by end-users, heavy bundle)
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -84,13 +95,29 @@ const SuspenseFallback = () => (
   </MobileShell>
 );
 
+const PreloadImportantRoutes = () => {
+  const { user, authReady } = useApp();
+
+  useEffect(() => {
+    if (!authReady || !user) return;
+    const run = user.role === "supplier" ? preloadSupplierRoutes : preloadResidentRoutes;
+    const idle = window.requestIdleCallback ?? ((cb: IdleRequestCallback) => window.setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 }), 1200));
+    const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout;
+    const id = idle(run);
+    return () => cancelIdle(id as never);
+  }, [authReady, user?.role]);
+
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AppProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner position="top-center" dir="rtl" />
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <PreloadImportantRoutes />
           <TermsAcceptanceGate>
             <RouteTransition>
               <Suspense fallback={<SuspenseFallback />}>
