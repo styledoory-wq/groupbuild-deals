@@ -67,7 +67,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     const hydrate = async (uid: string, email: string) => {
-      if (hydratingUserRef.current === uid && authReady) return;
+      if (hydratingUserRef.current === uid) return;
       hydratingUserRef.current = uid;
       try {
         const [profileRes, rolesRes, supplierRes] = await Promise.all([
