@@ -9,6 +9,7 @@ import { RequireAdmin } from "@/components/auth/RequireAdmin";
 import { RouteTransition } from "@/components/layout/RouteTransition";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
+import ResidentDashboard from "./pages/resident/ResidentDashboard";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -20,7 +21,6 @@ const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 const TermsResidents = lazy(() => import("./pages/TermsResidents"));
 const TermsSuppliers = lazy(() => import("./pages/TermsSuppliers"));
 
-const ResidentDashboard = lazy(() => import("./pages/resident/ResidentDashboard"));
 const ProjectsList = lazy(() => import("./pages/resident/ProjectsList"));
 const CategoriesList = lazy(() => import("./pages/resident/CategoriesList"));
 const DealsList = lazy(() => import("./pages/resident/DealsList"));
@@ -41,7 +41,6 @@ const SupplierLeads = lazy(() => import("./pages/supplier/SupplierLeads"));
 const SupplierReviews = lazy(() => import("./pages/supplier/SupplierReviews"));
 
 const preloadResidentRoutes = () => {
-  void import("./pages/resident/ResidentDashboard");
   void import("./pages/resident/DealDetail");
   void import("./pages/resident/DealsList");
   void import("./pages/resident/MyOffers");
