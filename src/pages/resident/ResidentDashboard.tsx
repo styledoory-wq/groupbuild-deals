@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search, LogOut, Compass, Hammer, Plug, Palette, Trees, PencilRuler, Tag } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -33,7 +33,7 @@ const STAGES: { id: string; title: string; icon: typeof Compass; desc: string }[
 
 export default function ResidentDashboard() {
   const navigate = useNavigate();
-  const { user, logout } = useApp();
+  const { user, authReady, logout } = useApp();
   const { regions, cities, loading: regionsLoading } = useRegions();
 
   const [profileCity, setProfileCity] = useState("");
@@ -44,22 +44,23 @@ export default function ResidentDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const applyDashboard = useCallback((data: DashboardData) => {
-    setProfileCity(data.profileCity);
-    setProfileRegion(data.profileRegion);
-    setAreaDeals(data.areaDeals);
-    setJoinedDeals(data.joinedDeals);
-    setAreaSuppliersCount(data.areaSuppliersCount);
-  }, []);
+  const dashboardCacheKey = authReady && user?.id ? `resident-dashboard:${user.id}` : "";
+  const cachedDashboard = useMemo(
+    () => (dashboardCacheKey ? getCachedValue<DashboardData>(dashboardCacheKey, 60_000) : null),
+    [dashboardCacheKey],
+  );
 
   useEffect(() => {
+    if (!authReady || !user?.id) return;
     // Wait for regions/cities to resolve so we don't double-fetch (causes a visible flash).
     if (regionsLoading) return;
     let cancelled = false;
-    const cacheKey = user?.id ? `resident-dashboard:${user.id}` : "";
-    const cached = cacheKey ? getCachedValue<DashboardData>(cacheKey, 60_000) : null;
-    if (cached) {
-      applyDashboard(cached);
+    if (cachedDashboard) {
+      setProfileCity(cachedDashboard.profileCity);
+      setProfileRegion(cachedDashboard.profileRegion);
+      setAreaDeals(cachedDashboard.areaDeals);
+      setJoinedDeals(cachedDashboard.joinedDeals);
+      setAreaSuppliersCount(cachedDashboard.areaSuppliersCount);
       setLoading(false);
     } else {
       setLoading(true);
@@ -73,13 +74,8 @@ export default function ResidentDashboard() {
     (async () => {
       try {
         setError(null);
-        const { data: session } = await supabase.auth.getSession();
-        const uid = session.session?.user?.id;
-        if (!uid) {
-          if (!cancelled) setLoading(false);
-          return;
-        }
-        const data = await cachedQuery(`resident-dashboard:${uid}`, async (): Promise<DashboardData> => {
+        const uid = user.id;
+        const data = await cachedQuery(dashboardCacheKey, async (): Promise<DashboardData> => {
 
         const { data: prof } = await supabase
           .from("profiles")
@@ -177,7 +173,13 @@ export default function ResidentDashboard() {
         }
           return { profileCity: city, profileRegion: region, areaDeals: nextAreaDeals, joinedDeals: nextJoinedDeals, areaSuppliersCount: allowedSupplierIds.length };
         }, 60_000);
-        if (!cancelled) applyDashboard(data);
+        if (!cancelled) {
+          setProfileCity(data.profileCity);
+          setProfileRegion(data.profileRegion);
+          setAreaDeals(data.areaDeals);
+          setJoinedDeals(data.joinedDeals);
+          setAreaSuppliersCount(data.areaSuppliersCount);
+        }
       } catch (e) {
         console.error("[ResidentDashboard] load error", e);
         if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינת הדשבורד");
@@ -190,7 +192,7 @@ export default function ResidentDashboard() {
       cancelled = true;
       window.clearTimeout(safety);
     };
-  }, [regions, cities, regionsLoading, user?.id, applyDashboard]);
+  }, [authReady, regions, cities, regionsLoading, user?.id, dashboardCacheKey, cachedDashboard]);
 
   const hasArea = !!(profileCity || profileRegion);
   const areaLabel = profileCity || regions.find((r) => r.slug === profileRegion)?.name_he || "";
