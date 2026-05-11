@@ -100,8 +100,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const hydratingUserRef = useRef<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [projects, setProjects] = useState<Project[]>(() => projectsCache?.data ?? []);
+  const [categories, setCategories] = useState<Category[]>(() => categoriesCache?.data ?? []);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   const loginDemo = (role: "resident" | "supplier" | "admin") => {
@@ -200,27 +200,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     (async () => {
-      const { data, error } = await withTimeout(supabase
-        .from("projects")
-        .select("id,name,city,building_count,apartment_count,status")
-        .eq("is_active", true)
-        .eq("is_deleted", false)
-        .order("created_at", { ascending: false }), "טעינת פרויקטים");
-
-      if (!active) return;
-      if (error) {
+      try {
+        const data = await loadProjectsOnce();
+        if (active) setProjects(data);
+      } catch (error) {
         console.error("[AppStore] projects load failed", error);
-        return;
       }
-
-      setProjects((data ?? []).map((p) => ({
-        id: p.id,
-        name: p.name,
-        city: p.city,
-        buildingCount: p.building_count ?? 0,
-        apartmentCount: p.apartment_count ?? 0,
-        status: (p.status as Project["status"]) ?? "planning",
-      })));
     })();
     return () => { active = false; };
   }, []);
@@ -229,23 +214,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     (async () => {
-      const { data, error } = await withTimeout(supabase
-        .from("categories")
-        .select("id,name,icon")
-        .eq("is_active", true)
-        .eq("is_deleted", false)
-        .order("display_order", { ascending: true }), "טעינת תחומים");
-
-      if (!active) return;
-      if (error) {
+      try {
+        const data = await loadCategoriesOnce();
+        if (active) setCategories(data);
+      } catch (error) {
         console.error("[AppStore] categories load failed", error);
-        return;
       }
-      setCategories(((data ?? []) as DbCategoryRow[]).map((c) => ({
-        id: c.id,
-        name: c.name,
-        icon: c.icon ?? "📦",
-      })));
     })();
     return () => { active = false; };
   }, []);
