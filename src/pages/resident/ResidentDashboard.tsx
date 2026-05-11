@@ -56,6 +56,14 @@ export default function ResidentDashboard() {
     // Wait for regions/cities to resolve so we don't double-fetch (causes a visible flash).
     if (regionsLoading) return;
     let cancelled = false;
+    const cacheKey = user?.id ? `resident-dashboard:${user.id}` : "";
+    const cached = cacheKey ? getCachedValue<DashboardData>(cacheKey, 60_000) : null;
+    if (cached) {
+      applyDashboard(cached);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     const safety = window.setTimeout(() => {
       if (!cancelled) {
         setError("טעינת הנתונים נמשכת יותר מדי זמן. נסו לרענן את המסך.");
@@ -71,6 +79,7 @@ export default function ResidentDashboard() {
           if (!cancelled) setLoading(false);
           return;
         }
+        const data = await cachedQuery(`resident-dashboard:${uid}`, async (): Promise<DashboardData> => {
 
         const { data: prof } = await supabase
           .from("profiles")
@@ -79,10 +88,6 @@ export default function ResidentDashboard() {
           .maybeSingle();
         const city = prof?.city ?? "";
         const region = prof?.region ?? "";
-        if (!cancelled) {
-          setProfileCity(city);
-          setProfileRegion(region);
-        }
 
         const regionRow = regions.find((r) => r.slug === region);
         const cityRow = cities.find((c) => c.name_he === city);
@@ -115,7 +120,7 @@ export default function ResidentDashboard() {
           .or(orParts.join(","));
         const supplierMap = new Map((sups ?? []).map((s) => [s.id as string, s]));
         const allowedSupplierIds = (sups ?? []).map((s) => s.id as string);
-        if (!cancelled) setAreaSuppliersCount(allowedSupplierIds.length);
+        let nextAreaDeals: DbDeal[] = [];
 
         if (allowedSupplierIds.length) {
           const { data: deals } = await supabase
@@ -128,7 +133,7 @@ export default function ResidentDashboard() {
             .in("supplier_id", allowedSupplierIds)
             .order("created_at", { ascending: false })
             .limit(20);
-          const list = (deals ?? []).map((d) => {
+          nextAreaDeals = (deals ?? []).map((d) => {
             const sup = supplierMap.get(d.supplier_id as string);
             return {
               ...(d as unknown as DbDeal),
@@ -136,9 +141,6 @@ export default function ResidentDashboard() {
               supplier_logo_url: sup?.logo_url ?? null,
             };
           });
-          if (!cancelled) setAreaDeals(list);
-        } else if (!cancelled) {
-          setAreaDeals([]);
         }
 
         const { data: interests } = await supabase
@@ -147,6 +149,7 @@ export default function ResidentDashboard() {
           .eq("user_id", uid)
           .eq("is_deleted", false);
         const joinedIds = Array.from(new Set((interests ?? []).map((i) => i.deal_id as string)));
+        let nextJoinedDeals: DbDeal[] = [];
         if (joinedIds.length) {
           const { data: jdeals } = await supabase
             .from("deals")
@@ -163,7 +166,7 @@ export default function ResidentDashboard() {
               .in("id", jSupIds);
             jSupMap = new Map((jsups ?? []).map((s) => [s.id as string, { business_name: s.business_name as string, logo_url: s.logo_url as string | null }]));
           }
-          const jlist = (jdeals ?? []).map((d) => {
+          nextJoinedDeals = (jdeals ?? []).map((d) => {
             const s = jSupMap.get(d.supplier_id as string);
             return {
               ...(d as unknown as DbDeal),
@@ -171,10 +174,10 @@ export default function ResidentDashboard() {
               supplier_logo_url: s?.logo_url ?? null,
             };
           });
-          if (!cancelled) setJoinedDeals(jlist);
-        } else if (!cancelled) {
-          setJoinedDeals([]);
         }
+          return { profileCity: city, profileRegion: region, areaDeals: nextAreaDeals, joinedDeals: nextJoinedDeals, areaSuppliersCount: allowedSupplierIds.length };
+        }, 60_000);
+        if (!cancelled) applyDashboard(data);
       } catch (e) {
         console.error("[ResidentDashboard] load error", e);
         if (!cancelled) setError(e instanceof Error ? e.message : "שגיאה בטעינת הדשבורד");
