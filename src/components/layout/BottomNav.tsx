@@ -69,3 +69,5 @@ function BottomNavImpl({ role }: { role: Role }) {
     </nav>
   );
 }
+
+export const BottomNav = memo(BottomNavImpl);
