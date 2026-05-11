@@ -4,6 +4,7 @@ import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search, LogOut, Compas
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
+import { DealCardSkeleton } from "@/components/deals/DealCardSkeleton";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
