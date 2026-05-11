@@ -4,6 +4,7 @@ import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search, LogOut, Compas
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
+import { DealCardSkeleton } from "@/components/deals/DealCardSkeleton";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -306,7 +307,10 @@ export default function ResidentDashboard() {
         </div>
 
         {loading ? (
-          <div className="gb-card p-6 text-center text-[13px] text-muted-foreground">טוען הצעות…</div>
+          <div className="space-y-3">
+            <DealCardSkeleton />
+            <DealCardSkeleton />
+          </div>
         ) : !hasArea ? (
           <button
             onClick={() => navigate("/resident/profile/edit")}

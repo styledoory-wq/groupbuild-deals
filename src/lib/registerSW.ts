@@ -1,17 +1,33 @@
 /**
- * Registers the PWA service worker after window load (production only).
- * Auto-activates new versions on next navigation.
+ * Registers the PWA service worker — production builds only, never in
+ * preview iframes or Lovable preview hosts (would otherwise serve stale
+ * builds and break navigation).
  */
 export function registerServiceWorker() {
   if (typeof window === "undefined") return;
   if (!("serviceWorker" in navigator)) return;
-  if (import.meta.env.DEV) return; // avoid HMR conflicts in dev
+
+  const isInIframe = (() => {
+    try { return window.self !== window.top; } catch { return true; }
+  })();
+  const host = window.location.hostname;
+  const isPreviewHost =
+    host.includes("id-preview--") ||
+    host.includes("lovableproject.com") ||
+    host.includes("lovable.app");
+
+  // In dev, preview, or iframes: actively unregister any stale SWs and bail.
+  if (import.meta.env.DEV || isInIframe || isPreviewHost) {
+    navigator.serviceWorker.getRegistrations?.().then((regs) => {
+      regs.forEach((r) => r.unregister().catch(() => {}));
+    }).catch(() => {});
+    return;
+  }
 
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/sw.js", { scope: "/" })
       .then((reg) => {
-        // Watch for an updated SW and skip waiting so users see the new build sooner.
         reg.addEventListener("updatefound", () => {
           const sw = reg.installing;
           if (!sw) return;
@@ -22,11 +38,8 @@ export function registerServiceWorker() {
           });
         });
       })
-      .catch((err) => {
-        console.warn("[SW] registration failed", err);
-      });
+      .catch((err) => console.warn("[SW] registration failed", err));
 
-    // Reload exactly once when a new SW takes control.
     let refreshing = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (refreshing) return;

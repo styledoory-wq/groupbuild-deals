@@ -44,35 +44,56 @@ const FALLBACK_CITIES: City[] = [
   { id: "beer_sheva", name_he: "באר שבע", region_id: "south" },
 ];
 
+// Module-level cache shared by every consumer of useRegions, so we never
+// re-query regions/cities on navigation between screens.
+let cachedRegions: Region[] | null = null;
+let cachedCities: City[] | null = null;
+let inflight: Promise<{ regions: Region[]; cities: City[] }> | null = null;
+
+async function loadAreas() {
+  if (cachedRegions && cachedCities) {
+    return { regions: cachedRegions, cities: cachedCities };
+  }
+  if (inflight) return inflight;
+  inflight = (async () => {
+    try {
+      const [r, c] = await Promise.all([
+        withTimeout(supabase.from("regions").select("*").order("display_order"), "טעינת אזורים"),
+        withTimeout(supabase.from("cities").select("*").order("name_he"), "טעינת ערים"),
+      ]);
+      const dbRegions = ((r.data ?? []) as Region[]).filter(Boolean);
+      const dbCities = ((c.data ?? []) as City[]).filter(Boolean);
+      cachedRegions = dbRegions.length > 0 ? dbRegions : FALLBACK_REGIONS;
+      cachedCities = dbCities.length > 0 ? dbCities : FALLBACK_CITIES;
+    } catch {
+      cachedRegions = FALLBACK_REGIONS;
+      cachedCities = FALLBACK_CITIES;
+    } finally {
+      inflight = null;
+    }
+    return { regions: cachedRegions!, cities: cachedCities! };
+  })();
+  return inflight;
+}
+
 export function useRegions() {
-  const [regions, setRegions] = useState<Region[]>([]);
-  const [cities, setCities] = useState<City[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [regions, setRegions] = useState<Region[]>(() => cachedRegions ?? []);
+  const [cities, setCities] = useState<City[]>(() => cachedCities ?? []);
+  const [loading, setLoading] = useState<boolean>(() => !(cachedRegions && cachedCities));
 
   useEffect(() => {
+    if (cachedRegions && cachedCities) {
+      setLoading(false);
+      return;
+    }
     let active = true;
-    (async () => {
-      try {
-        const [r, c] = await Promise.all([
-          withTimeout(supabase.from("regions").select("*").order("display_order"), "טעינת אזורים"),
-          withTimeout(supabase.from("cities").select("*").order("name_he"), "טעינת ערים"),
-        ]);
-        if (!active) return;
-        const dbRegions = ((r.data ?? []) as Region[]).filter(Boolean);
-        const dbCities = ((c.data ?? []) as City[]).filter(Boolean);
-        setRegions(dbRegions.length > 0 ? dbRegions : FALLBACK_REGIONS);
-        setCities(dbCities.length > 0 ? dbCities : FALLBACK_CITIES);
-      } catch {
-        if (!active) return;
-        setRegions(FALLBACK_REGIONS);
-        setCities(FALLBACK_CITIES);
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-    return () => {
-      active = false;
-    };
+    loadAreas().then(({ regions: rs, cities: cs }) => {
+      if (!active) return;
+      setRegions(rs);
+      setCities(cs);
+      setLoading(false);
+    });
+    return () => { active = false; };
   }, []);
 
   const citiesByRegion = (regionId: string) => cities.filter((c) => c.region_id === regionId);
