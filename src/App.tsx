@@ -41,12 +41,16 @@ const SupplierLeads = lazy(() => import("./pages/supplier/SupplierLeads"));
 const SupplierReviews = lazy(() => import("./pages/supplier/SupplierReviews"));
 
 const preloadResidentRoutes = () => {
+  void import("./pages/resident/ResidentDashboard");
   void import("./pages/resident/DealDetail");
   void import("./pages/resident/DealsList");
   void import("./pages/resident/MyOffers");
+  void import("./pages/resident/CategoriesList");
+  void import("./pages/resident/CategorySuppliers");
 };
 
 const preloadSupplierRoutes = () => {
+  void import("./pages/supplier/SupplierDashboard");
   void import("./pages/supplier/SupplierLeads");
   void import("./pages/supplier/SupplierOffers");
 };
