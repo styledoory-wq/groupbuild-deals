@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Home, LayoutGrid, Tag, User, Bell, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,7 +27,7 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
   ],
 };
 
-export function BottomNav({ role }: { role: Role }) {
+function BottomNavImpl({ role }: { role: Role }) {
   const location = useLocation();
   return (
     <nav
@@ -68,3 +69,5 @@ export function BottomNav({ role }: { role: Role }) {
     </nav>
   );
 }
+
+export const BottomNav = memo(BottomNavImpl);
