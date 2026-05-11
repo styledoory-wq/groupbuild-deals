@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -39,6 +39,17 @@ import OfferEditor from "./pages/supplier/OfferEditor";
 import SupplierOfferMarketingEdit from "./pages/supplier/SupplierOfferMarketingEdit";
 import SupplierLeads from "./pages/supplier/SupplierLeads";
 import SupplierReviews from "./pages/supplier/SupplierReviews";
+
+const preloadResidentRoutes = () => {
+  void import("./pages/resident/DealDetail");
+  void import("./pages/resident/DealsList");
+  void import("./pages/resident/MyOffers");
+};
+
+const preloadSupplierRoutes = () => {
+  void import("./pages/supplier/SupplierLeads");
+  void import("./pages/supplier/SupplierOffers");
+};
 
 // Admin routes — lazy loaded (rarely used by end-users, heavy bundle)
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -90,7 +101,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner position="top-center" dir="rtl" />
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <TermsAcceptanceGate>
             <RouteTransition>
               <Suspense fallback={<SuspenseFallback />}>
