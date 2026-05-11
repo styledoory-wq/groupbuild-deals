@@ -9,10 +9,19 @@ import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useRegions } from "@/hooks/useRegions";
+import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
 interface DbDeal extends RealDealCardData {
   is_demo?: boolean | null;
 }
+
+type DashboardData = {
+  profileCity: string;
+  profileRegion: string;
+  areaDeals: DbDeal[];
+  joinedDeals: DbDeal[];
+  areaSuppliersCount: number;
+};
 
 const STAGES: { id: string; title: string; icon: typeof Compass; desc: string }[] = [
   { id: "planning", title: "תכנון ועיצוב", icon: PencilRuler, desc: "אדריכלות, עיצוב פנים, יועצים" },
@@ -34,6 +43,14 @@ export default function ResidentDashboard() {
   const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const applyDashboard = (data: DashboardData) => {
+    setProfileCity(data.profileCity);
+    setProfileRegion(data.profileRegion);
+    setAreaDeals(data.areaDeals);
+    setJoinedDeals(data.joinedDeals);
+    setAreaSuppliersCount(data.areaSuppliersCount);
+  };
 
   useEffect(() => {
     // Wait for regions/cities to resolve so we don't double-fetch (causes a visible flash).
