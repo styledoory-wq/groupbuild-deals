@@ -27,7 +27,7 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
   ],
 };
 
-export function BottomNav({ role }: { role: Role }) {
+function BottomNavImpl({ role }: { role: Role }) {
   const location = useLocation();
   return (
     <nav
