@@ -88,23 +88,6 @@
     /* iOS PWA: prevent rubber-band background flashes */
     background-color: hsl(var(--background));
     min-height: 100vh;
-    min-height: 100dvh;
-  }
-
-  /* iOS standalone (PWA from home screen) — stable viewport, no jumps.
-     The dynamic toolbar is absent so 100vh/100dvh/100svh all behave;
-     we still pin the safe-area insets so headers/footers don't flicker. */
-  @supports (height: 100dvh) {
-    .min-h-screen { min-height: 100dvh; }
-  }
-
-  /* iOS standalone (PWA from home screen) — using status-bar-style "default"
-     means iOS reserves the status bar area, so no extra padding is needed.
-     We still ensure the safe-area inset is honored on devices that need it. */
-  @media (display-mode: standalone) {
-    body {
-      padding-top: env(safe-area-inset-top, 0px);
-    }
   }
 
   h1, h2, h3, h4, h5 {
@@ -376,7 +359,6 @@
   /* Route container — intentionally stable (no remount animation) to avoid page jumps on mobile. */
   .route-transition {
     min-height: 100vh;
-    min-height: 100dvh;
   }
   @media (prefers-reduced-motion: reduce) {
     .route-transition { animation: none; }
