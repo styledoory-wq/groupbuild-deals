@@ -20,7 +20,7 @@ type Mode = "signin" | "signup";
 export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { loginDemo, setUser, projects } = useApp();
+  const { setUser, projects } = useApp();
   const [role, setRole] = useState<Exclude<Role, "admin">>("resident");
   const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
   const [mode, setMode] = useState<Mode>(initialMode);
