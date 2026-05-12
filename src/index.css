@@ -375,6 +375,7 @@
   /* Route container — intentionally stable (no remount animation) to avoid page jumps on mobile. */
   .route-transition {
     min-height: 100vh;
+    min-height: 100dvh;
   }
   @media (prefers-reduced-motion: reduce) {
     .route-transition { animation: none; }
