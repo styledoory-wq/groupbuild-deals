@@ -48,20 +48,31 @@ export default function CategoriesList() {
     return categories.filter((c) => allowed.has(c.id));
   }, [categories, stage]);
 
-  const [suppliers, setSuppliers] = useState<SupplierLite[]>([]);
+  const cachedSuppliers = getCachedValue<SupplierLite[]>("categories:suppliers", 60_000);
+  const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cachedSuppliers ?? []);
+  const [loadingSuppliers, setLoadingSuppliers] = useState(() => !cachedSuppliers);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("suppliers")
-        .select("id,business_name,short_description,logo_url,categories,service_areas")
-        .eq("is_active", true)
-        .eq("is_deleted", false)
-        .in("approval_status", ["approved", "active"])
-        .order("business_name");
-      setSuppliers((data as SupplierLite[]) ?? []);
+      try {
+        const data = await cachedQuery<SupplierLite[]>("categories:suppliers", async () => {
+          const { data } = await supabase
+            .from("suppliers")
+            .select("id,business_name,short_description,logo_url,categories,service_areas")
+            .eq("is_active", true)
+            .eq("is_deleted", false)
+            .in("approval_status", ["approved", "active"])
+            .order("business_name");
+          return (data as SupplierLite[]) ?? [];
+        }, 60_000);
+        if (!cancelled) setSuppliers(data);
+      } finally {
+        if (!cancelled) setLoadingSuppliers(false);
+      }
     })();
+    return () => { cancelled = true; };
   }, []);
 
   const counts = useMemo(() => {
