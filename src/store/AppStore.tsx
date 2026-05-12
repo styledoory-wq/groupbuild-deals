@@ -14,7 +14,7 @@ let notificationsCache: Record<string, { data: AppNotification[]; at: number }> 
 interface AppState {
   user: User | null;
   setUser: (u: User | null) => void;
-  loginDemo: (role: "resident" | "supplier" | "admin") => User;
+  
   logout: () => Promise<void>;
   authReady: boolean;
 
