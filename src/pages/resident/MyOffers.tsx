@@ -25,6 +25,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { toast } from "sonner";
+import { getCachedValue, setCachedValue } from "@/lib/clientCache";
 
 type InterestRow = {
   id: string;
