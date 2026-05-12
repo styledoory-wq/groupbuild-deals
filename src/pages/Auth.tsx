@@ -192,11 +192,6 @@ export default function Auth() {
     }
   };
 
-  const handleDemo = (r: Exclude<Role, "admin">) => {
-    loginDemo(r);
-    if (r === "resident") navigate("/resident");
-    else navigate("/supplier");
-  };
 
   const roles: { id: Exclude<Role, "admin">; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [
     { id: "resident", label: "דייר", icon: Building2, desc: "הצטרפו לעסקאות" },
