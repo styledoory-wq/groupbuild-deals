@@ -98,11 +98,12 @@
     .min-h-screen { min-height: 100dvh; }
   }
 
-  /* Reserve safe-area top inset on standalone so content doesn't jump
-     under the status bar after hydration. */
+  /* iOS standalone (PWA from home screen) — using status-bar-style "default"
+     means iOS reserves the status bar area, so no extra padding is needed.
+     We still ensure the safe-area inset is honored on devices that need it. */
   @media (display-mode: standalone) {
     body {
-      padding-top: env(safe-area-inset-top);
+      padding-top: env(safe-area-inset-top, 0px);
     }
   }
 
