@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { AppNotification, Category, Project, Role, User } from "@/types";
-import { demoUsers } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
 import { withTimeout } from "@/lib/safeAsync";
 import { isAdminEmail, setAdminSession } from "@/lib/auth";
@@ -15,7 +14,7 @@ let notificationsCache: Record<string, { data: AppNotification[]; at: number }> 
 interface AppState {
   user: User | null;
   setUser: (u: User | null) => void;
-  loginDemo: (role: "resident" | "supplier" | "admin") => User;
+  
   logout: () => Promise<void>;
   authReady: boolean;
 
@@ -104,11 +103,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>(() => categoriesCache?.data ?? []);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
-  const loginDemo = (role: "resident" | "supplier" | "admin") => {
-    const u = demoUsers[role];
-    setUser(u);
-    return u;
-  };
 
   const logout = async () => {
     try { await supabase.auth.signOut(); } catch (e) { console.warn("[AppStore] signOut", e); }
@@ -291,7 +285,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AppState>(
     () => ({
-      user, setUser, loginDemo, logout, authReady,
+      user, setUser, logout, authReady,
       projects, setProjects,
       categories, setCategories,
       notifications, unreadCount, refreshNotifications, markNotificationsRead,

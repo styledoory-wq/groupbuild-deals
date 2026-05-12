@@ -20,7 +20,7 @@ type Mode = "signin" | "signup";
 export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { loginDemo, setUser, projects } = useApp();
+  const { setUser, projects } = useApp();
   const [role, setRole] = useState<Exclude<Role, "admin">>("resident");
   const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
   const [mode, setMode] = useState<Mode>(initialMode);
@@ -192,11 +192,6 @@ export default function Auth() {
     }
   };
 
-  const handleDemo = (r: Exclude<Role, "admin">) => {
-    loginDemo(r);
-    if (r === "resident") navigate("/resident");
-    else navigate("/supplier");
-  };
 
   const roles: { id: Exclude<Role, "admin">; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [
     { id: "resident", label: "דייר", icon: Building2, desc: "הצטרפו לעסקאות" },
