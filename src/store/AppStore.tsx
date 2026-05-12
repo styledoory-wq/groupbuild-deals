@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { AppNotification, Category, Project, Role, User } from "@/types";
-import { demoUsers } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
 import { withTimeout } from "@/lib/safeAsync";
 import { isAdminEmail, setAdminSession } from "@/lib/auth";
