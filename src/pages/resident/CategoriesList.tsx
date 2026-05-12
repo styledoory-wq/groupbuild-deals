@@ -6,6 +6,8 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
+import { CategoryTileSkeleton } from "@/components/deals/DealCardSkeleton";
+import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
 // Stage → category IDs mapping (matches dashboard)
 const STAGE_CATEGORIES: Record<string, { title: string; ids: string[] }> = {
@@ -46,20 +48,31 @@ export default function CategoriesList() {
     return categories.filter((c) => allowed.has(c.id));
   }, [categories, stage]);
 
-  const [suppliers, setSuppliers] = useState<SupplierLite[]>([]);
+  const cachedSuppliers = getCachedValue<SupplierLite[]>("categories:suppliers", 60_000);
+  const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cachedSuppliers ?? []);
+  const [loadingSuppliers, setLoadingSuppliers] = useState(() => !cachedSuppliers);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("suppliers")
-        .select("id,business_name,short_description,logo_url,categories,service_areas")
-        .eq("is_active", true)
-        .eq("is_deleted", false)
-        .in("approval_status", ["approved", "active"])
-        .order("business_name");
-      setSuppliers((data as SupplierLite[]) ?? []);
+      try {
+        const data = await cachedQuery<SupplierLite[]>("categories:suppliers", async () => {
+          const { data } = await supabase
+            .from("suppliers")
+            .select("id,business_name,short_description,logo_url,categories,service_areas")
+            .eq("is_active", true)
+            .eq("is_deleted", false)
+            .in("approval_status", ["approved", "active"])
+            .order("business_name");
+          return (data as SupplierLite[]) ?? [];
+        }, 60_000);
+        if (!cancelled) setSuppliers(data);
+      } finally {
+        if (!cancelled) setLoadingSuppliers(false);
+      }
     })();
+    return () => { cancelled = true; };
   }, []);
 
   const counts = useMemo(() => {
@@ -227,43 +240,47 @@ export default function CategoriesList() {
       {/* Categories grid */}
       {!q && (
         <div className="px-5 grid grid-cols-2 gap-3 pb-6">
-          {visibleCategories.map((c, idx) => {
-            const count = counts[c.id] ?? 0;
-            const hasSuppliers = count > 0;
-            return (
-              <Link
-                key={c.id}
-                to={`/resident/categories/${c.id}`}
-                className="gb-card-premium p-4 group relative animate-fade-up active:scale-[0.98] transition-transform"
-                style={{ animationDelay: `${idx * 30}ms` }}
-              >
-                <div className="flex items-start justify-between mb-3 relative">
-                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary-soft flex items-center justify-center text-2xl border border-gold/25 shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.15),0_8px_20px_-10px_hsl(217_56%_13%_/_0.4)] group-hover:scale-105 transition-transform">
-                    <span className="drop-shadow-[0_0_8px_hsl(44_53%_54%_/_0.4)]">{c.icon}</span>
-                  </div>
-                  {hasSuppliers ? (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 inline-flex items-center gap-1">
-                      <span className="gb-live-dot" />
-                      {count}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
-                      בקרוב
-                    </span>
-                  )}
-                </div>
-                <h3 className="font-bold text-foreground text-[14px] leading-tight relative tracking-tight">{c.name}</h3>
-                <div className="flex items-center justify-between mt-2 relative">
-                  <p className="text-[10px] text-muted-foreground">
-                    {hasSuppliers ? "צפו בספקים" : "אין ספקים זמינים"}
-                  </p>
-                  {hasSuppliers && (
-                    <ArrowLeft className="h-3 w-3 text-gold opacity-60 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-all" strokeWidth={2.5} />
-                  )}
-                </div>
-              </Link>
-            );
-          })}
+          {loadingSuppliers
+            ? Array.from({ length: visibleCategories.length || 6 }).map((_, i) => (
+                <CategoryTileSkeleton key={i} />
+              ))
+            : visibleCategories.map((c, idx) => {
+                const count = counts[c.id] ?? 0;
+                const hasSuppliers = count > 0;
+                return (
+                  <Link
+                    key={c.id}
+                    to={`/resident/categories/${c.id}`}
+                    className="gb-card-premium p-4 group relative animate-fade-up active:scale-[0.98] transition-transform"
+                    style={{ animationDelay: `${idx * 30}ms` }}
+                  >
+                    <div className="flex items-start justify-between mb-3 relative">
+                      <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary-soft flex items-center justify-center text-2xl border border-gold/25 shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.15),0_8px_20px_-10px_hsl(217_56%_13%_/_0.4)] group-hover:scale-105 transition-transform">
+                        <span className="drop-shadow-[0_0_8px_hsl(44_53%_54%_/_0.4)]">{c.icon}</span>
+                      </div>
+                      {hasSuppliers ? (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 inline-flex items-center gap-1">
+                          <span className="gb-live-dot" />
+                          {count}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
+                          בקרוב
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-bold text-foreground text-[14px] leading-tight relative tracking-tight">{c.name}</h3>
+                    <div className="flex items-center justify-between mt-2 relative">
+                      <p className="text-[10px] text-muted-foreground">
+                        {hasSuppliers ? "צפו בספקים" : "אין ספקים זמינים"}
+                      </p>
+                      {hasSuppliers && (
+                        <ArrowLeft className="h-3 w-3 text-gold opacity-60 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-all" strokeWidth={2.5} />
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
         </div>
       )}
 

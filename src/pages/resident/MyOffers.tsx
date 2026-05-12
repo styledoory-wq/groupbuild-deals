@@ -25,6 +25,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { toast } from "sonner";
+import { getCachedValue, setCachedValue } from "@/lib/clientCache";
 
 type InterestRow = {
   id: string;
@@ -64,20 +65,25 @@ const saveHiddenLocal = (ids: string[]) => {
   try { localStorage.setItem(HIDDEN_KEY, JSON.stringify(ids)); } catch { /* ignore */ }
 };
 
+type MyOfferItem = {
+  interest: InterestRow;
+  deal: DealRow | null;
+  count: number;
+  deposit: DepositRow | null;
+};
+
+const CACHE_KEY = "my-offers:items";
+
 export default function MyOffers() {
-  const [loading, setLoading] = useState(true);
+  const cached = getCachedValue<MyOfferItem[]>(CACHE_KEY, 60_000);
+  const [loading, setLoading] = useState(() => !cached);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<{
-    interest: InterestRow;
-    deal: DealRow | null;
-    count: number;
-    deposit: DepositRow | null;
-  }[]>([]);
+  const [items, setItems] = useState<MyOfferItem[]>(() => cached ?? []);
   const [showHidden, setShowHidden] = useState(false);
   const [hiddenLocal, setHiddenLocal] = useState<string[]>(loadHiddenLocal());
 
   const load = async () => {
-    setLoading(true);
+    if (!cached) setLoading(true);
     setError(null);
     try {
       const { data: session } = await supabase.auth.getSession();
@@ -132,14 +138,14 @@ export default function MyOffers() {
         dealIds.forEach((id) => { counts[id] = seen[id]?.size ?? 0; });
       }
 
-      setItems(
-        list.map((interest) => ({
-          interest,
-          deal: dealsMap[interest.deal_id] ?? null,
-          count: counts[interest.deal_id] ?? 0,
-          deposit: depMap[interest.deal_id] ?? null,
-        })),
-      );
+      const next: MyOfferItem[] = list.map((interest) => ({
+        interest,
+        deal: dealsMap[interest.deal_id] ?? null,
+        count: counts[interest.deal_id] ?? 0,
+        deposit: depMap[interest.deal_id] ?? null,
+      }));
+      setItems(next);
+      setCachedValue(CACHE_KEY, next);
     } catch (e) {
       console.error("[MyOffers] load error", e);
       setError(e instanceof Error ? e.message : "שגיאה בטעינה");
