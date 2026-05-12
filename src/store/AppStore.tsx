@@ -285,7 +285,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AppState>(
     () => ({
-      user, setUser, loginDemo, logout, authReady,
+      user, setUser, logout, authReady,
       projects, setProjects,
       categories, setCategories,
       notifications, unreadCount, refreshNotifications, markNotificationsRead,
