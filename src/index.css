@@ -85,6 +85,25 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
+    /* iOS PWA: prevent rubber-band background flashes */
+    background-color: hsl(var(--background));
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* iOS standalone (PWA from home screen) — stable viewport, no jumps.
+     The dynamic toolbar is absent so 100vh/100dvh/100svh all behave;
+     we still pin the safe-area insets so headers/footers don't flicker. */
+  @supports (height: 100dvh) {
+    .min-h-screen { min-height: 100dvh; }
+  }
+
+  /* Reserve safe-area top inset on standalone so content doesn't jump
+     under the status bar after hydration. */
+  @media (display-mode: standalone) {
+    body {
+      padding-top: env(safe-area-inset-top);
+    }
   }
 
   h1, h2, h3, h4, h5 {
