@@ -103,11 +103,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>(() => categoriesCache?.data ?? []);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
-  const loginDemo = (role: "resident" | "supplier" | "admin") => {
-    const u = demoUsers[role];
-    setUser(u);
-    return u;
-  };
 
   const logout = async () => {
     try { await supabase.auth.signOut(); } catch (e) { console.warn("[AppStore] signOut", e); }
