@@ -65,15 +65,20 @@ const saveHiddenLocal = (ids: string[]) => {
   try { localStorage.setItem(HIDDEN_KEY, JSON.stringify(ids)); } catch { /* ignore */ }
 };
 
+type MyOfferItem = {
+  interest: InterestRow;
+  deal: DealRow | null;
+  count: number;
+  deposit: DepositRow | null;
+};
+
+const CACHE_KEY = "my-offers:items";
+
 export default function MyOffers() {
-  const [loading, setLoading] = useState(true);
+  const cached = getCachedValue<MyOfferItem[]>(CACHE_KEY, 60_000);
+  const [loading, setLoading] = useState(() => !cached);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<{
-    interest: InterestRow;
-    deal: DealRow | null;
-    count: number;
-    deposit: DepositRow | null;
-  }[]>([]);
+  const [items, setItems] = useState<MyOfferItem[]>(() => cached ?? []);
   const [showHidden, setShowHidden] = useState(false);
   const [hiddenLocal, setHiddenLocal] = useState<string[]>(loadHiddenLocal());
 
