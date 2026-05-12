@@ -6,6 +6,8 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
+import { CategoryTileSkeleton } from "@/components/deals/DealCardSkeleton";
+import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
 // Stage → category IDs mapping (matches dashboard)
 const STAGE_CATEGORIES: Record<string, { title: string; ids: string[] }> = {
