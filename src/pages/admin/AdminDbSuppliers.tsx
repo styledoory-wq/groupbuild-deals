@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, ImageIcon, ShieldCheck, Loader2, ExternalLink, Plus, Trash2, Search, CheckCircle2, XCircle, Pencil } from "lucide-react";
+import { MapPin, ImageIcon, Loader2, ExternalLink, Plus, Trash2, Search, CheckCircle2, XCircle, Pencil, MoreHorizontal, Eye, Target } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
