@@ -334,21 +334,47 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories,commission_percent,monthly_subscription,billing_status,billing_notes")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories,commission_percent,monthly_subscription,billing_status,billing_notes,updated_at,created_at")
       .order("business_name");
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
 
-    // Pull region/city counts in parallel
-    const [{ data: regs }, { data: cits }] = await Promise.all([
+    // Pull region/city/deals/leads counts in parallel
+    const [{ data: regs }, { data: cits }, { data: dls }, { data: ints }] = await Promise.all([
       supabase.from("supplier_regions").select("supplier_id"),
       supabase.from("supplier_cities").select("supplier_id"),
+      supabase.from("deals").select("id,supplier_id,status,is_deleted"),
+      supabase.from("deal_interests").select("deal_id,is_deleted"),
     ]);
     const regCount = new Map<string, number>();
     const cityCount = new Map<string, number>();
     (regs ?? []).forEach((r: { supplier_id: string }) => regCount.set(r.supplier_id, (regCount.get(r.supplier_id) ?? 0) + 1));
     (cits ?? []).forEach((r: { supplier_id: string }) => cityCount.set(r.supplier_id, (cityCount.get(r.supplier_id) ?? 0) + 1));
-    setRows(base.map((r) => ({ ...r, regionCount: regCount.get(r.id) ?? 0, cityCount: cityCount.get(r.id) ?? 0 })));
+
+    // Build deal -> supplier map for active, non-deleted deals
+    const dealsBySupplier = new Map<string, number>();
+    const dealToSupplier = new Map<string, string>();
+    (dls ?? []).forEach((d: { id: string; supplier_id: string; status: string; is_deleted: boolean }) => {
+      dealToSupplier.set(d.id, d.supplier_id);
+      if (d.status === "active" && !d.is_deleted) {
+        dealsBySupplier.set(d.supplier_id, (dealsBySupplier.get(d.supplier_id) ?? 0) + 1);
+      }
+    });
+    const leadsBySupplier = new Map<string, number>();
+    (ints ?? []).forEach((i: { deal_id: string; is_deleted: boolean }) => {
+      if (i.is_deleted) return;
+      const sid = dealToSupplier.get(i.deal_id);
+      if (!sid) return;
+      leadsBySupplier.set(sid, (leadsBySupplier.get(sid) ?? 0) + 1);
+    });
+
+    setRows(base.map((r) => ({
+      ...r,
+      regionCount: regCount.get(r.id) ?? 0,
+      cityCount: cityCount.get(r.id) ?? 0,
+      dealsCount: dealsBySupplier.get(r.id) ?? 0,
+      leadsCount: leadsBySupplier.get(r.id) ?? 0,
+    })));
     setLoading(false);
   };
 
