@@ -44,6 +44,10 @@ interface Row {
   monthly_subscription?: number | null;
   billing_status?: string | null;
   billing_notes?: string | null;
+  updated_at?: string | null;
+  created_at?: string | null;
+  dealsCount?: number;
+  leadsCount?: number;
 }
 
 interface NewForm {
