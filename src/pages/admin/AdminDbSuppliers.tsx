@@ -111,6 +111,7 @@ export default function AdminDbSuppliers() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [supplierSearch, setSupplierSearch] = useState("");
+  const [quickFilter, setQuickFilter] = useState<"all" | "active" | "pending" | "no-deals" | "new" | "top">("all");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<NewForm>(emptyForm);
   const [saving, setSaving] = useState(false);
