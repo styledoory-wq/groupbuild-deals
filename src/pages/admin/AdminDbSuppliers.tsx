@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, ImageIcon, ShieldCheck, Loader2, ExternalLink, Plus, Trash2, Search, CheckCircle2, XCircle, Pencil } from "lucide-react";
+import { MapPin, ImageIcon, Loader2, ExternalLink, Plus, Trash2, Search, CheckCircle2, XCircle, Pencil, MoreHorizontal, Eye, Target } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -41,6 +44,10 @@ interface Row {
   monthly_subscription?: number | null;
   billing_status?: string | null;
   billing_notes?: string | null;
+  updated_at?: string | null;
+  created_at?: string | null;
+  dealsCount?: number;
+  leadsCount?: number;
 }
 
 interface NewForm {
@@ -104,6 +111,7 @@ export default function AdminDbSuppliers() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [supplierSearch, setSupplierSearch] = useState("");
+  const [quickFilter, setQuickFilter] = useState<"all" | "active" | "pending" | "no-deals" | "new" | "top">("all");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<NewForm>(emptyForm);
   const [saving, setSaving] = useState(false);
@@ -326,21 +334,47 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories,commission_percent,monthly_subscription,billing_status,billing_notes")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories,commission_percent,monthly_subscription,billing_status,billing_notes,updated_at,created_at")
       .order("business_name");
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
 
-    // Pull region/city counts in parallel
-    const [{ data: regs }, { data: cits }] = await Promise.all([
+    // Pull region/city/deals/leads counts in parallel
+    const [{ data: regs }, { data: cits }, { data: dls }, { data: ints }] = await Promise.all([
       supabase.from("supplier_regions").select("supplier_id"),
       supabase.from("supplier_cities").select("supplier_id"),
+      supabase.from("deals").select("id,supplier_id,status,is_deleted"),
+      supabase.from("deal_interests").select("deal_id,is_deleted"),
     ]);
     const regCount = new Map<string, number>();
     const cityCount = new Map<string, number>();
     (regs ?? []).forEach((r: { supplier_id: string }) => regCount.set(r.supplier_id, (regCount.get(r.supplier_id) ?? 0) + 1));
     (cits ?? []).forEach((r: { supplier_id: string }) => cityCount.set(r.supplier_id, (cityCount.get(r.supplier_id) ?? 0) + 1));
-    setRows(base.map((r) => ({ ...r, regionCount: regCount.get(r.id) ?? 0, cityCount: cityCount.get(r.id) ?? 0 })));
+
+    // Build deal -> supplier map for active, non-deleted deals
+    const dealsBySupplier = new Map<string, number>();
+    const dealToSupplier = new Map<string, string>();
+    (dls ?? []).forEach((d: { id: string; supplier_id: string; status: string; is_deleted: boolean }) => {
+      dealToSupplier.set(d.id, d.supplier_id);
+      if (d.status === "active" && !d.is_deleted) {
+        dealsBySupplier.set(d.supplier_id, (dealsBySupplier.get(d.supplier_id) ?? 0) + 1);
+      }
+    });
+    const leadsBySupplier = new Map<string, number>();
+    (ints ?? []).forEach((i: { deal_id: string; is_deleted: boolean }) => {
+      if (i.is_deleted) return;
+      const sid = dealToSupplier.get(i.deal_id);
+      if (!sid) return;
+      leadsBySupplier.set(sid, (leadsBySupplier.get(sid) ?? 0) + 1);
+    });
+
+    setRows(base.map((r) => ({
+      ...r,
+      regionCount: regCount.get(r.id) ?? 0,
+      cityCount: cityCount.get(r.id) ?? 0,
+      dealsCount: dealsBySupplier.get(r.id) ?? 0,
+      leadsCount: leadsBySupplier.get(r.id) ?? 0,
+    })));
     setLoading(false);
   };
 
@@ -574,123 +608,179 @@ export default function AdminDbSuppliers() {
     <MobileShell>
       <PageHeader title="ניהול ספקים" subtitle={`${rows.length} ספקים רשומים`} back />
 
-      <div className="px-5 -mt-2 mb-4 space-y-3">
-        <Button
-          onClick={() => { setForm(emptyForm); setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] }); setOpen(true); }}
-          className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold"
-        >
-          <Plus className="h-4 w-4 ml-1.5" /> הוסף ספק חדש
-        </Button>
+      <div className="px-4 -mt-2 mb-3 space-y-2.5">
         <div className="relative">
           <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <Input
             value={supplierSearch}
             onChange={(e) => setSupplierSearch(e.target.value)}
-            placeholder="חיפוש ספק לפי שם, אימייל, טלפון או קטגוריה"
-            className="h-10 pr-9 text-sm"
+            placeholder="חיפוש ספק…"
+            className="h-9 pr-9 text-[13px] rounded-xl"
           />
+        </div>
+        <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-0.5 scrollbar-none">
+          {([
+            ["all", "הכל"],
+            ["active", "פעילים"],
+            ["pending", "ממתינים"],
+            ["no-deals", "ללא הצעות"],
+            ["new", "חדשים"],
+            ["top", "מובילים"],
+          ] as const).map(([k, lbl]) => {
+            const active = quickFilter === k;
+            return (
+              <button
+                key={k}
+                onClick={() => setQuickFilter(k)}
+                className={
+                  "shrink-0 h-7 px-3 rounded-full text-[11px] font-bold border transition-all " +
+                  (active
+                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                    : "bg-card text-muted-foreground border-border hover:border-gold/40")
+                }
+              >
+                {lbl}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {(() => {
         const q = supplierSearch.trim().toLowerCase();
-        const filteredRows = !q ? rows : rows.filter((r) => {
+        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        let filteredRows = !q ? rows : rows.filter((r) => {
           const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name ?? "").join(" ") ?? "";
           return [r.business_name, r.email, r.phone, catNames].some((v) => (v ?? "").toLowerCase().includes(q));
         });
+        if (quickFilter === "active") {
+          filteredRows = filteredRows.filter((r) => r.is_active && r.approval_status === "approved");
+        } else if (quickFilter === "pending") {
+          filteredRows = filteredRows.filter((r) => r.approval_status === "pending");
+        } else if (quickFilter === "no-deals") {
+          filteredRows = filteredRows.filter((r) => (r.dealsCount ?? 0) === 0);
+        } else if (quickFilter === "new") {
+          filteredRows = filteredRows.filter((r) => r.created_at && new Date(r.created_at).getTime() >= sevenDaysAgo);
+        } else if (quickFilter === "top") {
+          filteredRows = [...filteredRows].sort((a, b) => (b.leadsCount ?? 0) - (a.leadsCount ?? 0)).filter((r) => (r.leadsCount ?? 0) > 0);
+        }
         return (
-      <div className="px-5 space-y-3 pb-24">
+      <div className="px-4 space-y-2 pb-32">
         {filteredRows.length === 0 && (
           <div className="gb-card p-6 text-center text-sm text-muted-foreground">
-            {rows.length === 0 ? "אין ספקים רשומים עדיין. הוסף ספק חדש כדי להתחיל." : "לא נמצאו ספקים תואמים לחיפוש"}
+            {rows.length === 0 ? "אין ספקים רשומים עדיין." : "לא נמצאו ספקים תואמים"}
           </div>
         )}
         {filteredRows.map((r) => {
-          const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name).filter(Boolean) ?? [];
-          const isNational = r.serves_all_country || r.service_areas?.includes("כל הארץ") || ((r.regionCount ?? 0) === 0 && (r.cityCount ?? 0) === 0);
-          const noAreas = false;
+          const isNational = r.serves_all_country || r.service_areas?.includes("כל הארץ");
           const noCats = !r.categories || r.categories.length === 0;
-          const hidden = noAreas || noCats || !r.is_active || r.approval_status !== "approved";
+          const blocked = !r.is_active;
+          const pending = r.approval_status === "pending";
+          const approved = r.approval_status === "approved" && r.is_active;
+          const statusDot = blocked ? "bg-red-500" : pending ? "bg-amber-400" : approved ? "bg-emerald-500" : "bg-muted-foreground";
+          const statusLabel = blocked ? "חסום" : pending ? "ממתין" : approved ? "פעיל" : "לא פעיל";
+          const areasLabel = isNational ? "כל הארץ" : `${r.regionCount ?? 0} אזורים`;
+          const updated = r.updated_at ? new Date(r.updated_at) : null;
+          const updatedLabel = updated
+            ? (() => {
+                const diff = Date.now() - updated.getTime();
+                const days = Math.floor(diff / 86_400_000);
+                if (days <= 0) return "היום";
+                if (days === 1) return "אתמול";
+                if (days < 7) return `לפני ${days} ימים`;
+                if (days < 30) return `לפני ${Math.floor(days / 7)} שב׳`;
+                return `לפני ${Math.floor(days / 30)} ח׳`;
+              })()
+            : "—";
 
           return (
-            <div key={r.id} className="gb-card p-4 space-y-3">
-              <div className="flex items-start gap-3">
-                <SupplierLogo name={r.business_name} logoUrl={r.logo_url} size="md" />
+            <div key={r.id} className="gb-card p-3">
+              <div className="flex items-center gap-2.5">
+                <SupplierLogo name={r.business_name} logoUrl={r.logo_url} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="font-bold truncate">{r.business_name}</h3>
-                    {r.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-gold shrink-0" />}
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <h3 className="font-bold text-[14px] truncate leading-tight">{r.business_name}</h3>
+                    <span className={`h-2 w-2 rounded-full shrink-0 ${statusDot}`} aria-hidden />
+                    <span className="text-[10px] text-muted-foreground font-medium shrink-0">{statusLabel}</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {isNational ? "כל הארץ" : `${r.regionCount ?? 0} אזורים · ${r.cityCount ?? 0} ערים`} · {r.is_active ? "פעיל" : "לא פעיל"} · {r.approval_status}
-                  </p>
                   <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                    קטגוריות: {catNames.length ? catNames.join(", ") : <span className="text-destructive">אין</span>}
+                    {areasLabel} • {r.dealsCount ?? 0} הצעות • {r.leadsCount ?? 0} לידים
                   </p>
-                  {hidden && (
-                    <p className="text-[11px] text-destructive mt-1 font-bold flex items-center gap-1">
-                      <XCircle className="h-3 w-3" />
-                      מוסתר מדיירים: {[
-                        !r.is_active && "לא פעיל",
-                        r.approval_status !== "approved" && "לא מאושר",
-                        noCats && "אין קטגוריה",
-                        noAreas && "אין אזורי שירות",
-                      ].filter(Boolean).join(" · ")}
-                    </p>
-                  )}
+                  <p className="text-[10px] text-muted-foreground/80 mt-0.5">
+                    עודכן {updatedLabel}{noCats ? " • ללא קטגוריה" : ""}
+                  </p>
                 </div>
-                <button
-                  onClick={() => setDeleteId(r.id)}
-                  className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center"
-                  aria-label="מחק"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
               </div>
-              {(Number(r.commission_percent ?? 0) > 0 || Number(r.monthly_subscription ?? 0) > 0 || (r.billing_status && r.billing_status !== "none")) && (
-                <div className="rounded-xl bg-gold/5 border border-gold/20 px-3 py-2 text-[11px] flex flex-wrap gap-x-3 gap-y-1">
-                  <span><b className="text-primary">עמלה:</b> {Number(r.commission_percent ?? 0)}%</span>
-                  <span><b className="text-primary">מנוי:</b> ₪{Number(r.monthly_subscription ?? 0)}</span>
-                  <span><b className="text-primary">חיוב:</b> {r.billing_status ?? "none"}</span>
-                </div>
-              )}
-              <button
-                onClick={() => openEdit(r.id)}
-                className="w-full h-10 rounded-xl bg-gradient-gold text-primary text-sm font-bold flex items-center justify-center gap-1.5 shadow-gold"
-              >
-                <Pencil className="h-4 w-4" /> עריכת ספק
-              </button>
-              <div className="grid grid-cols-2 gap-2">
+
+              <div className="grid grid-cols-2 gap-1.5 mt-2.5">
                 <button
-                  onClick={() => navigate(`/admin/suppliers/${r.id}/media`)}
-                  className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-bold flex items-center justify-center gap-1"
+                  onClick={() => openEdit(r.id)}
+                  className="h-9 rounded-xl bg-primary text-primary-foreground text-[12px] font-bold flex items-center justify-center gap-1"
                 >
-                  <ImageIcon className="h-3.5 w-3.5" /> מדיה
-                </button>
-                <button
-                  onClick={() => navigate(`/admin/suppliers/${r.id}/areas`)}
-                  className="h-9 rounded-xl bg-gold/10 text-primary border border-gold/30 text-xs font-bold flex items-center justify-center gap-1"
-                >
-                  <MapPin className="h-3.5 w-3.5" /> אזורים
-                </button>
-                <button
-                  onClick={() => openMatch(r)}
-                  className="h-9 rounded-xl bg-primary/10 text-primary border border-primary/30 text-xs font-bold flex items-center justify-center gap-1"
-                >
-                  <Search className="h-3.5 w-3.5" /> בדוק התאמה
-                </button>
-                <button
-                  onClick={() => navigate(`/suppliers/${r.id}`)}
-                  className="h-9 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center gap-1"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" /> תצוגה
+                  <Pencil className="h-3.5 w-3.5" /> עריכה
                 </button>
                 <button
                   onClick={() => navigate(`/supplier/offers/new?supplierId=${r.id}`)}
-                  className="col-span-2 h-9 rounded-xl bg-gradient-gold text-primary text-xs font-bold flex items-center justify-center gap-1 shadow-gold"
+                  className="h-9 rounded-xl bg-gradient-gold text-primary text-[12px] font-bold flex items-center justify-center gap-1 shadow-gold"
                 >
-                  <Plus className="h-3.5 w-3.5" /> צור הצעה לספק זה
+                  <Plus className="h-3.5 w-3.5" /> צור הצעה
                 </button>
+              </div>
+
+              <div className="flex items-center justify-between gap-1 mt-2 pt-2 border-t border-border/50">
+                <button
+                  onClick={() => navigate(`/admin/suppliers/${r.id}/media`)}
+                  className="flex-1 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted flex items-center justify-center"
+                  aria-label="מדיה" title="מדיה"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => navigate(`/admin/suppliers/${r.id}/areas`)}
+                  className="flex-1 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted flex items-center justify-center"
+                  aria-label="אזורים" title="אזורים"
+                >
+                  <MapPin className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => navigate(`/suppliers/${r.id}`)}
+                  className="flex-1 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted flex items-center justify-center"
+                  aria-label="תצוגה" title="תצוגה"
+                >
+                  <Eye className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => openMatch(r)}
+                  className="flex-1 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted flex items-center justify-center"
+                  aria-label="בדוק התאמה" title="בדוק התאמה"
+                >
+                  <Target className="h-4 w-4" />
+                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="flex-1 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted flex items-center justify-center"
+                      aria-label="עוד" title="עוד"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuItem onClick={() => navigate(`/suppliers/${r.id}`)}>
+                      <ExternalLink className="h-4 w-4 ml-2" /> פתח עמוד ציבורי
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openMatch(r)}>
+                      <Target className="h-4 w-4 ml-2" /> בדוק התאמה
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setDeleteId(r.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 ml-2" /> מחיקת ספק
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           );
@@ -698,6 +788,15 @@ export default function AdminDbSuppliers() {
       </div>
         );
       })()}
+
+      {/* Floating Action Button — add new supplier */}
+      <button
+        onClick={() => { setForm(emptyForm); setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] }); setOpen(true); }}
+        className="fixed z-40 left-5 bottom-24 h-14 w-14 rounded-full bg-gradient-gold text-primary shadow-gold flex items-center justify-center active:scale-95 transition-transform"
+        aria-label="הוסף ספק חדש"
+      >
+        <Plus className="h-6 w-6" strokeWidth={2.6} />
+      </button>
 
       {/* Create dialog */}
       <Dialog open={open} onOpenChange={setOpen}>

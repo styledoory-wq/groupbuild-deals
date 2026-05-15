@@ -44,23 +44,23 @@ function BottomNavImpl({ role }: { role: Role }) {
                 to={to}
                 className={cn(
                   "flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl transition-all duration-300 relative group",
-                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  active ? "text-white" : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {active && (
                   <span
                     aria-hidden
-                    className="absolute inset-x-1.5 inset-y-1 rounded-2xl bg-gradient-to-b from-gold/25 via-gold/10 to-transparent ring-1 ring-gold/40 shadow-[0_8px_20px_-8px_hsl(44_53%_54%_/_0.45)]"
+                    className="absolute inset-x-1.5 inset-y-1 rounded-2xl bg-gradient-to-b from-gold to-gold-light shadow-[0_8px_20px_-6px_hsl(44_53%_54%_/_0.55)]"
                   />
                 )}
                 <Icon
                   className={cn(
-                    "h-[19px] w-[19px] relative transition-transform duration-300",
-                    active && "text-gold drop-shadow-[0_0_8px_hsl(44_53%_54%_/_0.6)] scale-110"
+                    "relative transition-transform duration-300",
+                    active ? "h-[22px] w-[22px] text-white scale-105" : "h-[19px] w-[19px]"
                   )}
                   strokeWidth={active ? 2.4 : 1.75}
                 />
-                <span className={cn("text-[10px] leading-none relative", active ? "font-bold" : "font-normal")}>{label}</span>
+                <span className={cn("text-[10px] leading-none relative", active ? "font-bold text-white" : "font-normal")}>{label}</span>
               </NavLink>
             );
           })}
