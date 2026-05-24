@@ -28,7 +28,7 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
       <div
         className={cn(
           "w-full max-w-[480px] md:max-w-2xl lg:max-w-4xl xl:max-w-6xl",
-          "min-h-screen relative z-10 pb-28 md:pb-32",
+          "min-h-screen relative z-10 pb-28 md:pb-32 safe-top",
           className
         )}
       >
