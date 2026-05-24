@@ -48,7 +48,7 @@ export default function CategoriesList() {
     return categories.filter((c) => allowed.has(c.id));
   }, [categories, stage]);
 
-  const cachedSuppliers = getCachedValue<SupplierLite[]>("categories:suppliers", 60_000);
+  const cachedSuppliers = getCachedValue<SupplierLite[]>("categories:suppliers", 5 * 60_000);
   const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cachedSuppliers ?? []);
   const [loadingSuppliers, setLoadingSuppliers] = useState(() => !cachedSuppliers);
   const [search, setSearch] = useState("");
@@ -66,7 +66,7 @@ export default function CategoriesList() {
             .in("approval_status", ["approved", "active"])
             .order("business_name");
           return (data as SupplierLite[]) ?? [];
-        }, 60_000);
+        }, 5 * 60_000);
         if (!cancelled) setSuppliers(data);
       } finally {
         if (!cancelled) setLoadingSuppliers(false);

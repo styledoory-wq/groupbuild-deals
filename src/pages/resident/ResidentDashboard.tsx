@@ -46,7 +46,7 @@ export default function ResidentDashboard() {
 
   const dashboardCacheKey = authReady && user?.id ? `resident-dashboard:${user.id}` : "";
   const cachedDashboard = useMemo(
-    () => (dashboardCacheKey ? getCachedValue<DashboardData>(dashboardCacheKey, 60_000) : null),
+    () => (dashboardCacheKey ? getCachedValue<DashboardData>(dashboardCacheKey, 5 * 60_000) : null),
     [dashboardCacheKey],
   );
 
@@ -176,7 +176,7 @@ export default function ResidentDashboard() {
           });
         }
           return { profileCity: city, profileRegion: region, areaDeals: nextAreaDeals, joinedDeals: nextJoinedDeals, areaSuppliersCount: allowedSupplierIds.length };
-        }, 60_000);
+        }, 5 * 60_000);
         if (!cancelled) {
           setProfileCity(data.profileCity);
           setProfileRegion(data.profileRegion);

@@ -109,7 +109,14 @@ const PreloadImportantRoutes = () => {
 
   useEffect(() => {
     if (!authReady || !user) return;
-    const run = user.role === "supplier" ? preloadSupplierRoutes : preloadResidentRoutes;
+    const isSupplier = user.role === "supplier";
+    const run = () => {
+      (isSupplier ? preloadSupplierRoutes : preloadResidentRoutes)();
+      if (!isSupplier) {
+        // Warm data caches for the main resident tabs so switches feel instant.
+        void import("./lib/prefetchTabs").then((m) => m.prefetchResidentTabs());
+      }
+    };
     const idle = window.requestIdleCallback ?? ((cb: IdleRequestCallback) => window.setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 }), 1200));
     const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout;
     const id = idle(run);
