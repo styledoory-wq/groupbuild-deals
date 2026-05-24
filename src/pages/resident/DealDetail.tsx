@@ -853,13 +853,13 @@ export default function DealDetail() {
                     await navigator.share(shareData);
                   } else {
                     await navigator.clipboard.writeText(url);
-                    toast({ title: "הקישור הועתק", description: "אפשר לשתף עם השכנים" });
+                    toast.success("הקישור הועתק", { description: "אפשר לשתף עם השכנים" });
                   }
                 } catch (err) {
                   if ((err as Error)?.name !== "AbortError") {
                     try {
                       await navigator.clipboard.writeText(url);
-                      toast({ title: "הקישור הועתק", description: "אפשר לשתף עם השכנים" });
+                      toast.success("הקישור הועתק", { description: "אפשר לשתף עם השכנים" });
                     } catch { /* ignore */ }
                   }
                 }
