@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Sparkles, ArrowLeft, Building2, CheckCircle2, Home, Store, LogIn, UserPlus,
   ShieldCheck, Users, TrendingDown, Wallet, Tag as TagIcon,
