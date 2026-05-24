@@ -123,7 +123,10 @@ export default function Landing() {
     <div className="min-h-screen bg-primary text-primary-foreground flex justify-center">
       <div className="w-full max-w-[480px] relative">
         {/* Sticky header */}
-        <header className="sticky top-0 z-40 bg-primary/95 backdrop-blur">
+        <header
+          className="sticky top-0 z-40 bg-primary/95 backdrop-blur"
+          style={{ paddingTop: "env(safe-area-inset-top)" }}
+        >
           <div className="flex items-center justify-between px-5 h-20">
             <Link to="/" className="flex items-center" aria-label="GroupBuild">
               <BrandLogo variant="light" className="h-16 sm:h-20 w-auto" />
