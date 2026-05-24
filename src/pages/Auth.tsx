@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Briefcase, Mail, Sparkles, ArrowRight, ArrowLeft, User as UserIcon, MapPin, Lock } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,8 @@ import { isAdminEmail, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Role } from "@/types";
-import { BrandLogo } from "@/components/BrandLogo";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms";
-import { Link } from "react-router-dom";
 
 type Mode = "signin" | "signup";
 
@@ -206,9 +204,6 @@ export default function Auth() {
           <div className="absolute -bottom-10 -right-10 h-48 w-48 rounded-full bg-gold/5 blur-2xl" />
 
           <div className="relative animate-fade-up">
-            <div className="mb-5 flex">
-              <BrandLogo variant="light" size="lg" />
-            </div>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 mb-6">
               <Sparkles className="h-3.5 w-3.5 text-gold" />
               <span className="text-xs font-medium">רכש קבוצתי לדיירי בנייה חדשה</span>
