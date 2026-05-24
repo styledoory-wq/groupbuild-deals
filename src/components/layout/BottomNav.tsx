@@ -48,10 +48,16 @@ function BottomNavImpl({ role }: { role: Role }) {
                 )}
               >
                 {active && (
-                  <span
-                    aria-hidden
-                    className="absolute inset-x-1.5 inset-y-1 rounded-2xl bg-gradient-to-b from-gold to-gold-light shadow-[0_8px_20px_-6px_hsl(44_53%_54%_/_0.55)]"
-                  />
+                  <>
+                    <span
+                      aria-hidden
+                      className="absolute -inset-1 rounded-2xl bg-gold/30 blur-xl opacity-70"
+                    />
+                    <span
+                      aria-hidden
+                      className="absolute inset-x-1.5 inset-y-1 rounded-2xl bg-gradient-to-b from-gold to-gold-light shadow-[0_10px_24px_-6px_hsl(44_53%_54%_/_0.75)]"
+                    />
+                  </>
                 )}
                 <Icon
                   className={cn(

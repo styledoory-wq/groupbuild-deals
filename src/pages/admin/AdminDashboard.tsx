@@ -88,7 +88,7 @@ export default function AdminDashboard() {
         )}
       </header>
 
-      <div className="px-5 -mt-8 relative z-10 grid grid-cols-2 gap-3 mb-6">
+      <div className="px-5 -mt-8 relative z-10 grid grid-cols-2 gap-4 mb-10">
         <StatCard icon={Building2} label="פרויקטים" value={stats.projects || projects.length} />
         <StatCard icon={Users} label="ספקים" value={stats.suppliers} />
         <StatCard icon={Tag} label="עסקאות פעילות" value={stats.activeDeals} />
@@ -118,8 +118,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <section className="px-5 space-y-2">
-        <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground mb-3 px-1">ניהול מהיר</h2>
+      <section className="px-5 space-y-3 pb-10">
+        <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground mb-4 px-1">ניהול מהיר</h2>
         <QuickLink onClick={() => navigate("/admin/projects")} icon={Building2} label="ניהול פרויקטים" desc="הוספה, עריכה ומחיקה" />
         <QuickLink onClick={() => navigate("/admin/suppliers")} icon={ShieldCheck} label="ניהול ספקים" desc="הוספה, אזורי שירות, מדיה וקישורים" badge={stats.pendingSuppliers} />
         <QuickLink onClick={() => navigate("/admin/residents")} icon={Users} label="ניהול דיירים" desc="כל הדיירים והפרויקטים" />
@@ -140,32 +140,32 @@ export default function AdminDashboard() {
 
 function StatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: number }) {
   return (
-    <div className="gb-card p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="h-8 w-8 rounded-lg bg-muted/60 border border-border flex items-center justify-center text-primary">
-          <Icon className="h-4 w-4" strokeWidth={1.75} />
+    <div className="gb-card p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="h-9 w-9 rounded-lg bg-muted/40 border border-border flex items-center justify-center text-primary">
+          <Icon className="h-[18px] w-[18px]" strokeWidth={1.25} />
         </div>
       </div>
-      <div className="text-[22px] font-semibold text-primary leading-none tracking-tight">{value.toLocaleString("he-IL")}</div>
-      <div className="text-[11px] text-muted-foreground mt-2">{label}</div>
+      <div className="text-[24px] font-bold text-primary leading-none tracking-tight">{value.toLocaleString("he-IL")}</div>
+      <div className="text-sm text-muted-foreground mt-2">{label}</div>
     </div>
   );
 }
 
 function QuickLink({ onClick, icon: Icon, label, desc, badge }: { onClick: () => void; icon: LucideIcon; label: string; desc: string; badge?: number }) {
   return (
-    <button onClick={onClick} className="w-full gb-card p-4 flex items-center gap-3.5 text-right hover:border-gold/40 transition-smooth">
-      <div className="h-10 w-10 rounded-xl bg-muted/60 border border-border flex items-center justify-center text-primary">
-        <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+    <button onClick={onClick} className="w-full gb-card p-5 flex items-center gap-4 text-right hover:border-gold/40 transition-smooth">
+      <div className="h-11 w-11 rounded-xl bg-muted/40 border border-border flex items-center justify-center text-primary">
+        <Icon className="h-[18px] w-[18px]" strokeWidth={1.25} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="font-semibold text-sm text-foreground">{label}</div>
-        <div className="text-[11px] text-muted-foreground mt-0.5">{desc}</div>
+        <div className="font-bold text-sm text-foreground">{label}</div>
+        <div className="text-xs text-muted-foreground mt-1">{desc}</div>
       </div>
       {badge && badge > 0 ? (
         <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-destructive/10 text-destructive border border-destructive/20">{badge}</span>
       ) : (
-        <ChevronLeft className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
+        <ChevronLeft className="h-4 w-4 text-muted-foreground" strokeWidth={1.25} />
       )}
     </button>
   );
