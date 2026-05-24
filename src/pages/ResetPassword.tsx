@@ -45,7 +45,7 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen bg-gradient-hero text-primary-foreground flex justify-center">
-      <div className="w-full max-w-[480px] flex flex-col">
+      <div className="w-full max-w-[480px] flex flex-col safe-top">
         <div className="px-6 pt-12 pb-8">
           <h1 className="text-3xl font-extrabold mb-2">איפוס סיסמה</h1>
           <p className="text-primary-foreground/70 text-sm">בחרו סיסמה חדשה לחשבון שלכם.</p>
