@@ -75,7 +75,7 @@ type MyOfferItem = {
 const CACHE_KEY = "my-offers:items";
 
 export default function MyOffers() {
-  const cached = getCachedValue<MyOfferItem[]>(CACHE_KEY, 60_000);
+  const cached = getCachedValue<MyOfferItem[]>(CACHE_KEY, 5 * 60_000);
   const [loading, setLoading] = useState(() => !cached);
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<MyOfferItem[]>(() => cached ?? []);
