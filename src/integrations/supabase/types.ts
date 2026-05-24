@@ -130,6 +130,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           project_name: string | null
+          reapproval_deadline_at: string | null
           status: string
           terms_accepted_at: string | null
           updated_at: string
@@ -155,6 +156,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           project_name?: string | null
+          reapproval_deadline_at?: string | null
           status?: string
           terms_accepted_at?: string | null
           updated_at?: string
@@ -180,6 +182,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           project_name?: string | null
+          reapproval_deadline_at?: string | null
           status?: string
           terms_accepted_at?: string | null
           updated_at?: string
@@ -1157,6 +1160,7 @@ export type Database = {
         Args: { _interest_id: string; _lead_status: string }
         Returns: undefined
       }
+      auto_leave_expired_reapprovals: { Args: never; Returns: number }
       evaluate_conditional_joiners: {
         Args: { _deal_id: string }
         Returns: undefined
