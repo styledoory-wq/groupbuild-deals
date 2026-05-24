@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/auth";
 import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricing";
-import { BrandLogo } from "@/components/BrandLogo";
 
 type HotDeal = {
   id: string;
@@ -127,10 +126,7 @@ export default function Landing() {
           className="sticky top-0 z-40 bg-primary/95 backdrop-blur"
           style={{ paddingTop: "env(safe-area-inset-top)" }}
         >
-          <div className="flex items-center justify-between px-5 h-20">
-            <Link to="/" className="flex items-center" aria-label="GroupBuild">
-              <BrandLogo variant="light" className="h-16 sm:h-20 w-auto" />
-            </Link>
+          <div className="flex items-center justify-end px-5 h-16">
             <div className="flex items-center gap-2">
               {isAuthed ? (
                 <Button
