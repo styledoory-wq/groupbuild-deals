@@ -176,7 +176,7 @@ export default function ResidentDashboard() {
           });
         }
           return { profileCity: city, profileRegion: region, areaDeals: nextAreaDeals, joinedDeals: nextJoinedDeals, areaSuppliersCount: allowedSupplierIds.length };
-        }, 60_000);
+        }, 5 * 60_000);
         if (!cancelled) {
           setProfileCity(data.profileCity);
           setProfileRegion(data.profileRegion);

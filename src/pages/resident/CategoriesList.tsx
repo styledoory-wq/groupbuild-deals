@@ -66,7 +66,7 @@ export default function CategoriesList() {
             .in("approval_status", ["approved", "active"])
             .order("business_name");
           return (data as SupplierLite[]) ?? [];
-        }, 60_000);
+        }, 5 * 60_000);
         if (!cancelled) setSuppliers(data);
       } finally {
         if (!cancelled) setLoadingSuppliers(false);
