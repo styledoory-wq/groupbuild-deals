@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, MessageCircle, Phone, CheckCircle2, CreditCard, Clock } from "lucide-react";
+import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, MessageCircle, Phone, CheckCircle2, CreditCard, Clock, Share2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -837,6 +837,38 @@ export default function DealDetail() {
                 )}
               </Button>
             )}
+            {/* Invite neighbor */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={async () => {
+                const url = `${window.location.origin}/deals/${deal.id}`;
+                const shareData = {
+                  title: deal.title,
+                  text: `מצטרפים יחד למחיר משתלם: ${deal.title}`,
+                  url,
+                };
+                try {
+                  if (navigator.share) {
+                    await navigator.share(shareData);
+                  } else {
+                    await navigator.clipboard.writeText(url);
+                    toast.success("הקישור הועתק", { description: "אפשר לשתף עם השכנים" });
+                  }
+                } catch (err) {
+                  if ((err as Error)?.name !== "AbortError") {
+                    try {
+                      await navigator.clipboard.writeText(url);
+                      toast.success("הקישור הועתק", { description: "אפשר לשתף עם השכנים" });
+                    } catch { /* ignore */ }
+                  }
+                }
+              }}
+              className="w-full h-11 rounded-2xl border-gold/40 hover:bg-gold/5 font-bold gap-2"
+            >
+              <Share2 className="h-4 w-4" />
+              הזמן שכן להצטרף
+            </Button>
             {supplier && (() => {
               const wa = normalizeWhatsappUrl(supplier.whatsapp_url || supplier.phone);
               const tel = supplier.phone ? `tel:${supplier.phone.replace(/\s+/g, "")}` : null;
