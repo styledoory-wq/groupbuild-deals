@@ -21,6 +21,7 @@ const SupplierProfile = lazy(() => import("./pages/SupplierProfile"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 const TermsResidents = lazy(() => import("./pages/TermsResidents"));
 const TermsSuppliers = lazy(() => import("./pages/TermsSuppliers"));
+const SharedDeal = lazy(() => import("./pages/SharedDeal"));
 
 const ProjectsList = lazy(() => import("./pages/resident/ProjectsList"));
 const CategoriesList = lazy(() => import("./pages/resident/CategoriesList"));
