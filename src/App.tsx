@@ -8,6 +8,7 @@ import { AppProvider, useApp } from "@/store/AppStore";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
 import { RouteTransition } from "@/components/layout/RouteTransition";
 import { MobileShell } from "@/components/layout/MobileShell";
+import { SplashScreen } from "@/components/SplashScreen";
 import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
 
@@ -118,6 +119,11 @@ const PreloadImportantRoutes = () => {
   return null;
 };
 
+const AppSplash = () => {
+  const { authReady } = useApp();
+  return <SplashScreen ready={authReady} />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AppProvider>
@@ -125,6 +131,7 @@ const App = () => (
         <Toaster />
         <Sonner position="top-center" dir="rtl" />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <AppSplash />
           <PreloadImportantRoutes />
           <TermsAcceptanceGate>
             <RouteTransition>
