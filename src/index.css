@@ -85,9 +85,22 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
-    /* iOS PWA: prevent rubber-band background flashes */
-    background-color: hsl(var(--background));
+    /* iOS PWA: navy behind the status bar so the safe area blends with the header */
+    background-color: hsl(var(--primary));
     min-height: 100vh;
+  }
+
+  /* Fixed navy bar that fills the iOS safe-area-top (notch / Dynamic Island region) */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top);
+    background-color: hsl(var(--primary));
+    z-index: 100;
+    pointer-events: none;
   }
 
   h1, h2, h3, h4, h5 {
