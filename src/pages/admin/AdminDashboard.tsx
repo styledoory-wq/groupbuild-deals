@@ -88,7 +88,7 @@ export default function AdminDashboard() {
         )}
       </header>
 
-      <div className="px-5 -mt-8 relative z-10 grid grid-cols-2 gap-3 mb-6">
+      <div className="px-5 -mt-8 relative z-10 grid grid-cols-2 gap-4 mb-10">
         <StatCard icon={Building2} label="פרויקטים" value={stats.projects || projects.length} />
         <StatCard icon={Users} label="ספקים" value={stats.suppliers} />
         <StatCard icon={Tag} label="עסקאות פעילות" value={stats.activeDeals} />
