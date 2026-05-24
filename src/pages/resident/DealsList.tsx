@@ -104,26 +104,40 @@ export default function DealsList() {
         title={cat ? `${cat.icon}  ${cat.name}` : "כל העסקאות"}
         subtitle={loading ? "טוען עסקאות..." : `${deals.length} עסקאות פעילות`}
       />
-      <div className="px-5 md:px-8 lg:px-10 -mt-4 md:-mt-8 relative z-10 space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
-        {loading && <DealCardSkeletonList count={4} />}
-
-        {!loading && error && (
-          <div className="gb-card p-6 text-center md:col-span-2 lg:col-span-3">
-            <p className="text-sm font-bold text-foreground">שגיאה בטעינה</p>
-            <p className="text-xs text-muted-foreground mt-1">{error}</p>
+      <div className="px-5 md:px-8 lg:px-10 -mt-4 md:-mt-8 relative z-10">
+        {!loading && !error && deals.length > 0 && (
+          <div className="mb-5 flex items-baseline justify-between">
+            <h2 className="text-lg font-bold text-foreground tracking-tight">
+              {cat ? "עסקאות בקטגוריה" : "העסקאות החמות כעת"}
+            </h2>
+            <span className="text-xs text-muted-foreground">{deals.length} פעילות</span>
           </div>
         )}
 
-        {!loading && !error && deals.length === 0 && (
-          <div className="gb-card p-8 text-center md:col-span-2 lg:col-span-3">
-            <Tag className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-muted-foreground text-sm">אין עדיין עסקאות פעילות{cat ? ` בקטגוריה ${cat.name}` : ""}.</p>
-          </div>
-        )}
+        <div className="space-y-5 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+          {loading && <DealCardSkeletonList count={4} />}
 
-        {!loading && !error && deals.map((d) => (
-          <RealDealCard key={d.id} deal={d} joinersCount={counts[d.id] ?? 0} />
-        ))}
+          {!loading && error && (
+            <div className="rounded-2xl border border-border/60 bg-card p-6 text-center md:col-span-2 lg:col-span-3 shadow-sm">
+              <p className="text-sm font-bold text-foreground">שגיאה בטעינה</p>
+              <p className="text-xs text-muted-foreground mt-1">{error}</p>
+            </div>
+          )}
+
+          {!loading && !error && deals.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-border/70 bg-muted/30 p-10 text-center md:col-span-2 lg:col-span-3">
+              <Tag className="h-8 w-8 mx-auto mb-3 text-muted-foreground/70" />
+              <p className="text-sm font-semibold text-foreground">אין עדיין עסקאות פעילות</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."}
+              </p>
+            </div>
+          )}
+
+          {!loading && !error && deals.map((d) => (
+            <RealDealCard key={d.id} deal={d} joinersCount={counts[d.id] ?? 0} />
+          ))}
+        </div>
       </div>
       <BottomNav role="resident" />
     </MobileShell>

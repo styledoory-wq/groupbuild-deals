@@ -21,6 +21,7 @@ const SupplierProfile = lazy(() => import("./pages/SupplierProfile"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 const TermsResidents = lazy(() => import("./pages/TermsResidents"));
 const TermsSuppliers = lazy(() => import("./pages/TermsSuppliers"));
+const SharedDeal = lazy(() => import("./pages/SharedDeal"));
 
 const ProjectsList = lazy(() => import("./pages/resident/ProjectsList"));
 const CategoriesList = lazy(() => import("./pages/resident/CategoriesList"));
@@ -160,8 +161,8 @@ const App = () => (
                   <Route path="/resident/categories/:categoryId" element={<CategorySuppliers />} />
                   <Route path="/resident/deals" element={<DealsList />} />
                   <Route path="/resident/deals/:dealId" element={<DealDetail />} />
-                  <Route path="/resident/deals/:dealId" element={<DealDetail />} />
-<Route path="/deals/:dealId" element={<DealDetail />} />
+                  <Route path="/deals/:dealId" element={<SharedDeal />} />
+                  <Route path="/share/deal/:dealId" element={<SharedDeal />} />
                   <Route path="/resident/profile" element={<ResidentProfile />} />
                   <Route path="/resident/profile/edit" element={<ResidentProfileEdit />} />
                   <Route path="/resident/notifications" element={<Notifications />} />

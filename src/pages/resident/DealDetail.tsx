@@ -842,7 +842,7 @@ export default function DealDetail() {
               type="button"
               variant="outline"
               onClick={async () => {
-                const url = `${window.location.origin}/deals/${deal.id}`;
+                const url = `${window.location.origin}/share/deal/${deal.id}`;
                 const shareData = {
                   title: deal.title,
                   text: `מצטרפים יחד למחיר משתלם: ${deal.title}`,
