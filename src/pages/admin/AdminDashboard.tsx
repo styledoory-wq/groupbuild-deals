@@ -118,8 +118,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <section className="px-5 space-y-2">
-        <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground mb-3 px-1">ניהול מהיר</h2>
+      <section className="px-5 space-y-3 pb-10">
+        <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground mb-4 px-1">ניהול מהיר</h2>
         <QuickLink onClick={() => navigate("/admin/projects")} icon={Building2} label="ניהול פרויקטים" desc="הוספה, עריכה ומחיקה" />
         <QuickLink onClick={() => navigate("/admin/suppliers")} icon={ShieldCheck} label="ניהול ספקים" desc="הוספה, אזורי שירות, מדיה וקישורים" badge={stats.pendingSuppliers} />
         <QuickLink onClick={() => navigate("/admin/residents")} icon={Users} label="ניהול דיירים" desc="כל הדיירים והפרויקטים" />
