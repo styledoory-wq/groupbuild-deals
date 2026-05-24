@@ -140,14 +140,14 @@ export default function AdminDashboard() {
 
 function StatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: number }) {
   return (
-    <div className="gb-card p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="h-8 w-8 rounded-lg bg-muted/60 border border-border flex items-center justify-center text-primary">
-          <Icon className="h-4 w-4" strokeWidth={1.75} />
+    <div className="gb-card p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="h-9 w-9 rounded-lg bg-muted/40 border border-border flex items-center justify-center text-primary">
+          <Icon className="h-[18px] w-[18px]" strokeWidth={1.25} />
         </div>
       </div>
-      <div className="text-[22px] font-semibold text-primary leading-none tracking-tight">{value.toLocaleString("he-IL")}</div>
-      <div className="text-[11px] text-muted-foreground mt-2">{label}</div>
+      <div className="text-[24px] font-bold text-primary leading-none tracking-tight">{value.toLocaleString("he-IL")}</div>
+      <div className="text-sm text-muted-foreground mt-2">{label}</div>
     </div>
   );
 }
