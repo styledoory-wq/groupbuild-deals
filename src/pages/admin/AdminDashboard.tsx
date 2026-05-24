@@ -154,18 +154,18 @@ function StatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: strin
 
 function QuickLink({ onClick, icon: Icon, label, desc, badge }: { onClick: () => void; icon: LucideIcon; label: string; desc: string; badge?: number }) {
   return (
-    <button onClick={onClick} className="w-full gb-card p-4 flex items-center gap-3.5 text-right hover:border-gold/40 transition-smooth">
-      <div className="h-10 w-10 rounded-xl bg-muted/60 border border-border flex items-center justify-center text-primary">
-        <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+    <button onClick={onClick} className="w-full gb-card p-5 flex items-center gap-4 text-right hover:border-gold/40 transition-smooth">
+      <div className="h-11 w-11 rounded-xl bg-muted/40 border border-border flex items-center justify-center text-primary">
+        <Icon className="h-[18px] w-[18px]" strokeWidth={1.25} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="font-semibold text-sm text-foreground">{label}</div>
-        <div className="text-[11px] text-muted-foreground mt-0.5">{desc}</div>
+        <div className="font-bold text-sm text-foreground">{label}</div>
+        <div className="text-xs text-muted-foreground mt-1">{desc}</div>
       </div>
       {badge && badge > 0 ? (
         <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-destructive/10 text-destructive border border-destructive/20">{badge}</span>
       ) : (
-        <ChevronLeft className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
+        <ChevronLeft className="h-4 w-4 text-muted-foreground" strokeWidth={1.25} />
       )}
     </button>
   );
