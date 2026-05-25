@@ -652,10 +652,61 @@ export default function OfferEditor() {
           </Button>
         </div>
 
-        <Button onClick={save} disabled={saving} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card">
+        {/* Closure mechanics */}
+        <div className="gb-card p-4 space-y-3">
+          <h3 className="font-bold text-sm">סגירת ההצעה ומימוש</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="יעד משתתפים לסגירה">
+              <Input type="number" min={1} value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)} placeholder="לדוגמה 20" className="h-11 rounded-xl" />
+            </Field>
+            <Field label="מקס׳ מימושים (אופציונלי)">
+              <Input type="number" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
+            </Field>
+            <Field label="תאריך אחרון להצטרפות">
+              <Input type="date" value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-11 rounded-xl" />
+            </Field>
+            <Field label="תאריך אחרון למימוש">
+              <Input type="date" value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-11 rounded-xl" />
+            </Field>
+          </div>
+          <Field label="אזורי שירות (מופרדים בפסיק)">
+            <Input value={serviceAreasInput} onChange={(e) => setServiceAreasInput(e.target.value)} placeholder="תל אביב, רמת גן, חיפה" className="h-11 rounded-xl" />
+          </Field>
+          <Field label="תנאי הצעה">
+            <Textarea value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)} placeholder="מה נכלל בהצעה? תנאי תשלום? אחריות?" className="rounded-xl min-h-[70px]" />
+          </Field>
+          <Field label="הגבלות / חריגים">
+            <Textarea value={restrictions} onChange={(e) => setRestrictions(e.target.value)} placeholder="מה לא נכלל? חריגים?" className="rounded-xl min-h-[60px]" />
+          </Field>
+          <label className="flex items-center gap-2 cursor-pointer pt-1">
+            <input type="checkbox" checked={appointmentRequired} onChange={(e) => setAppointmentRequired(e.target.checked)} className="h-4 w-4 accent-primary" />
+            <span className="text-sm text-foreground">נדרשת קביעת פגישה לפני מימוש</span>
+          </label>
+        </div>
+
+        {/* Supplier commitment - required */}
+        <div className="gb-card p-4 border-2 border-gold/40 bg-gold/5">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={commitmentAccepted}
+              onChange={(e) => setCommitmentAccepted(e.target.checked)}
+              className="h-5 w-5 mt-0.5 accent-primary shrink-0"
+            />
+            <div className="text-sm leading-relaxed">
+              <span className="font-bold text-foreground">התחייבות הספק</span>
+              <p className="text-xs text-muted-foreground mt-1">
+                אני מתחייב לכבד את ההצעה הזו לכל דייר זכאי, לעמוד בלוחות הזמנים שהוגדרו, ולמסור שירות איכותי. אי-עמידה בהתחייבות עלולה לגרור השעיה מהמערכת.
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <Button onClick={save} disabled={saving || !commitmentAccepted} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card disabled:opacity-50">
           {saving ? <Loader2 className="h-4 w-4 ml-2 animate-spin" /> : <Save className="h-4 w-4 ml-2" />}
           {saving ? "שומר..." : "שמירת ההצעה"}
         </Button>
+
       </div>
 
       <BottomNav role="supplier" />
