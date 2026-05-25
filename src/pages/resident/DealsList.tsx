@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Tag } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -37,6 +37,7 @@ export default function DealsList() {
   const [counts, setCounts] = useState<Record<string, number>>(() => cached?.counts ?? {});
   const [loading, setLoading] = useState(() => !cached);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<"active" | "archive">("active");
 
   useEffect(() => {
     let cancelled = false;
@@ -119,23 +120,53 @@ export default function DealsList() {
   const cat = categories.find((c) => c.id === categoryId);
   const stageTitle = stageId ? STAGE_TITLES[stageId] : "";
 
+  const filtered = useMemo(
+    () =>
+      deals.filter((d) =>
+        tab === "active"
+          ? d.status === "active" && !d.auto_closed_at
+          : d.status === "closed" || !!d.auto_closed_at,
+      ),
+    [deals, tab],
+  );
+
   return (
     <MobileShell>
       <PageHeader
         title={cat ? `${cat.icon}  ${cat.name}` : stageTitle ? `הצעות — ${stageTitle}` : "כל העסקאות"}
-        subtitle={loading ? "טוען עסקאות..." : `${deals.length} עסקאות פעילות`}
+        subtitle={loading ? "טוען עסקאות..." : `${filtered.length} עסקאות ${tab === "active" ? "פעילות" : "בארכיון"}`}
       />
-      <div className="px-5 md:px-8 lg:px-10 -mt-4 md:-mt-8 relative z-10">
-        {!loading && !error && deals.length > 0 && (
-          <div className="mb-5 flex items-baseline justify-between">
-            <h2 className="text-lg font-bold text-foreground tracking-tight">
-              {cat ? "עסקאות בקטגוריה" : "העסקאות החמות כעת"}
-            </h2>
-            <span className="text-xs text-muted-foreground">{deals.length} פעילות</span>
-          </div>
-        )}
 
-        <div className="space-y-5 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+      {/* Pill toggle: Active / Archive */}
+      <div className="px-5 -mt-5 relative z-10">
+        <div className="bg-white border border-[#E2E8F0] rounded-full p-1 flex items-center shadow-[0_6px_18px_-10px_rgba(15,30,60,0.16)]">
+          <button
+            onClick={() => setTab("active")}
+            className={
+              "flex-1 h-10 rounded-full text-[13px] font-bold transition-all " +
+              (tab === "active"
+                ? "bg-[#0A1F3D] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                : "text-[#475569]")
+            }
+          >
+            פעילות
+          </button>
+          <button
+            onClick={() => setTab("archive")}
+            className={
+              "flex-1 h-10 rounded-full text-[13px] font-bold transition-all " +
+              (tab === "archive"
+                ? "bg-[#0A1F3D] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                : "text-[#475569]")
+            }
+          >
+            ארכיון
+          </button>
+        </div>
+      </div>
+
+      <div className="px-5 md:px-8 lg:px-10 mt-5 relative z-10">
+        <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
           {loading && <DealCardSkeletonList count={4} />}
 
           {!loading && error && (
@@ -145,17 +176,19 @@ export default function DealsList() {
             </div>
           )}
 
-          {!loading && !error && deals.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-border/70 bg-muted/30 p-10 text-center md:col-span-2 lg:col-span-3">
+          {!loading && !error && filtered.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-border/70 bg-white/60 p-10 text-center md:col-span-2 lg:col-span-3">
               <Tag className="h-8 w-8 mx-auto mb-3 text-muted-foreground/70" />
-              <p className="text-sm font-semibold text-foreground">אין עדיין עסקאות פעילות</p>
+              <p className="text-sm font-semibold text-foreground">
+                {tab === "active" ? "אין עדיין עסקאות פעילות" : "אין עסקאות בארכיון"}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."}
               </p>
             </div>
           )}
 
-          {!loading && !error && deals.map((d) => (
+          {!loading && !error && filtered.map((d) => (
             <RealDealCard key={d.id} deal={d} joinersCount={counts[d.id] ?? 0} />
           ))}
         </div>

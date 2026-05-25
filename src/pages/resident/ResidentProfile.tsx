@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, Building2, Phone, Mail, Pencil, FileText, Wallet, ChevronLeft } from "lucide-react";
+import { LogOut, Building2, Phone, Mail, Pencil, FileText, Wallet, ChevronLeft, User as UserIcon, Bell, Settings } from "lucide-react";
+
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
@@ -49,48 +50,65 @@ export default function ResidentProfile() {
       </div>
 
       <div className="pb-32 relative">
-        <div className="pt-10 px-5">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-[26px] font-extrabold tracking-tight text-[#0D2346] leading-tight">
-                הפרופיל שלי
-              </h1>
-              <p className="text-[13px] text-[#475569] mt-1">הפרטים והעסקאות שלך</p>
+        <div className="pt-4 px-5">
+          {/* Top bar */}
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={() => navigate(-1)}
+              className="h-10 w-10 rounded-full bg-white/70 backdrop-blur border border-[#E2E8F0] flex items-center justify-center text-[#0A1F3D] hover:bg-white transition-smooth"
+              aria-label="חזרה"
+            >
+              <ChevronLeft className="h-[18px] w-[18px] rotate-180" strokeWidth={1.75} />
+            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate("/resident/notifications")}
+                className="h-10 w-10 rounded-full bg-white/70 backdrop-blur border border-[#E2E8F0] flex items-center justify-center text-[#0A1F3D] hover:bg-white transition-smooth"
+                aria-label="התראות"
+              >
+                <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              </button>
+              <button
+                onClick={() => navigate("/resident/profile/edit")}
+                className="h-10 w-10 rounded-full bg-white/70 backdrop-blur border border-[#E2E8F0] flex items-center justify-center text-[#0A1F3D] hover:bg-white transition-smooth"
+                aria-label="הגדרות"
+              >
+                <Settings className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              </button>
             </div>
           </div>
 
-          {/* Profile hero card — elevated glass over ambient backdrop */}
-          <div className="ios-card p-6 text-center mb-5 animate-fade-in relative overflow-hidden">
-            {/* subtle inner sheen */}
-            <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A961]/40 to-transparent" />
-            <div className="h-24 w-24 rounded-full ios-avatar-gold mx-auto flex items-center justify-center">
-              <span className="text-[40px] font-extrabold text-white drop-shadow-sm leading-none">
-                {initial}
-              </span>
+          {/* Avatar + identity */}
+          <div className="text-center mb-8 animate-fade-in">
+            <div className="h-[110px] w-[110px] rounded-full ios-avatar-gold mx-auto flex items-center justify-center">
+              <UserIcon className="h-12 w-12 text-white" strokeWidth={1.75} />
             </div>
-            <h2 className="font-extrabold text-[20px] mt-4 text-[#0D2346] tracking-tight">{user?.name}</h2>
-            <div className="text-[12px] text-[#6B7280] mt-1">
+            <h2 className="font-extrabold text-[22px] mt-5 text-[#0A1F3D] tracking-tight">{user?.name}</h2>
+            <p className="text-[13px] text-[#475569] mt-1">
               דייר{project ? ` · ${project.name}` : ""}
-            </div>
-
-            <div className="mt-5 space-y-2.5">
+            </p>
+            <div className="mt-5 space-y-2">
               {user?.phone && (
-                <div className="ios-meta-row">
-                  <Phone className="h-4 w-4 text-[#C9A961]" /> {user.phone}
+                <div className="flex items-center justify-center gap-2 text-[13px] text-[#475569]">
+                  <span>{user.phone}</span>
+                  <Phone className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
                 </div>
               )}
               {user?.email && (
-                <div className="ios-meta-row">
-                  <Mail className="h-4 w-4 text-[#C9A961]" /> {user.email}
+                <div className="flex items-center justify-center gap-2 text-[13px] text-[#475569]">
+                  <span>{user.email}</span>
+                  <Mail className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
                 </div>
               )}
               {project && user?.apartment && (
-                <div className="ios-meta-row">
-                  <Building2 className="h-4 w-4 text-[#C9A961]" /> דירה {user.apartment}
+                <div className="flex items-center justify-center gap-2 text-[13px] text-[#475569]">
+                  <span>דירה {user.apartment}</span>
+                  <Building2 className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
                 </div>
               )}
             </div>
           </div>
+
 
           {/* Action list */}
           <div className="space-y-3">

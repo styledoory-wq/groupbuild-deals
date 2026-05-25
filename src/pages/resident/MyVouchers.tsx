@@ -39,15 +39,23 @@ export default function MyVouchers() {
         {loading ? (
           <div className="h-72 gb-skeleton rounded-3xl" />
         ) : vouchers.length === 0 ? (
-          <div className="rounded-3xl bg-card border border-border/60 p-10 text-center">
-            <div className="h-14 w-14 rounded-2xl bg-muted/40 border border-border mx-auto flex items-center justify-center mb-3">
-              <Ticket className="h-6 w-6 text-muted-foreground" />
+          <div className="ios-card p-10 text-center">
+            <div
+              className="h-16 w-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
+              style={{
+                background: "linear-gradient(145deg, rgba(212,180,106,0.18) 0%, rgba(201,169,97,0.10) 100%)",
+                border: "1px solid rgba(201,169,97,0.30)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 16px -8px rgba(201,169,97,0.30)",
+              }}
+            >
+              <Ticket className="h-7 w-7 text-[#C9A961]" strokeWidth={1.75} />
             </div>
-            <h3 className="font-bold text-foreground">אין עדיין הטבות זמינות</h3>
-            <p className="text-sm text-muted-foreground mt-2">
+            <h3 className="font-extrabold text-[17px] text-[#0A1F3D]">אין עדיין הטבות זמינות</h3>
+            <p className="text-[13px] text-[#475569] mt-2 leading-relaxed max-w-[280px] mx-auto">
               ברגע שעסקה שהצטרפת אליה תיסגר, יופיע כאן שובר ההטבה האישי שלך עם קוד מימוש ו-QR.
             </p>
           </div>
+
         ) : (
           vouchers.map(v => (
             <VoucherCard
