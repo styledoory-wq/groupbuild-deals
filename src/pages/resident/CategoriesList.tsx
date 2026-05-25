@@ -40,7 +40,9 @@ export default function CategoriesList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const stageId = searchParams.get("stage") || "";
+  const view = searchParams.get("view") || "";
   const stage = stageId ? STAGE_CATEGORIES[stageId] : null;
+  const showStageChoice = !!stage && view !== "suppliers";
 
   const visibleCategories = useMemo(() => {
     if (!stage) return categories;
