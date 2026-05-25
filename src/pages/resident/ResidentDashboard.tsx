@@ -329,7 +329,7 @@ export default function ResidentDashboard() {
       )}
 
       {!loading && joinedDeals.length > 0 && (
-        <section className="mt-7 mb-7">
+        <section className="mt-9 mb-8">
           <div className="flex items-center justify-between px-5 mb-3">
             <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
               <Heart className="h-3.5 w-3.5 text-gold fill-gold" strokeWidth={2} />
@@ -349,7 +349,7 @@ export default function ResidentDashboard() {
         </section>
       )}
 
-      {!loading && <section className="px-5 space-y-3 mt-7 mb-8">
+      {!loading && <section className="px-5 space-y-3 mt-9 mb-8">
         <div className="flex items-center justify-between">
           <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
             <Sparkles className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
