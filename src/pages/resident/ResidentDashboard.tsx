@@ -204,21 +204,9 @@ export default function ResidentDashboard() {
 
   return (
     <MobileShell>
-      {/* Cinematic hero */}
-      <header className="gb-aurora text-primary-foreground px-5 pt-6 pb-12 rounded-b-[32px] relative overflow-hidden">
-        <span aria-hidden className="gb-particle gb-particle-1 h-1 w-1 top-20 left-12" />
-        <span aria-hidden className="gb-particle gb-particle-2 h-1.5 w-1.5 top-32 right-16" />
-        <span aria-hidden className="gb-particle gb-particle-3 h-1 w-1 top-12 right-1/3" />
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
-          style={{
-            backgroundImage: "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-            maskImage: "radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)",
-            WebkitMaskImage: "radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)",
-          }}
-        />
+      {/* Calm architectural hero */}
+      <header className="gb-aurora text-primary-foreground px-5 pt-6 pb-10 rounded-b-[28px] relative overflow-hidden">
+
 
         <div className="flex items-center justify-between mb-5 relative">
           <div className="min-w-0">
@@ -273,8 +261,9 @@ export default function ResidentDashboard() {
 
           <button
             onClick={() => navigate("/resident/categories")}
-            className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold gb-pulse-glow flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform"
+            className="w-full h-12 rounded-2xl bg-gradient-gold text-[#0A1F3D] font-bold shadow-gold flex items-center justify-center gap-2 hover:brightness-105 active:scale-[0.99] transition-all"
           >
+
             <Search className="h-4 w-4" strokeWidth={2.5} />
             מצא ספקים באזור שלי
           </button>
