@@ -222,19 +222,41 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
                   <span className="gb-live-dot" />
                   <Users className="h-2.5 w-2.5" strokeWidth={2.5} />
-                  {realJoiners > 0 ? (
+                  {deal.target_participants ? (
+                    <>
+                      <span className="font-semibold text-foreground">{realJoiners}/{target}</span>
+                      {!isClosed && remaining > 0 ? (
+                        <span className="text-muted-foreground">· עוד {remaining} לסגירה</span>
+                      ) : null}
+                    </>
+                  ) : realJoiners > 0 ? (
                     <><span className="font-semibold text-foreground">{realJoiners}</span> דיירים הצטרפו</>
                   ) : (
                     <span className="font-semibold text-foreground">היו הראשונים להצטרף</span>
                   )}
                 </span>
-                {left && (
+                {isClosed ? (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                    {isRedeemed ? "מומשה" : "נסגרה"}
+                  </span>
+                ) : joinDeadline ? (
+                  <span className="inline-flex items-center gap-1 text-muted-foreground">
+                    <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
+                    עד <span className="font-semibold text-foreground">{fmtDate(joinDeadline)}</span>
+                  </span>
+                ) : left ? (
                   <span className="inline-flex items-center gap-1 text-muted-foreground">
                     <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
                     נסגר בעוד <span className="font-semibold text-foreground">{left}</span>
                   </span>
-                )}
+                ) : null}
               </div>
+              {redemptionDeadline && isClosed && !isRedeemed && (
+                <div className="mt-1.5 text-[10px] text-amber-700">
+                  מימוש עד {fmtDate(redemptionDeadline)}
+                </div>
+              )}
+
             </div>
           )}
         </div>
