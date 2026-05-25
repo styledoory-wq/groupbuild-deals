@@ -317,6 +317,64 @@
     background: hsl(44 73% 66%);
     box-shadow: 0 0 10px hsl(44 53% 54% / 0.8);
   }
+
+  /* ============ iOS Premium Surface System ============ */
+  /* Soft elegant page background gradient */
+  .ios-bg {
+    background: linear-gradient(180deg, #F8F9FC 0%, #EEF2F7 100%);
+    min-height: 100vh;
+  }
+
+  /* Premium light card — soft, layered, gold-kissed border */
+  .ios-card {
+    background: #F7F8FA;
+    border: 1px solid rgba(201, 169, 97, 0.18);
+    border-radius: 24px;
+    box-shadow:
+      0 8px 24px rgba(15, 23, 42, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease;
+  }
+
+  /* Navy gradient luxury button */
+  .ios-btn-navy {
+    background: linear-gradient(180deg, #0D2346 0%, #102B57 100%);
+    color: #FFFFFF;
+    border-radius: 16px;
+    box-shadow:
+      0 10px 24px -10px rgba(13, 35, 70, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, filter 200ms ease;
+  }
+  .ios-btn-navy:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .ios-btn-navy:active { transform: translateY(0) scale(0.97); box-shadow: 0 4px 12px -6px rgba(13, 35, 70, 0.55); }
+
+  /* Gold avatar disc */
+  .ios-avatar-gold {
+    background: linear-gradient(145deg, #D7BC79 0%, #B8923F 100%);
+    box-shadow:
+      0 10px 24px -10px rgba(184, 146, 63, 0.55),
+      inset 0 2px 4px rgba(255, 255, 255, 0.35),
+      inset 0 -3px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Native iOS-style floating dock */
+  .ios-dock {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-top: 1px solid rgba(201, 169, 97, 0.18);
+    box-shadow:
+      0 18px 40px -16px rgba(13, 35, 70, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  /* Inline meta row inside profile card */
+  .ios-meta-row {
+    @apply flex items-center justify-center gap-2 text-[13px];
+    color: #4B5563;
+  }
 }
 
 @keyframes gb-aurora {
