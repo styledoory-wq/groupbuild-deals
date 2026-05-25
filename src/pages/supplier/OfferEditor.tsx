@@ -275,6 +275,10 @@ export default function OfferEditor() {
     }
 
     type Json = import("@/integrations/supabase/types").Json;
+    const serviceAreas = serviceAreasInput
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
     const payload: Record<string, unknown> = {
       supplier_id: supplier.id,
       title: title.trim(),
@@ -286,12 +290,22 @@ export default function OfferEditor() {
       tiers: cleanTiers as unknown as Json,
       highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as Json,
       status: "active",
-      ends_at: new Date(Date.now() + 30 * 86400000).toISOString(),
+      ends_at: joinDeadline ? new Date(joinDeadline).toISOString() : new Date(Date.now() + 30 * 86400000).toISOString(),
       visibility_type: visibilityType,
       visibility_project_id: visibilityType === "project_only" ? visibilityProjectId : null,
       cover_image_url: coverImage,
       gallery_images: galleryImages as unknown as Json,
+      target_participants: targetParticipants ? Number(targetParticipants) : null,
+      join_deadline: joinDeadline ? new Date(joinDeadline).toISOString() : null,
+      redemption_deadline: redemptionDeadline ? new Date(redemptionDeadline).toISOString() : null,
+      offer_terms: offerTerms.trim() || null,
+      restrictions: restrictions.trim() || null,
+      max_redemptions: maxRedemptions ? Number(maxRedemptions) : null,
+      appointment_required: appointmentRequired,
+      service_areas: serviceAreas,
+      supplier_commitment_accepted: true,
     };
+
 
     // Mirror first-tier values into top-level fields for backward compatibility & sorting.
     if (offerType === "percentage") {
