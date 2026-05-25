@@ -109,6 +109,51 @@ export type Database = {
           },
         ]
       }
+      complaints: {
+        Row: {
+          admin_notes: string | null
+          attachments: Json
+          created_at: string
+          deal_id: string | null
+          description: string
+          id: string
+          issue_type: string
+          status: string
+          supplier_id: string | null
+          updated_at: string
+          user_id: string
+          voucher_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          attachments?: Json
+          created_at?: string
+          deal_id?: string | null
+          description: string
+          id?: string
+          issue_type: string
+          status?: string
+          supplier_id?: string | null
+          updated_at?: string
+          user_id: string
+          voucher_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          attachments?: Json
+          created_at?: string
+          deal_id?: string | null
+          description?: string
+          id?: string
+          issue_type?: string
+          status?: string
+          supplier_id?: string | null
+          updated_at?: string
+          user_id?: string
+          voucher_id?: string | null
+        }
+        Relationships: []
+      }
       deal_interests: {
         Row: {
           city: string | null
@@ -192,6 +237,8 @@ export type Database = {
       }
       deals: {
         Row: {
+          appointment_required: boolean
+          auto_closed_at: string | null
           base_price: number | null
           category_id: string | null
           cover_image_url: string | null
@@ -208,11 +255,19 @@ export type Database = {
           id: string
           is_deleted: boolean
           is_demo: boolean
+          join_deadline: string | null
+          max_redemptions: number | null
+          offer_terms: string | null
           offer_type: string
           original_price: number
           project_id: string | null
+          redemption_deadline: string | null
+          restrictions: string | null
+          service_areas: string[]
           status: string
+          supplier_commitment_accepted: boolean
           supplier_id: string
+          target_participants: number | null
           tiers: Json
           title: string
           updated_at: string
@@ -220,6 +275,8 @@ export type Database = {
           visibility_type: string
         }
         Insert: {
+          appointment_required?: boolean
+          auto_closed_at?: string | null
           base_price?: number | null
           category_id?: string | null
           cover_image_url?: string | null
@@ -236,11 +293,19 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           is_demo?: boolean
+          join_deadline?: string | null
+          max_redemptions?: number | null
+          offer_terms?: string | null
           offer_type?: string
           original_price?: number
           project_id?: string | null
+          redemption_deadline?: string | null
+          restrictions?: string | null
+          service_areas?: string[]
           status?: string
+          supplier_commitment_accepted?: boolean
           supplier_id: string
+          target_participants?: number | null
           tiers?: Json
           title: string
           updated_at?: string
@@ -248,6 +313,8 @@ export type Database = {
           visibility_type?: string
         }
         Update: {
+          appointment_required?: boolean
+          auto_closed_at?: string | null
           base_price?: number | null
           category_id?: string | null
           cover_image_url?: string | null
@@ -264,11 +331,19 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           is_demo?: boolean
+          join_deadline?: string | null
+          max_redemptions?: number | null
+          offer_terms?: string | null
           offer_type?: string
           original_price?: number
           project_id?: string | null
+          redemption_deadline?: string | null
+          restrictions?: string | null
+          service_areas?: string[]
           status?: string
+          supplier_commitment_accepted?: boolean
           supplier_id?: string
+          target_participants?: number | null
           tiers?: Json
           title?: string
           updated_at?: string
@@ -962,6 +1037,7 @@ export type Database = {
           catalog_url: string | null
           categories: string[]
           commission_percent: number
+          complaints_count: number
           contact_name: string | null
           created_at: string
           deleted_at: string | null
@@ -973,6 +1049,7 @@ export type Database = {
           is_active: boolean
           is_deleted: boolean
           is_demo: boolean
+          is_suspended: boolean
           logo_url: string | null
           monthly_subscription: number
           offers_products: boolean
@@ -981,9 +1058,12 @@ export type Database = {
           serves_all_country: boolean
           service_areas: string[]
           short_description: string | null
+          successful_redemptions: number
           supplier_kind: string | null
+          trust_score: number
           updated_at: string
           user_id: string | null
+          verified_supplier: boolean
           website_url: string | null
           whatsapp_url: string | null
         }
@@ -995,6 +1075,7 @@ export type Database = {
           catalog_url?: string | null
           categories?: string[]
           commission_percent?: number
+          complaints_count?: number
           contact_name?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -1006,6 +1087,7 @@ export type Database = {
           is_active?: boolean
           is_deleted?: boolean
           is_demo?: boolean
+          is_suspended?: boolean
           logo_url?: string | null
           monthly_subscription?: number
           offers_products?: boolean
@@ -1014,9 +1096,12 @@ export type Database = {
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
+          successful_redemptions?: number
           supplier_kind?: string | null
+          trust_score?: number
           updated_at?: string
           user_id?: string | null
+          verified_supplier?: boolean
           website_url?: string | null
           whatsapp_url?: string | null
         }
@@ -1028,6 +1113,7 @@ export type Database = {
           catalog_url?: string | null
           categories?: string[]
           commission_percent?: number
+          complaints_count?: number
           contact_name?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -1039,6 +1125,7 @@ export type Database = {
           is_active?: boolean
           is_deleted?: boolean
           is_demo?: boolean
+          is_suspended?: boolean
           logo_url?: string | null
           monthly_subscription?: number
           offers_products?: boolean
@@ -1047,9 +1134,12 @@ export type Database = {
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
+          successful_redemptions?: number
           supplier_kind?: string | null
+          trust_score?: number
           updated_at?: string
           user_id?: string | null
+          verified_supplier?: boolean
           website_url?: string | null
           whatsapp_url?: string | null
         }
@@ -1099,6 +1189,93 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      voucher_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          ip: string | null
+          metadata: Json
+          user_agent: string | null
+          voucher_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          user_agent?: string | null
+          voucher_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          user_agent?: string | null
+          voucher_id?: string | null
+        }
+        Relationships: []
+      }
+      vouchers: {
+        Row: {
+          code: string
+          created_at: string
+          deal_id: string
+          expires_at: string | null
+          id: string
+          issued_at: string
+          metadata: Json
+          redeemed_at: string | null
+          redeemed_by_supplier_id: string | null
+          reference_number: string
+          rotation_secret: string
+          status: string
+          supplier_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          deal_id: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          metadata?: Json
+          redeemed_at?: string | null
+          redeemed_by_supplier_id?: string | null
+          reference_number: string
+          rotation_secret?: string
+          status?: string
+          supplier_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          deal_id?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          metadata?: Json
+          redeemed_at?: string | null
+          redeemed_by_supplier_id?: string | null
+          reference_number?: string
+          rotation_secret?: string
+          status?: string
+          supplier_id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1191,6 +1368,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      issue_vouchers_for_deal: { Args: { _deal_id: string }; Returns: number }
       notify_admins: {
         Args: {
           _body: string
@@ -1212,6 +1390,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      redeem_voucher: { Args: { _code: string }; Returns: Json }
       refresh_supplier_service_areas: {
         Args: { _supplier_id: string }
         Returns: undefined
