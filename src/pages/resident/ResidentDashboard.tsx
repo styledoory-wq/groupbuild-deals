@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search, LogOut, Compass, Hammer, Plug, Palette, Trees, PencilRuler, Tag } from "lucide-react";
+import { Sparkles, ArrowLeft, MapPin, ChevronLeft, Heart, Search, LogOut, Compass, Hammer, Plug, Palette, Trees, PencilRuler, Tag, MessageCircle } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
@@ -231,6 +231,15 @@ export default function ResidentDashboard() {
             </h1>
           </div>
           <div className="flex items-center gap-2">
+            <a
+              href="https://wa.me/972500000000"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-10 w-10 rounded-full bg-white/[0.08] border border-white/15 flex items-center justify-center transition-smooth hover:bg-white/15 backdrop-blur"
+              aria-label="תמיכה בוואטסאפ"
+            >
+              <MessageCircle className="h-4 w-4" strokeWidth={1.75} />
+            </a>
             <button
               onClick={async () => {
                 await logout();
@@ -328,8 +337,71 @@ export default function ResidentDashboard() {
         </div>
       )}
 
+      {!loading && (
+        <section className="px-5 pt-7 pb-2">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-[15px] font-extrabold text-foreground flex items-center gap-1.5">
+              <Compass className="h-4 w-4 text-gold" strokeWidth={2} />
+              תהליך הבית שלי
+            </h2>
+            <span className="text-[10px] text-muted-foreground">בחרו שלב להתקדם</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground mb-4 leading-relaxed">
+            עקבו אחרי השלבים — בכל שלב תמצאו תחומים, אנשי מקצוע, ספקים והטבות.
+          </p>
+
+          <div className="space-y-2.5">
+            {STAGES.map((s, idx) => {
+              const Icon = s.icon;
+              const isCurrent = idx === 0;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
+                  className={
+                    "w-full text-right group relative flex items-center gap-3 p-3.5 rounded-2xl transition-smooth gb-tile-dark " +
+                    (isCurrent
+                      ? "ring-1 ring-gold/50 shadow-[0_0_24px_-8px_hsl(44_53%_54%_/_0.35)]"
+                      : "opacity-90 hover:opacity-100")
+                  }
+                  style={{ animationDelay: `${idx * 40}ms` }}
+                >
+                  <div className="relative shrink-0">
+                    <div
+                      className={
+                        "h-11 w-11 rounded-xl flex items-center justify-center border " +
+                        (isCurrent
+                          ? "bg-gradient-to-br from-gold/35 to-gold/10 border-gold/50"
+                          : "bg-gradient-to-br from-gold/15 to-gold/5 border-gold/20")
+                      }
+                    >
+                      <Icon className={"h-[18px] w-[18px] " + (isCurrent ? "text-gold" : "text-gold/70")} strokeWidth={1.75} />
+                    </div>
+                    <div className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-primary border border-gold/40 flex items-center justify-center text-[9px] font-bold gb-text-gold">
+                      {idx + 1}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h3 className="text-[14px] font-bold leading-tight">{s.title}</h3>
+                      {isCurrent && (
+                        <span className="text-[9px] font-bold gb-text-gold uppercase tracking-[0.14em] px-1.5 py-0.5 rounded-md bg-gold/10 border border-gold/30">
+                          השלב שלך
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-primary-foreground/55 line-clamp-1">{s.desc}</p>
+                  </div>
+                  <ChevronLeft className={"h-4 w-4 shrink-0 transition-all " + (isCurrent ? "text-gold group-hover:-translate-x-1" : "text-gold/40")} strokeWidth={2} />
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {!loading && joinedDeals.length > 0 && (
-        <section className="mt-9 mb-8">
+        <section className="mt-8 mb-2">
           <div className="flex items-center justify-between px-5 mb-3">
             <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
               <Heart className="h-3.5 w-3.5 text-gold fill-gold" strokeWidth={2} />
@@ -349,7 +421,7 @@ export default function ResidentDashboard() {
         </section>
       )}
 
-      {!loading && <section className="px-5 space-y-3 mt-9 mb-8">
+      {!loading && <section className="px-5 space-y-3 mt-8 pb-8">
         <div className="flex items-center justify-between">
           <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
             <Sparkles className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
@@ -397,48 +469,6 @@ export default function ResidentDashboard() {
             .slice(0, 2)
             .map((d) => <RealDealCard key={d.id} deal={d} />)
         )}
-      </section>}
-
-      {!loading && <section className="px-5 pb-8">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[13px] font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Compass className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
-            שלבי בנייה
-          </h2>
-          <span className="text-[10px] text-muted-foreground">בחרו שלב</span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2.5">
-          {STAGES.map((s, idx) => {
-            const Icon = s.icon;
-            const featured = idx === 0;
-            return (
-              <button
-                key={s.id}
-                onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
-                className={
-                  "gb-tile-dark p-3.5 text-right group relative " +
-                  (featured ? "col-span-2 flex items-center gap-3" : "flex flex-col items-start gap-2.5")
-                }
-                style={{ animationDelay: `${idx * 40}ms` }}
-              >
-                <div className="absolute top-2.5 left-2.5 text-[9px] font-bold gb-text-gold tracking-[0.18em] opacity-70">
-                  0{idx + 1}
-                </div>
-                <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-gold/25 to-gold/5 border border-gold/30 flex items-center justify-center shrink-0 shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.15)]">
-                  <Icon className="h-[18px] w-[18px] text-gold" strokeWidth={1.75} />
-                </div>
-                <div className="flex-1 min-w-0 w-full">
-                  <h3 className="text-[13px] font-bold leading-tight">{s.title}</h3>
-                  <p className="text-[10px] text-primary-foreground/55 mt-1 line-clamp-1">{s.desc}</p>
-                </div>
-                {featured && (
-                  <ChevronLeft className="h-4 w-4 text-gold opacity-60 group-hover:opacity-100 group-hover:-translate-x-1 transition-all shrink-0" strokeWidth={2} />
-                )}
-              </button>
-            );
-          })}
-        </div>
       </section>}
 
       <BottomNav role="resident" />
