@@ -172,7 +172,7 @@ export default function Landing() {
               </span>
             </div>
 
-            <h1 className="text-[34px] leading-[1.1] font-extrabold mb-4">
+            <h1 className="text-[34px] leading-[1.1] font-extrabold mb-4 text-white">
               קונים יחד —
               <br />
               משלמים <span className="gb-gold-text">פחות</span>
