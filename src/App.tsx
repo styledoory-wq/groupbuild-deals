@@ -33,6 +33,7 @@ const ResidentProfileEdit = lazy(() => import("./pages/resident/ResidentProfileE
 const Notifications = lazy(() => import("./pages/resident/Notifications"));
 const MyOffers = lazy(() => import("./pages/resident/MyOffers"));
 const MyDocuments = lazy(() => import("./pages/resident/MyDocuments"));
+const MyDeposits = lazy(() => import("./pages/resident/MyDeposits"));
 const MyVouchers = lazy(() => import("./pages/resident/MyVouchers"));
 const SupplierScan = lazy(() => import("./pages/supplier/SupplierScan"));
 const SupplierRedemptions = lazy(() => import("./pages/supplier/SupplierRedemptions"));
@@ -174,6 +175,7 @@ const App = () => (
                   <Route path="/resident/notifications" element={<Notifications />} />
                   <Route path="/resident/my-offers" element={<MyOffers />} />
                   <Route path="/resident/documents" element={<MyDocuments />} />
+                  <Route path="/resident/deposits" element={<MyDeposits />} />
                   <Route path="/resident/my-vouchers" element={<MyVouchers />} />
 
                   {/* Supplier */}
