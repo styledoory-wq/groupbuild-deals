@@ -65,8 +65,18 @@ export default function SupplierScan() {
 
     return () => {
       stopped = true;
-      scanner.stop().catch(() => { /* noop */ });
-      scanner.clear();
+      (async () => {
+        try {
+          // Only stop if actually scanning — otherwise html5-qrcode throws
+          // "Cannot stop, scanner is not running or paused."
+          // @ts-expect-error getState is provided by html5-qrcode at runtime
+          const state = typeof scanner.getState === "function" ? scanner.getState() : 2;
+          if (state === 2 /* SCANNING */ || state === 3 /* PAUSED */) {
+            await scanner.stop();
+          }
+        } catch { /* noop */ }
+        try { scanner.clear(); } catch { /* noop */ }
+      })();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, result.kind]);
