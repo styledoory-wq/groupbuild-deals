@@ -342,26 +342,6 @@ export default function ResidentDashboard() {
         </div>
       )}
 
-      {!loading && joinedDeals.length > 0 && (
-        <section className="pt-7 mb-2">
-          <div className="flex items-center justify-between px-5 mb-3">
-            <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-              <Heart className="h-3.5 w-3.5 text-gold fill-gold" strokeWidth={2} />
-              ההצעות שלך
-            </h2>
-            <Link to="/resident/my-offers" className="text-[11px] gb-gold-text font-bold flex items-center gap-1 hover:gap-1.5 transition-all">
-              הכל <ArrowLeft className="h-3 w-3" strokeWidth={2.5} />
-            </Link>
-          </div>
-          <div className="flex gap-3 overflow-x-auto px-5 pb-2 snap-x snap-mandatory no-scrollbar">
-            {joinedDeals.slice(0, 5).map((d) => (
-              <div key={d.id} className="snap-start shrink-0 w-[78%]">
-                <RealDealCard deal={d} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {!loading && !hasArea && (
         <section className="px-5 pt-7">
