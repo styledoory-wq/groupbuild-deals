@@ -9,64 +9,64 @@
 
 @layer base {
   :root {
-    /* Smoked navy luxury surface */
-    --background: 213 70% 8%;          /* #071427 */
-    --foreground: 218 30% 93%;         /* #E8EDF5 soft luxury white */
+    /* Pearl & Gold luxury surface (Cloud Navy variant) */
+    --background: 216 28% 97%;         /* #F5F7FA */
+    --foreground: 222 47% 11%;         /* #0F172A */
 
-    --card: 214 65% 12%;               /* #0A1F3D */
-    --card-foreground: 218 30% 93%;
+    --card: 0 0% 100%;                 /* pure white glass base */
+    --card-foreground: 222 47% 11%;
 
-    --popover: 213 68% 10%;
-    --popover-foreground: 218 30% 93%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 213 70% 8%;
-    --primary-foreground: 218 30% 93%;
-    --primary-soft: 214 60% 14%;       /* #102B57-ish but darker */
+    /* Primary = deep navy */
+    --primary: 214 73% 12%;            /* #0A1F3D */
+    --primary-foreground: 210 40% 98%; /* #F8FAFC */
+    --primary-soft: 215 60% 18%;       /* #102B57 */
 
-    /* Restrained champagne gold */
-    --secondary: 40 38% 56%;           /* slightly desaturated #C9A961 */
-    --secondary-foreground: 213 70% 8%;
-    --gold: 40 38% 56%;
-    --gold-light: 41 48% 65%;
-    --gold-foreground: 213 70% 8%;
+    /* Champagne gold accent */
+    --secondary: 41 47% 56%;           /* #C9A961 */
+    --secondary-foreground: 214 73% 12%;
+    --gold: 41 47% 56%;
+    --gold-light: 41 53% 63%;          /* #D4B46A */
+    --gold-foreground: 214 73% 12%;
 
-    --muted: 214 40% 14%;
-    --muted-foreground: 215 16% 68%;   /* soft elegant secondary */
+    --muted: 215 25% 94%;              /* #E7ECF3 */
+    --muted-foreground: 215 19% 35%;   /* #475569 secondary text */
 
-    --accent: 40 38% 56%;
-    --accent-foreground: 213 70% 8%;
+    --accent: 41 47% 56%;
+    --accent-foreground: 214 73% 12%;
 
-    --success: 152 35% 42%;
+    --success: 152 45% 40%;
     --success-foreground: 0 0% 100%;
 
-    --destructive: 0 60% 52%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 25% 50% / 0.10;
-    --input: 214 40% 18%;
-    --ring: 40 38% 56%;
+    --border: 215 25% 88%;             /* subtle hairline */
+    --input: 215 25% 92%;
+    --ring: 41 47% 56%;
 
     --radius: 1rem;
 
-    --gradient-hero: linear-gradient(180deg, #071427 0%, #081A33 50%, #06121F 100%);
-    --gradient-gold: linear-gradient(135deg, #B9963F 0%, #D9BC72 100%);
-    --gradient-card: linear-gradient(180deg, rgba(10,31,61,0.72) 0%, rgba(7,20,39,0.66) 100%);
+    --gradient-hero: linear-gradient(160deg, #071427 0%, #0A1F3D 55%, #081A33 100%);
+    --gradient-gold: linear-gradient(135deg, #B8923F 0%, #D4B46A 50%, #C9A961 100%);
+    --gradient-card: linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(247,249,252,0.78) 100%);
     --gradient-navy-deep: linear-gradient(160deg, #071427 0%, #0A1F3D 100%);
+    --gradient-page: linear-gradient(180deg, #F5F7FA 0%, #EEF2F7 50%, #E7ECF3 100%);
 
-    /* Restrained cinematic shadows */
-    --shadow-soft: 0 1px 2px rgba(0,0,0,0.30), 0 6px 16px -10px rgba(0,0,0,0.40);
-    --shadow-card: 0 1px 2px rgba(0,0,0,0.30), 0 18px 40px -22px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.025);
-    --shadow-elevated: 0 30px 60px -28px rgba(0,0,0,0.65), 0 10px 26px -16px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.03);
-    --shadow-floating: 0 40px 80px -32px rgba(0,0,0,0.75), 0 14px 30px -18px rgba(0,0,0,0.50);
-    --shadow-gold: 0 6px 22px -12px rgba(201,169,97,0.30), 0 0 0 1px rgba(201,169,97,0.12);
-    --glow-gold: 0 0 18px rgba(201,169,97,0.20);
-    --glow-navy: 0 0 28px rgba(8,26,51,0.55);
+    /* Refined airy shadows — soft cinematic, not heavy */
+    --shadow-soft: 0 1px 2px rgba(15,30,60,0.04), 0 4px 12px -6px rgba(15,30,60,0.06);
+    --shadow-card: 0 1px 2px rgba(15,30,60,0.04), 0 12px 32px -16px rgba(15,30,60,0.10), 0 2px 6px -2px rgba(15,30,60,0.04);
+    --shadow-elevated: 0 20px 48px -24px rgba(15,30,60,0.16), 0 6px 18px -10px rgba(15,30,60,0.08);
+    --shadow-floating: 0 28px 60px -28px rgba(15,30,60,0.22), 0 10px 24px -14px rgba(15,30,60,0.10);
+    --shadow-gold: 0 6px 22px -12px rgba(201,169,97,0.40), 0 0 0 1px rgba(201,169,97,0.18);
+    --glow-gold: 0 0 22px rgba(201,169,97,0.28);
+    --glow-navy: 0 0 28px rgba(10,31,61,0.18);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-
-
 }
 
 @layer base {
