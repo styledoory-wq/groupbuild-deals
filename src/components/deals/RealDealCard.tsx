@@ -22,7 +22,12 @@ export interface RealDealCardData {
   visibility_project_id?: string | null;
   cover_image_url?: string | null;
   gallery_images?: string[] | null;
+  target_participants?: number | null;
+  join_deadline?: string | null;
+  redemption_deadline?: string | null;
+  auto_closed_at?: string | null;
 }
+
 
 function timeLeft(endsAt: string | null): string | null {
   if (!endsAt) return null;
@@ -65,12 +70,22 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
   const realJoiners = Math.max(0, joinersCount);
   const isHot = realJoiners >= 5 || (left !== null && left.includes("שעות"));
 
-  // Progress: real joiners → maxTier
+  // Progress: prefer real target_participants when supplied
   const minTier = tiers[0]?.minParticipants ?? 0;
   const maxTier = tiers[tiers.length - 1]?.minParticipants ?? Math.max(minTier + 1, 10);
+  const target = deal.target_participants && deal.target_participants > 0
+    ? deal.target_participants
+    : maxTier;
   const progressPct = realJoiners > 0
-    ? Math.min(100, Math.max(4, Math.round((realJoiners / Math.max(1, maxTier)) * 100)))
+    ? Math.min(100, Math.max(4, Math.round((realJoiners / Math.max(1, target)) * 100)))
     : 0;
+  const remaining = Math.max(0, target - realJoiners);
+  const isClosed = deal.status === "closed" || !!deal.auto_closed_at;
+  const isRedeemed = deal.status === "redeemed";
+  const joinDeadline = deal.join_deadline ? new Date(deal.join_deadline) : null;
+  const redemptionDeadline = deal.redemption_deadline ? new Date(deal.redemption_deadline) : null;
+  const fmtDate = (d: Date) => d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit" });
+
 
   const cover = deal.cover_image_url ?? null;
   const galleryCount = Array.isArray(deal.gallery_images) ? deal.gallery_images.length : 0;
@@ -207,19 +222,41 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
                   <span className="gb-live-dot" />
                   <Users className="h-2.5 w-2.5" strokeWidth={2.5} />
-                  {realJoiners > 0 ? (
+                  {deal.target_participants ? (
+                    <>
+                      <span className="font-semibold text-foreground">{realJoiners}/{target}</span>
+                      {!isClosed && remaining > 0 ? (
+                        <span className="text-muted-foreground">· עוד {remaining} לסגירה</span>
+                      ) : null}
+                    </>
+                  ) : realJoiners > 0 ? (
                     <><span className="font-semibold text-foreground">{realJoiners}</span> דיירים הצטרפו</>
                   ) : (
                     <span className="font-semibold text-foreground">היו הראשונים להצטרף</span>
                   )}
                 </span>
-                {left && (
+                {isClosed ? (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                    {isRedeemed ? "מומשה" : "נסגרה"}
+                  </span>
+                ) : joinDeadline ? (
+                  <span className="inline-flex items-center gap-1 text-muted-foreground">
+                    <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
+                    עד <span className="font-semibold text-foreground">{fmtDate(joinDeadline)}</span>
+                  </span>
+                ) : left ? (
                   <span className="inline-flex items-center gap-1 text-muted-foreground">
                     <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
                     נסגר בעוד <span className="font-semibold text-foreground">{left}</span>
                   </span>
-                )}
+                ) : null}
               </div>
+              {redemptionDeadline && isClosed && !isRedeemed && (
+                <div className="mt-1.5 text-[10px] text-amber-700">
+                  מימוש עד {fmtDate(redemptionDeadline)}
+                </div>
+              )}
+
             </div>
           )}
         </div>

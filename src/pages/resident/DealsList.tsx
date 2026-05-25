@@ -34,9 +34,9 @@ export default function DealsList() {
         let query = supabase
           .from("deals")
           .select(
-            "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images,visibility_type,visibility_project_id,suppliers!inner(business_name,logo_url,is_active,approval_status)",
+            "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images,visibility_type,visibility_project_id,target_participants,join_deadline,redemption_deadline,auto_closed_at,suppliers!inner(business_name,logo_url,is_active,approval_status)",
           )
-          .eq("status", "active")
+          .in("status", ["active", "closed"])
           .order("created_at", { ascending: false });
 
         if (categoryId) query = query.eq("category_id", categoryId);
@@ -72,8 +72,13 @@ export default function DealsList() {
               visibility_project_id: (r.visibility_project_id as string | null) ?? null,
               cover_image_url: (r.cover_image_url as string | null) ?? null,
               gallery_images: (Array.isArray(r.gallery_images) ? (r.gallery_images as string[]) : []) as string[],
+              target_participants: (r.target_participants as number | null) ?? null,
+              join_deadline: (r.join_deadline as string | null) ?? null,
+              redemption_deadline: (r.redemption_deadline as string | null) ?? null,
+              auto_closed_at: (r.auto_closed_at as string | null) ?? null,
             };
           });
+
         let nextCounts: Record<string, number> = {};
         if (mapped.length) {
           nextCounts = await fetchDealJoinerCounts(mapped.map((d) => d.id));

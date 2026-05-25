@@ -56,11 +56,13 @@ export default function MyVouchers() {
                 id: v.id, code: v.code, reference_number: v.reference_number,
                 status: v.status, expires_at: v.expires_at, redeemed_at: v.redeemed_at,
                 rotation_secret: v.rotation_secret,
+                deal_id: v.deal_id, supplier_id: v.supplier_id,
                 deal_title: v.deals?.title ?? undefined,
                 supplier_name: v.suppliers?.business_name ?? undefined,
                 price: v.deals?.discounted_price ?? v.deals?.original_price ?? null,
               }}
             />
+
           ))
         )}
       </div>

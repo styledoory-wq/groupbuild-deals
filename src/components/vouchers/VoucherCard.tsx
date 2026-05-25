@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { CheckCircle2, Clock, Hash, ShieldCheck } from "lucide-react";
+import { ReportIssueDialog } from "@/components/complaints/ReportIssueDialog";
 
 type Voucher = {
   id: string;
@@ -13,7 +14,10 @@ type Voucher = {
   deal_title?: string;
   supplier_name?: string;
   price?: number | null;
+  deal_id?: string;
+  supplier_id?: string;
 };
+
 
 const STATUS_LABEL: Record<string, string> = {
   eligible: "זכאי להטבה",
@@ -109,6 +113,9 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
 
       <div className="text-[11px] text-muted-foreground text-center">
         תוקף מימוש: {expiresLabel}
+      </div>
+      <div className="flex justify-center pt-1">
+        <ReportIssueDialog dealId={voucher.deal_id} supplierId={voucher.supplier_id} voucherId={voucher.id} />
       </div>
     </div>
   );
