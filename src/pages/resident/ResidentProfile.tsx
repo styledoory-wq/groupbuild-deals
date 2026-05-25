@@ -87,26 +87,9 @@ export default function ResidentProfile() {
             </div>
           </div>
 
-          {/* Avatar + identity — clean compact glass avatar */}
+          {/* Identity — name + meta, no avatar */}
           <div className="text-center mb-8 animate-fade-in">
-            <div
-              className="h-[72px] w-[72px] rounded-full mx-auto flex items-center justify-center overflow-hidden"
-              style={{
-                background: "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(247,249,252,0.82) 100%)",
-                border: "1px solid rgba(201,169,97,0.45)",
-                boxShadow:
-                  "0 8px 22px -12px rgba(10,31,61,0.30), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 0 4px rgba(201,169,97,0.08)",
-              }}
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-              ) : initials ? (
-                <span className="text-[22px] font-extrabold tracking-tight text-[#0A1F3D]">{initials}</span>
-              ) : (
-                <UserIcon className="h-7 w-7 text-[#0A1F3D]" strokeWidth={1.75} />
-              )}
-            </div>
-            <h2 className="font-extrabold text-[20px] mt-4 text-[#0A1F3D] tracking-tight leading-snug px-4 break-words">
+            <h2 className="font-extrabold text-[22px] text-[#0A1F3D] tracking-tight leading-snug px-4 break-words">
               {user?.name}
             </h2>
             <p className="text-[13px] text-[#475569] mt-1.5 font-medium">
