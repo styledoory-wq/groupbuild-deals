@@ -50,13 +50,13 @@ function BottomNavImpl({ role }: { role: Role }) {
               >
                 {active && (
                   <>
-                    <span aria-hidden className="absolute -inset-1 rounded-full bg-gold/25 blur-2xl opacity-90" />
+                    <span aria-hidden className="absolute -inset-0.5 rounded-full bg-gold/10 blur-xl opacity-80" />
                     <span
                       aria-hidden
-                      className="absolute top-1 left-1/2 -translate-x-1/2 h-10 w-10 rounded-full"
+                      className="absolute top-1 left-1/2 -translate-x-1/2 h-9 w-9 rounded-full"
                       style={{
-                        background: "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.10) 0%, rgba(13,35,70,0.95) 55%, #06152E 100%)",
-                        boxShadow: "0 0 0 1px rgba(201,169,97,0.45), 0 8px 22px -6px rgba(201,169,97,0.45), inset 0 1px 0 rgba(255,255,255,0.08)",
+                        background: "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.06) 0%, rgba(8,26,51,0.95) 60%, #071427 100%)",
+                        boxShadow: "0 0 0 1px rgba(201,169,97,0.22), 0 4px 14px -6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
                       }}
                     />
                   </>
@@ -64,11 +64,11 @@ function BottomNavImpl({ role }: { role: Role }) {
                 <Icon
                   className={cn(
                     "relative transition-transform duration-300",
-                    active ? "h-[20px] w-[20px] text-gold-light scale-105 drop-shadow-[0_0_8px_rgba(226,198,121,0.55)]" : "h-[19px] w-[19px]"
+                    active ? "h-[19px] w-[19px] text-gold scale-105" : "h-[19px] w-[19px]"
                   )}
-                  strokeWidth={active ? 2 : 1.6}
+                  strokeWidth={active ? 1.9 : 1.6}
                 />
-                <span className={cn("text-[10px] leading-none relative", active ? "font-semibold text-gold-light" : "font-normal")}>{label}</span>
+                <span className={cn("text-[10px] leading-none relative", active ? "font-medium text-gold" : "font-normal")}>{label}</span>
               </NavLink>
             );
           })}
