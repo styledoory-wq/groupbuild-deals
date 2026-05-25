@@ -18,7 +18,16 @@ export default function ResidentProfile() {
     navigate("/", { replace: true });
   };
 
-  const initial = user?.name?.charAt(0) ?? "";
+  const initials = (user?.name ?? "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p.charAt(0))
+    .join("");
+  const avatarUrl = (user as unknown as { avatar_url?: string; image_url?: string; photo_url?: string })?.avatar_url
+    || (user as unknown as { image_url?: string })?.image_url
+    || (user as unknown as { photo_url?: string })?.photo_url
+    || "";
 
   const actions = [
     { label: "עריכת פרופיל", icon: Pencil, onClick: () => navigate("/resident/profile/edit") },
@@ -78,30 +87,46 @@ export default function ResidentProfile() {
             </div>
           </div>
 
-          {/* Avatar + identity */}
+          {/* Avatar + identity — clean compact glass avatar */}
           <div className="text-center mb-8 animate-fade-in">
-            <div className="h-[110px] w-[110px] rounded-full ios-avatar-gold mx-auto flex items-center justify-center">
-              <UserIcon className="h-12 w-12 text-white" strokeWidth={1.75} />
+            <div
+              className="h-[72px] w-[72px] rounded-full mx-auto flex items-center justify-center overflow-hidden"
+              style={{
+                background: "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(247,249,252,0.82) 100%)",
+                border: "1px solid rgba(201,169,97,0.45)",
+                boxShadow:
+                  "0 8px 22px -12px rgba(10,31,61,0.30), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 0 4px rgba(201,169,97,0.08)",
+              }}
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+              ) : initials ? (
+                <span className="text-[22px] font-extrabold tracking-tight text-[#0A1F3D]">{initials}</span>
+              ) : (
+                <UserIcon className="h-7 w-7 text-[#0A1F3D]" strokeWidth={1.75} />
+              )}
             </div>
-            <h2 className="font-extrabold text-[22px] mt-5 text-[#0A1F3D] tracking-tight">{user?.name}</h2>
-            <p className="text-[13px] text-[#475569] mt-1">
+            <h2 className="font-extrabold text-[20px] mt-4 text-[#0A1F3D] tracking-tight leading-snug px-4 break-words">
+              {user?.name}
+            </h2>
+            <p className="text-[13px] text-[#475569] mt-1.5 font-medium">
               דייר{project ? ` · ${project.name}` : ""}
             </p>
-            <div className="mt-5 space-y-2">
+            <div className="mt-5 space-y-2.5">
               {user?.phone && (
-                <div className="flex items-center justify-center gap-2 text-[13px] text-[#475569]">
+                <div className="flex items-center justify-center gap-2 text-[14px] text-[#334155]">
                   <span>{user.phone}</span>
                   <Phone className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
                 </div>
               )}
               {user?.email && (
-                <div className="flex items-center justify-center gap-2 text-[13px] text-[#475569]">
+                <div className="flex items-center justify-center gap-2 text-[14px] text-[#334155] break-all">
                   <span>{user.email}</span>
                   <Mail className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
                 </div>
               )}
               {project && user?.apartment && (
-                <div className="flex items-center justify-center gap-2 text-[13px] text-[#475569]">
+                <div className="flex items-center justify-center gap-2 text-[14px] text-[#334155]">
                   <span>דירה {user.apartment}</span>
                   <Building2 className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
                 </div>
@@ -110,23 +135,33 @@ export default function ResidentProfile() {
           </div>
 
 
-          {/* Action list */}
-          <div className="space-y-3">
-            {actions.map(({ label, icon: Icon, onClick }) => (
-              <button
-                key={label}
-                onClick={onClick}
-                className="ios-btn-navy w-full h-14 rounded-2xl px-5 flex items-center justify-between font-bold text-[15px] tracking-tight"
-              >
-                <span className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-xl bg-white/10 flex items-center justify-center">
-                    <Icon className="h-[18px] w-[18px] text-white" strokeWidth={2.2} />
+          {/* Action list — lighter glass cards, premium not heavy */}
+          <div className="space-y-2.5">
+            {actions.map(({ label, icon: Icon, onClick }, idx) => {
+              const isLogout = idx === actions.length - 1;
+              return (
+                <button
+                  key={label}
+                  onClick={onClick}
+                  className="w-full h-[60px] rounded-2xl px-4 flex items-center justify-between font-semibold text-[15px] tracking-tight bg-white/85 backdrop-blur border border-[#E2E8F0] text-[#0A1F3D] hover:border-[#C9A961]/45 hover:bg-white transition-all active:scale-[0.99] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)]"
+                >
+                  <span className="flex items-center gap-3">
+                    <span
+                      className={
+                        "h-10 w-10 rounded-xl flex items-center justify-center border " +
+                        (isLogout
+                          ? "bg-[#FEF2F2] border-[#FECACA] text-[#B91C1C]"
+                          : "bg-[#F1F5F9] border-[#E2E8F0] text-[#0A1F3D]")
+                      }
+                    >
+                      <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
+                    </span>
+                    <span className={isLogout ? "text-[#B91C1C]" : ""}>{label}</span>
                   </span>
-                  {label}
-                </span>
-                <ChevronLeft className="h-5 w-5 text-white/70" strokeWidth={2.4} />
-              </button>
-            ))}
+                  <ChevronLeft className="h-5 w-5 text-[#94A3B8]" strokeWidth={2} />
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
