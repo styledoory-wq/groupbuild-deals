@@ -219,25 +219,29 @@ export default function ResidentDashboard() {
           <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#071427]/55 via-[#0A1F3D]/65 to-[#071427]/90" />
           <div aria-hidden className="absolute inset-0 bg-gradient-to-l from-[#0A1F3D]/40 via-transparent to-transparent" />
 
-          {/* Top bar */}
-          <div className="relative flex items-center justify-between px-5 pt-4">
-            <button
-              onClick={() => navigate("/resident/notifications")}
-              className="h-10 w-10 rounded-full bg-white/10 border border-white/15 backdrop-blur flex items-center justify-center text-white hover:bg-white/15 transition-smooth"
-              aria-label="התראות"
+          {/* Top bar — support + logout, both labeled */}
+          <div className="relative flex items-center justify-between gap-2 px-5 pt-4">
+            <a
+              href="https://wa.me/972526247941"
+              target="_blank"
+              rel="noreferrer"
+              className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-[12px] font-semibold"
+              aria-label="תמיכה"
             >
-              <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
-            </button>
+              <MessageCircle className="h-[15px] w-[15px]" strokeWidth={2} />
+              <span>תמיכה</span>
+            </a>
             <button
               onClick={async () => {
                 await logout();
                 toast.success("התנתקת");
                 navigate("/", { replace: true });
               }}
-              className="h-10 w-10 rounded-full bg-white/10 border border-white/15 backdrop-blur flex items-center justify-center text-white hover:bg-white/15 transition-smooth"
-              aria-label="תפריט"
+              className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-[12px] font-semibold"
+              aria-label="התנתקות"
             >
-              <Menu className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              <LogOut className="h-[15px] w-[15px]" strokeWidth={2} />
+              <span>התנתקות</span>
             </button>
           </div>
 
@@ -381,31 +385,33 @@ export default function ResidentDashboard() {
                   key={s.id}
                   onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
                   className={
-                    "w-full text-right group relative flex items-center gap-3 p-3.5 rounded-2xl transition-smooth gb-tile-dark " +
-                    (isCurrent ? "ring-1 ring-gold/50" : "")
+                    "w-full h-[68px] rounded-2xl px-4 flex items-center justify-between font-semibold text-[15px] tracking-tight bg-white/85 backdrop-blur border text-[#0A1F3D] hover:bg-white transition-all active:scale-[0.99] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] " +
+                    (isCurrent ? "border-[#C9A961]/55 ring-1 ring-[#C9A961]/30" : "border-[#E2E8F0] hover:border-[#C9A961]/45")
                   }
                   style={{ animationDelay: `${idx * 40}ms` }}
                 >
-                  <div className="relative shrink-0">
-                    <div className="h-11 w-11 rounded-xl flex items-center justify-center border bg-gradient-to-br from-gold/30 to-gold/10 border-gold/40">
-                      <Icon className="h-[18px] w-[18px] text-gold" strokeWidth={1.75} />
-                    </div>
-                    <div className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-primary border border-gold/40 flex items-center justify-center text-[9px] font-bold gb-text-gold">
-                      {idx + 1}
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <h3 className="text-[14px] font-bold leading-tight text-white">{s.title}</h3>
-                      {isCurrent && (
-                        <span className="text-[9px] font-bold gb-text-gold uppercase tracking-[0.14em] px-1.5 py-0.5 rounded-md bg-gold/10 border border-gold/30">
-                          השלב שלך
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[12px] text-white/75 line-clamp-1">{s.desc}</p>
-                  </div>
-                  <ChevronLeft className="h-4 w-4 shrink-0 transition-all text-gold group-hover:-translate-x-1" strokeWidth={2} />
+                  <span className="flex items-center gap-3 text-right">
+                    <span className="relative shrink-0">
+                      <span className="h-10 w-10 rounded-xl flex items-center justify-center border bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border-[#C9A961]/40">
+                        <Icon className="h-[18px] w-[18px] text-[#B8923F]" strokeWidth={2} />
+                      </span>
+                      <span className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-[#0A1F3D] border border-[#C9A961]/50 flex items-center justify-center text-[9px] font-bold text-[#C9A961]">
+                        {idx + 1}
+                      </span>
+                    </span>
+                    <span className="flex flex-col items-start">
+                      <span className="flex items-center gap-2">
+                        <span className="text-[14px] font-bold leading-tight">{s.title}</span>
+                        {isCurrent && (
+                          <span className="text-[9px] font-bold text-[#B8923F] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-md bg-[#C9A961]/12 border border-[#C9A961]/30">
+                            השלב שלך
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-[12px] text-[#475569] line-clamp-1 mt-0.5">{s.desc}</span>
+                    </span>
+                  </span>
+                  <ChevronLeft className="h-5 w-5 shrink-0 text-[#94A3B8]" strokeWidth={2} />
                 </button>
               );
             })}
