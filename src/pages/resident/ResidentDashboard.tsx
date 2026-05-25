@@ -294,10 +294,15 @@ export default function ResidentDashboard() {
             <div className="text-[22px] font-extrabold leading-none tracking-tight">{areaSuppliersCount}</div>
             <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">ספקים</div>
           </div>
-          <div className="gb-stat-pill">
-            <div className="text-[22px] font-extrabold leading-none tracking-tight gb-text-gold">{joinedDeals.length}</div>
-            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצטרפת</div>
-          </div>
+          <button
+            onClick={() => navigate("/resident/my-offers")}
+            className="gb-stat-pill text-right hover:bg-white/10 transition-smooth relative"
+            aria-label="ההצעות שלי"
+          >
+            <div className="text-[22px] font-extrabold leading-none tracking-tight gb-text-gold text-center">{joinedDeals.length}</div>
+            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider text-center">ההצעות שלי</div>
+          </button>
+
         </div>
       </header>
 
