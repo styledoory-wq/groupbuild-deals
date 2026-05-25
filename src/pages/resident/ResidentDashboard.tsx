@@ -206,91 +206,100 @@ export default function ResidentDashboard() {
 
   return (
     <MobileShell>
-      {/* Calm architectural hero */}
-      <header className="gb-aurora text-primary-foreground px-5 pt-6 pb-10 rounded-b-[28px] relative overflow-hidden">
+      {/* === Architectural luxury hero === */}
+      <header className="relative">
+        <div className="relative h-[280px] overflow-hidden rounded-b-[28px]">
+          <img
+            src={heroBuilding}
+            alt=""
+            width={1280}
+            height={768}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#071427]/55 via-[#0A1F3D]/65 to-[#071427]/90" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-l from-[#0A1F3D]/40 via-transparent to-transparent" />
 
-
-        <div className="flex items-center justify-between mb-5 relative">
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="gb-live-dot" />
-              <p className="text-primary-foreground/60 text-[10px] uppercase tracking-[0.18em] font-medium">פלטפורמה פעילה</p>
-            </div>
-            <h1 className="text-[26px] font-extrabold leading-tight tracking-tight truncate">
-              שלום, <span className="gb-text-gold">{user?.name?.split(" ")[0] || "דייר"}</span>
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <a
-              href="https://wa.me/972500000000"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="h-9 px-3 rounded-full bg-white/[0.08] border border-white/15 flex items-center gap-1.5 text-[12px] font-semibold transition-smooth hover:bg-white/15 backdrop-blur"
-              aria-label="תמיכה בוואטסאפ"
+          {/* Top bar */}
+          <div className="relative flex items-center justify-between px-5 pt-4">
+            <button
+              onClick={() => navigate("/resident/notifications")}
+              className="h-10 w-10 rounded-full bg-white/10 border border-white/15 backdrop-blur flex items-center justify-center text-white hover:bg-white/15 transition-smooth"
+              aria-label="התראות"
             >
-              <MessageCircle className="h-3.5 w-3.5" strokeWidth={2} />
-              תמיכה
-            </a>
+              <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
+            </button>
             <button
               onClick={async () => {
                 await logout();
                 toast.success("התנתקת");
                 navigate("/", { replace: true });
               }}
-              className="h-9 px-3 rounded-full bg-white/[0.08] border border-white/15 flex items-center gap-1.5 text-[12px] font-semibold transition-smooth hover:bg-white/15 backdrop-blur"
-              aria-label="התנתקות"
+              className="h-10 w-10 rounded-full bg-white/10 border border-white/15 backdrop-blur flex items-center justify-center text-white hover:bg-white/15 transition-smooth"
+              aria-label="תפריט"
             >
-              <LogOut className="h-3.5 w-3.5" strokeWidth={2} />
-              התנתקות
+              <Menu className="h-[18px] w-[18px]" strokeWidth={1.75} />
             </button>
           </div>
+
+          {/* Greeting */}
+          <div className="relative px-5 mt-10 text-right">
+            <h1 className="text-[30px] font-extrabold text-white leading-[1.1] tracking-tight">
+              שלום, {user?.name?.split(" ")[0] || "דייר"}
+            </h1>
+            <p className="text-[13px] text-[#C9A961] mt-1.5 font-semibold">ברוך הבא</p>
+          </div>
         </div>
 
-        <div className="relative space-y-3">
+        {/* Floating navy area card */}
+        <div className="px-5 -mt-7 relative z-10">
           <button
             onClick={() => navigate("/resident/profile/edit")}
-            className="w-full bg-white/[0.06] backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3 text-right hover:bg-white/[0.10] transition-smooth flex items-center justify-between"
+            className="ios-btn-navy w-full rounded-2xl px-5 py-4 flex items-center justify-between text-right"
           >
+            <ChevronLeft className="h-5 w-5 text-white/60 shrink-0" strokeWidth={2} />
             <div>
-              <div className="flex items-center gap-1.5 text-[10px] gb-text-gold uppercase tracking-[0.15em] mb-0.5 font-bold">
-                <MapPin className="h-3 w-3" strokeWidth={2} />
+              <div className="flex items-center gap-1.5 justify-end text-[11px] text-white/60 uppercase tracking-[0.14em] font-semibold">
                 <span>האזור שלך</span>
+                <MapPin className="h-3 w-3 text-[#C9A961]" strokeWidth={2} />
               </div>
-              <div className="font-semibold text-[15px]">{areaLabel || "הגדר אזור"}</div>
+              <div className="text-[17px] font-extrabold text-white mt-0.5 tracking-tight">
+                {areaLabel || "הגדר אזור"}
+              </div>
             </div>
-            <ChevronLeft className="h-4 w-4 text-gold" strokeWidth={2} />
           </button>
-
-          <button
-            onClick={() => navigate("/resident/categories")}
-            className="w-full h-12 rounded-2xl bg-gradient-gold text-[#0A1F3D] font-bold shadow-gold flex items-center justify-center gap-2 hover:brightness-105 active:scale-[0.99] transition-all"
-          >
-
-            <Search className="h-4 w-4" strokeWidth={2.5} />
-            מצא ספקים באזור שלי
-          </button>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2.5 mt-6 relative">
-          <div className="gb-stat-pill">
-            <div className="text-[22px] font-extrabold leading-none tracking-tight">{areaDeals.length}</div>
-            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצעות</div>
-          </div>
-          <div className="gb-stat-pill">
-            <div className="text-[22px] font-extrabold leading-none tracking-tight">{areaSuppliersCount}</div>
-            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">ספקים</div>
-          </div>
-          <button
-            onClick={() => navigate("/resident/my-offers")}
-            className="gb-stat-pill text-right hover:bg-white/10 transition-smooth relative"
-            aria-label="ההצעות שלי"
-          >
-            <div className="text-[22px] font-extrabold leading-none tracking-tight gb-text-gold text-center">{joinedDeals.length}</div>
-            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider text-center">ההצעות שלי</div>
-          </button>
-
         </div>
       </header>
+
+      {/* Search pill */}
+      <div className="px-5 mt-4">
+        <button
+          onClick={() => navigate("/resident/categories")}
+          className="w-full h-12 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0_4px_14px_-6px_rgba(15,30,60,0.10)] flex items-center justify-between px-4 text-[#475569] hover:border-[#C9A961]/40 transition-all"
+        >
+          <Search className="h-[18px] w-[18px] text-[#475569]" strokeWidth={2} />
+          <span className="text-[13px] font-medium">מצא ספקים באזור שלי</span>
+        </button>
+      </div>
+
+      {/* Stats row */}
+      <div className="px-5 mt-4 grid grid-cols-3 gap-3">
+        <button
+          onClick={() => navigate("/resident/my-offers")}
+          className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] hover:border-[#C9A961]/40 transition-all text-center"
+        >
+          <div className="text-[24px] font-extrabold text-[#0A1F3D] leading-none tracking-tight gb-num">{joinedDeals.length}</div>
+          <div className="text-[11px] text-[#475569] mt-1.5 font-medium">הצעות שלי</div>
+        </button>
+        <div className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center">
+          <div className="text-[24px] font-extrabold text-[#0A1F3D] leading-none tracking-tight gb-num">{areaSuppliersCount}</div>
+          <div className="text-[11px] text-[#475569] mt-1.5 font-medium">ספקים</div>
+        </div>
+        <div className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center">
+          <div className="text-[24px] font-extrabold text-[#0A1F3D] leading-none tracking-tight gb-num">{areaDeals.length}</div>
+          <div className="text-[11px] text-[#475569] mt-1.5 font-medium">הצעות</div>
+        </div>
+      </div>
+
 
       {loading && (
         <div aria-hidden className="px-5 pt-7 pb-8 space-y-7">
