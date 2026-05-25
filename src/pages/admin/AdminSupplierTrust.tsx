@@ -43,12 +43,14 @@ export default function AdminSupplierTrust() {
 
   async function toggle(id: string, field: "verified_supplier" | "is_suspended", value: boolean) {
     setBusy(id);
-    const { error } = await supabase.from("suppliers").update({ [field]: value }).eq("id", id);
+    const patch: Record<string, boolean> = { [field]: value };
+    const { error } = await supabase.from("suppliers").update(patch as never).eq("id", id);
     setBusy(null);
     if (error) { toast.error("העדכון נכשל"); return; }
     toast.success("עודכן");
     setRows((prev) => prev.map((r) => r.id === id ? { ...r, [field]: value } : r));
   }
+
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
