@@ -231,6 +231,15 @@ export default function ResidentDashboard() {
             </h1>
           </div>
           <div className="flex items-center gap-2">
+            <a
+              href="https://wa.me/972500000000"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-10 w-10 rounded-full bg-white/[0.08] border border-white/15 flex items-center justify-center transition-smooth hover:bg-white/15 backdrop-blur"
+              aria-label="תמיכה בוואטסאפ"
+            >
+              <MessageCircle className="h-4 w-4" strokeWidth={1.75} />
+            </a>
             <button
               onClick={async () => {
                 await logout();
