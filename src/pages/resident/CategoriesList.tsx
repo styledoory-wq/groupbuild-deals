@@ -272,7 +272,7 @@ export default function CategoriesList() {
       )}
 
       {/* Categories grid */}
-      {!q && (
+      {!showStageChoice && !q && (
         <div className="px-5 grid grid-cols-2 gap-3 pb-6">
           {loadingSuppliers
             ? Array.from({ length: visibleCategories.length || 6 }).map((_, i) => (
