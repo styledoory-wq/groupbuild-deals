@@ -230,15 +230,16 @@ export default function ResidentDashboard() {
               שלום, <span className="gb-text-gold">{user?.name?.split(" ")[0] || "דייר"}</span>
             </h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <a
               href="https://wa.me/972500000000"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-10 w-10 rounded-full bg-white/[0.08] border border-white/15 flex items-center justify-center transition-smooth hover:bg-white/15 backdrop-blur"
+              className="h-9 px-3 rounded-full bg-white/[0.08] border border-white/15 flex items-center gap-1.5 text-[12px] font-semibold transition-smooth hover:bg-white/15 backdrop-blur"
               aria-label="תמיכה בוואטסאפ"
             >
-              <MessageCircle className="h-4 w-4" strokeWidth={1.75} />
+              <MessageCircle className="h-3.5 w-3.5" strokeWidth={2} />
+              תמיכה
             </a>
             <button
               onClick={async () => {
@@ -246,10 +247,11 @@ export default function ResidentDashboard() {
                 toast.success("התנתקת");
                 navigate("/", { replace: true });
               }}
-              className="h-10 w-10 rounded-full bg-white/[0.08] border border-white/15 flex items-center justify-center transition-smooth hover:bg-white/15 backdrop-blur"
+              className="h-9 px-3 rounded-full bg-white/[0.08] border border-white/15 flex items-center gap-1.5 text-[12px] font-semibold transition-smooth hover:bg-white/15 backdrop-blur"
               aria-label="התנתקות"
             >
-              <LogOut className="h-4 w-4" strokeWidth={1.75} />
+              <LogOut className="h-3.5 w-3.5" strokeWidth={2} />
+              התנתקות
             </button>
           </div>
         </div>
