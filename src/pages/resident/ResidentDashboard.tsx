@@ -205,7 +205,7 @@ export default function ResidentDashboard() {
   return (
     <MobileShell>
       {/* Cinematic hero */}
-      <header className="gb-aurora text-primary-foreground px-5 pt-8 pb-16 rounded-b-[32px] relative overflow-hidden">
+      <header className="gb-aurora text-primary-foreground px-5 pt-6 pb-12 rounded-b-[32px] relative overflow-hidden">
         <span aria-hidden className="gb-particle gb-particle-1 h-1 w-1 top-20 left-12" />
         <span aria-hidden className="gb-particle gb-particle-2 h-1.5 w-1.5 top-32 right-16" />
         <span aria-hidden className="gb-particle gb-particle-3 h-1 w-1 top-12 right-1/3" />
