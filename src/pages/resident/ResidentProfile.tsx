@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, Building2, Phone, Mail, Pencil, FileText, Wallet, ChevronLeft } from "lucide-react";
+import { LogOut, Building2, Phone, Mail, Pencil, FileText, Wallet, ChevronLeft, User as UserIcon, Bell, Settings } from "lucide-react";
+
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
