@@ -69,8 +69,8 @@ export default function SupplierScan() {
         try {
           // Only stop if actually scanning — otherwise html5-qrcode throws
           // "Cannot stop, scanner is not running or paused."
-          // @ts-expect-error getState is provided by html5-qrcode at runtime
-          const state = typeof scanner.getState === "function" ? scanner.getState() : 2;
+          const s = scanner as unknown as { getState?: () => number };
+          const state = typeof s.getState === "function" ? s.getState() : 2;
           if (state === 2 /* SCANNING */ || state === 3 /* PAUSED */) {
             await scanner.stop();
           }
