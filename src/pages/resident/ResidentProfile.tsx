@@ -4,6 +4,7 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { toast } from "sonner";
+import ambientBg from "@/assets/profile-ambient-bg.jpg";
 
 export default function ResidentProfile() {
   const navigate = useNavigate();
@@ -27,20 +28,41 @@ export default function ResidentProfile() {
 
   return (
     <MobileShell>
-      <div className="ios-bg pb-32">
-        {/* Top spacer for status bar feel */}
+      {/* Architectural ambient backdrop — soft blurred luxury skyline */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <img
+          src={ambientBg}
+          alt=""
+          loading="lazy"
+          width={1024}
+          height={1024}
+          className="absolute inset-x-0 top-0 w-full h-[70vh] object-cover opacity-[0.18] blur-[2px] scale-110"
+        />
+        {/* Navy tint wash to keep ambience cohesive */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A1F3D]/10 via-[#F5F7FA]/70 to-[#E7ECF3]" />
+        {/* Soft gold ambient glow top-right */}
+        <div className="absolute -top-24 -right-24 h-80 w-80 rounded-full bg-[#C9A961]/15 blur-3xl" />
+        {/* Navy depth glow bottom-left */}
+        <div className="absolute bottom-10 -left-20 h-72 w-72 rounded-full bg-[#0A1F3D]/10 blur-3xl" />
+        {/* Fine fade to white at content area for readability */}
+        <div className="absolute inset-x-0 top-[45vh] h-[40vh] bg-gradient-to-b from-transparent via-white/40 to-white/70" />
+      </div>
+
+      <div className="pb-32 relative">
         <div className="pt-10 px-5">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-[26px] font-extrabold tracking-tight text-[#0D2346] leading-tight">
                 הפרופיל שלי
               </h1>
-              <p className="text-[13px] text-[#6B7280] mt-1">הפרטים והעסקאות שלך</p>
+              <p className="text-[13px] text-[#475569] mt-1">הפרטים והעסקאות שלך</p>
             </div>
           </div>
 
-          {/* Profile hero card */}
-          <div className="ios-card p-6 text-center mb-5 animate-fade-in">
+          {/* Profile hero card — elevated glass over ambient backdrop */}
+          <div className="ios-card p-6 text-center mb-5 animate-fade-in relative overflow-hidden">
+            {/* subtle inner sheen */}
+            <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A961]/40 to-transparent" />
             <div className="h-24 w-24 rounded-full ios-avatar-gold mx-auto flex items-center justify-center">
               <span className="text-[40px] font-extrabold text-white drop-shadow-sm leading-none">
                 {initial}
@@ -70,7 +92,7 @@ export default function ResidentProfile() {
             </div>
           </div>
 
-          {/* Action list — grouped iOS-style cell stack */}
+          {/* Action list */}
           <div className="space-y-3">
             {actions.map(({ label, icon: Icon, onClick }) => (
               <button
