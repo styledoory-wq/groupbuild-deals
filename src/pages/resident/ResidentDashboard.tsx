@@ -345,19 +345,19 @@ export default function ResidentDashboard() {
         <section className="px-5 pt-7">
           <button
             onClick={() => navigate("/resident/profile/edit")}
-            className="w-full gb-tile-dark p-5 text-right group"
+            className="w-full rounded-2xl p-5 text-right group bg-white/85 backdrop-blur border border-[#C9A961]/45 shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] hover:bg-white transition-all"
           >
             <div className="flex items-start gap-3 relative">
-              <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-gold/30 to-gold/10 border border-gold/40 flex items-center justify-center shrink-0 shadow-[0_0_16px_hsl(44_53%_54%_/_0.3)]">
-                <MapPin className="h-[18px] w-[18px] text-gold" strokeWidth={2} />
+              <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center shrink-0">
+                <MapPin className="h-[18px] w-[18px] text-[#B8923F]" strokeWidth={2} />
               </div>
               <div className="flex-1">
-                <p className="text-[14px] font-bold">הגדירו את האזור שלכם</p>
-                <p className="text-[11px] text-primary-foreground/65 mt-1 leading-relaxed">
+                <p className="text-[14px] font-bold text-[#0A1F3D]">הגדירו את האזור שלכם</p>
+                <p className="text-[11px] text-[#475569] mt-1 leading-relaxed">
                   כדי שנציג לכם הצעות מותאמות מהספקים שמשרתים את האזור.
                 </p>
               </div>
-              <ChevronLeft className="h-4 w-4 text-gold mt-1 group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
+              <ChevronLeft className="h-4 w-4 text-[#B8923F] mt-1 group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
             </div>
           </button>
         </section>
