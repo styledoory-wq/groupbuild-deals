@@ -175,6 +175,7 @@ const App = () => (
                   <Route path="/resident/notifications" element={<Notifications />} />
                   <Route path="/resident/my-offers" element={<MyOffers />} />
                   <Route path="/resident/documents" element={<MyDocuments />} />
+                  <Route path="/resident/deposits" element={<MyDeposits />} />
                   <Route path="/resident/my-vouchers" element={<MyVouchers />} />
 
                   {/* Supplier */}
