@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Lock, Search } from "lucide-react";
 import { toast } from "sonner";
 import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
 import { Switch } from "@/components/ui/switch";
@@ -22,15 +22,19 @@ type DbDeal = {
   discount_percentage: number | null;
   base_price: number | null;
   offer_type: string | null;
+  target_participants: number | null;
+  auto_closed_at: string | null;
+  max_redemptions: number | null;
 };
 
 type SupplierMap = Record<string, { business_name: string }>;
+type DealCounts = { interests: number; paid: number; eligible: number; redeemed: number };
 
 export default function AdminDeals() {
   const { categories } = useApp();
   const [deals, setDeals] = useState<DbDeal[]>([]);
   const [suppliers, setSuppliers] = useState<SupplierMap>({});
-  const [counts, setCounts] = useState<Record<string, { interests: number; paid: number }>>({});
+  const [counts, setCounts] = useState<Record<string, DealCounts>>({});
   const [loading, setLoading] = useState(true);
   const [showInactive, setShowInactive] = useState(true);
   const [query, setQuery] = useState("");
@@ -40,7 +44,7 @@ export default function AdminDeals() {
     try {
       const { data, error } = await supabase
         .from("deals")
-        .select("id,title,status,category_id,supplier_id,original_price,discounted_price,discount_percentage,base_price,offer_type")
+        .select("id,title,status,category_id,supplier_id,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants,auto_closed_at,max_redemptions")
         .eq("is_deleted", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -58,13 +62,20 @@ export default function AdminDeals() {
         setSuppliers(m);
       }
 
-      const cMap: Record<string, { interests: number; paid: number }> = {};
+      const cMap: Record<string, DealCounts> = {};
       await Promise.all(list.map(async (d) => {
-        const [{ count: interests }, { count: paid }] = await Promise.all([
+        const [{ count: interests }, { count: paid }, { count: eligible }, { count: redeemed }] = await Promise.all([
           supabase.from("deal_interests").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("is_deleted", false),
           supabase.from("deposits").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "paid").eq("is_deleted", false),
+          supabase.from("vouchers").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "eligible"),
+          supabase.from("vouchers").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "redeemed"),
         ]);
-        cMap[d.id] = { interests: interests ?? 0, paid: paid ?? 0 };
+        cMap[d.id] = {
+          interests: interests ?? 0,
+          paid: paid ?? 0,
+          eligible: eligible ?? 0,
+          redeemed: redeemed ?? 0,
+        };
       }));
       setCounts(cMap);
     } catch (err) {
@@ -94,6 +105,13 @@ export default function AdminDeals() {
       return Number(d.original_price) * (1 - Number(d.discount_percentage) / 100);
     }
     return Number(d.base_price ?? d.original_price ?? 0);
+  };
+
+  const statusLabel = (d: DbDeal) => {
+    if (d.status === "closed" || d.auto_closed_at) return { label: "נסגרה", cls: "bg-emerald-500/10 text-emerald-700" };
+    if (d.status === "redeemed") return { label: "מומשה", cls: "bg-blue-500/10 text-blue-700" };
+    if (d.status === "active") return { label: "פעילה", cls: "bg-success/10 text-success" };
+    return { label: d.status, cls: "bg-muted text-muted-foreground" };
   };
 
   return (
@@ -126,35 +144,46 @@ export default function AdminDeals() {
           {visibleDeals.map((d) => {
             const supplier = suppliers[d.supplier_id];
             const category = categories.find((c) => c.id === d.category_id);
-            const cnt = counts[d.id] ?? { interests: 0, paid: 0 };
-            const isActive = d.status === "active";
+            const cnt = counts[d.id] ?? { interests: 0, paid: 0, eligible: 0, redeemed: 0 };
+            const st = statusLabel(d);
+            const target = d.target_participants ?? 0;
+            const totalIssued = cnt.eligible + cnt.redeemed;
+            const rate = totalIssued > 0 ? Math.round((cnt.redeemed / totalIssued) * 100) : 0;
+            const isLocked = !!d.auto_closed_at;
             return (
               <div key={d.id} className="gb-card p-4">
                 <div className="flex items-start gap-3 mb-2">
                   <div className="h-10 w-10 rounded-xl bg-gradient-hero flex items-center justify-center text-lg">{category?.icon ?? "🏷️"}</div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-sm truncate">{d.title}</h3>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
-                        {isActive ? "פעילה" : "מושבתת"}
-                      </span>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>
+                      {isLocked && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 inline-flex items-center gap-1">
+                          <Lock className="h-3 w-3" /> נעולה
+                        </span>
+                      )}
                       <p className="text-[11px] text-muted-foreground truncate">{supplier?.business_name ?? "—"}</p>
                     </div>
                   </div>
                   <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
                 </div>
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border text-center text-[11px]">
+                <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border text-center text-[11px]">
                   <div>
                     <div className="font-bold text-primary">{formatILS(priceFor(d))}</div>
                     <div className="text-muted-foreground">מחיר</div>
                   </div>
                   <div className="border-x border-border">
-                    <div className="font-bold text-success">{cnt.paid}</div>
-                    <div className="text-muted-foreground">פיקדונות שולמו</div>
+                    <div className="font-bold text-foreground">{cnt.paid}{target ? `/${target}` : ""}</div>
+                    <div className="text-muted-foreground">הצטרפו</div>
+                  </div>
+                  <div className="border-l border-border">
+                    <div className="font-bold text-emerald-700">{cnt.eligible + cnt.redeemed}</div>
+                    <div className="text-muted-foreground">זכאים</div>
                   </div>
                   <div>
-                    <div className="font-bold text-foreground">{cnt.interests}</div>
-                    <div className="text-muted-foreground">לידים</div>
+                    <div className="font-bold text-blue-700">{cnt.redeemed} <span className="text-[10px] text-muted-foreground">({rate}%)</span></div>
+                    <div className="text-muted-foreground">מומשו</div>
                   </div>
                 </div>
               </div>
