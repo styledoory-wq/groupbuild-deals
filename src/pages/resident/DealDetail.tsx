@@ -906,3 +906,76 @@ export default function DealDetail() {
     </MobileShell>
   );
 }
+
+/** Outline secondary actions row: invite neighbor + whatsapp + call. */
+function SecondaryActions({
+  deal,
+  supplier,
+}: {
+  deal: { id: string; title: string };
+  supplier: SupplierRow | null;
+}) {
+  const wa = supplier ? normalizeWhatsappUrl(supplier.whatsapp_url || supplier.phone) : null;
+  const tel = supplier?.phone ? `tel:${supplier.phone.replace(/\s+/g, "")}` : null;
+
+  const handleInvite = async () => {
+    const url = `${window.location.origin}/share/deal/${deal.id}`;
+    const shareData = { title: deal.title, text: `מצטרפים יחד למחיר משתלם: ${deal.title}`, url };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("הקישור הועתק", { description: "אפשר לשתף עם השכנים" });
+      }
+    } catch (err) {
+      if ((err as Error)?.name !== "AbortError") {
+        try {
+          await navigator.clipboard.writeText(url);
+          toast.success("הקישור הועתק", { description: "אפשר לשתף עם השכנים" });
+        } catch { /* ignore */ }
+      }
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      <button
+        type="button"
+        onClick={handleInvite}
+        className="h-11 rounded-2xl border border-border bg-card text-foreground text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
+      >
+        <Share2 className="h-4 w-4 text-gold" strokeWidth={1.5} />
+        הזמן שכן
+      </button>
+      {wa ? (
+        <a
+          href={wa}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="h-11 rounded-2xl border border-border bg-card text-foreground text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
+        >
+          <MessageCircle className="h-4 w-4 text-gold" strokeWidth={1.5} />
+          וואטסאפ
+        </a>
+      ) : (
+        <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-[10px] text-muted-foreground">
+          לא זמין
+        </div>
+      )}
+      {tel ? (
+        <a
+          href={tel}
+          className="h-11 rounded-2xl border border-border bg-card text-foreground text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
+        >
+          <Phone className="h-4 w-4 text-gold" strokeWidth={1.5} />
+          התקשר
+        </a>
+      ) : (
+        <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-[10px] text-muted-foreground">
+          לא זמין
+        </div>
+      )}
+    </div>
+  );
+}
