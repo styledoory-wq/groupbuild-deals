@@ -152,7 +152,38 @@ export default function CategoriesList() {
         </div>
       </header>
 
-      {/* Search bar */}
+      {/* Stage chooser — 2 simple options */}
+      {showStageChoice ? (
+        <div className="px-5 -mt-9 relative z-10 pb-6 space-y-3 animate-fade-up">
+          <button
+            onClick={() => navigate(`/resident/deals?stage=${stageId}`)}
+            className="w-full gb-tile-dark p-4 text-right group flex items-center gap-3"
+          >
+            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-gold/30 to-gold/10 border border-gold/40 flex items-center justify-center shrink-0">
+              <Tag className="h-5 w-5 text-gold" strokeWidth={2} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-[15px] font-bold leading-tight">הצעות קבוצתיות</h3>
+              <p className="text-[11px] text-primary-foreground/60 mt-1">הצעות פעילות בשלב {stage!.title}</p>
+            </div>
+            <ChevronLeft className="h-4 w-4 text-gold group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
+          </button>
+
+          <button
+            onClick={() => navigate(`/resident/categories?stage=${stageId}&view=suppliers`)}
+            className="w-full gb-tile-dark p-4 text-right group flex items-center gap-3"
+          >
+            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-gold/30 to-gold/10 border border-gold/40 flex items-center justify-center shrink-0">
+              <Users className="h-5 w-5 text-gold" strokeWidth={2} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-[15px] font-bold leading-tight">ספקים בתחום</h3>
+              <p className="text-[11px] text-primary-foreground/60 mt-1">בעלי מקצוע וספקים בשלב {stage!.title}</p>
+            </div>
+            <ChevronLeft className="h-4 w-4 text-gold group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
+          </button>
+        </div>
+      ) : (
       <div className="px-5 -mt-9 relative z-10 mb-4">
         <div className="gb-card p-3">
           <div className="relative">
@@ -177,6 +208,7 @@ export default function CategoriesList() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Search results */}
       {q && (
