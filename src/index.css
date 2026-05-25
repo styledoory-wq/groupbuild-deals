@@ -150,25 +150,26 @@
   }
 
 
-  /* Glass card — translucent navy + soft gold border */
+  /* Glass card — smoked navy with whisper-soft gold edge */
   .gb-card {
     @apply rounded-2xl relative;
-    background: rgba(13, 35, 70, 0.55);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid rgba(201, 169, 97, 0.18);
+    background: linear-gradient(180deg, rgba(10,31,61,0.62) 0%, rgba(7,20,39,0.55) 100%);
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.04);
     box-shadow: var(--shadow-card);
     transition: var(--transition-smooth);
   }
   .gb-card:hover {
-    box-shadow: var(--shadow-elevated), 0 0 0 1px rgba(201,169,97,0.28);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+    border-color: rgba(201,169,97,0.14);
+    transform: translateY(-1px);
   }
 
   .gb-card-flat {
     @apply rounded-2xl;
-    background: rgba(13, 35, 70, 0.45);
-    border: 1px solid rgba(201, 169, 97, 0.14);
+    background: rgba(8,26,51,0.45);
+    border: 1px solid rgba(255,255,255,0.04);
     box-shadow: none;
   }
 
