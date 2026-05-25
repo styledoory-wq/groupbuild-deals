@@ -208,6 +208,8 @@ const App = () => (
                   <Route path="/admin/db-suppliers" element={adminRoute(<AdminDbSuppliers />)} />
                   <Route path="/admin/stats" element={adminRoute(<AdminStats />)} />
                   <Route path="/admin/complaints" element={adminRoute(<AdminComplaints />)} />
+                  <Route path="/admin/supplier-trust" element={adminRoute(<AdminSupplierTrust />)} />
+
 
                   {/* Payment callbacks */}
                   <Route path="/payment/success" element={<PaymentSuccess />} />
