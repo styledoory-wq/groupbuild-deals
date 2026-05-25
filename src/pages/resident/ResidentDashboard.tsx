@@ -251,13 +251,6 @@ export default function ResidentDashboard() {
             >
               <LogOut className="h-4 w-4" strokeWidth={1.75} />
             </button>
-            <button
-              onClick={() => navigate("/resident/profile")}
-              className="h-10 w-10 rounded-full bg-gradient-to-br from-gold/30 to-gold/10 border border-gold/40 flex items-center justify-center font-bold text-sm transition-smooth hover:from-gold/40 backdrop-blur"
-              aria-label="פרופיל"
-            >
-              {user?.name?.charAt(0) || "ד"}
-            </button>
           </div>
         </div>
 
