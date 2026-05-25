@@ -114,14 +114,15 @@ export default function DealsList() {
     return () => {
       cancelled = true;
     };
-  }, [categoryId, cacheKey]);
+  }, [categoryId, stageId, cacheKey]);
 
   const cat = categories.find((c) => c.id === categoryId);
+  const stageTitle = stageId ? STAGE_TITLES[stageId] : "";
 
   return (
     <MobileShell>
       <PageHeader
-        title={cat ? `${cat.icon}  ${cat.name}` : "כל העסקאות"}
+        title={cat ? `${cat.icon}  ${cat.name}` : stageTitle ? `הצעות — ${stageTitle}` : "כל העסקאות"}
         subtitle={loading ? "טוען עסקאות..." : `${deals.length} עסקאות פעילות`}
       />
       <div className="px-5 md:px-8 lg:px-10 -mt-4 md:-mt-8 relative z-10">
