@@ -51,16 +51,16 @@ export default function ResidentProfile() {
       </div>
 
       <div className="px-5 space-y-2">
-        <Button onClick={() => navigate("/resident/profile/edit")} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground">
+        <Button onClick={() => navigate("/resident/profile/edit")} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90">
           <Pencil className="h-4 w-4 ml-2" /> עריכת פרופיל
         </Button>
-        <Button onClick={() => navigate("/resident/deposits")} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground">
+        <Button onClick={() => navigate("/resident/deposits")} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90">
           <Wallet className="h-4 w-4 ml-2" /> הפיקדונות שלי
         </Button>
-        <Button onClick={() => navigate("/resident/documents")} variant="outline" className="w-full h-12 rounded-2xl border-secondary text-secondary">
+        <Button onClick={() => navigate("/resident/documents")} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90">
           <FileText className="h-4 w-4 ml-2" /> המסמכים שלי
         </Button>
-        <Button onClick={handleLogout} variant="outline" className="w-full h-12 rounded-2xl border-border">
+        <Button onClick={handleLogout} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90">
           <LogOut className="h-4 w-4 ml-2" /> התנתקות
         </Button>
       </div>
