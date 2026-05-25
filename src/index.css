@@ -9,64 +9,61 @@
 
 @layer base {
   :root {
-    /* Cream surface */
-    --background: 42 33% 96%;          /* #F8F6F1 */
-    --foreground: 217 56% 13%;         /* navy text */
+    /* Deep navy luxury surface */
+    --background: 217 75% 10%;         /* #06152E */
+    --foreground: 214 22% 90%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 217 56% 13%;
+    --card: 217 70% 14%;
+    --card-foreground: 214 22% 92%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 217 56% 13%;
+    --popover: 217 75% 12%;
+    --popover-foreground: 214 22% 92%;
 
-    /* Navy primary */
-    --primary: 217 56% 13%;            /* #0F1E35 */
+    --primary: 217 75% 10%;
     --primary-foreground: 42 33% 96%;
-    --primary-soft: 217 49% 21%;       /* #1A2F4E */
+    --primary-soft: 217 65% 16%;       /* #0D2346 */
 
-    /* Gold secondary */
-    --secondary: 44 53% 54%;           /* #C8A84B */
-    --secondary-foreground: 217 56% 13%;
-    --gold: 44 53% 54%;
-    --gold-light: 44 73% 66%;          /* #E8C96A */
-    --gold-foreground: 217 56% 13%;
+    --secondary: 41 49% 58%;           /* #C9A961 */
+    --secondary-foreground: 217 75% 10%;
+    --gold: 41 49% 58%;
+    --gold-light: 41 64% 67%;          /* #E2C679 */
+    --gold-foreground: 217 75% 10%;
 
-    --muted: 40 24% 92%;
-    --muted-foreground: 217 18% 38%;
+    --muted: 217 45% 18%;
+    --muted-foreground: 214 17% 72%;   /* #B8C0CC */
 
-    --accent: 44 53% 54%;
-    --accent-foreground: 217 56% 13%;
+    --accent: 41 49% 58%;
+    --accent-foreground: 217 75% 10%;
 
-    --success: 145 49% 32%;            /* #2A7A4C */
+    --success: 145 49% 45%;
     --success-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 45%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 38 18% 88%;              /* softer hairline */
-    --input: 38 18% 88%;
-    --ring: 44 53% 54%;
+    --border: 41 40% 55% / 0.18;
+    --input: 217 45% 22%;
+    --ring: 41 49% 58%;
 
-    --radius: 0.875rem;
+    --radius: 1rem;
 
-    /* Gradients — toned-down, editorial */
-    --gradient-hero: linear-gradient(160deg, hsl(217 58% 12%) 0%, hsl(217 50% 18%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(44 53% 54%) 0%, hsl(44 60% 60%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 100%) 100%);
-    --gradient-navy-deep: linear-gradient(160deg, hsl(217 60% 10%) 0%, hsl(217 50% 16%) 100%);
+    --gradient-hero: linear-gradient(180deg, #06152E 0%, #0B1F42 45%, #07162F 100%);
+    --gradient-gold: linear-gradient(135deg, #C9A961 0%, #E2C679 100%);
+    --gradient-card: linear-gradient(180deg, rgba(13,35,70,0.78) 0%, rgba(8,20,45,0.72) 100%);
+    --gradient-navy-deep: linear-gradient(160deg, #06152E 0%, #0D2346 100%);
 
-    /* Shadows — soft blue-tinted, premium */
-    --shadow-soft: 0 1px 2px hsl(217 70% 30% / 0.06), 0 2px 10px -4px hsl(217 70% 35% / 0.10);
-    --shadow-card: 0 1px 3px hsl(217 70% 30% / 0.06), 0 10px 28px -12px hsl(217 70% 35% / 0.16), 0 2px 8px -3px hsl(217 70% 30% / 0.08);
-    --shadow-elevated: 0 20px 50px -22px hsl(217 70% 30% / 0.30), 0 8px 20px -10px hsl(217 70% 35% / 0.14);
-    --shadow-floating: 0 32px 64px -26px hsl(217 70% 30% / 0.38), 0 14px 30px -16px hsl(217 70% 35% / 0.20);
-    --shadow-gold: 0 8px 24px -10px hsl(44 53% 54% / 0.35), 0 0 0 1px hsl(44 53% 54% / 0.12);
-    --glow-gold: 0 0 24px hsl(44 53% 54% / 0.35);
-    --glow-navy: 0 0 32px hsl(217 60% 22% / 0.45);
+    --shadow-soft: 0 1px 2px rgba(0,0,0,0.35), 0 6px 18px -8px rgba(0,0,0,0.40);
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.40), 0 14px 36px -14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+    --shadow-elevated: 0 26px 60px -24px rgba(0,0,0,0.65), 0 10px 26px -12px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+    --shadow-floating: 0 36px 80px -28px rgba(0,0,0,0.75), 0 14px 30px -16px rgba(0,0,0,0.55);
+    --shadow-gold: 0 8px 28px -8px rgba(201,169,97,0.45), 0 0 0 1px rgba(201,169,97,0.18);
+    --glow-gold: 0 0 28px rgba(226,198,121,0.45);
+    --glow-navy: 0 0 36px rgba(13,35,70,0.65);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+
 }
 
 @layer base {
