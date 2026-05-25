@@ -276,18 +276,18 @@ export default function ResidentDashboard() {
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mt-5 relative">
+        <div className="grid grid-cols-3 gap-2.5 mt-6 relative">
           <div className="gb-stat-pill">
-            <div className="text-[18px] font-extrabold leading-none">{areaDeals.length}</div>
-            <div className="text-[9px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצעות</div>
+            <div className="text-[22px] font-extrabold leading-none tracking-tight">{areaDeals.length}</div>
+            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצעות</div>
           </div>
           <div className="gb-stat-pill">
-            <div className="text-[18px] font-extrabold leading-none">{areaSuppliersCount}</div>
-            <div className="text-[9px] text-primary-foreground/65 mt-1 uppercase tracking-wider">ספקים</div>
+            <div className="text-[22px] font-extrabold leading-none tracking-tight">{areaSuppliersCount}</div>
+            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">ספקים</div>
           </div>
           <div className="gb-stat-pill">
-            <div className="text-[18px] font-extrabold leading-none gb-text-gold">{joinedDeals.length}</div>
-            <div className="text-[9px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצטרפת</div>
+            <div className="text-[22px] font-extrabold leading-none tracking-tight gb-text-gold">{joinedDeals.length}</div>
+            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצטרפת</div>
           </div>
         </div>
       </header>
