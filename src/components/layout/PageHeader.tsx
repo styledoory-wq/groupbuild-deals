@@ -31,7 +31,7 @@ export function PageHeader({ title, subtitle, back = true, showBell = false, var
             onClick={() => navigate(-1)}
             className={cn(
               "h-10 w-10 rounded-full flex items-center justify-center transition-smooth",
-              isNavy ? "bg-white/10 hover:bg-white/15 border border-white/10 backdrop-blur" : "bg-card border border-border hover:bg-muted"
+              isNavy ? "bg-white/12 hover:bg-white/20 border border-white/20 backdrop-blur text-white" : "bg-card border border-border hover:bg-muted text-foreground"
             )}
             aria-label="חזרה"
           >
@@ -48,7 +48,7 @@ export function PageHeader({ title, subtitle, back = true, showBell = false, var
               onClick={() => navigate("/resident/notifications")}
               className={cn(
                 "relative h-10 w-10 rounded-full flex items-center justify-center transition-smooth",
-                isNavy ? "bg-white/10 hover:bg-white/15 border border-white/10 backdrop-blur" : "bg-card border border-border"
+                isNavy ? "bg-white/12 hover:bg-white/20 border border-white/20 backdrop-blur text-white" : "bg-card border border-border text-foreground"
               )}
               aria-label="התראות"
             >
@@ -63,9 +63,15 @@ export function PageHeader({ title, subtitle, back = true, showBell = false, var
 
       <div className="space-y-2 animate-fade-up relative text-right">
         <div className="gb-divider-gold mr-0 ml-auto" />
-        <h1 className="text-[26px] md:text-[34px] lg:text-[40px] font-extrabold leading-[1.15] tracking-tight">{title}</h1>
+        <h1 className={cn(
+          "text-[26px] md:text-[34px] lg:text-[40px] font-extrabold leading-[1.15] tracking-tight",
+          isNavy ? "text-white" : "text-foreground"
+        )}>{title}</h1>
         {subtitle && (
-          <p className={cn("text-[13px] leading-relaxed", isNavy ? "text-primary-foreground/70" : "text-muted-foreground")}>
+          <p className={cn(
+            "text-[14px] leading-relaxed font-medium",
+            isNavy ? "text-white/85" : "text-muted-foreground"
+          )}>
             {subtitle}
           </p>
         )}
