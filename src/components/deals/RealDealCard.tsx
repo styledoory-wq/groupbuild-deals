@@ -70,12 +70,22 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
   const realJoiners = Math.max(0, joinersCount);
   const isHot = realJoiners >= 5 || (left !== null && left.includes("שעות"));
 
-  // Progress: real joiners → maxTier
+  // Progress: prefer real target_participants when supplied
   const minTier = tiers[0]?.minParticipants ?? 0;
   const maxTier = tiers[tiers.length - 1]?.minParticipants ?? Math.max(minTier + 1, 10);
+  const target = deal.target_participants && deal.target_participants > 0
+    ? deal.target_participants
+    : maxTier;
   const progressPct = realJoiners > 0
-    ? Math.min(100, Math.max(4, Math.round((realJoiners / Math.max(1, maxTier)) * 100)))
+    ? Math.min(100, Math.max(4, Math.round((realJoiners / Math.max(1, target)) * 100)))
     : 0;
+  const remaining = Math.max(0, target - realJoiners);
+  const isClosed = deal.status === "closed" || !!deal.auto_closed_at;
+  const isRedeemed = deal.status === "redeemed";
+  const joinDeadline = deal.join_deadline ? new Date(deal.join_deadline) : null;
+  const redemptionDeadline = deal.redemption_deadline ? new Date(deal.redemption_deadline) : null;
+  const fmtDate = (d: Date) => d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit" });
+
 
   const cover = deal.cover_image_url ?? null;
   const galleryCount = Array.isArray(deal.gallery_images) ? deal.gallery_images.length : 0;
