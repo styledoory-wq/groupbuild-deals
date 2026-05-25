@@ -9,64 +9,64 @@
 
 @layer base {
   :root {
-    /* Smoked navy luxury surface */
-    --background: 213 70% 8%;          /* #071427 */
-    --foreground: 218 30% 93%;         /* #E8EDF5 soft luxury white */
+    /* Pearl & Gold luxury surface (Cloud Navy variant) */
+    --background: 216 28% 97%;         /* #F5F7FA */
+    --foreground: 222 47% 11%;         /* #0F172A */
 
-    --card: 214 65% 12%;               /* #0A1F3D */
-    --card-foreground: 218 30% 93%;
+    --card: 0 0% 100%;                 /* pure white glass base */
+    --card-foreground: 222 47% 11%;
 
-    --popover: 213 68% 10%;
-    --popover-foreground: 218 30% 93%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 213 70% 8%;
-    --primary-foreground: 218 30% 93%;
-    --primary-soft: 214 60% 14%;       /* #102B57-ish but darker */
+    /* Primary = deep navy */
+    --primary: 214 73% 12%;            /* #0A1F3D */
+    --primary-foreground: 210 40% 98%; /* #F8FAFC */
+    --primary-soft: 215 60% 18%;       /* #102B57 */
 
-    /* Restrained champagne gold */
-    --secondary: 40 38% 56%;           /* slightly desaturated #C9A961 */
-    --secondary-foreground: 213 70% 8%;
-    --gold: 40 38% 56%;
-    --gold-light: 41 48% 65%;
-    --gold-foreground: 213 70% 8%;
+    /* Champagne gold accent */
+    --secondary: 41 47% 56%;           /* #C9A961 */
+    --secondary-foreground: 214 73% 12%;
+    --gold: 41 47% 56%;
+    --gold-light: 41 53% 63%;          /* #D4B46A */
+    --gold-foreground: 214 73% 12%;
 
-    --muted: 214 40% 14%;
-    --muted-foreground: 215 16% 68%;   /* soft elegant secondary */
+    --muted: 215 25% 94%;              /* #E7ECF3 */
+    --muted-foreground: 215 19% 35%;   /* #475569 secondary text */
 
-    --accent: 40 38% 56%;
-    --accent-foreground: 213 70% 8%;
+    --accent: 41 47% 56%;
+    --accent-foreground: 214 73% 12%;
 
-    --success: 152 35% 42%;
+    --success: 152 45% 40%;
     --success-foreground: 0 0% 100%;
 
-    --destructive: 0 60% 52%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 25% 50% / 0.10;
-    --input: 214 40% 18%;
-    --ring: 40 38% 56%;
+    --border: 215 25% 88%;             /* subtle hairline */
+    --input: 215 25% 92%;
+    --ring: 41 47% 56%;
 
     --radius: 1rem;
 
-    --gradient-hero: linear-gradient(180deg, #071427 0%, #081A33 50%, #06121F 100%);
-    --gradient-gold: linear-gradient(135deg, #B9963F 0%, #D9BC72 100%);
-    --gradient-card: linear-gradient(180deg, rgba(10,31,61,0.72) 0%, rgba(7,20,39,0.66) 100%);
+    --gradient-hero: linear-gradient(160deg, #071427 0%, #0A1F3D 55%, #081A33 100%);
+    --gradient-gold: linear-gradient(135deg, #B8923F 0%, #D4B46A 50%, #C9A961 100%);
+    --gradient-card: linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(247,249,252,0.78) 100%);
     --gradient-navy-deep: linear-gradient(160deg, #071427 0%, #0A1F3D 100%);
+    --gradient-page: linear-gradient(180deg, #F5F7FA 0%, #EEF2F7 50%, #E7ECF3 100%);
 
-    /* Restrained cinematic shadows */
-    --shadow-soft: 0 1px 2px rgba(0,0,0,0.30), 0 6px 16px -10px rgba(0,0,0,0.40);
-    --shadow-card: 0 1px 2px rgba(0,0,0,0.30), 0 18px 40px -22px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.025);
-    --shadow-elevated: 0 30px 60px -28px rgba(0,0,0,0.65), 0 10px 26px -16px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.03);
-    --shadow-floating: 0 40px 80px -32px rgba(0,0,0,0.75), 0 14px 30px -18px rgba(0,0,0,0.50);
-    --shadow-gold: 0 6px 22px -12px rgba(201,169,97,0.30), 0 0 0 1px rgba(201,169,97,0.12);
-    --glow-gold: 0 0 18px rgba(201,169,97,0.20);
-    --glow-navy: 0 0 28px rgba(8,26,51,0.55);
+    /* Refined airy shadows — soft cinematic, not heavy */
+    --shadow-soft: 0 1px 2px rgba(15,30,60,0.04), 0 4px 12px -6px rgba(15,30,60,0.06);
+    --shadow-card: 0 1px 2px rgba(15,30,60,0.04), 0 12px 32px -16px rgba(15,30,60,0.10), 0 2px 6px -2px rgba(15,30,60,0.04);
+    --shadow-elevated: 0 20px 48px -24px rgba(15,30,60,0.16), 0 6px 18px -10px rgba(15,30,60,0.08);
+    --shadow-floating: 0 28px 60px -28px rgba(15,30,60,0.22), 0 10px 24px -14px rgba(15,30,60,0.10);
+    --shadow-gold: 0 6px 22px -12px rgba(201,169,97,0.40), 0 0 0 1px rgba(201,169,97,0.18);
+    --glow-gold: 0 0 22px rgba(201,169,97,0.28);
+    --glow-navy: 0 0 28px rgba(10,31,61,0.18);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-
-
 }
 
 @layer base {
@@ -80,17 +80,16 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Heebo', system-ui, -apple-system, sans-serif;
-    font-feature-settings: "kern" 1;
+    font-family: 'Heebo', 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "kern" 1, "ss01" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
-    /* iOS PWA: navy behind the status bar so the safe area blends with the header */
-    background-color: hsl(var(--primary));
+    background-color: hsl(var(--background));
     min-height: 100vh;
   }
 
-  /* Fixed navy bar that fills the iOS safe-area-top (notch / Dynamic Island region) */
+  /* Light pearl bar behind the iOS safe-area-top so the notch blends with the page */
   body::before {
     content: "";
     position: fixed;
@@ -98,14 +97,14 @@
     left: 0;
     right: 0;
     height: env(safe-area-inset-top);
-    background-color: hsl(var(--primary));
+    background-color: #F5F7FA;
     z-index: 100;
     pointer-events: none;
   }
 
   h1, h2, h3, h4, h5 {
-    @apply font-bold tracking-tight;
-    letter-spacing: -0.01em;
+    @apply font-bold tracking-tight text-foreground;
+    letter-spacing: -0.015em;
   }
 }
 
@@ -137,10 +136,10 @@
   .gb-press:hover { transform: translateY(-1px); }
   .gb-press:active { transform: translateY(0) scale(0.985); }
 
-  /* Skeleton shimmer — dark luxury */
+  /* Skeleton shimmer — soft pearl */
   .gb-skeleton {
     @apply rounded-xl;
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.04) 100%);
+    background: linear-gradient(90deg, rgba(15,30,60,0.04) 0%, rgba(15,30,60,0.09) 50%, rgba(15,30,60,0.04) 100%);
     background-size: 200% 100%;
     animation: gb-skeleton-pulse 1.6s ease-in-out infinite;
   }
@@ -150,26 +149,26 @@
   }
 
 
-  /* Glass card — smoked navy with whisper-soft gold edge */
+  /* Glass card — pearl white with whisper-soft gold edge */
   .gb-card {
     @apply rounded-2xl relative;
-    background: linear-gradient(180deg, rgba(10,31,61,0.62) 0%, rgba(7,20,39,0.55) 100%);
-    backdrop-filter: blur(28px) saturate(140%);
-    -webkit-backdrop-filter: blur(28px) saturate(140%);
-    border: 1px solid rgba(255,255,255,0.04);
+    background: linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(247,249,252,0.74) 100%);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border: 1px solid rgba(15,30,60,0.06);
     box-shadow: var(--shadow-card);
     transition: var(--transition-smooth);
   }
   .gb-card:hover {
     box-shadow: var(--shadow-elevated);
-    border-color: rgba(201,169,97,0.14);
+    border-color: rgba(201,169,97,0.22);
     transform: translateY(-1px);
   }
 
   .gb-card-flat {
     @apply rounded-2xl;
-    background: rgba(8,26,51,0.45);
-    border: 1px solid rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.62);
+    border: 1px solid rgba(15,30,60,0.05);
     box-shadow: none;
   }
 
@@ -211,20 +210,20 @@
     opacity: 0.6;
   }
 
-  /* Frosted glass on dark */
+  /* Frosted glass on dark hero */
   .gb-glass {
-    background: linear-gradient(180deg, hsl(0 0% 100% / 0.12), hsl(0 0% 100% / 0.04));
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    background: linear-gradient(180deg, hsl(0 0% 100% / 0.14), hsl(0 0% 100% / 0.04));
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
     @apply rounded-2xl border border-white/15;
   }
 
   /* Frosted glass on light surfaces */
   .gb-glass-light {
-    background: linear-gradient(180deg, hsl(0 0% 100% / 0.85), hsl(42 33% 96% / 0.75));
-    backdrop-filter: blur(20px) saturate(160%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    @apply rounded-2xl border border-white/60;
+    background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(247,249,252,0.66));
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    @apply rounded-2xl border border-white/70;
     box-shadow: var(--shadow-card);
   }
 
@@ -247,15 +246,15 @@
     pointer-events: none;
   }
 
-  /* Floating dock */
+  /* Floating dock (legacy light) */
   .gb-dock {
-    background: linear-gradient(180deg, hsl(0 0% 100% / 0.85), hsl(42 33% 96% / 0.75));
+    background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(247,249,252,0.72));
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     box-shadow:
-      0 24px 48px -16px hsl(217 56% 13% / 0.25),
-      0 0 0 1px hsl(0 0% 100% / 0.6),
-      inset 0 1px 0 hsl(0 0% 100% / 0.8);
+      0 20px 44px -18px rgba(15,30,60,0.20),
+      0 0 0 1px rgba(15,30,60,0.05),
+      inset 0 1px 0 rgba(255,255,255,0.9);
   }
 
   /* Live pulsing dot */
@@ -326,68 +325,81 @@
     box-shadow: 0 0 10px hsl(44 53% 54% / 0.8);
   }
 
-  /* ============ iOS Dark Luxury Surface System ============ */
-  /* Cinematic smoked-navy background with whisper ambient light */
+  /* ============ iOS Pearl & Gold Luxury Surface System ============ */
+  /* Soft pearl background with whisper navy ambient light */
   .ios-bg {
     background:
-      radial-gradient(55% 35% at 88% 6%, rgba(201,169,97,0.05) 0%, transparent 65%),
-      radial-gradient(70% 50% at 8% 92%, rgba(10,31,61,0.45) 0%, transparent 65%),
-      linear-gradient(180deg, #071427 0%, #081A33 50%, #06121F 100%);
+      radial-gradient(60% 40% at 90% 4%, rgba(201,169,97,0.10) 0%, transparent 65%),
+      radial-gradient(70% 50% at 6% 96%, rgba(10,31,61,0.08) 0%, transparent 65%),
+      linear-gradient(180deg, #FAFBFC 0%, #EEF2F7 50%, #E7ECF3 100%);
     min-height: 100vh;
     color: hsl(var(--foreground));
   }
 
-  /* Glassmorphism luxury card — restrained */
+  /* Glassmorphism luxury card — pearl white */
   .ios-card {
-    background: linear-gradient(180deg, rgba(10,31,61,0.70) 0%, rgba(7,20,39,0.62) 100%);
-    backdrop-filter: blur(28px) saturate(140%);
-    -webkit-backdrop-filter: blur(28px) saturate(140%);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(247,249,252,0.74) 100%);
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    border: 1px solid rgba(15,30,60,0.06);
     border-radius: 24px;
     box-shadow:
-      0 24px 50px -28px rgba(0,0,0,0.55),
-      inset 0 1px 0 rgba(255,255,255,0.035);
+      0 1px 2px rgba(15,30,60,0.04),
+      0 18px 40px -22px rgba(15,30,60,0.16),
+      inset 0 1px 0 rgba(255,255,255,0.9);
     transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease;
   }
 
-  /* Navy luxury button — restrained gold hairline */
+  /* Navy luxury button — primary CTA */
   .ios-btn-navy {
     background: linear-gradient(180deg, #0A1F3D 0%, #071427 100%);
-    color: #E8EDF5;
+    color: #F8FAFC;
     border-radius: 16px;
-    border: 1px solid rgba(201,169,97,0.10);
+    border: 1px solid rgba(201,169,97,0.20);
     box-shadow:
-      0 8px 20px -12px rgba(0,0,0,0.55),
-      inset 0 1px 0 rgba(255,255,255,0.04);
+      0 10px 24px -12px rgba(10,31,61,0.45),
+      inset 0 1px 0 rgba(255,255,255,0.10);
     transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, filter 200ms ease;
   }
-  .ios-btn-navy:hover { filter: brightness(1.08); border-color: rgba(201,169,97,0.22); }
+  .ios-btn-navy:hover { filter: brightness(1.10); border-color: rgba(201,169,97,0.40); box-shadow: 0 14px 30px -12px rgba(10,31,61,0.55), inset 0 1px 0 rgba(255,255,255,0.12); }
   .ios-btn-navy:active { transform: scale(0.98); }
+
+  /* Secondary button — soft pearl with navy text */
+  .ios-btn-secondary {
+    background: rgba(255,255,255,0.85);
+    color: #0A1F3D;
+    border-radius: 16px;
+    border: 1px solid rgba(15,30,60,0.10);
+    box-shadow: 0 4px 14px -8px rgba(15,30,60,0.12);
+    transition: var(--transition-smooth);
+  }
+  .ios-btn-secondary:hover { background: #FFFFFF; border-color: rgba(201,169,97,0.40); }
+  .ios-btn-secondary:active { transform: scale(0.98); }
 
   /* Gold avatar disc */
   .ios-avatar-gold {
-    background: linear-gradient(145deg, #D9BC72 0%, #B9963F 100%);
+    background: linear-gradient(145deg, #D4B46A 0%, #B8923F 100%);
     box-shadow:
-      0 10px 24px -14px rgba(185,150,63,0.45),
-      inset 0 2px 4px rgba(255,255,255,0.22),
-      inset 0 -3px 8px rgba(0,0,0,0.20);
+      0 12px 26px -14px rgba(184,146,63,0.55),
+      inset 0 2px 4px rgba(255,255,255,0.30),
+      inset 0 -3px 8px rgba(0,0,0,0.15);
   }
 
-  /* Native iOS-style floating dock — dark smoked glass */
+  /* Native iOS-style floating dock — dark navy glass on light bg (contrast for nav) */
   .ios-dock {
-    background: linear-gradient(180deg, rgba(8,26,51,0.66) 0%, rgba(7,20,39,0.72) 100%);
-    backdrop-filter: blur(30px) saturate(150%);
-    -webkit-backdrop-filter: blur(30px) saturate(150%);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: linear-gradient(180deg, rgba(10,31,61,0.92) 0%, rgba(7,20,39,0.94) 100%);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(201,169,97,0.16);
     box-shadow:
-      0 24px 50px -22px rgba(0,0,0,0.6),
-      inset 0 1px 0 rgba(255,255,255,0.04);
+      0 20px 44px -18px rgba(10,31,61,0.40),
+      inset 0 1px 0 rgba(255,255,255,0.06);
   }
 
   /* Inline meta row inside profile card */
   .ios-meta-row {
     @apply flex items-center justify-center gap-2 text-[13px];
-    color: #9CA6B5;
+    color: #475569;
   }
 }
 
