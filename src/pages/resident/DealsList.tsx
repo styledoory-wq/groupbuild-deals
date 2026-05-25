@@ -14,10 +14,24 @@ import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
 type DealWithSupplier = RealDealCardData;
 
+const STAGE_CATEGORY_IDS: Record<string, string[]> = {
+  planning: ["architect", "interior-designer", "consultant"],
+  structure: ["contractor", "skeleton", "gypsum"],
+  systems: ["electric", "plumbing", "ac", "smart-home"],
+  finishes: ["windows", "doors", "security-door", "flooring", "cladding", "painting", "kitchen", "bath", "showers", "sanitary", "carpentry", "closets", "lighting"],
+  outdoor: ["garden", "pergola", "cleaning"],
+};
+const STAGE_TITLES: Record<string, string> = {
+  planning: "תכנון ועיצוב", structure: "שלד ובנייה", systems: "מערכות הבית", finishes: "גמרים", outdoor: "חוץ ופיתוח",
+};
+
 export default function DealsList() {
   const { categoryId } = useParams();
+  const [searchParams] = useSearchParams();
+  const stageId = searchParams.get("stage") || "";
+  const stageCategoryIds = stageId ? STAGE_CATEGORY_IDS[stageId] ?? [] : [];
   const { categories } = useApp();
-  const cacheKey = `deals-list:${categoryId ?? "all"}`;
+  const cacheKey = `deals-list:${categoryId ?? (stageId ? `stage-${stageId}` : "all")}`;
   const cached = getCachedValue<{ deals: DealWithSupplier[]; counts: Record<string, number> }>(cacheKey, 5 * 60_000);
   const [deals, setDeals] = useState<DealWithSupplier[]>(() => cached?.deals ?? []);
   const [counts, setCounts] = useState<Record<string, number>>(() => cached?.counts ?? {});
