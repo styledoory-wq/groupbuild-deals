@@ -120,7 +120,3 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
     </div>
   );
 }
-
-    </div>
-  );
-}
