@@ -115,7 +115,7 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
                 </span>
               )}
               {discountBadge && (
-                <span className="text-[11px] font-extrabold px-2 py-1 rounded-full bg-gradient-to-r from-gold to-gold-light text-primary shadow">
+                <span className="text-[13px] font-extrabold px-2.5 py-1.5 rounded-full bg-gradient-to-r from-gold to-gold-light text-primary shadow-md ring-1 ring-gold/40">
                   עד {discountBadge} הנחה
                 </span>
               )}
