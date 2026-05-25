@@ -9,60 +9,63 @@
 
 @layer base {
   :root {
-    /* Deep navy luxury surface */
-    --background: 217 75% 10%;         /* #06152E */
-    --foreground: 214 22% 90%;
+    /* Smoked navy luxury surface */
+    --background: 213 70% 8%;          /* #071427 */
+    --foreground: 218 30% 93%;         /* #E8EDF5 soft luxury white */
 
-    --card: 217 70% 14%;
-    --card-foreground: 214 22% 92%;
+    --card: 214 65% 12%;               /* #0A1F3D */
+    --card-foreground: 218 30% 93%;
 
-    --popover: 217 75% 12%;
-    --popover-foreground: 214 22% 92%;
+    --popover: 213 68% 10%;
+    --popover-foreground: 218 30% 93%;
 
-    --primary: 217 75% 10%;
-    --primary-foreground: 42 33% 96%;
-    --primary-soft: 217 65% 16%;       /* #0D2346 */
+    --primary: 213 70% 8%;
+    --primary-foreground: 218 30% 93%;
+    --primary-soft: 214 60% 14%;       /* #102B57-ish but darker */
 
-    --secondary: 41 49% 58%;           /* #C9A961 */
-    --secondary-foreground: 217 75% 10%;
-    --gold: 41 49% 58%;
-    --gold-light: 41 64% 67%;          /* #E2C679 */
-    --gold-foreground: 217 75% 10%;
+    /* Restrained champagne gold */
+    --secondary: 40 38% 56%;           /* slightly desaturated #C9A961 */
+    --secondary-foreground: 213 70% 8%;
+    --gold: 40 38% 56%;
+    --gold-light: 41 48% 65%;
+    --gold-foreground: 213 70% 8%;
 
-    --muted: 217 45% 18%;
-    --muted-foreground: 214 17% 72%;   /* #B8C0CC */
+    --muted: 214 40% 14%;
+    --muted-foreground: 215 16% 68%;   /* soft elegant secondary */
 
-    --accent: 41 49% 58%;
-    --accent-foreground: 217 75% 10%;
+    --accent: 40 38% 56%;
+    --accent-foreground: 213 70% 8%;
 
-    --success: 145 49% 45%;
+    --success: 152 35% 42%;
     --success-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 55%;
+    --destructive: 0 60% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 41 40% 55% / 0.18;
-    --input: 217 45% 22%;
-    --ring: 41 49% 58%;
+    --border: 40 25% 50% / 0.10;
+    --input: 214 40% 18%;
+    --ring: 40 38% 56%;
 
     --radius: 1rem;
 
-    --gradient-hero: linear-gradient(180deg, #06152E 0%, #0B1F42 45%, #07162F 100%);
-    --gradient-gold: linear-gradient(135deg, #C9A961 0%, #E2C679 100%);
-    --gradient-card: linear-gradient(180deg, rgba(13,35,70,0.78) 0%, rgba(8,20,45,0.72) 100%);
-    --gradient-navy-deep: linear-gradient(160deg, #06152E 0%, #0D2346 100%);
+    --gradient-hero: linear-gradient(180deg, #071427 0%, #081A33 50%, #06121F 100%);
+    --gradient-gold: linear-gradient(135deg, #B9963F 0%, #D9BC72 100%);
+    --gradient-card: linear-gradient(180deg, rgba(10,31,61,0.72) 0%, rgba(7,20,39,0.66) 100%);
+    --gradient-navy-deep: linear-gradient(160deg, #071427 0%, #0A1F3D 100%);
 
-    --shadow-soft: 0 1px 2px rgba(0,0,0,0.35), 0 6px 18px -8px rgba(0,0,0,0.40);
-    --shadow-card: 0 1px 3px rgba(0,0,0,0.40), 0 14px 36px -14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
-    --shadow-elevated: 0 26px 60px -24px rgba(0,0,0,0.65), 0 10px 26px -12px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
-    --shadow-floating: 0 36px 80px -28px rgba(0,0,0,0.75), 0 14px 30px -16px rgba(0,0,0,0.55);
-    --shadow-gold: 0 8px 28px -8px rgba(201,169,97,0.45), 0 0 0 1px rgba(201,169,97,0.18);
-    --glow-gold: 0 0 28px rgba(226,198,121,0.45);
-    --glow-navy: 0 0 36px rgba(13,35,70,0.65);
+    /* Restrained cinematic shadows */
+    --shadow-soft: 0 1px 2px rgba(0,0,0,0.30), 0 6px 16px -10px rgba(0,0,0,0.40);
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.30), 0 18px 40px -22px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.025);
+    --shadow-elevated: 0 30px 60px -28px rgba(0,0,0,0.65), 0 10px 26px -16px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.03);
+    --shadow-floating: 0 40px 80px -32px rgba(0,0,0,0.75), 0 14px 30px -18px rgba(0,0,0,0.50);
+    --shadow-gold: 0 6px 22px -12px rgba(201,169,97,0.30), 0 0 0 1px rgba(201,169,97,0.12);
+    --glow-gold: 0 0 18px rgba(201,169,97,0.20);
+    --glow-navy: 0 0 28px rgba(8,26,51,0.55);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+
 
 }
 
