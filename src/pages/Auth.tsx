@@ -380,7 +380,7 @@ export default function Auth() {
               </label>
 
               <Button type="submit" disabled={loading || !termsAccepted}
-                className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold mt-2">
+                className="w-full h-12 rounded-2xl font-bold mt-2">
                 {loading ? "נרשם…" : "צרו חשבון"}
               </Button>
             </form>
