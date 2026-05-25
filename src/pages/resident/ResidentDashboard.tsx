@@ -242,9 +242,8 @@ export default function ResidentDashboard() {
           </div>
 
           {/* Greeting */}
-          <div className="relative px-5 mt-8 text-right">
-            <p className="text-[13px] text-[#C9A961] font-semibold tracking-wide">ברוך הבא</p>
-            <h1 className="text-[26px] sm:text-[28px] font-extrabold text-white leading-[1.15] tracking-tight mt-1.5 break-words">
+          <div className="relative px-5 mt-10 text-right">
+            <h1 className="text-[26px] sm:text-[28px] font-extrabold text-white leading-[1.15] tracking-tight break-words">
               שלום, {user?.name || "דייר"}
             </h1>
           </div>
@@ -383,22 +382,13 @@ export default function ResidentDashboard() {
                   onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
                   className={
                     "w-full text-right group relative flex items-center gap-3 p-3.5 rounded-2xl transition-smooth gb-tile-dark " +
-                    (isCurrent
-                      ? "ring-1 ring-gold/50 shadow-[0_0_24px_-8px_hsl(44_53%_54%_/_0.35)]"
-                      : "opacity-90 hover:opacity-100")
+                    (isCurrent ? "ring-1 ring-gold/50" : "")
                   }
                   style={{ animationDelay: `${idx * 40}ms` }}
                 >
                   <div className="relative shrink-0">
-                    <div
-                      className={
-                        "h-11 w-11 rounded-xl flex items-center justify-center border " +
-                        (isCurrent
-                          ? "bg-gradient-to-br from-gold/35 to-gold/10 border-gold/50"
-                          : "bg-gradient-to-br from-gold/15 to-gold/5 border-gold/20")
-                      }
-                    >
-                      <Icon className={"h-[18px] w-[18px] " + (isCurrent ? "text-gold" : "text-gold/70")} strokeWidth={1.75} />
+                    <div className="h-11 w-11 rounded-xl flex items-center justify-center border bg-gradient-to-br from-gold/30 to-gold/10 border-gold/40">
+                      <Icon className="h-[18px] w-[18px] text-gold" strokeWidth={1.75} />
                     </div>
                     <div className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-primary border border-gold/40 flex items-center justify-center text-[9px] font-bold gb-text-gold">
                       {idx + 1}
@@ -406,16 +396,16 @@ export default function ResidentDashboard() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <h3 className="text-[14px] font-bold leading-tight">{s.title}</h3>
+                      <h3 className="text-[14px] font-bold leading-tight text-white">{s.title}</h3>
                       {isCurrent && (
                         <span className="text-[9px] font-bold gb-text-gold uppercase tracking-[0.14em] px-1.5 py-0.5 rounded-md bg-gold/10 border border-gold/30">
                           השלב שלך
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-primary-foreground/55 line-clamp-1">{s.desc}</p>
+                    <p className="text-[12px] text-white/75 line-clamp-1">{s.desc}</p>
                   </div>
-                  <ChevronLeft className={"h-4 w-4 shrink-0 transition-all " + (isCurrent ? "text-gold group-hover:-translate-x-1" : "text-gold/40")} strokeWidth={2} />
+                  <ChevronLeft className="h-4 w-4 shrink-0 transition-all text-gold group-hover:-translate-x-1" strokeWidth={2} />
                 </button>
               );
             })}
