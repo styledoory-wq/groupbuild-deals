@@ -264,7 +264,7 @@ export default function Auth() {
                   className="h-12 rounded-2xl bg-card border-border" />
               </div>
               <Button type="submit" disabled={loading}
-                className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold flex items-center justify-center gap-2">
+                className="w-full h-12 rounded-2xl font-bold flex items-center justify-center gap-2">
                 {loading ? "מתחבר…" : "התחברות"}
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -380,7 +380,7 @@ export default function Auth() {
               </label>
 
               <Button type="submit" disabled={loading || !termsAccepted}
-                className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold mt-2">
+                className="w-full h-12 rounded-2xl font-bold mt-2">
                 {loading ? "נרשם…" : "צרו חשבון"}
               </Button>
             </form>

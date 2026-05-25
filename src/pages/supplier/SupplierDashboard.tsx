@@ -103,7 +103,6 @@ export default function SupplierDashboard() {
         if (cancelled) return;
         setDbSupplier(supplierRow);
 
-        // load my deals + counts
         if (supplierRow?.id && (supplierRow.approval_status === "approved" || supplierRow.approval_status === "active")) {
           const { data: dealRows, error: dealsErr } = await supabase
             .from("deals")
@@ -158,8 +157,8 @@ export default function SupplierDashboard() {
       <MobileShell>
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center">
-            <div className="h-10 w-10 mx-auto rounded-full border-2 border-primary border-t-transparent animate-spin mb-3" />
-            <div className="text-sm text-muted-foreground">טוען את החשבון…</div>
+            <div className="h-10 w-10 mx-auto rounded-full border-2 border-[#0A1F3D] border-t-transparent animate-spin mb-3" />
+            <div className="text-sm text-[#475569]">טוען את החשבון…</div>
           </div>
         </div>
       </MobileShell>
@@ -175,7 +174,7 @@ export default function SupplierDashboard() {
               <AlertCircle className="h-6 w-6 text-destructive" />
             </div>
             <h2 className="font-bold text-base mb-2">שגיאה בטעינה</h2>
-            <p className="text-sm text-muted-foreground mb-5">{error}</p>
+            <p className="text-sm text-[#475569] mb-5">{error}</p>
             <Button onClick={handleLogout} variant="outline" className="w-full rounded-2xl">
               חזרה למסך התחברות
             </Button>
@@ -189,44 +188,63 @@ export default function SupplierDashboard() {
   const isRejected = dbSupplier?.approval_status === "rejected";
   const businessName = dbSupplier?.business_name || user?.name || "החשבון שלי";
 
+  const HeroBar = ({ height = 230 }: { height?: number }) => (
+    <header className="relative">
+      <div className="relative overflow-hidden rounded-b-[28px] bg-[#0A1F3D]" style={{ height }}>
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#0A1F3D] via-[#0A1F3D] to-[#071427]" />
+        <div aria-hidden className="absolute -top-24 -right-20 h-72 w-72 rounded-full bg-[#C9A961]/10 blur-3xl" />
+        <div aria-hidden className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-[#C9A961]/5 blur-2xl" />
+
+        <div className="relative flex items-center justify-between gap-2 px-5 pt-4">
+          <span className="h-9 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur flex items-center text-white text-[11px] font-semibold uppercase tracking-[0.14em]">
+            אזור ספק
+          </span>
+          <button
+            onClick={handleLogout}
+            className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-[12px] font-semibold"
+            aria-label="יציאה"
+          >
+            <LogOut className="h-[15px] w-[15px]" strokeWidth={2} />
+            <span>התנתקות</span>
+          </button>
+        </div>
+
+        <div className="relative px-5 mt-8 text-right">
+          <h1 className="text-[26px] sm:text-[28px] font-extrabold text-white leading-[1.15] tracking-tight break-words">
+            {businessName}
+          </h1>
+          {dbSupplier && !isPending && !isRejected && (
+            <div className="mt-2">
+              <SupplierRatingBadge supplierId={dbSupplier.id} className="text-[11px] text-[#C9A961]" />
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+
   if (!dbSupplier || isPending || isRejected) {
     return (
       <MobileShell>
-        <header className="bg-gradient-hero text-primary-foreground px-5 pt-9 pb-10 rounded-b-[24px] relative overflow-hidden">
-          <div className="flex items-center justify-between mb-6 relative">
-            <div>
-              <p className="text-primary-foreground/55 text-[11px] uppercase tracking-wider">איזור ספק</p>
-              <h1 className="text-[22px] font-semibold mt-1 tracking-tight">{businessName}</h1>
+        <HeroBar height={210} />
+        <div className="px-5 mt-5">
+          <div className="bg-white rounded-2xl p-6 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] text-center">
+            <div className="h-14 w-14 mx-auto rounded-2xl bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center mb-4">
+              <Clock className="h-6 w-6 text-[#B8923F]" strokeWidth={2} />
             </div>
-            <button
-              onClick={handleLogout}
-              className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 flex items-center justify-center transition-smooth"
-              aria-label="יציאה"
-            >
-              <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
-            </button>
-          </div>
-        </header>
-
-        <div className="px-5 -mt-6 relative z-10">
-          <div className="gb-card p-6 text-center">
-            <div className="h-14 w-14 mx-auto rounded-full bg-gold/15 flex items-center justify-center mb-4">
-              <Clock className="h-7 w-7 text-gold" strokeWidth={1.75} />
-            </div>
-            <h2 className="font-bold text-base mb-2">
+            <h2 className="font-extrabold text-[#0A1F3D] text-base mb-2">
               {isRejected ? "ההרשמה נדחתה" : "ההרשמה התקבלה וממתינה לאישור"}
             </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+            <p className="text-sm text-[#475569] leading-relaxed mb-5">
               {isRejected
                 ? "לצערנו ההרשמה לא אושרה כרגע. ניתן לפנות לתמיכה לפרטים נוספים."
                 : "החשבון שלך ממתין לאישור מנהל. נעדכן אותך לאחר האישור ותוכל להתחיל לפרסם הצעות."}
             </p>
-            <Button onClick={() => navigate("/supplier/profile/edit")} variant="outline" className="w-full h-11 rounded-xl border-border">
+            <Button onClick={() => navigate("/supplier/profile/edit")} className="w-full h-11 rounded-2xl">
               <Pencil className="h-4 w-4 ml-2" /> השלמת פרטי הספק
             </Button>
           </div>
         </div>
-
         <BottomNav role="supplier" />
       </MobileShell>
     );
@@ -239,67 +257,50 @@ export default function SupplierDashboard() {
 
   return (
     <MobileShell>
-      <header className="bg-gradient-hero text-primary-foreground px-5 pt-9 pb-14 rounded-b-[24px] relative overflow-hidden">
-        <div className="flex items-center justify-between mb-7 relative">
-          <div>
-            <p className="text-primary-foreground/55 text-[11px] uppercase tracking-wider">איזור ספק</p>
-            <h1 className="text-[24px] font-semibold mt-1 tracking-tight">{businessName}</h1>
-            <div className="mt-2">
-              <SupplierRatingBadge supplierId={dbSupplier.id} className="text-[11px] gb-gold-text" />
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 flex items-center justify-center transition-smooth"
-            aria-label="יציאה"
-          >
-            <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
-          </button>
-        </div>
+      <HeroBar />
 
-        <div className="grid grid-cols-2 gap-3 relative">
-          <Stat icon={Users} label="לידים" value={totalLeads.toString()} />
-          <Stat icon={TrendingUp} label="המרה" value={`${conversion}%`} />
-          <Stat icon={Briefcase} label="עסקאות פעילות" value={myDeals.length.toString()} />
-          <Stat icon={DollarSign} label="הכנסה" value={formatILS(revenue)} small />
-        </div>
-      </header>
+      <div className="px-5 mt-4 grid grid-cols-2 gap-3">
+        <Stat icon={Users} label="לידים" value={totalLeads.toString()} />
+        <Stat icon={TrendingUp} label="המרה" value={`${conversion}%`} />
+        <Stat icon={Briefcase} label="עסקאות פעילות" value={myDeals.length.toString()} />
+        <Stat icon={DollarSign} label="הכנסה" value={formatILS(revenue)} small />
+      </div>
 
-      <div className="px-5 -mt-8 relative z-10 mb-6 space-y-2">
-        <Button onClick={() => navigate("/supplier/offers/new")} className="w-full h-12 rounded-xl bg-primary hover:bg-primary-soft text-primary-foreground font-semibold shadow-soft">
+      <div className="px-5 mt-5 mb-6 space-y-2.5">
+        <Button onClick={() => navigate("/supplier/offers/new")} className="w-full h-12 rounded-2xl font-semibold">
           <Plus className="h-4 w-4 ml-2" strokeWidth={2} /> צרו הצעה חדשה
         </Button>
-        <Button onClick={() => navigate("/supplier/profile/edit")} variant="outline" className="w-full h-11 rounded-xl border-border">
+        <Button onClick={() => navigate("/supplier/profile/edit")} variant="outline" className="w-full h-11 rounded-2xl">
           <Pencil className="h-4 w-4 ml-2" /> עריכת פרופיל ואזורי שירות
         </Button>
       </div>
 
-      <section className="px-5 space-y-3">
-        <h2 className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-1 px-1">
-          <Briefcase className="h-3 w-3 text-gold" strokeWidth={1.75} /> ההצעות שלי
+      <section className="px-5 space-y-3 pb-8">
+        <h2 className="text-[11px] uppercase tracking-[0.14em] text-[#475569] font-semibold flex items-center gap-1.5 mb-1 px-1">
+          <Briefcase className="h-3 w-3 text-[#B8923F]" strokeWidth={2} /> ההצעות שלי
         </h2>
         {myDeals.length === 0 && (
-          <div className="gb-card p-5 text-center text-sm text-muted-foreground">
+          <div className="bg-white rounded-2xl p-5 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center text-sm text-[#475569]">
             עדיין לא יצרת הצעות. לחץ "צרו הצעה חדשה" כדי להתחיל.
           </div>
         )}
         {myDeals.map((d) => {
           const c = counts[d.id] ?? { interests: 0, paid: 0 };
           return (
-            <div key={d.id} className="gb-card p-4">
+            <div key={d.id} className="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)]">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm truncate">{d.title}</h3>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">{d.status}</div>
+                  <h3 className="font-bold text-[14px] text-[#0A1F3D] truncate">{d.title}</h3>
+                  <div className="text-[11px] text-[#475569] mt-0.5">{d.status}</div>
                 </div>
                 <div className="text-left">
-                  <div className="font-semibold text-primary text-sm">{formatILS(priceFor(d))}</div>
-                  <div className="text-[10px] text-success font-medium mt-0.5">{c.paid} שילמו</div>
+                  <div className="font-extrabold text-[#0A1F3D] text-sm">{formatILS(priceFor(d))}</div>
+                  <div className="text-[10px] text-[#B8923F] font-bold mt-0.5">{c.paid} שילמו</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[11px] pt-3 border-t border-border">
-                <span className="px-2.5 py-1 rounded-full bg-muted/60 text-foreground border border-border">{c.interests} לידים</span>
-                <span className="px-2.5 py-1 rounded-full bg-success/10 text-success">{c.paid} פיקדונות</span>
+              <div className="flex items-center gap-2 text-[11px] pt-3 border-t border-[#E2E8F0]">
+                <span className="px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#0A1F3D] border border-[#E2E8F0] font-semibold">{c.interests} לידים</span>
+                <span className="px-2.5 py-1 rounded-full bg-[#C9A961]/12 text-[#B8923F] border border-[#C9A961]/30 font-semibold">{c.paid} פיקדונות</span>
               </div>
             </div>
           );
@@ -313,12 +314,14 @@ export default function SupplierDashboard() {
 
 function Stat({ icon: Icon, label, value, small }: { icon: LucideIcon; label: string; value: string; small?: boolean }) {
   return (
-    <div className="bg-white/[0.06] backdrop-blur border border-white/10 rounded-xl p-3.5">
-      <div className="flex items-center gap-2 mb-1.5">
-        <Icon className="h-3.5 w-3.5 text-gold" strokeWidth={1.75} />
-        <span className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{label}</span>
+    <div className="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)]">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center">
+          <Icon className="h-3.5 w-3.5 text-[#B8923F]" strokeWidth={2} />
+        </span>
+        <span className="text-[10px] text-[#475569] font-semibold uppercase tracking-[0.12em]">{label}</span>
       </div>
-      <div className={small ? "text-base font-semibold" : "text-xl font-semibold tracking-tight"}>{value}</div>
+      <div className={(small ? "text-[16px]" : "text-[22px]") + " font-extrabold text-[#0A1F3D] tracking-tight leading-none"}>{value}</div>
     </div>
   );
 }
