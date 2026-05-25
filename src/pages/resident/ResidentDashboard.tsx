@@ -294,10 +294,15 @@ export default function ResidentDashboard() {
             <div className="text-[22px] font-extrabold leading-none tracking-tight">{areaSuppliersCount}</div>
             <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">ספקים</div>
           </div>
-          <div className="gb-stat-pill">
-            <div className="text-[22px] font-extrabold leading-none tracking-tight gb-text-gold">{joinedDeals.length}</div>
-            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצטרפת</div>
-          </div>
+          <button
+            onClick={() => navigate("/resident/my-offers")}
+            className="gb-stat-pill text-right hover:bg-white/10 transition-smooth relative"
+            aria-label="ההצעות שלי"
+          >
+            <div className="text-[22px] font-extrabold leading-none tracking-tight gb-text-gold text-center">{joinedDeals.length}</div>
+            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider text-center">ההצעות שלי</div>
+          </button>
+
         </div>
       </header>
 
@@ -337,26 +342,6 @@ export default function ResidentDashboard() {
         </div>
       )}
 
-      {!loading && joinedDeals.length > 0 && (
-        <section className="pt-7 mb-2">
-          <div className="flex items-center justify-between px-5 mb-3">
-            <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-              <Heart className="h-3.5 w-3.5 text-gold fill-gold" strokeWidth={2} />
-              ההצעות שלך
-            </h2>
-            <Link to="/resident/my-offers" className="text-[11px] gb-gold-text font-bold flex items-center gap-1 hover:gap-1.5 transition-all">
-              הכל <ArrowLeft className="h-3 w-3" strokeWidth={2.5} />
-            </Link>
-          </div>
-          <div className="flex gap-3 overflow-x-auto px-5 pb-2 snap-x snap-mandatory no-scrollbar">
-            {joinedDeals.slice(0, 5).map((d) => (
-              <div key={d.id} className="snap-start shrink-0 w-[78%]">
-                <RealDealCard deal={d} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {!loading && !hasArea && (
         <section className="px-5 pt-7">
