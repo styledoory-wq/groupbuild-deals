@@ -22,7 +22,12 @@ export interface RealDealCardData {
   visibility_project_id?: string | null;
   cover_image_url?: string | null;
   gallery_images?: string[] | null;
+  target_participants?: number | null;
+  join_deadline?: string | null;
+  redemption_deadline?: string | null;
+  auto_closed_at?: string | null;
 }
+
 
 function timeLeft(endsAt: string | null): string | null {
   if (!endsAt) return null;
