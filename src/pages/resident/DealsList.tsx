@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Tag } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -14,10 +14,24 @@ import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
 type DealWithSupplier = RealDealCardData;
 
+const STAGE_CATEGORY_IDS: Record<string, string[]> = {
+  planning: ["architect", "interior-designer", "consultant"],
+  structure: ["contractor", "skeleton", "gypsum"],
+  systems: ["electric", "plumbing", "ac", "smart-home"],
+  finishes: ["windows", "doors", "security-door", "flooring", "cladding", "painting", "kitchen", "bath", "showers", "sanitary", "carpentry", "closets", "lighting"],
+  outdoor: ["garden", "pergola", "cleaning"],
+};
+const STAGE_TITLES: Record<string, string> = {
+  planning: "תכנון ועיצוב", structure: "שלד ובנייה", systems: "מערכות הבית", finishes: "גמרים", outdoor: "חוץ ופיתוח",
+};
+
 export default function DealsList() {
   const { categoryId } = useParams();
+  const [searchParams] = useSearchParams();
+  const stageId = searchParams.get("stage") || "";
+  const stageCategoryIds = stageId ? STAGE_CATEGORY_IDS[stageId] ?? [] : [];
   const { categories } = useApp();
-  const cacheKey = `deals-list:${categoryId ?? "all"}`;
+  const cacheKey = `deals-list:${categoryId ?? (stageId ? `stage-${stageId}` : "all")}`;
   const cached = getCachedValue<{ deals: DealWithSupplier[]; counts: Record<string, number> }>(cacheKey, 5 * 60_000);
   const [deals, setDeals] = useState<DealWithSupplier[]>(() => cached?.deals ?? []);
   const [counts, setCounts] = useState<Record<string, number>>(() => cached?.counts ?? {});
@@ -40,6 +54,7 @@ export default function DealsList() {
           .order("created_at", { ascending: false });
 
         if (categoryId) query = query.eq("category_id", categoryId);
+        else if (stageId && stageCategoryIds.length) query = query.in("category_id", stageCategoryIds);
 
         const { data, error: dErr } = await query;
         if (dErr) throw dErr;
@@ -99,14 +114,15 @@ export default function DealsList() {
     return () => {
       cancelled = true;
     };
-  }, [categoryId, cacheKey]);
+  }, [categoryId, stageId, cacheKey]);
 
   const cat = categories.find((c) => c.id === categoryId);
+  const stageTitle = stageId ? STAGE_TITLES[stageId] : "";
 
   return (
     <MobileShell>
       <PageHeader
-        title={cat ? `${cat.icon}  ${cat.name}` : "כל העסקאות"}
+        title={cat ? `${cat.icon}  ${cat.name}` : stageTitle ? `הצעות — ${stageTitle}` : "כל העסקאות"}
         subtitle={loading ? "טוען עסקאות..." : `${deals.length} עסקאות פעילות`}
       />
       <div className="px-5 md:px-8 lg:px-10 -mt-4 md:-mt-8 relative z-10">
