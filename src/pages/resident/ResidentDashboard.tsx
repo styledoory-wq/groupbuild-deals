@@ -337,8 +337,79 @@ export default function ResidentDashboard() {
         </div>
       )}
 
+      {!loading && joinedDeals.length > 0 && (
+        <section className="pt-7 mb-2">
+          <div className="flex items-center justify-between px-5 mb-3">
+            <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+              <Heart className="h-3.5 w-3.5 text-gold fill-gold" strokeWidth={2} />
+              ההצעות שלך
+            </h2>
+            <Link to="/resident/my-offers" className="text-[11px] gb-gold-text font-bold flex items-center gap-1 hover:gap-1.5 transition-all">
+              הכל <ArrowLeft className="h-3 w-3" strokeWidth={2.5} />
+            </Link>
+          </div>
+          <div className="flex gap-3 overflow-x-auto px-5 pb-2 snap-x snap-mandatory no-scrollbar">
+            {joinedDeals.slice(0, 5).map((d) => (
+              <div key={d.id} className="snap-start shrink-0 w-[78%]">
+                <RealDealCard deal={d} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {!loading && <section className={"px-5 space-y-3 " + (joinedDeals.length > 0 ? "mt-7" : "pt-7")}>
+        <div className="flex items-center justify-between">
+          <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+            <Sparkles className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
+            עסקאות פעילות
+          </h2>
+          <Link to="/resident/deals" className="text-[11px] gb-gold-text font-bold flex items-center gap-1 hover:gap-1.5 transition-all">
+            הכל <ArrowLeft className="h-3 w-3" strokeWidth={2.5} />
+          </Link>
+        </div>
+
+        {!hasArea ? (
+          <button
+            onClick={() => navigate("/resident/profile/edit")}
+            className="w-full gb-tile-dark p-5 text-right group"
+          >
+            <div className="flex items-start gap-3 relative">
+              <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-gold/30 to-gold/10 border border-gold/40 flex items-center justify-center shrink-0 shadow-[0_0_16px_hsl(44_53%_54%_/_0.3)]">
+                <MapPin className="h-[18px] w-[18px] text-gold" strokeWidth={2} />
+              </div>
+              <div className="flex-1">
+                <p className="text-[14px] font-bold">הגדירו את האזור שלכם</p>
+                <p className="text-[11px] text-primary-foreground/65 mt-1 leading-relaxed">
+                  כדי שנציג לכם הצעות מותאמות מהספקים שמשרתים את האזור.
+                </p>
+              </div>
+              <ChevronLeft className="h-4 w-4 text-gold mt-1 group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
+            </div>
+          </button>
+        ) : noAreaDeals ? (
+          <div className="gb-card p-6 text-center">
+            <div className="h-12 w-12 mx-auto rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 border border-gold/25 flex items-center justify-center mb-3">
+              <Tag className="h-5 w-5 text-gold" strokeWidth={2} />
+            </div>
+            <p className="text-[13px] font-bold text-foreground">אין כרגע הצעות פעילות באזור שלך</p>
+            <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
+              נעדכן אותך כשיתווספו הצעות חדשות באזור {areaLabel}.
+            </p>
+            <Link to="/resident/categories" className="inline-block mt-3 text-[11px] gb-gold-text font-bold">
+              עיין בקטגוריות →
+            </Link>
+          </div>
+        ) : (
+          areaDeals
+            .filter((d) => !joinedDeals.some((jd) => jd.id === d.id))
+            .slice(0, 2)
+            .map((d) => <RealDealCard key={d.id} deal={d} />)
+        )}
+      </section>}
+
       {!loading && (
-        <section className="px-5 pt-7 pb-2">
+        <section className="px-5 pt-8 pb-8">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-[15px] font-extrabold text-foreground flex items-center gap-1.5">
               <Compass className="h-4 w-4 text-gold" strokeWidth={2} />
@@ -347,7 +418,7 @@ export default function ResidentDashboard() {
             <span className="text-[10px] text-muted-foreground">בחרו שלב להתקדם</span>
           </div>
           <p className="text-[11px] text-muted-foreground mb-4 leading-relaxed">
-            עקבו אחרי השלבים — בכל שלב תמצאו תחומים, אנשי מקצוע, ספקים והטבות.
+            עקבו אחרי השלבים — בכל שלב תמצאו הצעות קבוצתיות וספקים בתחום.
           </p>
 
           <div className="space-y-2.5">
@@ -399,77 +470,6 @@ export default function ResidentDashboard() {
           </div>
         </section>
       )}
-
-      {!loading && joinedDeals.length > 0 && (
-        <section className="mt-8 mb-2">
-          <div className="flex items-center justify-between px-5 mb-3">
-            <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-              <Heart className="h-3.5 w-3.5 text-gold fill-gold" strokeWidth={2} />
-              ההצעות שלך
-            </h2>
-            <Link to="/resident/my-offers" className="text-[11px] gb-gold-text font-bold flex items-center gap-1 hover:gap-1.5 transition-all">
-              הכל <ArrowLeft className="h-3 w-3" strokeWidth={2.5} />
-            </Link>
-          </div>
-          <div className="flex gap-3 overflow-x-auto px-5 pb-2 snap-x snap-mandatory no-scrollbar">
-            {joinedDeals.slice(0, 5).map((d) => (
-              <div key={d.id} className="snap-start shrink-0 w-[78%]">
-                <RealDealCard deal={d} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {!loading && <section className="px-5 space-y-3 mt-8 pb-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-            <Sparkles className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
-            הצעות מומלצות
-          </h2>
-          <Link to="/resident/deals" className="text-[11px] gb-gold-text font-bold flex items-center gap-1 hover:gap-1.5 transition-all">
-            הכל <ArrowLeft className="h-3 w-3" strokeWidth={2.5} />
-          </Link>
-        </div>
-
-        {!hasArea ? (
-          <button
-            onClick={() => navigate("/resident/profile/edit")}
-            className="w-full gb-tile-dark p-5 text-right group"
-          >
-            <div className="flex items-start gap-3 relative">
-              <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-gold/30 to-gold/10 border border-gold/40 flex items-center justify-center shrink-0 shadow-[0_0_16px_hsl(44_53%_54%_/_0.3)]">
-                <MapPin className="h-[18px] w-[18px] text-gold" strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <p className="text-[14px] font-bold">הגדירו את האזור שלכם</p>
-                <p className="text-[11px] text-primary-foreground/65 mt-1 leading-relaxed">
-                  כדי שנציג לכם הצעות מותאמות מהספקים שמשרתים את האזור.
-                </p>
-              </div>
-              <ChevronLeft className="h-4 w-4 text-gold mt-1 group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
-            </div>
-          </button>
-        ) : noAreaDeals ? (
-          <div className="gb-card p-6 text-center">
-            <div className="h-12 w-12 mx-auto rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 border border-gold/25 flex items-center justify-center mb-3">
-              <Tag className="h-5 w-5 text-gold" strokeWidth={2} />
-            </div>
-            <p className="text-[13px] font-bold text-foreground">אין כרגע הצעות פעילות באזור שלך</p>
-            <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
-              נעדכן אותך כשיתווספו הצעות חדשות באזור {areaLabel}.
-            </p>
-            <Link to="/resident/categories" className="inline-block mt-3 text-[11px] gb-gold-text font-bold">
-              עיין בקטגוריות →
-            </Link>
-          </div>
-        ) : (
-          areaDeals
-            .filter((d) => !joinedDeals.some((jd) => jd.id === d.id))
-            .slice(0, 2)
-            .map((d) => <RealDealCard key={d.id} deal={d} />)
-        )}
-      </section>}
 
       <BottomNav role="resident" />
     </MobileShell>
