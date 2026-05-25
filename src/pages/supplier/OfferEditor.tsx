@@ -78,6 +78,18 @@ export default function OfferEditor() {
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
+  // Closure & redemption mechanics
+  const [targetParticipants, setTargetParticipants] = useState<string>("");
+  const [joinDeadline, setJoinDeadline] = useState<string>("");
+  const [redemptionDeadline, setRedemptionDeadline] = useState<string>("");
+  const [offerTerms, setOfferTerms] = useState<string>("");
+  const [restrictions, setRestrictions] = useState<string>("");
+  const [maxRedemptions, setMaxRedemptions] = useState<string>("");
+  const [appointmentRequired, setAppointmentRequired] = useState<boolean>(false);
+  const [serviceAreasInput, setServiceAreasInput] = useState<string>("");
+  const [commitmentAccepted, setCommitmentAccepted] = useState<boolean>(false);
+
+
   // When offer type changes, swap to sensible defaults if user hasn't customized.
   const switchOfferType = (next: OfferType) => {
     if (next === offerType) return;
