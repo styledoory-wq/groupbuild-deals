@@ -114,6 +114,13 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
       <div className="text-[11px] text-muted-foreground text-center">
         תוקף מימוש: {expiresLabel}
       </div>
+      <div className="flex justify-center pt-1">
+        <ReportIssueDialog dealId={voucher.deal_id} supplierId={voucher.supplier_id} voucherId={voucher.id} />
+      </div>
+    </div>
+  );
+}
+
     </div>
   );
 }
