@@ -205,7 +205,7 @@ export default function ResidentDashboard() {
   return (
     <MobileShell>
       {/* Cinematic hero */}
-      <header className="gb-aurora text-primary-foreground px-5 pt-8 pb-16 rounded-b-[32px] relative overflow-hidden">
+      <header className="gb-aurora text-primary-foreground px-5 pt-6 pb-12 rounded-b-[32px] relative overflow-hidden">
         <span aria-hidden className="gb-particle gb-particle-1 h-1 w-1 top-20 left-12" />
         <span aria-hidden className="gb-particle gb-particle-2 h-1.5 w-1.5 top-32 right-16" />
         <span aria-hidden className="gb-particle gb-particle-3 h-1 w-1 top-12 right-1/3" />
@@ -220,7 +220,7 @@ export default function ResidentDashboard() {
           }}
         />
 
-        <div className="flex items-center justify-between mb-7 relative">
+        <div className="flex items-center justify-between mb-5 relative">
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 mb-1">
               <span className="gb-live-dot" />
@@ -276,18 +276,18 @@ export default function ResidentDashboard() {
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mt-5 relative">
+        <div className="grid grid-cols-3 gap-2.5 mt-6 relative">
           <div className="gb-stat-pill">
-            <div className="text-[18px] font-extrabold leading-none">{areaDeals.length}</div>
-            <div className="text-[9px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצעות</div>
+            <div className="text-[22px] font-extrabold leading-none tracking-tight">{areaDeals.length}</div>
+            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצעות</div>
           </div>
           <div className="gb-stat-pill">
-            <div className="text-[18px] font-extrabold leading-none">{areaSuppliersCount}</div>
-            <div className="text-[9px] text-primary-foreground/65 mt-1 uppercase tracking-wider">ספקים</div>
+            <div className="text-[22px] font-extrabold leading-none tracking-tight">{areaSuppliersCount}</div>
+            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">ספקים</div>
           </div>
           <div className="gb-stat-pill">
-            <div className="text-[18px] font-extrabold leading-none gb-text-gold">{joinedDeals.length}</div>
-            <div className="text-[9px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצטרפת</div>
+            <div className="text-[22px] font-extrabold leading-none tracking-tight gb-text-gold">{joinedDeals.length}</div>
+            <div className="text-[10px] text-primary-foreground/65 mt-1 uppercase tracking-wider">הצטרפת</div>
           </div>
         </div>
       </header>
@@ -329,7 +329,7 @@ export default function ResidentDashboard() {
       )}
 
       {!loading && joinedDeals.length > 0 && (
-        <section className="mt-7 mb-7">
+        <section className="mt-9 mb-8">
           <div className="flex items-center justify-between px-5 mb-3">
             <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
               <Heart className="h-3.5 w-3.5 text-gold fill-gold" strokeWidth={2} />
@@ -349,7 +349,7 @@ export default function ResidentDashboard() {
         </section>
       )}
 
-      {!loading && <section className="px-5 space-y-3 mt-7 mb-8">
+      {!loading && <section className="px-5 space-y-3 mt-9 mb-8">
         <div className="flex items-center justify-between">
           <h2 className="text-[13px] font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
             <Sparkles className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
