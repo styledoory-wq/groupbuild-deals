@@ -242,9 +242,8 @@ export default function ResidentDashboard() {
           </div>
 
           {/* Greeting */}
-          <div className="relative px-5 mt-8 text-right">
-            <p className="text-[13px] text-[#C9A961] font-semibold tracking-wide">ברוך הבא</p>
-            <h1 className="text-[26px] sm:text-[28px] font-extrabold text-white leading-[1.15] tracking-tight mt-1.5 break-words">
+          <div className="relative px-5 mt-10 text-right">
+            <h1 className="text-[26px] sm:text-[28px] font-extrabold text-white leading-[1.15] tracking-tight break-words">
               שלום, {user?.name || "דייר"}
             </h1>
           </div>
