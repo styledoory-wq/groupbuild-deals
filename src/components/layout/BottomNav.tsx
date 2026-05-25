@@ -45,30 +45,27 @@ function BottomNavImpl({ role }: { role: Role }) {
                 to={to}
                 className={cn(
                   "flex-1 flex flex-col items-center gap-1 py-2 rounded-2xl transition-all duration-300 relative group",
-                  active ? "text-gold" : "text-[#B8C0CC] hover:text-white"
+                  active ? "text-gold" : "text-white/65 hover:text-white"
                 )}
               >
                 {active && (
-                  <>
-                    <span aria-hidden className="absolute -inset-0.5 rounded-full bg-gold/10 blur-xl opacity-80" />
-                    <span
-                      aria-hidden
-                      className="absolute top-1 left-1/2 -translate-x-1/2 h-9 w-9 rounded-full"
-                      style={{
-                        background: "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.06) 0%, rgba(8,26,51,0.95) 60%, #071427 100%)",
-                        boxShadow: "0 0 0 1px rgba(201,169,97,0.22), 0 4px 14px -6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
-                      }}
-                    />
-                  </>
+                  <span
+                    aria-hidden
+                    className="absolute top-1 left-1/2 -translate-x-1/2 h-9 w-9 rounded-full"
+                    style={{
+                      background: "radial-gradient(circle at 30% 25%, rgba(201,169,97,0.22) 0%, rgba(10,31,61,0.0) 70%)",
+                      boxShadow: "inset 0 0 0 1px rgba(201,169,97,0.30)",
+                    }}
+                  />
                 )}
                 <Icon
                   className={cn(
-                    "relative transition-transform duration-300",
-                    active ? "h-[19px] w-[19px] text-gold scale-105" : "h-[19px] w-[19px]"
+                    "relative transition-transform duration-300 h-[19px] w-[19px]",
+                    active && "text-gold scale-105"
                   )}
-                  strokeWidth={active ? 1.9 : 1.6}
+                  strokeWidth={active ? 2 : 1.7}
                 />
-                <span className={cn("text-[10px] leading-none relative", active ? "font-medium text-gold" : "font-normal")}>{label}</span>
+                <span className={cn("text-[10px] leading-none relative", active ? "font-semibold text-gold" : "font-normal")}>{label}</span>
               </NavLink>
             );
           })}
