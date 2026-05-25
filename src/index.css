@@ -399,7 +399,7 @@
   /* Inline meta row inside profile card */
   .ios-meta-row {
     @apply flex items-center justify-center gap-2 text-[13px];
-    color: #9CA6B5;
+    color: #475569;
   }
 }
 
