@@ -54,6 +54,7 @@ export default function DealsList() {
           .order("created_at", { ascending: false });
 
         if (categoryId) query = query.eq("category_id", categoryId);
+        else if (stageId && stageCategoryIds.length) query = query.in("category_id", stageCategoryIds);
 
         const { data, error: dErr } = await query;
         if (dErr) throw dErr;
