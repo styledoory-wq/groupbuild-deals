@@ -211,7 +211,7 @@ export default function CategoriesList() {
       )}
 
       {/* Search results */}
-      {q && (
+      {!showStageChoice && q && (
         <div className="px-5 mb-6 space-y-3 animate-fade-up">
           {matchingCategories.length > 0 && (
             <div>
