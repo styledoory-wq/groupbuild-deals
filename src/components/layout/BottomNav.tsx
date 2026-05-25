@@ -1,22 +1,23 @@
 import { memo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, LayoutGrid, Tag, User, Bell, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, type LucideIcon } from "lucide-react";
+import { Home, LayoutGrid, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, Ticket, ScanLine, CheckSquare, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types";
 
 const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
   resident: [
     { to: "/resident", label: "בית", icon: Home },
-    { to: "/resident/categories", label: "קטגוריות", icon: LayoutGrid },
     { to: "/resident/deals", label: "עסקאות", icon: Tag },
-    { to: "/resident/my-offers", label: "ההצעות שלי", icon: Heart },
+    { to: "/resident/my-vouchers", label: "ההטבה שלי", icon: Ticket },
+    { to: "/resident/my-offers", label: "שלי", icon: Heart },
     { to: "/resident/profile", label: "פרופיל", icon: User },
   ],
   supplier: [
     { to: "/supplier", label: "בית", icon: Home },
     { to: "/supplier/offers", label: "הצעות", icon: Briefcase },
+    { to: "/supplier/scan", label: "סריקה", icon: ScanLine },
+    { to: "/supplier/redemptions", label: "מימושים", icon: CheckSquare },
     { to: "/supplier/leads", label: "לידים", icon: Users },
-    { to: "/supplier/reviews", label: "ביקורות", icon: BarChart3 },
   ],
   admin: [
     { to: "/admin", label: "בית", icon: Home },
@@ -49,21 +50,12 @@ function BottomNavImpl({ role }: { role: Role }) {
               >
                 {active && (
                   <>
-                    <span
-                      aria-hidden
-                      className="absolute -inset-1 rounded-2xl bg-gold/30 blur-xl opacity-70"
-                    />
-                    <span
-                      aria-hidden
-                      className="absolute inset-x-1.5 inset-y-1 rounded-2xl bg-gradient-to-b from-gold to-gold-light shadow-[0_10px_24px_-6px_hsl(44_53%_54%_/_0.75)]"
-                    />
+                    <span aria-hidden className="absolute -inset-1 rounded-2xl bg-gold/30 blur-xl opacity-70" />
+                    <span aria-hidden className="absolute inset-x-1.5 inset-y-1 rounded-2xl bg-gradient-to-b from-gold to-gold-light shadow-[0_10px_24px_-6px_hsl(44_53%_54%_/_0.75)]" />
                   </>
                 )}
                 <Icon
-                  className={cn(
-                    "relative transition-transform duration-300",
-                    active ? "h-[22px] w-[22px] text-white scale-105" : "h-[19px] w-[19px]"
-                  )}
+                  className={cn("relative transition-transform duration-300", active ? "h-[22px] w-[22px] text-white scale-105" : "h-[19px] w-[19px]")}
                   strokeWidth={active ? 2.4 : 1.75}
                 />
                 <span className={cn("text-[10px] leading-none relative", active ? "font-bold text-white" : "font-normal")}>{label}</span>

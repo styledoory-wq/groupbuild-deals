@@ -33,6 +33,10 @@ const ResidentProfileEdit = lazy(() => import("./pages/resident/ResidentProfileE
 const Notifications = lazy(() => import("./pages/resident/Notifications"));
 const MyOffers = lazy(() => import("./pages/resident/MyOffers"));
 const MyDocuments = lazy(() => import("./pages/resident/MyDocuments"));
+const MyVouchers = lazy(() => import("./pages/resident/MyVouchers"));
+const SupplierScan = lazy(() => import("./pages/supplier/SupplierScan"));
+const SupplierRedemptions = lazy(() => import("./pages/supplier/SupplierRedemptions"));
+const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
 
 const SupplierDashboard = lazy(() => import("./pages/supplier/SupplierDashboard"));
 const SupplierProfileEdit = lazy(() => import("./pages/supplier/SupplierProfileEdit"));
@@ -168,6 +172,7 @@ const App = () => (
                   <Route path="/resident/notifications" element={<Notifications />} />
                   <Route path="/resident/my-offers" element={<MyOffers />} />
                   <Route path="/resident/documents" element={<MyDocuments />} />
+                  <Route path="/resident/my-vouchers" element={<MyVouchers />} />
 
                   {/* Supplier */}
                   <Route path="/supplier" element={<SupplierDashboard />} />
@@ -178,6 +183,8 @@ const App = () => (
                   <Route path="/settings/notifications" element={<NotificationSettings />} />
                   <Route path="/supplier/leads" element={<SupplierLeads />} />
                   <Route path="/supplier/reviews" element={<SupplierReviews />} />
+                  <Route path="/supplier/scan" element={<SupplierScan />} />
+                  <Route path="/supplier/redemptions" element={<SupplierRedemptions />} />
 
                   {/* Admin — hidden, gated, lazy */}
                   <Route path="/admin/login" element={<AdminLogin />} />
@@ -198,6 +205,7 @@ const App = () => (
                   <Route path="/admin/suppliers/:supplierId/media" element={adminRoute(<AdminSupplierMedia />)} />
                   <Route path="/admin/db-suppliers" element={adminRoute(<AdminDbSuppliers />)} />
                   <Route path="/admin/stats" element={adminRoute(<AdminStats />)} />
+                  <Route path="/admin/complaints" element={adminRoute(<AdminComplaints />)} />
 
                   {/* Payment callbacks */}
                   <Route path="/payment/success" element={<PaymentSuccess />} />
