@@ -201,6 +201,12 @@ export default function OfferEditor() {
       toast.error("יש להוסיף לפחות מדרגה אחת");
       return;
     }
+    if (!commitmentAccepted) {
+      toast.error("יש לאשר את התחייבות הספק לפני פרסום ההצעה");
+      return;
+    }
+
+
 
     // Validate & build tier payload
     const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
