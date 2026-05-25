@@ -220,7 +220,7 @@ export default function ResidentDashboard() {
           }}
         />
 
-        <div className="flex items-center justify-between mb-7 relative">
+        <div className="flex items-center justify-between mb-5 relative">
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 mb-1">
               <span className="gb-live-dot" />
