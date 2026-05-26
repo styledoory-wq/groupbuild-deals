@@ -149,27 +149,25 @@
   }
 
 
-  /* Glass card — pearl white with whisper-soft gold edge */
+  /* Elevated premium card — solid white with soft cinematic shadow */
   .gb-card {
     @apply rounded-2xl relative;
-    background: linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(247,249,252,0.74) 100%);
-    backdrop-filter: blur(22px) saturate(160%);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
-    border: 1px solid rgba(15,30,60,0.06);
-    box-shadow: var(--shadow-card);
+    background: #ffffff;
+    border: 1px solid rgba(220, 228, 240, 0.8);
+    box-shadow: 0 2px 16px rgba(15, 30, 60, 0.07);
     transition: var(--transition-smooth);
   }
   .gb-card:hover {
-    box-shadow: var(--shadow-elevated);
-    border-color: rgba(201,169,97,0.22);
+    box-shadow: 0 8px 28px rgba(15, 30, 60, 0.10);
+    border-color: rgba(201,169,97,0.28);
     transform: translateY(-1px);
   }
 
   .gb-card-flat {
     @apply rounded-2xl;
-    background: rgba(255,255,255,0.62);
-    border: 1px solid rgba(15,30,60,0.05);
-    box-shadow: none;
+    background: #ffffff;
+    border: 1px solid rgba(220, 228, 240, 0.8);
+    box-shadow: 0 2px 16px rgba(15, 30, 60, 0.07);
   }
 
   .gb-hero {
