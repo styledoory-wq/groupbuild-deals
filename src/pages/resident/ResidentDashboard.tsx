@@ -208,7 +208,7 @@ export default function ResidentDashboard() {
     <MobileShell>
       {/* === Architectural luxury hero === */}
       <header className="relative">
-        <div className="relative h-[280px] overflow-hidden rounded-b-[28px]">
+        <div className="relative overflow-hidden rounded-b-[28px] py-10 px-6">
           <img
             src={heroBuilding}
             alt=""
@@ -216,11 +216,14 @@ export default function ResidentDashboard() {
             height={768}
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#071427]/55 via-[#0A1F3D]/65 to-[#071427]/90" />
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-l from-[#0A1F3D]/40 via-transparent to-transparent" />
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to bottom, rgba(15,30,60,0.5) 0%, rgba(15,30,60,0.7) 100%)" }}
+          />
 
           {/* Top bar — support + logout, both labeled */}
-          <div className="relative flex items-center justify-between gap-2 px-5 pt-4">
+          <div className="relative flex items-center justify-between gap-2">
             <a
               href="https://wa.me/972526247941"
               target="_blank"
@@ -246,8 +249,11 @@ export default function ResidentDashboard() {
           </div>
 
           {/* Greeting */}
-          <div className="relative px-5 mt-10 text-right">
-            <h1 className="text-[26px] sm:text-[28px] font-extrabold text-white leading-[1.15] tracking-tight break-words">
+          <div className="relative mt-10 text-right">
+            <h1
+              className="text-[28px] font-bold text-white leading-[1.4] tracking-tight break-words"
+              style={{ textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}
+            >
               שלום, {user?.name || "דייר"}
             </h1>
           </div>
