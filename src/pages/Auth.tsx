@@ -209,7 +209,7 @@ export default function Auth() {
               <span className="text-xs font-medium">רכש קבוצתי לדיירי בנייה חדשה</span>
             </div>
 
-            <h1 className="text-4xl font-extrabold leading-tight mb-3">
+            <h1 className="text-4xl font-extrabold leading-tight mb-3 text-white">
               ברוכים הבאים
             </h1>
             <div className="gb-divider-gold mb-4" />
