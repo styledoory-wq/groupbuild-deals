@@ -324,7 +324,7 @@
     background:
       radial-gradient(60% 40% at 90% 4%, rgba(201,169,97,0.10) 0%, transparent 65%),
       radial-gradient(70% 50% at 6% 96%, rgba(10,31,61,0.08) 0%, transparent 65%),
-      linear-gradient(180deg, #FAFBFC 0%, #EEF2F7 50%, #E7ECF3 100%);
+      linear-gradient(160deg, #f0f4f8 0%, #e8edf5 100%);
     min-height: 100vh;
     color: hsl(var(--foreground));
   }
