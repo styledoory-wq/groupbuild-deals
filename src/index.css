@@ -103,7 +103,7 @@
   }
 
   h1, h2, h3, h4, h5 {
-    @apply font-bold tracking-tight text-foreground;
+    @apply font-bold tracking-tight;
     letter-spacing: -0.015em;
   }
 }
