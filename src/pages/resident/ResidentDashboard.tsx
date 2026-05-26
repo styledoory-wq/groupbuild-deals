@@ -288,18 +288,24 @@ export default function ResidentDashboard() {
       <div className="px-5 mt-4 grid grid-cols-3 gap-3">
         <button
           onClick={() => navigate("/resident/my-offers")}
-          className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] hover:border-[#C9A961]/40 transition-all text-center"
+          className="bg-[#f8fafc] rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] hover:border-[#C9A961]/40 transition-all text-center flex flex-col items-center"
         >
-          <div className="text-[24px] font-extrabold text-[#0A1F3D] leading-none tracking-tight gb-num">{joinedDeals.length}</div>
+          <Briefcase className="h-4 w-4 text-[#94a3b8] mb-1.5" strokeWidth={2} />
+          <div className="text-[28px] font-bold text-[#1e3a5f] leading-none tracking-tight gb-num">{joinedDeals.length}</div>
           <div className="text-[11px] text-[#475569] mt-1.5 font-medium">הצעות שלי</div>
+          <div className="text-[10px] text-[#94a3b8] mt-0.5">הצעות שהצטרפת אליהן</div>
         </button>
-        <div className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center">
-          <div className="text-[24px] font-extrabold text-[#0A1F3D] leading-none tracking-tight gb-num">{areaSuppliersCount}</div>
+        <div className="bg-[#f8fafc] rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center flex flex-col items-center">
+          <Store className="h-4 w-4 text-[#94a3b8] mb-1.5" strokeWidth={2} />
+          <div className="text-[28px] font-bold text-[#1e3a5f] leading-none tracking-tight gb-num">{areaSuppliersCount}</div>
           <div className="text-[11px] text-[#475569] mt-1.5 font-medium">ספקים</div>
+          <div className="text-[10px] text-[#94a3b8] mt-0.5">ספקים באזורך</div>
         </div>
-        <div className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center">
-          <div className="text-[24px] font-extrabold text-[#0A1F3D] leading-none tracking-tight gb-num">{areaDeals.length}</div>
+        <div className="bg-[#f8fafc] rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center flex flex-col items-center">
+          <Sparkles className="h-4 w-4 text-[#94a3b8] mb-1.5" strokeWidth={2} />
+          <div className="text-[28px] font-bold text-[#1e3a5f] leading-none tracking-tight gb-num">{areaDeals.length}</div>
           <div className="text-[11px] text-[#475569] mt-1.5 font-medium">הצעות</div>
+          <div className="text-[10px] text-[#94a3b8] mt-0.5">עסקאות פעילות</div>
         </div>
       </div>
 
