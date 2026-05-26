@@ -338,7 +338,7 @@ export default function Auth() {
                   </Label>
                   <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)}
                     placeholder="לדוגמה: מטבחי רויאל" required maxLength={80}
-                    className="h-12 rounded-2xl bg-card border-border" />
+                    className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
                 </div>
               )}
 
