@@ -98,7 +98,7 @@
     left: 0;
     right: 0;
     height: env(safe-area-inset-top);
-    background-color: #F5F7FA;
+    background-color: #f0f4f8;
     z-index: 100;
     pointer-events: none;
   }
