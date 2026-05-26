@@ -253,15 +253,15 @@ export default function Auth() {
                 </Label>
                 <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.co.il" dir="ltr" required
-                  className="h-12 rounded-2xl bg-card border-border" />
+                  className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold flex items-center gap-1.5">
                   <Lock className="h-3.5 w-3.5 gb-gold-text" /> סיסמה
                 </Label>
                 <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                  required minLength={6} dir="ltr"
-                  className="h-12 rounded-2xl bg-card border-border" />
+                  required minLength={6} dir="ltr" placeholder="הזינו את הסיסמה"
+                  className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
               </div>
               <Button type="submit" disabled={loading}
                 className="w-full h-12 rounded-2xl font-bold flex items-center justify-center gap-2">
@@ -303,7 +303,7 @@ export default function Auth() {
                 </Label>
                 <Input value={fullName} onChange={(e) => setFullName(e.target.value)}
                   placeholder="ישראל ישראלי" required maxLength={60}
-                  className="h-12 rounded-2xl bg-card border-border" />
+                  className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
               </div>
 
               {role === "resident" && (
@@ -314,14 +314,14 @@ export default function Auth() {
                     </Label>
                     <Input value={city} onChange={(e) => setCity(e.target.value)}
                       placeholder="תל אביב" required maxLength={40}
-                      className="h-12 rounded-2xl bg-card border-border" />
+                      className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-bold flex items-center gap-1.5">
                       <Building2 className="h-3.5 w-3.5 gb-gold-text" /> פרויקט (אופציונלי)
                     </Label>
                     <select value={projectId} onChange={(e) => setProjectId(e.target.value)}
-                      className="flex h-12 w-full rounded-2xl border border-border bg-card px-3 text-sm">
+                      className="flex h-12 w-full rounded-xl border-[1.5px] border-[#e2e8f0] bg-white px-4 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none transition-all duration-200">
                       <option value="">בחרו פרויקט</option>
                       {projects.map((p) => (
                         <option key={p.id} value={p.id}>{p.name} — {p.city}</option>
@@ -338,7 +338,7 @@ export default function Auth() {
                   </Label>
                   <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)}
                     placeholder="לדוגמה: מטבחי רויאל" required maxLength={80}
-                    className="h-12 rounded-2xl bg-card border-border" />
+                    className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
                 </div>
               )}
 
@@ -348,7 +348,7 @@ export default function Auth() {
                 </Label>
                 <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.co.il" dir="ltr" required
-                  className="h-12 rounded-2xl bg-card border-border" />
+                  className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
               </div>
 
               <div className="space-y-1.5">
@@ -357,7 +357,7 @@ export default function Auth() {
                 </Label>
                 <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                   required minLength={6} dir="ltr" placeholder="לפחות 6 תווים"
-                  className="h-12 rounded-2xl bg-card border-border" />
+                  className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
               </div>
 
               <label className="flex items-start gap-2 text-xs cursor-pointer pt-1">
