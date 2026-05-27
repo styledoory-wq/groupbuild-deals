@@ -294,7 +294,7 @@ export default function ResidentDashboard() {
       <div className="px-5 mt-4 grid grid-cols-3 gap-3">
         <button
           onClick={() => navigate("/resident/my-offers")}
-          className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] hover:border-[#C9A961]/40 transition-all text-center flex flex-col items-center"
+          className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center flex flex-col items-center active:scale-[0.97] transition-transform"
         >
           <Briefcase className="h-4 w-4 text-[#94a3b8] mb-1.5" strokeWidth={2} />
           <div className="w-[30px] h-[2px] bg-[#C9A84C] rounded-full mb-2" />
