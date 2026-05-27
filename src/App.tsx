@@ -35,6 +35,7 @@ const MyOffers = lazy(() => import("./pages/resident/MyOffers"));
 const MyDocuments = lazy(() => import("./pages/resident/MyDocuments"));
 const MyDeposits = lazy(() => import("./pages/resident/MyDeposits"));
 const MyVouchers = lazy(() => import("./pages/resident/MyVouchers"));
+const PrivacyPolicy = lazy(() => import("./pages/resident/PrivacyPolicy"));
 const SupplierScan = lazy(() => import("./pages/supplier/SupplierScan"));
 const SupplierRedemptions = lazy(() => import("./pages/supplier/SupplierRedemptions"));
 const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
