@@ -96,7 +96,7 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
 
   return (
     <Link to={`/resident/deals/${deal.id}`} className="block group">
-      <article className="gb-card-premium overflow-hidden p-0 transition-all duration-300">
+      <article className="gb-card-premium gb-deal-card overflow-hidden p-0 transition-all duration-300">
         {/* Hero image (if exists) */}
         {cover && (
           <div className="relative h-40 w-full overflow-hidden">
