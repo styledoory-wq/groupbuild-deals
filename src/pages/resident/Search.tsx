@@ -167,7 +167,7 @@ export default function SearchPage() {
                 to={`/suppliers/${s.id}`}
                 className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] hover:border-[#C9A84C]/40 transition"
               >
-                <SupplierLogo url={s.logo_url} name={s.business_name} size={48} />
+                <SupplierLogo logoUrl={s.logo_url} name={s.business_name} size="md" />
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-[15px] text-[#0D1B2E] truncate">{s.business_name}</p>
                   {s.short_description && (
