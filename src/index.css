@@ -85,12 +85,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
-    background: linear-gradient(160deg, #f0f4f8 0%, #e8edf5 100%);
-    background-attachment: fixed;
+    background: #F4F6F9;
     min-height: 100vh;
   }
 
-  /* Light pearl bar behind the iOS safe-area-top so the notch blends with the page */
+  /* Pearl bar behind the iOS safe-area-top so the notch blends with the page */
   body::before {
     content: "";
     position: fixed;
@@ -98,7 +97,7 @@
     left: 0;
     right: 0;
     height: env(safe-area-inset-top);
-    background-color: #f0f4f8;
+    background-color: #F4F6F9;
     z-index: 100;
     pointer-events: none;
   }
