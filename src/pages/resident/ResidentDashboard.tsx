@@ -263,7 +263,7 @@ export default function ResidentDashboard() {
         <div className="px-5 -mt-7 relative z-10">
           <button
             onClick={() => navigate("/resident/profile/edit")}
-            className="ios-btn-navy w-full rounded-2xl px-5 py-4 flex items-center justify-between text-right"
+            className="w-full rounded-2xl px-5 py-4 flex items-center justify-between text-right bg-[#1A2F4E] text-white shadow-[0_6px_18px_-10px_rgba(13,27,46,0.45)] transition-all hover:brightness-105 active:scale-[0.97]"
           >
             <ChevronLeft className="h-5 w-5 text-white/60 shrink-0" strokeWidth={2} />
             <div>
@@ -294,22 +294,25 @@ export default function ResidentDashboard() {
       <div className="px-5 mt-4 grid grid-cols-3 gap-3">
         <button
           onClick={() => navigate("/resident/my-offers")}
-          className="bg-[#f8fafc] rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] hover:border-[#C9A961]/40 transition-all text-center flex flex-col items-center"
+          className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] hover:border-[#C9A961]/40 transition-all text-center flex flex-col items-center"
         >
           <Briefcase className="h-4 w-4 text-[#94a3b8] mb-1.5" strokeWidth={2} />
-          <div className="text-[28px] font-bold text-[#1e3a5f] leading-none tracking-tight gb-num">{joinedDeals.length}</div>
+          <div className="w-[30px] h-[2px] bg-[#C9A84C] rounded-full mb-2" />
+          <div className="text-[2rem] font-extrabold text-[#0D1B2E] leading-none tracking-tight gb-num">{joinedDeals.length}</div>
           <div className="text-[11px] text-[#475569] mt-1.5 font-medium">הצעות שלי</div>
           <div className="text-[10px] text-[#94a3b8] mt-0.5">הצעות שהצטרפת אליהן</div>
         </button>
-        <div className="bg-[#f8fafc] rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center flex flex-col items-center">
+        <div className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center flex flex-col items-center">
           <Store className="h-4 w-4 text-[#94a3b8] mb-1.5" strokeWidth={2} />
-          <div className="text-[28px] font-bold text-[#1e3a5f] leading-none tracking-tight gb-num">{areaSuppliersCount}</div>
+          <div className="w-[30px] h-[2px] bg-[#C9A84C] rounded-full mb-2" />
+          <div className="text-[2rem] font-extrabold text-[#0D1B2E] leading-none tracking-tight gb-num">{areaSuppliersCount}</div>
           <div className="text-[11px] text-[#475569] mt-1.5 font-medium">ספקים</div>
           <div className="text-[10px] text-[#94a3b8] mt-0.5">ספקים באזורך</div>
         </div>
-        <div className="bg-[#f8fafc] rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center flex flex-col items-center">
+        <div className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center flex flex-col items-center">
           <Sparkles className="h-4 w-4 text-[#94a3b8] mb-1.5" strokeWidth={2} />
-          <div className="text-[28px] font-bold text-[#1e3a5f] leading-none tracking-tight gb-num">{areaDeals.length}</div>
+          <div className="w-[30px] h-[2px] bg-[#C9A84C] rounded-full mb-2" />
+          <div className="text-[2rem] font-extrabold text-[#0D1B2E] leading-none tracking-tight gb-num">{areaDeals.length}</div>
           <div className="text-[11px] text-[#475569] mt-1.5 font-medium">הצעות</div>
           <div className="text-[10px] text-[#94a3b8] mt-0.5">עסקאות פעילות</div>
         </div>
@@ -398,7 +401,7 @@ export default function ResidentDashboard() {
                   onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
                   className={
                     "w-full h-[68px] rounded-2xl px-4 flex items-center justify-between font-semibold text-[15px] tracking-tight bg-white/85 backdrop-blur border text-[#0A1F3D] hover:bg-white transition-all active:scale-[0.99] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] " +
-                    (isCurrent ? "border-[#C9A961]/55 ring-1 ring-[#C9A961]/30" : "border-[#E2E8F0] hover:border-[#C9A961]/45")
+                    (isCurrent ? "border-[#C9A961]/55 ring-1 ring-[#C9A961]/30 border-r-[3px] border-r-[#C9A84C]" : "border-[#E2E8F0] hover:border-[#C9A961]/45")
                   }
                   style={{ animationDelay: `${idx * 40}ms` }}
                 >
@@ -407,7 +410,7 @@ export default function ResidentDashboard() {
                       <span className="h-10 w-10 rounded-xl flex items-center justify-center border bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border-[#C9A961]/40">
                         <Icon className="h-[18px] w-[18px] text-[#B8923F]" strokeWidth={2} />
                       </span>
-                      <span className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-[#0A1F3D] border border-[#C9A961]/50 flex items-center justify-center text-[9px] font-bold text-[#C9A961]">
+                      <span className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-[#C9A84C] border border-[#0D1B2E]/20 flex items-center justify-center text-[9px] font-bold text-[#0D1B2E]">
                         {idx + 1}
                       </span>
                     </span>
