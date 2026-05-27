@@ -9,33 +9,33 @@
 
 @layer base {
   :root {
-    /* Pearl & Gold luxury surface (Cloud Navy variant) */
-    --background: 216 28% 97%;         /* #F5F7FA */
-    --foreground: 222 47% 11%;         /* #0F172A */
+    /* GroupBuild brand surface */
+    --background: 214 22% 96%;         /* #F4F6F9 */
+    --foreground: 215 56% 12%;         /* #0D1B2E */
 
-    --card: 0 0% 100%;                 /* pure white glass base */
-    --card-foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 56% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 215 56% 12%;
 
-    /* Primary = deep navy */
-    --primary: 214 73% 12%;            /* #0A1F3D */
-    --primary-foreground: 210 40% 98%; /* #F8FAFC */
-    --primary-soft: 215 60% 18%;       /* #102B57 */
+    /* Primary = navy dark */
+    --primary: 215 56% 12%;            /* #0D1B2E */
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 215 49% 21%;       /* #1A2F4E */
 
-    /* Champagne gold accent */
-    --secondary: 41 47% 56%;           /* #C9A961 */
-    --secondary-foreground: 214 73% 12%;
-    --gold: 41 47% 56%;
-    --gold-light: 41 53% 63%;          /* #D4B46A */
-    --gold-foreground: 214 73% 12%;
+    /* Brand gold */
+    --secondary: 43 54% 54%;           /* #C9A84C */
+    --secondary-foreground: 215 56% 12%;
+    --gold: 43 54% 54%;                /* #C9A84C */
+    --gold-light: 45 73% 67%;          /* #E8C96B */
+    --gold-foreground: 215 56% 12%;
 
-    --muted: 215 25% 94%;              /* #E7ECF3 */
-    --muted-foreground: 215 19% 35%;   /* #475569 secondary text */
+    --muted: 214 22% 92%;
+    --muted-foreground: 213 16% 49%;   /* #6B7A8D */
 
-    --accent: 41 47% 56%;
-    --accent-foreground: 214 73% 12%;
+    --accent: 43 54% 54%;
+    --accent-foreground: 215 56% 12%;
 
     --success: 152 45% 40%;
     --success-foreground: 0 0% 100%;
@@ -43,17 +43,17 @@
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 25% 88%;             /* subtle hairline */
-    --input: 215 25% 92%;
-    --ring: 41 47% 56%;
+    --border: 214 22% 88%;
+    --input: 214 22% 92%;
+    --ring: 43 54% 54%;
 
     --radius: 1rem;
 
-    --gradient-hero: linear-gradient(160deg, #071427 0%, #0A1F3D 55%, #081A33 100%);
-    --gradient-gold: linear-gradient(135deg, #B8923F 0%, #D4B46A 50%, #C9A961 100%);
-    --gradient-card: linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(247,249,252,0.78) 100%);
-    --gradient-navy-deep: linear-gradient(160deg, #071427 0%, #0A1F3D 100%);
-    --gradient-page: linear-gradient(160deg, #f0f4f8 0%, #e8edf5 100%);
+    --gradient-hero: linear-gradient(160deg, #0D1B2E 0%, #1A2F4E 100%);
+    --gradient-gold: linear-gradient(135deg, #C9A84C 0%, #E8C96B 100%);
+    --gradient-card: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+    --gradient-navy-deep: linear-gradient(160deg, #0D1B2E 0%, #1A2F4E 100%);
+    --gradient-page: #F4F6F9;
 
     /* Refined airy shadows — soft cinematic, not heavy */
     --shadow-soft: 0 1px 2px rgba(15,30,60,0.04), 0 4px 12px -6px rgba(15,30,60,0.06);
@@ -85,12 +85,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
-    background: linear-gradient(160deg, #f0f4f8 0%, #e8edf5 100%);
-    background-attachment: fixed;
+    background: #F4F6F9;
     min-height: 100vh;
   }
 
-  /* Light pearl bar behind the iOS safe-area-top so the notch blends with the page */
+  /* Pearl bar behind the iOS safe-area-top so the notch blends with the page */
   body::before {
     content: "";
     position: fixed;
@@ -98,7 +97,7 @@
     left: 0;
     right: 0;
     height: env(safe-area-inset-top);
-    background-color: #f0f4f8;
+    background-color: #F4F6F9;
     z-index: 100;
     pointer-events: none;
   }
@@ -150,25 +149,26 @@
   }
 
 
-  /* Elevated premium card — solid white with soft cinematic shadow */
+  /* Elevated premium card — solid white, brand-toned border, gold whisper */
   .gb-card {
     @apply rounded-2xl relative;
     background: #ffffff;
-    border: 1px solid rgba(220, 228, 240, 0.8);
-    box-shadow: 0 2px 16px rgba(15, 30, 60, 0.07);
+    border: 1px solid rgba(201, 168, 76, 0.10);
+    box-shadow: 0 2px 12px rgba(13, 27, 46, 0.08);
+    padding: 16px;
     transition: var(--transition-smooth);
   }
   .gb-card:hover {
-    box-shadow: 0 8px 28px rgba(15, 30, 60, 0.10);
-    border-color: rgba(201,169,97,0.28);
+    box-shadow: 0 6px 20px rgba(13, 27, 46, 0.12);
+    border-color: rgba(201, 168, 76, 0.30);
     transform: translateY(-1px);
   }
 
   .gb-card-flat {
     @apply rounded-2xl;
     background: #ffffff;
-    border: 1px solid rgba(220, 228, 240, 0.8);
-    box-shadow: 0 2px 16px rgba(15, 30, 60, 0.07);
+    border: 1px solid rgba(201, 168, 76, 0.10);
+    box-shadow: 0 2px 12px rgba(13, 27, 46, 0.08);
   }
 
   .gb-hero {
@@ -318,81 +318,114 @@
     box-shadow: 0 0 10px hsl(44 53% 54% / 0.8);
   }
 
-  /* ============ iOS Pearl & Gold Luxury Surface System ============ */
-  /* Soft pearl background with whisper navy ambient light */
+  /* Brand page surface */
   .ios-bg {
-    background:
-      radial-gradient(60% 40% at 90% 4%, rgba(201,169,97,0.10) 0%, transparent 65%),
-      radial-gradient(70% 50% at 6% 96%, rgba(10,31,61,0.08) 0%, transparent 65%),
-      linear-gradient(160deg, #f0f4f8 0%, #e8edf5 100%);
+    background: #F4F6F9;
     min-height: 100vh;
     color: hsl(var(--foreground));
   }
 
   /* Glassmorphism luxury card — pearl white */
   .ios-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(247,249,252,0.74) 100%);
-    backdrop-filter: blur(22px) saturate(170%);
-    -webkit-backdrop-filter: blur(22px) saturate(170%);
-    border: 1px solid rgba(15,30,60,0.06);
-    border-radius: 24px;
-    box-shadow:
-      0 1px 2px rgba(15,30,60,0.04),
-      0 18px 40px -22px rgba(15,30,60,0.16),
-      inset 0 1px 0 rgba(255,255,255,0.9);
+    background: #ffffff;
+    border: 1px solid rgba(201, 168, 76, 0.10);
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(13, 27, 46, 0.08);
     transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease;
   }
 
-  /* Navy luxury button — primary CTA */
+  /* Primary CTA — gold on navy */
   .ios-btn-navy {
-    background: linear-gradient(180deg, #0A1F3D 0%, #071427 100%);
-    color: #F8FAFC;
-    border-radius: 16px;
-    border: 1px solid rgba(201,169,97,0.20);
-    box-shadow:
-      0 10px 24px -12px rgba(10,31,61,0.45),
-      inset 0 1px 0 rgba(255,255,255,0.10);
-    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, filter 200ms ease;
+    background: #C9A84C;
+    color: #0D1B2E;
+    border-radius: 12px;
+    border: 1px solid rgba(13,27,46,0.08);
+    font-weight: 700;
+    box-shadow: 0 6px 18px -10px rgba(201,168,76,0.55);
+    transition: transform 150ms ease, filter 200ms ease, box-shadow 220ms ease;
   }
-  .ios-btn-navy:hover { filter: brightness(1.10); border-color: rgba(201,169,97,0.40); box-shadow: 0 14px 30px -12px rgba(10,31,61,0.55), inset 0 1px 0 rgba(255,255,255,0.12); }
-  .ios-btn-navy:active { transform: scale(0.98); }
+  .ios-btn-navy:hover { filter: brightness(1.05); }
+  .ios-btn-navy:active { transform: scale(0.97); }
 
-  /* Secondary button — soft pearl with navy text */
+  /* Secondary button — navy on white */
   .ios-btn-secondary {
-    background: rgba(255,255,255,0.85);
-    color: #0A1F3D;
-    border-radius: 16px;
-    border: 1px solid rgba(15,30,60,0.10);
-    box-shadow: 0 4px 14px -8px rgba(15,30,60,0.12);
-    transition: var(--transition-smooth);
+    background: #0D1B2E;
+    color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid rgba(201,168,76,0.20);
+    box-shadow: 0 6px 18px -12px rgba(13,27,46,0.45);
+    transition: transform 150ms ease, filter 200ms ease;
   }
-  .ios-btn-secondary:hover { background: #FFFFFF; border-color: rgba(201,169,97,0.40); }
-  .ios-btn-secondary:active { transform: scale(0.98); }
+  .ios-btn-secondary:hover { filter: brightness(1.08); border-color: rgba(201,168,76,0.40); }
+  .ios-btn-secondary:active { transform: scale(0.97); }
 
   /* Gold avatar disc */
   .ios-avatar-gold {
-    background: linear-gradient(145deg, #D4B46A 0%, #B8923F 100%);
+    background: linear-gradient(145deg, #E8C96B 0%, #C9A84C 100%);
     box-shadow:
-      0 12px 26px -14px rgba(184,146,63,0.55),
+      0 12px 26px -14px rgba(201,168,76,0.55),
       inset 0 2px 4px rgba(255,255,255,0.30),
       inset 0 -3px 8px rgba(0,0,0,0.15);
   }
 
-  /* Native iOS-style floating dock — dark navy glass on light bg (contrast for nav) */
+  /* Brand floating dock — solid navy */
   .ios-dock {
-    background: linear-gradient(180deg, rgba(10,31,61,0.92) 0%, rgba(7,20,39,0.94) 100%);
-    backdrop-filter: blur(28px) saturate(160%);
-    -webkit-backdrop-filter: blur(28px) saturate(160%);
-    border: 1px solid rgba(201,169,97,0.16);
+    background: #0D1B2E;
+    border: 1px solid rgba(201,168,76,0.18);
+    border-radius: 24px;
     box-shadow:
-      0 20px 44px -18px rgba(10,31,61,0.40),
-      inset 0 1px 0 rgba(255,255,255,0.06);
+      0 20px 44px -18px rgba(13,27,46,0.45),
+      inset 0 1px 0 rgba(255,255,255,0.05);
   }
 
   /* Inline meta row inside profile card */
   .ios-meta-row {
     @apply flex items-center justify-center gap-2 text-[13px];
-    color: #475569;
+    color: #6B7A8D;
+  }
+
+  /* Brand input field */
+  .gb-input {
+    border: 1.5px solid #E2E8F0;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: border-color 160ms ease, box-shadow 200ms ease;
+  }
+  .gb-input:focus,
+  .gb-input:focus-visible {
+    outline: none;
+    border-color: #C9A84C;
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+  }
+
+  /* Gold accent line for section titles */
+  .gb-gold-underline {
+    @apply block h-[2px] w-10 rounded-full mt-2;
+    background: #C9A84C;
+  }
+
+  /* Deal card — gold leading edge (RTL = right) */
+  .gb-deal-card {
+    border-right: 3px solid #C9A84C;
+  }
+  .gb-deal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13,27,46,0.12);
+  }
+
+  /* Brand progress bar */
+  .gb-progress {
+    background: #E8EAED;
+    border-radius: 999px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .gb-progress > .gb-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #C9A84C, #E8C96B);
+    transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
@@ -453,11 +486,37 @@
     padding-top: calc(env(safe-area-inset-top) + 0.5rem);
   }
 
-  /* Route container — intentionally stable (no remount animation) to avoid page jumps on mobile. */
+  /* Route fade — clean opacity transition between pages (no slide) */
   .route-transition {
     min-height: 100vh;
+    animation: gb-route-fade 0.2s ease-out both;
   }
+  @keyframes gb-route-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* Card entrance — fade + lift, staggered by position */
+  @keyframes gb-card-enter {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .gb-card,
+  .gb-card-flat,
+  .gb-card-premium,
+  .ios-card {
+    animation: gb-card-enter 0.25s ease both;
+  }
+  .gb-card:nth-child(1),.gb-card-flat:nth-child(1),.gb-card-premium:nth-child(1),.ios-card:nth-child(1) { animation-delay: 0s; }
+  .gb-card:nth-child(2),.gb-card-flat:nth-child(2),.gb-card-premium:nth-child(2),.ios-card:nth-child(2) { animation-delay: .08s; }
+  .gb-card:nth-child(3),.gb-card-flat:nth-child(3),.gb-card-premium:nth-child(3),.ios-card:nth-child(3) { animation-delay: .16s; }
+  .gb-card:nth-child(4),.gb-card-flat:nth-child(4),.gb-card-premium:nth-child(4),.ios-card:nth-child(4) { animation-delay: .24s; }
+  .gb-card:nth-child(5),.gb-card-flat:nth-child(5),.gb-card-premium:nth-child(5),.ios-card:nth-child(5) { animation-delay: .32s; }
+  .gb-card:nth-child(6),.gb-card-flat:nth-child(6),.gb-card-premium:nth-child(6),.ios-card:nth-child(6) { animation-delay: .40s; }
+  .gb-card:nth-child(n+7),.gb-card-flat:nth-child(n+7),.gb-card-premium:nth-child(n+7),.ios-card:nth-child(n+7) { animation-delay: .48s; }
+
   @media (prefers-reduced-motion: reduce) {
-    .route-transition { animation: none; }
+    .route-transition,
+    .gb-card, .gb-card-flat, .gb-card-premium, .ios-card { animation: none; }
   }
 }

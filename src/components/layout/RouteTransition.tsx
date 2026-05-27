@@ -14,5 +14,5 @@ export function RouteTransition({ children }: { children: ReactNode }) {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [pathname]);
 
-  return <div className="route-transition">{children}</div>;
+  return <div key={pathname} className="route-transition">{children}</div>;
 }
