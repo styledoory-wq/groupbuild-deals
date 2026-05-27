@@ -35,6 +35,7 @@ const MyOffers = lazy(() => import("./pages/resident/MyOffers"));
 const MyDocuments = lazy(() => import("./pages/resident/MyDocuments"));
 const MyDeposits = lazy(() => import("./pages/resident/MyDeposits"));
 const MyVouchers = lazy(() => import("./pages/resident/MyVouchers"));
+const PrivacyPolicy = lazy(() => import("./pages/resident/PrivacyPolicy"));
 const SupplierScan = lazy(() => import("./pages/supplier/SupplierScan"));
 const SupplierRedemptions = lazy(() => import("./pages/supplier/SupplierRedemptions"));
 const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
@@ -177,6 +178,7 @@ const App = () => (
                   <Route path="/resident/documents" element={<MyDocuments />} />
                   <Route path="/resident/deposits" element={<MyDeposits />} />
                   <Route path="/resident/my-vouchers" element={<MyVouchers />} />
+                  <Route path="/resident/privacy" element={<PrivacyPolicy />} />
 
                   {/* Supplier */}
                   <Route path="/supplier" element={<SupplierDashboard />} />

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, Building2, Phone, Mail, Pencil, FileText, Wallet, ChevronLeft, User as UserIcon, Bell, Settings } from "lucide-react";
+import { LogOut, Building2, Phone, Mail, Pencil, FileText, Wallet, ChevronLeft, User as UserIcon, Bell, Settings, Shield } from "lucide-react";
 
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -33,6 +33,7 @@ export default function ResidentProfile() {
     { label: "עריכת פרופיל", icon: Pencil, onClick: () => navigate("/resident/profile/edit") },
     { label: "הפיקדונות שלי", icon: Wallet, onClick: () => navigate("/resident/deposits") },
     { label: "המסמכים שלי", icon: FileText, onClick: () => navigate("/resident/documents") },
+    { label: "מדיניות פרטיות", icon: Shield, onClick: () => navigate("/resident/privacy") },
     { label: "התנתקות", icon: LogOut, onClick: handleLogout },
   ];
 
