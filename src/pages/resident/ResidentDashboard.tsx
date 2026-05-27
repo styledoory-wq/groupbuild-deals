@@ -401,7 +401,7 @@ export default function ResidentDashboard() {
                   onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
                   className={
                     "w-full h-[68px] rounded-2xl px-4 flex items-center justify-between font-semibold text-[15px] tracking-tight bg-white/85 backdrop-blur border text-[#0A1F3D] hover:bg-white transition-all active:scale-[0.99] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] " +
-                    (isCurrent ? "border-[#C9A961]/55 ring-1 ring-[#C9A961]/30" : "border-[#E2E8F0] hover:border-[#C9A961]/45")
+                    (isCurrent ? "border-[#C9A961]/55 ring-1 ring-[#C9A961]/30 border-r-[3px] border-r-[#C9A84C]" : "border-[#E2E8F0] hover:border-[#C9A961]/45")
                   }
                   style={{ animationDelay: `${idx * 40}ms` }}
                 >
@@ -410,7 +410,7 @@ export default function ResidentDashboard() {
                       <span className="h-10 w-10 rounded-xl flex items-center justify-center border bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border-[#C9A961]/40">
                         <Icon className="h-[18px] w-[18px] text-[#B8923F]" strokeWidth={2} />
                       </span>
-                      <span className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-[#0A1F3D] border border-[#C9A961]/50 flex items-center justify-center text-[9px] font-bold text-[#C9A961]">
+                      <span className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-[#C9A84C] border border-[#0D1B2E]/20 flex items-center justify-center text-[9px] font-bold text-[#0D1B2E]">
                         {idx + 1}
                       </span>
                     </span>
