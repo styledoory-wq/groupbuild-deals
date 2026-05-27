@@ -149,25 +149,26 @@
   }
 
 
-  /* Elevated premium card — solid white with soft cinematic shadow */
+  /* Elevated premium card — solid white, brand-toned border, gold whisper */
   .gb-card {
     @apply rounded-2xl relative;
     background: #ffffff;
-    border: 1px solid rgba(220, 228, 240, 0.8);
-    box-shadow: 0 2px 16px rgba(15, 30, 60, 0.07);
+    border: 1px solid rgba(201, 168, 76, 0.10);
+    box-shadow: 0 2px 12px rgba(13, 27, 46, 0.08);
+    padding: 16px;
     transition: var(--transition-smooth);
   }
   .gb-card:hover {
-    box-shadow: 0 8px 28px rgba(15, 30, 60, 0.10);
-    border-color: rgba(201,169,97,0.28);
+    box-shadow: 0 6px 20px rgba(13, 27, 46, 0.12);
+    border-color: rgba(201, 168, 76, 0.30);
     transform: translateY(-1px);
   }
 
   .gb-card-flat {
     @apply rounded-2xl;
     background: #ffffff;
-    border: 1px solid rgba(220, 228, 240, 0.8);
-    box-shadow: 0 2px 16px rgba(15, 30, 60, 0.07);
+    border: 1px solid rgba(201, 168, 76, 0.10);
+    box-shadow: 0 2px 12px rgba(13, 27, 46, 0.08);
   }
 
   .gb-hero {
