@@ -27,9 +27,9 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
       </div>
       <div
         className={cn(
-          "w-full max-w-[480px] sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-6xl",
+          "w-full max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-6xl",
           "min-h-screen min-h-[100dvh] relative z-10 safe-top",
-          "pb-[calc(env(safe-area-inset-bottom)+88px)] md:pb-[calc(env(safe-area-inset-bottom)+100px)]",
+          "pb-[calc(env(safe-area-inset-bottom)+68px)] sm:pb-[calc(env(safe-area-inset-bottom)+80px)] md:pb-[calc(env(safe-area-inset-bottom)+96px)]",
           className
         )}
       >
@@ -38,3 +38,4 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
     </div>
   );
 }
+
