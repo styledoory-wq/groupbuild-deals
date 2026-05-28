@@ -21,7 +21,7 @@ export function PageHeader({ title, subtitle, back = true, showBell = false, var
   return (
     <header
       className={cn(
-        "px-5 md:px-8 lg:px-10 pt-6 md:pt-8 pb-8 md:pb-12 rounded-b-[28px] md:rounded-b-[36px] relative overflow-hidden",
+        "px-4 sm:px-5 md:px-8 lg:px-10 pt-5 sm:pt-6 md:pt-8 pb-7 sm:pb-8 md:pb-12 rounded-b-[24px] sm:rounded-b-[28px] md:rounded-b-[36px] relative overflow-hidden",
         isNavy ? "gb-hero-calm" : "bg-background text-foreground border-b border-border"
       )}
     >
@@ -64,7 +64,7 @@ export function PageHeader({ title, subtitle, back = true, showBell = false, var
       <div className="space-y-2 animate-fade-up relative text-right">
         <div className="gb-divider-gold mr-0 ml-auto" />
         <h1 className={cn(
-          "text-[26px] md:text-[34px] lg:text-[40px] font-extrabold leading-[1.15] tracking-tight",
+          "text-[22px] sm:text-[26px] md:text-[34px] lg:text-[40px] font-extrabold leading-[1.15] tracking-tight break-words",
           isNavy ? "text-white" : "text-foreground"
         )}>{title}</h1>
         {subtitle && (
