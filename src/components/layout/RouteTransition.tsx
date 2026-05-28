@@ -3,16 +3,16 @@ import { useLocation } from "react-router-dom";
 
 /**
  * Lightweight route behavior.
- * Important: do not key/remount the whole route tree on navigation — it causes
- * visible refreshes, duplicate effects and content jumps on mobile.
+ * IMPORTANT: do NOT key by pathname — that remounts the whole route tree on
+ * every navigation, causing visible refreshes, duplicate effects, layout
+ * jumps and slow transitions on mobile. We only reset scroll instead.
  */
 export function RouteTransition({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Avoid jarring scroll on hash links / same page
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [pathname]);
 
-  return <div key={pathname} className="route-transition">{children}</div>;
+  return <div className="route-transition">{children}</div>;
 }
