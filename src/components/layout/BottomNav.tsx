@@ -35,8 +35,8 @@ function BottomNavImpl({ role }: { role: Role }) {
       dir="rtl"
       className="fixed bottom-0 inset-x-0 z-40 flex justify-center pointer-events-none"
     >
-      <div className="pointer-events-auto w-full max-w-[440px] sm:max-w-lg md:max-w-xl lg:max-w-2xl px-3 sm:px-4 pb-[calc(env(safe-area-inset-bottom)+8px)] md:pb-[calc(env(safe-area-inset-bottom)+12px)]">
-        <div className="ios-dock rounded-[22px] sm:rounded-[24px] px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 md:py-2.5 flex items-center justify-between gap-0.5">
+      <div className="pointer-events-auto w-full max-w-[440px] sm:max-w-lg md:max-w-xl lg:max-w-2xl px-2 sm:px-3 pb-[calc(env(safe-area-inset-bottom)+4px)] md:pb-[calc(env(safe-area-inset-bottom)+10px)]">
+        <div className="ios-dock rounded-[20px] sm:rounded-[22px] px-1 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 flex items-center justify-between gap-0.5">
           {items[role].map(({ to, label, icon: Icon }) => {
             const active = location.pathname === to || (to !== `/${role}` && location.pathname.startsWith(to));
             return (
@@ -44,14 +44,14 @@ function BottomNavImpl({ role }: { role: Role }) {
                 key={to}
                 to={to}
                 className={cn(
-                  "flex-1 min-w-0 flex flex-col items-center gap-1 py-1.5 sm:py-2 rounded-2xl transition-all duration-300 relative group",
+                  "flex-1 min-w-0 flex flex-col items-center gap-0.5 sm:gap-1 py-1 sm:py-1.5 md:py-2 rounded-2xl transition-all duration-300 relative group",
                   active ? "text-gold" : "text-white/65 hover:text-white"
                 )}
               >
                 {active && (
                   <span
                     aria-hidden
-                    className="absolute top-0.5 sm:top-1 left-1/2 -translate-x-1/2 h-8 w-8 sm:h-9 sm:w-9 rounded-full"
+                    className="absolute top-0.5 left-1/2 -translate-x-1/2 h-7 w-7 sm:h-8 sm:w-8 rounded-full"
                     style={{
                       background: "radial-gradient(circle at 30% 25%, rgba(201,169,97,0.22) 0%, rgba(10,31,61,0.0) 70%)",
                       boxShadow: "inset 0 0 0 1px rgba(201,169,97,0.30)",
@@ -60,12 +60,12 @@ function BottomNavImpl({ role }: { role: Role }) {
                 )}
                 <Icon
                   className={cn(
-                    "relative transition-transform duration-300 h-[18px] w-[18px] sm:h-[19px] sm:w-[19px] md:h-5 md:w-5 shrink-0",
+                    "relative transition-transform duration-300 h-4 w-4 sm:h-[18px] sm:w-[18px] md:h-5 md:w-5 shrink-0",
                     active && "text-gold scale-105"
                   )}
                   strokeWidth={active ? 2 : 1.7}
                 />
-                <span className={cn("text-[9.5px] sm:text-[10px] md:text-[11px] leading-none relative truncate max-w-full px-0.5", active ? "font-semibold text-gold" : "font-normal")}>{label}</span>
+                <span className={cn("text-[9px] sm:text-[10px] md:text-[11px] leading-none relative truncate max-w-full px-0.5", active ? "font-semibold text-gold" : "font-normal")}>{label}</span>
               </NavLink>
             );
           })}
@@ -74,5 +74,6 @@ function BottomNavImpl({ role }: { role: Role }) {
     </nav>
   );
 }
+
 
 export const BottomNav = memo(BottomNavImpl);
