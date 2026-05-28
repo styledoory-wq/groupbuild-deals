@@ -64,7 +64,7 @@ export function PageHeader({ title, subtitle, back = true, showBell = false, var
       <div className="space-y-2 animate-fade-up relative text-right">
         <div className="gb-divider-gold mr-0 ml-auto" />
         <h1 className={cn(
-          "text-[26px] md:text-[34px] lg:text-[40px] font-extrabold leading-[1.15] tracking-tight",
+          "text-[22px] sm:text-[26px] md:text-[34px] lg:text-[40px] font-extrabold leading-[1.15] tracking-tight break-words",
           isNavy ? "text-white" : "text-foreground"
         )}>{title}</h1>
         {subtitle && (
