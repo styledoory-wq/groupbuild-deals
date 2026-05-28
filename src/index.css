@@ -191,7 +191,11 @@
     background: #ffffff;
     border: 1px solid rgba(201, 168, 76, 0.10);
     box-shadow: 0 2px 12px rgba(13, 27, 46, 0.08);
-    padding: 16px;
+    padding: 12px;
+  }
+  @media (min-width: 640px) {
+    .gb-card { padding: 16px; }
+
     transition: var(--transition-smooth);
   }
   .gb-card:hover {
