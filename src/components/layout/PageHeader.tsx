@@ -21,7 +21,7 @@ export function PageHeader({ title, subtitle, back = true, showBell = false, var
   return (
     <header
       className={cn(
-        "px-5 md:px-8 lg:px-10 pt-6 md:pt-8 pb-8 md:pb-12 rounded-b-[28px] md:rounded-b-[36px] relative overflow-hidden",
+        "px-4 sm:px-5 md:px-8 lg:px-10 pt-5 sm:pt-6 md:pt-8 pb-7 sm:pb-8 md:pb-12 rounded-b-[24px] sm:rounded-b-[28px] md:rounded-b-[36px] relative overflow-hidden",
         isNavy ? "gb-hero-calm" : "bg-background text-foreground border-b border-border"
       )}
     >
