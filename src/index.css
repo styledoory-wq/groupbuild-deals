@@ -93,12 +93,12 @@
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
     background: #F4F6F9;
-    min-height: 100vh;
     min-height: 100dvh;
+    /* Smoother momentum scroll on iOS / WebKit */
+    -webkit-overflow-scrolling: touch;
   }
 
   #root {
-    min-height: 100vh;
     min-height: 100dvh;
   }
 
@@ -106,6 +106,9 @@
     max-width: 100%;
     height: auto;
   }
+
+  /* Prevent any element from forcing horizontal scroll on small screens */
+  * { min-width: 0; }
 
   /* Prevent iOS auto-zoom on input focus (requires 16px+ font-size) */
   input, select, textarea {
