@@ -512,37 +512,52 @@
     padding-top: calc(env(safe-area-inset-top) + 0.5rem);
   }
 
-  /* Route fade — clean opacity transition between pages (no slide) */
+  /* Route content — no per-navigation animation. The previous fade caused a
+     visible flash on every page change and made navigation feel slow. We rely
+     on instant paint + stable skeletons for perceived speed. */
   .route-transition {
-    min-height: 100vh;
-    animation: gb-route-fade 0.2s ease-out both;
-  }
-  @keyframes gb-route-fade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    min-height: 100dvh;
   }
 
-  /* Card entrance — fade + lift, staggered by position */
+  /* Card entrance — single subtle fade, no per-child stagger.
+     The old staggered delays (up to 480ms) made lists feel sluggish on every
+     navigation. Keep a tiny fade for polish, but render all cards together. */
   @keyframes gb-card-enter {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; transform: translateY(4px); }
     to   { opacity: 1; transform: translateY(0); }
   }
   .gb-card,
   .gb-card-flat,
   .gb-card-premium,
   .ios-card {
-    animation: gb-card-enter 0.25s ease both;
+    animation: gb-card-enter 0.18s ease-out both;
   }
-  .gb-card:nth-child(1),.gb-card-flat:nth-child(1),.gb-card-premium:nth-child(1),.ios-card:nth-child(1) { animation-delay: 0s; }
-  .gb-card:nth-child(2),.gb-card-flat:nth-child(2),.gb-card-premium:nth-child(2),.ios-card:nth-child(2) { animation-delay: .08s; }
-  .gb-card:nth-child(3),.gb-card-flat:nth-child(3),.gb-card-premium:nth-child(3),.ios-card:nth-child(3) { animation-delay: .16s; }
-  .gb-card:nth-child(4),.gb-card-flat:nth-child(4),.gb-card-premium:nth-child(4),.ios-card:nth-child(4) { animation-delay: .24s; }
-  .gb-card:nth-child(5),.gb-card-flat:nth-child(5),.gb-card-premium:nth-child(5),.ios-card:nth-child(5) { animation-delay: .32s; }
-  .gb-card:nth-child(6),.gb-card-flat:nth-child(6),.gb-card-premium:nth-child(6),.ios-card:nth-child(6) { animation-delay: .40s; }
-  .gb-card:nth-child(n+7),.gb-card-flat:nth-child(n+7),.gb-card-premium:nth-child(n+7),.ios-card:nth-child(n+7) { animation-delay: .48s; }
+
+  /* Improve scroll & tap feel on touch devices */
+  .route-transition,
+  .gb-card, .gb-card-flat, .gb-card-premium, .ios-card,
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Promote off-screen sections — browser can skip layout/paint until visible.
+     Major perceived-speed win on long resident/admin lists. */
+  .gb-cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 320px;
+  }
+
+  /* Mobile (≤640) — disable per-card entrance animation entirely. Native-feel
+     instant rendering > decorative fades on phones. */
+  @media (max-width: 640px) {
+    .gb-card, .gb-card-flat, .gb-card-premium, .ios-card { animation: none; }
+    .gb-float { animation: none; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .route-transition,
-    .gb-card, .gb-card-flat, .gb-card-premium, .ios-card { animation: none; }
+    .gb-card, .gb-card-flat, .gb-card-premium, .ios-card,
+    .gb-float, .gb-pulse-glow, .gb-shimmer,
+    .gb-particle-1, .gb-particle-2, .gb-particle-3 { animation: none !important; }
   }
 }
