@@ -129,10 +129,7 @@
 
   /* Prevent iOS auto-zoom on input focus (requires 16px+ font-size) */
   input, select, textarea {
-    font-size: 16px;
-  }
-  @media (min-width: 768px) {
-    input, select, textarea { font-size: inherit; }
+    font-size: 16px !important;
   }
 
   /* Pearl bar behind the iOS safe-area-top so the notch blends with the page */
