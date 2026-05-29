@@ -124,8 +124,10 @@
     height: auto;
   }
 
-  /* Prevent any element from forcing horizontal scroll on small screens */
-  * { min-width: 0; }
+  /* Allow flex/grid CHILDREN to shrink below their content size — without this
+     intrinsic min-content sizing causes phantom horizontal overflow. Scoped to
+     flex/grid descendants only (not every element, which broke layouts). */
+  .flex > *, .grid > *, [class*="flex"] > *, [class*="grid"] > * { min-width: 0; }
 
   /* Prevent iOS auto-zoom on input focus (requires 16px+ font-size) */
   input, select, textarea {
