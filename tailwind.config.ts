@@ -7,10 +7,50 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "1rem",
-      screens: { "2xl": "1400px" },
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1.25rem",
+        md: "1.5rem",
+        lg: "2rem",
+        xl: "2.5rem",
+      },
+      screens: { "2xl": "1440px" },
+    },
+    screens: {
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1440px",
+      wide: "1440px",
     },
     extend: {
+      fontSize: {
+        // Fluid type scale — single source of truth, clamp(min, vw, max)
+        "fs-xs":   ["clamp(0.72rem, 0.68rem + 0.20vw, 0.80rem)", { lineHeight: "1.45" }],
+        "fs-sm":   ["clamp(0.82rem, 0.78rem + 0.25vw, 0.92rem)", { lineHeight: "1.5" }],
+        "fs-base": ["clamp(0.95rem, 0.90rem + 0.30vw, 1.06rem)", { lineHeight: "1.6" }],
+        "fs-lg":   ["clamp(1.08rem, 1.00rem + 0.45vw, 1.25rem)", { lineHeight: "1.5" }],
+        "fs-xl":   ["clamp(1.25rem, 1.10rem + 0.75vw, 1.55rem)", { lineHeight: "1.35" }],
+        "fs-2xl":  ["clamp(1.50rem, 1.25rem + 1.20vw, 2.00rem)", { lineHeight: "1.25" }],
+        "fs-3xl":  ["clamp(1.85rem, 1.50rem + 1.80vw, 2.65rem)", { lineHeight: "1.15" }],
+        "fs-4xl":  ["clamp(2.25rem, 1.75rem + 2.50vw, 3.50rem)", { lineHeight: "1.05" }],
+      },
+      spacing: {
+        "safe-top": "env(safe-area-inset-top)",
+        "safe-bottom": "env(safe-area-inset-bottom)",
+        "nav-h": "var(--nav-h)",
+        "pad-x": "var(--pad-x)",
+      },
+      minHeight: {
+        touch: "44px",
+      },
+      minWidth: {
+        touch: "44px",
+      },
+      maxWidth: {
+        app: "var(--app-max-w)",
+      },
       fontFamily: {
         sans: ['Heebo', 'sans-serif'],
         display: ['Heebo', 'sans-serif'],

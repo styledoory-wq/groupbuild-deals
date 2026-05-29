@@ -9,6 +9,16 @@
 
 @layer base {
   :root {
+    /* ===== Responsive design tokens (single source of truth) ===== */
+    /* Fluid horizontal page padding — scales 16px → 32px */
+    --pad-x: clamp(1rem, 0.5rem + 2vw, 2rem);
+    /* App content max width */
+    --app-max-w: 1280px;
+    /* Bottom navigation height (used by shells for padding offset) */
+    --nav-h: clamp(60px, 56px + 1.2vw, 72px);
+    /* Min touch target per WCAG / Apple HIG */
+    --tap: 44px;
+
     /* GroupBuild brand surface */
     --background: 214 22% 96%;         /* #F4F6F9 */
     --foreground: 215 56% 12%;         /* #0D1B2E */
@@ -114,8 +124,10 @@
     height: auto;
   }
 
-  /* Prevent any element from forcing horizontal scroll on small screens */
-  * { min-width: 0; }
+  /* Allow flex/grid CHILDREN to shrink below their content size — without this
+     intrinsic min-content sizing causes phantom horizontal overflow. Scoped to
+     flex/grid descendants only (not every element, which broke layouts). */
+  .flex > *, .grid > *, [class*="flex"] > *, [class*="grid"] > * { min-width: 0; }
 
   /* Prevent iOS auto-zoom on input focus (requires 16px+ font-size) */
   input, select, textarea {
@@ -148,15 +160,15 @@
    Typography scale, spacing, motion primitives — used across the app
    to keep the experience consistent and premium. */
 @layer components {
-  /* Typography — semantic, premium scale */
-  .gb-display     { @apply text-[28px] md:text-[36px] lg:text-[44px] font-extrabold tracking-tight leading-[1.05]; letter-spacing: -0.02em; }
-  .gb-h1          { @apply text-[22px] md:text-[28px] font-extrabold tracking-tight leading-[1.15]; letter-spacing: -0.015em; }
-  .gb-h2          { @apply text-[18px] md:text-[22px] font-bold tracking-tight leading-[1.2]; }
-  .gb-h3          { @apply text-[15px] md:text-[16px] font-bold leading-[1.3]; }
-  .gb-body        { @apply text-[14px] leading-[1.6] text-foreground; }
-  .gb-body-sm     { @apply text-[12px] leading-[1.55] text-muted-foreground; }
-  .gb-caption     { @apply text-[11px] uppercase tracking-[0.08em] font-bold text-muted-foreground; }
-  .gb-overline    { @apply text-[10px] uppercase tracking-[0.12em] font-bold text-muted-foreground; }
+  /* Typography — fluid scale tokens (clamp-based, no per-breakpoint snaps) */
+  .gb-display     { @apply text-fs-4xl font-extrabold tracking-tight; letter-spacing: -0.02em; }
+  .gb-h1          { @apply text-fs-2xl font-extrabold tracking-tight; letter-spacing: -0.015em; }
+  .gb-h2          { @apply text-fs-xl font-bold tracking-tight; }
+  .gb-h3          { @apply text-fs-lg font-bold; }
+  .gb-body        { @apply text-fs-base text-foreground; }
+  .gb-body-sm     { @apply text-fs-sm text-muted-foreground; }
+  .gb-caption     { @apply text-fs-xs uppercase tracking-[0.08em] font-bold text-muted-foreground; }
+  .gb-overline    { @apply text-fs-xs uppercase tracking-[0.12em] font-bold text-muted-foreground; }
   .gb-num         { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 
   /* Section spacing primitives */
@@ -191,11 +203,7 @@
     background: #ffffff;
     border: 1px solid rgba(201, 168, 76, 0.10);
     box-shadow: 0 2px 12px rgba(13, 27, 46, 0.08);
-    padding: 12px;
-  }
-  @media (min-width: 640px) {
-    .gb-card { padding: 16px; }
-
+    padding: clamp(12px, 1.5vw, 20px);
     transition: var(--transition-smooth);
   }
   .gb-card:hover {

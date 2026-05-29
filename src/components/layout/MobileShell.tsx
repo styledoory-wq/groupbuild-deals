@@ -2,16 +2,19 @@ import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Adaptive shell — mobile-first, scales cleanly across phone → tablet → desktop.
- * Breakpoints:
- *  - Phone:   full width up to 480px (handles iPhone SE 320px → 14 Pro Max 430px)
- *  - Tablet:  sm (≥640) → max-w-xl, md (≥768) → max-w-2xl with extra padding
- *  - Desktop: lg (≥1024) → max-w-4xl
- *  - Wide:    xl (≥1280) → max-w-6xl
+ * Adaptive shell — mobile-first, fluid across phone → tablet → desktop → wide.
+ *
+ * - Width: full on phone, max-w-app (1280) on desktop, centered.
+ * - Bottom padding: reserves the BottomNav height (var(--nav-h)) + iOS safe
+ *   area, so content always clears the floating dock on every device.
+ * - Top padding: safe-area-inset-top so notched devices don't clip content.
+ *
+ * Pages should still use <AppContainer> internally for horizontal padding;
+ * this shell only handles outer chrome.
  */
 export function MobileShell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className="min-h-screen min-h-[100dvh] flex justify-center relative overflow-x-hidden ios-bg">
+    <div className="min-h-[100dvh] flex justify-center relative ios-bg">
       {/* Soft ambient lighting — pearl & gold */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
         <div className="absolute -top-32 -right-24 h-72 w-72 sm:h-80 sm:w-80 md:h-[28rem] md:w-[28rem] rounded-full bg-[#C9A961]/[0.10] blur-3xl gb-float" />
@@ -27,10 +30,12 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
       </div>
       <div
         className={cn(
-          "w-full max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-6xl",
-          "min-h-screen min-h-[100dvh] relative z-10 safe-top",
-          "pb-[calc(env(safe-area-inset-bottom)+68px)] sm:pb-[calc(env(safe-area-inset-bottom)+80px)] md:pb-[calc(env(safe-area-inset-bottom)+96px)]",
-          className
+          "w-full max-w-[var(--app-max-w)]",
+          "min-h-[100dvh] relative z-10",
+          "pt-[env(safe-area-inset-top)]",
+          // Reserve space for the floating BottomNav + safe-area + breathing room
+          "pb-[calc(env(safe-area-inset-bottom)+var(--nav-h)+12px)]",
+          className,
         )}
       >
         {children}
@@ -38,4 +43,3 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
     </div>
   );
 }
-
