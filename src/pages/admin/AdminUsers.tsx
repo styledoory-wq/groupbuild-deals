@@ -138,7 +138,7 @@ export default function AdminUsers() {
               key={t.id}
               onClick={() => setTypeFilter(t.id)}
               className={
-                "h-9 rounded-xl text-[11px] font-bold border transition " +
+                "h-9 rounded-xl text-fs-xs font-bold border transition " +
                 (typeFilter === t.id
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card text-foreground border-border")
@@ -175,17 +175,17 @@ export default function AdminUsers() {
                       {u.full_name || u.business_name || u.email || "—"}
                     </h3>
                     {!u.is_active && (
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
+                      <span className="text-fs-xs font-bold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
                         חסום
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                  <p className="text-fs-xs text-muted-foreground truncate">
                     {TYPE_LABEL[u.user_type] ?? u.user_type}
                     {u.email ? ` · ${u.email}` : ""}
                     {u.phone ? ` · ${u.phone}` : ""}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/80 truncate mt-0.5">
+                  <p className="text-fs-xs text-muted-foreground/80 truncate mt-0.5">
                     {u.city || "—"}{project ? ` · ${project.name}` : ""}
                   </p>
                 </div>
@@ -198,7 +198,7 @@ export default function AdminUsers() {
                 </button>
               </div>
               {u.admin_notes && (
-                <div className="mt-2 pt-2 border-t border-border text-[11px] text-muted-foreground italic">
+                <div className="mt-2 pt-2 border-t border-border text-fs-xs text-muted-foreground italic">
                   📝 {u.admin_notes}
                 </div>
               )}
@@ -319,7 +319,7 @@ export default function AdminUsers() {
                   משתמש פעיל
                 </label>
                 {!editing.is_active && (
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-destructive/10 text-destructive inline-flex items-center gap-1">
+                  <span className="text-fs-xs font-bold px-2 py-1 rounded-full bg-destructive/10 text-destructive inline-flex items-center gap-1">
                     <ShieldAlert className="h-3 w-3" /> חסום
                   </span>
                 )}

@@ -156,7 +156,7 @@ export default function AdminCategories() {
               <div className="text-xl">{c.icon}</div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-bold truncate">{c.name}</div>
-                <div className="text-[10px] text-muted-foreground">{counts[c.id] ?? 0} עסקאות</div>
+                <div className="text-fs-xs text-muted-foreground">{counts[c.id] ?? 0} עסקאות</div>
               </div>
               <button onClick={() => remove(c.id)} disabled={busy} className="h-8 w-8 rounded-lg hover:bg-destructive/10 text-destructive flex items-center justify-center disabled:opacity-50">
                 <Trash2 className="h-4 w-4" />

@@ -83,23 +83,23 @@ export default function AdminSupplierTrust() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-bold text-sm truncate">{r.business_name}</h3>
                       {r.verified_supplier && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 inline-flex items-center gap-1">
+                        <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 inline-flex items-center gap-1">
                           <BadgeCheck className="h-3 w-3" /> מאומת
                         </span>
                       )}
                       {r.is_suspended && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive inline-flex items-center gap-1">
+                        <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive inline-flex items-center gap-1">
                           <Ban className="h-3 w-3" /> מושעה
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5">
+                    <div className="text-fs-xs text-muted-foreground mt-0.5">
                       סטטוס: {r.approval_status} · {r.is_active ? "פעיל" : "כבוי"}
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-2 text-center text-[11px] py-2 border-t border-b border-border">
+                <div className="grid grid-cols-4 gap-2 text-center text-fs-xs py-2 border-t border-b border-border">
                   <div>
                     <div className="font-bold text-foreground inline-flex items-center gap-0.5 justify-center">
                       <Star className="h-3 w-3 text-gold" /> {Number(r.trust_score).toFixed(1)}
@@ -140,7 +140,7 @@ export default function AdminSupplierTrust() {
                   >
                     {r.is_suspended ? "בטל השעיה" : "השעה"}
                   </Button>
-                  <Link to={`/admin/complaints?supplier=${r.id}`} className="inline-flex items-center justify-center px-3 rounded-md border border-border text-[12px] font-bold">
+                  <Link to={`/admin/complaints?supplier=${r.id}`} className="inline-flex items-center justify-center px-3 rounded-md border border-border text-fs-sm font-bold">
                     <AlertTriangle className="h-4 w-4" />
                   </Link>
                 </div>
