@@ -41,6 +41,47 @@ export default function SupplierScan() {
 
   useEffect(() => {
     if (mode !== "scan" || result.kind !== "idle") return;
+
+    // Native (iOS/Android) path: use MLKit BarcodeScanner with transparent webview overlay.
+    if (Capacitor.isNativePlatform()) {
+      let cancelled = false;
+      let listenerHandle: { remove: () => Promise<void> } | null = null;
+
+      (async () => {
+        try {
+          const perm = await BarcodeScanner.requestPermissions();
+          if (perm.camera !== "granted" && perm.camera !== "limited") {
+            toast.error("נדרשת הרשאת מצלמה. עבור לקוד ידני.");
+            setMode("manual");
+            return;
+          }
+          document.body.classList.add("barcode-scanner-active");
+          listenerHandle = await BarcodeScanner.addListener("barcodeScanned", async (ev) => {
+            if (cancelled) return;
+            cancelled = true;
+            try { await BarcodeScanner.stopScan(); } catch { /* noop */ }
+            try { await listenerHandle?.remove(); } catch { /* noop */ }
+            document.body.classList.remove("barcode-scanner-active");
+            await lookup(parseScan(ev.barcode.rawValue));
+          });
+          await BarcodeScanner.startScan({ formats: [BarcodeFormat.QrCode] });
+        } catch {
+          toast.error("לא ניתן להפעיל מצלמה. השתמש בקוד ידני.");
+          setMode("manual");
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+        (async () => {
+          try { await BarcodeScanner.stopScan(); } catch { /* noop */ }
+          try { await listenerHandle?.remove(); } catch { /* noop */ }
+          document.body.classList.remove("barcode-scanner-active");
+        })();
+      };
+    }
+
+    // Web fallback: html5-qrcode using getUserMedia.
     const elId = "supplier-scan-region";
     const el = document.getElementById(elId);
     if (!el) return;
@@ -69,8 +110,6 @@ export default function SupplierScan() {
       stopped = true;
       (async () => {
         try {
-          // Only stop if actually scanning — otherwise html5-qrcode throws
-          // "Cannot stop, scanner is not running or paused."
           const s = scanner as unknown as { getState?: () => number };
           const state = typeof s.getState === "function" ? s.getState() : 2;
           if (state === 2 /* SCANNING */ || state === 3 /* PAUSED */) {
