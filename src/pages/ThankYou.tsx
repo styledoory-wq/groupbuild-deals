@@ -7,7 +7,7 @@ export default function ThankYou() {
 
   return (
     <div className="min-h-screen bg-primary text-primary-foreground flex justify-center">
-      <div className="w-full max-w-[480px] flex flex-col">
+      <div className="w-full max-w-screen-sm flex flex-col">
         {/* Header */}
         <header className="px-5 h-14 flex items-center border-b border-white/5">
           <div className="flex items-center gap-2">
@@ -31,7 +31,7 @@ export default function ThankYou() {
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/15 mb-4">
             <Sparkles className="h-3 w-3 text-gold" />
-            <span className="text-[11px] font-bold text-gold">נרשמת בהצלחה</span>
+            <span className="text-fs-xs font-bold text-gold">נרשמת בהצלחה</span>
           </div>
 
           <h1 className="text-3xl font-extrabold mb-3 leading-tight">
@@ -41,7 +41,7 @@ export default function ThankYou() {
           </h1>
           <div className="gb-divider-gold mb-5" />
 
-          <p className="text-primary-foreground/80 text-[15px] leading-relaxed max-w-[340px] mb-8">
+          <p className="text-primary-foreground/80 text-fs-base leading-relaxed max-w-[340px] mb-8">
             הפרטים שלך נקלטו במערכת. נחזור אליך בהקדם עם פרטי הפרויקט שלך
             וההצעות הקבוצתיות הראשונות שמתאימות לך.
           </p>
@@ -73,7 +73,7 @@ export default function ThankYou() {
             חזרה לעמוד הבית
           </Button>
 
-          <p className="text-[11px] text-primary-foreground/50 mt-6">
+          <p className="text-fs-xs text-primary-foreground/50 mt-6">
             יש שאלה? כתבו לנו ונחזור אליכם.
           </p>
         </main>

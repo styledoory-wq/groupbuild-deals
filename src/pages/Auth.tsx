@@ -198,7 +198,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-gradient-hero text-primary-foreground flex justify-center">
-      <div className="w-full max-w-[480px] flex flex-col safe-top">
+      <div className="w-full max-w-screen-sm flex flex-col safe-top">
         <div className="px-6 pt-12 pb-8 relative overflow-hidden">
           <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
           <div className="absolute -bottom-10 -right-10 h-48 w-48 rounded-full bg-gold/5 blur-2xl" />
@@ -291,7 +291,7 @@ export default function Auth() {
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="text-sm font-bold">{label}</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">{desc}</div>
+                      <div className="text-fs-xs text-muted-foreground mt-0.5">{desc}</div>
                     </button>
                   ))}
                 </div>

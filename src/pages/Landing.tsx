@@ -120,7 +120,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-primary text-primary-foreground flex justify-center">
-      <div className="w-full max-w-[480px] relative">
+      <div className="w-full max-w-screen-sm relative">
         {/* Sticky header */}
         <header
           className="sticky top-0 z-40 bg-primary/95 backdrop-blur"
@@ -172,13 +172,13 @@ export default function Landing() {
               </span>
             </div>
 
-            <h1 className="text-[34px] leading-[1.1] font-extrabold mb-4 text-white">
+            <h1 className="text-fs-3xl leading-[1.1] font-extrabold mb-4 text-white">
               קונים יחד —
               <br />
               משלמים <span className="gb-gold-text">פחות</span>
             </h1>
             <div className="gb-divider-gold mb-5" />
-            <p className="text-primary-foreground/75 text-[15px] leading-relaxed mb-3">
+            <p className="text-primary-foreground/75 text-fs-base leading-relaxed mb-3">
               GroupBuild מחברת דיירים בפרויקטים חדשים לספקים מאומתים, ויוצרת כוח קנייה קבוצתי שמוריד מחירים.
             </p>
             <p className="text-gold/90 text-sm font-bold mb-8">
@@ -262,7 +262,7 @@ export default function Landing() {
                         <div className="min-w-0">
                           <h3 className="font-bold text-sm text-foreground truncate">{d.title}</h3>
                           {d.supplier_name && (
-                            <p className="text-[11px] text-muted-foreground inline-flex items-center gap-1 mt-0.5">
+                            <p className="text-fs-xs text-muted-foreground inline-flex items-center gap-1 mt-0.5">
                               <ShieldCheck className="h-3 w-3 text-gold" />
                               {d.supplier_name}
                             </p>
@@ -272,7 +272,7 @@ export default function Landing() {
                           {display.headline}
                         </div>
                       </div>
-                      <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-1.5">
+                      <div className="flex items-center justify-between text-fs-xs text-muted-foreground mb-1.5">
                         {d.paid_count === 0 ? (
                           <span className="text-primary font-bold">הצעה חדשה — היה הראשון להצטרף</span>
                         ) : (
@@ -288,7 +288,7 @@ export default function Landing() {
                       <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-2">
                         <div className="h-full bg-gradient-gold rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
                       </div>
-                      <div className="text-[11px] font-bold gb-gold-text text-left">צפה בהצעה ←</div>
+                      <div className="text-fs-xs font-bold gb-gold-text text-left">צפה בהצעה ←</div>
                     </article>
                   </Link>
                 );
@@ -431,7 +431,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <footer className="bg-primary text-primary-foreground/60 px-6 py-6 text-center text-[11px] border-t border-white/5">
+        <footer className="bg-primary text-primary-foreground/60 px-6 py-6 text-center text-fs-xs border-t border-white/5">
           © {new Date().getFullYear()} GroupBuild · רכש קבוצתי לדיירי בנייה חדשה
         </footer>
       </div>
@@ -446,7 +446,7 @@ function StatCard({ icon, value, label, accent }: { icon: React.ReactNode; value
         {icon}
       </div>
       <div className={"text-lg font-extrabold mb-0.5 " + (accent ? "gb-gold-text" : "text-foreground")}>{value}</div>
-      <div className="text-[11px] text-muted-foreground leading-tight">{label}</div>
+      <div className="text-fs-xs text-muted-foreground leading-tight">{label}</div>
     </div>
   );
 }

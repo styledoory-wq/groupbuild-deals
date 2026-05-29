@@ -228,22 +228,22 @@ export default function SupplierProfile() {
               {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-gold shrink-0" />}
             </div>
             <div className="mb-1 flex items-center gap-1.5 flex-wrap">
-              <SupplierRatingBadge supplierId={supplier.id} className="text-[11px] text-primary-foreground/90 [&>b]:text-gold [&>span]:text-primary-foreground/70" />
+              <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-primary-foreground/90 [&>b]:text-gold [&>span]:text-primary-foreground/70" />
               {(() => {
                 const isSvc = Boolean(supplier.offers_services) || supplier.supplier_kind === "service";
                 const isProd = Boolean(supplier.offers_products) || supplier.supplier_kind === "product";
                 if (isSvc && isProd) return (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/40">
+                  <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/40">
                     שירות + מוצרים
                   </span>
                 );
                 if (isSvc) return (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-400/20 text-blue-100 border border-blue-300/30">
+                  <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-blue-400/20 text-blue-100 border border-blue-300/30">
                     בעל מקצוע
                   </span>
                 );
                 if (isProd) return (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-100 border border-emerald-300/30">
+                  <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-100 border border-emerald-300/30">
                     ספק מוצרים
                   </span>
                 );
@@ -299,7 +299,7 @@ export default function SupplierProfile() {
               {supplierCategories.map((c) => (
                 <span
                   key={c.id}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-gold/10 text-primary border border-gold/30"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold bg-gold/10 text-primary border border-gold/30"
                 >
                   <span>{c.icon}</span> {c.name}
                 </span>
@@ -314,7 +314,7 @@ export default function SupplierProfile() {
             <MapPin className="h-3.5 w-3.5 text-gold" /> אזורי שירות
           </h2>
           {supplier.serves_all_country ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-gold/15 text-primary border border-gold/40">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold bg-gold/15 text-primary border border-gold/40">
               נותן שירות בכל הארץ
             </span>
           ) : serviceAreas.length > 0 ? (
@@ -322,7 +322,7 @@ export default function SupplierProfile() {
               {serviceAreas.map((name) => (
                 <span
                   key={name}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-primary/10 text-primary border border-primary/30"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold bg-primary/10 text-primary border border-primary/30"
                 >
                   {name}
                 </span>
@@ -370,7 +370,7 @@ export default function SupplierProfile() {
 
       {/* CTA */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0">
           <Button
             onClick={handleInterest}
             disabled={submitting || interested}
@@ -432,14 +432,14 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-bold truncate flex items-center gap-1.5">
                   <span className="truncate">{r.name}</span>
-                  <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
+                  <span className="text-fs-xs font-normal px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
                     {isLink ? "קישור" : "PDF"}
                   </span>
                 </div>
                 {r.description && (
-                  <div className="text-[11px] text-muted-foreground line-clamp-1">{r.description}</div>
+                  <div className="text-fs-xs text-muted-foreground line-clamp-1">{r.description}</div>
                 )}
-                <div className="text-[11px] text-gold font-bold mt-0.5">
+                <div className="text-fs-xs text-gold font-bold mt-0.5">
                   {isLink ? "צפייה בקטלוג ↗" : "צפייה בקטלוג"}
                 </div>
               </div>
@@ -459,7 +459,7 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-bold truncate">צפייה בקטלוג</div>
-              <div className="text-[11px] text-muted-foreground">PDF · ייפתח בכרטיסיה חדשה</div>
+              <div className="text-fs-xs text-muted-foreground">PDF · ייפתח בכרטיסיה חדשה</div>
             </div>
             <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
           </a>

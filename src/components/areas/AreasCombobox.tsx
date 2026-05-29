@@ -156,7 +156,7 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
                       <Check className={cn("ml-2 h-4 w-4", active ? "opacity-100" : "opacity-0")} />
                       <span>{c.name_he}</span>
                       {region && (
-                        <span className="mr-2 text-[11px] text-muted-foreground">· {region.name_he}</span>
+                        <span className="mr-2 text-fs-xs text-muted-foreground">· {region.name_he}</span>
                       )}
                     </CommandItem>
                   );
@@ -173,7 +173,7 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
             <span
               key={`${chip.type}-${chip.id}`}
               className={cn(
-                "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border",
+                "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold border",
                 chip.type === "all"
                   ? "bg-gold/15 text-primary border-gold/40"
                   : chip.type === "region"

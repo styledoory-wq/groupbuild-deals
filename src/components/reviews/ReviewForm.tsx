@@ -86,7 +86,7 @@ export function ReviewForm({ supplierId, dealId, dealCompleted, onSubmitted }: P
       <h2 className="text-sm font-bold text-foreground mb-1">
         {existing ? "עדכון הביקורת שלך" : "השאר דירוג וחוות דעת"}
       </h2>
-      <p className="text-[11px] text-muted-foreground mb-4">
+      <p className="text-fs-xs text-muted-foreground mb-4">
         הדירוג שלך משפיע ישירות על הציון הציבורי של הספק.
       </p>
 
