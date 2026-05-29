@@ -252,13 +252,13 @@ export default function SupplierLeads() {
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="min-w-0">
                           <h4 className="font-bold text-sm text-foreground truncate">{name}</h4>
-                          <p className="text-[11px] text-muted-foreground truncate">{q.message ?? "פנייה כללית"}</p>
+                          <p className="text-fs-xs text-muted-foreground truncate">{q.message ?? "פנייה כללית"}</p>
                         </div>
-                        <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gold/10 text-primary border border-gold/30 shrink-0">
+                        <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gold/10 text-primary border border-gold/30 shrink-0">
                           פנייה חדשה
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground mb-2">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-fs-xs text-muted-foreground mb-2">
                         {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
                         {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
                         {q.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {q.city}</span>}
@@ -268,10 +268,10 @@ export default function SupplierLeads() {
                       {(phone || wa) && (
                         <div className="flex gap-2">
                           {phone && (
-                            <a href={`tel:${phone}`} className="flex-1 text-center text-[11px] font-bold py-2 rounded-lg bg-primary text-primary-foreground">חיוג</a>
+                            <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-primary text-primary-foreground">חיוג</a>
                           )}
                           {wa && (
-                            <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-[11px] font-bold py-2 rounded-lg bg-success/10 text-success border border-success/30 inline-flex items-center justify-center gap-1">
+                            <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-success/10 text-success border border-success/30 inline-flex items-center justify-center gap-1">
                               <MessageCircle className="h-3 w-3" /> וואטסאפ
                             </a>
                           )}
@@ -297,16 +297,16 @@ export default function SupplierLeads() {
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="min-w-0">
                       <h4 className="font-bold text-sm text-foreground truncate">{name}</h4>
-                      <p className="text-[11px] text-muted-foreground truncate">{dealTitle(i.deal_id)}</p>
+                      <p className="text-fs-xs text-muted-foreground truncate">{dealTitle(i.deal_id)}</p>
                     </div>
                     {committed && (
-                      <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gold/10 text-primary border border-gold/30 shrink-0">
+                      <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gold/10 text-primary border border-gold/30 shrink-0">
                         <BadgeCheck className="h-3 w-3" />
                         {i.deposit_status === "paid" ? "פיקדון שולם" : `התחייב ${ils(Number(i.deposit_amount))}`}
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground mb-2">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-fs-xs text-muted-foreground mb-2">
                     {phone && (
                       <span className="inline-flex items-center gap-1">
                         <Phone className="h-3 w-3" /> {phone}
@@ -342,7 +342,7 @@ export default function SupplierLeads() {
                     )}
                   </div>
                   {i.notes && (
-                    <p className="text-[11px] text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">
+                    <p className="text-fs-xs text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">
                       {i.notes}
                     </p>
                   )}
@@ -350,14 +350,14 @@ export default function SupplierLeads() {
                     <button
                       onClick={() => updateLeadStatus(i.id, "approved")}
                       disabled={statusBusy === i.id || i.lead_status === "approved"}
-                      className="h-8 rounded-lg bg-success text-success-foreground text-[11px] font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                      className="h-8 rounded-lg bg-success text-success-foreground text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
                     >
                       <Check className="h-3 w-3" /> מאושר
                     </button>
                     <button
                       onClick={() => updateLeadStatus(i.id, "rejected")}
                       disabled={statusBusy === i.id || i.lead_status === "rejected"}
-                      className="h-8 rounded-lg bg-muted text-foreground text-[11px] font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                      className="h-8 rounded-lg bg-muted text-foreground text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
                     >
                       <X className="h-3 w-3" /> לא רלוונטי
                     </button>
@@ -367,7 +367,7 @@ export default function SupplierLeads() {
                       {phone && (
                         <a
                           href={`tel:${phone}`}
-                          className="flex-1 text-center text-[11px] font-bold py-2 rounded-lg bg-primary text-primary-foreground"
+                          className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-primary text-primary-foreground"
                         >
                           חיוג
                         </a>
@@ -377,7 +377,7 @@ export default function SupplierLeads() {
                           href={wa}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex-1 text-center text-[11px] font-bold py-2 rounded-lg bg-success/10 text-success border border-success/30 inline-flex items-center justify-center gap-1"
+                          className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-success/10 text-success border border-success/30 inline-flex items-center justify-center gap-1"
                         >
                           <MessageCircle className="h-3 w-3" /> וואטסאפ
                         </a>
@@ -388,7 +388,7 @@ export default function SupplierLeads() {
                     <button
                       onClick={() => markDepositPaid(i.user_id, i.deal_id)}
                       disabled={busyKey === i.user_id + i.deal_id}
-                      className="mt-2 w-full text-[11px] font-bold py-2 rounded-lg bg-gold/15 text-primary border border-gold/40 inline-flex items-center justify-center gap-1 disabled:opacity-50"
+                      className="mt-2 w-full text-fs-xs font-bold py-2 rounded-lg bg-gold/15 text-primary border border-gold/40 inline-flex items-center justify-center gap-1 disabled:opacity-50"
                     >
                       <CheckCircle2 className="h-3 w-3" /> סמן פיקדון כשולם (אדמין)
                     </button>

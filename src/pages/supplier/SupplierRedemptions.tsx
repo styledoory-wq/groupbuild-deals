@@ -73,7 +73,7 @@ export default function SupplierRedemptions() {
           <StatCard icon={TrendingUp} label="% מימוש" value={`${stats.rate}%`} />
         </div>
         <div className="rounded-2xl bg-primary text-primary-foreground p-4">
-          <div className="text-[11px] uppercase tracking-wider text-primary-foreground/60">פוטנציאל הכנסה</div>
+          <div className="text-fs-xs uppercase tracking-wider text-primary-foreground/60">פוטנציאל הכנסה</div>
           <div className="text-2xl font-bold gb-gold-text mt-1">₪{stats.potential.toLocaleString("he-IL")}</div>
         </div>
 
@@ -95,7 +95,7 @@ export default function SupplierRedemptions() {
                 <div className="font-bold text-foreground truncate">{r.profiles?.full_name ?? "דייר"}</div>
                 <div className="text-xs text-muted-foreground truncate">{r.deals?.title} · {r.profiles?.project_id ?? ""}</div>
               </div>
-              <span className="font-mono text-[11px] text-muted-foreground whitespace-nowrap">{r.code}</span>
+              <span className="font-mono text-fs-xs text-muted-foreground whitespace-nowrap">{r.code}</span>
             </div>
             <Select value={r.status} onValueChange={(v) => updateStatus(r.id, v)} disabled={r.status === "redeemed"}>
               <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
@@ -116,7 +116,7 @@ function StatCard({ icon: Icon, label, value }: { icon: typeof Users; label: str
     <div className="rounded-2xl bg-card border border-border/60 p-3 text-center">
       <Icon className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
       <div className="text-lg font-bold text-foreground">{value}</div>
-      <div className="text-[10px] text-muted-foreground">{label}</div>
+      <div className="text-fs-xs text-muted-foreground">{label}</div>
     </div>
   );
 }

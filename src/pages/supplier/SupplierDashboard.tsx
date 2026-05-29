@@ -196,12 +196,12 @@ export default function SupplierDashboard() {
         <div aria-hidden className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-[#C9A961]/5 blur-2xl" />
 
         <div className="relative flex items-center justify-between gap-2 px-5 pt-4">
-          <span className="h-9 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur flex items-center text-white text-[11px] font-semibold uppercase tracking-[0.14em]">
+          <span className="h-9 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur flex items-center text-white text-fs-xs font-semibold uppercase tracking-[0.14em]">
             אזור ספק
           </span>
           <button
             onClick={handleLogout}
-            className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-[12px] font-semibold"
+            className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-fs-sm font-semibold"
             aria-label="יציאה"
           >
             <LogOut className="h-[15px] w-[15px]" strokeWidth={2} />
@@ -210,12 +210,12 @@ export default function SupplierDashboard() {
         </div>
 
         <div className="relative px-5 mt-8 text-right">
-          <h1 className="text-[26px] sm:text-[28px] font-extrabold text-white leading-[1.15] tracking-tight break-words">
+          <h1 className="text-fs-2xl sm:text-fs-2xl font-extrabold text-white leading-[1.15] tracking-tight break-words">
             {businessName}
           </h1>
           {dbSupplier && !isPending && !isRejected && (
             <div className="mt-2">
-              <SupplierRatingBadge supplierId={dbSupplier.id} className="text-[11px] text-[#C9A961]" />
+              <SupplierRatingBadge supplierId={dbSupplier.id} className="text-fs-xs text-[#C9A961]" />
             </div>
           )}
         </div>
@@ -276,7 +276,7 @@ export default function SupplierDashboard() {
       </div>
 
       <section className="px-5 space-y-3 pb-8">
-        <h2 className="text-[11px] uppercase tracking-[0.14em] text-[#475569] font-semibold flex items-center gap-1.5 mb-1 px-1">
+        <h2 className="text-fs-xs uppercase tracking-[0.14em] text-[#475569] font-semibold flex items-center gap-1.5 mb-1 px-1">
           <Briefcase className="h-3 w-3 text-[#B8923F]" strokeWidth={2} /> ההצעות שלי
         </h2>
         {myDeals.length === 0 && (
@@ -290,15 +290,15 @@ export default function SupplierDashboard() {
             <div key={d.id} className="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)]">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-[14px] text-[#0A1F3D] truncate">{d.title}</h3>
-                  <div className="text-[11px] text-[#475569] mt-0.5">{d.status}</div>
+                  <h3 className="font-bold text-fs-sm text-[#0A1F3D] truncate">{d.title}</h3>
+                  <div className="text-fs-xs text-[#475569] mt-0.5">{d.status}</div>
                 </div>
                 <div className="text-left">
                   <div className="font-extrabold text-[#0A1F3D] text-sm">{formatILS(priceFor(d))}</div>
-                  <div className="text-[10px] text-[#B8923F] font-bold mt-0.5">{c.paid} שילמו</div>
+                  <div className="text-fs-xs text-[#B8923F] font-bold mt-0.5">{c.paid} שילמו</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[11px] pt-3 border-t border-[#E2E8F0]">
+              <div className="flex items-center gap-2 text-fs-xs pt-3 border-t border-[#E2E8F0]">
                 <span className="px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#0A1F3D] border border-[#E2E8F0] font-semibold">{c.interests} לידים</span>
                 <span className="px-2.5 py-1 rounded-full bg-[#C9A961]/12 text-[#B8923F] border border-[#C9A961]/30 font-semibold">{c.paid} פיקדונות</span>
               </div>
@@ -319,9 +319,9 @@ function Stat({ icon: Icon, label, value, small }: { icon: LucideIcon; label: st
         <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center">
           <Icon className="h-3.5 w-3.5 text-[#B8923F]" strokeWidth={2} />
         </span>
-        <span className="text-[10px] text-[#475569] font-semibold uppercase tracking-[0.12em]">{label}</span>
+        <span className="text-fs-xs text-[#475569] font-semibold uppercase tracking-[0.12em]">{label}</span>
       </div>
-      <div className={(small ? "text-[16px]" : "text-[22px]") + " font-extrabold text-[#0A1F3D] tracking-tight leading-none"}>{value}</div>
+      <div className={(small ? "text-fs-base" : "text-fs-xl") + " font-extrabold text-[#0A1F3D] tracking-tight leading-none"}>{value}</div>
     </div>
   );
 }

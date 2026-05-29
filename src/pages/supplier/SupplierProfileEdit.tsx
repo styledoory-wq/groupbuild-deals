@@ -324,12 +324,12 @@ export default function SupplierProfileEdit() {
                   }
                 >
                   <div className={"text-sm font-bold " + (opt.checked ? "text-primary" : "text-foreground")}>{opt.label}</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{opt.sub}</div>
-                  <span className={"absolute top-2 left-2 h-4 w-4 rounded-md border flex items-center justify-center text-[10px] " + (opt.checked ? "bg-gold border-gold text-gold-foreground" : "border-border")}>{opt.checked ? "✓" : ""}</span>
+                  <div className="text-fs-xs text-muted-foreground mt-0.5 leading-tight">{opt.sub}</div>
+                  <span className={"absolute top-2 left-2 h-4 w-4 rounded-md border flex items-center justify-center text-fs-xs " + (opt.checked ? "bg-gold border-gold text-gold-foreground" : "border-border")}>{opt.checked ? "✓" : ""}</span>
                 </button>
               ))}
             </div>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-fs-xs text-muted-foreground">
               {offersServices && offersProducts ? "ספק 'גם וגם' — תופיע בשני הסינונים" : !offersServices && !offersProducts ? "בחרו לפחות אפשרות אחת כדי להופיע לדיירים." : "ניתן לסמן את שתי האפשרויות אם אתם גם נותני שירות וגם מוכרי מוצרים."}
             </p>
           </div>
@@ -343,7 +343,7 @@ export default function SupplierProfileEdit() {
           <Field label="אימייל" icon={Mail}>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-11 rounded-xl" />
             {email.trim().toLowerCase() !== originalEmail.toLowerCase() && (
-              <p className="text-[11px] text-gold mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
+              <p className="text-fs-xs text-gold mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
             )}
           </Field>
           <Field label="תיאור קצר (יוצג בכרטיס)" icon={FileText}>
@@ -399,7 +399,7 @@ export default function SupplierProfileEdit() {
             {supplierId ? (
               <SupplierCatalogsManager supplierId={supplierId} />
             ) : (
-              <p className="text-[11px] text-muted-foreground">שמור את הפרופיל כדי להוסיף קטלוגים.</p>
+              <p className="text-fs-xs text-muted-foreground">שמור את הפרופיל כדי להוסיף קטלוגים.</p>
             )}
           </div>
 
