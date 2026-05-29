@@ -1,4 +1,5 @@
 import type { CapacitorConfig } from '@capacitor/cli';
+import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 
 const config: CapacitorConfig = {
   appId: 'app.lovable.6b860cbcd9e9429eb2ee0ed4e79df143',
@@ -10,6 +11,15 @@ const config: CapacitorConfig = {
   },
   ios: {
     contentInset: 'always',
+  },
+  plugins: {
+    Keyboard: {
+      // "native" lets iOS smoothly resize the webview so inputs stay visible
+      // and the page slides up instead of getting covered.
+      resize: KeyboardResize.Native,
+      style: KeyboardStyle.Default,
+      resizeOnFullScreen: true,
+    },
   },
 };
 

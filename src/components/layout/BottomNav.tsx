@@ -39,9 +39,9 @@ function BottomNavImpl({ role }: { role: Role }) {
   return (
     <nav
       dir="rtl"
-      className="fixed bottom-0 inset-x-0 z-40 flex justify-center pointer-events-none"
+      className="fixed bottom-0 inset-x-0 z-40 flex justify-center pointer-events-none transition-transform duration-200 [.keyboard-open_&]:translate-y-full [.keyboard-open_&]:pointer-events-none"
     >
-      <div className="pointer-events-auto w-full max-w-[var(--app-max-w)] px-[var(--pad-x)] pb-[calc(env(safe-area-inset-bottom)+6px)]">
+      <div className="pointer-events-auto w-full max-w-[var(--app-max-w)] px-[var(--pad-x)] pb-[max(env(safe-area-inset-bottom),8px)]">
         <div
           className="ios-dock rounded-[22px] px-1.5 sm:px-2.5 flex items-stretch justify-between gap-0.5"
           style={{ minHeight: "var(--nav-h)" }}
