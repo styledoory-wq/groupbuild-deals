@@ -167,7 +167,7 @@ export default function SupplierReviews() {
 
           <div className="mt-4 space-y-1.5">
             {dist.map((d) => (
-              <div key={d.star} className="flex items-center gap-2 text-[11px]">
+              <div key={d.star} className="flex items-center gap-2 text-fs-xs">
                 <span className="w-4 text-muted-foreground">{d.star}</span>
                 <Star className="h-3 w-3 fill-gold text-gold" />
                 <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
@@ -207,7 +207,7 @@ export default function SupplierReviews() {
               {r.comment && (
                 <p className="text-xs text-muted-foreground leading-relaxed">{r.comment}</p>
               )}
-              <p className="text-[10px] text-muted-foreground mt-2">
+              <p className="text-fs-xs text-muted-foreground mt-2">
                 {new Date(r.created_at).toLocaleDateString("he-IL")}
               </p>
             </div>

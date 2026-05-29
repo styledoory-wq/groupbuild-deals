@@ -113,7 +113,7 @@ export default function SupplierOfferMarketingEdit() {
           <div className="h-8 w-8 rounded-xl bg-gold/20 flex items-center justify-center shrink-0">
             <Sparkles className="h-4 w-4 text-gold" />
           </div>
-          <div className="text-[12px] leading-relaxed">
+          <div className="text-fs-sm leading-relaxed">
             <div className="font-bold text-foreground mb-0.5">עריכה בטוחה</div>
             <p className="text-muted-foreground">
               ניתן לעדכן את הטקסט השיווקי, הכותרת והתיאור — נתוני פיקדון, מדרגות ותנאים נעולים לשמירה על ההוגנות לדיירים.
@@ -184,7 +184,7 @@ export default function SupplierOfferMarketingEdit() {
               {highlights.map((h, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1.5 text-[12px] font-bold px-2.5 py-1.5 rounded-full bg-gold/10 text-primary border border-gold/30"
+                  className="inline-flex items-center gap-1.5 text-fs-sm font-bold px-2.5 py-1.5 rounded-full bg-gold/10 text-primary border border-gold/30"
                 >
                   {h}
                   <button
@@ -205,13 +205,13 @@ export default function SupplierOfferMarketingEdit() {
           <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
             <Lock className="h-3.5 w-3.5" /> שדות נעולים לעריכה
           </div>
-          <ul className="text-[12px] text-muted-foreground space-y-1 pr-5 list-disc">
+          <ul className="text-fs-sm text-muted-foreground space-y-1 pr-5 list-disc">
             <li>סכום פיקדון ודרישת פיקדון</li>
             <li>מדרגות מחיר / הנחה</li>
             <li>סטטוס ההצעה ותנאי הצטרפות</li>
             <li>קטגוריה ונראות (ציבורי / פרויקט)</li>
           </ul>
-          <p className="text-[11px] text-muted-foreground flex items-start gap-1.5 pt-1">
+          <p className="text-fs-xs text-muted-foreground flex items-start gap-1.5 pt-1">
             <ShieldAlert className="h-3.5 w-3.5 text-gold shrink-0 mt-0.5" />
             לשינויים בשדות אלו יש לפנות למנהל המערכת. נועד למניעת שינויים לאחר שדיירים כבר הצטרפו.
           </p>
@@ -219,7 +219,7 @@ export default function SupplierOfferMarketingEdit() {
       </div>
 
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0 flex gap-2">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0 flex gap-2">
           <Button variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-xl">
             ביטול
           </Button>

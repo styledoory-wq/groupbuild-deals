@@ -150,11 +150,11 @@ export default function SupplierOffers() {
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-sm truncate">{d.title}</h3>
-                  <p className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+                  <p className="text-fs-xs text-muted-foreground inline-flex items-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-gold" /> ספק מאומת
                   </p>
                 </div>
-                <span className={`text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap ${d.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                <span className={`text-fs-xs font-bold px-2 py-1 rounded-full whitespace-nowrap ${d.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
                   {d.status === "active" ? "פעילה" : "מושבתת"}
                 </span>
                 <DealActionsMenu dealId={d.id} status={d.status} onChanged={refresh} />
@@ -163,15 +163,15 @@ export default function SupplierOffers() {
               <div className="pt-2 border-t border-border mt-2">
                 <div className="font-extrabold text-primary text-base">{display.headline}</div>
                 {display.savings && (
-                  <div className="text-[11px] font-bold text-success mt-0.5">{display.savings}</div>
+                  <div className="text-fs-xs font-bold text-success mt-0.5">{display.savings}</div>
                 )}
-                <p className="text-[10px] text-muted-foreground mt-1.5">
+                <p className="text-fs-xs text-muted-foreground mt-1.5">
                   ככל שיותר דיירים מצטרפים — ההנחה גדלה
                 </p>
 
                 {hasTiers && (
                   <div className="mt-3 rounded-xl border border-border bg-muted/30 overflow-hidden">
-                    <div className="grid grid-cols-2 gap-1 px-3 py-2 bg-muted/60 text-[10px] font-bold text-muted-foreground">
+                    <div className="grid grid-cols-2 gap-1 px-3 py-2 bg-muted/60 text-fs-xs font-bold text-muted-foreground">
                       <span>מצטרפים</span>
                       <span className="text-left">הנחה</span>
                     </div>
@@ -181,7 +181,7 @@ export default function SupplierOffers() {
                       return (
                         <div
                           key={idx}
-                          className={`grid grid-cols-2 gap-1 px-3 py-2 text-[11px] border-t border-border ${
+                          className={`grid grid-cols-2 gap-1 px-3 py-2 text-fs-xs border-t border-border ${
                             isFirst ? "bg-gold/5" : ""
                           }`}
                         >
@@ -196,11 +196,11 @@ export default function SupplierOffers() {
                 <div className="flex items-center justify-between mt-3 pt-2 border-t border-border">
                   <Link
                     to={`/supplier/offers/${d.id}/marketing`}
-                    className="inline-flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-xl bg-gold/10 text-primary border border-gold/30 hover:bg-gold/20 transition-smooth"
+                    className="inline-flex items-center gap-1.5 text-fs-sm font-bold px-3 py-1.5 rounded-xl bg-gold/10 text-primary border border-gold/30 hover:bg-gold/20 transition-smooth"
                   >
                     <Pencil className="h-3.5 w-3.5" /> עריכה שיווקית
                   </Link>
-                  <div className="text-[10px] text-muted-foreground">
+                  <div className="text-fs-xs text-muted-foreground">
                     {new Date(d.created_at).toLocaleDateString("he-IL")}
                   </div>
                 </div>

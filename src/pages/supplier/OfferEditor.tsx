@@ -443,7 +443,7 @@ export default function OfferEditor() {
             </label>
             {depositRequired && (
               <div>
-                <div className="text-[11px] font-bold text-muted-foreground mb-1">סכום הפיקדון (₪)</div>
+                <div className="text-fs-xs font-bold text-muted-foreground mb-1">סכום הפיקדון (₪)</div>
                 <Input
                   type="number"
                   min={1}
@@ -451,7 +451,7 @@ export default function OfferEditor() {
                   onChange={(e) => setDepositAmount(+e.target.value)}
                   className="h-11 rounded-xl"
                 />
-                <p className="text-[10px] text-muted-foreground mt-1">
+                <p className="text-fs-xs text-muted-foreground mt-1">
                   בשלב זה הפיקדון מהווה התחייבות בלבד — לא תתבצע גבייה בפועל.
                 </p>
               </div>
@@ -470,7 +470,7 @@ export default function OfferEditor() {
               setGalleryImages(gallery);
             }}
           />
-          <p className="text-[11px] text-muted-foreground mt-3 leading-relaxed">
+          <p className="text-fs-xs text-muted-foreground mt-3 leading-relaxed">
             הצעות עם תמונות נראות פרימיום ומגדילות משמעותית את ההצטרפויות.
           </p>
         </div>
@@ -502,7 +502,7 @@ export default function OfferEditor() {
               מחיר לפני ואחרי
             </button>
           </div>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
+          <p className="text-fs-xs text-muted-foreground leading-relaxed">
             ככל שיותר דיירים מצטרפים — ההנחה גדלה.
           </p>
         </div>
@@ -536,7 +536,7 @@ export default function OfferEditor() {
           </div>
           {visibilityType === "project_only" && (
             <div>
-              <div className="text-[11px] font-bold text-muted-foreground mb-1">בחר פרויקט</div>
+              <div className="text-fs-xs font-bold text-muted-foreground mb-1">בחר פרויקט</div>
               <select
                 value={visibilityProjectId}
                 onChange={(e) => setVisibilityProjectId(e.target.value)}
@@ -547,7 +547,7 @@ export default function OfferEditor() {
                   <option key={p.id} value={p.id}>{p.name} · {p.city}</option>
                 ))}
               </select>
-              <p className="text-[10px] text-muted-foreground mt-1">
+              <p className="text-fs-xs text-muted-foreground mt-1">
                 רק דיירים המשויכים לפרויקט זה יראו את ההצעה.
               </p>
             </div>
@@ -558,7 +558,7 @@ export default function OfferEditor() {
         <div className="gb-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-sm">מדרגות לפי כמות מצטרפים</h3>
-            <span className="text-[10px] text-muted-foreground">{tiers.length} מדרגות</span>
+            <span className="text-fs-xs text-muted-foreground">{tiers.length} מדרגות</span>
           </div>
 
           <div className="space-y-3">
@@ -717,7 +717,7 @@ export default function OfferEditor() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-[11px] font-bold text-muted-foreground mb-1.5 block">{label}</span>
+      <span className="text-fs-xs font-bold text-muted-foreground mb-1.5 block">{label}</span>
       {children}
     </label>
   );
@@ -726,7 +726,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Mini({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="text-[10px] text-muted-foreground mb-1">{label}</div>
+      <div className="text-fs-xs text-muted-foreground mb-1">{label}</div>
       {children}
     </div>
   );
