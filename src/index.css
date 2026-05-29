@@ -160,15 +160,15 @@
    Typography scale, spacing, motion primitives — used across the app
    to keep the experience consistent and premium. */
 @layer components {
-  /* Typography — semantic, premium scale */
-  .gb-display     { @apply text-[28px] md:text-[36px] lg:text-[44px] font-extrabold tracking-tight leading-[1.05]; letter-spacing: -0.02em; }
-  .gb-h1          { @apply text-[22px] md:text-[28px] font-extrabold tracking-tight leading-[1.15]; letter-spacing: -0.015em; }
-  .gb-h2          { @apply text-[18px] md:text-[22px] font-bold tracking-tight leading-[1.2]; }
-  .gb-h3          { @apply text-[15px] md:text-[16px] font-bold leading-[1.3]; }
-  .gb-body        { @apply text-[14px] leading-[1.6] text-foreground; }
-  .gb-body-sm     { @apply text-[12px] leading-[1.55] text-muted-foreground; }
-  .gb-caption     { @apply text-[11px] uppercase tracking-[0.08em] font-bold text-muted-foreground; }
-  .gb-overline    { @apply text-[10px] uppercase tracking-[0.12em] font-bold text-muted-foreground; }
+  /* Typography — fluid scale tokens (clamp-based, no per-breakpoint snaps) */
+  .gb-display     { @apply text-fs-4xl font-extrabold tracking-tight; letter-spacing: -0.02em; }
+  .gb-h1          { @apply text-fs-2xl font-extrabold tracking-tight; letter-spacing: -0.015em; }
+  .gb-h2          { @apply text-fs-xl font-bold tracking-tight; }
+  .gb-h3          { @apply text-fs-lg font-bold; }
+  .gb-body        { @apply text-fs-base text-foreground; }
+  .gb-body-sm     { @apply text-fs-sm text-muted-foreground; }
+  .gb-caption     { @apply text-fs-xs uppercase tracking-[0.08em] font-bold text-muted-foreground; }
+  .gb-overline    { @apply text-fs-xs uppercase tracking-[0.12em] font-bold text-muted-foreground; }
   .gb-num         { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 
   /* Section spacing primitives */
