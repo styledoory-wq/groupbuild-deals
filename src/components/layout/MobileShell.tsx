@@ -14,7 +14,10 @@ import { cn } from "@/lib/utils";
  */
 export function MobileShell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className="min-h-[100dvh] flex justify-center relative ios-bg">
+    <div
+      className="min-h-[100dvh] flex justify-center relative ios-bg"
+      style={{ overscrollBehavior: "none", backgroundColor: "#F1F5F9" }}
+    >
       {/* Soft ambient lighting — pearl & gold */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
         <div className="absolute -top-32 -right-24 h-72 w-72 sm:h-80 sm:w-80 md:h-[28rem] md:w-[28rem] rounded-full bg-[#C9A961]/[0.10] blur-3xl gb-float" />
