@@ -61,7 +61,7 @@ export default function AdminComplaints() {
                   <div className="text-xs text-muted-foreground mt-0.5">ספק: {r.suppliers.business_name}</div>
                 )}
               </div>
-              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+              <span className="text-fs-xs text-muted-foreground whitespace-nowrap">
                 {new Date(r.created_at).toLocaleDateString("he-IL")}
               </span>
             </div>

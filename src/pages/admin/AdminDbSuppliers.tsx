@@ -615,7 +615,7 @@ export default function AdminDbSuppliers() {
             value={supplierSearch}
             onChange={(e) => setSupplierSearch(e.target.value)}
             placeholder="חיפוש ספק…"
-            className="h-9 pr-9 text-[13px] rounded-xl"
+            className="h-9 pr-9 text-fs-sm rounded-xl"
           />
         </div>
         <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-0.5 scrollbar-none">
@@ -633,7 +633,7 @@ export default function AdminDbSuppliers() {
                 key={k}
                 onClick={() => setQuickFilter(k)}
                 className={
-                  "shrink-0 h-7 px-3 rounded-full text-[11px] font-bold border transition-all " +
+                  "shrink-0 h-7 px-3 rounded-full text-fs-xs font-bold border transition-all " +
                   (active
                     ? "bg-primary text-primary-foreground border-primary shadow-sm"
                     : "bg-card text-muted-foreground border-border hover:border-gold/40")
@@ -699,14 +699,14 @@ export default function AdminDbSuppliers() {
                 <SupplierLogo name={r.business_name} logoUrl={r.logo_url} size="sm" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <h3 className="font-bold text-[14px] truncate leading-tight">{r.business_name}</h3>
+                    <h3 className="font-bold text-fs-sm truncate leading-tight">{r.business_name}</h3>
                     <span className={`h-2 w-2 rounded-full shrink-0 ${statusDot}`} aria-hidden />
-                    <span className="text-[10px] text-muted-foreground font-medium shrink-0">{statusLabel}</span>
+                    <span className="text-fs-xs text-muted-foreground font-medium shrink-0">{statusLabel}</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                  <p className="text-fs-xs text-muted-foreground mt-0.5 truncate">
                     {areasLabel} • {r.dealsCount ?? 0} הצעות • {r.leadsCount ?? 0} לידים
                   </p>
-                  <p className="text-[10px] text-muted-foreground/80 mt-0.5">
+                  <p className="text-fs-xs text-muted-foreground/80 mt-0.5">
                     עודכן {updatedLabel}{noCats ? " • ללא קטגוריה" : ""}
                   </p>
                 </div>
@@ -715,13 +715,13 @@ export default function AdminDbSuppliers() {
               <div className="grid grid-cols-2 gap-1.5 mt-2.5">
                 <button
                   onClick={() => openEdit(r.id)}
-                  className="h-9 rounded-xl bg-primary text-primary-foreground text-[12px] font-bold flex items-center justify-center gap-1"
+                  className="h-9 rounded-xl bg-primary text-primary-foreground text-fs-sm font-bold flex items-center justify-center gap-1"
                 >
                   <Pencil className="h-3.5 w-3.5" /> עריכה
                 </button>
                 <button
                   onClick={() => navigate(`/supplier/offers/new?supplierId=${r.id}`)}
-                  className="h-9 rounded-xl bg-gradient-gold text-primary text-[12px] font-bold flex items-center justify-center gap-1 shadow-gold"
+                  className="h-9 rounded-xl bg-gradient-gold text-primary text-fs-sm font-bold flex items-center justify-center gap-1 shadow-gold"
                 >
                   <Plus className="h-3.5 w-3.5" /> צור הצעה
                 </button>
@@ -839,7 +839,7 @@ export default function AdminDbSuppliers() {
                 {form.logo_url ? (
                   <img src={form.logo_url} alt="לוגו" className="h-14 w-14 rounded-xl object-cover border border-border" />
                 ) : (
-                  <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center text-[10px] text-muted-foreground">אין</div>
+                  <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center text-fs-xs text-muted-foreground">אין</div>
                 )}
                 <div className="flex-1 space-y-1.5">
                   <input
@@ -856,12 +856,12 @@ export default function AdminDbSuppliers() {
                     <button
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, logo_url: "" }))}
-                      className="text-[11px] text-destructive underline"
+                      className="text-fs-xs text-destructive underline"
                     >
                       הסר לוגו
                     </button>
                   )}
-                  {uploadingLogo && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+                  {uploadingLogo && <p className="text-fs-xs text-muted-foreground">מעלה...</p>}
                 </div>
               </div>
             </div>
@@ -882,19 +882,19 @@ export default function AdminDbSuppliers() {
                 />
                 {form.catalog_url && (
                   <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted">
-                    <a href={form.catalog_url} target="_blank" rel="noreferrer noopener" className="text-[11px] text-primary underline truncate">
+                    <a href={form.catalog_url} target="_blank" rel="noreferrer noopener" className="text-fs-xs text-primary underline truncate">
                       צפייה בקטלוג שהועלה
                     </a>
                     <button
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, catalog_url: "" }))}
-                      className="text-[11px] text-destructive underline shrink-0"
+                      className="text-fs-xs text-destructive underline shrink-0"
                     >
                       הסר
                     </button>
                   </div>
                 )}
-                {uploadingCatalog && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+                {uploadingCatalog && <p className="text-fs-xs text-muted-foreground">מעלה...</p>}
               </div>
             </div>
 
@@ -922,7 +922,7 @@ export default function AdminDbSuppliers() {
             {/* Categories — REQUIRED */}
             <div className="pt-2 border-t">
               <Label className="text-sm font-bold">קטגוריות *</Label>
-              <p className="text-[11px] text-muted-foreground mb-2">בחר לפחות אחת — אחרת הספק לא יוצג לדיירים</p>
+              <p className="text-fs-xs text-muted-foreground mb-2">בחר לפחות אחת — אחרת הספק לא יוצג לדיירים</p>
               <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
                 {categories.map((c) => {
                   const active = form.categoryIds.includes(c.id);
@@ -951,7 +951,7 @@ export default function AdminDbSuppliers() {
 
             <div className="pt-2 border-t">
               <Label className="text-sm font-bold">אזורי שירות *</Label>
-              <p className="text-[11px] text-muted-foreground mb-2">
+              <p className="text-fs-xs text-muted-foreground mb-2">
                 חפש ובחר אזורים, ערים, או "כל הארץ"
               </p>
               <AreasCombobox value={areas} onChange={setAreas} />
@@ -1033,7 +1033,7 @@ export default function AdminDbSuppliers() {
                   {editForm.logo_url ? (
                     <img src={editForm.logo_url} alt="לוגו" className="h-14 w-14 rounded-xl object-cover border border-border" />
                   ) : (
-                    <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center text-[10px] text-muted-foreground">אין</div>
+                    <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center text-fs-xs text-muted-foreground">אין</div>
                   )}
                   <div className="flex-1 space-y-1.5">
                     <input
@@ -1047,11 +1047,11 @@ export default function AdminDbSuppliers() {
                       disabled={uploadingEditLogo}
                     />
                     {editForm.logo_url && (
-                      <button type="button" onClick={() => setEditForm((f) => ({ ...f, logo_url: "" }))} className="text-[11px] text-destructive underline">
+                      <button type="button" onClick={() => setEditForm((f) => ({ ...f, logo_url: "" }))} className="text-fs-xs text-destructive underline">
                         הסר לוגו
                       </button>
                     )}
-                    {uploadingEditLogo && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+                    {uploadingEditLogo && <p className="text-fs-xs text-muted-foreground">מעלה...</p>}
                   </div>
                 </div>
               </div>
@@ -1072,15 +1072,15 @@ export default function AdminDbSuppliers() {
                   />
                   {editForm.catalog_url && (
                     <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted">
-                      <a href={editForm.catalog_url} target="_blank" rel="noreferrer noopener" className="text-[11px] text-primary underline truncate">
+                      <a href={editForm.catalog_url} target="_blank" rel="noreferrer noopener" className="text-fs-xs text-primary underline truncate">
                         צפייה בקטלוג שהועלה
                       </a>
-                      <button type="button" onClick={() => setEditForm((f) => ({ ...f, catalog_url: "" }))} className="text-[11px] text-destructive underline shrink-0">
+                      <button type="button" onClick={() => setEditForm((f) => ({ ...f, catalog_url: "" }))} className="text-fs-xs text-destructive underline shrink-0">
                         הסר
                       </button>
                     </div>
                   )}
-                  {uploadingEditCatalog && <p className="text-[11px] text-muted-foreground">מעלה...</p>}
+                  {uploadingEditCatalog && <p className="text-fs-xs text-muted-foreground">מעלה...</p>}
                 </div>
               </div>
 
@@ -1208,7 +1208,7 @@ export default function AdminDbSuppliers() {
                 </div>
               </div>
 
-              <p className="text-[11px] text-muted-foreground pt-2 border-t">
+              <p className="text-fs-xs text-muted-foreground pt-2 border-t">
                 💡 לניהול גלריית תמונות, סגרו את החלון ובחרו "מדיה" בכרטיס הספק.
               </p>
             </div>
@@ -1257,7 +1257,7 @@ export default function AdminDbSuppliers() {
                     }`}
                   >
                     <div className="font-bold">{r.full_name ?? r.email ?? "ללא שם"}</div>
-                    <div className="text-muted-foreground text-[10px]">
+                    <div className="text-muted-foreground text-fs-xs">
                       {r.city ?? "—"} · {r.region ?? "ללא אזור"}
                     </div>
                   </button>

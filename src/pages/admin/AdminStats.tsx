@@ -66,18 +66,18 @@ export default function AdminStats() {
         <div className="gb-card p-5 bg-gradient-hero text-primary-foreground">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-[11px] text-primary-foreground/60">הכנסה מוערכת</div>
+              <div className="text-fs-xs text-primary-foreground/60">הכנסה מוערכת</div>
               <div className="text-3xl font-extrabold gb-gold-text mt-1">{formatILS(revenue)}</div>
             </div>
             <TrendingUp className="h-10 w-10 text-gold" />
           </div>
           <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/10 text-sm">
             <div>
-              <div className="text-[11px] text-primary-foreground/60">חיסכון לדיירים</div>
+              <div className="text-fs-xs text-primary-foreground/60">חיסכון לדיירים</div>
               <div className="font-bold gb-gold-text">{formatILS(totalSavings)}</div>
             </div>
             <div>
-              <div className="text-[11px] text-primary-foreground/60">שווי עסקה ממוצע</div>
+              <div className="text-fs-xs text-primary-foreground/60">שווי עסקה ממוצע</div>
               <div className="font-bold">{formatILS(avgDealSize)}</div>
             </div>
           </div>
@@ -127,7 +127,7 @@ function Mini({ icon: Icon, label, value }: { icon: React.ComponentType<{ classN
         </div>
       </div>
       <div className="text-xl font-extrabold text-primary">{value.toLocaleString("he-IL")}</div>
-      <div className="text-[10px] text-muted-foreground">{label}</div>
+      <div className="text-fs-xs text-muted-foreground">{label}</div>
     </div>
   );
 }

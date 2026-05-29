@@ -99,7 +99,7 @@ export default function AdminRegions() {
               <MapPin className="h-4 w-4 text-gold" />
               <div className="flex-1">
                 <div className="text-sm font-semibold">{r.name_he}</div>
-                <div className="text-[11px] text-muted-foreground" dir="ltr">{r.slug}</div>
+                <div className="text-fs-xs text-muted-foreground" dir="ltr">{r.slug}</div>
               </div>
               <button onClick={() => removeRegion(r.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg" aria-label="מחק">
                 <Trash2 className="h-4 w-4" />
@@ -126,7 +126,7 @@ export default function AdminRegions() {
               <div key={c.id} className="gb-card p-3 flex items-center gap-2">
                 <div className="flex-1">
                   <div className="text-sm font-semibold">{c.name_he}</div>
-                  <div className="text-[11px] text-muted-foreground">{reg?.name_he ?? "—"}</div>
+                  <div className="text-fs-xs text-muted-foreground">{reg?.name_he ?? "—"}</div>
                 </div>
                 <button onClick={() => removeCity(c.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg">
                   <Trash2 className="h-4 w-4" />

@@ -235,7 +235,7 @@ export default function AdminProjects() {
                     type="button"
                     onClick={() => setForm({ ...form, status: st })}
                     className={
-                      "h-9 rounded-xl text-[11px] font-bold border transition " +
+                      "h-9 rounded-xl text-fs-xs font-bold border transition " +
                       (form.status === st ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border")
                     }
                   >
@@ -330,7 +330,7 @@ function CityCombobox({ value, cities, onChange }: { value: string; cities: stri
 
 function Tag({ children, accent }: { children: React.ReactNode; accent?: boolean }) {
   return (
-    <span className={"text-[10px] font-bold px-2 py-1 rounded-full " + (accent ? "bg-gold/15 text-primary" : "bg-muted text-muted-foreground")}>
+    <span className={"text-fs-xs font-bold px-2 py-1 rounded-full " + (accent ? "bg-gold/15 text-primary" : "bg-muted text-muted-foreground")}>
       {children}
     </span>
   );

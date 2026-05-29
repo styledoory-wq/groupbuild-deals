@@ -235,7 +235,7 @@ export default function AdminResidents() {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-sm truncate">{r.full_name || r.email}</h3>
-                <p className="text-[11px] text-muted-foreground truncate">
+                <p className="text-fs-xs text-muted-foreground truncate">
                   {project?.name || "ללא פרויקט"}{r.city ? ` · ${r.city}` : ""}{r.phone ? ` · ${r.phone}` : ""}
                 </p>
               </div>
@@ -289,7 +289,7 @@ export default function AdminResidents() {
                 <button
                   type="button"
                   onClick={() => setCreateNewProject((v) => !v)}
-                  className="text-[11px] font-bold text-primary underline"
+                  className="text-fs-xs font-bold text-primary underline"
                 >
                   {createNewProject ? "בחירה מרשימה" : "+ פרויקט חדש"}
                 </button>

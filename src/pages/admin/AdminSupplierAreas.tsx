@@ -112,7 +112,7 @@ export default function AdminSupplierAreas() {
           <Globe className="h-5 w-5 text-gold" />
           <div className="flex-1">
             <div className="font-bold text-sm">משרת את כל הארץ</div>
-            <div className="text-[11px] text-muted-foreground">הספק יוצג לכל הדיירים בכל מקום</div>
+            <div className="text-fs-xs text-muted-foreground">הספק יוצג לכל הדיירים בכל מקום</div>
           </div>
         </label>
 
@@ -122,7 +122,7 @@ export default function AdminSupplierAreas() {
               <div className="flex items-center gap-2 mb-3">
                 <MapPin className="h-4 w-4 text-gold" />
                 <h3 className="font-bold text-sm">אזורים</h3>
-                <span className="text-[11px] text-muted-foreground mr-auto">{selectedRegions.size} נבחרו</span>
+                <span className="text-fs-xs text-muted-foreground mr-auto">{selectedRegions.size} נבחרו</span>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 {regions.map((r) => {
@@ -149,9 +149,9 @@ export default function AdminSupplierAreas() {
               <div className="gb-card p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <h3 className="font-bold text-sm">ערים ספציפיות (אופציונלי)</h3>
-                  <span className="text-[11px] text-muted-foreground mr-auto">{selectedCities.size} נבחרו</span>
+                  <span className="text-fs-xs text-muted-foreground mr-auto">{selectedCities.size} נבחרו</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground mb-3">
+                <p className="text-fs-xs text-muted-foreground mb-3">
                   אם לא תבחר ערים — הספק יוצג לכל העיר באזורים שנבחרו.
                 </p>
                 <div className="space-y-3 max-h-[40vh] overflow-y-auto">
@@ -161,7 +161,7 @@ export default function AdminSupplierAreas() {
                     if (!region || regionCities.length === 0) return null;
                     return (
                       <div key={rid}>
-                        <div className="text-[11px] font-bold text-muted-foreground mb-1.5">{region.name_he}</div>
+                        <div className="text-fs-xs font-bold text-muted-foreground mb-1.5">{region.name_he}</div>
                         <div className="flex flex-wrap gap-1">
                           {regionCities.map((c) => {
                             const active = selectedCities.has(c.id);
@@ -170,7 +170,7 @@ export default function AdminSupplierAreas() {
                                 key={c.id}
                                 onClick={() => toggleCity(c.id)}
                                 className={
-                                  "px-2.5 py-1 rounded-full text-[11px] font-bold border transition " +
+                                  "px-2.5 py-1 rounded-full text-fs-xs font-bold border transition " +
                                   (active
                                     ? "bg-gold/20 text-primary border-gold"
                                     : "bg-card text-foreground border-border")
@@ -192,7 +192,7 @@ export default function AdminSupplierAreas() {
       </div>
 
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-20 pt-3 bg-gradient-to-t from-background via-background to-background/0">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-20 pt-3 bg-gradient-to-t from-background via-background to-background/0">
           <Button
             onClick={save}
             disabled={saving}

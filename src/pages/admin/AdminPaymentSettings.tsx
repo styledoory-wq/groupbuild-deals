@@ -82,13 +82,13 @@ export default function AdminPaymentSettings() {
                     <div className="text-base font-bold">
                       {p === "grow" ? "Grow" : "Cardcom"}
                     </div>
-                    <div className="text-[10px] text-muted-foreground mt-1">
+                    <div className="text-fs-xs text-muted-foreground mt-1">
                       {p === "grow" ? "Meshulam Pay" : "Cardcom Solutions"}
                     </div>
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] text-muted-foreground mt-3 leading-relaxed">
+              <p className="text-fs-xs text-muted-foreground mt-3 leading-relaxed">
                 לאחר בחירת הספק, הוסיפו את מפתחות ה-API המתאימים בהגדרות הסודות של Lovable Cloud
                 ({provider === "grow" ? "GROW_API_KEY, GROW_PAGE_CODE, GROW_USER_ID" : "CARDCOM_TERMINAL_NUMBER, CARDCOM_API_NAME"}).
               </p>

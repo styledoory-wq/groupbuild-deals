@@ -157,18 +157,18 @@ export default function AdminDeals() {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-sm truncate">{d.title}</h3>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>
+                      <span className={`text-fs-xs font-bold px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>
                       {isLocked && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 inline-flex items-center gap-1">
+                        <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 inline-flex items-center gap-1">
                           <Lock className="h-3 w-3" /> נעולה
                         </span>
                       )}
-                      <p className="text-[11px] text-muted-foreground truncate">{supplier?.business_name ?? "—"}</p>
+                      <p className="text-fs-xs text-muted-foreground truncate">{supplier?.business_name ?? "—"}</p>
                     </div>
                   </div>
                   <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
                 </div>
-                <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border text-center text-[11px]">
+                <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border text-center text-fs-xs">
                   <div>
                     <div className="font-bold text-primary">{formatILS(priceFor(d))}</div>
                     <div className="text-muted-foreground">מחיר</div>
@@ -182,7 +182,7 @@ export default function AdminDeals() {
                     <div className="text-muted-foreground">זכאים</div>
                   </div>
                   <div>
-                    <div className="font-bold text-blue-700">{cnt.redeemed} <span className="text-[10px] text-muted-foreground">({rate}%)</span></div>
+                    <div className="font-bold text-blue-700">{cnt.redeemed} <span className="text-fs-xs text-muted-foreground">({rate}%)</span></div>
                     <div className="text-muted-foreground">מומשו</div>
                   </div>
                 </div>

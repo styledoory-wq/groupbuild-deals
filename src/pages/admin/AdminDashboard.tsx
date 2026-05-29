@@ -71,12 +71,12 @@ export default function AdminDashboard() {
           <div aria-hidden className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-[#C9A961]/5 blur-2xl" />
 
           <div className="relative flex items-center justify-between gap-2 px-5 pt-4">
-            <span className="h-9 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur flex items-center text-white text-[11px] font-semibold uppercase tracking-[0.14em]">
+            <span className="h-9 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur flex items-center text-white text-fs-xs font-semibold uppercase tracking-[0.14em]">
               אזור ניהול
             </span>
             <button
               onClick={handleLogout}
-              className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-[12px] font-semibold"
+              className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-fs-sm font-semibold"
               aria-label="יציאה"
             >
               <LogOut className="h-[15px] w-[15px]" strokeWidth={2} />
@@ -85,10 +85,10 @@ export default function AdminDashboard() {
           </div>
 
           <div className="relative px-5 mt-8 text-right">
-            <h1 className="text-[26px] sm:text-[28px] font-extrabold text-white leading-[1.15] tracking-tight">
+            <h1 className="text-fs-2xl sm:text-fs-2xl font-extrabold text-white leading-[1.15] tracking-tight">
               GroupBuild Admin
             </h1>
-            <p className="text-white/65 text-[12px] mt-1">פאנל בקרה ראשי</p>
+            <p className="text-white/65 text-fs-sm mt-1">פאנל בקרה ראשי</p>
           </div>
         </div>
       </header>
@@ -118,8 +118,8 @@ export default function AdminDashboard() {
           <div aria-hidden className="absolute -top-10 -left-10 h-32 w-32 rounded-full bg-[#C9A961]/15 blur-2xl" />
           <div className="flex items-center justify-between relative">
             <div>
-              <div className="text-[11px] text-white/60 uppercase tracking-[0.14em] font-semibold">פיקדונות ששולמו</div>
-              <div className="text-[26px] font-extrabold text-[#C9A961] mt-1.5 tracking-tight">{formatILS(stats.paidDepositsAmount)}</div>
+              <div className="text-fs-xs text-white/60 uppercase tracking-[0.14em] font-semibold">פיקדונות ששולמו</div>
+              <div className="text-fs-2xl font-extrabold text-[#C9A961] mt-1.5 tracking-tight">{formatILS(stats.paidDepositsAmount)}</div>
             </div>
             <div className="h-11 w-11 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center">
               <TrendingUp className="h-[18px] w-[18px] text-[#C9A961]" strokeWidth={2} />
@@ -127,11 +127,11 @@ export default function AdminDashboard() {
           </div>
           <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-white/10 relative">
             <div>
-              <div className="text-[11px] text-white/55 uppercase tracking-[0.14em] font-semibold">פיקדונות (סה״כ)</div>
+              <div className="text-fs-xs text-white/55 uppercase tracking-[0.14em] font-semibold">פיקדונות (סה״כ)</div>
               <div className="font-bold mt-1 text-white">{stats.totalDeposits}</div>
             </div>
             <div>
-              <div className="text-[11px] text-white/55 uppercase tracking-[0.14em] font-semibold">דירות</div>
+              <div className="text-fs-xs text-white/55 uppercase tracking-[0.14em] font-semibold">דירות</div>
               <div className="font-bold mt-1 text-white">{stats.apartments}</div>
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
       </div>
 
       <section className="px-5 space-y-2.5 pb-10">
-        <h2 className="text-[11px] uppercase tracking-[0.14em] text-[#475569] font-semibold mb-3 px-1">ניהול מהיר</h2>
+        <h2 className="text-fs-xs uppercase tracking-[0.14em] text-[#475569] font-semibold mb-3 px-1">ניהול מהיר</h2>
         <QuickLink onClick={() => navigate("/admin/projects")} icon={Building2} label="ניהול פרויקטים" desc="הוספה, עריכה ומחיקה" />
         <QuickLink onClick={() => navigate("/admin/suppliers")} icon={ShieldCheck} label="ניהול ספקים" desc="הוספה, אזורי שירות, מדיה וקישורים" badge={stats.pendingSuppliers} />
         <QuickLink onClick={() => navigate("/admin/residents")} icon={Users} label="ניהול דיירים" desc="כל הדיירים והפרויקטים" />
@@ -167,8 +167,8 @@ function StatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: strin
           <Icon className="h-[18px] w-[18px] text-[#B8923F]" strokeWidth={2} />
         </span>
       </div>
-      <div className="text-[24px] font-extrabold text-[#0A1F3D] leading-none tracking-tight">{value.toLocaleString("he-IL")}</div>
-      <div className="text-[12px] text-[#475569] mt-2 font-medium">{label}</div>
+      <div className="text-fs-xl font-extrabold text-[#0A1F3D] leading-none tracking-tight">{value.toLocaleString("he-IL")}</div>
+      <div className="text-fs-sm text-[#475569] mt-2 font-medium">{label}</div>
     </div>
   );
 }
@@ -180,11 +180,11 @@ function QuickLink({ onClick, icon: Icon, label, desc, badge }: { onClick: () =>
         <Icon className="h-[18px] w-[18px] text-[#B8923F]" strokeWidth={2} />
       </span>
       <div className="flex-1 min-w-0">
-        <div className="font-bold text-[14px] text-[#0A1F3D]">{label}</div>
-        <div className="text-[11px] text-[#475569] mt-0.5">{desc}</div>
+        <div className="font-bold text-fs-sm text-[#0A1F3D]">{label}</div>
+        <div className="text-fs-xs text-[#475569] mt-0.5">{desc}</div>
       </div>
       {badge && badge > 0 ? (
-        <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-destructive/10 text-destructive border border-destructive/25">{badge}</span>
+        <span className="text-fs-xs font-bold px-2 py-1 rounded-full bg-destructive/10 text-destructive border border-destructive/25">{badge}</span>
       ) : (
         <ChevronLeft className="h-4 w-4 text-[#94A3B8]" strokeWidth={2} />
       )}

@@ -66,7 +66,7 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-hero text-primary-foreground flex justify-center">
-      <div className="w-full max-w-[480px] flex flex-col px-6 pt-16 pb-8">
+      <div className="w-full max-w-screen-sm flex flex-col px-6 pt-16 pb-8">
         <button
           onClick={() => navigate("/")}
           className="self-start text-xs text-primary-foreground/60 hover:text-gold transition-smooth flex items-center gap-1 mb-8"
@@ -130,7 +130,7 @@ export default function AdminLogin() {
           </form>
         </div>
 
-        <p className="text-center text-[11px] text-primary-foreground/50 mt-6">
+        <p className="text-center text-fs-xs text-primary-foreground/50 mt-6">
           הגישה מתועדת ומאובטחת
         </p>
       </div>

@@ -97,7 +97,7 @@ export default function AdminSettings() {
               onChange={(e) => setSettings({ ...settings, notification_email: e.target.value })}
               placeholder="admin@example.co.il"
             />
-            <p className="text-[11px] text-muted-foreground mt-1.5">
+            <p className="text-fs-xs text-muted-foreground mt-1.5">
               לכתובת זו יישלחו התראות על אירועים חדשים במערכת.
             </p>
           </div>
@@ -123,14 +123,14 @@ export default function AdminSettings() {
               />
               <div className="flex-1">
                 <div className="text-sm font-bold">{opt.label}</div>
-                <div className="text-[11px] text-muted-foreground">{opt.desc}</div>
+                <div className="text-fs-xs text-muted-foreground">{opt.desc}</div>
               </div>
             </label>
           ))}
         </div>
 
         <div className="gb-card p-3 bg-amber-50 border-amber-200/50">
-          <p className="text-[11px] text-amber-900">
+          <p className="text-fs-xs text-amber-900">
             💡 שליחת מיילים בפועל דורשת הגדרת דומיין מייל. כרגע ההתראות נרשמות בלוגים. ניתן להגדיר דומיין מאוחר יותר ללא שינוי קוד.
           </p>
         </div>
@@ -158,7 +158,7 @@ export default function AdminSettings() {
               onChange={(e) => setTestEmail(e.target.value)}
               placeholder="test@example.co.il"
             />
-            <p className="text-[11px] text-muted-foreground mt-1.5">
+            <p className="text-fs-xs text-muted-foreground mt-1.5">
               נשלח דרך Resend מ-onboarding@resend.dev (זמני עד אימות הדומיין)
             </p>
           </div>

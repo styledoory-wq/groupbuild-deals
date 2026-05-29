@@ -197,7 +197,7 @@ export default function AdminSupplierMedia() {
       </div>
 
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-[480px] px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0 flex gap-2">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0 flex gap-2">
           <Button type="button" variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-xl">
             <ArrowRight className="h-4 w-4 ml-2" /> ביטול
           </Button>

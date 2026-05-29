@@ -164,7 +164,7 @@ export default function AdminDeposits() {
                 key={f.key}
                 onClick={() => setView(f.key)}
                 className={
-                  "px-3 h-7 rounded-full text-[11px] font-bold transition-smooth " +
+                  "px-3 h-7 rounded-full text-fs-xs font-bold transition-smooth " +
                   (view === f.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70")
                 }
               >
@@ -205,17 +205,17 @@ export default function AdminDeposits() {
                       <h3 className={"font-bold text-sm truncate " + (dealMissing ? "italic text-muted-foreground" : "")}>
                         {dealTitle}
                       </h3>
-                      <p className="text-[11px] text-muted-foreground truncate">
+                      <p className="text-fs-xs text-muted-foreground truncate">
                         {prof?.name ?? dep.user_id.slice(0, 8) + "…"}
                         {prof?.phone ? ` · ${prof.phone}` : ""}
                       </p>
-                      <p className="text-[10px] text-muted-foreground/80 mt-0.5">
+                      <p className="text-fs-xs text-muted-foreground/80 mt-0.5">
                         {stamp}{dep.payment_provider ? ` · ${dep.payment_provider}` : ""}
                       </p>
                     </div>
                     <div className="text-left">
                       <div className="font-bold text-primary text-sm">{formatILS(Number(dep.amount))}</div>
-                      <div className={"text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 " + meta.cls}>
+                      <div className={"text-fs-xs font-bold px-2 py-0.5 rounded-full mt-1 " + meta.cls}>
                         {meta.label}
                       </div>
                     </div>
@@ -254,7 +254,7 @@ export default function AdminDeposits() {
                     <button
                       onClick={() => toggleHidden(dep.id, dep.is_hidden)}
                       disabled={busyId === dep.id}
-                      className="w-full h-8 rounded-lg text-[11px] text-muted-foreground hover:text-primary hover:bg-muted/40 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50"
+                      className="w-full h-8 rounded-lg text-fs-xs text-muted-foreground hover:text-primary hover:bg-muted/40 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50"
                     >
                       {dep.is_hidden ? <><Eye className="h-3 w-3" /> החזר לתצוגה</> : <><EyeOff className="h-3 w-3" /> הסתר מהתצוגה</>}
                     </button>
