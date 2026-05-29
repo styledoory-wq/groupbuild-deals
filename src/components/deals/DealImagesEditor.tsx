@@ -68,14 +68,14 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 8 }: P
       {/* Cover */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h4 className="text-[12px] font-bold text-foreground">תמונת שער (Cover)</h4>
-          <span className="text-[10px] text-muted-foreground">JPG / PNG · עד 5MB</span>
+          <h4 className="text-fs-sm font-bold text-foreground">תמונת שער (Cover)</h4>
+          <span className="text-fs-xs text-muted-foreground">JPG / PNG · עד 5MB</span>
         </div>
         {cover ? (
           <div className="relative rounded-2xl overflow-hidden border border-gold/30 group">
             <img src={cover} alt="cover" className="w-full h-44 object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-            <span className="absolute top-2 right-2 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-gold text-primary shadow">
+            <span className="absolute top-2 right-2 inline-flex items-center gap-1 text-fs-xs font-bold px-2 py-1 rounded-full bg-gold text-primary shadow">
               <Star className="h-3 w-3" /> שער ראשי
             </span>
             <button
@@ -101,8 +101,8 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 8 }: P
                 <div className="h-12 w-12 rounded-2xl bg-gold/15 border border-gold/30 flex items-center justify-center">
                   <ImagePlus className="h-6 w-6 text-gold" />
                 </div>
-                <div className="text-[12px] font-bold text-foreground">העלאת תמונת שער</div>
-                <div className="text-[10px] text-muted-foreground">תוצג בראש ההצעה</div>
+                <div className="text-fs-sm font-bold text-foreground">העלאת תמונת שער</div>
+                <div className="text-fs-xs text-muted-foreground">תוצג בראש ההצעה</div>
               </>
             )}
           </button>
@@ -119,10 +119,10 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 8 }: P
       {/* Gallery */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h4 className="text-[12px] font-bold text-foreground">
+          <h4 className="text-fs-sm font-bold text-foreground">
             גלריה <span className="text-muted-foreground font-normal">({gallery.length}/{maxGallery})</span>
           </h4>
-          <span className="text-[10px] text-muted-foreground">לפני / אחרי · עבודות · מוצרים</span>
+          <span className="text-fs-xs text-muted-foreground">לפני / אחרי · עבודות · מוצרים</span>
         </div>
         <div className="grid grid-cols-3 gap-2">
           {gallery.map((url, i) => (
@@ -160,7 +160,7 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 8 }: P
               ) : (
                 <>
                   <ImagePlus className="h-5 w-5 text-gold" />
-                  <span className="text-[10px] font-bold text-muted-foreground">הוסף</span>
+                  <span className="text-fs-xs font-bold text-muted-foreground">הוסף</span>
                 </>
               )}
             </button>

@@ -25,8 +25,8 @@ export function VerifiedBadge({
 }: Props) {
   const Icon = ICONS[icon];
   const sizes = size === "sm"
-    ? "text-[10px] px-2 py-0.5 gap-1"
-    : "text-[12px] px-2.5 py-1 gap-1.5";
+    ? "text-fs-xs px-2 py-0.5 gap-1"
+    : "text-fs-sm px-2.5 py-1 gap-1.5";
   const variants = {
     gold: "bg-gold/10 text-primary border-gold/40",
     success: "bg-success/10 text-success border-success/30",

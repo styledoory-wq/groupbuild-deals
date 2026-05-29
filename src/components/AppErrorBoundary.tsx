@@ -28,7 +28,7 @@ export class AppErrorBoundary extends Component<{ children: ReactNode }, State> 
           <p className="text-sm text-muted-foreground leading-relaxed mb-5">
             במקום מסך לבן, שמרנו את השגיאה. נסו לרענן; אם זה חוזר, צלמו את המסך ופנו לתמיכה.
           </p>
-          <p className="text-[11px] text-muted-foreground bg-muted rounded-xl p-2 mb-4 break-words" dir="ltr">
+          <p className="text-fs-xs text-muted-foreground bg-muted rounded-xl p-2 mb-4 break-words" dir="ltr">
             {this.state.error.message}
           </p>
           <Button onClick={() => window.location.reload()} className="w-full rounded-xl">

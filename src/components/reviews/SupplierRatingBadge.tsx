@@ -14,7 +14,7 @@ export function SupplierRatingBadge({ supplierId, className, showEmpty = true }:
 
   if (loading) {
     return (
-      <span className={cn("inline-flex items-center gap-1 text-[11px] text-muted-foreground", className)}>
+      <span className={cn("inline-flex items-center gap-1 text-fs-xs text-muted-foreground", className)}>
         <Star className="h-3 w-3 text-muted" /> ...
       </span>
     );
@@ -23,14 +23,14 @@ export function SupplierRatingBadge({ supplierId, className, showEmpty = true }:
   if (count === 0) {
     if (!showEmpty) return null;
     return (
-      <span className={cn("inline-flex items-center gap-1 text-[11px] text-muted-foreground", className)}>
+      <span className={cn("inline-flex items-center gap-1 text-fs-xs text-muted-foreground", className)}>
         <Star className="h-3 w-3 text-gold/60" /> ספק חדש בפלטפורמה
       </span>
     );
   }
 
   return (
-    <span className={cn("inline-flex items-center gap-1 text-[11px]", className)}>
+    <span className={cn("inline-flex items-center gap-1 text-fs-xs", className)}>
       <Star className="h-3 w-3 fill-gold text-gold" />
       <b className="text-foreground">{avg.toFixed(1)}</b>
       <span className="text-muted-foreground">({count} חוות דעת)</span>

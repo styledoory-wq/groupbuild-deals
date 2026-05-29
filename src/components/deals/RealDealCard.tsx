@@ -109,26 +109,26 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
             <div className="absolute top-2 right-2 flex flex-wrap items-center gap-1.5">
               {isHot && (
-                <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-1 rounded-full bg-orange-500/95 text-white shadow">
+                <span className="inline-flex items-center gap-0.5 text-fs-xs font-bold px-2 py-1 rounded-full bg-orange-500/95 text-white shadow">
                   <Flame className="h-3 w-3" strokeWidth={2.5} />
                   HOT
                 </span>
               )}
               {discountBadge && (
-                <span className="text-[13px] font-extrabold px-2.5 py-1.5 rounded-full bg-gradient-to-r from-gold to-gold-light text-primary shadow-md ring-1 ring-gold/40">
+                <span className="text-fs-sm font-extrabold px-2.5 py-1.5 rounded-full bg-gradient-to-r from-gold to-gold-light text-primary shadow-md ring-1 ring-gold/40">
                   עד {discountBadge} הנחה
                 </span>
               )}
             </div>
             {galleryCount > 0 && (
-              <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-black/55 text-white">
+              <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 text-fs-xs font-bold px-2 py-1 rounded-full bg-black/55 text-white">
                 <ImageIcon className="h-3 w-3" /> {galleryCount + 1}
               </span>
             )}
             <div className="absolute bottom-2 left-2">
               <span
                 className={
-                  "text-[10px] font-bold px-2 py-1 rounded-full inline-flex items-center gap-1 " +
+                  "text-fs-xs font-bold px-2 py-1 rounded-full inline-flex items-center gap-1 " +
                   (isProjectOnly
                     ? "bg-blue-500/90 text-white"
                     : "bg-success/90 text-white")
@@ -151,14 +151,14 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
             {!cover && (
               <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
                 {isHot && (
-                  <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-700 border border-orange-500/30">
+                  <span className="inline-flex items-center gap-0.5 text-fs-xs font-bold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-700 border border-orange-500/30">
                     <Flame className="h-2.5 w-2.5" strokeWidth={2.5} />
                     HOT
                   </span>
                 )}
                 <span
                   className={
-                    "text-[9px] font-bold px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5 " +
+                    "text-fs-xs font-bold px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5 " +
                     (isProjectOnly
                       ? "bg-blue-500/10 text-blue-600 border border-blue-500/30"
                       : "bg-success/10 text-success border border-success/30")
@@ -169,9 +169,9 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
                 </span>
               </div>
             )}
-            <h3 className="font-bold text-[15px] text-foreground leading-snug truncate">{deal.title}</h3>
+            <h3 className="font-bold text-fs-base text-foreground leading-snug truncate">{deal.title}</h3>
             {deal.supplier_name && (
-              <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1 truncate">
+              <p className="text-fs-xs text-muted-foreground mt-0.5 inline-flex items-center gap-1 truncate">
                 <ShieldCheck className="h-3 w-3 text-gold shrink-0" strokeWidth={2.5} />
                 <span className="truncate">{deal.supplier_name}</span>
               </p>
@@ -183,21 +183,21 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
         <div className="pt-3 border-t border-border/50 relative">
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
-              <div className="text-[20px] font-extrabold text-primary leading-tight tracking-tight">{display.headline}</div>
+              <div className="text-fs-xl font-extrabold text-primary leading-tight tracking-tight">{display.headline}</div>
               {bestSavings && bestSavings > 0 ? (
-                <div className="text-[11px] font-bold text-success mt-1 inline-flex items-center gap-1">
+                <div className="text-fs-xs font-bold text-success mt-1 inline-flex items-center gap-1">
                   <TrendingDown className="h-3 w-3" strokeWidth={2.5} />
                   חוסכים עד {ils(bestSavings)}
                 </div>
               ) : display.savings ? (
-                <div className="text-[11px] font-bold text-success mt-1 inline-flex items-center gap-1">
+                <div className="text-fs-xs font-bold text-success mt-1 inline-flex items-center gap-1">
                   <TrendingDown className="h-3 w-3" strokeWidth={2.5} />
                   {display.savings}
                 </div>
               ) : null}
             </div>
             {tiers.length > 0 && (
-              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 shrink-0">
+              <span className="text-fs-xs font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 shrink-0">
                 {tiers.length} מדרגות
               </span>
             )}
@@ -218,7 +218,7 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
                   <div className="absolute inset-0 gb-shimmer opacity-70" />
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-2 text-[10px]">
+              <div className="flex items-center justify-between mt-2 text-fs-xs">
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
                   <span className="gb-live-dot" />
                   <Users className="h-2.5 w-2.5" strokeWidth={2.5} />
@@ -236,7 +236,7 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
                   )}
                 </span>
                 {isClosed ? (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                  <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
                     {isRedeemed ? "מומשה" : "נסגרה"}
                   </span>
                 ) : joinDeadline ? (
@@ -252,7 +252,7 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
                 ) : null}
               </div>
               {redemptionDeadline && isClosed && !isRedeemed && (
-                <div className="mt-1.5 text-[10px] text-amber-700">
+                <div className="mt-1.5 text-fs-xs text-amber-700">
                   מימוש עד {fmtDate(redemptionDeadline)}
                 </div>
               )}

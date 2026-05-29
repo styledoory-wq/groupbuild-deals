@@ -266,7 +266,7 @@ export function SupplierCatalogsManager({ supplierId }: Props) {
       {loading ? (
         <div className="text-xs text-muted-foreground text-center py-3">טוען…</div>
       ) : rows.length === 0 ? (
-        <div className="text-[11px] text-muted-foreground text-center py-2">עדיין לא הועלו קטלוגים</div>
+        <div className="text-fs-xs text-muted-foreground text-center py-2">עדיין לא הועלו קטלוגים</div>
       ) : (
         <div className="space-y-1.5">
           {rows.map((r) => {
@@ -318,18 +318,18 @@ export function SupplierCatalogsManager({ supplierId }: Props) {
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-bold truncate flex items-center gap-1.5">
                         {r.name}
-                        <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                        <span className="text-fs-xs font-normal px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                           {r.kind === "link" ? "קישור" : "PDF"}
                         </span>
                       </div>
                       {r.description && (
-                        <div className="text-[11px] text-muted-foreground line-clamp-2">{r.description}</div>
+                        <div className="text-fs-xs text-muted-foreground line-clamp-2">{r.description}</div>
                       )}
                       <a
                         href={r.file_url}
                         target="_blank"
                         rel="noreferrer noopener"
-                        className="inline-flex items-center gap-1 text-[11px] text-gold underline mt-0.5"
+                        className="inline-flex items-center gap-1 text-fs-xs text-gold underline mt-0.5"
                         dir="ltr"
                       >
                         <ExternalLink className="h-3 w-3" /> {r.kind === "link" ? "פתיחת הקישור" : "פתיחת PDF"}

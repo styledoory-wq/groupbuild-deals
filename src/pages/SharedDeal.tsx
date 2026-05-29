@@ -119,7 +119,7 @@ export default function SharedDeal() {
 
         {!loading && deal && (
           <>
-            <div className="mt-6 mb-3 inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-gold/15 text-primary border border-gold/30">
+            <div className="mt-6 mb-3 inline-flex items-center gap-1.5 text-fs-xs font-bold px-3 py-1 rounded-full bg-gold/15 text-primary border border-gold/30">
               <Sparkles className="h-3 w-3" />
               שכן שיתף אתכם בעסקה קבוצתית
             </div>
@@ -184,7 +184,7 @@ export default function SharedDeal() {
               <Button asChild size="lg" className="w-full h-12 rounded-xl text-base font-bold">
                 <Link to={authHref}>הצטרפו לעסקה הקבוצתית</Link>
               </Button>
-              <p className="text-[11px] text-center text-muted-foreground">
+              <p className="text-fs-xs text-center text-muted-foreground">
                 הרשמה מהירה • ללא עלות • סודיות מובטחת
               </p>
             </div>

@@ -62,10 +62,10 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
     <div className="rounded-3xl bg-card border border-border/60 p-6 space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{voucher.supplier_name ?? "ספק"}</div>
+          <div className="text-fs-xs uppercase tracking-wider text-muted-foreground">{voucher.supplier_name ?? "ספק"}</div>
           <h3 className="text-lg font-bold text-foreground mt-1 leading-tight">{voucher.deal_title ?? "הטבה"}</h3>
         </div>
-        <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
+        <span className={`text-fs-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
           isRedeemed ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20"
           : isExpired ? "bg-muted text-muted-foreground border border-border"
           : "bg-gold/15 text-amber-700 border border-gold/30"
@@ -77,7 +77,7 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
       {!isRedeemed && !isExpired ? (
         <div className="bg-white rounded-2xl p-5 flex flex-col items-center gap-3 border border-border">
           <QRCodeSVG value={buildQrPayload(voucher, tick)} size={200} level="M" includeMargin={false} />
-          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-fs-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
             <span>מתחדש בעוד {secondsLeft} שניות</span>
           </div>
@@ -89,7 +89,7 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
             {isRedeemed ? "השובר מומש" : "השובר פג תוקף"}
           </p>
           {voucher.redeemed_at && (
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-fs-xs text-muted-foreground">
               {new Date(voucher.redeemed_at).toLocaleString("he-IL")}
             </p>
           )}
@@ -98,20 +98,20 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
 
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div className="rounded-xl bg-muted/30 border border-border p-3">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
+          <div className="text-fs-xs uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
             <ShieldCheck className="h-3 w-3" /> קוד מימוש
           </div>
           <div className="font-mono font-bold text-base tracking-wider text-foreground">{voucher.code}</div>
         </div>
         <div className="rounded-xl bg-muted/30 border border-border p-3">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
+          <div className="text-fs-xs uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
             <Hash className="h-3 w-3" /> אסמכתא
           </div>
           <div className="font-mono text-xs text-foreground break-all">{voucher.reference_number}</div>
         </div>
       </div>
 
-      <div className="text-[11px] text-muted-foreground text-center">
+      <div className="text-fs-xs text-muted-foreground text-center">
         תוקף מימוש: {expiresLabel}
       </div>
       <div className="flex justify-center pt-1">

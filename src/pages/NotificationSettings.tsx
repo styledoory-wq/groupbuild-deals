@@ -87,7 +87,7 @@ export default function NotificationSettings() {
 
       <div className="px-5 -mt-4 relative z-10 space-y-4 pb-24">
         <div className="gb-card p-3 bg-gold/10 border-gold/30">
-          <p className="text-[11px] text-primary leading-relaxed">
+          <p className="text-fs-xs text-primary leading-relaxed">
             <Mail className="inline h-3.5 w-3.5 ml-1" />
             שליחת המיילים תופעל ברגע שיוגדר דומיין שולח. עד אז ההעדפות נשמרות ואינן נשלחות בפועל.
           </p>
@@ -148,7 +148,7 @@ function Row({
     <label className={"flex items-start gap-3 p-2 rounded-xl " + (disabled ? "opacity-50" : "hover:bg-muted/40 cursor-pointer")}>
       <div className="flex-1">
         <div className="text-sm font-bold">{label}</div>
-        <div className="text-[11px] text-muted-foreground">{desc}</div>
+        <div className="text-fs-xs text-muted-foreground">{desc}</div>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} disabled={disabled} />
     </label>
