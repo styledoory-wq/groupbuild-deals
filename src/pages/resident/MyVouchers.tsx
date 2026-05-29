@@ -50,8 +50,8 @@ export default function MyVouchers() {
             >
               <Ticket className="h-7 w-7 text-[#C9A961]" strokeWidth={1.75} />
             </div>
-            <h3 className="font-extrabold text-[17px] text-[#0A1F3D]">אין עדיין הטבות זמינות</h3>
-            <p className="text-[13px] text-[#475569] mt-2 leading-relaxed max-w-[280px] mx-auto">
+            <h3 className="font-extrabold text-fs-lg text-[#0A1F3D]">אין עדיין הטבות זמינות</h3>
+            <p className="text-fs-sm text-[#475569] mt-2 leading-relaxed max-w-[280px] mx-auto">
               ברגע שעסקה שהצטרפת אליה תיסגר, יופיע כאן שובר ההטבה האישי שלך עם קוד מימוש ו-QR.
             </p>
           </div>

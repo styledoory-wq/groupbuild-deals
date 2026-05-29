@@ -111,7 +111,7 @@ export default function SearchPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="חפש עסקאות, ספקים, בעלי מקצוע..."
-            className="w-full h-12 rounded-2xl bg-white border border-[#E2E8F0] pr-11 pl-4 text-[15px] text-[#0D1B2E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#C9A84C] focus:ring-[3px] focus:ring-[#C9A84C]/15 transition"
+            className="w-full h-12 rounded-2xl bg-white border border-[#E2E8F0] pr-11 pl-4 text-fs-base text-[#0D1B2E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#C9A84C] focus:ring-[3px] focus:ring-[#C9A84C]/15 transition"
             dir="rtl"
           />
         </div>
@@ -124,7 +124,7 @@ export default function SearchPage() {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex-1 h-10 rounded-xl text-[14px] font-semibold transition ${
+              className={`flex-1 h-10 rounded-xl text-fs-sm font-semibold transition ${
                 tab === t.id
                   ? "bg-[#0D1B2E] text-white"
                   : "text-[#475569] hover:text-[#0D1B2E]"
@@ -140,7 +140,7 @@ export default function SearchPage() {
             <div className="h-16 w-16 rounded-2xl bg-white border border-[#E2E8F0] flex items-center justify-center mb-4">
               <SearchIcon className="h-7 w-7 text-[#C9A84C]" />
             </div>
-            <p className="text-[15px] font-semibold text-[#475569]">התחל לחפש...</p>
+            <p className="text-fs-base font-semibold text-[#475569]">התחל לחפש...</p>
           </div>
         ) : loading ? (
           <div className="space-y-3">
@@ -149,7 +149,7 @@ export default function SearchPage() {
           </div>
         ) : tab === "deals" ? (
           deals.length === 0 ? (
-            <p className="text-center text-[#94A3B8] py-12 text-[14px]">לא נמצאו עסקאות</p>
+            <p className="text-center text-[#94A3B8] py-12 text-fs-sm">לא נמצאו עסקאות</p>
           ) : (
             <div className="space-y-4">
               {deals.map((d) => (
@@ -158,7 +158,7 @@ export default function SearchPage() {
             </div>
           )
         ) : suppliers.length === 0 ? (
-          <p className="text-center text-[#94A3B8] py-12 text-[14px]">לא נמצאו ספקים</p>
+          <p className="text-center text-[#94A3B8] py-12 text-fs-sm">לא נמצאו ספקים</p>
         ) : (
           <div className="space-y-3">
             {suppliers.map((s) => (
@@ -169,9 +169,9 @@ export default function SearchPage() {
               >
                 <SupplierLogo logoUrl={s.logo_url} name={s.business_name} size="md" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-[15px] text-[#0D1B2E] truncate">{s.business_name}</p>
+                  <p className="font-bold text-fs-base text-[#0D1B2E] truncate">{s.business_name}</p>
                   {s.short_description && (
-                    <p className="text-[12px] text-[#64748B] truncate">{s.short_description}</p>
+                    <p className="text-fs-xs text-[#64748B] truncate">{s.short_description}</p>
                   )}
                 </div>
                 <Store className="h-5 w-5 text-[#C9A84C]" />

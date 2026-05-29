@@ -143,7 +143,7 @@ export default function DealsList() {
           <button
             onClick={() => setTab("active")}
             className={
-              "flex-1 h-10 rounded-full text-[13px] font-bold transition-all " +
+              "flex-1 h-10 rounded-full text-fs-sm font-bold transition-all " +
               (tab === "active"
                 ? "bg-[#0A1F3D] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
                 : "text-[#475569]")
@@ -154,7 +154,7 @@ export default function DealsList() {
           <button
             onClick={() => setTab("archive")}
             className={
-              "flex-1 h-10 rounded-full text-[13px] font-bold transition-all " +
+              "flex-1 h-10 rounded-full text-fs-sm font-bold transition-all " +
               (tab === "archive"
                 ? "bg-[#0A1F3D] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
                 : "text-[#475569]")

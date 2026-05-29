@@ -228,7 +228,7 @@ export default function ResidentDashboard() {
               href="https://wa.me/972526247941"
               target="_blank"
               rel="noreferrer"
-              className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-[12px] font-semibold"
+              className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-fs-xs font-semibold"
               aria-label="תמיכה"
             >
               <MessageCircle className="h-[15px] w-[15px]" strokeWidth={2} />
@@ -240,7 +240,7 @@ export default function ResidentDashboard() {
                 toast.success("התנתקת");
                 navigate("/", { replace: true });
               }}
-              className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-[12px] font-semibold"
+              className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-fs-xs font-semibold"
               aria-label="התנתקות"
             >
               <LogOut className="h-[15px] w-[15px]" strokeWidth={2} />
@@ -251,7 +251,7 @@ export default function ResidentDashboard() {
           {/* Greeting */}
           <div className="relative mt-10 text-right">
             <h1
-              className="text-[28px] font-bold text-white leading-[1.4] tracking-tight break-words"
+              className="text-fs-2xl font-bold text-white leading-[1.4] tracking-tight break-words"
               style={{ textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}
             >
               שלום, {user?.name || "דייר"}
@@ -267,11 +267,11 @@ export default function ResidentDashboard() {
           >
             <ChevronLeft className="h-5 w-5 text-white/60 shrink-0" strokeWidth={2} />
             <div>
-              <div className="flex items-center gap-1.5 justify-end text-[11px] text-white/60 uppercase tracking-[0.14em] font-semibold">
+              <div className="flex items-center gap-1.5 justify-end text-fs-xs text-white/60 uppercase tracking-[0.14em] font-semibold">
                 <span>האזור שלך</span>
                 <MapPin className="h-3 w-3 text-[#C9A961]" strokeWidth={2} />
               </div>
-              <div className="text-[17px] font-extrabold text-white mt-0.5 tracking-tight">
+              <div className="text-fs-lg font-extrabold text-white mt-0.5 tracking-tight">
                 {areaLabel || "הגדר אזור"}
               </div>
             </div>
@@ -286,7 +286,7 @@ export default function ResidentDashboard() {
           className="w-full h-12 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0_4px_14px_-6px_rgba(15,30,60,0.10)] flex items-center justify-between px-4 text-[#475569] hover:border-[#C9A961]/40 transition-all"
         >
           <Search className="h-[18px] w-[18px] text-[#475569]" strokeWidth={2} />
-          <span className="text-[13px] font-medium">מצא ספקים באזור שלי</span>
+          <span className="text-fs-sm font-medium">מצא ספקים באזור שלי</span>
         </button>
       </div>
 
@@ -299,22 +299,22 @@ export default function ResidentDashboard() {
           <Briefcase className="h-4 w-4 text-[#94a3b8] mb-1.5" strokeWidth={2} />
           <div className="w-[30px] h-[2px] bg-[#C9A84C] rounded-full mb-2" />
           <div className="text-[2rem] font-extrabold text-[#0D1B2E] leading-none tracking-tight gb-num">{joinedDeals.length}</div>
-          <div className="text-[11px] text-[#475569] mt-1.5 font-medium">הצעות שלי</div>
-          <div className="text-[10px] text-[#94a3b8] mt-0.5">הצעות שהצטרפת אליהן</div>
+          <div className="text-fs-xs text-[#475569] mt-1.5 font-medium">הצעות שלי</div>
+          <div className="text-fs-xs text-[#94a3b8] mt-0.5">הצעות שהצטרפת אליהן</div>
         </button>
         <div className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center flex flex-col items-center">
           <Store className="h-4 w-4 text-[#94a3b8] mb-1.5" strokeWidth={2} />
           <div className="w-[30px] h-[2px] bg-[#C9A84C] rounded-full mb-2" />
           <div className="text-[2rem] font-extrabold text-[#0D1B2E] leading-none tracking-tight gb-num">{areaSuppliersCount}</div>
-          <div className="text-[11px] text-[#475569] mt-1.5 font-medium">ספקים</div>
-          <div className="text-[10px] text-[#94a3b8] mt-0.5">ספקים באזורך</div>
+          <div className="text-fs-xs text-[#475569] mt-1.5 font-medium">ספקים</div>
+          <div className="text-fs-xs text-[#94a3b8] mt-0.5">ספקים באזורך</div>
         </div>
         <div className="bg-white rounded-2xl py-4 px-2 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center flex flex-col items-center">
           <Sparkles className="h-4 w-4 text-[#94a3b8] mb-1.5" strokeWidth={2} />
           <div className="w-[30px] h-[2px] bg-[#C9A84C] rounded-full mb-2" />
           <div className="text-[2rem] font-extrabold text-[#0D1B2E] leading-none tracking-tight gb-num">{areaDeals.length}</div>
-          <div className="text-[11px] text-[#475569] mt-1.5 font-medium">הצעות</div>
-          <div className="text-[10px] text-[#94a3b8] mt-0.5">עסקאות פעילות</div>
+          <div className="text-fs-xs text-[#475569] mt-1.5 font-medium">הצעות</div>
+          <div className="text-fs-xs text-[#94a3b8] mt-0.5">עסקאות פעילות</div>
         </div>
       </div>
 
@@ -367,8 +367,8 @@ export default function ResidentDashboard() {
                 <MapPin className="h-[18px] w-[18px] text-[#B8923F]" strokeWidth={2} />
               </div>
               <div className="flex-1">
-                <p className="text-[14px] font-bold text-[#0A1F3D]">הגדירו את האזור שלכם</p>
-                <p className="text-[11px] text-[#475569] mt-1 leading-relaxed">
+                <p className="text-fs-sm font-bold text-[#0A1F3D]">הגדירו את האזור שלכם</p>
+                <p className="text-fs-xs text-[#475569] mt-1 leading-relaxed">
                   כדי שנציג לכם הצעות מותאמות מהספקים שמשרתים את האזור.
                 </p>
               </div>
@@ -381,13 +381,13 @@ export default function ResidentDashboard() {
       {!loading && (
         <section className="px-5 pt-8 pb-8">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-[15px] font-extrabold text-foreground flex items-center gap-1.5">
+            <h2 className="text-fs-base font-extrabold text-foreground flex items-center gap-1.5">
               <Compass className="h-4 w-4 text-gold" strokeWidth={2} />
               תהליך הבית שלי
             </h2>
-            <span className="text-[10px] text-muted-foreground">בחרו שלב להתקדם</span>
+            <span className="text-fs-xs text-muted-foreground">בחרו שלב להתקדם</span>
           </div>
-          <p className="text-[11px] text-muted-foreground mb-4 leading-relaxed">
+          <p className="text-fs-xs text-muted-foreground mb-4 leading-relaxed">
             עקבו אחרי השלבים — בכל שלב תמצאו הצעות קבוצתיות וספקים בתחום.
           </p>
 
@@ -400,7 +400,7 @@ export default function ResidentDashboard() {
                   key={s.id}
                   onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
                   className={
-                    "w-full h-[68px] rounded-2xl px-4 flex items-center justify-between font-semibold text-[15px] tracking-tight bg-white/85 backdrop-blur border text-[#0A1F3D] hover:bg-white transition-all active:scale-[0.99] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] " +
+                    "w-full h-[68px] rounded-2xl px-4 flex items-center justify-between font-semibold text-fs-base tracking-tight bg-white/85 backdrop-blur border text-[#0A1F3D] hover:bg-white transition-all active:scale-[0.99] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] " +
                     (isCurrent ? "border-[#C9A961]/55 ring-1 ring-[#C9A961]/30 border-r-[3px] border-r-[#C9A84C]" : "border-[#E2E8F0] hover:border-[#C9A961]/45")
                   }
                   style={{ animationDelay: `${idx * 40}ms` }}
@@ -410,20 +410,20 @@ export default function ResidentDashboard() {
                       <span className="h-10 w-10 rounded-xl flex items-center justify-center border bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border-[#C9A961]/40">
                         <Icon className="h-[18px] w-[18px] text-[#B8923F]" strokeWidth={2} />
                       </span>
-                      <span className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-[#C9A84C] border border-[#0D1B2E]/20 flex items-center justify-center text-[9px] font-bold text-[#0D1B2E]">
+                      <span className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-[#C9A84C] border border-[#0D1B2E]/20 flex items-center justify-center text-fs-xs font-bold text-[#0D1B2E]">
                         {idx + 1}
                       </span>
                     </span>
                     <span className="flex flex-col items-start">
                       <span className="flex items-center gap-2">
-                        <span className="text-[14px] font-bold leading-tight">{s.title}</span>
+                        <span className="text-fs-sm font-bold leading-tight">{s.title}</span>
                         {isCurrent && (
-                          <span className="text-[9px] font-bold text-[#B8923F] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-md bg-[#C9A961]/12 border border-[#C9A961]/30">
+                          <span className="text-fs-xs font-bold text-[#B8923F] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-md bg-[#C9A961]/12 border border-[#C9A961]/30">
                             השלב שלך
                           </span>
                         )}
                       </span>
-                      <span className="text-[12px] text-[#475569] line-clamp-1 mt-0.5">{s.desc}</span>
+                      <span className="text-fs-xs text-[#475569] line-clamp-1 mt-0.5">{s.desc}</span>
                     </span>
                   </span>
                   <ChevronLeft className="h-5 w-5 shrink-0 text-[#94A3B8]" strokeWidth={2} />

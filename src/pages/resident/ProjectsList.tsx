@@ -66,7 +66,7 @@ export default function ProjectsList() {
                     <MapPin className="h-3 w-3" />
                     {p.city}
                   </div>
-                  <div className="flex items-center gap-2 text-[11px]">
+                  <div className="flex items-center gap-2 text-fs-xs">
                     <span className="px-2 py-0.5 rounded-full bg-primary/5 text-primary font-medium">
                       {p.buildingCount} בניינים
                     </span>

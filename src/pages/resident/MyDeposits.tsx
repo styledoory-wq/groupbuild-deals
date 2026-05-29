@@ -140,7 +140,7 @@ export default function MyDeposits() {
           <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-xl shrink-0">🛒</div>
           <div className="flex-1 min-w-0">
             <div className={"font-bold text-sm truncate " + (dealMissing ? "text-muted-foreground italic" : "")}>{dealTitle}</div>
-            <div className="text-[11px] text-muted-foreground">
+            <div className="text-fs-xs text-muted-foreground">
               פיקדון {formatILS(Number(dep.amount))} · {stampDate}
               {status === "refunded" && dep.refunded_at ? " · הוחזר" : ""}
             </div>
@@ -152,12 +152,12 @@ export default function MyDeposits() {
         <div className="mt-2 flex items-center gap-2">
           {dep.is_hidden ? (
             <button onClick={() => toggleHidden(dep.id, dep.is_hidden)} disabled={busyId === dep.id}
-              className="flex-1 h-7 rounded-lg text-[11px] text-muted-foreground hover:text-primary hover:bg-muted/40 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50">
+              className="flex-1 h-7 rounded-lg text-fs-xs text-muted-foreground hover:text-primary hover:bg-muted/40 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50">
               <Eye className="h-3 w-3" /> החזר לתצוגה
             </button>
           ) : (
             <button onClick={() => setConfirmDeleteId(dep.id)} disabled={busyId === dep.id}
-              className="flex-1 h-7 rounded-lg text-[11px] text-destructive hover:bg-destructive/10 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50">
+              className="flex-1 h-7 rounded-lg text-fs-xs text-destructive hover:bg-destructive/10 flex items-center justify-center gap-1 transition-smooth disabled:opacity-50">
               <Trash2 className="h-3 w-3" /> מחק מההיסטוריה
             </button>
           )}
@@ -177,7 +177,7 @@ export default function MyDeposits() {
             פיקדונות פעילים
           </h2>
           {hiddenCount > 0 && (
-            <button onClick={() => setShowHidden((v) => !v)} className="text-[11px] text-muted-foreground hover:text-primary">
+            <button onClick={() => setShowHidden((v) => !v)} className="text-fs-xs text-muted-foreground hover:text-primary">
               {showHidden ? `הסתר מוסתרים (${hiddenCount})` : `הצג מוסתרים (${hiddenCount})`}
             </button>
           )}

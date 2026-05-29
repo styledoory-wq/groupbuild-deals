@@ -210,7 +210,7 @@ export default function CategorySuppliers() {
 
         <button
           onClick={() => navigate(-1)}
-          className="relative inline-flex items-center gap-1 text-[11px] text-primary-foreground/70 hover:text-gold transition-smooth mb-5"
+          className="relative inline-flex items-center gap-1 text-fs-xs text-primary-foreground/70 hover:text-gold transition-smooth mb-5"
         >
           <ArrowRight className="h-3.5 w-3.5" />
           חזרה לתחומים
@@ -219,7 +219,7 @@ export default function CategorySuppliers() {
         <div className="relative animate-fade-up">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/8 border border-white/12 mb-4">
             <Sparkles className="h-3.5 w-3.5 text-gold" />
-            <span className="text-[11px] font-medium text-primary-foreground/90">
+            <span className="text-fs-xs font-medium text-primary-foreground/90">
               {filteredSuppliers.length} ספקים זמינים · {areaLabel}
             </span>
           </div>
@@ -231,10 +231,10 @@ export default function CategorySuppliers() {
               </div>
             )}
             <div>
-              <h1 className="text-[24px] leading-[1.15] font-extrabold">
+              <h1 className="text-fs-xl leading-[1.15] font-extrabold">
                 <span className="gb-gold-text">{activeCategory?.name ?? "ספקים"}</span>
               </h1>
-              <p className="text-primary-foreground/65 text-[12px] mt-0.5">ספקים מובילים בתחום</p>
+              <p className="text-primary-foreground/65 text-fs-xs mt-0.5">ספקים מובילים בתחום</p>
             </div>
           </div>
           <div className="gb-divider-gold" />
@@ -247,7 +247,7 @@ export default function CategorySuppliers() {
           {/* Kind filter */}
           <div>
             <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">סוג ספק</span>
+              <span className="text-fs-xs uppercase tracking-wider font-bold text-muted-foreground">סוג ספק</span>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
               {[
@@ -262,7 +262,7 @@ export default function CategorySuppliers() {
                     type="button"
                     onClick={() => setKindFilter(v as typeof kindFilter)}
                     className={
-                      "h-10 rounded-xl text-[11px] font-bold inline-flex items-center justify-center gap-1.5 border transition-all " +
+                      "h-10 rounded-xl text-fs-xs font-bold inline-flex items-center justify-center gap-1.5 border transition-all " +
                       (active
                         ? "bg-gradient-to-br from-gold/20 to-gold/5 text-primary border-gold shadow-[0_0_0_2px_hsl(var(--gold)/0.15)]"
                         : "bg-card text-muted-foreground border-border hover:border-gold/40")
@@ -278,7 +278,7 @@ export default function CategorySuppliers() {
 
           <div className="flex items-center gap-1.5 pt-1">
             <MapPin className="h-3.5 w-3.5 text-gold" />
-            <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
+            <span className="text-fs-xs uppercase tracking-wider font-bold text-muted-foreground">
               סינון לפי אזור
             </span>
           </div>
@@ -319,7 +319,7 @@ export default function CategorySuppliers() {
         ) : loadError ? (
           <div className="gb-card p-8 text-center">
             <p className="text-sm font-bold text-foreground">שגיאה בטעינה</p>
-            <p className="text-[11px] text-muted-foreground mt-1.5">נסו לרענן את המסך בעוד רגע.</p>
+            <p className="text-fs-xs text-muted-foreground mt-1.5">נסו לרענן את המסך בעוד רגע.</p>
           </div>
         ) : filteredSuppliers.length === 0 ? (
           <div className="gb-card p-8 text-center">
@@ -327,7 +327,7 @@ export default function CategorySuppliers() {
               <UserPlus className="h-6 w-6 text-gold" />
             </div>
             <p className="text-sm font-bold text-foreground">לא נמצאו ספקים</p>
-            <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed max-w-[240px] mx-auto">
+            <p className="text-fs-xs text-muted-foreground mt-1.5 leading-relaxed max-w-[240px] mx-auto">
               שנה אזור או הזמן ספקים להצטרף כדי לפתוח עוד אפשרויות לדיירים.
             </p>
             <button
@@ -349,9 +349,9 @@ export default function CategorySuppliers() {
               <div className="absolute -top-10 -left-10 h-20 w-20 rounded-full bg-gold/8 blur-2xl group-hover:bg-gold/15 transition-smooth pointer-events-none" />
               <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="lg" />
               <div className="flex-1 min-w-0 relative">
-                <h3 className="font-bold text-foreground text-[15px] truncate">{s.business_name}</h3>
+                <h3 className="font-bold text-foreground text-fs-base truncate">{s.business_name}</h3>
                 {s.short_description && (
-                  <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                  <p className="text-fs-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
                     {s.short_description}
                   </p>
                 )}
@@ -361,28 +361,28 @@ export default function CategorySuppliers() {
                     const isSvc = Boolean(s.offers_services) || s.supplier_kind === "service";
                     const isProd = Boolean(s.offers_products) || s.supplier_kind === "product";
                     if (isSvc && isProd) return (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-500/15 to-emerald-500/15 text-primary border border-gold/30 inline-flex items-center gap-1">
+                      <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-500/15 to-emerald-500/15 text-primary border border-gold/30 inline-flex items-center gap-1">
                         <Sparkles className="h-2.5 w-2.5 text-gold" /> שירות + מוצרים
                       </span>
                     );
                     if (isSvc) return (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/30 inline-flex items-center gap-1">
+                      <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/30 inline-flex items-center gap-1">
                         <Wrench className="h-2.5 w-2.5" /> בעל מקצוע
                       </span>
                     );
                     if (isProd) return (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 inline-flex items-center gap-1">
+                      <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 inline-flex items-center gap-1">
                         <Package className="h-2.5 w-2.5" /> ספק מוצרים
                       </span>
                     );
                     return null;
                   })()}
                   {s.serves_all_country && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/15 text-primary border border-gold/20">
+                    <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-gold/15 text-primary border border-gold/20">
                       ארצי
                     </span>
                   )}
-                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground flex items-center gap-1">
+                  <span className="text-fs-xs font-medium px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground flex items-center gap-1">
                     <Star className="h-2.5 w-2.5 text-gold" /> מאומת
                   </span>
                 </div>

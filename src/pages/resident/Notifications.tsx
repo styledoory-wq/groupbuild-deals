@@ -50,7 +50,7 @@ export default function Notifications() {
                   {n.unread && <span className="h-2 w-2 rounded-full bg-gold" />}
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">{n.body}</p>
-                <p className="text-[10px] text-muted-foreground mt-2">{new Date(n.createdAt).toLocaleDateString("he-IL")}</p>
+                <p className="text-fs-xs text-muted-foreground mt-2">{new Date(n.createdAt).toLocaleDateString("he-IL")}</p>
               </div>
             </div>
           );
