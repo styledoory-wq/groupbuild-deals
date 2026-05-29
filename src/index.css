@@ -108,8 +108,9 @@
     font-feature-settings: "kern" 1, "ss01" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
     overscroll-behavior-y: none;
-    background: #F4F6F9;
+    background: #F1F5F9;
     min-height: 100dvh;
     /* Smoother momentum scroll on iOS / WebKit */
     -webkit-overflow-scrolling: touch;
