@@ -256,7 +256,7 @@ export default function MyDocuments() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm truncate">{doc.file_name}</div>
-                    <div className="text-[11px] text-muted-foreground">
+                    <div className="text-fs-xs text-muted-foreground">
                       {catInfo.label} · {formatSize(doc.file_size)} ·{" "}
                       {new Date(doc.created_at).toLocaleDateString("he-IL")}
                     </div>

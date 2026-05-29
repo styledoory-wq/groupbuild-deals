@@ -91,27 +91,27 @@ export default function ResidentProfile() {
 
           {/* Identity — name + meta, no avatar */}
           <div className="text-center mb-8 animate-fade-in">
-            <h2 className="font-extrabold text-[22px] text-[#0A1F3D] tracking-tight leading-snug px-4 break-words">
+            <h2 className="font-extrabold text-fs-xl text-[#0A1F3D] tracking-tight leading-snug px-4 break-words">
               {user?.name}
             </h2>
-            <p className="text-[13px] text-[#475569] mt-1.5 font-medium">
+            <p className="text-fs-sm text-[#475569] mt-1.5 font-medium">
               דייר{project ? ` · ${project.name}` : ""}
             </p>
             <div className="mt-5 space-y-2.5">
               {user?.phone && (
-                <div className="flex items-center justify-center gap-2 text-[14px] text-[#334155]">
+                <div className="flex items-center justify-center gap-2 text-fs-sm text-[#334155]">
                   <span>{user.phone}</span>
                   <Phone className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
                 </div>
               )}
               {user?.email && (
-                <div className="flex items-center justify-center gap-2 text-[14px] text-[#334155] break-all">
+                <div className="flex items-center justify-center gap-2 text-fs-sm text-[#334155] break-all">
                   <span>{user.email}</span>
                   <Mail className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
                 </div>
               )}
               {project && user?.apartment && (
-                <div className="flex items-center justify-center gap-2 text-[14px] text-[#334155]">
+                <div className="flex items-center justify-center gap-2 text-fs-sm text-[#334155]">
                   <span>דירה {user.apartment}</span>
                   <Building2 className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
                 </div>
@@ -128,7 +128,7 @@ export default function ResidentProfile() {
                 <button
                   key={label}
                   onClick={onClick}
-                  className="w-full h-[60px] rounded-2xl px-4 flex items-center justify-between font-semibold text-[15px] tracking-tight bg-white/85 backdrop-blur border border-[#E2E8F0] text-[#0A1F3D] hover:border-[#C9A961]/45 hover:bg-white transition-all active:scale-[0.99] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)]"
+                  className="w-full h-[60px] rounded-2xl px-4 flex items-center justify-between font-semibold text-fs-base tracking-tight bg-white/85 backdrop-blur border border-[#E2E8F0] text-[#0A1F3D] hover:border-[#C9A961]/45 hover:bg-white transition-all active:scale-[0.99] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)]"
                 >
                   <span className="flex items-center gap-3">
                     <span

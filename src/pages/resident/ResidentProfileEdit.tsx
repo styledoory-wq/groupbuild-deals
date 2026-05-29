@@ -159,7 +159,7 @@ export default function ResidentProfileEdit() {
           <Field label="אימייל" icon={Mail}>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-11 rounded-xl" />
             {email.trim().toLowerCase() !== originalEmail.toLowerCase() && (
-              <p className="text-[11px] text-gold mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
+              <p className="text-fs-xs text-gold mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
             )}
           </Field>
         </section>

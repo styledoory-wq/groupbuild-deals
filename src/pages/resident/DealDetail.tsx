@@ -511,19 +511,19 @@ export default function DealDetail() {
 
           <div className="p-5">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-success">
+              <span className="inline-flex items-center gap-1.5 text-fs-xs font-bold uppercase tracking-[0.08em] text-success">
                 <span className="gb-live-dot" />
                 עסקה פעילה
               </span>
               {category?.name && (
-                <span className="text-[10px] font-bold text-muted-foreground">· {category.icon ?? "🏷️"} {category.name}</span>
+                <span className="text-fs-xs font-bold text-muted-foreground">· {category.icon ?? "🏷️"} {category.name}</span>
               )}
             </div>
-            <h1 className="text-[24px] font-extrabold text-foreground leading-tight tracking-tight">
+            <h1 className="text-fs-xl font-extrabold text-foreground leading-tight tracking-tight">
               {deal.title}
             </h1>
             {deal.description && (
-              <p className="text-[13px] text-muted-foreground leading-relaxed mt-3 whitespace-pre-line line-clamp-3">
+              <p className="text-fs-sm text-muted-foreground leading-relaxed mt-3 whitespace-pre-line line-clamp-3">
                 {deal.description}
               </p>
             )}
@@ -557,8 +557,8 @@ export default function DealDetail() {
         <div className="bg-card rounded-3xl p-6 border border-border/60">
           <div className="flex justify-between items-end mb-6">
             <div className="space-y-1">
-              <p className="text-[11px] font-medium text-muted-foreground">מחיר קבוצתי נוכחי</p>
-              <div className="text-[32px] font-black text-primary leading-none tracking-tight">
+              <p className="text-fs-xs font-medium text-muted-foreground">מחיר קבוצתי נוכחי</p>
+              <div className="text-fs-3xl font-black text-primary leading-none tracking-tight">
                 {display.headline}
               </div>
             </div>
@@ -576,15 +576,15 @@ export default function DealDetail() {
           {progressTarget > 0 && (
             <div className="space-y-2.5">
               <div className="flex justify-between items-center">
-                <span className="text-[12px] font-bold text-foreground">
+                <span className="text-fs-xs font-bold text-foreground">
                   {participantCount} דיירים הצטרפו
                 </span>
                 {nextTier ? (
-                  <span className="text-[12px] font-medium text-gold">
+                  <span className="text-fs-xs font-medium text-gold">
                     עוד {peopleNeeded} למדרגה הבאה
                   </span>
                 ) : (
-                  <span className="text-[12px] font-bold text-success">המדרגה הטובה ביותר</span>
+                  <span className="text-fs-xs font-bold text-success">המדרגה הטובה ביותר</span>
                 )}
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -600,7 +600,7 @@ export default function DealDetail() {
         {/* TIERS LADDER */}
         {tiers.length > 0 && (
           <div className="bg-card rounded-3xl p-6 border border-border/60">
-            <h3 className="text-[13px] font-extrabold text-foreground mb-4">מדרגות מחיר לפי כמות</h3>
+            <h3 className="text-fs-sm font-extrabold text-foreground mb-4">מדרגות מחיר לפי כמות</h3>
             <div className="space-y-3">
               {tiers.map((t, idx) => {
                 const td = describeTier(offerType, t);
@@ -629,13 +629,13 @@ export default function DealDetail() {
                               : "w-1.5 h-1.5 border border-border",
                         )}
                       />
-                      <span className={cn("text-[13px]", isActive ? "font-bold text-foreground" : "text-foreground")}>
+                      <span className={cn("text-fs-sm", isActive ? "font-bold text-foreground" : "text-foreground")}>
                         {tierRange(t)} דיירים{isActive ? " (פעיל)" : ""}
                       </span>
                     </div>
                     <span
                       className={cn(
-                        "text-[13px] gb-num",
+                        "text-fs-sm gb-num",
                         isActive ? "font-black text-primary" : isPast ? "font-bold" : "font-bold text-gold",
                       )}
                     >
@@ -655,8 +655,8 @@ export default function DealDetail() {
               <Shield className="w-6 h-6 text-gold" strokeWidth={1.5} />
             </div>
             <div className="space-y-0.5 min-w-0">
-              <p className="text-[11px] text-muted-foreground">פיקדון להבטחת המקום</p>
-              <p className="text-[14px] font-bold text-foreground">
+              <p className="text-fs-xs text-muted-foreground">פיקדון להבטחת המקום</p>
+              <p className="text-fs-sm font-bold text-foreground">
                 {ils(Number(deal.deposit_amount))} · מאושר ידנית על ידי המערכת
               </p>
             </div>
@@ -672,13 +672,13 @@ export default function DealDetail() {
             <div className="flex items-center gap-3 min-w-0">
               <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="md" />
               <div className="min-w-0">
-                <p className="text-[14px] font-bold text-foreground truncate">{supplier.business_name}</p>
-                <div className="text-[11px] text-muted-foreground">
+                <p className="text-fs-sm font-bold text-foreground truncate">{supplier.business_name}</p>
+                <div className="text-fs-xs text-muted-foreground">
                   <SupplierRatingBadge supplierId={supplier.id} showEmpty />
                 </div>
               </div>
             </div>
-            <span className="text-[11px] font-bold text-primary px-3 py-1.5 bg-muted rounded-lg shrink-0">
+            <span className="text-fs-xs font-bold text-primary px-3 py-1.5 bg-muted rounded-lg shrink-0">
               פרופיל ספק
             </span>
           </Link>
@@ -690,7 +690,7 @@ export default function DealDetail() {
 
       {/* FIXED ACTION DOCK */}
       <div className="fixed bottom-20 inset-x-0 z-50 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-[480px] px-4 pt-4 pb-2 bg-gradient-to-t from-background via-background to-background/0">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-4 pb-2 bg-gradient-to-t from-background via-background to-background/0">
           {interested ? (
             <div className="space-y-3">
               {/* Festive joined card */}
@@ -699,8 +699,8 @@ export default function DealDetail() {
                   <CheckCircle2 className="w-5 h-5 text-primary" strokeWidth={2.5} />
                 </div>
                 <div className="text-right">
-                  <p className="text-[14px] font-extrabold leading-tight">הצטרפת בהצלחה!</p>
-                  <p className="text-[11px] text-primary-foreground/70 leading-tight mt-0.5">
+                  <p className="text-fs-sm font-extrabold leading-tight">הצטרפת בהצלחה!</p>
+                  <p className="text-fs-xs text-primary-foreground/70 leading-tight mt-0.5">
                     {interestDepositStatus === "paid"
                       ? "פיקדון שולם — המקום מובטח"
                       : interestStatus === "pending_deposit"
@@ -718,7 +718,7 @@ export default function DealDetail() {
               <Button
                 onClick={handleJoinClick}
                 disabled={submittingInterest}
-                className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-extrabold text-[16px] hover:bg-primary/90"
+                className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-extrabold text-fs-base hover:bg-primary/90"
               >
                 {submittingInterest ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -746,14 +746,14 @@ export default function DealDetail() {
             <DialogDescription className="text-right leading-relaxed">
               <span className="block font-bold text-foreground">{deal.title}</span>
               {supplier?.business_name && (
-                <span className="block text-[12px] text-muted-foreground mt-0.5">{supplier.business_name}</span>
+                <span className="block text-fs-xs text-muted-foreground mt-0.5">{supplier.business_name}</span>
               )}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 mt-2">
             <div>
-              <Label className="text-[12px] mb-1 block">שם מלא *</Label>
+              <Label className="text-fs-xs mb-1 block">שם מלא *</Label>
               <Input
                 value={joinForm.full_name}
                 onChange={(e) => setJoinForm({ ...joinForm, full_name: e.target.value })}
@@ -762,7 +762,7 @@ export default function DealDetail() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label className="text-[12px] mb-1 block">טלפון *</Label>
+                <Label className="text-fs-xs mb-1 block">טלפון *</Label>
                 <Input
                   type="tel"
                   value={joinForm.phone}
@@ -771,7 +771,7 @@ export default function DealDetail() {
                 />
               </div>
               <div>
-                <Label className="text-[12px] mb-1 block">עיר</Label>
+                <Label className="text-fs-xs mb-1 block">עיר</Label>
                 <Input
                   value={joinForm.city}
                   onChange={(e) => setJoinForm({ ...joinForm, city: e.target.value })}
@@ -780,7 +780,7 @@ export default function DealDetail() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label className="text-[12px] mb-1 block">פרויקט</Label>
+                <Label className="text-fs-xs mb-1 block">פרויקט</Label>
                 <Input
                   value={joinForm.project_name}
                   onChange={(e) => setJoinForm({ ...joinForm, project_name: e.target.value })}
@@ -788,7 +788,7 @@ export default function DealDetail() {
                 />
               </div>
               <div>
-                <Label className="text-[12px] mb-1 block">כמות משוערת</Label>
+                <Label className="text-fs-xs mb-1 block">כמות משוערת</Label>
                 <Input
                   type="number"
                   inputMode="numeric"
@@ -799,7 +799,7 @@ export default function DealDetail() {
               </div>
             </div>
             <div>
-              <Label className="text-[12px] mb-1 block">הערות / מה אני צריך</Label>
+              <Label className="text-fs-xs mb-1 block">הערות / מה אני צריך</Label>
               <Textarea
                 rows={3}
                 value={joinForm.notes}
@@ -809,7 +809,7 @@ export default function DealDetail() {
             </div>
 
             {depositRequired && (
-              <div className="rounded-xl border border-gold/40 bg-gold/5 px-3 py-2 text-[12px] text-foreground">
+              <div className="rounded-xl border border-gold/40 bg-gold/5 px-3 py-2 text-fs-xs text-foreground">
                 <div className="font-bold mb-0.5">פיקדון נדרש: {ils(Number(deal.deposit_amount ?? 0))}</div>
                 <div className="text-muted-foreground">
                   הצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת.
@@ -819,7 +819,7 @@ export default function DealDetail() {
 
             {/* Join condition */}
             <div className="rounded-2xl border border-border bg-muted/40 p-3 space-y-2">
-              <div className="text-[12px] font-extrabold text-foreground">תנאי ההצטרפות שלי</div>
+              <div className="text-fs-xs font-extrabold text-foreground">תנאי ההצטרפות שלי</div>
               <label className={cn(
                 "flex items-start gap-2 p-2.5 rounded-xl border cursor-pointer transition-smooth",
                 joinCondition === "flexible" ? "border-gold bg-gold/5" : "border-border bg-card"
@@ -831,7 +831,7 @@ export default function DealDetail() {
                   checked={joinCondition === "flexible"}
                   onChange={() => setJoinCondition("flexible")}
                 />
-                <div className="text-[12px] leading-relaxed">
+                <div className="text-fs-xs leading-relaxed">
                   <div className="font-bold text-foreground">הצטרפות גמישה</div>
                   <div className="text-muted-foreground">אני מצטרף בכל מצב, גם אם מדרגת ההנחה תרד בהמשך.</div>
                 </div>
@@ -847,7 +847,7 @@ export default function DealDetail() {
                   checked={joinCondition === "conditional"}
                   onChange={() => setJoinCondition("conditional")}
                 />
-                <div className="text-[12px] leading-relaxed">
+                <div className="text-fs-xs leading-relaxed">
                   <div className="font-bold text-foreground">הצטרפות מותנית</div>
                   <div className="text-muted-foreground">
                     אני מצטרף רק אם המדרגה הנוכחית
@@ -858,7 +858,7 @@ export default function DealDetail() {
               </label>
             </div>
 
-            <div className="rounded-xl bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground leading-relaxed">
+            <div className="rounded-xl bg-muted/60 px-3 py-2 text-fs-xs text-muted-foreground leading-relaxed">
               💡 המחיר הסופי נקבע לפי מספר המשתתפים הפעילים בעת סגירת הקבוצה.
             </div>
 
@@ -869,7 +869,7 @@ export default function DealDetail() {
                 onChange={(e) => setAcceptedTerms(e.target.checked)}
                 className="h-4 w-4 mt-0.5 accent-primary shrink-0"
               />
-              <span className="text-[12px] text-foreground leading-relaxed">
+              <span className="text-fs-xs text-foreground leading-relaxed">
                 אני מאשר/ת קריאת התקנון ותנאי השימוש, ויצירת קשר מצד הספק או מנהל המערכת.
                 ההצטרפות אינה מחייבת רכישה — המחיר הסופי, האחריות והאספקה ייקבעו ישירות מול הספק.
               </span>
@@ -943,7 +943,7 @@ function SecondaryActions({
       <button
         type="button"
         onClick={handleInvite}
-        className="h-11 rounded-2xl border border-border bg-card text-foreground text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
+        className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
       >
         <Share2 className="h-4 w-4 text-gold" strokeWidth={1.5} />
         הזמן שכן
@@ -953,26 +953,26 @@ function SecondaryActions({
           href={wa}
           target="_blank"
           rel="noopener noreferrer"
-          className="h-11 rounded-2xl border border-border bg-card text-foreground text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
+          className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
         >
           <MessageCircle className="h-4 w-4 text-gold" strokeWidth={1.5} />
           וואטסאפ
         </a>
       ) : (
-        <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-[10px] text-muted-foreground">
+        <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-fs-xs text-muted-foreground">
           לא זמין
         </div>
       )}
       {tel ? (
         <a
           href={tel}
-          className="h-11 rounded-2xl border border-border bg-card text-foreground text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
+          className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
         >
           <Phone className="h-4 w-4 text-gold" strokeWidth={1.5} />
           התקשר
         </a>
       ) : (
-        <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-[10px] text-muted-foreground">
+        <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-fs-xs text-muted-foreground">
           לא זמין
         </div>
       )}

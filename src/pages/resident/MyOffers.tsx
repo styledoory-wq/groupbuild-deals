@@ -207,7 +207,7 @@ export default function MyOffers() {
             <div className="inline-flex rounded-2xl bg-card border border-border p-1 shadow-sm">
               <button
                 onClick={() => setShowHidden(false)}
-                className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-smooth ${
+                className={`px-3 py-1.5 rounded-xl text-fs-xs font-bold transition-smooth ${
                   !showHidden ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                 }`}
               >
@@ -215,14 +215,14 @@ export default function MyOffers() {
               </button>
               <button
                 onClick={() => setShowHidden(true)}
-                className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-smooth ${
+                className={`px-3 py-1.5 rounded-xl text-fs-xs font-bold transition-smooth ${
                   showHidden ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                 }`}
               >
                 ארכיון {hiddenCount > 0 && <span className="opacity-70">({hiddenCount})</span>}
               </button>
             </div>
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
+            <span className="inline-flex items-center gap-1 text-fs-xs font-bold text-muted-foreground">
               <span className="gb-live-dot" />
               עדכון בזמן אמת
             </span>
@@ -282,7 +282,7 @@ export default function MyOffers() {
                       size="sm"
                       variant="outline"
                       onClick={() => toggleHide({ interest, deposit }, !hidden)}
-                      className="h-8 rounded-xl text-[11px]"
+                      className="h-8 rounded-xl text-fs-xs"
                     >
                       {hidden ? "החזרה" : "הסתרה"}
                     </Button>
@@ -311,7 +311,7 @@ export default function MyOffers() {
                 <div key={interest.id} className="gb-card-premium p-4 relative overflow-hidden">
                   {/* live indicator */}
                   {dealActive && (
-                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[10px] font-bold text-success">
+                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-fs-xs font-bold text-success">
                       <span className="gb-live-dot" /> LIVE
                     </span>
                   )}
@@ -325,7 +325,7 @@ export default function MyOffers() {
                         {deal.title}
                         <ShieldCheck className="h-3.5 w-3.5 text-gold shrink-0" />
                       </h3>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">
+                      <p className="text-fs-xs text-muted-foreground mt-0.5 inline-flex items-center gap-1">
                         <span>{count} מצטרפים</span>
                         <span>·</span>
                         <span className={dealActive ? "text-success font-bold" : ""}>
@@ -354,32 +354,32 @@ export default function MyOffers() {
                   <Link to={`/resident/deals/${deal.id}`} className="block">
                     <div className="pt-3 border-t border-border/60 flex items-end justify-between gap-2">
                       <div>
-                        <div className="text-[10px] font-bold text-muted-foreground mb-0.5">המחיר הנוכחי שלך</div>
-                        <div className="text-[20px] font-extrabold text-primary leading-none">{display.headline}</div>
+                        <div className="text-fs-xs font-bold text-muted-foreground mb-0.5">המחיר הנוכחי שלך</div>
+                        <div className="text-fs-xl font-extrabold text-primary leading-none">{display.headline}</div>
                         {display.savings && (
-                          <div className="text-[11px] font-bold text-success mt-1">{display.savings}</div>
+                          <div className="text-fs-xs font-bold text-success mt-1">{display.savings}</div>
                         )}
                       </div>
                       <div className="flex flex-col items-end gap-1.5">
                         {paid && (
-                          <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-success/10 text-success border border-success/30">
+                          <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-success/10 text-success border border-success/30">
                             <CheckCircle2 className="h-3 w-3" />
                             פיקדון אושר
                           </span>
                         )}
                         {pending && (
-                          <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gold/15 text-primary border border-gold/40">
+                          <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gold/15 text-primary border border-gold/40">
                             <Clock className="h-3 w-3" />
                             ממתין לאישור
                           </span>
                         )}
                         {refunded && (
-                          <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-muted-foreground border border-border">
+                          <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-muted-foreground border border-border">
                             הוחזר
                           </span>
                         )}
                         {interest.deposit_required && interest.deposit_amount > 0 && (
-                          <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-card text-primary border border-gold/30">
+                          <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-card text-primary border border-gold/30">
                             <BadgeCheck className="h-3 w-3" />
                             {ils(Number(interest.deposit_amount))}
                           </span>

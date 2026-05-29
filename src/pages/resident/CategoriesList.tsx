@@ -133,12 +133,12 @@ export default function CategoriesList() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 mb-5">
             <span className="gb-live-dot" />
             <Sparkles className="h-3 w-3 text-gold" strokeWidth={2.5} />
-            <span className="text-[10px] font-semibold tracking-wider uppercase">
+            <span className="text-fs-xs font-semibold tracking-wider uppercase">
               {totalSuppliers > 0 ? `${totalSuppliers} ספקים מאושרים` : "ספקים נבחרים בקפידה"}
             </span>
           </div>
 
-          <h1 className="text-[30px] leading-[1.1] font-extrabold mb-3 tracking-tight">
+          <h1 className="text-fs-2xl leading-[1.1] font-extrabold mb-3 tracking-tight">
             {stage ? (
               <>{stage.title}<br /><span className="gb-text-gold">תחומי השלב</span></>
             ) : (
@@ -146,7 +146,7 @@ export default function CategoriesList() {
             )}
           </h1>
           <div className="gb-divider-gold gb-glow-gold mb-3" />
-          <p className="text-primary-foreground/70 text-[13px] leading-relaxed max-w-[88%]">
+          <p className="text-primary-foreground/70 text-fs-sm leading-relaxed max-w-[88%]">
             {stage ? "בחרו תחום כדי לראות את הספקים שמשרתים אותו." : "בחרו תחום, או חפשו ספק לפי שם, קטגוריה או אזור."}
           </p>
         </div>
@@ -163,8 +163,8 @@ export default function CategoriesList() {
               <Tag className="h-5 w-5 text-[#B8923F]" strokeWidth={2} />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-[15px] font-bold leading-tight text-[#0A1F3D]">הצעות קבוצתיות</h3>
-              <p className="text-[12px] text-[#475569] mt-1">הצעות פעילות בשלב {stage!.title}</p>
+              <h3 className="text-fs-base font-bold leading-tight text-[#0A1F3D]">הצעות קבוצתיות</h3>
+              <p className="text-fs-xs text-[#475569] mt-1">הצעות פעילות בשלב {stage!.title}</p>
             </div>
             <ChevronLeft className="h-4 w-4 text-[#C9A961] group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
           </button>
@@ -177,8 +177,8 @@ export default function CategoriesList() {
               <Users className="h-5 w-5 text-[#B8923F]" strokeWidth={2} />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-[15px] font-bold leading-tight text-[#0A1F3D]">ספקים בתחום</h3>
-              <p className="text-[12px] text-[#475569] mt-1">בעלי מקצוע וספקים בשלב {stage!.title}</p>
+              <h3 className="text-fs-base font-bold leading-tight text-[#0A1F3D]">ספקים בתחום</h3>
+              <p className="text-fs-xs text-[#475569] mt-1">בעלי מקצוע וספקים בשלב {stage!.title}</p>
             </div>
             <ChevronLeft className="h-4 w-4 text-[#C9A961] group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
           </button>
@@ -215,7 +215,7 @@ export default function CategoriesList() {
         <div className="px-5 mb-6 space-y-3 animate-fade-up">
           {matchingCategories.length > 0 && (
             <div>
-              <p className="text-[11px] font-bold text-muted-foreground mb-2">קטגוריות תואמות</p>
+              <p className="text-fs-xs font-bold text-muted-foreground mb-2">קטגוריות תואמות</p>
               <div className="flex flex-wrap gap-2">
                 {matchingCategories.map((c) => (
                   <Link
@@ -232,7 +232,7 @@ export default function CategoriesList() {
           )}
 
           <div>
-            <p className="text-[11px] font-bold text-muted-foreground mb-2">
+            <p className="text-fs-xs font-bold text-muted-foreground mb-2">
               ספקים תואמים ({searchResults.length})
             </p>
             {searchResults.length === 0 ? (
@@ -256,7 +256,7 @@ export default function CategoriesList() {
                       <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="sm" />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm truncate">{s.business_name}</p>
-                        <p className="text-[11px] text-muted-foreground truncate">
+                        <p className="text-fs-xs text-muted-foreground truncate">
                           {catNames || "ספק"}
                           {s.service_areas?.length > 0 && ` · ${s.service_areas.slice(0, 2).join(", ")}`}
                         </p>
@@ -293,19 +293,19 @@ export default function CategoriesList() {
                         <span className="drop-shadow-[0_0_8px_hsl(44_53%_54%_/_0.4)]">{c.icon}</span>
                       </div>
                       {hasSuppliers ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 inline-flex items-center gap-1">
+                        <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 inline-flex items-center gap-1">
                           <span className="gb-live-dot" />
                           {count}
                         </span>
                       ) : (
-                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
+                        <span className="text-fs-xs font-medium px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
                           בקרוב
                         </span>
                       )}
                     </div>
-                    <h3 className="font-bold text-foreground text-[14px] leading-tight relative tracking-tight">{c.name}</h3>
+                    <h3 className="font-bold text-foreground text-fs-sm leading-tight relative tracking-tight">{c.name}</h3>
                     <div className="flex items-center justify-between mt-2 relative">
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-fs-xs text-muted-foreground">
                         {hasSuppliers ? "צפו בספקים" : "אין ספקים זמינים"}
                       </p>
                       {hasSuppliers && (
