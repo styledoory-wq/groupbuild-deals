@@ -42,11 +42,9 @@ export default function SupplierScan() {
   useEffect(() => {
     if (mode !== "scan" || result.kind !== "idle") return;
 
-    // Native (iOS/Android) path: use MLKit BarcodeScanner with transparent webview overlay.
+    // Native (iOS/Android) path: use MLKit BarcodeScanner one-shot scan().
     if (Capacitor.isNativePlatform()) {
       let cancelled = false;
-      let listenerHandle: { remove: () => Promise<void> } | null = null;
-
       (async () => {
         try {
           const perm = await BarcodeScanner.requestPermissions();
@@ -55,30 +53,22 @@ export default function SupplierScan() {
             setMode("manual");
             return;
           }
-          document.body.classList.add("barcode-scanner-active");
-          listenerHandle = await BarcodeScanner.addListener("barcodeScanned", async (ev) => {
-            if (cancelled) return;
-            cancelled = true;
-            try { await BarcodeScanner.stopScan(); } catch { /* noop */ }
-            try { await listenerHandle?.remove(); } catch { /* noop */ }
-            document.body.classList.remove("barcode-scanner-active");
-            await lookup(parseScan(ev.barcode.rawValue));
-          });
-          await BarcodeScanner.startScan({ formats: [BarcodeFormat.QrCode] });
+          const { barcodes } = await BarcodeScanner.scan({ formats: [BarcodeFormat.QrCode] });
+          if (cancelled) return;
+          const raw = barcodes[0]?.rawValue;
+          if (raw) {
+            await lookup(parseScan(raw));
+          } else {
+            setMode("manual");
+          }
         } catch {
-          toast.error("לא ניתן להפעיל מצלמה. השתמש בקוד ידני.");
-          setMode("manual");
+          if (!cancelled) {
+            toast.error("לא ניתן להפעיל מצלמה. השתמש בקוד ידני.");
+            setMode("manual");
+          }
         }
       })();
-
-      return () => {
-        cancelled = true;
-        (async () => {
-          try { await BarcodeScanner.stopScan(); } catch { /* noop */ }
-          try { await listenerHandle?.remove(); } catch { /* noop */ }
-          document.body.classList.remove("barcode-scanner-active");
-        })();
-      };
+      return () => { cancelled = true; };
     }
 
     // Web fallback: html5-qrcode using getUserMedia.
