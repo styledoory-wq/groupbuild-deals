@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, XCircle, ScanLine, Keyboard } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
+import { Capacitor } from "@capacitor/core";
+import { BarcodeScanner, BarcodeFormat } from "@capacitor-mlkit/barcode-scanning";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -39,6 +41,37 @@ export default function SupplierScan() {
 
   useEffect(() => {
     if (mode !== "scan" || result.kind !== "idle") return;
+
+    // Native (iOS/Android) path: use MLKit BarcodeScanner one-shot scan().
+    if (Capacitor.isNativePlatform()) {
+      let cancelled = false;
+      (async () => {
+        try {
+          const perm = await BarcodeScanner.requestPermissions();
+          if (perm.camera !== "granted" && perm.camera !== "limited") {
+            toast.error("נדרשת הרשאת מצלמה. עבור לקוד ידני.");
+            setMode("manual");
+            return;
+          }
+          const { barcodes } = await BarcodeScanner.scan({ formats: [BarcodeFormat.QrCode] });
+          if (cancelled) return;
+          const raw = barcodes[0]?.rawValue;
+          if (raw) {
+            await lookup(parseScan(raw));
+          } else {
+            setMode("manual");
+          }
+        } catch {
+          if (!cancelled) {
+            toast.error("לא ניתן להפעיל מצלמה. השתמש בקוד ידני.");
+            setMode("manual");
+          }
+        }
+      })();
+      return () => { cancelled = true; };
+    }
+
+    // Web fallback: html5-qrcode using getUserMedia.
     const elId = "supplier-scan-region";
     const el = document.getElementById(elId);
     if (!el) return;
@@ -67,8 +100,6 @@ export default function SupplierScan() {
       stopped = true;
       (async () => {
         try {
-          // Only stop if actually scanning — otherwise html5-qrcode throws
-          // "Cannot stop, scanner is not running or paused."
           const s = scanner as unknown as { getState?: () => number };
           const state = typeof s.getState === "function" ? s.getState() : 2;
           if (state === 2 /* SCANNING */ || state === 3 /* PAUSED */) {
