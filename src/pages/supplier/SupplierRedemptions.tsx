@@ -15,6 +15,8 @@ type Row = {
   profiles?: { full_name: string | null; project_id: string | null } | null;
 };
 
+type RawVoucherRow = Omit<Row, "deals">;
+
 const STATUSES = ["eligible","appointment","measured","ordered","installed","completed","redeemed"] as const;
 const STATUS_LABEL: Record<string, string> = {
   eligible: "זכאי", appointment: "נקבעה פגישה", measured: "נלקחו מידות",
@@ -36,10 +38,16 @@ export default function SupplierRedemptions() {
       if (!supplier) { setLoading(false); return; }
       const { data } = await supabase
         .from("vouchers")
-        .select("id, code, status, reference_number, user_id, deal_id, redeemed_at, deals(title, discounted_price, original_price), profiles:user_id(full_name, project_id)")
+        .select("id, code, status, reference_number, user_id, deal_id, redeemed_at, profiles:user_id(full_name, project_id)")
         .eq("supplier_id", supplier.id)
         .order("created_at", { ascending: false });
-      setRows((data ?? []) as unknown as Row[]);
+      const rawRows = (data ?? []) as unknown as RawVoucherRow[];
+      const dealIds = Array.from(new Set(rawRows.map((r) => r.deal_id).filter(Boolean)));
+      const { data: deals } = dealIds.length
+        ? await supabase.from("deals").select("id, title, discounted_price, original_price").in("id", dealIds)
+        : { data: [] };
+      const dealsById = new Map((deals ?? []).map((d) => [String(d.id), d]));
+      setRows(rawRows.map((r) => ({ ...r, deals: dealsById.get(r.deal_id) ?? null })));
       setLoading(false);
     })();
   }, []);
