@@ -216,7 +216,9 @@ export default function OfferEditor() {
       return;
     }
     if (!commitmentAccepted) {
-      toast.error("יש לאשר את התחייבות הספק לפני פרסום ההצעה");
+      setCommitmentError(true);
+      commitmentRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      toast.error("יש לסמן את אישור התחייבות הספק בתחתית הטופס כדי לפרסם את ההצעה");
       return;
     }
 
