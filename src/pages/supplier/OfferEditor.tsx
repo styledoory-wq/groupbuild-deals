@@ -678,13 +678,13 @@ export default function OfferEditor() {
             <Field label="מקס׳ מימושים (אופציונלי)">
               <Input type="number" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
             </Field>
-            <Field label="תאריך אחרון להצטרפות">
-              <Input type="date" value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-11 rounded-xl" />
-            </Field>
-            <Field label="תאריך אחרון למימוש">
-              <Input type="date" value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-11 rounded-xl" />
-            </Field>
           </div>
+          <Field label="תאריך אחרון להצטרפות">
+            <Input type="date" dir="ltr" value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-11 rounded-xl text-right" />
+          </Field>
+          <Field label="תאריך אחרון למימוש">
+            <Input type="date" dir="ltr" value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-11 rounded-xl text-right" />
+          </Field>
           <Field label="אזורי שירות (מופרדים בפסיק)">
             <Input value={serviceAreasInput} onChange={(e) => setServiceAreasInput(e.target.value)} placeholder="תל אביב, רמת גן, חיפה" className="h-11 rounded-xl" />
           </Field>
