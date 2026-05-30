@@ -701,19 +701,29 @@ export default function OfferEditor() {
         </div>
 
         {/* Supplier commitment - required */}
-        <div className="gb-card p-4 border-2 border-gold/40 bg-gold/5">
+        <div
+          ref={commitmentRef}
+          className={`gb-card p-4 border-2 transition-colors ${
+            commitmentError && !commitmentAccepted
+              ? "border-destructive bg-destructive/5 animate-pulse"
+              : "border-gold/40 bg-gold/5"
+          }`}
+        >
           <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={commitmentAccepted}
-              onChange={(e) => setCommitmentAccepted(e.target.checked)}
+              onChange={(e) => { setCommitmentAccepted(e.target.checked); if (e.target.checked) setCommitmentError(false); }}
               className="h-5 w-5 mt-0.5 accent-primary shrink-0"
             />
             <div className="text-sm leading-relaxed">
-              <span className="font-bold text-foreground">התחייבות הספק</span>
+              <span className="font-bold text-foreground">התחייבות הספק <span className="text-destructive">*</span></span>
               <p className="text-xs text-muted-foreground mt-1">
                 אני מתחייב לכבד את ההצעה הזו לכל דייר זכאי, לעמוד בלוחות הזמנים שהוגדרו, ולמסור שירות איכותי. אי-עמידה בהתחייבות עלולה לגרור השעיה מהמערכת.
               </p>
+              {commitmentError && !commitmentAccepted && (
+                <p className="text-xs font-bold text-destructive mt-2">חובה לסמן את ההתחייבות כדי לפרסם את ההצעה</p>
+              )}
             </div>
           </label>
         </div>
