@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { CheckCircle2, Clock, Hash, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Clock, Hash, ShieldCheck, Tag, Store, ReceiptText } from "lucide-react";
 import { ReportIssueDialog } from "@/components/complaints/ReportIssueDialog";
 
 type Voucher = {
@@ -13,7 +13,11 @@ type Voucher = {
   rotation_secret: string;
   deal_title?: string;
   supplier_name?: string;
+  category_name?: string;
   price?: number | null;
+  original_price?: number | null;
+  benefit_price?: number | null;
+  savings?: number | null;
   deal_id?: string;
   supplier_id?: string;
 };
@@ -39,6 +43,11 @@ function buildQrPayload(v: Voucher, tick: number): string {
   return JSON.stringify({ c: v.code, t: tick, r: v.rotation_secret.slice(0, 8) });
 }
 
+const formatIls = (value?: number | null) =>
+  value != null && Number.isFinite(Number(value))
+    ? new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(Number(value))
+    : "—";
+
 export function VoucherCard({ voucher }: { voucher: Voucher }) {
   const [tick, setTick] = useState(() => Math.floor(Date.now() / 45000));
   const [secondsLeft, setSecondsLeft] = useState(45 - Math.floor((Date.now() / 1000) % 45));
@@ -57,13 +66,26 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
   const expiresLabel = voucher.expires_at
     ? new Date(voucher.expires_at).toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" })
     : "ללא הגבלה";
+  const benefitPrice = voucher.benefit_price ?? voucher.price ?? null;
+  const savings = voucher.savings ?? (
+    voucher.original_price != null && benefitPrice != null
+      ? Math.max(0, Number(voucher.original_price) - Number(benefitPrice))
+      : null
+  );
 
   return (
-    <div className="rounded-3xl bg-card border border-border/60 p-6 space-y-5">
+    <div className="rounded-3xl bg-card border border-border/60 p-6 space-y-5 shadow-soft">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-fs-xs uppercase tracking-wider text-muted-foreground">{voucher.supplier_name ?? "ספק"}</div>
+          <div className="text-fs-xs uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">
+            <Store className="h-3 w-3" /> {voucher.supplier_name ?? "ספק"}
+          </div>
           <h3 className="text-lg font-bold text-foreground mt-1 leading-tight">{voucher.deal_title ?? "הטבה"}</h3>
+          {voucher.category_name && (
+            <div className="text-fs-xs text-muted-foreground mt-1 inline-flex items-center gap-1">
+              <Tag className="h-3 w-3" /> {voucher.category_name}
+            </div>
+          )}
         </div>
         <span className={`text-fs-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
           isRedeemed ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20"
@@ -72,6 +94,23 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
         }`}>
           {STATUS_LABEL[voucher.status] ?? voucher.status}
         </span>
+      </div>
+
+      <div className="rounded-2xl bg-primary text-primary-foreground p-4 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-fs-xs text-primary-foreground/65">מחיר רגיל</div>
+            <div className="text-sm line-through text-primary-foreground/75">{formatIls(voucher.original_price)}</div>
+          </div>
+          <div className="text-left">
+            <div className="text-fs-xs text-primary-foreground/65">מחיר הטבה</div>
+            <div className="text-2xl font-extrabold gb-gold-text leading-none">{formatIls(benefitPrice)}</div>
+          </div>
+        </div>
+        <div className="rounded-xl bg-primary-foreground/10 border border-primary-foreground/15 px-3 py-2 flex items-center justify-between gap-2">
+          <span className="text-fs-xs text-primary-foreground/70 inline-flex items-center gap-1"><ReceiptText className="h-3 w-3" /> גובה החיסכון</span>
+          <span className="font-bold text-primary-foreground">{formatIls(savings)}</span>
+        </div>
       </div>
 
       {!isRedeemed && !isExpired ? (
