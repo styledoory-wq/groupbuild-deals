@@ -39,7 +39,7 @@ export async function resolveSupplierForUser<T extends SupplierAccount = Supplie
     .limit(1)
     .maybeSingle();
   if (byUser.error) throw byUser.error;
-  if (byUser.data) return byUser.data as T;
+  if (byUser.data) return byUser.data as unknown as T;
 
   const claimedId = await claimSupplierByEmail();
   if (claimedId) {
@@ -49,7 +49,7 @@ export async function resolveSupplierForUser<T extends SupplierAccount = Supplie
       .eq("id", claimedId)
       .maybeSingle();
     if (byClaim.error) throw byClaim.error;
-    if (byClaim.data) return byClaim.data as T;
+    if (byClaim.data) return byClaim.data as unknown as T;
   }
 
   if (email) {
@@ -61,7 +61,7 @@ export async function resolveSupplierForUser<T extends SupplierAccount = Supplie
       .limit(1)
       .maybeSingle();
     if (byEmail.error) throw byEmail.error;
-    if (byEmail.data) return byEmail.data as T;
+    if (byEmail.data) return byEmail.data as unknown as T;
   }
 
   return null;
