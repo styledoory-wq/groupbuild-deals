@@ -13,12 +13,17 @@ export type SupplierAccount = {
 const DEFAULT_SUPPLIER_SELECT = "id,business_name,approval_status,is_active,user_id,email,categories";
 
 async function claimSupplierByEmail(): Promise<string | null> {
-  const rpc = supabase.rpc as unknown as (
-    fn: string,
+  // IMPORTANT: call supabase.rpc directly (do NOT destructure / reassign),
+  // otherwise `this` is lost inside supabase-js and you get
+  // "undefined is not an object (evaluating 'this.rest')".
+  const { data, error } = await (supabase.rpc as (
+    fn: "claim_supplier_profile_by_email",
     args?: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message?: string } | null }>;
-
-  const { data, error } = await rpc("claim_supplier_profile_by_email", {});
+  ) => Promise<{ data: unknown; error: { message?: string } | null }>).call(
+    supabase,
+    "claim_supplier_profile_by_email",
+    {},
+  );
   if (error) {
     console.warn("[supplierAuth] supplier claim skipped", error);
     return null;
