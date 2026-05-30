@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { verifyAdminFromSession } from "@/lib/auth";
 import { Save, AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
@@ -90,6 +90,8 @@ export default function OfferEditor() {
   const [appointmentRequired, setAppointmentRequired] = useState<boolean>(false);
   const [serviceAreasInput, setServiceAreasInput] = useState<string>("");
   const [commitmentAccepted, setCommitmentAccepted] = useState<boolean>(false);
+  const [commitmentError, setCommitmentError] = useState<boolean>(false);
+  const commitmentRef = useRef<HTMLDivElement | null>(null);
 
 
   // When offer type changes, swap to sensible defaults if user hasn't customized.
@@ -214,7 +216,9 @@ export default function OfferEditor() {
       return;
     }
     if (!commitmentAccepted) {
-      toast.error("יש לאשר את התחייבות הספק לפני פרסום ההצעה");
+      setCommitmentError(true);
+      commitmentRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      toast.error("יש לסמן את אישור התחייבות הספק בתחתית הטופס כדי לפרסם את ההצעה");
       return;
     }
 
@@ -674,13 +678,13 @@ export default function OfferEditor() {
             <Field label="מקס׳ מימושים (אופציונלי)">
               <Input type="number" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
             </Field>
-            <Field label="תאריך אחרון להצטרפות">
-              <Input type="date" value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-11 rounded-xl" />
-            </Field>
-            <Field label="תאריך אחרון למימוש">
-              <Input type="date" value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-11 rounded-xl" />
-            </Field>
           </div>
+          <Field label="תאריך אחרון להצטרפות">
+            <Input type="date" dir="ltr" value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-11 rounded-xl text-right" />
+          </Field>
+          <Field label="תאריך אחרון למימוש">
+            <Input type="date" dir="ltr" value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-11 rounded-xl text-right" />
+          </Field>
           <Field label="אזורי שירות (מופרדים בפסיק)">
             <Input value={serviceAreasInput} onChange={(e) => setServiceAreasInput(e.target.value)} placeholder="תל אביב, רמת גן, חיפה" className="h-11 rounded-xl" />
           </Field>
@@ -697,19 +701,29 @@ export default function OfferEditor() {
         </div>
 
         {/* Supplier commitment - required */}
-        <div className="gb-card p-4 border-2 border-gold/40 bg-gold/5">
+        <div
+          ref={commitmentRef}
+          className={`gb-card p-4 border-2 transition-colors ${
+            commitmentError && !commitmentAccepted
+              ? "border-destructive bg-destructive/5 animate-pulse"
+              : "border-gold/40 bg-gold/5"
+          }`}
+        >
           <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={commitmentAccepted}
-              onChange={(e) => setCommitmentAccepted(e.target.checked)}
+              onChange={(e) => { setCommitmentAccepted(e.target.checked); if (e.target.checked) setCommitmentError(false); }}
               className="h-5 w-5 mt-0.5 accent-primary shrink-0"
             />
             <div className="text-sm leading-relaxed">
-              <span className="font-bold text-foreground">התחייבות הספק</span>
+              <span className="font-bold text-foreground">התחייבות הספק <span className="text-destructive">*</span></span>
               <p className="text-xs text-muted-foreground mt-1">
                 אני מתחייב לכבד את ההצעה הזו לכל דייר זכאי, לעמוד בלוחות הזמנים שהוגדרו, ולמסור שירות איכותי. אי-עמידה בהתחייבות עלולה לגרור השעיה מהמערכת.
               </p>
+              {commitmentError && !commitmentAccepted && (
+                <p className="text-xs font-bold text-destructive mt-2">חובה לסמן את ההתחייבות כדי לפרסם את ההצעה</p>
+              )}
             </div>
           </label>
         </div>
