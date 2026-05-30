@@ -31,7 +31,7 @@ export default function DealsList() {
   const stageId = searchParams.get("stage") || "";
   const stageCategoryIds = stageId ? STAGE_CATEGORY_IDS[stageId] ?? [] : [];
   const { categories } = useApp();
-  const cacheKey = `deals-list:${categoryId ?? (stageId ? `stage-${stageId}` : "all")}`;
+  const cacheKey = `deals-list:v2:${categoryId ?? (stageId ? `stage-${stageId}` : "all")}`;
   const cached = getCachedValue<{ deals: DealWithSupplier[]; counts: Record<string, number> }>(cacheKey, 5 * 60_000);
   const [deals, setDeals] = useState<DealWithSupplier[]>(() => cached?.deals ?? []);
   const [counts, setCounts] = useState<Record<string, number>>(() => cached?.counts ?? {});
