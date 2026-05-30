@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 export function MobileShell({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div
-      className="min-h-[100dvh] flex justify-center relative ios-bg"
+      className="min-h-screen min-h-[100dvh] flex justify-center relative overflow-x-hidden ios-bg"
       style={{ overscrollBehavior: "none", backgroundColor: "#F1F5F9" }}
     >
       {/* Soft ambient lighting — pearl & gold */}
@@ -34,7 +34,7 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
       <div
         className={cn(
           "w-full max-w-[var(--app-max-w)]",
-          "min-h-[100dvh] relative z-10",
+          "min-h-screen min-h-[100dvh] relative z-10 overflow-x-hidden",
           "pt-[env(safe-area-inset-top)]",
           // Reserve space for the floating BottomNav + safe-area + breathing room
           "pb-[calc(env(safe-area-inset-bottom)+var(--nav-h)+12px)]",

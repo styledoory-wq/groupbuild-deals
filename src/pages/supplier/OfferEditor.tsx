@@ -19,6 +19,8 @@ type SupplierLite = {
   business_name: string;
   approval_status: string;
   categories: string[] | null;
+  email: string | null;
+  user_id: string | null;
 };
 
 // UI-side tier rows (strings so empty inputs are easy to manage)
@@ -125,7 +127,7 @@ export default function OfferEditor() {
           }
           const r = await supabase
             .from("suppliers")
-            .select("id, business_name, approval_status, categories")
+            .select("id, business_name, approval_status, categories, email, user_id")
             .eq("id", adminTargetSupplierId)
             .maybeSingle();
           s = (r.data as SupplierLite | null) ?? null;
@@ -133,17 +135,27 @@ export default function OfferEditor() {
           const email = session.user.email ?? "";
           const byUser = await supabase
             .from("suppliers")
-            .select("id, business_name, approval_status, categories")
+            .select("id, business_name, approval_status, categories, email, user_id")
             .eq("user_id", session.user.id)
             .maybeSingle();
           s = (byUser.data as SupplierLite | null) ?? null;
           if (!s && email) {
             const byEmail = await supabase
               .from("suppliers")
-              .select("id, business_name, approval_status, categories")
+              .select("id, business_name, approval_status, categories, email, user_id")
               .ilike("email", email)
               .maybeSingle();
             s = (byEmail.data as SupplierLite | null) ?? null;
+            if (s && !s.user_id) {
+              const { error: claimError } = await (supabase.rpc as any)("claim_supplier_profile_by_email", {
+                _supplier_id: s.id,
+              });
+              if (!claimError) {
+                s = { ...s, user_id: session.user.id, email: email || s.email };
+              } else {
+                console.warn("[OfferEditor] supplier claim skipped", claimError);
+              }
+            }
           }
         }
 
@@ -702,7 +714,7 @@ export default function OfferEditor() {
           </label>
         </div>
 
-        <Button onClick={save} disabled={saving || !commitmentAccepted} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card disabled:opacity-50">
+        <Button onClick={save} disabled={saving} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card disabled:opacity-50">
           {saving ? <Loader2 className="h-4 w-4 ml-2 animate-spin" /> : <Save className="h-4 w-4 ml-2" />}
           {saving ? "שומר..." : "שמירת ההצעה"}
         </Button>

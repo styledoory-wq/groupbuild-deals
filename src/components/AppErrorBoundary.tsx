@@ -4,6 +4,18 @@ import { Button } from "@/components/ui/button";
 
 type State = { error: Error | null };
 
+const CHUNK_RECOVERY_KEY = "gb-chunk-recovery-attempted";
+
+function isRecoverableLoadError(error: Error) {
+  const message = error.message || "";
+  return (
+    message.includes("Failed to fetch dynamically imported module") ||
+    message.includes("Importing a module script failed") ||
+    message.includes("Loading chunk") ||
+    message.includes("ChunkLoadError")
+  );
+}
+
 export class AppErrorBoundary extends Component<{ children: ReactNode }, State> {
   state: State = { error: null };
 
@@ -13,6 +25,11 @@ export class AppErrorBoundary extends Component<{ children: ReactNode }, State> 
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("[AppErrorBoundary]", error, info.componentStack);
+
+    if (isRecoverableLoadError(error) && sessionStorage.getItem(CHUNK_RECOVERY_KEY) !== "1") {
+      sessionStorage.setItem(CHUNK_RECOVERY_KEY, "1");
+      window.location.reload();
+    }
   }
 
   render() {

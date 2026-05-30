@@ -7,7 +7,7 @@ import { BrandLogo } from "@/components/BrandLogo";
  * Stays mounted until `ready` is true AND a minimum display time has elapsed
  * (prevents flash on fast loads), then fades out smoothly.
  */
-export function SplashScreen({ ready, minDurationMs = 650 }: { ready: boolean; minDurationMs?: number }) {
+export function SplashScreen({ ready, minDurationMs = 2500 }: { ready: boolean; minDurationMs?: number }) {
   const [minElapsed, setMinElapsed] = useState(false);
   const [hidden, setHidden] = useState(false);
 
@@ -45,7 +45,7 @@ export function SplashScreen({ ready, minDurationMs = 650 }: { ready: boolean; m
 
       <div className="relative flex flex-col items-center gap-10">
         <div className="animate-fade-in">
-          <BrandLogo size="xl" variant="dark" className="drop-shadow-[0_8px_24px_hsl(217_56%_13%_/_0.18)]" />
+          <BrandLogo size="xl" variant="dark" className="h-40 drop-shadow-[0_8px_24px_hsl(217_56%_13%_/_0.18)]" />
         </div>
 
         {/* Pulse loader dots */}

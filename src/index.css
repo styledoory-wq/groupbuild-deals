@@ -22,50 +22,35 @@
     /* GroupBuild brand surface */
     --background: 214 22% 96%;         /* #F4F6F9 */
     --foreground: 215 56% 12%;         /* #0D1B2E */
-
     --card: 0 0% 100%;
     --card-foreground: 215 56% 12%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 215 56% 12%;
-
-    /* Primary = navy dark */
-    --primary: 215 56% 12%;            /* #0D1B2E */
+    --primary: 215 56% 12%;
     --primary-foreground: 0 0% 100%;
-    --primary-soft: 215 49% 21%;       /* #1A2F4E */
-
-    /* Brand gold */
-    --secondary: 43 54% 54%;           /* #C9A84C */
+    --primary-soft: 215 49% 21%;
+    --secondary: 43 54% 54%;
     --secondary-foreground: 215 56% 12%;
-    --gold: 43 54% 54%;                /* #C9A84C */
-    --gold-light: 45 73% 67%;          /* #E8C96B */
+    --gold: 43 54% 54%;
+    --gold-light: 45 73% 67%;
     --gold-foreground: 215 56% 12%;
-
     --muted: 214 22% 92%;
-    --muted-foreground: 213 16% 49%;   /* #6B7A8D */
-
+    --muted-foreground: 213 16% 49%;
     --accent: 43 54% 54%;
     --accent-foreground: 215 56% 12%;
-
     --success: 152 45% 40%;
     --success-foreground: 0 0% 100%;
-
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 214 22% 88%;
     --input: 214 22% 92%;
     --ring: 43 54% 54%;
-
     --radius: 1rem;
-
     --gradient-hero: linear-gradient(160deg, #0D1B2E 0%, #1A2F4E 100%);
     --gradient-gold: linear-gradient(135deg, #C9A84C 0%, #E8C96B 100%);
     --gradient-card: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
     --gradient-navy-deep: linear-gradient(160deg, #0D1B2E 0%, #1A2F4E 100%);
     --gradient-page: #F4F6F9;
-
-    /* Refined airy shadows — soft cinematic, not heavy */
     --shadow-soft: 0 1px 2px rgba(15,30,60,0.04), 0 4px 12px -6px rgba(15,30,60,0.06);
     --shadow-card: 0 1px 2px rgba(15,30,60,0.04), 0 12px 32px -16px rgba(15,30,60,0.10), 0 2px 6px -2px rgba(15,30,60,0.04);
     --shadow-elevated: 0 20px 48px -24px rgba(15,30,60,0.16), 0 6px 18px -10px rgba(15,30,60,0.08);
@@ -73,16 +58,13 @@
     --shadow-gold: 0 6px 22px -12px rgba(201,169,97,0.40), 0 0 0 1px rgba(201,169,97,0.18);
     --glow-gold: 0 0 22px rgba(201,169,97,0.28);
     --glow-navy: 0 0 28px rgba(10,31,61,0.18);
-
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
 
   html {
     direction: rtl;
@@ -95,8 +77,8 @@
     background-color: #0A1F3D;
     overscroll-behavior: none;
   }
-  @media (min-width: 640px) { html { font-size: 15px; } }
-  @media (min-width: 768px) { html { font-size: 16px; } }
+  @media (min-width: 640px) { html { font-size: 16px; } }
+  @media (min-width: 768px) { html { font-size: 17px; } }
 
   html, body, #root {
     width: 100%;
@@ -112,14 +94,13 @@
     overscroll-behavior-y: none;
     background: #F1F5F9;
     min-height: 100dvh;
-    /* Smoother momentum scroll on iOS / WebKit */
     -webkit-overflow-scrolling: touch;
   }
 
   #root {
     min-height: 100dvh;
+    background: #F4F6F9;
   }
-
 
   img, video, svg {
     max-width: 100%;
@@ -136,15 +117,12 @@
     font-size: 16px !important;
   }
 
-  /* Pearl bar behind the iOS safe-area-top so the notch blends with the page */
   body::before {
     content: "";
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: env(safe-area-inset-top);
-    background-color: #F4F6F9;
+    background-color: #0A1F3D;
     z-index: 100;
     pointer-events: none;
   }
@@ -155,9 +133,6 @@
   }
 }
 
-/* ===== Unified Design System tokens =====
-   Typography scale, spacing, motion primitives — used across the app
-   to keep the experience consistent and premium. */
 @layer components {
   /* Typography — fluid scale tokens (clamp-based, no per-breakpoint snaps) */
   .gb-display     { @apply text-fs-4xl font-extrabold tracking-tight; letter-spacing: -0.02em; }
@@ -170,20 +145,15 @@
   .gb-overline    { @apply text-fs-xs uppercase tracking-[0.12em] font-bold text-muted-foreground; }
   .gb-num         { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 
-  /* Section spacing primitives */
   .gb-stack-xs    { @apply space-y-1.5; }
   .gb-stack-sm    { @apply space-y-2.5; }
   .gb-stack-md    { @apply space-y-4; }
   .gb-stack-lg    { @apply space-y-6 md:space-y-8; }
 
-  /* Premium interactive — unified hover/press */
-  .gb-press {
-    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, background-color 180ms ease;
-  }
+  .gb-press { transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, background-color 180ms ease; }
   .gb-press:hover { transform: translateY(-1px); }
   .gb-press:active { transform: translateY(0) scale(0.985); }
 
-  /* Skeleton shimmer — soft pearl */
   .gb-skeleton {
     @apply rounded-xl;
     background: linear-gradient(90deg, rgba(15,30,60,0.04) 0%, rgba(15,30,60,0.09) 50%, rgba(15,30,60,0.04) 100%);
@@ -195,8 +165,6 @@
     50% { background-position: -200% 0; }
   }
 
-
-  /* Elevated premium card — solid white, brand-toned border, gold whisper */
   .gb-card {
     @apply rounded-2xl relative;
     background: #ffffff;
@@ -218,23 +186,14 @@
     box-shadow: 0 2px 12px rgba(13, 27, 46, 0.08);
   }
 
-  .gb-hero {
-    background: var(--gradient-hero);
-    @apply text-primary-foreground;
-  }
-
+  .gb-hero { background: var(--gradient-hero); @apply text-primary-foreground; }
   .gb-gold-text { @apply text-secondary; }
   .gb-gradient-gold { background: var(--gradient-gold); }
-
-  .gb-divider-gold {
-    @apply h-[2px] w-12 rounded-full;
-    background: var(--gradient-gold);
-  }
+  .gb-divider-gold { @apply h-[2px] w-12 rounded-full; background: var(--gradient-gold); }
 
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Cinematic premium hero (legacy — kept) */
   .gb-hero-premium {
     background:
       radial-gradient(60% 40% at 85% 0%, hsl(44 73% 66% / 0.18) 0%, transparent 60%),
@@ -243,7 +202,6 @@
     @apply text-primary-foreground relative overflow-hidden;
   }
 
-  /* Calm architectural navy hero — used by PageHeader */
   .gb-hero-calm {
     background:
       radial-gradient(70% 50% at 100% 0%, rgba(201,169,97,0.12) 0%, transparent 65%),
@@ -253,7 +211,6 @@
     box-shadow: inset 0 -1px 0 rgba(201,169,97,0.10);
   }
 
-  /* Frosted glass on dark hero */
   .gb-glass {
     background: linear-gradient(180deg, hsl(0 0% 100% / 0.14), hsl(0 0% 100% / 0.04));
     backdrop-filter: blur(18px) saturate(160%);
@@ -261,7 +218,6 @@
     @apply rounded-2xl border border-white/15;
   }
 
-  /* Frosted glass on light surfaces */
   .gb-glass-light {
     background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(247,249,252,0.66));
     backdrop-filter: blur(22px) saturate(170%);
@@ -270,7 +226,6 @@
     box-shadow: var(--shadow-card);
   }
 
-  /* Premium card with gold ring + sheen */
   .gb-card-premium {
     @apply rounded-3xl border border-border bg-card relative overflow-hidden;
     box-shadow: var(--shadow-elevated), 0 0 0 1px hsl(44 53% 54% / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.6);
@@ -289,21 +244,14 @@
     pointer-events: none;
   }
 
-  /* Floating dock (legacy light) */
   .gb-dock {
     background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(247,249,252,0.72));
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
-    box-shadow:
-      0 20px 44px -18px rgba(15,30,60,0.20),
-      0 0 0 1px rgba(15,30,60,0.05),
-      inset 0 1px 0 rgba(255,255,255,0.9);
+    box-shadow: 0 20px 44px -18px rgba(15,30,60,0.20), 0 0 0 1px rgba(15,30,60,0.05), inset 0 1px 0 rgba(255,255,255,0.9);
   }
 
-  /* Live pulsing dot */
-  .gb-live-dot {
-    @apply relative inline-flex h-2 w-2 rounded-full bg-success;
-  }
+  .gb-live-dot { @apply relative inline-flex h-2 w-2 rounded-full bg-success; }
   .gb-live-dot::after {
     content: "";
     position: absolute; inset: 0; border-radius: 9999px;
@@ -323,11 +271,8 @@
     color: transparent;
   }
 
-  .gb-section-fade {
-    background: linear-gradient(180deg, transparent, hsl(42 33% 96% / 0.6) 50%, transparent);
-  }
+  .gb-section-fade { background: linear-gradient(180deg, transparent, hsl(42 33% 96% / 0.6) 50%, transparent); }
 
-  /* Calm aurora (softened — no animation, low saturation) */
   .gb-aurora {
     background:
       radial-gradient(70% 50% at 100% 0%, rgba(201,169,97,0.14) 0%, transparent 60%),
@@ -335,7 +280,6 @@
       linear-gradient(160deg, #071427 0%, #0A1F3D 60%, #0B2247 100%);
   }
 
-  /* Premium dark tile (used for navigation tiles, stage cards) */
   .gb-tile-dark {
     background:
       radial-gradient(80% 60% at 100% 0%, hsl(44 53% 54% / 0.18), transparent 60%),
@@ -349,7 +293,6 @@
     box-shadow: 0 20px 40px -16px hsl(217 56% 13% / 0.65), inset 0 1px 0 hsl(0 0% 100% / 0.10), 0 0 0 1px hsl(44 53% 54% / 0.25);
   }
 
-  /* Inline stat pill — premium minimal */
   .gb-stat-pill {
     @apply rounded-2xl px-3 py-4 flex flex-col items-center justify-center gap-1;
     background: linear-gradient(180deg, hsl(0 0% 100% / 0.09), hsl(0 0% 100% / 0.025));
@@ -358,21 +301,10 @@
     box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.08);
   }
 
-  /* Floating particle dot */
-  .gb-particle {
-    @apply absolute rounded-full pointer-events-none;
-    background: hsl(44 73% 66%);
-    box-shadow: 0 0 10px hsl(44 53% 54% / 0.8);
-  }
+  .gb-particle { @apply absolute rounded-full pointer-events-none; background: hsl(44 73% 66%); box-shadow: 0 0 10px hsl(44 53% 54% / 0.8); }
 
-  /* Brand page surface */
-  .ios-bg {
-    background: #F4F6F9;
-    min-height: 100vh;
-    color: hsl(var(--foreground));
-  }
+  .ios-bg { background: #F4F6F9; min-height: 100vh; color: hsl(var(--foreground)); }
 
-  /* Glassmorphism luxury card — pearl white */
   .ios-card {
     background: #ffffff;
     border: 1px solid rgba(201, 168, 76, 0.10);
@@ -381,24 +313,17 @@
     transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease;
   }
 
-  /* Primary CTA — gold on navy */
   .ios-btn-navy {
-    background: #C9A84C;
-    color: #0D1B2E;
-    border-radius: 12px;
-    border: 1px solid rgba(13,27,46,0.08);
-    font-weight: 700;
+    background: #C9A84C; color: #0D1B2E; border-radius: 12px;
+    border: 1px solid rgba(13,27,46,0.08); font-weight: 700;
     box-shadow: 0 6px 18px -10px rgba(201,168,76,0.55);
     transition: transform 150ms ease, filter 200ms ease, box-shadow 220ms ease;
   }
   .ios-btn-navy:hover { filter: brightness(1.05); }
   .ios-btn-navy:active { transform: scale(0.97); }
 
-  /* Secondary button — navy on white */
   .ios-btn-secondary {
-    background: #0D1B2E;
-    color: #ffffff;
-    border-radius: 12px;
+    background: #0D1B2E; color: #ffffff; border-radius: 12px;
     border: 1px solid rgba(201,168,76,0.20);
     box-shadow: 0 6px 18px -12px rgba(13,27,46,0.45);
     transition: transform 150ms ease, filter 200ms ease;
@@ -406,178 +331,84 @@
   .ios-btn-secondary:hover { filter: brightness(1.08); border-color: rgba(201,168,76,0.40); }
   .ios-btn-secondary:active { transform: scale(0.97); }
 
-  /* Gold avatar disc */
   .ios-avatar-gold {
     background: linear-gradient(145deg, #E8C96B 0%, #C9A84C 100%);
-    box-shadow:
-      0 12px 26px -14px rgba(201,168,76,0.55),
-      inset 0 2px 4px rgba(255,255,255,0.30),
-      inset 0 -3px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 26px -14px rgba(201,168,76,0.55), inset 0 2px 4px rgba(255,255,255,0.30), inset 0 -3px 8px rgba(0,0,0,0.15);
   }
 
-  /* Brand floating dock — solid navy */
   .ios-dock {
     background: #0D1B2E;
     border: 1px solid rgba(201,168,76,0.18);
     border-radius: 24px;
-    box-shadow:
-      0 20px 44px -18px rgba(13,27,46,0.45),
-      inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow: 0 20px 44px -18px rgba(13,27,46,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
   }
 
-  /* Inline meta row inside profile card */
-  .ios-meta-row {
-    @apply flex items-center justify-center gap-2 text-[13px];
-    color: #6B7A8D;
-  }
+  .ios-meta-row { @apply flex items-center justify-center gap-2 text-[13px]; color: #6B7A8D; }
 
-  /* Brand input field */
   .gb-input {
-    border: 1.5px solid #E2E8F0;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 14px 16px;
+    border: 1.5px solid #E2E8F0; background: #ffffff; border-radius: 12px; padding: 14px 16px;
     transition: border-color 160ms ease, box-shadow 200ms ease;
   }
-  .gb-input:focus,
-  .gb-input:focus-visible {
-    outline: none;
-    border-color: #C9A84C;
-    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+  .gb-input:focus, .gb-input:focus-visible {
+    outline: none; border-color: #C9A84C; box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
   }
 
-  /* Gold accent line for section titles */
-  .gb-gold-underline {
-    @apply block h-[2px] w-10 rounded-full mt-2;
-    background: #C9A84C;
-  }
+  .gb-gold-underline { @apply block h-[2px] w-10 rounded-full mt-2; background: #C9A84C; }
+  .gb-deal-card { border-right: 3px solid #C9A84C; }
+  .gb-deal-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(13,27,46,0.12); }
 
-  /* Deal card — gold leading edge (RTL = right) */
-  .gb-deal-card {
-    border-right: 3px solid #C9A84C;
-  }
-  .gb-deal-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(13,27,46,0.12);
-  }
-
-  /* Brand progress bar */
-  .gb-progress {
-    background: #E8EAED;
-    border-radius: 999px;
-    height: 6px;
-    overflow: hidden;
-  }
+  .gb-progress { background: #E8EAED; border-radius: 999px; height: 6px; overflow: hidden; }
   .gb-progress > .gb-progress-fill {
-    height: 100%;
-    border-radius: 999px;
+    height: 100%; border-radius: 999px;
     background: linear-gradient(90deg, #C9A84C, #E8C96B);
     transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
-@keyframes gb-aurora {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
+@keyframes gb-aurora { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 @keyframes gb-particle-float {
   0% { transform: translate3d(0, 0, 0); opacity: 0; }
   10%, 90% { opacity: 0.7; }
   100% { transform: translate3d(20px, -60px, 0); opacity: 0; }
 }
-
 .gb-particle-1 { animation: gb-particle-float 8s ease-in-out infinite; }
 .gb-particle-2 { animation: gb-particle-float 10s ease-in-out infinite 1.5s; }
 .gb-particle-3 { animation: gb-particle-float 12s ease-in-out infinite 3s; }
-
-@keyframes gb-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
+@keyframes gb-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @keyframes gb-pulse-glow {
   0%, 100% { box-shadow: 0 0 0 0 hsl(44 53% 54% / 0.5); }
   50% { box-shadow: 0 0 0 12px hsl(44 53% 54% / 0); }
 }
-
 .gb-pulse-glow { animation: gb-pulse-glow 2s ease-in-out infinite; }
-
-@keyframes gb-ping {
-  0% { transform: scale(1); opacity: 0.7; }
-  75%, 100% { transform: scale(2.4); opacity: 0; }
-}
-
-@keyframes gb-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
+@keyframes gb-ping { 0% { transform: scale(1); opacity: 0.7; } 75%, 100% { transform: scale(2.4); opacity: 0; } }
+@keyframes gb-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 .gb-shimmer {
-  background: linear-gradient(90deg,
-    hsl(44 53% 54% / 0) 0%,
-    hsl(44 73% 66% / 0.45) 50%,
-    hsl(44 53% 54% / 0) 100%);
+  background: linear-gradient(90deg, hsl(44 53% 54% / 0) 0%, hsl(44 73% 66% / 0.45) 50%, hsl(44 53% 54% / 0) 100%);
   background-size: 200% 100%;
   animation: gb-shimmer 2.4s linear infinite;
 }
 
 @layer utilities {
-  .safe-bottom {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
-  }
-  .safe-top {
-    padding-top: env(safe-area-inset-top);
-  }
-  .safe-top-plus {
-    padding-top: calc(env(safe-area-inset-top) + 0.5rem);
-  }
+  .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 1rem); }
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-top-plus { padding-top: calc(env(safe-area-inset-top) + 0.5rem); }
+  .route-transition { min-height: 100dvh; }
 
-  /* Route content — no per-navigation animation. The previous fade caused a
-     visible flash on every page change and made navigation feel slow. We rely
-     on instant paint + stable skeletons for perceived speed. */
-  .route-transition {
-    min-height: 100dvh;
-  }
-
-  /* Card entrance — single subtle fade, no per-child stagger.
-     The old staggered delays (up to 480ms) made lists feel sluggish on every
-     navigation. Keep a tiny fade for polish, but render all cards together. */
   @keyframes gb-card-enter {
     from { opacity: 0; transform: translateY(4px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .gb-card,
-  .gb-card-flat,
-  .gb-card-premium,
-  .ios-card {
-    animation: gb-card-enter 0.18s ease-out both;
-  }
+  .gb-card, .gb-card-flat, .gb-card-premium, .ios-card { animation: gb-card-enter 0.18s ease-out both; }
+  .route-transition, .gb-card, .gb-card-flat, .gb-card-premium, .ios-card, button, a { -webkit-tap-highlight-color: transparent; }
+  .gb-cv-auto { content-visibility: auto; contain-intrinsic-size: 1px 320px; }
 
-  /* Improve scroll & tap feel on touch devices */
-  .route-transition,
-  .gb-card, .gb-card-flat, .gb-card-premium, .ios-card,
-  button, a {
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Promote off-screen sections — browser can skip layout/paint until visible.
-     Major perceived-speed win on long resident/admin lists. */
-  .gb-cv-auto {
-    content-visibility: auto;
-    contain-intrinsic-size: 1px 320px;
-  }
-
-  /* Mobile (≤640) — disable per-card entrance animation entirely. Native-feel
-     instant rendering > decorative fades on phones. */
   @media (max-width: 640px) {
     .gb-card, .gb-card-flat, .gb-card-premium, .ios-card { animation: none; }
     .gb-float { animation: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .route-transition,
-    .gb-card, .gb-card-flat, .gb-card-premium, .ios-card,
+    .route-transition, .gb-card, .gb-card-flat, .gb-card-premium, .ios-card,
     .gb-float, .gb-pulse-glow, .gb-shimmer,
     .gb-particle-1, .gb-particle-2, .gb-particle-3 { animation: none !important; }
   }

@@ -686,10 +686,13 @@ export default function DealDetail() {
       </div>
 
       {/* Spacer for fixed CTA + BottomNav */}
-      <div aria-hidden className="h-48" />
+      <div aria-hidden className="h-64" />
 
       {/* FIXED ACTION DOCK */}
-      <div className="fixed bottom-20 inset-x-0 z-50 flex justify-center pointer-events-none">
+      <div
+        className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
+      >
         <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-4 pb-2 bg-gradient-to-t from-background via-background to-background/0">
           {interested ? (
             <div className="space-y-3">

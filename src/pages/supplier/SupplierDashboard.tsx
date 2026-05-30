@@ -190,7 +190,7 @@ export default function SupplierDashboard() {
 
   const HeroBar = ({ height = 230 }: { height?: number }) => (
     <header className="relative">
-      <div className="relative overflow-hidden rounded-b-[28px] bg-[#0A1F3D]" style={{ height }}>
+      <div className="relative overflow-hidden rounded-b-[28px] bg-[#0A1F3D] w-full" style={{ height }}>
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#0A1F3D] via-[#0A1F3D] to-[#071427]" />
         <div aria-hidden className="absolute -top-24 -right-20 h-72 w-72 rounded-full bg-[#C9A961]/10 blur-3xl" />
         <div aria-hidden className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-[#C9A961]/5 blur-2xl" />
@@ -209,8 +209,8 @@ export default function SupplierDashboard() {
           </button>
         </div>
 
-        <div className="relative px-5 mt-8 text-right">
-          <h1 className="text-fs-2xl sm:text-fs-2xl font-extrabold text-white leading-[1.15] tracking-tight break-words">
+        <div className="relative px-5 mt-8 text-right w-full">
+          <h1 className="text-fs-2xl sm:text-fs-2xl font-extrabold text-white leading-[1.15] tracking-tight break-words w-full">
             {businessName}
           </h1>
           {dbSupplier && !isPending && !isRejected && (
@@ -257,55 +257,57 @@ export default function SupplierDashboard() {
 
   return (
     <MobileShell>
-      <HeroBar />
+      <div className="w-full overflow-x-hidden">
+        <HeroBar />
 
-      <div className="px-5 mt-4 grid grid-cols-2 gap-3">
-        <Stat icon={Users} label="לידים" value={totalLeads.toString()} />
-        <Stat icon={TrendingUp} label="המרה" value={`${conversion}%`} />
-        <Stat icon={Briefcase} label="עסקאות פעילות" value={myDeals.length.toString()} />
-        <Stat icon={DollarSign} label="הכנסה" value={formatILS(revenue)} small />
-      </div>
+        <div className="px-5 mt-4 grid grid-cols-2 gap-3 w-full">
+          <Stat icon={Users} label="לידים" value={totalLeads.toString()} />
+          <Stat icon={TrendingUp} label="המרה" value={`${conversion}%`} />
+          <Stat icon={Briefcase} label="עסקאות פעילות" value={myDeals.length.toString()} />
+          <Stat icon={DollarSign} label="הכנסה" value={formatILS(revenue)} small />
+        </div>
 
-      <div className="px-5 mt-5 mb-6 space-y-2.5">
-        <Button onClick={() => navigate("/supplier/offers/new")} className="w-full h-12 rounded-2xl font-semibold">
-          <Plus className="h-4 w-4 ml-2" strokeWidth={2} /> צרו הצעה חדשה
-        </Button>
-        <Button onClick={() => navigate("/supplier/profile/edit")} variant="outline" className="w-full h-11 rounded-2xl">
-          <Pencil className="h-4 w-4 ml-2" /> עריכת פרופיל ואזורי שירות
-        </Button>
-      </div>
+        <div className="px-5 mt-5 mb-6 space-y-2.5 w-full">
+          <Button onClick={() => navigate("/supplier/offers/new")} className="w-full h-12 rounded-2xl font-semibold">
+            <Plus className="h-4 w-4 ml-2" strokeWidth={2} /> צרו הצעה חדשה
+          </Button>
+          <Button onClick={() => navigate("/supplier/profile/edit")} variant="outline" className="w-full h-11 rounded-2xl">
+            <Pencil className="h-4 w-4 ml-2" /> עריכת פרופיל ואזורי שירות
+          </Button>
+        </div>
 
-      <section className="px-5 space-y-3 pb-8">
-        <h2 className="text-fs-xs uppercase tracking-[0.14em] text-[#475569] font-semibold flex items-center gap-1.5 mb-1 px-1">
-          <Briefcase className="h-3 w-3 text-[#B8923F]" strokeWidth={2} /> ההצעות שלי
-        </h2>
-        {myDeals.length === 0 && (
-          <div className="bg-white rounded-2xl p-5 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center text-sm text-[#475569]">
-            עדיין לא יצרת הצעות. לחץ "צרו הצעה חדשה" כדי להתחיל.
-          </div>
-        )}
-        {myDeals.map((d) => {
-          const c = counts[d.id] ?? { interests: 0, paid: 0 };
-          return (
-            <div key={d.id} className="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)]">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-fs-sm text-[#0A1F3D] truncate">{d.title}</h3>
-                  <div className="text-fs-xs text-[#475569] mt-0.5">{d.status}</div>
-                </div>
-                <div className="text-left">
-                  <div className="font-extrabold text-[#0A1F3D] text-sm">{formatILS(priceFor(d))}</div>
-                  <div className="text-fs-xs text-[#B8923F] font-bold mt-0.5">{c.paid} שילמו</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-fs-xs pt-3 border-t border-[#E2E8F0]">
-                <span className="px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#0A1F3D] border border-[#E2E8F0] font-semibold">{c.interests} לידים</span>
-                <span className="px-2.5 py-1 rounded-full bg-[#C9A961]/12 text-[#B8923F] border border-[#C9A961]/30 font-semibold">{c.paid} פיקדונות</span>
-              </div>
+        <section className="px-5 space-y-3 pb-8 w-full">
+          <h2 className="text-fs-xs uppercase tracking-[0.14em] text-[#475569] font-semibold flex items-center gap-1.5 mb-1 px-1">
+            <Briefcase className="h-3 w-3 text-[#B8923F]" strokeWidth={2} /> ההצעות שלי
+          </h2>
+          {myDeals.length === 0 && (
+            <div className="bg-white rounded-2xl p-5 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center text-sm text-[#475569]">
+              עדיין לא יצרת הצעות. לחץ "צרו הצעה חדשה" כדי להתחיל.
             </div>
-          );
-        })}
-      </section>
+          )}
+          {myDeals.map((d) => {
+            const c = counts[d.id] ?? { interests: 0, paid: 0 };
+            return (
+              <div key={d.id} className="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] w-full">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-fs-sm text-[#0A1F3D] truncate">{d.title}</h3>
+                    <div className="text-fs-xs text-[#475569] mt-0.5">{d.status}</div>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-extrabold text-[#0A1F3D] text-sm">{formatILS(priceFor(d))}</div>
+                    <div className="text-fs-xs text-[#B8923F] font-bold mt-0.5">{c.paid} שילמו</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-fs-xs pt-3 border-t border-[#E2E8F0]">
+                  <span className="px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#0A1F3D] border border-[#E2E8F0] font-semibold">{c.interests} לידים</span>
+                  <span className="px-2.5 py-1 rounded-full bg-[#C9A961]/12 text-[#B8923F] border border-[#C9A961]/30 font-semibold">{c.paid} פיקדונות</span>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+      </div>
 
       <BottomNav role="supplier" />
     </MobileShell>
@@ -314,7 +316,7 @@ export default function SupplierDashboard() {
 
 function Stat({ icon: Icon, label, value, small }: { icon: LucideIcon; label: string; value: string; small?: boolean }) {
   return (
-    <div className="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)]">
+    <div className="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] w-full">
       <div className="flex items-center gap-2 mb-2">
         <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center">
           <Icon className="h-3.5 w-3.5 text-[#B8923F]" strokeWidth={2} />

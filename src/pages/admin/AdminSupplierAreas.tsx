@@ -191,8 +191,11 @@ export default function AdminSupplierAreas() {
         )}
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-20 pt-3 bg-gradient-to-t from-background via-background to-background/0">
+      <div
+        className="fixed inset-x-0 z-30 flex justify-center pointer-events-none"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
+      >
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0">
           <Button
             onClick={save}
             disabled={saving}

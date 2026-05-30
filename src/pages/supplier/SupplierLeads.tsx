@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2, XCircle, Check, X } from "lucide-react";
+import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -208,6 +208,7 @@ export default function SupplierLeads() {
   }, []);
 
   const dealTitle = (id: string) => deals.find((d) => d.id === id)?.title ?? "עסקה שנמחקה";
+  const totalCount = interests.length + inquiries.length;
 
   return (
     <MobileShell>
@@ -222,7 +223,7 @@ export default function SupplierLeads() {
           <div className="gb-card p-6 text-center">
             <p className="text-sm text-destructive font-bold">{error}</p>
           </div>
-        ) : interests.length === 0 && inquiries.length === 0 ? (
+        ) : totalCount === 0 ? (
           <div className="gb-card p-8 flex flex-col items-center text-center">
             <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mb-3">
               <Inbox className="h-7 w-7 text-muted-foreground" />
@@ -236,7 +237,7 @@ export default function SupplierLeads() {
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Users className="h-4 w-4 text-gold" />
-              סה"כ {interests.length + inquiries.length} פניות{deals.length ? ` · ${deals.length} הצעות` : " · אין הצעות פעילות"}
+              סה"כ {totalCount} פניות{deals.length ? ` · ${deals.length} הצעות` : " · אין הצעות פעילות"}
             </div>
             {inquiries.length > 0 && (
               <div className="space-y-2">
