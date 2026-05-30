@@ -206,18 +206,19 @@ export default function MyVouchers() {
                     )}
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2">
                     <Button
                       onClick={() => handleShare(p)}
-                      className="flex-1 rounded-xl bg-gradient-gold text-primary font-bold shadow-gold"
+                      className="w-full h-auto min-h-11 rounded-xl bg-gradient-gold text-primary font-bold shadow-gold whitespace-normal text-center leading-tight py-2.5 px-3"
                     >
-                      <Share2 className="h-4 w-4 ml-1.5" />
-                      שתפו עם שכנים כדי לסגור את ההצעה
+                      <Share2 className="h-4 w-4 ml-1.5 shrink-0" />
+                      <span className="text-fs-sm">שתפו עם שכנים כדי לסגור את ההצעה</span>
                     </Button>
-                    <Link to={`/resident/deals/${p.deal_id}`}>
-                      <Button variant="outline" className="rounded-xl">לפרטים</Button>
+                    <Link to={`/resident/deals/${p.deal_id}`} className="w-full">
+                      <Button variant="outline" className="w-full rounded-xl">לפרטים</Button>
                     </Link>
                   </div>
+
                 </div>
               );
             })}
