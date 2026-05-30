@@ -24,6 +24,8 @@ type VoucherInfo = {
   profiles?: { full_name: string | null; project_id: string | null } | null;
 };
 
+type RawVoucherInfo = Omit<VoucherInfo, "deals">;
+
 function parseScan(raw: string): string {
   try {
     const obj = JSON.parse(raw);
@@ -116,13 +118,19 @@ export default function SupplierScan() {
     setResult({ kind: "looking-up", code });
     const { data, error } = await supabase
       .from("vouchers")
-      .select("id, code, reference_number, status, deal_id, deals(title, discounted_price, original_price), profiles:user_id(full_name, project_id)")
+      .select("id, code, reference_number, status, deal_id, profiles:user_id(full_name, project_id)")
       .eq("code", code)
       .maybeSingle();
     if (error || !data) { setResult({ kind: "error", message: "שובר לא נמצא" }); return; }
     if (data.status === "redeemed") { setResult({ kind: "error", message: "השובר כבר מומש" }); return; }
     if (data.status === "expired") { setResult({ kind: "error", message: "השובר פג תוקף" }); return; }
-    setResult({ kind: "eligible", voucher: data as unknown as VoucherInfo });
+    const raw = data as unknown as RawVoucherInfo;
+    const { data: deal } = await supabase
+      .from("deals")
+      .select("title, discounted_price, original_price")
+      .eq("id", raw.deal_id)
+      .maybeSingle();
+    setResult({ kind: "eligible", voucher: { ...raw, deals: deal ?? null } });
   }
 
   async function confirmRedeem() {
