@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentSupplier } from "@/lib/supplierAuth";
 import { toast } from "sonner";
 
 type Result =
@@ -115,10 +116,14 @@ export default function SupplierScan() {
 
   async function lookup(code: string) {
     setResult({ kind: "looking-up", code });
+    const { session, supplier } = await getCurrentSupplier<{ id: string }>("id");
+    if (!session) { setResult({ kind: "error", message: "יש להתחבר כספק" }); return; }
+    if (!supplier) { setResult({ kind: "error", message: "לא נמצא פרופיל ספק מחובר" }); return; }
     const { data, error } = await supabase
       .from("vouchers")
       .select("id, code, reference_number, status, deal_id, profiles:user_id(full_name, project_id)")
       .eq("code", code)
+      .eq("supplier_id", supplier.id)
       .maybeSingle();
     if (error || !data) { setResult({ kind: "error", message: "שובר לא נמצא" }); return; }
     if (data.status === "redeemed") { setResult({ kind: "error", message: "השובר כבר מומש" }); return; }
