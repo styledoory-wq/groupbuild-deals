@@ -1370,6 +1370,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_supplier_for_deal: {
+        Args: { _deal_id: string; _user_id?: string }
+        Returns: boolean
+      }
+      is_supplier_owner: {
+        Args: { _supplier_id: string; _user_id?: string }
+        Returns: boolean
+      }
       issue_vouchers_for_deal: { Args: { _deal_id: string }; Returns: number }
       notify_admins: {
         Args: {
@@ -1420,6 +1428,10 @@ export type Database = {
       }
       user_can_review: {
         Args: { _deal_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_participates_in_deal: {
+        Args: { _deal_id: string; _user_id?: string }
         Returns: boolean
       }
     }
