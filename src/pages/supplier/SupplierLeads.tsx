@@ -310,15 +310,15 @@ export default function SupplierLeads() {
     const wa = normalizeWhatsappUrl(phone);
     const isSwiped = swipeId === q.id && !trashed;
     return (
-      <div key={q.id} className="relative">
+      <div key={q.id} className="relative overflow-hidden rounded-2xl">
         {isSwiped && (
           <button onClick={() => setConfirmDelete({ kind: "inquiry", id: q.id })}
-            className="absolute top-0 bottom-0 right-0 w-20 bg-destructive text-destructive-foreground rounded-2xl flex items-center justify-center gap-1 text-fs-xs font-bold">
+            className="absolute top-0 bottom-0 left-0 w-20 bg-destructive text-destructive-foreground rounded-2xl flex items-center justify-center gap-1 text-fs-xs font-bold z-0">
             <Trash2 className="h-4 w-4" /> מחק
           </button>
         )}
         <div
-          className="gb-card p-4 border-r-4 border-gold/40 transition-transform"
+          className="gb-card p-4 border-r-4 border-gold/40 transition-transform relative z-10"
           style={isSwiped ? { transform: "translateX(80px)" } : undefined}
           onTouchStart={trashed ? undefined : onTouchStart}
           onTouchEnd={trashed ? undefined : makeSwipeEnd(q.id)}
@@ -375,15 +375,15 @@ export default function SupplierLeads() {
     const committed = i.deposit_required && ["committed", "paid"].includes(i.deposit_status);
     const isSwiped = swipeId === i.id && !trashed;
     return (
-      <div key={i.id} className="relative">
+      <div key={i.id} className="relative overflow-hidden rounded-2xl">
         {isSwiped && (
           <button onClick={() => setConfirmDelete({ kind: "interest", id: i.id })}
-            className="absolute top-0 bottom-0 right-0 w-20 bg-destructive text-destructive-foreground rounded-2xl flex items-center justify-center gap-1 text-fs-xs font-bold">
+            className="absolute top-0 bottom-0 left-0 w-20 bg-destructive text-destructive-foreground rounded-2xl flex items-center justify-center gap-1 text-fs-xs font-bold z-0">
             <Trash2 className="h-4 w-4" /> מחק
           </button>
         )}
         <div
-          className="gb-card p-4 transition-transform"
+          className="gb-card p-4 transition-transform relative z-10"
           style={isSwiped ? { transform: "translateX(80px)" } : undefined}
           onTouchStart={trashed ? undefined : onTouchStart}
           onTouchEnd={trashed ? undefined : makeSwipeEnd(i.id)}
