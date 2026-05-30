@@ -350,7 +350,7 @@ export default function SupplierLeads() {
           ) : (
             <>
               {(phone || wa) && (
-                <div className="flex gap-2 mb-2">
+                <div className="flex gap-2 mt-2">
                   {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-primary text-primary-foreground">חיוג</a>}
                   {wa && (
                     <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-success/10 text-success border border-success/30 inline-flex items-center justify-center gap-1">
@@ -359,10 +359,6 @@ export default function SupplierLeads() {
                   )}
                 </div>
               )}
-              <button onClick={() => setConfirmDelete({ kind: "inquiry", id: q.id })}
-                className="w-full h-8 rounded-lg text-fs-xs text-destructive hover:bg-destructive/10 flex items-center justify-center gap-1 transition-smooth">
-                <Trash2 className="h-3 w-3" /> מחק (לסל מחזור)
-              </button>
             </>
           )}
         </div>
@@ -447,7 +443,7 @@ export default function SupplierLeads() {
                 </button>
               </div>
               {(phone || wa) && (
-                <div className="flex gap-2 mb-2">
+                <div className="flex gap-2">
                   {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-primary text-primary-foreground">חיוג</a>}
                   {wa && (
                     <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-success/10 text-success border border-success/30 inline-flex items-center justify-center gap-1">
@@ -459,14 +455,10 @@ export default function SupplierLeads() {
               {isAdmin && i.deposit_required && i.deposit_status !== "paid" && (
                 <button onClick={() => markDepositPaid(i.user_id, i.deal_id)}
                   disabled={busyKey === i.user_id + i.deal_id}
-                  className="mb-2 w-full text-fs-xs font-bold py-2 rounded-lg bg-gold/15 text-primary border border-gold/40 inline-flex items-center justify-center gap-1 disabled:opacity-50">
+                  className="mt-2 w-full text-fs-xs font-bold py-2 rounded-lg bg-gold/15 text-primary border border-gold/40 inline-flex items-center justify-center gap-1 disabled:opacity-50">
                   <CheckCircle2 className="h-3 w-3" /> סמן פיקדון כשולם (אדמין)
                 </button>
               )}
-              <button onClick={() => setConfirmDelete({ kind: "interest", id: i.id })}
-                className="w-full h-8 rounded-lg text-fs-xs text-destructive hover:bg-destructive/10 flex items-center justify-center gap-1 transition-smooth">
-                <Trash2 className="h-3 w-3" /> מחק (לסל מחזור)
-              </button>
             </>
           )}
         </div>
