@@ -1390,6 +1390,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      purge_old_trashed_leads: { Args: never; Returns: Json }
       redeem_voucher: { Args: { _code: string }; Returns: Json }
       refresh_supplier_service_areas: {
         Args: { _supplier_id: string }
@@ -1397,6 +1398,22 @@ export type Database = {
       }
       set_deposit_hidden: {
         Args: { _deposit_id: string; _hidden: boolean }
+        Returns: undefined
+      }
+      supplier_restore_inquiry: {
+        Args: { _inquiry_id: string }
+        Returns: undefined
+      }
+      supplier_restore_interest: {
+        Args: { _interest_id: string }
+        Returns: undefined
+      }
+      supplier_soft_delete_inquiry: {
+        Args: { _inquiry_id: string }
+        Returns: undefined
+      }
+      supplier_soft_delete_interest: {
+        Args: { _interest_id: string }
         Returns: undefined
       }
       user_can_review: {
