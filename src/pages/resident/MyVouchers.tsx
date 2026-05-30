@@ -62,48 +62,55 @@ export default function MyVouchers() {
       const dealsNeedingFetch = dealIds.filter((id) => !voucheredDealIds.has(id));
 
       if (dealsNeedingFetch.length) {
-        const [{ data: deals }, { data: paidRows }] = await Promise.all([
-          supabase
-            .from("deals")
-            .select("id, title, status, target_participants, join_deadline, discounted_price, original_price, supplier_id, suppliers(business_name)")
-            .in("id", dealsNeedingFetch),
-          supabase
-            .from("deposits")
-            .select("deal_id, user_id")
-            .in("deal_id", dealsNeedingFetch)
-            .eq("status", "paid")
-            .eq("is_deleted", false),
-        ]);
-        const seen: Record<string, Set<string>> = {};
-        (paidRows ?? []).forEach((r: { deal_id: string; user_id: string }) => {
-          if (!seen[r.deal_id]) seen[r.deal_id] = new Set();
-          seen[r.deal_id].add(r.user_id);
-        });
+        const { data: deals } = await supabase
+          .from("deals")
+          .select("id, title, status, target_participants, tiers, join_deadline, discounted_price, original_price, supplier_id, suppliers(business_name)")
+          .in("id", dealsNeedingFetch);
+
         const interestByDeal: Record<string, string> = {};
         (ints ?? []).forEach((i) => { interestByDeal[i.deal_id] = i.id; });
-        const pendingRows: PendingRow[] = (deals ?? [])
-          .filter((d) => (d as { status: string }).status === "active")
-          .map((d) => {
-            const dd = d as {
-              id: string; title: string; target_participants: number | null;
-              join_deadline: string | null; discounted_price: number | null;
-              original_price: number | null;
-              suppliers?: { business_name: string | null } | null;
-            };
-            return {
-              interest_id: interestByDeal[dd.id] ?? dd.id,
-              deal_id: dd.id,
-              title: dd.title,
-              supplier_name: dd.suppliers?.business_name ?? null,
-              target_participants: dd.target_participants,
-              join_deadline: dd.join_deadline,
-              paid_count: seen[dd.id]?.size ?? 0,
-              discounted_price: dd.discounted_price,
-              original_price: dd.original_price,
-            };
-          });
+
+        const activeDeals = (deals ?? []).filter((d) => (d as { status: string }).status === "active");
+
+        // Use the canonical paid-count RPC so deposit-free approved interests are counted too
+        const counts: Record<string, number> = {};
+        await Promise.all(activeDeals.map(async (d) => {
+          const id = (d as { id: string }).id;
+          const { data: c } = await supabase.rpc("get_deal_paid_count", { _deal_id: id });
+          counts[id] = (c as number | null) ?? 0;
+        }));
+
+        const pendingRows: PendingRow[] = activeDeals.map((d) => {
+          const dd = d as {
+            id: string; title: string; target_participants: number | null;
+            tiers: Array<{ maxParticipants?: number | string | null }> | null;
+            join_deadline: string | null; discounted_price: number | null;
+            original_price: number | null;
+            suppliers?: { business_name: string | null } | null;
+          };
+          // Effective target: explicit target_participants, else max tier maxParticipants
+          let target = dd.target_participants ?? null;
+          if (!target && Array.isArray(dd.tiers)) {
+            const maxes = dd.tiers
+              .map((t) => Number(t?.maxParticipants))
+              .filter((n) => Number.isFinite(n) && n > 0);
+            if (maxes.length) target = Math.max(...maxes);
+          }
+          return {
+            interest_id: interestByDeal[dd.id] ?? dd.id,
+            deal_id: dd.id,
+            title: dd.title,
+            supplier_name: dd.suppliers?.business_name ?? null,
+            target_participants: target,
+            join_deadline: dd.join_deadline,
+            paid_count: counts[dd.id] ?? 0,
+            discounted_price: dd.discounted_price,
+            original_price: dd.original_price,
+          };
+        });
         setPending(pendingRows);
       }
+
       setLoading(false);
     })();
   }, []);
