@@ -111,7 +111,6 @@ export default function SupplierScan() {
         try { scanner.clear(); } catch { /* noop */ }
       })();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, result.kind]);
 
   async function lookup(code: string) {
