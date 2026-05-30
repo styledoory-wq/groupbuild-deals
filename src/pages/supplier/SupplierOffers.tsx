@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentSupplier } from "@/lib/supplierAuth";
 import { describeOffer, describeTier, tierRange, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
 
@@ -43,8 +44,7 @@ export default function SupplierOffers() {
     let cancelled = false;
     (async () => {
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const session = sessionData.session;
+        const { session, supplier } = await getCurrentSupplier<{ id: string }>("id");
         if (!session) {
           if (!cancelled) {
             setError("יש להתחבר כספק.");
@@ -52,22 +52,7 @@ export default function SupplierOffers() {
           }
           return;
         }
-
-        const email = session.user.email ?? "";
-        const byUser = await supabase
-          .from("suppliers")
-          .select("id")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-        let sid = byUser.data?.id ?? null;
-        if (!sid && email) {
-          const byEmail = await supabase
-            .from("suppliers")
-            .select("id")
-            .ilike("email", email)
-            .maybeSingle();
-          sid = byEmail.data?.id ?? null;
-        }
+        const sid = supplier?.id ?? null;
         if (!cancelled) setSupplierId(sid);
 
         if (!sid) {

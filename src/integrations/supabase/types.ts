@@ -1338,6 +1338,7 @@ export type Database = {
         Returns: undefined
       }
       auto_leave_expired_reapprovals: { Args: never; Returns: number }
+      claim_supplier_profile_by_email: { Args: never; Returns: string }
       close_expired_deals: { Args: never; Returns: number }
       deal_effective_target: { Args: { _deal_id: string }; Returns: number }
       evaluate_conditional_joiners: {
@@ -1368,6 +1369,14 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_supplier_for_deal: {
+        Args: { _deal_id: string; _user_id?: string }
+        Returns: boolean
+      }
+      is_supplier_owner: {
+        Args: { _supplier_id: string; _user_id?: string }
         Returns: boolean
       }
       issue_vouchers_for_deal: { Args: { _deal_id: string }; Returns: number }
@@ -1420,6 +1429,10 @@ export type Database = {
       }
       user_can_review: {
         Args: { _deal_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_participates_in_deal: {
+        Args: { _deal_id: string; _user_id?: string }
         Returns: boolean
       }
     }

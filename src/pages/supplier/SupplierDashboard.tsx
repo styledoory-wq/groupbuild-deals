@@ -9,6 +9,7 @@ import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
+import { resolveSupplierForUser } from "@/lib/supplierAuth";
 
 type DbSupplier = {
   id: string;
@@ -56,31 +57,12 @@ export default function SupplierDashboard() {
         }
 
         const email = session.user.email ?? "";
-        const byUser = await supabase
-          .from("suppliers")
-          .select("id, business_name, approval_status, is_active, user_id, email")
-          .eq("user_id", session.user.id)
-          .order("updated_at", { ascending: false });
-
-        const byEmail = email
-          ? await supabase
-            .from("suppliers")
-            .select("id, business_name, approval_status, is_active, user_id, email")
-            .ilike("email", email)
-            .order("updated_at", { ascending: false })
-          : { data: [], error: null };
-
-        const fetchErr = byUser.error ?? byEmail.error;
-        const candidates = [...(byUser.data ?? []), ...(byEmail.data ?? [])];
-        const existing = candidates.find((s) => ["approved", "active"].includes(s.approval_status)) ?? candidates[0] ?? null;
-        if (fetchErr) throw fetchErr;
-
-        let supplierRow = existing as DbSupplier | null;
-        if (supplierRow) {
-          if (!supplierRow.user_id || !supplierRow.email) {
-            await supabase.from("suppliers").update({ user_id: session.user.id, email: email || supplierRow.email }).eq("id", supplierRow.id);
-          }
-        } else {
+        let supplierRow = await resolveSupplierForUser<DbSupplier>(
+          session.user.id,
+          email,
+          "id, business_name, approval_status, is_active, user_id, email",
+        );
+        if (!supplierRow) {
           const meta = (session.user.user_metadata ?? {}) as Record<string, string>;
           const businessName = meta.business_name?.trim() || meta.full_name?.trim() || session.user.email || "ספק חדש";
           const { data: created, error: insertErr } = await supabase

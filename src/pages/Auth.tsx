@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import type { Role } from "@/types";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms";
+import { resolveSupplierForUser } from "@/lib/supplierAuth";
 
 type Mode = "signin" | "signup";
 
@@ -59,11 +60,11 @@ export default function Auth() {
     // Load profile + roles + supplier record in parallel.
     // user_roles is the source of truth for role; profile.user_type is fallback only.
     setAuthError(null);
-    const [{ data: profile }, { data: roles }, { data: supplierRow }] = await Promise.all([
+    const [{ data: profile }, { data: roles }] = await Promise.all([
       withTimeout(supabase.from("profiles").select("*").eq("id", userId).maybeSingle(), "טעינת פרופיל"),
       withTimeout(supabase.from("user_roles").select("role").eq("user_id", userId), "טעינת הרשאות"),
-      withTimeout(supabase.from("suppliers").select("id").eq("user_id", userId).maybeSingle(), "טעינת ספק"),
     ]);
+    const supplierRow = await withTimeout(resolveSupplierForUser(userId, userEmail, "id"), "טעינת ספק");
 
     // Admin access is granted ONLY by verified email match.
     const isAdmin = isAdminEmail(userEmail);

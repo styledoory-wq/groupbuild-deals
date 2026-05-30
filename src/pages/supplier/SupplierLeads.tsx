@@ -13,6 +13,7 @@ import { ils } from "@/lib/offerPricing";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 import { isAdminEmail } from "@/lib/auth";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
+import { resolveSupplierForUser } from "@/lib/supplierAuth";
 
 type DealLite = { id: string; title: string };
 type InterestRow = {
@@ -222,12 +223,7 @@ export default function SupplierLeads() {
         const email = session.session.user.email ?? "";
         if (!cancelled) setIsAdmin(isAdminEmail(email));
 
-        let { data: sup } = await supabase
-          .from("suppliers").select("id").eq("user_id", userId).maybeSingle();
-        if (!sup && email) {
-          const r = await supabase.from("suppliers").select("id").ilike("email", email).maybeSingle();
-          sup = r.data;
-        }
+        const sup = await resolveSupplierForUser<{ id: string }>(userId, email, "id");
         if (!sup) {
           if (!cancelled) { setError("לא נמצא פרופיל ספק. השלם את הפרטים תחילה."); setLoading(false); }
           return;

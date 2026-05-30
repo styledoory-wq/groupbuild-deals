@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentSupplier } from "@/lib/supplierAuth";
 import { toast } from "sonner";
 
 type Row = {
@@ -31,10 +32,7 @@ export default function SupplierRedemptions() {
 
   useEffect(() => {
     (async () => {
-      const { data: s } = await supabase.auth.getSession();
-      if (!s.session) { setLoading(false); return; }
-      const { data: supplier } = await supabase
-        .from("suppliers").select("id").eq("user_id", s.session.user.id).maybeSingle();
+      const { supplier } = await getCurrentSupplier<{ id: string }>("id");
       if (!supplier) { setLoading(false); return; }
       const { data } = await supabase
         .from("vouchers")
