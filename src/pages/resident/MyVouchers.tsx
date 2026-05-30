@@ -13,8 +13,9 @@ type VoucherRow = {
   id: string; code: string; reference_number: string; status: string;
   expires_at: string | null; redeemed_at: string | null; rotation_secret: string;
   deal_id: string; supplier_id: string;
-  deals?: { title: string | null; discounted_price: number | null; original_price: number | null; status: string | null } | null;
+  deals?: { title: string | null; category_id: string | null; discounted_price: number | null; original_price: number | null; base_price: number | null; discount_percentage: number | null; offer_type: string | null; tiers: unknown; status: string | null } | null;
   suppliers?: { business_name: string | null } | null;
+  category_name?: string | null;
 };
 
 type PendingRow = {
@@ -51,7 +52,7 @@ export default function MyVouchers() {
       const voucherSupplierIds = Array.from(new Set(rawVouchers.map((v) => v.supplier_id).filter(Boolean)));
       const [{ data: voucherDeals }, { data: voucherSuppliers }] = await Promise.all([
         voucherDealIds.length
-          ? supabase.from("deals").select("id, title, discounted_price, original_price, status").in("id", voucherDealIds)
+          ? supabase.from("deals").select("id, title, category_id, discounted_price, original_price, base_price, discount_percentage, offer_type, tiers, status").in("id", voucherDealIds)
           : Promise.resolve({ data: [] }),
         voucherSupplierIds.length
           ? supabase.from("suppliers").select("id, business_name").in("id", voucherSupplierIds)
@@ -59,11 +60,17 @@ export default function MyVouchers() {
       ]);
       const dealsById = new Map((voucherDeals ?? []).map((d) => [String(d.id), d]));
       const suppliersById = new Map((voucherSuppliers ?? []).map((sp) => [String(sp.id), sp]));
+      const categoryIds = Array.from(new Set((voucherDeals ?? []).map((d) => String((d as { category_id?: string | null }).category_id ?? "")).filter(Boolean)));
+      const { data: cats } = categoryIds.length
+        ? await supabase.from("categories").select("id, name").in("id", categoryIds)
+        : { data: [] };
+      const categoriesById = new Map((cats ?? []).map((c) => [String(c.id), c.name]));
       const vs = rawVouchers
         .map((v) => ({
           ...v,
           deals: dealsById.get(v.deal_id) ?? null,
           suppliers: suppliersById.get(v.supplier_id) ?? null,
+          category_name: categoriesById.get(String((dealsById.get(v.deal_id) as { category_id?: string | null } | undefined)?.category_id ?? "")) ?? null,
         }))
         .filter((v) => v.deals?.status !== "active");
       setVouchers(vs);
@@ -256,7 +263,13 @@ export default function MyVouchers() {
                   deal_id: v.deal_id, supplier_id: v.supplier_id,
                   deal_title: v.deals?.title ?? undefined,
                   supplier_name: v.suppliers?.business_name ?? undefined,
+                  category_name: v.category_name ?? undefined,
                   price: v.deals?.discounted_price ?? v.deals?.original_price ?? null,
+                  original_price: v.deals?.original_price ?? v.deals?.base_price ?? null,
+                  benefit_price: v.deals?.discounted_price ?? null,
+                  savings: v.deals?.original_price != null && v.deals?.discounted_price != null
+                    ? Math.max(0, Number(v.deals.original_price) - Number(v.deals.discounted_price))
+                    : null,
                 }}
               />
             ))}
