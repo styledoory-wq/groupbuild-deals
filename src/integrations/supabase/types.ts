@@ -1338,6 +1338,7 @@ export type Database = {
         Returns: undefined
       }
       auto_leave_expired_reapprovals: { Args: never; Returns: number }
+      claim_supplier_profile_by_email: { Args: never; Returns: string }
       close_expired_deals: { Args: never; Returns: number }
       deal_effective_target: { Args: { _deal_id: string }; Returns: number }
       evaluate_conditional_joiners: {
