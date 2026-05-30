@@ -680,10 +680,10 @@ export default function OfferEditor() {
             </Field>
           </div>
           <Field label="תאריך אחרון להצטרפות">
-            <Input type="date" dir="ltr" value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-11 rounded-xl text-right" />
+            <Input type="date" dir="ltr" value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-11 rounded-xl w-full min-w-0 px-3 text-left" />
           </Field>
           <Field label="תאריך אחרון למימוש">
-            <Input type="date" dir="ltr" value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-11 rounded-xl text-right" />
+            <Input type="date" dir="ltr" value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-11 rounded-xl w-full min-w-0 px-3 text-left" />
           </Field>
           <Field label="אזורי שירות (מופרדים בפסיק)">
             <Input value={serviceAreasInput} onChange={(e) => setServiceAreasInput(e.target.value)} placeholder="תל אביב, רמת גן, חיפה" className="h-11 rounded-xl" />
