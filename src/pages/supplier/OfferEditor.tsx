@@ -679,12 +679,14 @@ export default function OfferEditor() {
               <Input type="number" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
             </Field>
           </div>
-          <Field label="תאריך אחרון להצטרפות">
-            <Input type="date" dir="ltr" value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-10 rounded-xl max-w-[180px] px-2 text-sm text-left" />
-          </Field>
-          <Field label="תאריך אחרון למימוש">
-            <Input type="date" dir="ltr" value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-10 rounded-xl max-w-[180px] px-2 text-sm text-left" />
-          </Field>
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="תאריך אחרון להצטרפות">
+              <Input type="date" dir="ltr" value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-9 rounded-xl max-w-[140px] px-2 text-sm text-left" />
+            </Field>
+            <Field label="תאריך אחרון למימוש">
+              <Input type="date" dir="ltr" value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-9 rounded-xl max-w-[140px] px-2 text-sm text-left" />
+            </Field>
+          </div>
           <Field label="אזורי שירות (מופרדים בפסיק)">
             <Input value={serviceAreasInput} onChange={(e) => setServiceAreasInput(e.target.value)} placeholder="תל אביב, רמת גן, חיפה" className="h-11 rounded-xl" />
           </Field>
