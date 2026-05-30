@@ -43,12 +43,29 @@ export default function MyVouchers() {
       // Only show vouchers for deals that have actually closed
       const { data: vData } = await supabase
         .from("vouchers")
-        .select("id, code, reference_number, status, expires_at, redeemed_at, rotation_secret, deal_id, supplier_id, deals(title, discounted_price, original_price, status), suppliers(business_name)")
+        .select("id, code, reference_number, status, expires_at, redeemed_at, rotation_secret, deal_id, supplier_id")
         .eq("user_id", uid)
         .order("created_at", { ascending: false });
-      const vs = ((vData ?? []) as unknown as VoucherRow[]).filter(
-        (v) => v.deals?.status !== "active"
-      );
+      const rawVouchers = ((vData ?? []) as unknown as VoucherRow[]);
+      const voucherDealIds = Array.from(new Set(rawVouchers.map((v) => v.deal_id).filter(Boolean)));
+      const voucherSupplierIds = Array.from(new Set(rawVouchers.map((v) => v.supplier_id).filter(Boolean)));
+      const [{ data: voucherDeals }, { data: voucherSuppliers }] = await Promise.all([
+        voucherDealIds.length
+          ? supabase.from("deals").select("id, title, discounted_price, original_price, status").in("id", voucherDealIds)
+          : Promise.resolve({ data: [] }),
+        voucherSupplierIds.length
+          ? supabase.from("suppliers").select("id, business_name").in("id", voucherSupplierIds)
+          : Promise.resolve({ data: [] }),
+      ]);
+      const dealsById = new Map((voucherDeals ?? []).map((d) => [String(d.id), d]));
+      const suppliersById = new Map((voucherSuppliers ?? []).map((sp) => [String(sp.id), sp]));
+      const vs = rawVouchers
+        .map((v) => ({
+          ...v,
+          deals: dealsById.get(v.deal_id) ?? null,
+          suppliers: suppliersById.get(v.supplier_id) ?? null,
+        }))
+        .filter((v) => v.deals?.status !== "active");
       setVouchers(vs);
 
       // Pending: user joined an active deal — waiting for group close
@@ -64,8 +81,13 @@ export default function MyVouchers() {
       if (dealsNeedingFetch.length) {
         const { data: deals } = await supabase
           .from("deals")
-          .select("id, title, status, target_participants, tiers, join_deadline, discounted_price, original_price, supplier_id, suppliers(business_name)")
+          .select("id, title, status, target_participants, tiers, join_deadline, discounted_price, original_price, supplier_id")
           .in("id", dealsNeedingFetch);
+        const supplierIds = Array.from(new Set((deals ?? []).map((d) => String((d as { supplier_id?: string }).supplier_id ?? "")).filter(Boolean)));
+        const { data: pendingSuppliers } = supplierIds.length
+          ? await supabase.from("suppliers").select("id, business_name").in("id", supplierIds)
+          : { data: [] };
+        const pendingSuppliersById = new Map((pendingSuppliers ?? []).map((sp) => [String(sp.id), sp.business_name ?? null]));
 
         const interestByDeal: Record<string, string> = {};
         (ints ?? []).forEach((i) => { interestByDeal[i.deal_id] = i.id; });
@@ -86,7 +108,7 @@ export default function MyVouchers() {
             tiers: Array<{ maxParticipants?: number | string | null }> | null;
             join_deadline: string | null; discounted_price: number | null;
             original_price: number | null;
-            suppliers?: { business_name: string | null } | null;
+            supplier_id: string;
           };
           // Effective target: explicit target_participants, else max tier maxParticipants
           let target = dd.target_participants ?? null;
@@ -100,7 +122,7 @@ export default function MyVouchers() {
             interest_id: interestByDeal[dd.id] ?? dd.id,
             deal_id: dd.id,
             title: dd.title,
-            supplier_name: dd.suppliers?.business_name ?? null,
+            supplier_name: pendingSuppliersById.get(dd.supplier_id) ?? null,
             target_participants: target,
             join_deadline: dd.join_deadline,
             paid_count: counts[dd.id] ?? 0,
