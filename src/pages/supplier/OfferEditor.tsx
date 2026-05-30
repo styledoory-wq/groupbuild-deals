@@ -90,6 +90,8 @@ export default function OfferEditor() {
   const [appointmentRequired, setAppointmentRequired] = useState<boolean>(false);
   const [serviceAreasInput, setServiceAreasInput] = useState<string>("");
   const [commitmentAccepted, setCommitmentAccepted] = useState<boolean>(false);
+  const [commitmentError, setCommitmentError] = useState<boolean>(false);
+  const commitmentRef = useRef<HTMLDivElement | null>(null);
 
 
   // When offer type changes, swap to sensible defaults if user hasn't customized.
