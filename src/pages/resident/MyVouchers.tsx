@@ -1,44 +1,133 @@
 import { useEffect, useState } from "react";
-import { Ticket } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Ticket, Users, Share2, Clock, Hourglass } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { VoucherCard } from "@/components/vouchers/VoucherCard";
+import { toast } from "sonner";
 
-type Row = {
+type VoucherRow = {
   id: string; code: string; reference_number: string; status: string;
   expires_at: string | null; redeemed_at: string | null; rotation_secret: string;
   deal_id: string; supplier_id: string;
-  deals?: { title: string | null; discounted_price: number | null; original_price: number | null } | null;
+  deals?: { title: string | null; discounted_price: number | null; original_price: number | null; status: string | null } | null;
   suppliers?: { business_name: string | null } | null;
 };
 
+type PendingRow = {
+  interest_id: string;
+  deal_id: string;
+  title: string;
+  supplier_name: string | null;
+  target_participants: number | null;
+  join_deadline: string | null;
+  paid_count: number;
+  discounted_price: number | null;
+  original_price: number | null;
+};
+
 export default function MyVouchers() {
-  const [vouchers, setVouchers] = useState<Row[]>([]);
+  const [vouchers, setVouchers] = useState<VoucherRow[]>([]);
+  const [pending, setPending] = useState<PendingRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       const { data: s } = await supabase.auth.getSession();
       if (!s.session) { setLoading(false); return; }
-      const { data } = await supabase
+      const uid = s.session.user.id;
+
+      // Only show vouchers for deals that have actually closed
+      const { data: vData } = await supabase
         .from("vouchers")
-        .select("id, code, reference_number, status, expires_at, redeemed_at, rotation_secret, deal_id, supplier_id, deals(title, discounted_price, original_price), suppliers(business_name)")
-        .eq("user_id", s.session.user.id)
+        .select("id, code, reference_number, status, expires_at, redeemed_at, rotation_secret, deal_id, supplier_id, deals(title, discounted_price, original_price, status), suppliers(business_name)")
+        .eq("user_id", uid)
         .order("created_at", { ascending: false });
-      setVouchers((data ?? []) as unknown as Row[]);
+      const vs = ((vData ?? []) as unknown as VoucherRow[]).filter(
+        (v) => v.deals?.status !== "active"
+      );
+      setVouchers(vs);
+
+      // Pending: user joined an active deal — waiting for group close
+      const { data: ints } = await supabase
+        .from("deal_interests")
+        .select("id, deal_id")
+        .eq("user_id", uid)
+        .eq("is_deleted", false);
+      const dealIds = Array.from(new Set((ints ?? []).map((i) => i.deal_id)));
+      const voucheredDealIds = new Set(vs.map((v) => v.deal_id));
+      const dealsNeedingFetch = dealIds.filter((id) => !voucheredDealIds.has(id));
+
+      if (dealsNeedingFetch.length) {
+        const [{ data: deals }, { data: paidRows }] = await Promise.all([
+          supabase
+            .from("deals")
+            .select("id, title, status, target_participants, join_deadline, discounted_price, original_price, supplier_id, suppliers(business_name)")
+            .in("id", dealsNeedingFetch),
+          supabase
+            .from("deposits")
+            .select("deal_id, user_id")
+            .in("deal_id", dealsNeedingFetch)
+            .eq("status", "paid")
+            .eq("is_deleted", false),
+        ]);
+        const seen: Record<string, Set<string>> = {};
+        (paidRows ?? []).forEach((r: { deal_id: string; user_id: string }) => {
+          if (!seen[r.deal_id]) seen[r.deal_id] = new Set();
+          seen[r.deal_id].add(r.user_id);
+        });
+        const interestByDeal: Record<string, string> = {};
+        (ints ?? []).forEach((i) => { interestByDeal[i.deal_id] = i.id; });
+        const pendingRows: PendingRow[] = (deals ?? [])
+          .filter((d) => (d as { status: string }).status === "active")
+          .map((d) => {
+            const dd = d as {
+              id: string; title: string; target_participants: number | null;
+              join_deadline: string | null; discounted_price: number | null;
+              original_price: number | null;
+              suppliers?: { business_name: string | null } | null;
+            };
+            return {
+              interest_id: interestByDeal[dd.id] ?? dd.id,
+              deal_id: dd.id,
+              title: dd.title,
+              supplier_name: dd.suppliers?.business_name ?? null,
+              target_participants: dd.target_participants,
+              join_deadline: dd.join_deadline,
+              paid_count: seen[dd.id]?.size ?? 0,
+              discounted_price: dd.discounted_price,
+              original_price: dd.original_price,
+            };
+          });
+        setPending(pendingRows);
+      }
       setLoading(false);
     })();
   }, []);
 
+  const handleShare = async (p: PendingRow) => {
+    const url = `${window.location.origin}/deals/${p.deal_id}`;
+    const text = `הצטרפו אליי להצעה הקבוצתית "${p.title}" — ככל שיש יותר שכנים, ההנחה גדלה!`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: p.title, text, url });
+      } else {
+        await navigator.clipboard.writeText(`${text}\n${url}`);
+        toast.success("הקישור הועתק — שלחו לשכנים");
+      }
+    } catch { /* user cancelled */ }
+  };
+
   return (
     <MobileShell>
-      <PageHeader title="ההטבה שלי" subtitle="השוברים הזכאים שלך" />
+      <PageHeader title="ההטבה שלי" subtitle="ההצעות שהצטרפת אליהן והשוברים שלך" />
       <div className="px-5 pb-28 space-y-5">
         {loading ? (
           <div className="h-72 gb-skeleton rounded-3xl" />
-        ) : vouchers.length === 0 ? (
+        ) : vouchers.length === 0 && pending.length === 0 ? (
           <div className="ios-card p-10 text-center">
             <div
               className="h-16 w-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
@@ -55,23 +144,93 @@ export default function MyVouchers() {
               ברגע שעסקה שהצטרפת אליה תיסגר, יופיע כאן שובר ההטבה האישי שלך עם קוד מימוש ו-QR.
             </p>
           </div>
-
         ) : (
-          vouchers.map(v => (
-            <VoucherCard
-              key={v.id}
-              voucher={{
-                id: v.id, code: v.code, reference_number: v.reference_number,
-                status: v.status, expires_at: v.expires_at, redeemed_at: v.redeemed_at,
-                rotation_secret: v.rotation_secret,
-                deal_id: v.deal_id, supplier_id: v.supplier_id,
-                deal_title: v.deals?.title ?? undefined,
-                supplier_name: v.suppliers?.business_name ?? undefined,
-                price: v.deals?.discounted_price ?? v.deals?.original_price ?? null,
-              }}
-            />
+          <>
+            {/* Pending — joined but group hasn't closed yet */}
+            {pending.map((p) => {
+              const target = p.target_participants ?? 0;
+              const pct = target > 0 ? Math.min(100, Math.round((p.paid_count / target) * 100)) : 0;
+              const remaining = Math.max(0, target - p.paid_count);
+              const price = p.discounted_price ?? p.original_price;
+              return (
+                <div key={p.interest_id} className="rounded-3xl bg-card border border-border/60 p-6 space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-fs-xs uppercase tracking-wider text-muted-foreground">{p.supplier_name ?? "ספק"}</div>
+                      <h3 className="text-lg font-bold text-foreground mt-1 leading-tight">{p.title}</h3>
+                    </div>
+                    <span className="text-fs-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap bg-gold/15 text-amber-700 border border-gold/30 inline-flex items-center gap-1">
+                      <Hourglass className="h-3 w-3" />
+                      ממתין לסגירת הקבוצה
+                    </span>
+                  </div>
 
-          ))
+                  <div className="rounded-2xl bg-muted/30 border border-border p-4 space-y-3">
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <div className="text-fs-xs text-muted-foreground">מחיר צפוי</div>
+                        <div className="text-fs-xl font-extrabold text-primary leading-none">
+                          {price != null ? `${Number(price).toLocaleString("he-IL")} ₪` : "—"}
+                        </div>
+                      </div>
+                      <div className="text-fs-xs text-muted-foreground inline-flex items-center gap-1">
+                        <Users className="h-3.5 w-3.5" />
+                        {p.paid_count}{target > 0 ? ` / ${target}` : ""} מצטרפים
+                      </div>
+                    </div>
+                    {target > 0 && (
+                      <>
+                        <div className="h-2 rounded-full bg-border overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-gold to-amber-500 transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <div className="text-fs-xs text-muted-foreground">
+                          {remaining > 0 ? `עוד ${remaining} מצטרפים לסגירת ההצעה` : "היעד הושג — השובר ייפתח בקרוב"}
+                        </div>
+                      </>
+                    )}
+                    {p.join_deadline && (
+                      <div className="text-fs-xs text-muted-foreground inline-flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        מועד סגירה: {new Date(p.join_deadline).toLocaleDateString("he-IL")}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleShare(p)}
+                      className="flex-1 rounded-xl bg-gradient-gold text-primary font-bold shadow-gold"
+                    >
+                      <Share2 className="h-4 w-4 ml-1.5" />
+                      שתפו עם שכנים כדי לסגור את ההצעה
+                    </Button>
+                    <Link to={`/resident/deals/${p.deal_id}`}>
+                      <Button variant="outline" className="rounded-xl">לפרטים</Button>
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Active vouchers — deal closed */}
+            {vouchers.map((v) => (
+              <VoucherCard
+                key={v.id}
+                voucher={{
+                  id: v.id, code: v.code, reference_number: v.reference_number,
+                  status: v.status, expires_at: v.expires_at, redeemed_at: v.redeemed_at,
+                  rotation_secret: v.rotation_secret,
+                  deal_id: v.deal_id, supplier_id: v.supplier_id,
+                  deal_title: v.deals?.title ?? undefined,
+                  supplier_name: v.suppliers?.business_name ?? undefined,
+                  price: v.deals?.discounted_price ?? v.deals?.original_price ?? null,
+                }}
+              />
+            ))}
+          </>
         )}
       </div>
       <BottomNav role="resident" />
