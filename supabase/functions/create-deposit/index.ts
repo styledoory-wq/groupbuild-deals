@@ -1,6 +1,10 @@
 // Edge function: create-deposit
 // Creates a pending deposit row and returns a payment URL from the active provider.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  getPaymentProvider,
+  PaymentProviderError,
+} from "../_shared/paymentProviders.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,57 +14,7 @@ const corsHeaders = {
 
 interface CreateDepositBody {
   deal_id: string;
-  amount?: number;
-}
-
-interface ProviderResult {
-  payment_url: string;
-  provider_transaction_id: string;
-}
-
-// ---------------------------------------------------------------
-// Provider Adapters
-// ---------------------------------------------------------------
-function providerSecretsStatus(provider: "grow" | "cardcom"): { ok: boolean; missing: string[] } {
-  if (provider === "grow") {
-    const required = ["GROW_API_KEY", "GROW_PAGE_CODE", "GROW_USER_ID"];
-    const missing = required.filter((k) => !Deno.env.get(k));
-    return { ok: missing.length === 0, missing };
-  }
-  const required = ["CARDCOM_TERMINAL_NUMBER", "CARDCOM_API_NAME"];
-  const missing = required.filter((k) => !Deno.env.get(k));
-  return { ok: missing.length === 0, missing };
-}
-
-async function createGrowPayment(_args: {
-  depositId: string;
-  amount: number;
-  userEmail: string | null;
-  userName: string | null;
-  dealId: string;
-}): Promise<ProviderResult> {
-  // TODO: Replace with real Grow (MeshulamPay) API call once credentials arrive.
-  // Required secrets: GROW_API_KEY, GROW_PAGE_CODE, GROW_USER_ID
-  // Docs: https://grow.meshulam.co.il/api-docs (createPaymentProcess endpoint)
-  //
-  // const apiKey   = Deno.env.get("GROW_API_KEY")!;
-  // const pageCode = Deno.env.get("GROW_PAGE_CODE")!;
-  // const userId   = Deno.env.get("GROW_USER_ID")!;
-  // const res = await fetch("https://sandbox.meshulam.co.il/api/light/server/1.0/createPaymentProcess/", { ... });
-  // return { payment_url: data.data.url, provider_transaction_id: data.data.processId };
-  throw new Error("grow_not_implemented");
-}
-
-async function createCardcomPayment(_args: {
-  depositId: string;
-  amount: number;
-  userEmail: string | null;
-  userName: string | null;
-  dealId: string;
-}): Promise<ProviderResult> {
-  // TODO: Replace with real Cardcom LowProfile API call once credentials arrive.
-  // Required secrets: CARDCOM_TERMINAL_NUMBER, CARDCOM_API_NAME
-  throw new Error("cardcom_not_implemented");
+  offer_id?: string | null;
 }
 
 // ---------------------------------------------------------------
@@ -102,37 +56,125 @@ Deno.serve(async (req) => {
 
     const [{ data: settings }, { data: profile }] = await Promise.all([
       admin.from("system_settings").select("*").limit(1).maybeSingle(),
-      admin.from("profiles").select("full_name").eq("id", userId).maybeSingle(),
+      admin.from("profiles").select("full_name,phone").eq("id", userId).maybeSingle(),
     ]);
 
-    if (!settings?.active_payment_provider || !settings?.deposit_default_amount) {
-      console.error("Missing system_settings (active_payment_provider / deposit_default_amount)");
+    if (!settings?.active_payment_provider) {
+      console.error("Missing system_settings.active_payment_provider");
       return json({
         error: "settings_missing",
         message: "הגדרות מערכת התשלומים חסרות. אנא פנו לתמיכה.",
       }, 409);
     }
 
-    const provider = settings.active_payment_provider as "grow" | "cardcom";
-    const amount = body.amount ?? Number(settings.deposit_default_amount);
+    let paymentProvider;
+    try {
+      paymentProvider = getPaymentProvider(settings.active_payment_provider);
+    } catch (providerErr) {
+      const err = providerErr instanceof PaymentProviderError ? providerErr : null;
+      return json({
+        error: err?.code ?? "provider_invalid",
+        message: "ספק הסליקה אינו מוגדר תקין. אנא פנו לתמיכה.",
+      }, err?.status ?? 409);
+    }
+    const provider = paymentProvider.key;
 
-    // Pre-check provider secrets BEFORE creating any deposit row
-    const secretsCheck = providerSecretsStatus(provider);
-    if (!secretsCheck.ok) {
+    // Authorize through the caller's RLS-visible deal scope, then derive amount
+    // exclusively from the deal. Client-supplied amounts are intentionally ignored.
+    const { data: visibleDeal, error: dealErr } = await supabase
+      .from("deals")
+      .select("id,status,is_deleted,deposit_required,deposit_amount,title,supplier_id")
+      .eq("id", body.deal_id)
+      .eq("is_deleted", false)
+      .eq("status", "active")
+      .maybeSingle();
+    if (dealErr) throw dealErr;
+    if (!visibleDeal) {
+      return json({
+        error: "deal_not_found",
+        message: "העסקה לא זמינה לתשלום פיקדון.",
+      }, 404);
+    }
+    if (!visibleDeal.deposit_required || Number(visibleDeal.deposit_amount ?? 0) <= 0) {
+      return json({
+        error: "deposit_not_required",
+        message: "לעסקה זו לא נדרש פיקדון.",
+      }, 409);
+    }
+
+    const amount = Number(visibleDeal.deposit_amount);
+    const amountInAgorot = Math.round(amount * 100);
+    const hasAtMostTwoDecimals = Math.abs(amount * 100 - amountInAgorot) < 0.000001;
+    if (!Number.isFinite(amount) || amount <= 0 || !hasAtMostTwoDecimals) {
+      return json({
+        error: "invalid_deposit_amount",
+        message: "סכום הפיקדון בעסקה אינו תקין.",
+      }, 409);
+    }
+    const minDepositAmount = settings.deposit_min_amount == null ? null : Number(settings.deposit_min_amount);
+    const maxDepositAmount = settings.deposit_max_amount == null ? null : Number(settings.deposit_max_amount);
+    if (minDepositAmount !== null && Number.isFinite(minDepositAmount) && amount < minDepositAmount) {
+      return json({
+        error: "deposit_amount_below_minimum",
+        message: "סכום הפיקדון נמוך מהמינימום המוגדר במערכת.",
+      }, 409);
+    }
+    if (maxDepositAmount !== null && Number.isFinite(maxDepositAmount) && amount > maxDepositAmount) {
+      return json({
+        error: "deposit_amount_above_maximum",
+        message: "סכום הפיקדון גבוה מהמקסימום המוגדר במערכת.",
+      }, 409);
+    }
+    const paymentFeeAbsorber = typeof settings.payment_fee_absorber === "string"
+      ? settings.payment_fee_absorber
+      : "groupbuild";
+    const supplierDeductionBasis = paymentFeeAbsorber === "groupbuild" ? "gross" : "net";
+
+    const { data: existingDeposit } = await admin
+      .from("deposits")
+      .select("id,status,provider_payment_url,payment_provider")
+      .eq("user_id", userId)
+      .eq("deal_id", body.deal_id)
+      .eq("is_deleted", false)
+      .in("status", ["pending", "paid"])
+      .maybeSingle();
+    if (existingDeposit?.status === "paid") {
+      return json({
+        error: "already_paid",
+        message: "הפיקדון כבר שולם עבור העסקה הזו.",
+        deposit_id: existingDeposit.id,
+      }, 409);
+    }
+    if (existingDeposit?.status === "pending" && existingDeposit.provider_payment_url) {
+      return json({
+        ok: true,
+        deposit_id: existingDeposit.id,
+        payment_url: existingDeposit.provider_payment_url,
+        provider: existingDeposit.payment_provider,
+        provider_response: null,
+      });
+    }
+    if (existingDeposit?.status === "pending" && existingDeposit.payment_provider !== provider) {
+      return json({
+        error: "existing_deposit_provider_mismatch",
+        message: "קיים פיקדון פתוח עם ספק תשלום אחר. אנא פנו לתמיכה.",
+      }, 409);
+    }
+
+    // Pre-check provider readiness BEFORE creating any deposit row.
+    const missingSecrets = paymentProvider.getMissingSecrets();
+    if (missingSecrets.length > 0) {
       console.warn(
-        `Payment attempt blocked: provider=${provider} missing secrets=${secretsCheck.missing.join(",")} user=${userId} deal=${body.deal_id}`,
+        `Payment attempt blocked: provider=${provider} missing secrets=${missingSecrets.join(",")} user=${userId} deal=${body.deal_id}`,
       );
-      // Log failed attempt for admin visibility (no real deposit created)
-      await admin.from("deposits").insert({
+      await admin.from("deposit_attempt_logs").insert({
         user_id: userId,
         deal_id: body.deal_id,
-        amount,
-        currency: "ILS",
-        payment_provider: provider,
-        status: "failed",
+        attempted_amount: amount,
+        reason: "provider_not_configured",
         metadata: {
-          reason: "provider_not_configured",
-          missing_secrets: secretsCheck.missing,
+          provider,
+          missing_secrets: missingSecrets,
           attempted_at: new Date().toISOString(),
         },
       });
@@ -144,43 +186,78 @@ Deno.serve(async (req) => {
       // Note: returning 200 so the client can show the friendly toast without
       // supabase-js wrapping it as a generic non-2xx error.
     }
-
-    // 1. Insert pending deposit
-    const { data: deposit, error: insErr } = await admin
-      .from("deposits")
-      .insert({
+    if (!paymentProvider.implemented) {
+      await admin.from("deposit_attempt_logs").insert({
         user_id: userId,
         deal_id: body.deal_id,
-        amount,
-        currency: "ILS",
-        payment_provider: provider,
-        status: "pending",
-      })
-      .select()
-      .single();
-    if (insErr) throw insErr;
+        attempted_amount: amount,
+        reason: "provider_not_implemented",
+        metadata: {
+          provider,
+          attempted_at: new Date().toISOString(),
+        },
+      });
+      return json({
+        error: "provider_not_implemented",
+        message: "ספק התשלום עדיין לא חובר בפועל. אנא פנו לתמיכה.",
+        provider,
+      }, 200);
+    }
+
+    // 1. Reuse an existing pending deposit when present; otherwise create one.
+    let deposit = existingDeposit;
+    if (!deposit) {
+      const { data: insertedDeposit, error: insErr } = await admin
+        .from("deposits")
+        .insert({
+          user_id: userId,
+          deal_id: body.deal_id,
+          amount,
+          gross_deposit_amount: amount,
+          payment_processing_fee_amount: null,
+          payment_processing_fee_status: "unknown",
+          net_deposit_amount: amount,
+          payment_fee_absorber: paymentFeeAbsorber,
+          supplier_deduction_basis: supplierDeductionBasis,
+          supplier_deduction_amount: amount,
+          currency: "ILS",
+          payment_provider: provider,
+          status: "pending",
+          metadata: {
+            source: "create_deposit_function",
+            deal_title: visibleDeal.title ?? null,
+          },
+        })
+        .select()
+        .single();
+      if (insErr) throw insErr;
+      deposit = insertedDeposit;
+    }
 
     // 2. Ask provider for a payment URL
-    let providerRes: ProviderResult;
+    let providerRes;
     try {
-      providerRes =
-        provider === "cardcom"
-          ? await createCardcomPayment({
-              depositId: deposit.id,
-              amount,
-              userEmail,
-              userName: profile?.full_name ?? null,
-              dealId: body.deal_id,
-            })
-          : await createGrowPayment({
-              depositId: deposit.id,
-              amount,
-              userEmail,
-              userName: profile?.full_name ?? null,
-              dealId: body.deal_id,
-            });
+      providerRes = await paymentProvider.createCheckoutSession({
+        depositId: deposit.id,
+        dealId: body.deal_id,
+        offerId: typeof body.offer_id === "string" ? body.offer_id : null,
+        residentId: userId,
+        supplierId: visibleDeal.supplier_id,
+        amount,
+        currency: "ILS",
+        paymentFeeAbsorber,
+        userEmail,
+        userName: profile?.full_name ?? null,
+        userPhone: profile?.phone ?? null,
+        dealTitle: visibleDeal.title ?? null,
+        description: visibleDeal.title ?? null,
+      });
     } catch (provErr) {
-      const reason = provErr instanceof Error ? provErr.message : String(provErr);
+      const reason = provErr instanceof PaymentProviderError
+        ? provErr.code
+        : provErr instanceof Error
+          ? provErr.message
+          : String(provErr);
       await admin
         .from("deposits")
         .update({ status: "failed", metadata: { reason } })
@@ -193,12 +270,15 @@ Deno.serve(async (req) => {
     }
 
     // 3. Save provider info on the deposit
+    const providerUpdate: Record<string, unknown> = {
+      provider_payment_url: providerRes.payment_url,
+    };
+    if (providerRes.provider_transaction_id) {
+      providerUpdate.provider_transaction_id = providerRes.provider_transaction_id;
+    }
     await admin
       .from("deposits")
-      .update({
-        provider_payment_url: providerRes.payment_url,
-        provider_transaction_id: providerRes.provider_transaction_id,
-      })
+      .update(providerUpdate)
       .eq("id", deposit.id);
 
     return json({
@@ -206,6 +286,7 @@ Deno.serve(async (req) => {
       deposit_id: deposit.id,
       payment_url: providerRes.payment_url,
       provider,
+      provider_response: providerRes.raw_response ?? null,
     });
   } catch (e) {
     console.error("create-deposit error", e);

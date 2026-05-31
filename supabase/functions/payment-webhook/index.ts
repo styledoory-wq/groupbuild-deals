@@ -1,84 +1,46 @@
 // Edge function: payment-webhook
-// Receives async payment notifications from Grow / Cardcom and updates deposits.
-// Public endpoint — no JWT required.
+// Receives async payment notifications from the active external provider and updates deposits.
+// Public endpoint: provider authentication is handled by the selected payment adapter.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  getPaymentProvider,
+  PaymentProviderError,
+} from "../_shared/paymentProviders.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "content-type",
+  "Access-Control-Allow-Headers": "authorization, content-type, x-webhook-secret, x-make-callback-secret",
 };
 
-type DepositStatus = "pending" | "paid" | "failed" | "cancelled" | "refunded";
-
-interface ParsedWebhook {
-  depositId: string | null;
-  providerTxnId: string | null;
-  status: DepositStatus;
-  raw: unknown;
-}
-
-// ---------------------------------------------------------------
-// Provider parsers
-// ---------------------------------------------------------------
-function parseGrowWebhook(payload: Record<string, unknown>): ParsedWebhook {
-  // TODO: Verify Grow signature once credentials arrive.
-  // Grow typically posts: { status, data: { transactionId, chargeIdentifier, statusCode, ... } }
-  const data = (payload.data as Record<string, unknown>) ?? payload;
-  const statusCode = Number(data.statusCode ?? payload.status ?? 0);
-  const status: DepositStatus =
-    statusCode === 1 ? "paid" : statusCode === 0 ? "pending" : "failed";
-
-  return {
-    depositId: (data.chargeIdentifier as string) ?? null,
-    providerTxnId: (data.transactionId as string) ?? null,
-    status,
-    raw: payload,
-  };
-}
-
-function parseCardcomWebhook(payload: Record<string, unknown>): ParsedWebhook {
-  // TODO: Verify Cardcom signature once credentials arrive.
-  // Cardcom posts: { ResponseCode, ReturnValue, LowProfileId, TranzactionId, ... }
-  const responseCode = Number(payload.ResponseCode ?? -1);
-  const status: DepositStatus = responseCode === 0 ? "paid" : "failed";
-
-  return {
-    depositId: (payload.ReturnValue as string) ?? null,
-    providerTxnId:
-      (payload.TranzactionId as string) ??
-      (payload.LowProfileId as string) ??
-      null,
-    status,
-    raw: payload,
-  };
-}
-
-// ---------------------------------------------------------------
-// Handler
-// ---------------------------------------------------------------
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
     const url = new URL(req.url);
-    const provider = (url.searchParams.get("provider") ?? "grow") as
-      | "grow"
-      | "cardcom";
+    const providerParam = url.searchParams.get("provider") ?? "grow";
+    let paymentProvider;
+    try {
+      paymentProvider = getPaymentProvider(providerParam);
+    } catch (providerErr) {
+      const err = providerErr instanceof PaymentProviderError ? providerErr : null;
+      return json({ ok: false, error: err?.code ?? "invalid_provider" }, err?.status ?? 400);
+    }
+    const provider = paymentProvider.key;
 
-    let payload: Record<string, unknown> = {};
-    const ctype = req.headers.get("content-type") ?? "";
-    if (ctype.includes("application/json")) {
-      payload = await req.json();
-    } else {
-      const form = await req.formData();
-      form.forEach((v, k) => (payload[k] = String(v)));
+    const reqForForm = req.clone();
+    const rawBody = await req.text();
+    const signatureOk = await paymentProvider.verifyWebhookSignature({ req, url, rawBody });
+    if (!signatureOk) {
+      console.warn("Rejected payment webhook: invalid signature/secret", { provider });
+      return json({ ok: false, error: "unauthorized" }, 401);
     }
 
-    const parsed =
-      provider === "cardcom"
-        ? parseCardcomWebhook(payload)
-        : parseGrowWebhook(payload);
+    const payload = await parseRequestBody(reqForForm, rawBody);
+    if (!payload) {
+      return json({ ok: false, error: "invalid_payload" }, 400);
+    }
 
+    const parsed = paymentProvider.parseWebhookEvent(payload);
     if (!parsed.depositId) {
       console.warn("Webhook missing depositId", { provider, payload });
       return json({ ok: false, error: "missing_deposit_id" }, 400);
@@ -89,13 +51,86 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    const { data: deposit, error: depErr } = await admin
+      .from("deposits")
+      .select("id,status,payment_provider,provider_transaction_id,is_deleted,supplier_deduction_basis,gross_deposit_amount")
+      .eq("id", parsed.depositId)
+      .maybeSingle();
+    if (depErr) throw depErr;
+    if (!deposit || deposit.is_deleted) {
+      return json({ ok: false, error: "deposit_not_found" }, 404);
+    }
+    if (deposit.payment_provider !== provider) {
+      console.warn("Rejected payment webhook: provider mismatch", {
+        expected: deposit.payment_provider,
+        received: provider,
+        depositId: parsed.depositId,
+      });
+      return json({ ok: false, error: "provider_mismatch" }, 409);
+    }
+    if (provider === "grow_make" && !parsed.providerTxnId) {
+      return json({ ok: false, error: "missing_provider_transaction_id" }, 400);
+    }
+    if (provider === "grow_make" && parsed.depositStatus === "paid" && parsed.grossAmount === null) {
+      return json({ ok: false, error: "missing_gross_amount" }, 400);
+    }
+    if (
+      provider === "grow_make" &&
+      parsed.grossAmount !== null &&
+      Math.abs(Number(deposit.gross_deposit_amount ?? 0) - parsed.grossAmount) > 0.01
+    ) {
+      console.warn("Rejected Make/Grow webhook: amount mismatch", {
+        expected: deposit.gross_deposit_amount,
+        received: parsed.grossAmount,
+        depositId: parsed.depositId,
+      });
+      return json({ ok: false, error: "amount_mismatch" }, 409);
+    }
+    if (
+      deposit.provider_transaction_id &&
+      parsed.providerTxnId &&
+      deposit.provider_transaction_id !== parsed.providerTxnId
+    ) {
+      console.warn("Rejected payment webhook: transaction mismatch", {
+        existing: deposit.provider_transaction_id,
+        received: parsed.providerTxnId,
+        depositId: parsed.depositId,
+      });
+      return json({ ok: false, error: "transaction_mismatch" }, 409);
+    }
+    if (deposit.status === "paid" && parsed.depositStatus === "paid") {
+      return json({ ok: true, idempotent: true });
+    }
+
+    const grossAmount = parsed.grossAmount;
+    const feeAmount = parsed.processingFeeAmount;
+    const netAmount = grossAmount !== null && feeAmount !== null
+      ? Math.max(grossAmount - feeAmount, 0)
+      : grossAmount;
+    const supplierDeductionAmount = deposit.supplier_deduction_basis === "gross"
+      ? grossAmount
+      : netAmount;
+
     const update: Record<string, unknown> = {
-      status: parsed.status,
+      status: parsed.depositStatus,
       provider_transaction_id: parsed.providerTxnId,
-      metadata: parsed.raw,
+      metadata: {
+        provider_status: parsed.providerStatus,
+        provider_fee_status: parsed.processingFeeStatus,
+        raw: parsed.raw,
+      },
     };
-    if (parsed.status === "paid") update.paid_at = new Date().toISOString();
-    if (parsed.status === "refunded")
+    if (grossAmount !== null) update.gross_deposit_amount = grossAmount;
+    if (feeAmount !== null) update.payment_processing_fee_amount = feeAmount;
+    update.payment_processing_fee_status = parsed.processingFeeStatus;
+    if (netAmount !== null) {
+      update.net_deposit_amount = netAmount;
+    }
+    if (supplierDeductionAmount !== null) {
+      update.supplier_deduction_amount = supplierDeductionAmount;
+    }
+    if (parsed.depositStatus === "paid") update.paid_at = new Date().toISOString();
+    if (parsed.depositStatus === "refunded")
       update.refunded_at = new Date().toISOString();
 
     const { error } = await admin
@@ -106,10 +141,32 @@ Deno.serve(async (req) => {
 
     return json({ ok: true });
   } catch (e) {
+    if (e instanceof PaymentProviderError) {
+      console.error("payment-webhook provider error", e.code, e.message);
+      return json({ ok: false, error: e.code, missing_secrets: e.missingSecrets }, e.status);
+    }
     console.error("payment-webhook error", e);
     return json({ ok: false, error: e instanceof Error ? e.message : String(e) }, 500);
   }
 });
+
+async function parseRequestBody(reqForForm: Request, rawBody: string): Promise<Record<string, unknown> | null> {
+  const ctype = reqForForm.headers.get("content-type") ?? "";
+  if (ctype.includes("application/json")) {
+    return JSON.parse(rawBody || "{}") as Record<string, unknown>;
+  }
+  if (ctype.includes("application/x-www-form-urlencoded")) {
+    return Object.fromEntries(new URLSearchParams(rawBody));
+  }
+  try {
+    const form = await reqForForm.formData();
+    const payload: Record<string, unknown> = {};
+    form.forEach((v, k) => (payload[k] = String(v)));
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {

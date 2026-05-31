@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 type State = { error: Error | null };
 
 const CHUNK_RECOVERY_KEY = "gb-chunk-recovery-attempted";
+const CHUNK_RECOVERY_TTL_MS = 10_000;
 
 function isRecoverableLoadError(error: Error) {
   const message = error.message || "";
@@ -19,6 +20,10 @@ function isRecoverableLoadError(error: Error) {
 export class AppErrorBoundary extends Component<{ children: ReactNode }, State> {
   state: State = { error: null };
 
+  componentDidMount() {
+    sessionStorage.removeItem(CHUNK_RECOVERY_KEY);
+  }
+
   static getDerivedStateFromError(error: Error) {
     return { error };
   }
@@ -26,9 +31,14 @@ export class AppErrorBoundary extends Component<{ children: ReactNode }, State> 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("[AppErrorBoundary]", error, info.componentStack);
 
-    if (isRecoverableLoadError(error) && sessionStorage.getItem(CHUNK_RECOVERY_KEY) !== "1") {
-      sessionStorage.setItem(CHUNK_RECOVERY_KEY, "1");
-      window.location.reload();
+    if (isRecoverableLoadError(error)) {
+      const lastAttempt = Number(sessionStorage.getItem(CHUNK_RECOVERY_KEY) || "0");
+      const canRetry = !lastAttempt || Date.now() - lastAttempt > CHUNK_RECOVERY_TTL_MS;
+
+      if (canRetry) {
+        sessionStorage.setItem(CHUNK_RECOVERY_KEY, String(Date.now()));
+        window.location.replace(window.location.href);
+      }
     }
   }
 

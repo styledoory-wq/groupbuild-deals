@@ -15,15 +15,31 @@ export function isAdminEmail(email: string | null | undefined): boolean {
   return normalizeEmail(email) === normalizeEmail(ADMIN_EMAIL);
 }
 
+export async function hasAdminRole(userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) {
+    console.warn("[auth] admin role check failed", error);
+    return false;
+  }
+  return !!data;
+}
+
 /**
  * Server-verified admin check.
  * Returns true only if there is an authenticated Supabase session
- * AND the session's email matches the admin email.
+ * and the user has the admin role. The hardcoded admin email remains as
+ * a bootstrap fallback for the original owner account.
  */
 export async function verifyAdminFromSession(): Promise<boolean> {
   const { data } = await supabase.auth.getSession();
-  const email = data.session?.user?.email;
-  return isAdminEmail(email);
+  const user = data.session?.user;
+  if (!user) return false;
+  return (await hasAdminRole(user.id)) || isAdminEmail(user.email);
 }
 
 const ADMIN_SESSION_KEY = "gb_admin_session";

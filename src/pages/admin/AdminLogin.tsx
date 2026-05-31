@@ -4,7 +4,7 @@ import { ShieldCheck, Lock, ArrowRight, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useApp } from "@/store/AppStore";
-import { ADMIN_EMAIL, isAdminEmail, setAdminSession } from "@/lib/auth";
+import { ADMIN_EMAIL, hasAdminRole, isAdminEmail, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -20,7 +20,7 @@ export default function AdminLogin() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
-      if (data.session && isAdminEmail(data.session.user.email)) {
+      if (data.session && ((await hasAdminRole(data.session.user.id)) || isAdminEmail(data.session.user.email))) {
         setAdminSession(true);
         const from = (location.state as { from?: string } | null)?.from;
         navigate(from && from.startsWith("/admin") ? from : "/admin", { replace: true });
@@ -31,10 +31,6 @@ export default function AdminLogin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAdminEmail(email)) {
-      toast.error("אין לך הרשאה לגשת לאזור זה");
-      return;
-    }
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -42,7 +38,8 @@ export default function AdminLogin() {
         password,
       });
       if (error) throw error;
-      if (!isAdminEmail(data.user?.email)) {
+      const allowed = data.user ? (await hasAdminRole(data.user.id)) || isAdminEmail(data.user.email) : false;
+      if (!allowed) {
         await supabase.auth.signOut();
         toast.error("אין לך הרשאה לגשת לאזור זה");
         return;

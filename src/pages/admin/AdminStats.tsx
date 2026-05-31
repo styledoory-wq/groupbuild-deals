@@ -21,7 +21,7 @@ export default function AdminStats() {
         supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false),
         supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("approval_status", ["approved", "active"]),
         supabase.from("deposits").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["pending", "paid"]),
-        supabase.from("deposits").select("deal_id,amount").eq("status", "paid").eq("is_deleted", false),
+        supabase.from("deposits").select("deal_id,gross_deposit_amount,net_deposit_amount").eq("status", "paid").eq("is_deleted", false),
       ]);
 
       setDeals((dealsRes.data ?? []) as DealRow[]);
@@ -31,7 +31,7 @@ export default function AdminStats() {
         deposits: depRes.count ?? 0,
       });
       const m: Record<string, number> = {};
-      (depPaidRes.data ?? []).forEach((d: { deal_id: string; amount: number | null }) => {
+      (depPaidRes.data ?? []).forEach((d: { deal_id: string; gross_deposit_amount: number | null; net_deposit_amount: number | null }) => {
         m[d.deal_id] = (m[d.deal_id] ?? 0) + 1;
       });
       setPaidByDeal(m);

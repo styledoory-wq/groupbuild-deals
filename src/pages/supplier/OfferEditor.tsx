@@ -23,6 +23,11 @@ type SupplierLite = {
   user_id: string | null;
 };
 
+type DepositLimits = {
+  min: number | null;
+  max: number | null;
+};
+
 // UI-side tier rows (strings so empty inputs are easy to manage)
 type TierRow = {
   minParticipants: string;
@@ -42,6 +47,8 @@ const emptyTier = (overrides: Partial<TierRow> = {}): TierRow => ({
   label: "",
   ...overrides,
 });
+
+const DEPOSIT_AMOUNT_RE = /^\d+(\.\d{1,2})?$/;
 
 const defaultPercentageTiers = (): TierRow[] => [
   emptyTier({ minParticipants: "1", maxParticipants: "4", discount_percentage: "5", label: "מדרגה ראשונה" }),
@@ -72,7 +79,8 @@ export default function OfferEditor() {
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [depositRequired, setDepositRequired] = useState<boolean>(false);
-  const [depositAmount, setDepositAmount] = useState<number>(1000);
+  const [depositAmount, setDepositAmount] = useState<string>("1000");
+  const [depositLimits, setDepositLimits] = useState<DepositLimits>({ min: null, max: null });
   const [saving, setSaving] = useState(false);
 
   const [offerType, setOfferType] = useState<OfferType>("percentage");
@@ -161,8 +169,21 @@ export default function OfferEditor() {
           }
         }
 
+        const { data: paymentSettings } = await supabase
+          .from("system_settings")
+          .select("deposit_default_amount,deposit_min_amount,deposit_max_amount")
+          .limit(1)
+          .maybeSingle();
+
         if (!cancelled) {
           setSupplier(s);
+          if (paymentSettings?.deposit_default_amount != null) {
+            setDepositAmount(String(paymentSettings.deposit_default_amount));
+          }
+          setDepositLimits({
+            min: paymentSettings?.deposit_min_amount == null ? null : Number(paymentSettings.deposit_min_amount),
+            max: paymentSettings?.deposit_max_amount == null ? null : Number(paymentSettings.deposit_max_amount),
+          });
           if (s?.categories?.length && categories.find((c) => c.id === s!.categories![0])) {
             setCategoryId(s.categories[0]);
           } else if (categories.length) {
@@ -220,6 +241,28 @@ export default function OfferEditor() {
       commitmentRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       toast.error("יש לסמן את אישור התחייבות הספק בתחתית הטופס כדי לפרסם את ההצעה");
       return;
+    }
+
+    let cleanDepositAmount = 0;
+    if (depositRequired) {
+      const rawDepositAmount = depositAmount.trim();
+      if (!DEPOSIT_AMOUNT_RE.test(rawDepositAmount)) {
+        toast.error("סכום הפיקדון חייב להיות מספר חיובי עם עד שתי ספרות אחרי הנקודה");
+        return;
+      }
+      cleanDepositAmount = Number(rawDepositAmount);
+      if (!Number.isFinite(cleanDepositAmount) || cleanDepositAmount <= 0) {
+        toast.error("סכום הפיקדון חייב להיות גדול מ-0");
+        return;
+      }
+      if (depositLimits.min !== null && cleanDepositAmount < depositLimits.min) {
+        toast.error(`סכום הפיקדון חייב להיות לפחות ${depositLimits.min}`);
+        return;
+      }
+      if (depositLimits.max !== null && cleanDepositAmount > depositLimits.max) {
+        toast.error(`סכום הפיקדון לא יכול להיות גבוה מ-${depositLimits.max}`);
+        return;
+      }
     }
 
 
@@ -302,7 +345,7 @@ export default function OfferEditor() {
       category_id: categoryId,
       offer_type: offerType,
       deposit_required: depositRequired,
-      deposit_amount: depositRequired ? depositAmount : 0,
+      deposit_amount: depositRequired ? cleanDepositAmount : 0,
       tiers: cleanTiers as unknown as Json,
       highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as Json,
       status: "active",
@@ -463,12 +506,15 @@ export default function OfferEditor() {
                 <Input
                   type="number"
                   min={1}
+                  step="0.01"
                   value={depositAmount}
-                  onChange={(e) => setDepositAmount(+e.target.value)}
+                  onChange={(e) => setDepositAmount(e.target.value)}
                   className="h-11 rounded-xl"
                 />
                 <p className="text-fs-xs text-muted-foreground mt-1">
-                  בשלב זה הפיקדון מהווה התחייבות בלבד — לא תתבצע גבייה בפועל.
+                  ניתן להזין כל סכום תקין, למשל 1346 או 1346.50.
+                  {depositLimits.min !== null ? ` מינימום: ${depositLimits.min}.` : ""}
+                  {depositLimits.max !== null ? ` מקסימום: ${depositLimits.max}.` : ""}
                 </p>
               </div>
             )}

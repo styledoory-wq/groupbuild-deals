@@ -12,6 +12,13 @@ type DbDeposit = {
   user_id: string;
   deal_id: string;
   amount: number;
+  gross_deposit_amount: number;
+  payment_processing_fee_amount: number | null;
+  payment_processing_fee_status: string;
+  net_deposit_amount: number;
+  supplier_deduction_amount: number;
+  supplier_deduction_basis: string;
+  payment_fee_absorber: string;
   status: string;
   payment_provider: string | null;
   created_at: string;
@@ -52,7 +59,7 @@ export default function AdminDeposits() {
     try {
       const { data, error } = await supabase
         .from("deposits")
-        .select("id,user_id,deal_id,amount,status,payment_provider,created_at,paid_at,refunded_at,is_hidden")
+        .select("id,user_id,deal_id,amount,gross_deposit_amount,payment_processing_fee_amount,payment_processing_fee_status,net_deposit_amount,supplier_deduction_amount,supplier_deduction_basis,payment_fee_absorber,status,payment_provider,created_at,paid_at,refunded_at,is_hidden")
         .eq("is_deleted", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -140,12 +147,15 @@ export default function AdminDeposits() {
 
   const activeTotal = deposits
     .filter((d) => !d.is_hidden && (d.status === "pending" || d.status === "paid"))
-    .reduce((s, d) => s + Number(d.amount || 0), 0);
+    .reduce((s, d) => s + Number(d.gross_deposit_amount ?? d.amount ?? 0), 0);
+  const activeNetTotal = deposits
+    .filter((d) => !d.is_hidden && (d.status === "pending" || d.status === "paid"))
+    .reduce((s, d) => s + Number(d.net_deposit_amount ?? d.amount ?? 0), 0);
   const activeCount = deposits.filter((d) => !d.is_hidden && (d.status === "pending" || d.status === "paid")).length;
 
   return (
     <MobileShell>
-      <PageHeader title="מעקב פיקדונות" subtitle={`${activeCount} פיקדונות פעילים · ${formatILS(activeTotal)}`} />
+      <PageHeader title="מעקב פיקדונות" subtitle={`${activeCount} פיקדונות פעילים · ברוטו ${formatILS(activeTotal)} · נטו ${formatILS(activeNetTotal)}`} />
 
       <div className="px-5 -mt-4 relative z-10 space-y-3">
         <div className="gb-card p-3">
@@ -214,12 +224,36 @@ export default function AdminDeposits() {
                       </p>
                     </div>
                     <div className="text-left">
-                      <div className="font-bold text-primary text-sm">{formatILS(Number(dep.amount))}</div>
+                      <div className="font-bold text-primary text-sm">{formatILS(Number(dep.gross_deposit_amount ?? dep.amount))}</div>
                       <div className={"text-fs-xs font-bold px-2 py-0.5 rounded-full mt-1 " + meta.cls}>
                         {meta.label}
                       </div>
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border text-center">
+                    <div className="rounded-xl bg-muted/30 p-2">
+                      <div className="text-fs-xs text-muted-foreground">ברוטו</div>
+                      <div className="text-xs font-bold">{formatILS(Number(dep.gross_deposit_amount ?? dep.amount))}</div>
+                    </div>
+                    <div className="rounded-xl bg-muted/30 p-2">
+                      <div className="text-fs-xs text-muted-foreground">עמלת סליקה</div>
+                      <div className="text-xs font-bold">
+                        {dep.payment_processing_fee_amount === null
+                          ? "לא ידוע"
+                          : formatILS(Number(dep.payment_processing_fee_amount))}
+                      </div>
+                    </div>
+                    <div className="rounded-xl bg-muted/30 p-2">
+                      <div className="text-fs-xs text-muted-foreground">נטו לניכוי</div>
+                      <div className="text-xs font-bold">{formatILS(Number(dep.supplier_deduction_amount ?? dep.net_deposit_amount ?? dep.amount))}</div>
+                    </div>
+                  </div>
+                  <p className="text-fs-xs text-muted-foreground mt-2">
+                    סטטוס עמלה: {dep.payment_processing_fee_status === "final" ? "סופי" : dep.payment_processing_fee_status === "estimated" ? "משוער" : dep.payment_processing_fee_status === "pending" ? "ממתין" : "לא ידוע"}
+                    {" · "}סופג עמלה: {dep.payment_fee_absorber === "resident" ? "דייר" : dep.payment_fee_absorber === "supplier" ? "ספק" : "GroupBuild"}
+                    {" · "}זיכוי ספק: {dep.supplier_deduction_basis === "gross" ? "ברוטו" : "נטו"}
+                  </p>
 
                   {isPending && (
                     <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-border">

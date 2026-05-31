@@ -295,41 +295,44 @@ export default function DealDetail() {
         min_tier_locked: joinCondition === "conditional" && activeTierNow ? activeTierNow.minParticipants : null,
         conditional_status: "ok",
       };
-      const { error: insErr } = await supabase.from("deal_interests").insert(payload);
-      if (insErr && !insErr.message.toLowerCase().includes("duplicate")) throw insErr;
-
-      // Create a real pending deposit row (only if one doesn't already exist for this user+deal).
-      if (depositRequired) {
-        const { data: existingDep } = await supabase
-          .from("deposits")
-          .select("id,status")
+      let interestId: string | null = null;
+      const { data: insertedInterest, error: insErr } = await supabase
+        .from("deal_interests")
+        .insert(payload)
+        .select("id")
+        .single();
+      if (insErr) {
+        if (!insErr.message.toLowerCase().includes("duplicate")) throw insErr;
+        const { data: existingInterest, error: existingInterestErr } = await supabase
+          .from("deal_interests")
+          .select("id")
           .eq("user_id", session.session.user.id)
           .eq("deal_id", deal.id)
           .eq("is_deleted", false)
-          .in("status", ["pending", "paid"])
           .maybeSingle();
-        if (!existingDep) {
-          // amount + status are enforced server-side by the integrity trigger.
-          const { error: depErr } = await supabase.from("deposits").insert({
-            user_id: session.session.user.id,
-            deal_id: deal.id,
-            amount: 0, // overridden by trigger from deals.deposit_amount
-            currency: "ILS",
-            payment_provider: "grow",
-            status: "pending",
-            metadata: { source: "resident_join", deal_title: deal.title },
-          });
-          if (depErr) {
-            console.error("[deposit_insert_failed]", depErr);
-            await supabase.from("deposit_attempt_logs").insert({
-              user_id: session.session.user.id,
-              deal_id: deal.id,
-              attempted_amount: Number(deal.deposit_amount ?? 0),
-              reason: depErr.message ?? "unknown",
-              metadata: { code: depErr.code ?? null, source: "resident_join" },
-            });
-            throw depErr;
-          }
+        if (existingInterestErr) throw existingInterestErr;
+        interestId = existingInterest?.id ?? null;
+      } else {
+        interestId = insertedInterest?.id ?? null;
+      }
+
+      let paymentUrl: string | null = null;
+      if (depositRequired) {
+        const { data: depositResponse, error: depositErr } = await supabase.functions.invoke("create-deposit", {
+          body: { deal_id: deal.id },
+        });
+        if (depositErr) {
+          console.error("[create_deposit_failed]", depositErr);
+          throw new Error("לא הצלחנו ליצור קישור תשלום. נסו שוב או פנו לתמיכה.");
+        }
+        if (depositResponse?.error) {
+          console.error("[create_deposit_error_response]", depositResponse);
+          throw new Error(depositResponse.message ?? "לא הצלחנו ליצור קישור תשלום.");
+        }
+        paymentUrl = typeof depositResponse?.payment_url === "string" ? depositResponse.payment_url : null;
+        if (!paymentUrl) {
+          console.error("[create_deposit_missing_payment_url]", depositResponse);
+          throw new Error("לא התקבל קישור תשלום. נסו שוב או פנו לתמיכה.");
         }
       }
 
@@ -402,20 +405,19 @@ export default function DealDetail() {
         .catch(() => {});
 
       // Send Resend email to supplier about new lead
-      if (deal.supplier_id) {
+      if (deal.supplier_id && interestId) {
         supabase.functions
           .invoke("send-email", {
             body: {
               type: "new_lead",
-              supplier_id: deal.supplier_id,
-              deal_title: deal.title,
-              lead_name: payload.full_name,
-              lead_phone: payload.phone,
-              lead_city: payload.city,
-              project_name: payload.project_name,
+              interest_id: interestId,
             },
           })
           .catch((e) => console.warn("[email] new_lead failed", e));
+      }
+
+      if (paymentUrl) {
+        window.location.href = paymentUrl;
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שמירה נכשלה");

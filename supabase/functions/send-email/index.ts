@@ -15,16 +15,17 @@ const BRAND_GOLD = "#C9A24B";
 type Payload =
   | { type: "supplier_approved"; supplier_id: string }
   | { type: "resident_approved"; user_id: string }
-  | {
-      type: "new_lead";
-      supplier_id: string;
-      deal_title?: string;
-      lead_name?: string;
-      lead_phone?: string;
-      lead_city?: string;
-      project_name?: string;
-    }
+  | { type: "new_lead"; interest_id: string }
   | { type: "test"; to: string };
+
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 function wrap(title: string, bodyHtml: string, ctaUrl?: string, ctaText?: string) {
   return `<!doctype html>
@@ -109,7 +110,7 @@ Deno.serve(async (req) => {
       if (!sup?.email) return json({ success: false, error: "לספק אין כתובת מייל" }, 200);
       if (!(await prefAllows(sup.user_id, "approval"))) return json({ success: true, skipped: "user_pref" });
       const html = wrap("החשבון שלך אושר 🎉",
-        `<p>שלום ${sup.business_name ?? ""},</p><p>החשבון שלך במערכת <b>GroupBuild</b> אושר ופעיל.</p>`,
+        `<p>שלום ${escapeHtml(sup.business_name)},</p><p>החשבון שלך במערכת <b>GroupBuild</b> אושר ופעיל.</p>`,
         "https://groupbuild.co.il/auth", "כניסה למערכת");
       await sendResend(sup.email, "החשבון שלך אושר במערכת GroupBuild", html);
       return json({ success: true });
@@ -122,28 +123,49 @@ Deno.serve(async (req) => {
       if (!prof?.email) return json({ success: false, error: "למשתמש אין כתובת מייל" }, 200);
       if (!(await prefAllows(body.user_id, "approval"))) return json({ success: true, skipped: "user_pref" });
       const html = wrap("החשבון שלך אושר 🎉",
-        `<p>שלום ${prof.full_name ?? ""},</p><p>החשבון שלך במערכת <b>GroupBuild</b> אושר ומוכן לשימוש.</p>`,
+        `<p>שלום ${escapeHtml(prof.full_name)},</p><p>החשבון שלך במערכת <b>GroupBuild</b> אושר ומוכן לשימוש.</p>`,
         "https://groupbuild.co.il/auth", "כניסה למערכת");
       await sendResend(prof.email, "החשבון שלך אושר במערכת GroupBuild", html);
       return json({ success: true });
     }
 
     if (body.type === "new_lead") {
+      if (!body.interest_id) return json({ success: false, error: "missing_interest_id" }, 200);
+
+      const { data: interest } = await admin.from("deal_interests")
+        .select("id,user_id,deal_id,full_name,phone,city,project_name,estimated_quantity,is_deleted")
+        .eq("id", body.interest_id)
+        .maybeSingle();
+      if (!interest || interest.is_deleted) return json({ success: false, error: "lead_not_found" }, 200);
+
+      const { data: deal } = await admin.from("deals")
+        .select("id,title,supplier_id")
+        .eq("id", interest.deal_id)
+        .maybeSingle();
+      if (!deal?.supplier_id) return json({ success: false, error: "deal_not_found" }, 200);
+
       const { data: sup } = await admin.from("suppliers")
-        .select("email, business_name, user_id").eq("id", body.supplier_id).maybeSingle();
+        .select("email, business_name, user_id").eq("id", deal.supplier_id).maybeSingle();
       if (!sup?.email) return json({ success: false, error: "לספק אין כתובת מייל" }, 200);
+
+      const callerOwnsLead = interest.user_id === u.user.id;
+      const callerOwnsSupplier = sup.user_id === u.user.id;
+      if (!isAdmin && !callerOwnsLead && !callerOwnsSupplier) {
+        return json({ success: false, error: "forbidden" }, 200);
+      }
+
       if (!(await prefAllows(sup.user_id, "lead"))) return json({ success: true, skipped: "user_pref" });
       const details = [
-        body.lead_name && `שם: ${body.lead_name}`,
-        body.lead_phone && `טלפון: ${body.lead_phone}`,
-        body.lead_city && `עיר: ${body.lead_city}`,
-        body.project_name && `פרויקט: ${body.project_name}`,
+        interest.full_name && `שם: ${escapeHtml(interest.full_name)}`,
+        interest.phone && `טלפון: ${escapeHtml(interest.phone)}`,
+        interest.city && `עיר: ${escapeHtml(interest.city)}`,
+        interest.project_name && `פרויקט: ${escapeHtml(interest.project_name)}`,
       ].filter(Boolean).join("<br>");
       const html = wrap("ליד חדש בהצעה שלך",
-        `<p>שלום ${sup.business_name ?? ""},</p><p>דייר חדש הביע עניין בהצעה: <b>${body.deal_title ?? ""}</b></p>
+        `<p>שלום ${escapeHtml(sup.business_name)},</p><p>דייר חדש הביע עניין בהצעה: <b>${escapeHtml(deal.title)}</b></p>
          ${details ? `<div style="background:#F5F1EA;padding:14px;border-radius:10px;margin-top:10px">${details}</div>` : ""}`,
         "https://groupbuild.co.il/supplier/leads", "צפייה בליד");
-      await sendResend(sup.email, `ליד חדש: ${body.deal_title ?? "הצעה שלך"}`, html);
+      await sendResend(sup.email, `ליד חדש: ${deal.title ?? "הצעה שלך"}`, html);
       return json({ success: true });
     }
 

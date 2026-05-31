@@ -34,11 +34,11 @@ export default function AdminDashboard() {
           supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false).eq("approval_status", "pending"),
           supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["active", "closing-soon"]),
           supabase.from("deposits").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["pending", "paid"]),
-          supabase.from("deposits").select("amount").eq("status", "paid").eq("is_deleted", false),
+          supabase.from("deposits").select("gross_deposit_amount,net_deposit_amount").eq("status", "paid").eq("is_deleted", false),
         ]);
 
         const apartments = (projRes.data ?? []).reduce((s: number, p: { apartment_count: number | null }) => s + (p.apartment_count ?? 0), 0);
-        const paidAmount = (depPaidRes.data ?? []).reduce((s: number, d: { amount: number | null }) => s + Number(d.amount ?? 0), 0);
+        const paidAmount = (depPaidRes.data ?? []).reduce((s: number, d: { gross_deposit_amount: number | null }) => s + Number(d.gross_deposit_amount ?? 0), 0);
 
         setStats({
           projects: projRes.count ?? (projRes.data?.length ?? 0),

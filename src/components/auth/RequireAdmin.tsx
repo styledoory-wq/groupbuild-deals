@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { isAdminEmail, setAdminSession } from "@/lib/auth";
+import { hasAdminRole, isAdminEmail, setAdminSession } from "@/lib/auth";
 import { toast } from "sonner";
 
 /**
@@ -27,7 +27,7 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
       setState(next);
     };
 
-    const handleSession = (
+    const handleSession = async (
       session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"],
     ) => {
       if (!session) {
@@ -35,7 +35,8 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
         finish("anon");
         return;
       }
-      if (isAdminEmail(session.user.email)) {
+      const allowed = (await hasAdminRole(session.user.id)) || isAdminEmail(session.user.email);
+      if (allowed) {
         setAdminSession(true);
         finish("allowed");
       } else {
@@ -47,7 +48,7 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
 
     // Listen first so INITIAL_SESSION is captured
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleSession(session);
+      void handleSession(session);
     });
 
     // Also explicitly read once
@@ -58,7 +59,7 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
           finish("error", error.message || "שגיאה בטעינת ההזדהות");
           return;
         }
-        handleSession(data.session);
+        void handleSession(data.session);
       })
       .catch((err) => {
         finish("error", err instanceof Error ? err.message : "שגיאה בטעינת ההזדהות");

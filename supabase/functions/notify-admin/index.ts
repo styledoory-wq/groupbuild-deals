@@ -27,11 +27,28 @@ Deno.serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const auth = req.headers.get("Authorization") ?? "";
+    if (!auth.startsWith("Bearer ")) {
+      return json({ error: "unauthorized" }, 401);
+    }
+
+    const userClient = createClient(SUPABASE_URL, ANON, {
+      global: { headers: { Authorization: auth } },
+    });
+    const { data: userData, error: userErr } = await userClient.auth.getUser();
+    if (userErr || !userData.user) {
+      return json({ error: "unauthorized" }, 401);
+    }
+
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
     const body = (await req.json()) as Payload;
     if (!body?.event || !body?.title) {
       return json({ error: "missing event/title" }, 400);
+    }
+    if (!["new_resident", "new_supplier", "deal_interest", "waitlist_lead"].includes(body.event)) {
+      return json({ error: "invalid_event" }, 400);
     }
 
     // Read current admin settings
@@ -55,7 +72,7 @@ Deno.serve(async (req) => {
       title: body.title,
       to: recipient,
       shouldNotify,
-      details: body.details,
+      details: scrubDetails(body.details),
     });
 
     return json({
@@ -69,6 +86,14 @@ Deno.serve(async (req) => {
     return json({ error: msg }, 500);
   }
 });
+
+function scrubDetails(details: Record<string, unknown> | null | undefined) {
+  const safe = { ...(details ?? {}) };
+  for (const key of Object.keys(safe)) {
+    if (/email|phone|name/i.test(key)) safe[key] = "[redacted]";
+  }
+  return safe;
+}
 
 function json(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {

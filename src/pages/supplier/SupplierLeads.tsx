@@ -88,10 +88,10 @@ export default function SupplierLeads() {
       setInterests((prev) => prev.map((i) => (i.id === interestId ? {
         ...i,
         lead_status: status,
-        status: status === "approved" ? (i.deposit_required ? "paid" : "approved") : "rejected",
-        deposit_status: status === "approved" && i.deposit_required ? "paid" : i.deposit_status,
+        status: status === "approved" ? (i.deposit_required ? "pending_deposit" : "approved") : "rejected",
+        deposit_status: status === "approved" && i.deposit_required ? "pending" : i.deposit_status,
       } : i)));
-      toast.success(status === "approved" ? "הליד אושר והפיקדון סומן כשולם" : "הליד סומן כלא רלוונטי");
+      toast.success(status === "approved" ? "הליד אושר" : "הליד סומן כלא רלוונטי");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "עדכון נכשל");
     } finally {

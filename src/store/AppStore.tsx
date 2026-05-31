@@ -131,7 +131,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const supplierRow = supplierRes.data as { id?: string } | null;
 
         let resolvedRole: Role = "resident";
-        if (isAdminEmail(email)) resolvedRole = "admin";
+        if (roles.some((r) => r.role === "admin") || isAdminEmail(email)) resolvedRole = "admin";
         else if (roles.some((r) => r.role === "supplier")) resolvedRole = "supplier";
         else if (profile?.user_type === "supplier") resolvedRole = "supplier";
         else if (supplierRow?.id) resolvedRole = "supplier";

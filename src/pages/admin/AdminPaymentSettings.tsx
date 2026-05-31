@@ -10,13 +10,24 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type Provider = "grow" | "cardcom";
+type Provider = "grow_make" | "grow" | "cardcom" | "stripe";
+type FeeAbsorber = "resident" | "supplier" | "groupbuild";
+
+const providerSecrets: Record<Provider, string> = {
+  grow_make: "MAKE_CREATE_PAYMENT_LINK_WEBHOOK_URL, MAKE_CALLBACK_SECRET, GROW_MAKE_SUCCESS_URL, GROW_MAKE_CANCEL_URL",
+  grow: "GROW_API_KEY, GROW_PAGE_CODE, GROW_USER_ID",
+  cardcom: "CARDCOM_TERMINAL_NUMBER, CARDCOM_API_NAME",
+  stripe: "STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET",
+};
 
 export default function AdminPaymentSettings() {
   const [id, setId] = useState<string | null>(null);
-  const [provider, setProvider] = useState<Provider>("grow");
+  const [provider, setProvider] = useState<Provider>("grow_make");
   const [depositAmount, setDepositAmount] = useState<number>(1000);
+  const [depositMinAmount, setDepositMinAmount] = useState<string>("");
+  const [depositMaxAmount, setDepositMaxAmount] = useState<string>("");
   const [commission, setCommission] = useState<number>(0);
+  const [feeAbsorber, setFeeAbsorber] = useState<FeeAbsorber>("groupbuild");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -30,9 +41,12 @@ export default function AdminPaymentSettings() {
       if (error) toast.error(error.message);
       if (data) {
         setId(data.id);
-        setProvider((data.active_payment_provider as Provider) ?? "grow");
+        setProvider((data.active_payment_provider as Provider) ?? "grow_make");
         setDepositAmount(Number(data.deposit_default_amount));
+        setDepositMinAmount(data.deposit_min_amount == null ? "" : String(data.deposit_min_amount));
+        setDepositMaxAmount(data.deposit_max_amount == null ? "" : String(data.deposit_max_amount));
         setCommission(Number(data.commission_percent));
+        setFeeAbsorber((data.payment_fee_absorber as FeeAbsorber) ?? "groupbuild");
       }
       setLoading(false);
     })();
@@ -40,13 +54,30 @@ export default function AdminPaymentSettings() {
 
   const handleSave = async () => {
     if (!id) return;
+    const minAmount = depositMinAmount.trim() === "" ? null : Number(depositMinAmount);
+    const maxAmount = depositMaxAmount.trim() === "" ? null : Number(depositMaxAmount);
+    if (minAmount !== null && (!Number.isFinite(minAmount) || minAmount <= 0)) {
+      toast.error("סכום מינימום חייב להיות מספר חיובי");
+      return;
+    }
+    if (maxAmount !== null && (!Number.isFinite(maxAmount) || maxAmount <= 0)) {
+      toast.error("סכום מקסימום חייב להיות מספר חיובי");
+      return;
+    }
+    if (minAmount !== null && maxAmount !== null && minAmount > maxAmount) {
+      toast.error("סכום מינימום לא יכול להיות גבוה מהמקסימום");
+      return;
+    }
     setSaving(true);
     const { error } = await supabase
       .from("system_settings")
       .update({
         active_payment_provider: provider,
         deposit_default_amount: depositAmount,
+        deposit_min_amount: minAmount,
+        deposit_max_amount: maxAmount,
         commission_percent: commission,
+        payment_fee_absorber: feeAbsorber,
       })
       .eq("id", id);
     setSaving(false);
@@ -67,8 +98,8 @@ export default function AdminPaymentSettings() {
                 <CreditCard className="h-4 w-4 gb-gold-text" />
                 ספק סליקה פעיל
               </h2>
-              <div className="grid grid-cols-2 gap-2">
-                {(["grow", "cardcom"] as Provider[]).map((p) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {(["grow_make", "grow", "cardcom", "stripe"] as Provider[]).map((p) => (
                   <button
                     key={p}
                     onClick={() => setProvider(p)}
@@ -80,17 +111,17 @@ export default function AdminPaymentSettings() {
                     )}
                   >
                     <div className="text-base font-bold">
-                      {p === "grow" ? "Grow" : "Cardcom"}
+                      {p === "grow_make" ? "Grow Make" : p === "grow" ? "Grow API" : p === "cardcom" ? "Cardcom" : "Stripe"}
                     </div>
                     <div className="text-fs-xs text-muted-foreground mt-1">
-                      {p === "grow" ? "Meshulam Pay" : "Cardcom Solutions"}
+                      {p === "grow_make" ? "Make.com + Grow" : p === "grow" ? "Direct API disabled" : p === "cardcom" ? "Cardcom disabled" : "Stripe disabled"}
                     </div>
                   </button>
                 ))}
               </div>
               <p className="text-fs-xs text-muted-foreground mt-3 leading-relaxed">
                 לאחר בחירת הספק, הוסיפו את מפתחות ה-API המתאימים בהגדרות הסודות של Lovable Cloud
-                ({provider === "grow" ? "GROW_API_KEY, GROW_PAGE_CODE, GROW_USER_ID" : "CARDCOM_TERMINAL_NUMBER, CARDCOM_API_NAME"}).
+                ({providerSecrets[provider]}).
               </p>
             </section>
 
@@ -109,6 +140,32 @@ export default function AdminPaymentSettings() {
                   min={0}
                 />
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">מינימום פיקדון אופציונלי</Label>
+                  <Input
+                    type="number"
+                    value={depositMinAmount}
+                    onChange={(e) => setDepositMinAmount(e.target.value)}
+                    className="h-12 rounded-2xl"
+                    min={0}
+                    step="0.01"
+                    placeholder="ללא"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">מקסימום פיקדון אופציונלי</Label>
+                  <Input
+                    type="number"
+                    value={depositMaxAmount}
+                    onChange={(e) => setDepositMaxAmount(e.target.value)}
+                    className="h-12 rounded-2xl"
+                    min={0}
+                    step="0.01"
+                    placeholder="ללא"
+                  />
+                </div>
+              </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold flex items-center gap-1.5">
                   <Percent className="h-3.5 w-3.5" />
@@ -123,6 +180,33 @@ export default function AdminPaymentSettings() {
                   max={100}
                   step={0.5}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold">מי סופג כלכלית את עמלת הסליקה</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {([
+                    ["resident", "דייר"],
+                    ["supplier", "ספק"],
+                    ["groupbuild", "GroupBuild"],
+                  ] as Array<[FeeAbsorber, string]>).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setFeeAbsorber(value)}
+                      className={cn(
+                        "h-10 rounded-xl border text-xs font-bold transition-smooth",
+                        feeAbsorber === value ? "border-gold bg-gold/10 text-primary" : "border-border bg-card text-muted-foreground"
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="rounded-xl bg-muted/40 p-3 text-fs-xs text-muted-foreground leading-relaxed">
+                  {feeAbsorber === "resident" && "הדייר משלם את הפיקדון בתוספת עמלת הסליקה. הספק מקבל זיכוי/ניכוי לפי סכום הפיקדון נטו אחרי עמלה."}
+                  {feeAbsorber === "supplier" && "הדייר משלם את סכום הפיקדון בלבד. עמלת הסליקה מקטינה את סכום הזיכוי/ניכוי של הספק."}
+                  {feeAbsorber === "groupbuild" && "הדייר משלם את סכום הפיקדון בלבד. הספק מקבל זיכוי/ניכוי לפי ברוטו, ו-GroupBuild סופגת את עמלת הסליקה."}
+                </div>
               </div>
             </section>
 
