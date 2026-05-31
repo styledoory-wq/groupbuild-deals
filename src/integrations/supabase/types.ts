@@ -424,6 +424,7 @@ export type Database = {
           currency: string
           deal_id: string
           deleted_at: string | null
+          gross_deposit_amount: number
           hidden_at: string | null
           hidden_by: string | null
           id: string
@@ -431,12 +432,18 @@ export type Database = {
           is_demo: boolean
           is_hidden: boolean
           metadata: Json | null
+          net_deposit_amount: number
           paid_at: string | null
+          payment_fee_absorber: string
+          payment_processing_fee_amount: number | null
+          payment_processing_fee_status: string
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
           provider_payment_url: string | null
           provider_transaction_id: string | null
           refunded_at: string | null
           status: Database["public"]["Enums"]["deposit_status"]
+          supplier_deduction_amount: number
+          supplier_deduction_basis: string
           user_id: string
         }
         Insert: {
@@ -445,6 +452,7 @@ export type Database = {
           currency?: string
           deal_id: string
           deleted_at?: string | null
+          gross_deposit_amount: number
           hidden_at?: string | null
           hidden_by?: string | null
           id?: string
@@ -452,12 +460,18 @@ export type Database = {
           is_demo?: boolean
           is_hidden?: boolean
           metadata?: Json | null
+          net_deposit_amount: number
           paid_at?: string | null
+          payment_fee_absorber?: string
+          payment_processing_fee_amount?: number | null
+          payment_processing_fee_status?: string
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
           provider_payment_url?: string | null
           provider_transaction_id?: string | null
           refunded_at?: string | null
           status?: Database["public"]["Enums"]["deposit_status"]
+          supplier_deduction_amount: number
+          supplier_deduction_basis?: string
           user_id: string
         }
         Update: {
@@ -466,6 +480,7 @@ export type Database = {
           currency?: string
           deal_id?: string
           deleted_at?: string | null
+          gross_deposit_amount?: number
           hidden_at?: string | null
           hidden_by?: string | null
           id?: string
@@ -473,12 +488,18 @@ export type Database = {
           is_demo?: boolean
           is_hidden?: boolean
           metadata?: Json | null
+          net_deposit_amount?: number
           paid_at?: string | null
+          payment_fee_absorber?: string
+          payment_processing_fee_amount?: number | null
+          payment_processing_fee_status?: string
           payment_provider?: Database["public"]["Enums"]["payment_provider_enum"]
           provider_payment_url?: string | null
           provider_transaction_id?: string | null
           refunded_at?: string | null
           status?: Database["public"]["Enums"]["deposit_status"]
+          supplier_deduction_amount?: number
+          supplier_deduction_basis?: string
           user_id?: string
         }
         Relationships: []
@@ -1151,7 +1172,10 @@ export type Database = {
           commission_percent: number
           created_at: string
           deposit_default_amount: number
+          deposit_max_amount: number | null
+          deposit_min_amount: number | null
           id: string
+          payment_fee_absorber: string
           updated_at: string
         }
         Insert: {
@@ -1159,7 +1183,10 @@ export type Database = {
           commission_percent?: number
           created_at?: string
           deposit_default_amount?: number
+          deposit_max_amount?: number | null
+          deposit_min_amount?: number | null
           id?: string
+          payment_fee_absorber?: string
           updated_at?: string
         }
         Update: {
@@ -1167,7 +1194,10 @@ export type Database = {
           commission_percent?: number
           created_at?: string
           deposit_default_amount?: number
+          deposit_max_amount?: number | null
+          deposit_min_amount?: number | null
           id?: string
+          payment_fee_absorber?: string
           updated_at?: string
         }
         Relationships: []
