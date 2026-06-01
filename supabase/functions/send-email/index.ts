@@ -16,6 +16,12 @@ type Payload =
   | { type: "supplier_approved"; supplier_id: string }
   | { type: "resident_approved"; user_id: string }
   | { type: "new_lead"; interest_id: string }
+  | { type: "deposit_confirmed"; user_id: string; amount?: number; deal_title?: string }
+  | { type: "new_offer"; user_id: string; deal_title: string; supplier_name?: string }
+  | { type: "voucher_created"; user_id: string; voucher_code: string; deal_title?: string }
+  | { type: "deal_status_changed"; user_id: string; deal_title: string; status: string }
+  | { type: "welcome"; user_id: string }
+  | { type: "admin_notification"; subject: string; message: string }
   | { type: "test"; to: string };
 
 function escapeHtml(value: unknown): string {
@@ -92,15 +98,35 @@ Deno.serve(async (req) => {
       .eq("user_id", u.user.id).eq("role", "admin")
       .maybeSingle().then((r) => !!r.data);
 
-    async function prefAllows(userId: string | null, kind: "approval" | "lead"): Promise<boolean> {
+    type PrefKind = "approval" | "lead" | "deposit" | "new_offer" | "voucher" | "deal_status" | "system" | "welcome";
+    const PREF_COL: Record<PrefKind, string> = {
+      approval: "approval_email_enabled",
+      lead: "new_lead_email_enabled",
+      deposit: "deposit_email_enabled",
+      new_offer: "new_offer_email_enabled",
+      voucher: "voucher_email_enabled",
+      deal_status: "deal_status_email_enabled",
+      system: "system_email_enabled",
+      welcome: "welcome_email_enabled",
+    };
+    async function prefAllows(userId: string | null, kind: PrefKind): Promise<boolean> {
       if (!userId) return true;
+      const col = PREF_COL[kind];
       const { data } = await admin
         .from("notification_settings")
-        .select("email_notifications_enabled, approval_email_enabled, new_lead_email_enabled")
+        .select(`email_notifications_enabled, ${col}`)
         .eq("user_id", userId).maybeSingle();
       if (!data) return true;
-      if (!data.email_notifications_enabled) return false;
-      return kind === "approval" ? data.approval_email_enabled : data.new_lead_email_enabled;
+      // deno-lint-ignore no-explicit-any
+      const d = data as any;
+      if (!d.email_notifications_enabled) return false;
+      return d[col] !== false;
+    }
+
+    async function getUserEmail(userId: string): Promise<{ email: string | null; name: string }> {
+      const { data: prof } = await admin.from("profiles")
+        .select("email, full_name").eq("id", userId).maybeSingle();
+      return { email: prof?.email ?? null, name: prof?.full_name ?? "" };
     }
 
     if (body.type === "supplier_approved") {
@@ -176,6 +202,78 @@ Deno.serve(async (req) => {
          <p>אם הגיע אליך – שליחת המיילים דרך Resend פעילה ותקינה.</p>`,
         "https://groupbuild.co.il", "לאתר");
       await sendResend(body.to, "בדיקת מיילים — GroupBuild", html);
+      return json({ success: true });
+    }
+
+    if (body.type === "deposit_confirmed") {
+      if (!isAdmin && body.user_id !== u.user.id) return json({ success: false, error: "forbidden" });
+      const { email, name } = await getUserEmail(body.user_id);
+      if (!email) return json({ success: false, error: "no_email" });
+      if (!(await prefAllows(body.user_id, "deposit"))) return json({ success: true, skipped: "user_pref" });
+      const detail = body.deal_title ? ` עבור <b>${escapeHtml(body.deal_title)}</b>` : "";
+      const amount = body.amount ? ` בסך ${escapeHtml(body.amount)} ₪` : "";
+      const html = wrap("הפיקדון שלך אושר ✅",
+        `<p>שלום ${escapeHtml(name)},</p><p>הפיקדון שלך${amount}${detail} התקבל בהצלחה.</p>`,
+        "https://groupbuild.co.il/resident/my-deposits", "צפייה בפיקדונות שלי");
+      await sendResend(email, "אישור פיקדון — GroupBuild", html);
+      return json({ success: true });
+    }
+
+    if (body.type === "new_offer") {
+      const { email, name } = await getUserEmail(body.user_id);
+      if (!email) return json({ success: false, error: "no_email" });
+      if (!(await prefAllows(body.user_id, "new_offer"))) return json({ success: true, skipped: "user_pref" });
+      const supplier = body.supplier_name ? ` מאת ${escapeHtml(body.supplier_name)}` : "";
+      const html = wrap("הצעה חדשה זמינה",
+        `<p>שלום ${escapeHtml(name)},</p><p>הצעה חדשה הופקה${supplier}: <b>${escapeHtml(body.deal_title)}</b></p>`,
+        "https://groupbuild.co.il/resident/deals", "צפייה בהצעה");
+      await sendResend(email, `הצעה חדשה: ${body.deal_title}`, html);
+      return json({ success: true });
+    }
+
+    if (body.type === "voucher_created") {
+      if (!isAdmin && body.user_id !== u.user.id) return json({ success: false, error: "forbidden" });
+      const { email, name } = await getUserEmail(body.user_id);
+      if (!email) return json({ success: false, error: "no_email" });
+      if (!(await prefAllows(body.user_id, "voucher"))) return json({ success: true, skipped: "user_pref" });
+      const dealLine = body.deal_title ? `<p>עבור: <b>${escapeHtml(body.deal_title)}</b></p>` : "";
+      const html = wrap("השובר שלך מוכן 🎟️",
+        `<p>שלום ${escapeHtml(name)},</p>${dealLine}<p>קוד שובר: <b style="font-size:18px">${escapeHtml(body.voucher_code)}</b></p>`,
+        "https://groupbuild.co.il/resident/my-vouchers", "צפייה בשוברים שלי");
+      await sendResend(email, "שובר חדש זמין במערכת", html);
+      return json({ success: true });
+    }
+
+    if (body.type === "deal_status_changed") {
+      const { email, name } = await getUserEmail(body.user_id);
+      if (!email) return json({ success: false, error: "no_email" });
+      if (!(await prefAllows(body.user_id, "deal_status"))) return json({ success: true, skipped: "user_pref" });
+      const html = wrap("עדכון סטטוס עסקה",
+        `<p>שלום ${escapeHtml(name)},</p><p>סטטוס העסקה <b>${escapeHtml(body.deal_title)}</b> השתנה ל-<b>${escapeHtml(body.status)}</b>.</p>`,
+        "https://groupbuild.co.il/resident/deals", "צפייה בעסקה");
+      await sendResend(email, `עדכון: ${body.deal_title}`, html);
+      return json({ success: true });
+    }
+
+    if (body.type === "welcome") {
+      const { email, name } = await getUserEmail(body.user_id);
+      if (!email) return json({ success: false, error: "no_email" });
+      if (!(await prefAllows(body.user_id, "welcome"))) return json({ success: true, skipped: "user_pref" });
+      const html = wrap("ברוכים הבאים ל-GroupBuild 👋",
+        `<p>שלום ${escapeHtml(name)},</p><p>שמחים שהצטרפת! במערכת תוכל לראות הצעות מותאמות, להזמין שוברים ולעקוב אחרי הפעילות שלך.</p>`,
+        "https://groupbuild.co.il", "התחלה");
+      await sendResend(email, "ברוכים הבאים ל-GroupBuild", html);
+      return json({ success: true });
+    }
+
+    if (body.type === "admin_notification") {
+      if (!isAdmin) return json({ success: false, error: "forbidden" });
+      const { data: settings } = await admin
+        .from("admin_settings").select("notification_email").limit(1).maybeSingle();
+      const to = settings?.notification_email;
+      if (!to) return json({ success: false, error: "no_admin_email" });
+      const html = wrap(body.subject, `<p>${escapeHtml(body.message)}</p>`);
+      await sendResend(to, body.subject, html);
       return json({ success: true });
     }
 

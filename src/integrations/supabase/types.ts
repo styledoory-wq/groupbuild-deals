@@ -504,6 +504,39 @@ export type Database = {
         }
         Relationships: []
       }
+      device_tokens: {
+        Row: {
+          created_at: string
+          device_info: Json | null
+          id: string
+          last_active_at: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_info?: Json | null
+          id?: string
+          last_active_at?: string
+          platform: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_info?: Json | null
+          id?: string
+          last_active_at?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           category: string
@@ -588,30 +621,93 @@ export type Database = {
       notification_settings: {
         Row: {
           approval_email_enabled: boolean
+          approval_push_enabled: boolean
+          approval_sms_enabled: boolean
           created_at: string
+          deal_status_email_enabled: boolean
+          deal_status_push_enabled: boolean
+          deal_status_sms_enabled: boolean
+          deposit_email_enabled: boolean
+          deposit_push_enabled: boolean
+          deposit_sms_enabled: boolean
           email_notifications_enabled: boolean
           new_lead_email_enabled: boolean
+          new_lead_push_enabled: boolean
+          new_lead_sms_enabled: boolean
+          new_offer_email_enabled: boolean
+          new_offer_push_enabled: boolean
+          new_offer_sms_enabled: boolean
+          push_notifications_enabled: boolean
+          sms_notifications_enabled: boolean
           system_email_enabled: boolean
+          system_push_enabled: boolean
+          system_sms_enabled: boolean
           updated_at: string
           user_id: string
+          voucher_email_enabled: boolean
+          voucher_push_enabled: boolean
+          voucher_sms_enabled: boolean
+          welcome_email_enabled: boolean
         }
         Insert: {
           approval_email_enabled?: boolean
+          approval_push_enabled?: boolean
+          approval_sms_enabled?: boolean
           created_at?: string
+          deal_status_email_enabled?: boolean
+          deal_status_push_enabled?: boolean
+          deal_status_sms_enabled?: boolean
+          deposit_email_enabled?: boolean
+          deposit_push_enabled?: boolean
+          deposit_sms_enabled?: boolean
           email_notifications_enabled?: boolean
           new_lead_email_enabled?: boolean
+          new_lead_push_enabled?: boolean
+          new_lead_sms_enabled?: boolean
+          new_offer_email_enabled?: boolean
+          new_offer_push_enabled?: boolean
+          new_offer_sms_enabled?: boolean
+          push_notifications_enabled?: boolean
+          sms_notifications_enabled?: boolean
           system_email_enabled?: boolean
+          system_push_enabled?: boolean
+          system_sms_enabled?: boolean
           updated_at?: string
           user_id: string
+          voucher_email_enabled?: boolean
+          voucher_push_enabled?: boolean
+          voucher_sms_enabled?: boolean
+          welcome_email_enabled?: boolean
         }
         Update: {
           approval_email_enabled?: boolean
+          approval_push_enabled?: boolean
+          approval_sms_enabled?: boolean
           created_at?: string
+          deal_status_email_enabled?: boolean
+          deal_status_push_enabled?: boolean
+          deal_status_sms_enabled?: boolean
+          deposit_email_enabled?: boolean
+          deposit_push_enabled?: boolean
+          deposit_sms_enabled?: boolean
           email_notifications_enabled?: boolean
           new_lead_email_enabled?: boolean
+          new_lead_push_enabled?: boolean
+          new_lead_sms_enabled?: boolean
+          new_offer_email_enabled?: boolean
+          new_offer_push_enabled?: boolean
+          new_offer_sms_enabled?: boolean
+          push_notifications_enabled?: boolean
+          sms_notifications_enabled?: boolean
           system_email_enabled?: boolean
+          system_push_enabled?: boolean
+          system_sms_enabled?: boolean
           updated_at?: string
           user_id?: string
+          voucher_email_enabled?: boolean
+          voucher_push_enabled?: boolean
+          voucher_sms_enabled?: boolean
+          welcome_email_enabled?: boolean
         }
         Relationships: []
       }
