@@ -186,6 +186,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
       void hydrate(session.user.id, session.user.email ?? "");
+      // Register push token (native only, safe no-op on web).
+      void import("@/lib/pushNotifications").then((m) =>
+        m.registerPushNotifications(session.user.id)
+      ).catch(() => { /* ignore */ });
     });
     return () => { cancelled = true; sub.subscription.unsubscribe(); };
   }, []);
