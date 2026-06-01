@@ -98,15 +98,35 @@ Deno.serve(async (req) => {
       .eq("user_id", u.user.id).eq("role", "admin")
       .maybeSingle().then((r) => !!r.data);
 
-    async function prefAllows(userId: string | null, kind: "approval" | "lead"): Promise<boolean> {
+    type PrefKind = "approval" | "lead" | "deposit" | "new_offer" | "voucher" | "deal_status" | "system" | "welcome";
+    const PREF_COL: Record<PrefKind, string> = {
+      approval: "approval_email_enabled",
+      lead: "new_lead_email_enabled",
+      deposit: "deposit_email_enabled",
+      new_offer: "new_offer_email_enabled",
+      voucher: "voucher_email_enabled",
+      deal_status: "deal_status_email_enabled",
+      system: "system_email_enabled",
+      welcome: "welcome_email_enabled",
+    };
+    async function prefAllows(userId: string | null, kind: PrefKind): Promise<boolean> {
       if (!userId) return true;
+      const col = PREF_COL[kind];
       const { data } = await admin
         .from("notification_settings")
-        .select("email_notifications_enabled, approval_email_enabled, new_lead_email_enabled")
+        .select(`email_notifications_enabled, ${col}`)
         .eq("user_id", userId).maybeSingle();
       if (!data) return true;
-      if (!data.email_notifications_enabled) return false;
-      return kind === "approval" ? data.approval_email_enabled : data.new_lead_email_enabled;
+      // deno-lint-ignore no-explicit-any
+      const d = data as any;
+      if (!d.email_notifications_enabled) return false;
+      return d[col] !== false;
+    }
+
+    async function getUserEmail(userId: string): Promise<{ email: string | null; name: string }> {
+      const { data: prof } = await admin.from("profiles")
+        .select("email, full_name").eq("id", userId).maybeSingle();
+      return { email: prof?.email ?? null, name: prof?.full_name ?? "" };
     }
 
     if (body.type === "supplier_approved") {
