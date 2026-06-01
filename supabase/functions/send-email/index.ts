@@ -16,6 +16,12 @@ type Payload =
   | { type: "supplier_approved"; supplier_id: string }
   | { type: "resident_approved"; user_id: string }
   | { type: "new_lead"; interest_id: string }
+  | { type: "deposit_confirmed"; user_id: string; amount?: number; deal_title?: string }
+  | { type: "new_offer"; user_id: string; deal_title: string; supplier_name?: string }
+  | { type: "voucher_created"; user_id: string; voucher_code: string; deal_title?: string }
+  | { type: "deal_status_changed"; user_id: string; deal_title: string; status: string }
+  | { type: "welcome"; user_id: string }
+  | { type: "admin_notification"; subject: string; message: string }
   | { type: "test"; to: string };
 
 function escapeHtml(value: unknown): string {
