@@ -12,6 +12,7 @@ import { preloadRoleRoutes } from "@/lib/routePreload";
 import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
 
+const Welcome = lazy(() => import("./pages/Welcome"));
 const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -121,7 +122,8 @@ const App = () => (
             <RouteTransition>
               <Suspense fallback={<SuspenseFallback />}>
                 <Routes>
-                  <Route path="/" element={<Landing />} />
+                  <Route path="/" element={<Welcome />} />
+                  <Route path="/about" element={<Landing />} />
                   <Route path="/index" element={<Navigate to="/" replace />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
