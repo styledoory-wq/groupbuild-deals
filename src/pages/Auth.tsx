@@ -215,7 +215,7 @@ export default function Auth() {
   return (
     <div
       dir="rtl"
-      className="min-h-[100dvh] h-[100dvh] w-full flex justify-center text-white relative overflow-hidden"
+      className="auth-screen min-h-[100dvh] h-[100dvh] w-full flex justify-center text-white relative overflow-hidden"
       style={{ background: "#071C3B" }}
     >
       {/* Edge-to-edge background image (extends behind status bar) with layered overlays */}
