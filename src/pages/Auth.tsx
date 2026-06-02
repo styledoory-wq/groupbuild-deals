@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Building2, Briefcase, Mail, Sparkles, ArrowRight, ArrowLeft, User as UserIcon, MapPin, Lock } from "lucide-react";
+import { Building2, Briefcase, Mail, Sparkles, ArrowRight, ArrowLeft, User as UserIcon, MapPin, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
+
 import { useApp } from "@/store/AppStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +27,8 @@ export default function Auth() {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
 
   // Form fields
   const [email, setEmail] = useState("");
@@ -197,211 +201,277 @@ export default function Auth() {
     { id: "supplier", label: "ספק", icon: Briefcase, desc: "צרו הצעות" },
   ];
 
+  // Shared pill input class — Blink-style outlined, transparent on navy
+  const pillInput =
+    "h-14 w-full rounded-full bg-transparent border-[1.5px] border-white/25 px-6 text-[15px] text-white placeholder:text-white/55 text-center focus:border-[#C9A961] focus:shadow-[0_0_0_3px_rgba(201,169,97,0.18)] focus:outline-none focus:ring-0 transition-all duration-200";
+
   return (
     <div
       dir="rtl"
       className="min-h-screen min-h-[100dvh] flex justify-center text-white relative overflow-hidden"
       style={{ background: "linear-gradient(180deg, #0A1F3D 0%, #0D2748 55%, #07172E 100%)" }}
     >
-      {/* Ambient gold orbs — Blink/Welcome style */}
+      {/* Ambient gold orbs */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 -right-24 h-80 w-80 rounded-full bg-[#C9A961]/15 blur-3xl" />
+        <div className="absolute -top-32 -right-24 h-80 w-80 rounded-full bg-[#C9A961]/12 blur-3xl" />
         <div className="absolute top-1/3 -left-24 h-96 w-96 rounded-full bg-[#C9A961]/8 blur-3xl" />
         <div className="absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-[#0A1F3D]/40 blur-3xl" />
       </div>
 
-      <div className="relative z-10 w-full max-w-screen-sm flex flex-col safe-top">
-        <div className="px-6 pt-12 pb-8 relative">
-          <div className="relative animate-fade-up">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 mb-6 backdrop-blur">
-              <Sparkles className="h-3.5 w-3.5 text-[#C9A961]" />
-              <span className="text-xs font-medium">רכש קבוצתי לדיירי בנייה חדשה</span>
-            </div>
-
-            <h1 className="text-[clamp(2rem,7vw,2.75rem)] leading-[1.05] font-extrabold tracking-tight text-white mb-3">
-              ברוכים הבאים
-              <br />
-              ל־<span className="bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#E8C97D] bg-clip-text text-transparent">GroupBuild</span>
-            </h1>
-            <div className="h-[2px] w-16 rounded-full bg-gradient-to-l from-transparent via-[#C9A961] to-transparent mb-4" />
-            <p className="text-white/70 text-sm leading-relaxed max-w-sm">
-              {mode === "signin"
-                ? "התחברו כדי להמשיך להצטרף לעסקאות הקבוצתיות שלכם."
-                : "פתחו חשבון חדש בכמה צעדים קצרים."}
-            </p>
-          </div>
+      <div
+        className="relative z-10 w-full max-w-screen-sm flex flex-col px-6"
+        style={{
+          paddingTop: "max(env(safe-area-inset-top), 28px)",
+          paddingBottom: "max(env(safe-area-inset-bottom), 20px)",
+        }}
+      >
+        {/* Brand + tagline */}
+        <div className="flex flex-col items-center text-center pt-6 pb-2 animate-fade-up">
+          <BrandLogo variant="light" size="xl" className="mb-8" />
+          <h1 className="text-[clamp(1.5rem,5.5vw,1.875rem)] font-semibold tracking-tight text-white">
+            {mode === "signin" ? "טוב לראות אותך שוב" : "ברוכים הבאים"}
+          </h1>
+          <div className="mt-3 h-[2px] w-12 rounded-full bg-gradient-to-l from-transparent via-[#C9A961] to-transparent" />
+          <p className="mt-3 text-white/65 text-sm leading-relaxed max-w-xs">
+            {mode === "signin"
+              ? "התחברו כדי להמשיך לעסקאות הקבוצתיות שלכם"
+              : "פתחו חשבון חדש בכמה צעדים קצרים"}
+          </p>
         </div>
 
-        <div className="flex-1 bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-8 -mt-2 shadow-[0_-12px_40px_-12px_rgba(0,0,0,0.3)]">
-          {/* Tabs */}
-          <div className="flex gap-2 p-1 bg-muted rounded-2xl mb-6">
-            {(["signin", "signup"] as const).map((m) => (
-              <button
-                type="button"
-                key={m}
-                onClick={() => setMode(m)}
-                className={cn(
-                  "flex-1 py-2 rounded-xl text-sm font-bold transition-smooth",
-                  mode === m ? "bg-card shadow-soft text-primary" : "text-muted-foreground"
-                )}
-              >
-                {m === "signin" ? "התחברות" : "הרשמה"}
-              </button>
-            ))}
+        {authError && (
+          <div className="mt-6 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-3 text-sm text-red-100 leading-relaxed">
+            {authError}
           </div>
+        )}
 
-          {authError && (
-            <div className="mb-4 rounded-2xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive leading-relaxed">
-              {authError}
-            </div>
-          )}
-
-
+        {/* Forms */}
+        <div className="flex-1 flex flex-col justify-center py-8">
           {mode === "signin" ? (
             <form onSubmit={handleSignIn} className="space-y-4 animate-fade-up">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5 gb-gold-text" /> אימייל
-                </Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.co.il" dir="ltr" required
-                  className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="מייל"
+                dir="rtl"
+                required
+                className={pillInput}
+              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="סיסמה"
+                  required
+                  minLength={6}
+                  dir="rtl"
+                  className={cn(pillInput, "pl-14")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold flex items-center gap-1.5">
-                  <Lock className="h-3.5 w-3.5 gb-gold-text" /> סיסמה
-                </Label>
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                  required minLength={6} dir="ltr" placeholder="הזינו את הסיסמה"
-                  className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
-              </div>
-              <Button type="submit" disabled={loading}
-                className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#E8C97D] text-[#0A1F3D] font-bold text-base shadow-[0_12px_40px_-12px_rgba(201,169,97,0.7)] hover:brightness-105 flex items-center justify-center gap-2">
-                {loading ? "מתחבר…" : "התחברות"}
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
 
-              <button type="button" onClick={handleForgotPassword} disabled={loading}
-                className="w-full text-center text-xs text-muted-foreground hover:text-primary underline-offset-4 hover:underline transition-smooth">
-                שכחתי סיסמה
-              </button>
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={loading}
+                  className="text-sm text-white/75 hover:text-[#C9A961] transition-colors"
+                >
+                  שכחתי את הסיסמה
+                </button>
+              </div>
             </form>
           ) : (
-            <form onSubmit={handleSignUp} className="space-y-4 animate-fade-up">
-              <div>
-                <h2 className="text-sm font-bold mb-2">בחרו את התפקיד שלכם</h2>
-                <div className="grid grid-cols-2 gap-2">
-                  {roles.map(({ id, label, icon: Icon, desc }) => (
-                    <button type="button" key={id} onClick={() => setRole(id)}
+            <form onSubmit={handleSignUp} className="space-y-3.5 animate-fade-up">
+              {/* Role selector */}
+              <div className="grid grid-cols-2 gap-2 mb-1">
+                {roles.map(({ id, label, icon: Icon, desc }) => (
+                  <button
+                    type="button"
+                    key={id}
+                    onClick={() => setRole(id)}
+                    className={cn(
+                      "p-3 rounded-2xl border-[1.5px] text-center transition-colors backdrop-blur",
+                      role === id
+                        ? "border-[#C9A961] bg-[#C9A961]/10"
+                        : "border-white/20 bg-white/5 hover:bg-white/10"
+                    )}
+                  >
+                    <div
                       className={cn(
-                        "p-3 rounded-2xl border-2 transition-smooth text-center",
-                        role === id ? "border-gold bg-gradient-to-b from-gold/10 to-transparent" : "border-border bg-card"
-                      )}>
-                      <div className={cn(
-                        "h-10 w-10 mx-auto rounded-xl flex items-center justify-center mb-2",
-                        role === id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                      )}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div className="text-sm font-bold">{label}</div>
-                      <div className="text-fs-xs text-muted-foreground mt-0.5">{desc}</div>
-                    </button>
-                  ))}
-                </div>
+                        "h-9 w-9 mx-auto rounded-xl flex items-center justify-center mb-1.5",
+                        role === id ? "bg-[#C9A961] text-[#0A1F3D]" : "bg-white/10 text-white/70"
+                      )}
+                    >
+                      <Icon className="h-4.5 w-4.5" />
+                    </div>
+                    <div className="text-sm font-bold text-white">{label}</div>
+                    <div className="text-[11px] text-white/60 mt-0.5">{desc}</div>
+                  </button>
+                ))}
               </div>
 
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold flex items-center gap-1.5">
-                  <UserIcon className="h-3.5 w-3.5 gb-gold-text" /> שם מלא
-                </Label>
-                <Input value={fullName} onChange={(e) => setFullName(e.target.value)}
-                  placeholder="ישראל ישראלי" required maxLength={60}
-                  className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
-              </div>
+              <Input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="שם מלא"
+                required
+                maxLength={60}
+                className={pillInput}
+              />
 
               {role === "resident" && (
                 <>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-bold flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 gb-gold-text" /> עיר
-                    </Label>
-                    <Input value={city} onChange={(e) => setCity(e.target.value)}
-                      placeholder="תל אביב" required maxLength={40}
-                      className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-bold flex items-center gap-1.5">
-                      <Building2 className="h-3.5 w-3.5 gb-gold-text" /> פרויקט (אופציונלי)
-                    </Label>
-                    <select value={projectId} onChange={(e) => setProjectId(e.target.value)}
-                      className="flex h-12 w-full rounded-xl border-[1.5px] border-[#e2e8f0] bg-white px-4 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none transition-all duration-200">
-                      <option value="">בחרו פרויקט</option>
-                      {projects.map((p) => (
-                        <option key={p.id} value={p.id}>{p.name} — {p.city}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <Input
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="עיר"
+                    required
+                    maxLength={40}
+                    className={pillInput}
+                  />
+                  <select
+                    value={projectId}
+                    onChange={(e) => setProjectId(e.target.value)}
+                    className={cn(pillInput, "appearance-none")}
+                    style={{ color: projectId ? "#fff" : "rgba(255,255,255,0.55)" }}
+                  >
+                    <option value="" style={{ color: "#0A1F3D" }}>פרויקט (אופציונלי)</option>
+                    {projects.map((p) => (
+                      <option key={p.id} value={p.id} style={{ color: "#0A1F3D" }}>
+                        {p.name} — {p.city}
+                      </option>
+                    ))}
+                  </select>
                 </>
               )}
 
               {role === "supplier" && (
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold flex items-center gap-1.5">
-                    <Briefcase className="h-3.5 w-3.5 gb-gold-text" /> שם העסק
-                  </Label>
-                  <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="לדוגמה: מטבחי רויאל" required maxLength={80}
-                    className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
-                </div>
+                <Input
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  placeholder="שם העסק"
+                  required
+                  maxLength={80}
+                  className={pillInput}
+                />
               )}
 
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5 gb-gold-text" /> אימייל
-                </Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.co.il" dir="ltr" required
-                  className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="מייל"
+                dir="rtl"
+                required
+                className={pillInput}
+              />
+
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="סיסמה (לפחות 6 תווים)"
+                  required
+                  minLength={6}
+                  dir="rtl"
+                  className={cn(pillInput, "pl-14")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
 
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold flex items-center gap-1.5">
-                  <Lock className="h-3.5 w-3.5 gb-gold-text" /> סיסמה
-                </Label>
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                  required minLength={6} dir="ltr" placeholder="לפחות 6 תווים"
-                  className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
-              </div>
-
-              <label className="flex items-start gap-2 text-xs cursor-pointer pt-1">
+              <label className="flex items-start gap-2 text-xs text-white/75 cursor-pointer pt-1 px-1">
                 <input
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-primary"
+                  className="mt-0.5 h-4 w-4 accent-[#C9A961]"
                 />
                 <span>
                   קראתי ואני מאשר את{" "}
                   <Link
                     to={role === "supplier" ? "/terms/suppliers" : "/terms/residents"}
                     target="_blank"
-                    className="font-bold gb-gold-text underline-offset-2 hover:underline"
+                    className="font-bold text-[#E8C97D] underline-offset-2 hover:underline"
                   >
                     תנאי השימוש
                   </Link>
                 </span>
               </label>
-
-              <Button type="submit" disabled={loading || !termsAccepted}
-                className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#E8C97D] text-[#0A1F3D] font-bold text-base shadow-[0_12px_40px_-12px_rgba(201,169,97,0.7)] hover:brightness-105 mt-2">
-                {loading ? "נרשם…" : "צרו חשבון"}
-              </Button>
-
             </form>
           )}
+        </div>
 
+        {/* Primary CTA — bottom pill */}
+        <div className="space-y-4">
+          {mode === "signin" ? (
+            <Button
+              type="button"
+              onClick={(e) => handleSignIn(e as unknown as React.FormEvent)}
+              disabled={loading}
+              className="w-full h-14 rounded-full bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.75)] hover:brightness-105"
+            >
+              {loading ? "מתחבר…" : "כניסה"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={(e) => handleSignUp(e as unknown as React.FormEvent)}
+              disabled={loading || !termsAccepted}
+              className="w-full h-14 rounded-full bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.75)] hover:brightness-105 disabled:opacity-60"
+            >
+              {loading ? "נרשם…" : "צרו חשבון"}
+            </Button>
+          )}
+
+          {/* Footer links */}
+          <div className="flex items-center justify-center gap-4 text-sm text-white/75">
+            <button
+              type="button"
+              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              className="flex items-center gap-1.5 hover:text-[#C9A961] transition-colors"
+            >
+              {mode === "signin" ? (
+                <>
+                  <UserIcon className="h-4 w-4" />
+                  הרשמה
+                </>
+              ) : (
+                <>
+                  <ArrowRight className="h-4 w-4" />
+                  כבר יש לי חשבון
+                </>
+              )}
+            </button>
+            <span className="text-white/25">|</span>
+            <Link
+              to="/about"
+              className="flex items-center gap-1.5 hover:text-[#C9A961] transition-colors"
+            >
+              <HelpCircle className="h-4 w-4" />
+              עזרה
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
