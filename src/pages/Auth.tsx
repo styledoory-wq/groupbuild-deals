@@ -201,49 +201,52 @@ export default function Auth() {
     { id: "supplier", label: "ספק", icon: Briefcase, desc: "צרו הצעות" },
   ];
 
-  // Distinctive input style — rounded-2xl, right-aligned RTL, leading icon on the right,
-  // subtle gold focus accent. Deliberately NOT a Blink-style pill with centered placeholder.
+  // Higher-contrast glassmorphism so inputs read clearly over the photo.
   const fieldWrap = "relative";
   const fieldInput =
-    "h-14 w-full rounded-2xl bg-white/[0.04] border border-white/15 pr-12 pl-4 text-[15px] text-white placeholder:text-white/45 text-right focus:bg-white/[0.07] focus:border-[#C9A961]/70 focus:shadow-[0_0_0_3px_rgba(201,169,97,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
+    "h-14 w-full rounded-2xl bg-white/[0.10] backdrop-blur-md border border-white/25 pr-12 pl-4 text-[15px] text-white placeholder:text-white/70 text-right shadow-[0_4px_18px_-8px_rgba(0,0,0,0.45)] focus:bg-white/[0.14] focus:border-[#D4AF37] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.18)] focus:outline-none focus:ring-0 transition-all duration-200";
 
   return (
     <div
       dir="rtl"
-      className="min-h-screen min-h-[100dvh] flex justify-center text-white relative overflow-hidden"
+      className="min-h-[100dvh] h-[100dvh] w-full flex justify-center text-white relative overflow-hidden"
       style={{ background: "#071C3B" }}
     >
-      {/* Background image with layered overlays for human visibility */}
+      {/* Edge-to-edge background image (extends behind status bar) with layered overlays */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <img
           src={authBgAsset.url}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover object-center scale-105"
-          style={{ filter: "saturate(1.08) brightness(1.02) contrast(1.02)", opacity: 1 }}
+          className="absolute inset-0 w-full h-full object-cover scale-[1.04]"
+          style={{
+            objectPosition: "62% 28%",
+            filter: "saturate(1.1) brightness(1.06) contrast(1.02)",
+            opacity: 1,
+          }}
           draggable={false}
         />
-        {/* Local warm spotlight behind people — lifts faces & upper bodies */}
+        {/* Warm local spotlight on the people — lifts faces */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 55% 40% at 68% 48%, rgba(255,225,170,0.18) 0%, rgba(255,210,150,0.10) 35%, transparent 65%)",
+              "radial-gradient(ellipse 58% 32% at 62% 38%, rgba(255,228,178,0.22) 0%, rgba(255,212,150,0.10) 40%, transparent 70%)",
           }}
         />
-        {/* Brand navy mood — top only, light touch */}
+        {/* Light navy mood at top — lets sky + building stay vivid */}
         <div
-          className="absolute inset-x-0 top-0 h-1/2"
+          className="absolute inset-x-0 top-0 h-[38%]"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(7,28,59,0.55) 0%, rgba(7,28,59,0.20) 70%, transparent 100%)",
+              "linear-gradient(to bottom, rgba(7,28,59,0.55) 0%, rgba(7,28,59,0.15) 70%, transparent 100%)",
           }}
         />
-        {/* Form readability — strong navy gradient only at the bottom */}
+        {/* Calm dark zone behind the form so inputs read clearly */}
         <div
-          className="absolute inset-x-0 bottom-0 h-[55%]"
+          className="absolute inset-x-0 bottom-0 h-[62%]"
           style={{
             background:
-              "linear-gradient(to bottom, transparent 0%, rgba(7,23,46,0.55) 35%, rgba(7,23,46,0.92) 75%, #07172E 100%)",
+              "linear-gradient(to bottom, transparent 0%, rgba(7,23,46,0.45) 25%, rgba(7,23,46,0.88) 60%, #07172E 90%)",
           }}
         />
         {/* Subtle gold ambient */}
@@ -254,21 +257,21 @@ export default function Auth() {
       <div
         className="relative z-10 w-full max-w-screen-sm flex flex-col px-6"
         style={{
-          paddingTop: "max(env(safe-area-inset-top), 18px)",
-          paddingBottom: "max(env(safe-area-inset-bottom), 16px)",
+          paddingTop: "max(env(safe-area-inset-top), 12px)",
+          paddingBottom: "max(env(safe-area-inset-bottom), 14px)",
         }}
       >
-        {/* Brand header — compact, centered, story-first */}
-        <div className="pt-2 pb-1 animate-fade-up flex flex-col items-center text-center">
-          <BrandLogo variant="light" size="lg" className="opacity-95" />
-          <h1 className="mt-4 text-[clamp(1.5rem,5.5vw,1.875rem)] font-extrabold leading-tight tracking-tight">
+        {/* Brand header — premium, story-first */}
+        <div className="pt-1 pb-1 animate-fade-up flex flex-col items-center text-center">
+          <BrandLogo variant="light" size="xl" className="opacity-100 drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)]" />
+          <h1 className="mt-5 text-[clamp(1.6rem,5.8vw,2rem)] font-extrabold leading-tight tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]">
             {mode === "signin" ? "טוב לראות אותך שוב" : "בואו נצא לדרך"}
           </h1>
-          <div className="mt-2 flex items-center gap-1.5">
-            <div className="h-[2px] w-10 rounded-full bg-[#D4AF37]" />
+          <div className="mt-2.5 flex items-center gap-1.5">
+            <div className="h-[2px] w-12 rounded-full bg-[#D4AF37]" />
             <div className="h-[2px] w-2 rounded-full bg-[#D4AF37]/40" />
           </div>
-          <p className="mt-2.5 text-white/70 text-[13px] leading-snug max-w-[20rem]">
+          <p className="mt-2.5 text-white/85 text-[13px] leading-snug max-w-[20rem] drop-shadow-[0_1px_6px_rgba(0,0,0,0.5)]">
             {mode === "signin"
               ? "התחברו כדי להמשיך לעסקאות הקבוצתיות שלכם"
               : "פתחו חשבון וחסכו עם השכנים על הבית החדש"}
