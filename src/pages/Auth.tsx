@@ -213,21 +213,37 @@ export default function Auth() {
       className="min-h-screen min-h-[100dvh] flex justify-center text-white relative overflow-hidden"
       style={{ background: "#071C3B" }}
     >
-      {/* Background image — secondary, heavily darkened & blurred */}
+      {/* Background image with layered overlays for human visibility */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <img
           src={authBgAsset.url}
           alt=""
           className="absolute inset-0 w-full h-full object-cover object-center scale-105"
-          style={{ filter: "saturate(1.05) brightness(0.95)", opacity: 1 }}
+          style={{ filter: "saturate(1.08) brightness(1.02) contrast(1.02)", opacity: 1 }}
           draggable={false}
         />
-        {/* Navy overlay — keeps the photo readable behind UI without hiding it */}
+        {/* Local warm spotlight behind people — lifts faces & upper bodies */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(7,28,59,0.55) 0%, rgba(8,27,56,0.65) 55%, rgba(7,23,46,0.88) 88%, #07172E 100%)",
+              "radial-gradient(ellipse 55% 40% at 68% 48%, rgba(255,225,170,0.18) 0%, rgba(255,210,150,0.10) 35%, transparent 65%)",
+          }}
+        />
+        {/* Brand navy mood — top only, light touch */}
+        <div
+          className="absolute inset-x-0 top-0 h-1/2"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(7,28,59,0.55) 0%, rgba(7,28,59,0.20) 70%, transparent 100%)",
+          }}
+        />
+        {/* Form readability — strong navy gradient only at the bottom */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-[55%]"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 0%, rgba(7,23,46,0.55) 35%, rgba(7,23,46,0.92) 75%, #07172E 100%)",
           }}
         />
         {/* Subtle gold ambient */}
