@@ -334,36 +334,44 @@ export default function Auth() {
               </div>
             </form>
           ) : (
-            <form onSubmit={handleSignUp} className="space-y-3 animate-fade-up">
-              {/* Role selector */}
-              <div className="grid grid-cols-2 gap-2 mb-1">
-                {roles.map(({ id, label, icon: Icon, desc }) => (
-                  <button
-                    type="button"
-                    key={id}
-                    onClick={() => setRole(id)}
-                    className={cn(
-                      "p-3 rounded-2xl border text-right transition-colors backdrop-blur flex items-center gap-3",
-                      role === id
-                        ? "border-[#C9A961] bg-[#C9A961]/10"
-                        : "border-white/15 bg-white/5 hover:bg-white/10"
-                    )}
-                  >
-                    <div
+            <form onSubmit={handleSignUp} className="space-y-3.5 animate-fade-up">
+              {/* Account type selector with explicit title */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 px-1">
+                  <span className="text-[12px] font-semibold tracking-wide text-[#E8C97D] uppercase">בחר סוג חשבון</span>
+                  <div className="flex-1 h-px bg-gradient-to-l from-transparent via-white/15 to-transparent" />
+                </div>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {roles.map(({ id, label, icon: Icon, desc }) => (
+                    <button
+                      type="button"
+                      key={id}
+                      onClick={() => setRole(id)}
                       className={cn(
-                        "h-9 w-9 rounded-xl flex items-center justify-center shrink-0",
-                        role === id ? "bg-[#C9A961] text-[#0A1F3D]" : "bg-white/10 text-white/70"
+                        "p-3 rounded-2xl border text-right transition-all backdrop-blur-md flex items-center gap-3",
+                        role === id
+                          ? "border-[#D4AF37] bg-[#D4AF37]/15 shadow-[0_0_0_2px_rgba(212,175,55,0.18),0_8px_24px_-12px_rgba(212,175,55,0.6)]"
+                          : "border-white/20 bg-white/[0.08] hover:bg-white/[0.12]"
                       )}
                     >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-bold text-white leading-tight">{label}</div>
-                      <div className="text-[11px] text-white/55 leading-tight mt-0.5">{desc}</div>
-                    </div>
-                  </button>
-                ))}
+                      <div
+                        className={cn(
+                          "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                          role === id ? "bg-[#D4AF37] text-[#07172E]" : "bg-white/10 text-white/80"
+                        )}
+                      >
+                        <Icon className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-bold text-white leading-tight">{label}</div>
+                        <div className="text-[11px] text-white/65 leading-tight mt-0.5">{desc}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <div className="h-px bg-gradient-to-l from-transparent via-white/10 to-transparent mt-1" />
               </div>
+
 
               <div className={fieldWrap}>
                 <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
