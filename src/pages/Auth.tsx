@@ -276,10 +276,11 @@ export default function Auth() {
                   className="h-12 bg-white border-[1.5px] border-[#e2e8f0] rounded-xl px-4 py-3.5 text-sm focus:border-[#1e3a5f] focus:shadow-[0_0_0_3px_rgba(30,58,95,0.1)] focus:outline-none focus:ring-0 transition-all duration-200" />
               </div>
               <Button type="submit" disabled={loading}
-                className="w-full h-12 rounded-2xl font-bold flex items-center justify-center gap-2">
+                className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#E8C97D] text-[#0A1F3D] font-bold text-base shadow-[0_12px_40px_-12px_rgba(201,169,97,0.7)] hover:brightness-105 flex items-center justify-center gap-2">
                 {loading ? "מתחבר…" : "התחברות"}
                 <ArrowLeft className="h-4 w-4" />
               </Button>
+
               <button type="button" onClick={handleForgotPassword} disabled={loading}
                 className="w-full text-center text-xs text-muted-foreground hover:text-primary underline-offset-4 hover:underline transition-smooth">
                 שכחתי סיסמה
