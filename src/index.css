@@ -127,6 +127,15 @@
     pointer-events: none;
   }
 
+  body.auth-fullscreen::before {
+    display: none;
+  }
+
+  body.auth-fullscreen,
+  body.auth-fullscreen #root {
+    background: #071C3B;
+  }
+
   h1, h2, h3, h4, h5 {
     @apply font-bold tracking-tight;
     letter-spacing: -0.015em;
