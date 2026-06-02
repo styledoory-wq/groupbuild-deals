@@ -127,8 +127,12 @@
     pointer-events: none;
   }
 
-  body.auth-fullscreen::before {
+  html:has(body.auth-fullscreen)::before,
+  body.auth-fullscreen::before,
+  #root:has(.auth-screen)::before,
+  .auth-screen::before {
     display: none;
+    content: none;
   }
 
   body.auth-fullscreen,
