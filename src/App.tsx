@@ -81,7 +81,17 @@ const queryClient = new QueryClient({
 const adminRoute = (el: React.ReactNode) => <RequireAdmin>{el}</RequireAdmin>;
 
 const SuspenseFallback = () => (
-  <div style={{ minHeight: "100dvh", background: "#F4F6F9" }} />
+  <div
+    role="status"
+    aria-label="טוען"
+    className="flex items-center justify-center"
+    style={{ minHeight: "100dvh", background: "#F4F6F9" }}
+  >
+    <div
+      className="h-8 w-8 rounded-full border-2 animate-spin"
+      style={{ borderColor: "#0A1F3D33", borderTopColor: "#C9A961" }}
+    />
+  </div>
 );
 
 const PreloadImportantRoutes = () => {
