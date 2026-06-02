@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Briefcase, Mail, ArrowRight, ArrowLeft, User as UserIcon, MapPin, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -38,6 +38,12 @@ export default function Auth() {
   const [businessName, setBusinessName] = useState("");
   const [projectId, setProjectId] = useState<string>("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+
+
+  useLayoutEffect(() => {
+    document.body.classList.add("auth-fullscreen");
+    return () => document.body.classList.remove("auth-fullscreen");
+  }, []);
 
 
   // If already logged in → redirect by role
@@ -209,7 +215,7 @@ export default function Auth() {
   return (
     <div
       dir="rtl"
-      className="min-h-[100dvh] h-[100dvh] w-full flex justify-center text-white relative overflow-hidden"
+      className="auth-screen min-h-[100dvh] h-[100dvh] w-full flex justify-center text-white relative overflow-hidden"
       style={{ background: "#071C3B" }}
     >
       {/* Edge-to-edge background image (extends behind status bar) with layered overlays */}
@@ -217,9 +223,9 @@ export default function Auth() {
         <img
           src={authBgAsset.url}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover scale-[1.04]"
+          className="absolute inset-0 w-full h-full object-cover"
           style={{
-            objectPosition: "62% 28%",
+            objectPosition: "center top",
             filter: "saturate(1.1) brightness(1.06) contrast(1.02)",
             opacity: 1,
           }}
@@ -257,7 +263,7 @@ export default function Auth() {
       <div
         className="relative z-10 w-full max-w-screen-sm flex flex-col px-6"
         style={{
-          paddingTop: "max(env(safe-area-inset-top), 12px)",
+          paddingTop: "12px",
           paddingBottom: "max(env(safe-area-inset-bottom), 14px)",
         }}
       >
