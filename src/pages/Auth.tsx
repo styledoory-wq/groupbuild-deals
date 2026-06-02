@@ -27,6 +27,8 @@ export default function Auth() {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
 
   // Form fields
   const [email, setEmail] = useState("");
