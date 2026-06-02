@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogIn, UserPlus, Info, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BrandLogo } from "@/components/BrandLogo";
+
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/auth";
 
