@@ -198,23 +198,33 @@ export default function Auth() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-hero text-primary-foreground flex justify-center">
-      <div className="w-full max-w-screen-sm flex flex-col safe-top">
-        <div className="px-6 pt-12 pb-8 relative overflow-hidden">
-          <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
-          <div className="absolute -bottom-10 -right-10 h-48 w-48 rounded-full bg-gold/5 blur-2xl" />
+    <div
+      dir="rtl"
+      className="min-h-screen min-h-[100dvh] flex justify-center text-white relative overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #0A1F3D 0%, #0D2748 55%, #07172E 100%)" }}
+    >
+      {/* Ambient gold orbs — Blink/Welcome style */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-32 -right-24 h-80 w-80 rounded-full bg-[#C9A961]/15 blur-3xl" />
+        <div className="absolute top-1/3 -left-24 h-96 w-96 rounded-full bg-[#C9A961]/8 blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-[#0A1F3D]/40 blur-3xl" />
+      </div>
 
+      <div className="relative z-10 w-full max-w-screen-sm flex flex-col safe-top">
+        <div className="px-6 pt-12 pb-8 relative">
           <div className="relative animate-fade-up">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 mb-6">
-              <Sparkles className="h-3.5 w-3.5 text-gold" />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 mb-6 backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5 text-[#C9A961]" />
               <span className="text-xs font-medium">רכש קבוצתי לדיירי בנייה חדשה</span>
             </div>
 
-            <h1 className="text-4xl font-extrabold leading-tight mb-3 text-white">
+            <h1 className="text-[clamp(2rem,7vw,2.75rem)] leading-[1.05] font-extrabold tracking-tight text-white mb-3">
               ברוכים הבאים
+              <br />
+              ל־<span className="bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#E8C97D] bg-clip-text text-transparent">GroupBuild</span>
             </h1>
-            <div className="gb-divider-gold mb-4" />
-            <p className="text-primary-foreground/70 text-sm leading-relaxed max-w-sm">
+            <div className="h-[2px] w-16 rounded-full bg-gradient-to-l from-transparent via-[#C9A961] to-transparent mb-4" />
+            <p className="text-white/70 text-sm leading-relaxed max-w-sm">
               {mode === "signin"
                 ? "התחברו כדי להמשיך להצטרף לעסקאות הקבוצתיות שלכם."
                 : "פתחו חשבון חדש בכמה צעדים קצרים."}
@@ -222,7 +232,7 @@ export default function Auth() {
           </div>
         </div>
 
-        <div className="flex-1 bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-8 -mt-2">
+        <div className="flex-1 bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-8 -mt-2 shadow-[0_-12px_40px_-12px_rgba(0,0,0,0.3)]">
           {/* Tabs */}
           <div className="flex gap-2 p-1 bg-muted rounded-2xl mb-6">
             {(["signin", "signup"] as const).map((m) => (
@@ -245,6 +255,7 @@ export default function Auth() {
               {authError}
             </div>
           )}
+
 
           {mode === "signin" ? (
             <form onSubmit={handleSignIn} className="space-y-4 animate-fade-up">
