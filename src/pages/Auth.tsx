@@ -211,65 +211,62 @@ export default function Auth() {
     <div
       dir="rtl"
       className="min-h-screen min-h-[100dvh] flex justify-center text-white relative overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #0A1F3D 0%, #0D2748 55%, #07172E 100%)" }}
+      style={{ background: "#071C3B" }}
     >
-      {/* Ambient gold orbs */}
+      {/* Background image — secondary, heavily darkened & blurred */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 -right-24 h-80 w-80 rounded-full bg-[#C9A961]/12 blur-3xl" />
-        <div className="absolute top-1/3 -left-24 h-96 w-96 rounded-full bg-[#C9A961]/8 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-[#0A1F3D]/40 blur-3xl" />
+        <img
+          src={authBgAsset.url}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover object-top scale-110"
+          style={{ filter: "blur(6px) saturate(0.85) brightness(0.55)", opacity: 0.55 }}
+          draggable={false}
+        />
+        {/* Strong navy overlay to push image back ~30% more */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(7,28,59,0.72) 0%, rgba(8,27,56,0.85) 45%, rgba(7,23,46,0.96) 78%, #07172E 100%)",
+          }}
+        />
+        {/* Subtle gold ambient */}
+        <div className="absolute top-1/3 -left-24 h-80 w-80 rounded-full bg-[#D4AF37]/8 blur-3xl" />
+        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#D4AF37]/6 blur-3xl" />
       </div>
 
       <div
         className="relative z-10 w-full max-w-screen-sm flex flex-col px-6"
         style={{
-          paddingTop: "max(env(safe-area-inset-top), 28px)",
-          paddingBottom: "max(env(safe-area-inset-bottom), 20px)",
+          paddingTop: "max(env(safe-area-inset-top), 18px)",
+          paddingBottom: "max(env(safe-area-inset-bottom), 16px)",
         }}
       >
-        {/* Brand header — right-anchored layout (different from Blink's centered logo) */}
-        <div className="pt-4 pb-2 animate-fade-up">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col items-start">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#C9A961]/12 border border-[#C9A961]/30 text-[10.5px] font-medium text-[#E8C97D] mb-3">
-                <Sparkles className="h-3 w-3" />
-                רכש קבוצתי לבנייה חדשה
-              </span>
-              <h1 className="text-[clamp(1.625rem,6vw,2.125rem)] font-extrabold leading-[1.05] tracking-tight">
-                {mode === "signin" ? (
-                  <>
-                    שמחים<br />לראותכם שוב.
-                  </>
-                ) : (
-                  <>
-                    בואו<br />נצא לדרך.
-                  </>
-                )}
-              </h1>
-              <div className="mt-3 flex items-center gap-2">
-                <div className="h-[3px] w-8 rounded-full bg-[#C9A961]" />
-                <div className="h-[3px] w-3 rounded-full bg-[#C9A961]/40" />
-              </div>
-            </div>
-            <BrandLogo variant="light" size="lg" className="opacity-90 -mt-2" />
+        {/* Brand header — compact, centered, story-first */}
+        <div className="pt-2 pb-1 animate-fade-up flex flex-col items-center text-center">
+          <BrandLogo variant="light" size="lg" className="opacity-95" />
+          <h1 className="mt-4 text-[clamp(1.5rem,5.5vw,1.875rem)] font-extrabold leading-tight tracking-tight">
+            {mode === "signin" ? "טוב לראות אותך שוב" : "בואו נצא לדרך"}
+          </h1>
+          <div className="mt-2 flex items-center gap-1.5">
+            <div className="h-[2px] w-10 rounded-full bg-[#D4AF37]" />
+            <div className="h-[2px] w-2 rounded-full bg-[#D4AF37]/40" />
           </div>
-          <p className="mt-4 text-white/65 text-sm leading-relaxed max-w-[18rem]">
+          <p className="mt-2.5 text-white/70 text-[13px] leading-snug max-w-[20rem]">
             {mode === "signin"
-              ? "התחברו והמשיכו לעסקאות הקבוצתיות של השכונה שלכם."
-              : "פתחו חשבון בכמה צעדים — ותתחילו לחסוך עם השכנים."}
+              ? "התחברו כדי להמשיך לעסקאות הקבוצתיות שלכם"
+              : "פתחו חשבון וחסכו עם השכנים על הבית החדש"}
           </p>
         </div>
 
         {authError && (
-          <div className="mt-5 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-3 text-sm text-red-100 leading-relaxed">
+          <div className="mt-3 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-100 leading-relaxed">
             {authError}
           </div>
         )}
 
-
-
         {/* Forms */}
-        <div className="flex-1 flex flex-col justify-center py-6">
+        <div className="flex-1 flex flex-col justify-center py-3">
           {mode === "signin" ? (
             <form onSubmit={handleSignIn} className="space-y-3.5 animate-fade-up">
               <div className={fieldWrap}>
