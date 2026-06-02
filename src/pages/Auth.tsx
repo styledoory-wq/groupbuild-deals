@@ -201,9 +201,11 @@ export default function Auth() {
     { id: "supplier", label: "ספק", icon: Briefcase, desc: "צרו הצעות" },
   ];
 
-  // Shared pill input class — Blink-style outlined, transparent on navy
-  const pillInput =
-    "h-14 w-full rounded-full bg-transparent border-[1.5px] border-white/25 px-6 text-[15px] text-white placeholder:text-white/55 text-center focus:border-[#C9A961] focus:shadow-[0_0_0_3px_rgba(201,169,97,0.18)] focus:outline-none focus:ring-0 transition-all duration-200";
+  // Distinctive input style — rounded-2xl, right-aligned RTL, leading icon on the right,
+  // subtle gold focus accent. Deliberately NOT a Blink-style pill with centered placeholder.
+  const fieldWrap = "relative";
+  const fieldInput =
+    "h-14 w-full rounded-2xl bg-white/[0.04] border border-white/15 pr-12 pl-4 text-[15px] text-white placeholder:text-white/45 text-right focus:bg-white/[0.07] focus:border-[#C9A961]/70 focus:shadow-[0_0_0_3px_rgba(201,169,97,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
 
   return (
     <div
@@ -225,25 +227,46 @@ export default function Auth() {
           paddingBottom: "max(env(safe-area-inset-bottom), 20px)",
         }}
       >
-        {/* Brand + tagline */}
-        <div className="flex flex-col items-center text-center pt-6 pb-2 animate-fade-up">
-          <BrandLogo variant="light" size="xl" className="mb-8" />
-          <h1 className="text-[clamp(1.5rem,5.5vw,1.875rem)] font-semibold tracking-tight text-white">
-            {mode === "signin" ? "טוב לראות אותך שוב" : "ברוכים הבאים"}
-          </h1>
-          <div className="mt-3 h-[2px] w-12 rounded-full bg-gradient-to-l from-transparent via-[#C9A961] to-transparent" />
-          <p className="mt-3 text-white/65 text-sm leading-relaxed max-w-xs">
+        {/* Brand header — right-anchored layout (different from Blink's centered logo) */}
+        <div className="pt-4 pb-2 animate-fade-up">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col items-start">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#C9A961]/12 border border-[#C9A961]/30 text-[10.5px] font-medium text-[#E8C97D] mb-3">
+                <Sparkles className="h-3 w-3" />
+                רכש קבוצתי לבנייה חדשה
+              </span>
+              <h1 className="text-[clamp(1.625rem,6vw,2.125rem)] font-extrabold leading-[1.05] tracking-tight">
+                {mode === "signin" ? (
+                  <>
+                    שמחים<br />לראותכם שוב.
+                  </>
+                ) : (
+                  <>
+                    בואו<br />נצא לדרך.
+                  </>
+                )}
+              </h1>
+              <div className="mt-3 flex items-center gap-2">
+                <div className="h-[3px] w-8 rounded-full bg-[#C9A961]" />
+                <div className="h-[3px] w-3 rounded-full bg-[#C9A961]/40" />
+              </div>
+            </div>
+            <BrandLogo variant="light" size="lg" className="opacity-90 -mt-2" />
+          </div>
+          <p className="mt-4 text-white/65 text-sm leading-relaxed max-w-[18rem]">
             {mode === "signin"
-              ? "התחברו כדי להמשיך לעסקאות הקבוצתיות שלכם"
-              : "פתחו חשבון חדש בכמה צעדים קצרים"}
+              ? "התחברו והמשיכו לעסקאות הקבוצתיות של השכונה שלכם."
+              : "פתחו חשבון בכמה צעדים — ותתחילו לחסוך עם השכנים."}
           </p>
         </div>
 
         {authError && (
-          <div className="mt-6 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-3 text-sm text-red-100 leading-relaxed">
+          <div className="mt-5 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-3 text-sm text-red-100 leading-relaxed">
             {authError}
           </div>
         )}
+
+
 
         {/* Forms */}
         <div className="flex-1 flex flex-col justify-center py-8">
