@@ -201,9 +201,11 @@ export default function Auth() {
     { id: "supplier", label: "ספק", icon: Briefcase, desc: "צרו הצעות" },
   ];
 
-  // Shared pill input class — Blink-style outlined, transparent on navy
-  const pillInput =
-    "h-14 w-full rounded-full bg-transparent border-[1.5px] border-white/25 px-6 text-[15px] text-white placeholder:text-white/55 text-center focus:border-[#C9A961] focus:shadow-[0_0_0_3px_rgba(201,169,97,0.18)] focus:outline-none focus:ring-0 transition-all duration-200";
+  // Distinctive input style — rounded-2xl, right-aligned RTL, leading icon on the right,
+  // subtle gold focus accent. Deliberately NOT a Blink-style pill with centered placeholder.
+  const fieldWrap = "relative";
+  const fieldInput =
+    "h-14 w-full rounded-2xl bg-white/[0.04] border border-white/15 pr-12 pl-4 text-[15px] text-white placeholder:text-white/45 text-right focus:bg-white/[0.07] focus:border-[#C9A961]/70 focus:shadow-[0_0_0_3px_rgba(201,169,97,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
 
   return (
     <div
@@ -225,40 +227,65 @@ export default function Auth() {
           paddingBottom: "max(env(safe-area-inset-bottom), 20px)",
         }}
       >
-        {/* Brand + tagline */}
-        <div className="flex flex-col items-center text-center pt-6 pb-2 animate-fade-up">
-          <BrandLogo variant="light" size="xl" className="mb-8" />
-          <h1 className="text-[clamp(1.5rem,5.5vw,1.875rem)] font-semibold tracking-tight text-white">
-            {mode === "signin" ? "טוב לראות אותך שוב" : "ברוכים הבאים"}
-          </h1>
-          <div className="mt-3 h-[2px] w-12 rounded-full bg-gradient-to-l from-transparent via-[#C9A961] to-transparent" />
-          <p className="mt-3 text-white/65 text-sm leading-relaxed max-w-xs">
+        {/* Brand header — right-anchored layout (different from Blink's centered logo) */}
+        <div className="pt-4 pb-2 animate-fade-up">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col items-start">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#C9A961]/12 border border-[#C9A961]/30 text-[10.5px] font-medium text-[#E8C97D] mb-3">
+                <Sparkles className="h-3 w-3" />
+                רכש קבוצתי לבנייה חדשה
+              </span>
+              <h1 className="text-[clamp(1.625rem,6vw,2.125rem)] font-extrabold leading-[1.05] tracking-tight">
+                {mode === "signin" ? (
+                  <>
+                    שמחים<br />לראותכם שוב.
+                  </>
+                ) : (
+                  <>
+                    בואו<br />נצא לדרך.
+                  </>
+                )}
+              </h1>
+              <div className="mt-3 flex items-center gap-2">
+                <div className="h-[3px] w-8 rounded-full bg-[#C9A961]" />
+                <div className="h-[3px] w-3 rounded-full bg-[#C9A961]/40" />
+              </div>
+            </div>
+            <BrandLogo variant="light" size="lg" className="opacity-90 -mt-2" />
+          </div>
+          <p className="mt-4 text-white/65 text-sm leading-relaxed max-w-[18rem]">
             {mode === "signin"
-              ? "התחברו כדי להמשיך לעסקאות הקבוצתיות שלכם"
-              : "פתחו חשבון חדש בכמה צעדים קצרים"}
+              ? "התחברו והמשיכו לעסקאות הקבוצתיות של השכונה שלכם."
+              : "פתחו חשבון בכמה צעדים — ותתחילו לחסוך עם השכנים."}
           </p>
         </div>
 
         {authError && (
-          <div className="mt-6 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-3 text-sm text-red-100 leading-relaxed">
+          <div className="mt-5 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-3 text-sm text-red-100 leading-relaxed">
             {authError}
           </div>
         )}
 
+
+
         {/* Forms */}
-        <div className="flex-1 flex flex-col justify-center py-8">
+        <div className="flex-1 flex flex-col justify-center py-6">
           {mode === "signin" ? (
-            <form onSubmit={handleSignIn} className="space-y-4 animate-fade-up">
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="מייל"
-                dir="rtl"
-                required
-                className={pillInput}
-              />
-              <div className="relative">
+            <form onSubmit={handleSignIn} className="space-y-3.5 animate-fade-up">
+              <div className={fieldWrap}>
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="כתובת מייל"
+                  dir="rtl"
+                  required
+                  className={fieldInput}
+                />
+              </div>
+              <div className={fieldWrap}>
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -267,31 +294,31 @@ export default function Auth() {
                   required
                   minLength={6}
                   dir="rtl"
-                  className={cn(pillInput, "pl-14")}
+                  className={cn(fieldInput, "pl-12")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-5 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
               </div>
 
-              <div className="pt-2 text-center">
+              <div className="pt-1 flex justify-end">
                 <button
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={loading}
-                  className="text-sm text-white/75 hover:text-[#C9A961] transition-colors"
+                  className="text-xs text-white/70 hover:text-[#C9A961] transition-colors underline-offset-4 hover:underline"
                 >
-                  שכחתי את הסיסמה
+                  שכחתי סיסמה ›
                 </button>
               </div>
             </form>
           ) : (
-            <form onSubmit={handleSignUp} className="space-y-3.5 animate-fade-up">
+            <form onSubmit={handleSignUp} className="space-y-3 animate-fade-up">
               {/* Role selector */}
               <div className="grid grid-cols-2 gap-2 mb-1">
                 {roles.map(({ id, label, icon: Icon, desc }) => (
@@ -300,83 +327,101 @@ export default function Auth() {
                     key={id}
                     onClick={() => setRole(id)}
                     className={cn(
-                      "p-3 rounded-2xl border-[1.5px] text-center transition-colors backdrop-blur",
+                      "p-3 rounded-2xl border text-right transition-colors backdrop-blur flex items-center gap-3",
                       role === id
                         ? "border-[#C9A961] bg-[#C9A961]/10"
-                        : "border-white/20 bg-white/5 hover:bg-white/10"
+                        : "border-white/15 bg-white/5 hover:bg-white/10"
                     )}
                   >
                     <div
                       className={cn(
-                        "h-9 w-9 mx-auto rounded-xl flex items-center justify-center mb-1.5",
+                        "h-9 w-9 rounded-xl flex items-center justify-center shrink-0",
                         role === id ? "bg-[#C9A961] text-[#0A1F3D]" : "bg-white/10 text-white/70"
                       )}
                     >
-                      <Icon className="h-4.5 w-4.5" />
+                      <Icon className="h-4 w-4" />
                     </div>
-                    <div className="text-sm font-bold text-white">{label}</div>
-                    <div className="text-[11px] text-white/60 mt-0.5">{desc}</div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-bold text-white leading-tight">{label}</div>
+                      <div className="text-[11px] text-white/55 leading-tight mt-0.5">{desc}</div>
+                    </div>
                   </button>
                 ))}
               </div>
 
-              <Input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="שם מלא"
-                required
-                maxLength={60}
-                className={pillInput}
-              />
+              <div className={fieldWrap}>
+                <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="שם מלא"
+                  required
+                  maxLength={60}
+                  className={fieldInput}
+                />
+              </div>
 
               {role === "resident" && (
                 <>
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="עיר"
-                    required
-                    maxLength={40}
-                    className={pillInput}
-                  />
-                  <select
-                    value={projectId}
-                    onChange={(e) => setProjectId(e.target.value)}
-                    className={cn(pillInput, "appearance-none")}
-                    style={{ color: projectId ? "#fff" : "rgba(255,255,255,0.55)" }}
-                  >
-                    <option value="" style={{ color: "#0A1F3D" }}>פרויקט (אופציונלי)</option>
-                    {projects.map((p) => (
-                      <option key={p.id} value={p.id} style={{ color: "#0A1F3D" }}>
-                        {p.name} — {p.city}
-                      </option>
-                    ))}
-                  </select>
+                  <div className={fieldWrap}>
+                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                    <Input
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="עיר"
+                      required
+                      maxLength={40}
+                      className={fieldInput}
+                    />
+                  </div>
+                  <div className={fieldWrap}>
+                    <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                    <select
+                      value={projectId}
+                      onChange={(e) => setProjectId(e.target.value)}
+                      className={cn(fieldInput, "appearance-none cursor-pointer")}
+                      style={{ color: projectId ? "#fff" : "rgba(255,255,255,0.45)" }}
+                    >
+                      <option value="" style={{ color: "#0A1F3D" }}>פרויקט (אופציונלי)</option>
+                      {projects.map((p) => (
+                        <option key={p.id} value={p.id} style={{ color: "#0A1F3D" }}>
+                          {p.name} — {p.city}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </>
               )}
 
               {role === "supplier" && (
-                <Input
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="שם העסק"
-                  required
-                  maxLength={80}
-                  className={pillInput}
-                />
+                <div className={fieldWrap}>
+                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                  <Input
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    placeholder="שם העסק"
+                    required
+                    maxLength={80}
+                    className={fieldInput}
+                  />
+                </div>
               )}
 
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="מייל"
-                dir="rtl"
-                required
-                className={pillInput}
-              />
+              <div className={fieldWrap}>
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="כתובת מייל"
+                  dir="rtl"
+                  required
+                  className={fieldInput}
+                />
+              </div>
 
-              <div className="relative">
+              <div className={fieldWrap}>
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -385,17 +430,18 @@ export default function Auth() {
                   required
                   minLength={6}
                   dir="rtl"
-                  className={cn(pillInput, "pl-14")}
+                  className={cn(fieldInput, "pl-12")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-5 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
               </div>
+
 
               <label className="flex items-start gap-2 text-xs text-white/75 cursor-pointer pt-1 px-1">
                 <input
@@ -419,27 +465,30 @@ export default function Auth() {
           )}
         </div>
 
-        {/* Primary CTA — bottom pill */}
+        {/* Primary CTA — rounded square with arrow, not pill */}
         <div className="space-y-4">
           {mode === "signin" ? (
             <Button
               type="button"
               onClick={(e) => handleSignIn(e as unknown as React.FormEvent)}
               disabled={loading}
-              className="w-full h-14 rounded-full bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.75)] hover:brightness-105"
+              className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.6)] hover:brightness-105 flex items-center justify-center gap-2"
             >
-              {loading ? "מתחבר…" : "כניסה"}
+              {loading ? "מתחבר…" : "המשך לחשבון שלי"}
+              <ArrowLeft className="h-4 w-4" />
             </Button>
           ) : (
             <Button
               type="button"
               onClick={(e) => handleSignUp(e as unknown as React.FormEvent)}
               disabled={loading || !termsAccepted}
-              className="w-full h-14 rounded-full bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.75)] hover:brightness-105 disabled:opacity-60"
+              className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.6)] hover:brightness-105 disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              {loading ? "נרשם…" : "צרו חשבון"}
+              {loading ? "נרשם…" : "פתחו את החשבון"}
+              <ArrowLeft className="h-4 w-4" />
             </Button>
           )}
+
 
           {/* Footer links */}
           <div className="flex items-center justify-center gap-4 text-sm text-white/75">
