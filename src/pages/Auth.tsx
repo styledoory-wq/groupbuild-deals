@@ -269,19 +269,23 @@ export default function Auth() {
 
 
         {/* Forms */}
-        <div className="flex-1 flex flex-col justify-center py-8">
+        <div className="flex-1 flex flex-col justify-center py-6">
           {mode === "signin" ? (
-            <form onSubmit={handleSignIn} className="space-y-4 animate-fade-up">
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="מייל"
-                dir="rtl"
-                required
-                className={pillInput}
-              />
-              <div className="relative">
+            <form onSubmit={handleSignIn} className="space-y-3.5 animate-fade-up">
+              <div className={fieldWrap}>
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="כתובת מייל"
+                  dir="rtl"
+                  required
+                  className={fieldInput}
+                />
+              </div>
+              <div className={fieldWrap}>
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -290,31 +294,31 @@ export default function Auth() {
                   required
                   minLength={6}
                   dir="rtl"
-                  className={cn(pillInput, "pl-14")}
+                  className={cn(fieldInput, "pl-12")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-5 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
               </div>
 
-              <div className="pt-2 text-center">
+              <div className="pt-1 flex justify-end">
                 <button
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={loading}
-                  className="text-sm text-white/75 hover:text-[#C9A961] transition-colors"
+                  className="text-xs text-white/70 hover:text-[#C9A961] transition-colors underline-offset-4 hover:underline"
                 >
-                  שכחתי את הסיסמה
+                  שכחתי סיסמה ›
                 </button>
               </div>
             </form>
           ) : (
-            <form onSubmit={handleSignUp} className="space-y-3.5 animate-fade-up">
+            <form onSubmit={handleSignUp} className="space-y-3 animate-fade-up">
               {/* Role selector */}
               <div className="grid grid-cols-2 gap-2 mb-1">
                 {roles.map(({ id, label, icon: Icon, desc }) => (
@@ -323,83 +327,101 @@ export default function Auth() {
                     key={id}
                     onClick={() => setRole(id)}
                     className={cn(
-                      "p-3 rounded-2xl border-[1.5px] text-center transition-colors backdrop-blur",
+                      "p-3 rounded-2xl border text-right transition-colors backdrop-blur flex items-center gap-3",
                       role === id
                         ? "border-[#C9A961] bg-[#C9A961]/10"
-                        : "border-white/20 bg-white/5 hover:bg-white/10"
+                        : "border-white/15 bg-white/5 hover:bg-white/10"
                     )}
                   >
                     <div
                       className={cn(
-                        "h-9 w-9 mx-auto rounded-xl flex items-center justify-center mb-1.5",
+                        "h-9 w-9 rounded-xl flex items-center justify-center shrink-0",
                         role === id ? "bg-[#C9A961] text-[#0A1F3D]" : "bg-white/10 text-white/70"
                       )}
                     >
-                      <Icon className="h-4.5 w-4.5" />
+                      <Icon className="h-4 w-4" />
                     </div>
-                    <div className="text-sm font-bold text-white">{label}</div>
-                    <div className="text-[11px] text-white/60 mt-0.5">{desc}</div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-bold text-white leading-tight">{label}</div>
+                      <div className="text-[11px] text-white/55 leading-tight mt-0.5">{desc}</div>
+                    </div>
                   </button>
                 ))}
               </div>
 
-              <Input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="שם מלא"
-                required
-                maxLength={60}
-                className={pillInput}
-              />
+              <div className={fieldWrap}>
+                <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="שם מלא"
+                  required
+                  maxLength={60}
+                  className={fieldInput}
+                />
+              </div>
 
               {role === "resident" && (
                 <>
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="עיר"
-                    required
-                    maxLength={40}
-                    className={pillInput}
-                  />
-                  <select
-                    value={projectId}
-                    onChange={(e) => setProjectId(e.target.value)}
-                    className={cn(pillInput, "appearance-none")}
-                    style={{ color: projectId ? "#fff" : "rgba(255,255,255,0.55)" }}
-                  >
-                    <option value="" style={{ color: "#0A1F3D" }}>פרויקט (אופציונלי)</option>
-                    {projects.map((p) => (
-                      <option key={p.id} value={p.id} style={{ color: "#0A1F3D" }}>
-                        {p.name} — {p.city}
-                      </option>
-                    ))}
-                  </select>
+                  <div className={fieldWrap}>
+                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                    <Input
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="עיר"
+                      required
+                      maxLength={40}
+                      className={fieldInput}
+                    />
+                  </div>
+                  <div className={fieldWrap}>
+                    <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                    <select
+                      value={projectId}
+                      onChange={(e) => setProjectId(e.target.value)}
+                      className={cn(fieldInput, "appearance-none cursor-pointer")}
+                      style={{ color: projectId ? "#fff" : "rgba(255,255,255,0.45)" }}
+                    >
+                      <option value="" style={{ color: "#0A1F3D" }}>פרויקט (אופציונלי)</option>
+                      {projects.map((p) => (
+                        <option key={p.id} value={p.id} style={{ color: "#0A1F3D" }}>
+                          {p.name} — {p.city}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </>
               )}
 
               {role === "supplier" && (
-                <Input
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="שם העסק"
-                  required
-                  maxLength={80}
-                  className={pillInput}
-                />
+                <div className={fieldWrap}>
+                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                  <Input
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    placeholder="שם העסק"
+                    required
+                    maxLength={80}
+                    className={fieldInput}
+                  />
+                </div>
               )}
 
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="מייל"
-                dir="rtl"
-                required
-                className={pillInput}
-              />
+              <div className={fieldWrap}>
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="כתובת מייל"
+                  dir="rtl"
+                  required
+                  className={fieldInput}
+                />
+              </div>
 
-              <div className="relative">
+              <div className={fieldWrap}>
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -408,17 +430,18 @@ export default function Auth() {
                   required
                   minLength={6}
                   dir="rtl"
-                  className={cn(pillInput, "pl-14")}
+                  className={cn(fieldInput, "pl-12")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-5 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
               </div>
+
 
               <label className="flex items-start gap-2 text-xs text-white/75 cursor-pointer pt-1 px-1">
                 <input
