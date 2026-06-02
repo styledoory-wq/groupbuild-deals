@@ -40,6 +40,12 @@ export default function Auth() {
   const [termsAccepted, setTermsAccepted] = useState(false);
 
 
+  useEffect(() => {
+    document.body.classList.add("auth-fullscreen");
+    return () => document.body.classList.remove("auth-fullscreen");
+  }, []);
+
+
   // If already logged in → redirect by role
   useEffect(() => {
     withTimeout(supabase.auth.getSession(), "בדיקת התחברות").then(async ({ data: { session } }) => {
@@ -217,9 +223,9 @@ export default function Auth() {
         <img
           src={authBgAsset.url}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover scale-[1.04]"
+          className="absolute inset-0 w-full h-full object-cover"
           style={{
-            objectPosition: "62% 28%",
+            objectPosition: "center top",
             filter: "saturate(1.1) brightness(1.06) contrast(1.02)",
             opacity: 1,
           }}
