@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogIn, UserPlus, Info, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BrandLogo } from "@/components/BrandLogo";
+
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/auth";
 
@@ -69,16 +69,9 @@ export default function Welcome() {
           paddingBottom: "max(env(safe-area-inset-bottom), 24px)",
         }}
       >
-        {/* Hero — centered logo & tagline */}
-        <div className="flex-1 flex flex-col items-center justify-center text-center gap-8">
-          <div className="relative">
-            <div className="absolute inset-0 -m-8 rounded-full bg-[#C9A961]/15 blur-2xl" aria-hidden />
-            <div className="relative h-28 w-28 rounded-[28px] bg-white/8 border border-white/15 backdrop-blur-md flex items-center justify-center shadow-[0_20px_60px_-20px_rgba(201,169,97,0.5)]">
-              <BrandLogo variant="light" size="lg" />
-            </div>
-          </div>
-
-          <div className="space-y-3 animate-fade-up">
+        {/* Hero — centered tagline */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center gap-6">
+          <div className="space-y-4 animate-fade-up">
             <h1 className="text-[clamp(2rem,7vw,2.75rem)] leading-[1.05] font-extrabold tracking-tight">
               ברוכים הבאים
               <br />
