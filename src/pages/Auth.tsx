@@ -218,16 +218,16 @@ export default function Auth() {
         <img
           src={authBgAsset.url}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover object-top scale-110"
-          style={{ filter: "blur(6px) saturate(0.85) brightness(0.55)", opacity: 0.55 }}
+          className="absolute inset-0 w-full h-full object-cover object-center scale-105"
+          style={{ filter: "saturate(1.05) brightness(0.95)", opacity: 1 }}
           draggable={false}
         />
-        {/* Strong navy overlay to push image back ~30% more */}
+        {/* Navy overlay — keeps the photo readable behind UI without hiding it */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(7,28,59,0.72) 0%, rgba(8,27,56,0.85) 45%, rgba(7,23,46,0.96) 78%, #07172E 100%)",
+              "linear-gradient(180deg, rgba(7,28,59,0.55) 0%, rgba(8,27,56,0.65) 55%, rgba(7,23,46,0.88) 88%, #07172E 100%)",
           }}
         />
         {/* Subtle gold ambient */}
