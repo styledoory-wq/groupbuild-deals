@@ -465,27 +465,30 @@ export default function Auth() {
           )}
         </div>
 
-        {/* Primary CTA — bottom pill */}
+        {/* Primary CTA — rounded square with arrow, not pill */}
         <div className="space-y-4">
           {mode === "signin" ? (
             <Button
               type="button"
               onClick={(e) => handleSignIn(e as unknown as React.FormEvent)}
               disabled={loading}
-              className="w-full h-14 rounded-full bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.75)] hover:brightness-105"
+              className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.6)] hover:brightness-105 flex items-center justify-center gap-2"
             >
-              {loading ? "מתחבר…" : "כניסה"}
+              {loading ? "מתחבר…" : "המשך לחשבון שלי"}
+              <ArrowLeft className="h-4 w-4" />
             </Button>
           ) : (
             <Button
               type="button"
               onClick={(e) => handleSignUp(e as unknown as React.FormEvent)}
               disabled={loading || !termsAccepted}
-              className="w-full h-14 rounded-full bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.75)] hover:brightness-105 disabled:opacity-60"
+              className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.6)] hover:brightness-105 disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              {loading ? "נרשם…" : "צרו חשבון"}
+              {loading ? "נרשם…" : "פתחו את החשבון"}
+              <ArrowLeft className="h-4 w-4" />
             </Button>
           )}
+
 
           {/* Footer links */}
           <div className="flex items-center justify-center gap-4 text-sm text-white/75">
