@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Briefcase, Mail, ArrowRight, ArrowLeft, User as UserIcon, MapPin, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -40,7 +40,7 @@ export default function Auth() {
   const [termsAccepted, setTermsAccepted] = useState(false);
 
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.body.classList.add("auth-fullscreen");
     return () => document.body.classList.remove("auth-fullscreen");
   }, []);
@@ -263,7 +263,7 @@ export default function Auth() {
       <div
         className="relative z-10 w-full max-w-screen-sm flex flex-col px-6"
         style={{
-          paddingTop: "max(env(safe-area-inset-top), 12px)",
+          paddingTop: "12px",
           paddingBottom: "max(env(safe-area-inset-bottom), 14px)",
         }}
       >
