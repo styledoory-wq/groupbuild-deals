@@ -199,10 +199,10 @@ export default function ResidentDashboard() {
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 12px)" }}
       >
         {/* === Header === */}
-        <header className="px-5 pt-4 pb-3 flex items-center justify-between gap-3">
+        <header className="px-5 pt-3 pb-2 flex items-center justify-between gap-3">
           <button
             onClick={() => navigate("/resident/notifications")}
-            className="relative h-11 w-11 rounded-full border border-white/12 bg-white/[0.04] flex items-center justify-center"
+            className="relative h-10 w-10 rounded-full border border-white/12 bg-white/[0.04] flex items-center justify-center"
             aria-label="התראות"
           >
             <Bell className="h-[18px] w-[18px] text-white/80" strokeWidth={2} />
@@ -215,19 +215,19 @@ export default function ResidentDashboard() {
 
           <button
             onClick={() => navigate("/resident/profile")}
-            className="flex items-center gap-3 min-w-0"
+            className="flex items-center gap-2.5 min-w-0"
           >
             <div className="text-right min-w-0">
               <div className="flex items-center gap-1.5 justify-end">
-                <span className="text-[17px] font-bold tracking-tight truncate">שלום {fullName || "דייר"}</span>
+                <span className="text-[16px] font-bold tracking-tight truncate">שלום {fullName || "דייר"}</span>
                 <span aria-hidden>👋</span>
               </div>
-              <div className="text-[12px] text-white/60 mt-0.5 truncate">
-                {city || "הגדר אזור"}{council ? ` · ${council}` : ""}
+              <div className="text-[11px] text-white/60 mt-0.5 truncate">
+                {city || "הגדר אזור"}{council ? ` | ${council}` : ""}
               </div>
             </div>
-            <div className="h-11 w-11 rounded-full bg-white/[0.06] border border-[#C9A961]/40 flex items-center justify-center">
-              <UserIcon className="h-5 w-5 text-[#C9A961]" strokeWidth={2} />
+            <div className="h-10 w-10 rounded-full bg-white/[0.06] border border-[#C9A961]/40 flex items-center justify-center">
+              <UserIcon className="h-[18px] w-[18px] text-[#C9A961]" strokeWidth={2} />
             </div>
           </button>
         </header>
@@ -236,15 +236,15 @@ export default function ResidentDashboard() {
         <div className="px-5">
           <button
             onClick={() => navigate("/resident/search")}
-            className="w-full h-11 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-between px-4 text-white/60"
+            className="w-full h-10 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-between px-4 text-white/60"
           >
-            <SearchIcon className="h-[18px] w-[18px]" strokeWidth={2} />
-            <span className="text-[13px] font-medium">חפש ספקים, קטגוריות, מוצרים…</span>
+            <SearchIcon className="h-4 w-4" strokeWidth={2} />
+            <span className="text-[12px] font-medium">חפש ספקים, קטגוריות, מוצרים…</span>
           </button>
         </div>
 
         {/* === 3 KPI cards === */}
-        <div className="px-5 mt-4 grid grid-cols-3 gap-2.5">
+        <div className="px-5 mt-2.5 grid grid-cols-3 gap-2">
           {[
             { label: "הצעות", sub: "הצעות פעילות", val: areaDeals.length, Icon: Sparkles, to: "/resident/deals" },
             { label: "ספקים", sub: "ספקים באזור", val: areaSuppliersCount, Icon: Store, to: "/resident/categories" },
@@ -253,12 +253,12 @@ export default function ResidentDashboard() {
             <button
               key={k.label}
               onClick={() => navigate(k.to)}
-              className="rounded-2xl bg-white/[0.04] border border-white/10 py-3 px-2 flex flex-col items-center active:scale-[0.97] transition-transform"
+              className="rounded-2xl bg-white/[0.04] border border-white/10 py-2 px-2 flex flex-col items-center active:scale-[0.97] transition-transform"
             >
-              <k.Icon className="h-[18px] w-[18px] text-[#C9A961] mb-1.5" strokeWidth={2} />
-              <div className="text-[26px] font-extrabold leading-none gb-num">{k.val}</div>
-              <div className="text-[12px] text-white/85 mt-1.5 font-semibold">{k.label}</div>
-              <div className="text-[10px] text-white/45 mt-0.5">{k.sub}</div>
+              <k.Icon className="h-[14px] w-[14px] text-[#C9A961] mb-1" strokeWidth={2} />
+              <div className="text-[20px] font-extrabold leading-none gb-num">{k.val}</div>
+              <div className="text-[11px] text-white/85 mt-1 font-semibold leading-none">{k.label}</div>
+              <div className="text-[9px] text-white/45 mt-0.5 leading-none">{k.sub}</div>
             </button>
           ))}
         </div>
