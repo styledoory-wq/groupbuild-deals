@@ -199,10 +199,10 @@ export default function ResidentDashboard() {
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 12px)" }}
       >
         {/* === Header === */}
-        <header className="px-5 pt-4 pb-3 flex items-center justify-between gap-3">
+        <header className="px-5 pt-3 pb-2 flex items-center justify-between gap-3">
           <button
             onClick={() => navigate("/resident/notifications")}
-            className="relative h-11 w-11 rounded-full border border-white/12 bg-white/[0.04] flex items-center justify-center"
+            className="relative h-10 w-10 rounded-full border border-white/12 bg-white/[0.04] flex items-center justify-center"
             aria-label="התראות"
           >
             <Bell className="h-[18px] w-[18px] text-white/80" strokeWidth={2} />
@@ -215,19 +215,19 @@ export default function ResidentDashboard() {
 
           <button
             onClick={() => navigate("/resident/profile")}
-            className="flex items-center gap-3 min-w-0"
+            className="flex items-center gap-2.5 min-w-0"
           >
             <div className="text-right min-w-0">
               <div className="flex items-center gap-1.5 justify-end">
-                <span className="text-[17px] font-bold tracking-tight truncate">שלום {fullName || "דייר"}</span>
+                <span className="text-[16px] font-bold tracking-tight truncate">שלום {fullName || "דייר"}</span>
                 <span aria-hidden>👋</span>
               </div>
-              <div className="text-[12px] text-white/60 mt-0.5 truncate">
-                {city || "הגדר אזור"}{council ? ` · ${council}` : ""}
+              <div className="text-[11px] text-white/60 mt-0.5 truncate">
+                {city || "הגדר אזור"}{council ? ` | ${council}` : ""}
               </div>
             </div>
-            <div className="h-11 w-11 rounded-full bg-white/[0.06] border border-[#C9A961]/40 flex items-center justify-center">
-              <UserIcon className="h-5 w-5 text-[#C9A961]" strokeWidth={2} />
+            <div className="h-10 w-10 rounded-full bg-white/[0.06] border border-[#C9A961]/40 flex items-center justify-center">
+              <UserIcon className="h-[18px] w-[18px] text-[#C9A961]" strokeWidth={2} />
             </div>
           </button>
         </header>
@@ -236,15 +236,15 @@ export default function ResidentDashboard() {
         <div className="px-5">
           <button
             onClick={() => navigate("/resident/search")}
-            className="w-full h-11 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-between px-4 text-white/60"
+            className="w-full h-10 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-between px-4 text-white/60"
           >
-            <SearchIcon className="h-[18px] w-[18px]" strokeWidth={2} />
-            <span className="text-[13px] font-medium">חפש ספקים, קטגוריות, מוצרים…</span>
+            <SearchIcon className="h-4 w-4" strokeWidth={2} />
+            <span className="text-[12px] font-medium">חפש ספקים, קטגוריות, מוצרים…</span>
           </button>
         </div>
 
         {/* === 3 KPI cards === */}
-        <div className="px-5 mt-4 grid grid-cols-3 gap-2.5">
+        <div className="px-5 mt-2.5 grid grid-cols-3 gap-2">
           {[
             { label: "הצעות", sub: "הצעות פעילות", val: areaDeals.length, Icon: Sparkles, to: "/resident/deals" },
             { label: "ספקים", sub: "ספקים באזור", val: areaSuppliersCount, Icon: Store, to: "/resident/categories" },
@@ -253,27 +253,27 @@ export default function ResidentDashboard() {
             <button
               key={k.label}
               onClick={() => navigate(k.to)}
-              className="rounded-2xl bg-white/[0.04] border border-white/10 py-3 px-2 flex flex-col items-center active:scale-[0.97] transition-transform"
+              className="rounded-2xl bg-white/[0.04] border border-white/10 py-2 px-2 flex flex-col items-center active:scale-[0.97] transition-transform"
             >
-              <k.Icon className="h-[18px] w-[18px] text-[#C9A961] mb-1.5" strokeWidth={2} />
-              <div className="text-[26px] font-extrabold leading-none gb-num">{k.val}</div>
-              <div className="text-[12px] text-white/85 mt-1.5 font-semibold">{k.label}</div>
-              <div className="text-[10px] text-white/45 mt-0.5">{k.sub}</div>
+              <k.Icon className="h-[14px] w-[14px] text-[#C9A961] mb-1" strokeWidth={2} />
+              <div className="text-[20px] font-extrabold leading-none gb-num">{k.val}</div>
+              <div className="text-[11px] text-white/85 mt-1 font-semibold leading-none">{k.label}</div>
+              <div className="text-[9px] text-white/45 mt-0.5 leading-none">{k.sub}</div>
             </button>
           ))}
         </div>
 
         {/* === Stage stepper === */}
-        <section className="px-5 mt-5">
-          <div className="flex items-center justify-end gap-1.5 mb-3">
-            <h2 className="text-[13px] font-bold text-white">תהליך הבית שלי</h2>
-            <Info className="h-3.5 w-3.5 text-[#C9A961]" strokeWidth={2} />
+        <section className="px-5 mt-3">
+          <div className="flex items-center justify-end gap-1.5 mb-1.5">
+            <h2 className="text-[12px] font-bold text-white">תהליך הבית שלי</h2>
+            <Info className="h-3 w-3 text-[#C9A961]" strokeWidth={2} />
           </div>
           <div className="relative">
             {/* connector line */}
-            <div className="absolute top-3.5 right-3 left-3 h-px bg-white/12" />
+            <div className="absolute top-3 right-3 left-3 h-px bg-white/12" />
             <div
-              className="absolute top-3.5 right-3 h-px bg-[#C9A961] transition-all"
+              className="absolute top-3 right-3 h-px bg-[#C9A961] transition-all"
               style={{
                 width: `calc((100% - 24px) * ${STAGES.findIndex((s) => s.id === currentStage) / (STAGES.length - 1)})`,
               }}
@@ -286,11 +286,11 @@ export default function ResidentDashboard() {
                   <button
                     key={s.id}
                     onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
-                    className="flex flex-col items-center gap-1.5"
+                    className="flex flex-col items-center gap-1"
                   >
                     <span
                       className={
-                        "relative z-10 h-7 w-7 rounded-full flex items-center justify-center text-[12px] font-bold border " +
+                        "relative z-10 h-6 w-6 rounded-full flex items-center justify-center text-[11px] font-bold border " +
                         (isCurrent
                           ? "bg-[#C9A961] border-[#C9A961] text-[#0A1F3D]"
                           : isPast
@@ -300,7 +300,7 @@ export default function ResidentDashboard() {
                     >
                       {i + 1}
                     </span>
-                    <span className={"text-[10px] leading-tight text-center px-0.5 " + (isCurrent ? "text-[#C9A961] font-bold" : "text-white/55 font-medium")}>
+                    <span className={"text-[9px] leading-tight text-center px-0.5 " + (isCurrent ? "text-[#C9A961] font-bold" : "text-white/55 font-medium")}>
                       {s.short}
                     </span>
                   </button>
@@ -311,15 +311,14 @@ export default function ResidentDashboard() {
         </section>
 
         {/* === Featured current-stage card === */}
-        <section className="px-5 mt-5">
+        <section className="px-5 mt-3">
           <div className="rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden">
-            {/* In RTL: first DOM child = right column. Text first → text on right, image on left. */}
-            <div className="grid grid-cols-[1fr_42%]">
+            <div className="grid grid-cols-[1fr_38%]">
               {/* content side (right in RTL) */}
-              <div className="p-4 flex flex-col">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="relative h-12 w-12 shrink-0">
-                    <svg viewBox="0 0 50 50" className="h-12 w-12 -rotate-90">
+              <div className="p-3 flex flex-col">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="relative h-10 w-10 shrink-0">
+                    <svg viewBox="0 0 50 50" className="h-10 w-10 -rotate-90">
                       <circle cx="25" cy="25" r={R} stroke="rgba(255,255,255,0.12)" strokeWidth="4" fill="none" />
                       <circle
                         cx="25" cy="25" r={R}
@@ -328,21 +327,21 @@ export default function ResidentDashboard() {
                         strokeDashoffset={C - (C * stageProgress) / 100}
                       />
                     </svg>
-                    <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-[#C9A961]">
+                    <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-[#C9A961]">
                       {stageProgress}%
                     </span>
                   </div>
                   <div className="text-right">
-                    <div className="text-[18px] font-extrabold tracking-tight leading-tight">{stageMeta.title}</div>
+                    <div className="text-[16px] font-extrabold tracking-tight leading-tight">{stageMeta.title}</div>
                   </div>
                 </div>
 
-                <p className="mt-2 text-[12px] text-white/70 leading-relaxed text-right line-clamp-2">
+                <p className="mt-1.5 text-[11px] text-white/70 leading-snug text-right line-clamp-2">
                   {stageMeta.description}
                 </p>
 
-                <div className="my-3 h-px bg-white/10" />
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="my-2 h-px bg-white/10" />
+                <div className="grid grid-cols-3 gap-1">
                   {(stageCategories.length > 0
                     ? stageCategories.map((c) => ({ key: c.id, label: c.name, onClick: () => navigate(`/resident/categories/${c.id}`), emoji: c.icon as string | null, Icon: null as null | typeof Triangle }))
                     : stageMeta.defaults.map((d, i) => ({ key: `d-${i}`, label: d.label, onClick: () => navigate(`/resident/categories?stage=${currentStage}`), emoji: null as string | null, Icon: d.Icon }))
@@ -350,46 +349,46 @@ export default function ResidentDashboard() {
                     <button
                       key={c.key}
                       onClick={c.onClick}
-                      className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+                      className="flex flex-col items-center gap-1 active:scale-95 transition-transform"
                     >
-                      <span className="h-8 w-8 rounded-full border border-[#C9A961]/35 bg-[#C9A961]/[0.08] flex items-center justify-center">
+                      <span className="h-7 w-7 rounded-full border border-[#C9A961]/35 bg-[#C9A961]/[0.08] flex items-center justify-center">
                         {c.emoji ? (
-                          <span className="text-[16px] leading-none">{c.emoji}</span>
+                          <span className="text-[14px] leading-none">{c.emoji}</span>
                         ) : c.Icon ? (
-                          <c.Icon className="h-[15px] w-[15px] text-[#C9A961]" strokeWidth={2} />
+                          <c.Icon className="h-[13px] w-[13px] text-[#C9A961]" strokeWidth={2} />
                         ) : null}
                       </span>
-                      <span className="text-[10px] text-white/70 text-center line-clamp-1 leading-tight">{c.label}</span>
+                      <span className="text-[9px] text-white/70 text-center line-clamp-1 leading-tight">{c.label}</span>
                     </button>
                   ))}
                 </div>
 
                 <button
                   onClick={() => navigate(`/resident/categories?stage=${currentStage}`)}
-                  className="mt-3 h-10 rounded-xl bg-[#C9A961] text-[#0A1F3D] font-extrabold text-[13px] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
+                  className="mt-2.5 h-9 rounded-xl bg-[#C9A961] text-[#0A1F3D] font-extrabold text-[12px] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
                 >
-                  <ChevronLeft className="h-4 w-4" strokeWidth={3} />
+                  <ChevronLeft className="h-3.5 w-3.5" strokeWidth={3} />
                   צפה בהצעות
                 </button>
               </div>
 
               {/* image side (left in RTL) */}
-              <div className="relative h-full min-h-[220px] bg-[#0A1F3D]">
+              <div className="relative h-full min-h-[170px] bg-[#0A1F3D]">
                 {heroDeal?.cover_image_url ? (
                   <img src={heroDeal.cover_image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
                 ) : (
                   <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_30%_30%,#1B3E73_0%,#0E2A55_50%,#04122A_100%)]">
-                    <StageIcon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-14 w-14 text-[#C9A961]/35" strokeWidth={1.5} />
+                    <StageIcon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-12 w-12 text-[#C9A961]/35" strokeWidth={1.5} />
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#04122A]/85 via-transparent to-transparent" />
-                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur text-[10px] font-bold text-[#C9A961] border border-[#C9A961]/40">
+                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/45 backdrop-blur text-[9px] font-bold text-[#C9A961] border border-[#C9A961]/40">
                   שלב נוכחי
                 </span>
-                <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/55 backdrop-blur rounded-full px-2.5 py-1">
-                  <Users className="h-3 w-3 text-[#C9A961]" strokeWidth={2.5} />
-                  <span className="text-[11px] font-bold text-white gb-num">{groupResidents}</span>
-                  <span className="text-[10px] text-white/70">דיירים בקבוצה</span>
+                <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/55 backdrop-blur rounded-full px-2 py-0.5">
+                  <Users className="h-2.5 w-2.5 text-[#C9A961]" strokeWidth={2.5} />
+                  <span className="text-[10px] font-bold text-white gb-num">{groupResidents}</span>
+                  <span className="text-[9px] text-white/70">דיירים</span>
                 </div>
               </div>
             </div>
@@ -397,29 +396,30 @@ export default function ResidentDashboard() {
         </section>
 
         {/* === Recommended offers entry / empty state === */}
-        <section className="px-5 mt-3.5">
+        <section className="px-5 mt-2.5">
           <button
             onClick={() => (areaDeals.length > 0 ? navigate("/resident/deals") : handleSubscribe())}
-            className="w-full rounded-2xl bg-white/[0.04] border border-white/10 px-4 py-3 flex items-center justify-between gap-3 active:scale-[0.99] transition-transform"
+            className="w-full rounded-2xl bg-white/[0.04] border border-white/10 px-4 py-2.5 flex items-center justify-between gap-3 active:scale-[0.99] transition-transform"
           >
             <ChevronLeft className="h-4 w-4 text-white/55" strokeWidth={2} />
             <div className="flex items-center gap-3 min-w-0 text-right">
               <div className="min-w-0">
-                <div className="text-[14px] font-bold leading-tight">
+                <div className="text-[13px] font-bold leading-tight">
                   {areaDeals.length > 0 ? "עסקאות מומלצות עבורך" : "אין עדיין הצעות באזור שלך"}
                 </div>
-                <div className="text-[11px] text-white/55 mt-0.5 truncate">
+                <div className="text-[10px] text-white/55 mt-0.5 truncate">
                   {areaDeals.length > 0 ? "הצעות שנבחרו במיוחד עבורך" : "עדכן אותי כשיש הצעה חדשה"}
                 </div>
               </div>
-              <div className="h-9 w-9 rounded-xl bg-[#C9A961]/15 border border-[#C9A961]/30 flex items-center justify-center shrink-0">
+              <div className="h-8 w-8 rounded-xl bg-[#C9A961]/15 border border-[#C9A961]/30 flex items-center justify-center shrink-0">
                 {areaDeals.length > 0
-                  ? <Sparkles className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
-                  : <BellPlus className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />}
+                  ? <Sparkles className="h-3.5 w-3.5 text-[#C9A961]" strokeWidth={2} />
+                  : <BellPlus className="h-3.5 w-3.5 text-[#C9A961]" strokeWidth={2} />}
               </div>
             </div>
           </button>
         </section>
+
       </div>
 
       <BottomNav role="resident" />
