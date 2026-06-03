@@ -121,15 +121,21 @@ export default function DealsList() {
   const cat = categories.find((c) => c.id === categoryId);
   const stageTitle = stageId ? STAGE_TITLES[stageId] : "";
 
-  const filtered = useMemo(
-    () =>
-      deals.filter((d) =>
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return deals.filter((d) => {
+      const statusMatch =
         tab === "active"
           ? d.status === "active" && !d.auto_closed_at
-          : d.status === "closed" || !!d.auto_closed_at,
-      ),
-    [deals, tab],
-  );
+          : d.status === "closed" || !!d.auto_closed_at;
+      if (!statusMatch) return false;
+      if (!term) return true;
+      return (
+        d.title.toLowerCase().includes(term) ||
+        (d.supplier_name ?? "").toLowerCase().includes(term)
+      );
+    });
+  }, [deals, tab, q]);
 
   return (
     <MobileShell>
