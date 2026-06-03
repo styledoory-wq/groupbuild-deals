@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   Bell, Search as SearchIcon, ChevronLeft, User as UserIcon,
   Sparkles, Store, Briefcase, PencilRuler, Hammer, Plug, Palette, Trees,
-  Info, BellPlus,
+  Info, BellPlus, Triangle, Armchair, Users2, Wrench, Wind, Lightbulb,
+  Brush, LayoutGrid, Bath, Sprout, Fence, Sun, Users,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
