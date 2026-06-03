@@ -172,6 +172,19 @@ export default function DealsList() {
         </div>
       </div>
 
+      <div className="px-5 mt-4 relative z-10">
+        <div className="relative">
+          <SearchIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="חפש עסקה לפי שם..."
+            className="w-full h-11 rounded-2xl bg-white border border-[#E2E8F0] pr-11 pl-4 text-fs-sm text-[#0D1B2E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#C9A84C] focus:ring-[3px] focus:ring-[#C9A84C]/15 transition"
+            dir="rtl"
+          />
+        </div>
+      </div>
+
       <div className="px-5 md:px-8 lg:px-10 mt-5 relative z-10">
         <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
           {loading && <DealCardSkeletonList count={4} />}
