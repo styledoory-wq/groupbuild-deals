@@ -507,32 +507,42 @@ export default function Auth() {
           )}
 
 
-          {/* Footer links */}
-          <div className="flex items-center justify-center gap-4 text-sm text-white/75">
-            <button
-              type="button"
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-              className="flex items-center gap-1.5 hover:text-[#C9A961] transition-colors"
-            >
-              {mode === "signin" ? (
-                <>
-                  <UserIcon className="h-4 w-4" />
+          {/* Register prompt — clearly separated below CTA */}
+          <div className="text-center text-sm text-white/70">
+            {mode === "signin" ? (
+              <>
+                עדיין אין לך חשבון?{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode("signup")}
+                  className="font-bold text-[#E8C97D] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
+                >
                   הרשמה
-                </>
-              ) : (
-                <>
-                  <ArrowRight className="h-4 w-4" />
-                  כבר יש לי חשבון
-                </>
-              )}
-            </button>
-            <span className="text-white/25">|</span>
+                </button>
+              </>
+            ) : (
+              <>
+                כבר יש לך חשבון?{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode("signin")}
+                  className="font-bold text-[#E8C97D] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
+                >
+                  התחברות
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Secondary: how it works */}
+          <div className="flex items-center justify-center">
             <Link
               to="/about"
-              className="flex items-center gap-1.5 hover:text-[#C9A961] transition-colors"
+              className="flex items-center gap-1.5 text-xs text-white/55 hover:text-[#C9A961] transition-colors"
             >
-              <HelpCircle className="h-4 w-4" />
-              עזרה
+              <HelpCircle className="h-3.5 w-3.5" />
+              איך זה עובד?
+
             </Link>
           </div>
         </div>
