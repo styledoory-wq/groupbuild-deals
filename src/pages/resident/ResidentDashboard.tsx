@@ -14,12 +14,18 @@ import { toast } from "sonner";
 
 type StageId = "planning" | "structure" | "systems" | "finishes" | "outdoor";
 
-const STAGES: { id: StageId; title: string; short: string; icon: typeof PencilRuler; description: string }[] = [
-  { id: "planning",  title: "תכנון ועיצוב", short: "תכנון ועיצוב", icon: PencilRuler, description: "כל מה שקשור לתכנון, עיצוב וקבלת ההחלטות הראשונות לבית שלכם." },
-  { id: "structure", title: "שלד ובנייה",    short: "שלד ובנייה",   icon: Hammer,      description: "שלב הבנייה — קונסטרוקציה, איטום, גג ומעטפת." },
-  { id: "systems",   title: "מערכות הבית",  short: "מערכות הבית", icon: Plug,        description: "חשמל, אינסטלציה, מיזוג ומערכות חכמות." },
-  { id: "finishes",  title: "גמרים",         short: "גמרים",         icon: Palette,     description: "ריצוף, צבע, מטבחים, חדרי רחצה וגמרים פנימיים." },
-  { id: "outdoor",   title: "חוץ ופיתוח",   short: "חוץ ופיתוח",   icon: Trees,       description: "גינון, חצרות, גדרות ופיתוח חיצוני." },
+type StageDefault = { label: string; Icon: typeof PencilRuler };
+const STAGES: { id: StageId; title: string; short: string; icon: typeof PencilRuler; description: string; defaults: StageDefault[] }[] = [
+  { id: "planning",  title: "תכנון ועיצוב", short: "תכנון ועיצוב", icon: PencilRuler, description: "כל מה שקשור לתכנון, עיצוב וקבלת ההחלטות הראשונות לבית שלכם.",
+    defaults: [ { label: "אדריכלות", Icon: Triangle }, { label: "עיצוב פנים", Icon: Armchair }, { label: "יועצים", Icon: Users2 } ] },
+  { id: "structure", title: "שלד ובנייה",    short: "שלד ובנייה",   icon: Hammer,      description: "שלב הבנייה — קונסטרוקציה, איטום, גג ומעטפת.",
+    defaults: [ { label: "קונסטרוקציה", Icon: Hammer }, { label: "איטום", Icon: Wrench }, { label: "מעטפת", Icon: LayoutGrid } ] },
+  { id: "systems",   title: "מערכות הבית",  short: "מערכות הבית", icon: Plug,        description: "חשמל, אינסטלציה, מיזוג ומערכות חכמות.",
+    defaults: [ { label: "חשמל", Icon: Lightbulb }, { label: "אינסטלציה", Icon: Wrench }, { label: "מיזוג", Icon: Wind } ] },
+  { id: "finishes",  title: "גמרים",         short: "גמרים",         icon: Palette,     description: "ריצוף, צבע, מטבחים, חדרי רחצה וגמרים פנימיים.",
+    defaults: [ { label: "ריצוף", Icon: LayoutGrid }, { label: "צבע", Icon: Brush }, { label: "מטבח ואמבט", Icon: Bath } ] },
+  { id: "outdoor",   title: "חוץ ופיתוח",   short: "חוץ ופיתוח",   icon: Trees,       description: "גינון, חצרות, גדרות ופיתוח חיצוני.",
+    defaults: [ { label: "גינון", Icon: Sprout }, { label: "גדרות", Icon: Fence }, { label: "תאורת חוץ", Icon: Sun } ] },
 ];
 
 interface MiniDeal { id: string; title: string; cover_image_url: string | null; supplier_name: string | null }
