@@ -54,6 +54,7 @@ export type Database = {
           is_active: boolean
           is_deleted: boolean
           name: string
+          stage: string | null
           updated_at: string
         }
         Insert: {
@@ -65,6 +66,7 @@ export type Database = {
           is_active?: boolean
           is_deleted?: boolean
           name: string
+          stage?: string | null
           updated_at?: string
         }
         Update: {
@@ -76,30 +78,41 @@ export type Database = {
           is_active?: boolean
           is_deleted?: boolean
           name?: string
+          stage?: string | null
           updated_at?: string
         }
         Relationships: []
       }
       cities: {
         Row: {
+          council_id: string | null
           created_at: string
           id: string
           name_he: string
           region_id: string
         }
         Insert: {
+          council_id?: string | null
           created_at?: string
           id?: string
           name_he: string
           region_id: string
         }
         Update: {
+          council_id?: string | null
           created_at?: string
           id?: string
           name_he?: string
           region_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "cities_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "regional_councils"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cities_region_id_fkey"
             columns: ["region_id"]
@@ -858,6 +871,7 @@ export type Database = {
           building_count: number
           city: string
           created_at: string
+          current_stage: string
           deleted_at: string | null
           id: string
           is_active: boolean
@@ -871,6 +885,7 @@ export type Database = {
           building_count?: number
           city: string
           created_at?: string
+          current_stage?: string
           deleted_at?: string | null
           id: string
           is_active?: boolean
@@ -884,6 +899,7 @@ export type Database = {
           building_count?: number
           city?: string
           created_at?: string
+          current_stage?: string
           deleted_at?: string | null
           id?: string
           is_active?: boolean
@@ -893,6 +909,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      regional_councils: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name_he: string
+          region_id: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_he: string
+          region_id: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_he?: string
+          region_id?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regional_councils_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       regions: {
         Row: {
@@ -1024,6 +1075,36 @@ export type Database = {
           },
           {
             foreignKeyName: "supplier_cities_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_councils: {
+        Row: {
+          council_id: string
+          supplier_id: string
+        }
+        Insert: {
+          council_id: string
+          supplier_id: string
+        }
+        Update: {
+          council_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_councils_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "regional_councils"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_councils_supplier_id_fkey"
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
@@ -1481,6 +1562,13 @@ export type Database = {
           residents_count: number
           suppliers_count: number
           total_savings: number
+        }[]
+      }
+      get_matching_deals_for_user: {
+        Args: { _limit?: number; _stage_filter?: string }
+        Returns: {
+          deal_id: string
+          match_priority: number
         }[]
       }
       get_supplier_rating: {
