@@ -351,7 +351,7 @@ export default function ResidentDashboard() {
         {!loading && areaDeals.length > 0 && (
           <div className="space-y-3">
             {areaDeals.slice(0, 4).map((d) => (
-              <RealDealCard key={d.id} data={d} onClick={() => navigate(`/resident/deals/${d.id}`)} />
+              <RealDealCard key={d.id} deal={d} />
             ))}
           </div>
         )}
