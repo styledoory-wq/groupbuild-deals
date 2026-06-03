@@ -14,7 +14,7 @@ import type { Role } from "@/types";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
-import authBgAsset from "@/assets/auth-bg.png.asset.json";
+
 
 type Mode = "signin" | "signup";
 
