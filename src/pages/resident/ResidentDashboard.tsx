@@ -1,132 +1,140 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  MapPin, ChevronLeft, Search as SearchIcon, Bell, LogOut,
-  PencilRuler, Hammer, Plug, Palette, Trees, Sparkles, Store, Briefcase, BellPlus,
+  Bell, Search as SearchIcon, ChevronLeft, User as UserIcon,
+  Sparkles, Store, Briefcase, PencilRuler, Hammer, Plug, Palette, Trees,
+  Info, BellPlus,
 } from "lucide-react";
-import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
-import { DealCardSkeleton } from "@/components/deals/DealCardSkeleton";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import { toast } from "sonner";
 
 type StageId = "planning" | "structure" | "systems" | "finishes" | "outdoor";
 
-const STAGES: { id: StageId; title: string; icon: typeof PencilRuler }[] = [
-  { id: "planning",  title: "תכנון ועיצוב",  icon: PencilRuler },
-  { id: "structure", title: "שלד ובנייה",    icon: Hammer },
-  { id: "systems",   title: "מערכות הבית",  icon: Plug },
-  { id: "finishes",  title: "גמרים",         icon: Palette },
-  { id: "outdoor",   title: "חוץ ופיתוח",   icon: Trees },
+const STAGES: { id: StageId; title: string; short: string; icon: typeof PencilRuler; description: string }[] = [
+  { id: "planning",  title: "תכנון ועיצוב", short: "תכנון ועיצוב", icon: PencilRuler, description: "כל מה שקשור לתכנון, עיצוב וקבלת ההחלטות הראשונות לבית שלכם." },
+  { id: "structure", title: "שלד ובנייה",    short: "שלד ובנייה",   icon: Hammer,      description: "שלב הבנייה — קונסטרוקציה, איטום, גג ומעטפת." },
+  { id: "systems",   title: "מערכות הבית",  short: "מערכות הבית", icon: Plug,        description: "חשמל, אינסטלציה, מיזוג ומערכות חכמות." },
+  { id: "finishes",  title: "גמרים",         short: "גמרים",         icon: Palette,     description: "ריצוף, צבע, מטבחים, חדרי רחצה וגמרים פנימיים." },
+  { id: "outdoor",   title: "חוץ ופיתוח",   short: "חוץ ופיתוח",   icon: Trees,       description: "גינון, חצרות, גדרות ופיתוח חיצוני." },
 ];
 
-interface DbDeal extends RealDealCardData {}
+interface MiniDeal { id: string; title: string; cover_image_url: string | null; supplier_name: string | null }
 
 export default function ResidentDashboard() {
   const navigate = useNavigate();
-  const { user, authReady, logout } = useApp();
+  const { user, authReady } = useApp();
 
-  const [profile, setProfile] = useState<{ full_name: string; city: string; project_id: string | null }>({
-    full_name: "",
-    city: "",
-    project_id: null,
-  });
+  const [fullName, setFullName] = useState("");
+  const [city, setCity] = useState("");
+  const [council, setCouncil] = useState("");
+  const [projectId, setProjectId] = useState<string | null>(null);
+
   const [currentStage, setCurrentStage] = useState<StageId>("planning");
-  const [stageProgress, setStageProgress] = useState(0); // 0–100
-  const [areaDeals, setAreaDeals] = useState<DbDeal[]>([]);
+  const [stageProgress, setStageProgress] = useState(20);
+  const [stageCategories, setStageCategories] = useState<{ id: string; name: string; icon: string }[]>([]);
+
+  const [areaDeals, setAreaDeals] = useState<MiniDeal[]>([]);
   const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
   const [joinedCount, setJoinedCount] = useState(0);
-  const [activeDealsCount, setActiveDealsCount] = useState(0);
+  const [groupResidents, setGroupResidents] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authReady || !user?.id) {
-      setLoading(false);
-      return;
-    }
+    if (!authReady || !user?.id) return;
     let cancelled = false;
     (async () => {
       try {
-        setLoading(true);
         const uid = user.id;
 
-        // Profile
         const { data: prof } = await supabase
           .from("profiles")
-          .select("full_name,city,project_id")
+          .select("full_name,city,project_id,city_id")
           .eq("id", uid)
           .maybeSingle();
-        const fullName = prof?.full_name ?? user.name ?? "דייר";
-        const city = prof?.city ?? "";
-        const projectId = (prof?.project_id as string | null) ?? null;
 
-        // Project current stage
+        const fname = prof?.full_name ?? user.name ?? "דייר";
+        const cityName = prof?.city ?? "";
+        let councilName = "";
+        if (prof?.city_id) {
+          const { data: cityRow } = await supabase
+            .from("cities")
+            .select("council_id")
+            .eq("id", prof.city_id)
+            .maybeSingle();
+          if (cityRow?.council_id) {
+            const { data: c } = await supabase
+              .from("regional_councils")
+              .select("name_he")
+              .eq("id", cityRow.council_id)
+              .maybeSingle();
+            councilName = c?.name_he ?? "";
+          }
+        }
+
         let stage: StageId = "planning";
-        if (projectId) {
+        if (prof?.project_id) {
           const { data: proj } = await supabase
             .from("projects")
             .select("current_stage")
-            .eq("id", projectId)
+            .eq("id", prof.project_id)
             .maybeSingle();
           const s = (proj?.current_stage as string | undefined) ?? "planning";
           if (["planning","structure","systems","finishes","outdoor"].includes(s)) stage = s as StageId;
         }
-
-        // Stage progress = (index / total) approximation if no real metric stored
         const idx = STAGES.findIndex((x) => x.id === stage);
-        setStageProgress(Math.round(((idx + 0.5) / STAGES.length) * 100));
+        const progress = Math.round(((idx + 0.2) / STAGES.length) * 100);
 
-        // Match deals via RPC (city → council → region → nationwide), filtered by stage
+        const { data: cats } = await supabase
+          .from("categories")
+          .select("id,name,icon")
+          .eq("stage", stage)
+          .eq("is_active", true)
+          .eq("is_deleted", false)
+          .order("display_order")
+          .limit(3);
+
         const { data: matches } = await supabase.rpc("get_matching_deals_for_user", {
           _stage_filter: stage,
-          _limit: 30,
+          _limit: 12,
         });
         const dealIds = (matches ?? []).map((m: { deal_id: string }) => m.deal_id);
 
-        let nextAreaDeals: DbDeal[] = [];
-        let suppliersInArea = new Set<string>();
-
+        let nextDeals: MiniDeal[] = [];
+        let suppliers = new Set<string>();
+        let totalJoiners = 0;
         if (dealIds.length) {
           const { data: deals } = await supabase
             .from("deals")
-            .select("id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images")
+            .select("id,title,supplier_id,cover_image_url")
             .in("id", dealIds);
           const supIds = Array.from(new Set((deals ?? []).map((d) => d.supplier_id as string)));
           const { data: sups } = supIds.length
-            ? await supabase.from("suppliers").select("id,business_name,logo_url").in("id", supIds)
-            : { data: [] as Array<{ id: string; business_name: string; logo_url: string | null }> };
-          const sMap = new Map((sups ?? []).map((s) => [s.id as string, s]));
-          nextAreaDeals = (deals ?? []).map((d) => {
-            const s = sMap.get(d.supplier_id as string);
-            suppliersInArea.add(d.supplier_id as string);
+            ? await supabase.from("suppliers").select("id,business_name").in("id", supIds)
+            : { data: [] as Array<{ id: string; business_name: string }> };
+          const sMap = new Map((sups ?? []).map((s) => [s.id as string, s.business_name as string]));
+          nextDeals = (deals ?? []).map((d) => {
+            suppliers.add(d.supplier_id as string);
             return {
-              ...(d as unknown as DbDeal),
-              supplier_name: s?.business_name ?? null,
-              supplier_logo_url: s?.logo_url ?? null,
+              id: d.id as string,
+              title: d.title as string,
+              cover_image_url: (d.cover_image_url as string) ?? null,
+              supplier_name: sMap.get(d.supplier_id as string) ?? null,
             };
           });
+          const counts = await fetchDealJoinerCounts(nextDeals.map((d) => d.id));
+          totalJoiners = Object.values(counts).reduce((a, b) => a + b, 0);
         }
 
-        // Joined / active deals counts
         const { data: interests } = await supabase
           .from("deal_interests")
-          .select("deal_id,status")
+          .select("deal_id")
           .eq("user_id", uid)
           .eq("is_deleted", false);
-        const joinedIds = Array.from(new Set((interests ?? []).map((i) => i.deal_id as string)));
-        let activeCount = 0;
-        if (joinedIds.length) {
-          const { data: jdeals } = await supabase
-            .from("deals")
-            .select("id,status")
-            .in("id", joinedIds);
-          activeCount = (jdeals ?? []).filter((d) => d.status === "active").length;
-        }
+        const joined = new Set((interests ?? []).map((i) => i.deal_id as string)).size;
 
-        // Unread notifications
         const { count: notifCount } = await supabase
           .from("notifications")
           .select("id", { count: "exact", head: true })
@@ -135,27 +143,28 @@ export default function ResidentDashboard() {
           .eq("is_deleted", false);
 
         if (cancelled) return;
-        setProfile({ full_name: fullName, city, project_id: projectId });
+        setFullName(fname);
+        setCity(cityName);
+        setCouncil(councilName);
+        setProjectId(prof?.project_id ?? null);
         setCurrentStage(stage);
-        setAreaDeals(nextAreaDeals);
-        setAreaSuppliersCount(suppliersInArea.size);
-        setJoinedCount(joinedIds.length);
-        setActiveDealsCount(activeCount);
+        setStageProgress(progress);
+        setStageCategories((cats ?? []).map((c) => ({ id: c.id, name: c.name, icon: c.icon })));
+        setAreaDeals(nextDeals);
+        setAreaSuppliersCount(suppliers.size);
+        setJoinedCount(joined);
+        setGroupResidents(totalJoiners);
         setUnreadNotifications(notifCount ?? 0);
       } catch (e) {
         console.error("[ResidentDashboard] load error", e);
-      } finally {
-        if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
   }, [authReady, user?.id, user?.name]);
 
-  const currentStageMeta = useMemo(
-    () => STAGES.find((s) => s.id === currentStage) ?? STAGES[0],
-    [currentStage],
-  );
-  const CurrentIcon = currentStageMeta.icon;
+  const stageMeta = useMemo(() => STAGES.find((s) => s.id === currentStage) ?? STAGES[0], [currentStage]);
+  const StageIcon = stageMeta.icon;
+  const heroDeal = areaDeals[0];
 
   const handleSubscribe = async () => {
     if (!user?.id) return;
@@ -166,198 +175,249 @@ export default function ResidentDashboard() {
     toast.success("נשלח אליך עדכון ברגע שתופיע הצעה באזורך");
   };
 
+  // Progress ring geometry
+  const R = 22, C = 2 * Math.PI * R;
+
   return (
-    <MobileShell>
-      {/* === Compact header === */}
-      <header className="px-5 pt-4 pb-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate("/resident/notifications")}
-              className="relative h-10 w-10 rounded-full bg-white border border-[#E2E8F0] flex items-center justify-center shadow-[0_2px_8px_-4px_rgba(15,30,60,0.10)]"
-              aria-label="התראות"
-            >
-              <Bell className="h-[18px] w-[18px] text-[#0A1F3D]" strokeWidth={2} />
-              {unreadNotifications > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#E74C3C] text-white text-[10px] font-bold flex items-center justify-center">
-                  {unreadNotifications > 9 ? "9+" : unreadNotifications}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={async () => { await logout(); toast.success("התנתקת"); navigate("/", { replace: true }); }}
-              className="h-10 w-10 rounded-full bg-white border border-[#E2E8F0] flex items-center justify-center"
-              aria-label="התנתקות"
-            >
-              <LogOut className="h-[16px] w-[16px] text-[#475569]" strokeWidth={2} />
-            </button>
-          </div>
-          <div className="text-right">
-            <h1 className="text-fs-lg font-extrabold text-[#0A1F3D] leading-tight tracking-tight">
-              שלום, {profile.full_name || "דייר"}
-            </h1>
-            <button
-              onClick={() => navigate("/resident/profile/edit")}
-              className="mt-0.5 flex items-center gap-1 text-fs-xs text-[#475569] font-medium ms-auto"
-            >
-              <span>{profile.city || "הגדר אזור"}</span>
-              <MapPin className="h-3 w-3 text-[#C9A961]" strokeWidth={2} />
-            </button>
-          </div>
+    <div
+      dir="rtl"
+      className="min-h-screen min-h-[100dvh] w-full text-white"
+      style={{
+        background:
+          "radial-gradient(120% 80% at 50% 0%, #0E2A55 0%, #071C3B 55%, #04122A 100%)",
+      }}
+    >
+      <div
+        className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 12px)" }}
+      >
+        {/* === Header === */}
+        <header className="px-5 pt-4 pb-3 flex items-center justify-between gap-3">
+          <button
+            onClick={() => navigate("/resident/notifications")}
+            className="relative h-11 w-11 rounded-full border border-white/12 bg-white/[0.04] flex items-center justify-center"
+            aria-label="התראות"
+          >
+            <Bell className="h-[18px] w-[18px] text-white/80" strokeWidth={2} />
+            {unreadNotifications > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#E74C3C] text-white text-[10px] font-bold flex items-center justify-center">
+                {unreadNotifications > 9 ? "9+" : unreadNotifications}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => navigate("/resident/profile")}
+            className="flex items-center gap-3 min-w-0"
+          >
+            <div className="text-right min-w-0">
+              <div className="flex items-center gap-1.5 justify-end">
+                <span className="text-[17px] font-bold tracking-tight truncate">שלום {fullName || "דייר"}</span>
+                <span aria-hidden>👋</span>
+              </div>
+              <div className="text-[12px] text-white/60 mt-0.5 truncate">
+                {city || "הגדר אזור"}{council ? ` · ${council}` : ""}
+              </div>
+            </div>
+            <div className="h-11 w-11 rounded-full bg-white/[0.06] border border-[#C9A961]/40 flex items-center justify-center">
+              <UserIcon className="h-5 w-5 text-[#C9A961]" strokeWidth={2} />
+            </div>
+          </button>
+        </header>
+
+        {/* === Search === */}
+        <div className="px-5">
+          <button
+            onClick={() => navigate("/resident/search")}
+            className="w-full h-11 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-between px-4 text-white/60"
+          >
+            <SearchIcon className="h-[18px] w-[18px]" strokeWidth={2} />
+            <span className="text-[13px] font-medium">חפש ספקים, קטגוריות, מוצרים…</span>
+          </button>
         </div>
-      </header>
 
-      {/* === Single search bar === */}
-      <div className="px-5">
-        <button
-          onClick={() => navigate("/resident/search")}
-          className="w-full h-11 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0_2px_10px_-6px_rgba(15,30,60,0.10)] flex items-center justify-between px-4 text-[#475569]"
-        >
-          <SearchIcon className="h-[18px] w-[18px]" strokeWidth={2} />
-          <span className="text-fs-sm font-medium">חפש ספקים והצעות</span>
-        </button>
-      </div>
-
-      {/* === KPI cards === */}
-      <div className="px-5 mt-4 grid grid-cols-4 gap-2">
-        {[
-          { label: "הצעות", val: areaDeals.length, icon: Sparkles, to: "/resident/deals" },
-          { label: "ספקים", val: areaSuppliersCount, icon: Store, to: "/resident/categories" },
-          { label: "שלי", val: joinedCount, icon: Briefcase, to: "/resident/my-offers" },
-          { label: "פעילות", val: activeDealsCount, icon: Sparkles, to: "/resident/my-offers" },
-        ].map((k) => {
-          const Icon = k.icon;
-          return (
+        {/* === 3 KPI cards === */}
+        <div className="px-5 mt-4 grid grid-cols-3 gap-2.5">
+          {[
+            { label: "הצעות", sub: "הצעות פעילות", val: areaDeals.length, Icon: Sparkles, to: "/resident/deals" },
+            { label: "ספקים", sub: "ספקים באזור", val: areaSuppliersCount, Icon: Store, to: "/resident/categories" },
+            { label: "שלי",   sub: "הצעות שהצטרפת", val: joinedCount, Icon: Briefcase, to: "/resident/my-offers" },
+          ].map((k) => (
             <button
               key={k.label}
               onClick={() => navigate(k.to)}
-              className="bg-white rounded-xl py-3 px-1 border border-[#E2E8F0] shadow-[0_2px_8px_-6px_rgba(15,30,60,0.08)] flex flex-col items-center active:scale-[0.97] transition-transform"
+              className="rounded-2xl bg-white/[0.04] border border-white/10 py-3 px-2 flex flex-col items-center active:scale-[0.97] transition-transform"
             >
-              <Icon className="h-[14px] w-[14px] text-[#94a3b8] mb-1" strokeWidth={2} />
-              <div className="text-[1.35rem] font-extrabold text-[#0A1F3D] leading-none gb-num">{k.val}</div>
-              <div className="text-[10px] text-[#475569] mt-1 font-medium">{k.label}</div>
+              <k.Icon className="h-[18px] w-[18px] text-[#C9A961] mb-1.5" strokeWidth={2} />
+              <div className="text-[26px] font-extrabold leading-none gb-num">{k.val}</div>
+              <div className="text-[12px] text-white/85 mt-1.5 font-semibold">{k.label}</div>
+              <div className="text-[10px] text-white/45 mt-0.5">{k.sub}</div>
             </button>
-          );
-        })}
-      </div>
-
-      {/* === Horizontal stage progress === */}
-      <section className="px-5 mt-5">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-fs-sm font-bold text-[#0A1F3D]">שלבי הפרויקט</h2>
-          <span className="text-fs-xs text-[#94a3b8]">{stageProgress}%</span>
+          ))}
         </div>
-        <div className="flex items-center gap-1.5">
-          {STAGES.map((s, i) => {
-            const Icon = s.icon;
-            const isCurrent = s.id === currentStage;
-            const isPast = STAGES.findIndex((x) => x.id === currentStage) > i;
-            return (
-              <button
-                key={s.id}
-                onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
-                className={
-                  "flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl border transition-all " +
-                  (isCurrent
-                    ? "bg-[#0A1F3D] border-[#C9A961] text-white"
-                    : isPast
-                      ? "bg-[#C9A961]/10 border-[#C9A961]/40 text-[#0A1F3D]"
-                      : "bg-white border-[#E2E8F0] text-[#94a3b8]")
-                }
-                aria-label={s.title}
-              >
-                <Icon className="h-4 w-4" strokeWidth={2} />
-                <span className="text-[9px] font-semibold leading-tight text-center px-0.5 line-clamp-1">{s.title}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
 
-      {/* === Current stage card === */}
-      <section className="px-5 mt-4">
-        <div className="rounded-2xl bg-gradient-to-br from-[#0A1F3D] to-[#13325E] text-white p-4 shadow-[0_8px_24px_-12px_rgba(10,31,61,0.5)]">
-          <div className="flex items-center justify-between">
-            <div className="text-right">
-              <div className="flex items-center gap-1.5 justify-end text-fs-xs text-[#C9A961] uppercase tracking-[0.14em] font-semibold">
-                <span>השלב הנוכחי</span>
-              </div>
-              <div className="text-fs-lg font-extrabold mt-1 tracking-tight">{currentStageMeta.title}</div>
-              <div className="text-fs-xs text-white/70 mt-1">
-                {areaDeals.length} הצעות זמינות באזור שלך
-              </div>
-            </div>
-            <div className="h-12 w-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center">
-              <CurrentIcon className="h-6 w-6 text-[#C9A961]" strokeWidth={2} />
-            </div>
+        {/* === Stage stepper === */}
+        <section className="px-5 mt-5">
+          <div className="flex items-center justify-end gap-1.5 mb-3">
+            <h2 className="text-[13px] font-bold text-white">תהליך הבית שלי</h2>
+            <Info className="h-3.5 w-3.5 text-[#C9A961]" strokeWidth={2} />
           </div>
-          <div className="mt-3 h-1.5 rounded-full bg-white/15 overflow-hidden">
+          <div className="relative">
+            {/* connector line */}
+            <div className="absolute top-3.5 right-3 left-3 h-px bg-white/12" />
             <div
-              className="h-full bg-[#C9A961] rounded-full transition-all"
-              style={{ width: `${stageProgress}%` }}
+              className="absolute top-3.5 right-3 h-px bg-[#C9A961] transition-all"
+              style={{
+                width: `calc((100% - 24px) * ${STAGES.findIndex((s) => s.id === currentStage) / (STAGES.length - 1)})`,
+              }}
             />
+            <div className="grid grid-cols-5 gap-1">
+              {STAGES.map((s, i) => {
+                const isCurrent = s.id === currentStage;
+                const isPast = STAGES.findIndex((x) => x.id === currentStage) > i;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => navigate(`/resident/categories?stage=${s.id}`)}
+                    className="flex flex-col items-center gap-1.5"
+                  >
+                    <span
+                      className={
+                        "relative z-10 h-7 w-7 rounded-full flex items-center justify-center text-[12px] font-bold border " +
+                        (isCurrent
+                          ? "bg-[#C9A961] border-[#C9A961] text-[#0A1F3D]"
+                          : isPast
+                            ? "bg-[#C9A961]/15 border-[#C9A961]/60 text-[#C9A961]"
+                            : "bg-transparent border-white/20 text-white/45")
+                      }
+                    >
+                      {i + 1}
+                    </span>
+                    <span className={"text-[10px] leading-tight text-center px-0.5 " + (isCurrent ? "text-[#C9A961] font-bold" : "text-white/55 font-medium")}>
+                      {s.short}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <button
-            onClick={() => navigate(`/resident/categories?stage=${currentStage}`)}
-            className="mt-3 w-full h-10 rounded-xl bg-[#C9A961] text-[#0A1F3D] font-bold text-fs-sm flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
-          >
-            צפה בהצעות
-            <ChevronLeft className="h-4 w-4" strokeWidth={2.5} />
-          </button>
-        </div>
-      </section>
+        </section>
 
-      {/* === Recommended offers === */}
-      <section className="px-5 mt-5 pb-4">
-        <div className="flex items-center justify-between mb-2.5">
-          <h2 className="text-fs-sm font-bold text-[#0A1F3D]">הצעות מומלצות עבורך</h2>
-          {areaDeals.length > 0 && (
+        {/* === Featured current-stage card === */}
+        <section className="px-5 mt-5">
+          <div className="rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden">
+            <div className="grid grid-cols-[42%_1fr]">
+              {/* image side */}
+              <div className="relative h-full min-h-[200px] bg-[#0A1F3D]">
+                {heroDeal?.cover_image_url ? (
+                  <img src={heroDeal.cover_image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#13325E] to-[#071C3B]" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#04122A]/85 via-transparent to-transparent" />
+                <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur text-[10px] font-bold text-[#C9A961] border border-[#C9A961]/40">
+                  שלב נוכחי
+                </span>
+                {groupResidents > 0 && (
+                  <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/55 backdrop-blur rounded-full px-2.5 py-1">
+                    <Sparkles className="h-3 w-3 text-[#C9A961]" strokeWidth={2.5} />
+                    <span className="text-[11px] font-bold text-white">{groupResidents}</span>
+                    <span className="text-[10px] text-white/70">דיירים בקבוצה</span>
+                  </div>
+                )}
+              </div>
+
+              {/* content side */}
+              <div className="p-4 flex flex-col">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="relative h-12 w-12 shrink-0">
+                    <svg viewBox="0 0 50 50" className="h-12 w-12 -rotate-90">
+                      <circle cx="25" cy="25" r={R} stroke="rgba(255,255,255,0.12)" strokeWidth="4" fill="none" />
+                      <circle
+                        cx="25" cy="25" r={R}
+                        stroke="#C9A961" strokeWidth="4" fill="none" strokeLinecap="round"
+                        strokeDasharray={C}
+                        strokeDashoffset={C - (C * stageProgress) / 100}
+                      />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-[#C9A961]">
+                      {stageProgress}%
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[18px] font-extrabold tracking-tight leading-tight">{stageMeta.title}</div>
+                  </div>
+                </div>
+
+                <p className="mt-2 text-[12px] text-white/70 leading-relaxed text-right line-clamp-2">
+                  {stageMeta.description}
+                </p>
+
+                {stageCategories.length > 0 && (
+                  <>
+                    <div className="my-3 h-px bg-white/10" />
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {stageCategories.map((c) => (
+                        <button
+                          key={c.id}
+                          onClick={() => navigate(`/resident/categories/${c.id}`)}
+                          className="flex flex-col items-center gap-1 active:scale-95 transition-transform"
+                        >
+                          <span className="text-[18px] leading-none">{c.icon}</span>
+                          <span className="text-[10px] text-white/70 text-center line-clamp-1 leading-tight">{c.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                <button
+                  onClick={() => navigate(`/resident/categories?stage=${currentStage}`)}
+                  className="mt-3 h-10 rounded-xl bg-[#C9A961] text-[#0A1F3D] font-extrabold text-[13px] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
+                >
+                  <ChevronLeft className="h-4 w-4" strokeWidth={3} />
+                  צפה בהצעות
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* === Recommended offers entry === */}
+        <section className="px-5 mt-3.5">
+          {areaDeals.length > 0 ? (
             <button
               onClick={() => navigate("/resident/deals")}
-              className="text-fs-xs text-[#475569] font-medium flex items-center gap-0.5"
+              className="w-full rounded-2xl bg-white/[0.04] border border-white/10 px-4 py-3 flex items-center justify-between gap-3 active:scale-[0.99] transition-transform"
             >
-              לכולן
-              <ChevronLeft className="h-3 w-3" strokeWidth={2} />
+              <ChevronLeft className="h-4 w-4 text-white/55" strokeWidth={2} />
+              <div className="flex items-center gap-3 min-w-0 text-right">
+                <div className="min-w-0">
+                  <div className="text-[14px] font-bold leading-tight">עסקאות מומלצות עבורך</div>
+                  <div className="text-[11px] text-white/55 mt-0.5 truncate">הצעות שנבחרו במיוחד עבורך</div>
+                </div>
+                <div className="h-9 w-9 rounded-xl bg-[#C9A961]/15 border border-[#C9A961]/30 flex items-center justify-center shrink-0">
+                  <Sparkles className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
+                </div>
+              </div>
             </button>
-          )}
-        </div>
-
-        {loading && (
-          <div className="space-y-3">
-            <DealCardSkeleton />
-            <DealCardSkeleton />
-          </div>
-        )}
-
-        {!loading && areaDeals.length === 0 && (
-          <div className="rounded-2xl bg-white border border-[#E2E8F0] p-5 text-center">
-            <div className="mx-auto h-12 w-12 rounded-full bg-[#F3E9CC] flex items-center justify-center mb-3">
-              <Sparkles className="h-6 w-6 text-[#B8923F]" strokeWidth={2} />
+          ) : (
+            <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-4 text-center">
+              <p className="text-[13px] font-bold">אין עדיין הצעות זמינות באזור שלך</p>
+              <p className="text-[11px] text-white/55 mt-1">נעדכן אותך מיד כשתופיע הצעה לשלב הנוכחי.</p>
+              <button
+                onClick={handleSubscribe}
+                className="mt-3 h-9 px-4 rounded-xl bg-[#C9A961] text-[#0A1F3D] text-[12px] font-bold inline-flex items-center gap-1.5"
+              >
+                <BellPlus className="h-3.5 w-3.5" strokeWidth={2.5} />
+                עדכן אותי כשיש הצעה חדשה
+              </button>
             </div>
-            <p className="text-fs-sm font-bold text-[#0A1F3D]">אין עדיין הצעות זמינות באזור שלך</p>
-            <p className="text-fs-xs text-[#475569] mt-1 leading-relaxed">
-              ברגע שספק מהאזור שלך יפרסם הצעה לשלב הנוכחי, נעדכן אותך מיד.
-            </p>
-            <button
-              onClick={handleSubscribe}
-              className="mt-4 h-10 px-4 rounded-xl bg-[#0A1F3D] text-white font-bold text-fs-sm inline-flex items-center gap-1.5 active:scale-[0.98] transition-transform"
-            >
-              <BellPlus className="h-4 w-4" strokeWidth={2} />
-              עדכן אותי כשיש הצעה חדשה
-            </button>
-          </div>
-        )}
-
-        {!loading && areaDeals.length > 0 && (
-          <div className="space-y-3">
-            {areaDeals.slice(0, 4).map((d) => (
-              <RealDealCard key={d.id} deal={d} />
-            ))}
-          </div>
-        )}
-      </section>
+          )}
+        </section>
+      </div>
 
       <BottomNav role="resident" />
-    </MobileShell>
+    </div>
   );
 }
