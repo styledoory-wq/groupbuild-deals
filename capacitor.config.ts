@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   appName: 'GroupBuild',
   webDir: 'dist',
   ios: {
-    contentInset: 'always',
+    contentInset: 'never',
   },
   plugins: {
     Keyboard: {
