@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { Tag } from "lucide-react";
+import { Tag, Search as SearchIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -38,6 +38,7 @@ export default function DealsList() {
   const [loading, setLoading] = useState(() => !cached);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<"active" | "archive">("active");
+  const [q, setQ] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -120,15 +121,21 @@ export default function DealsList() {
   const cat = categories.find((c) => c.id === categoryId);
   const stageTitle = stageId ? STAGE_TITLES[stageId] : "";
 
-  const filtered = useMemo(
-    () =>
-      deals.filter((d) =>
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return deals.filter((d) => {
+      const statusMatch =
         tab === "active"
           ? d.status === "active" && !d.auto_closed_at
-          : d.status === "closed" || !!d.auto_closed_at,
-      ),
-    [deals, tab],
-  );
+          : d.status === "closed" || !!d.auto_closed_at;
+      if (!statusMatch) return false;
+      if (!term) return true;
+      return (
+        d.title.toLowerCase().includes(term) ||
+        (d.supplier_name ?? "").toLowerCase().includes(term)
+      );
+    });
+  }, [deals, tab, q]);
 
   return (
     <MobileShell>
@@ -162,6 +169,19 @@ export default function DealsList() {
           >
             ארכיון
           </button>
+        </div>
+      </div>
+
+      <div className="px-5 mt-4 relative z-10">
+        <div className="relative">
+          <SearchIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="חפש עסקה לפי שם..."
+            className="w-full h-11 rounded-2xl bg-white border border-[#E2E8F0] pr-11 pl-4 text-fs-sm text-[#0D1B2E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#C9A84C] focus:ring-[3px] focus:ring-[#C9A84C]/15 transition"
+            dir="rtl"
+          />
         </div>
       </div>
 
