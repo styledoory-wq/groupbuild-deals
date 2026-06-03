@@ -215,74 +215,61 @@ export default function Auth() {
   return (
     <div
       dir="rtl"
-      className="auth-screen min-h-[100dvh] h-[100dvh] w-full flex justify-center text-white relative overflow-hidden"
+      className="auth-screen min-h-[100dvh] w-full flex justify-center text-white relative overflow-hidden"
       style={{ background: "#071C3B" }}
     >
-      {/* Edge-to-edge background image (extends behind status bar) with layered overlays */}
+      {/* Premium navy gradient + soft radial light — no photography */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <img
-          src={authBgAsset.url}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            objectPosition: "center top",
-            filter: "saturate(1.1) brightness(1.06) contrast(1.02)",
-            opacity: 1,
-          }}
-          draggable={false}
-        />
-        {/* Warm local spotlight on the people — lifts faces */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 58% 32% at 62% 38%, rgba(255,228,178,0.22) 0%, rgba(255,212,150,0.10) 40%, transparent 70%)",
+              "linear-gradient(180deg, #0A2147 0%, #081B38 55%, #050F25 100%)",
           }}
         />
-        {/* Light navy mood at top — lets sky + building stay vivid */}
+        {/* Soft luminous radial */}
         <div
-          className="absolute inset-x-0 top-0 h-[38%]"
+          className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(7,28,59,0.55) 0%, rgba(7,28,59,0.15) 70%, transparent 100%)",
+              "radial-gradient(ellipse 70% 50% at 50% 22%, rgba(212,175,55,0.10) 0%, rgba(212,175,55,0.04) 35%, transparent 70%)",
           }}
         />
-        {/* Calm dark zone behind the form so inputs read clearly */}
+        {/* Subtle gold ambient orbs */}
+        <div className="absolute -top-32 -right-24 h-80 w-80 rounded-full bg-[#D4AF37]/8 blur-3xl" />
+        <div className="absolute top-1/2 -left-24 h-96 w-96 rounded-full bg-[#D4AF37]/6 blur-3xl" />
+        {/* Fine grain via subtle radial dots — premium texture */}
         <div
-          className="absolute inset-x-0 bottom-0 h-[62%]"
+          className="absolute inset-0 opacity-[0.05]"
           style={{
-            background:
-              "linear-gradient(to bottom, transparent 0%, rgba(7,23,46,0.45) 25%, rgba(7,23,46,0.88) 60%, #07172E 90%)",
+            backgroundImage:
+              "radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)",
+            backgroundSize: "3px 3px",
           }}
         />
-        {/* Subtle gold ambient */}
-        <div className="absolute top-1/3 -left-24 h-80 w-80 rounded-full bg-[#D4AF37]/8 blur-3xl" />
-        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#D4AF37]/6 blur-3xl" />
       </div>
 
       <div
         className="relative z-10 w-full max-w-screen-sm flex flex-col px-6"
         style={{
-          paddingTop: "12px",
-          paddingBottom: "max(env(safe-area-inset-bottom), 14px)",
+          paddingTop: "max(env(safe-area-inset-top), 28px)",
+          paddingBottom: "max(env(safe-area-inset-bottom), 20px)",
         }}
       >
-        {/* Brand header — premium, story-first */}
-        <div className="pt-1 pb-1 animate-fade-up flex flex-col items-center text-center">
-          <BrandLogo variant="light" size="xl" className="opacity-100 drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)]" />
-          <h1 className="mt-5 text-[clamp(1.6rem,5.8vw,2rem)] font-extrabold leading-tight tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]">
-            {mode === "signin" ? "טוב לראות אותך שוב" : "בואו נצא לדרך"}
+        {/* Brand header — minimal, product-focused */}
+        <div className="pt-6 pb-2 animate-fade-up flex flex-col items-center text-center">
+          <BrandLogo variant="light" size="xl" className="opacity-100" />
+          <h1 className="mt-7 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight">
+            {mode === "signin" ? "מתחברים לעסקאות טובות יותר" : "בואו נצא לדרך"}
           </h1>
-          <div className="mt-2.5 flex items-center gap-1.5">
-            <div className="h-[2px] w-12 rounded-full bg-[#D4AF37]" />
-            <div className="h-[2px] w-2 rounded-full bg-[#D4AF37]/40" />
-          </div>
-          <p className="mt-2.5 text-white/85 text-[13px] leading-snug max-w-[20rem] drop-shadow-[0_1px_6px_rgba(0,0,0,0.5)]">
+          <div className="mt-3 h-[2px] w-10 rounded-full bg-[#D4AF37]" />
+          <p className="mt-3 text-white/65 text-[13px] leading-relaxed max-w-[22rem]">
             {mode === "signin"
-              ? "התחברו כדי להמשיך לעסקאות הקבוצתיות שלכם"
-              : "פתחו חשבון וחסכו עם השכנים על הבית החדש"}
+              ? "דיירים וספקים מתחברים לפלטפורמה אחת ויוצרים כוח קנייה שחוסך כסף לכולם"
+              : "פתחו חשבון בדקות ספורות והצטרפו לכוח הקנייה של הפרויקט שלכם"}
           </p>
         </div>
+
 
         {authError && (
           <div className="mt-3 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-100 leading-relaxed">
