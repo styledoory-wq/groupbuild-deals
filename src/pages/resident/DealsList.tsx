@@ -38,6 +38,7 @@ export default function DealsList() {
   const [loading, setLoading] = useState(() => !cached);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<"active" | "archive">("active");
+  const [q, setQ] = useState("");
 
   useEffect(() => {
     let cancelled = false;
