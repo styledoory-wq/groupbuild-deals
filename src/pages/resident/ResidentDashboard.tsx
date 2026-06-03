@@ -313,28 +313,9 @@ export default function ResidentDashboard() {
         {/* === Featured current-stage card === */}
         <section className="px-5 mt-5">
           <div className="rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden">
-            <div className="grid grid-cols-[42%_1fr]">
-              {/* image side */}
-              <div className="relative h-full min-h-[200px] bg-[#0A1F3D]">
-                {heroDeal?.cover_image_url ? (
-                  <img src={heroDeal.cover_image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
-                ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#13325E] to-[#071C3B]" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#04122A]/85 via-transparent to-transparent" />
-                <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur text-[10px] font-bold text-[#C9A961] border border-[#C9A961]/40">
-                  שלב נוכחי
-                </span>
-                {groupResidents > 0 && (
-                  <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/55 backdrop-blur rounded-full px-2.5 py-1">
-                    <Sparkles className="h-3 w-3 text-[#C9A961]" strokeWidth={2.5} />
-                    <span className="text-[11px] font-bold text-white">{groupResidents}</span>
-                    <span className="text-[10px] text-white/70">דיירים בקבוצה</span>
-                  </div>
-                )}
-              </div>
-
-              {/* content side */}
+            {/* In RTL: first DOM child = right column. Text first → text on right, image on left. */}
+            <div className="grid grid-cols-[1fr_42%]">
+              {/* content side (right in RTL) */}
               <div className="p-4 flex flex-col">
                 <div className="flex items-start justify-between gap-2">
                   <div className="relative h-12 w-12 shrink-0">
@@ -360,23 +341,28 @@ export default function ResidentDashboard() {
                   {stageMeta.description}
                 </p>
 
-                {stageCategories.length > 0 && (
-                  <>
-                    <div className="my-3 h-px bg-white/10" />
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {stageCategories.map((c) => (
-                        <button
-                          key={c.id}
-                          onClick={() => navigate(`/resident/categories/${c.id}`)}
-                          className="flex flex-col items-center gap-1 active:scale-95 transition-transform"
-                        >
-                          <span className="text-[18px] leading-none">{c.icon}</span>
-                          <span className="text-[10px] text-white/70 text-center line-clamp-1 leading-tight">{c.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+                <div className="my-3 h-px bg-white/10" />
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(stageCategories.length > 0
+                    ? stageCategories.map((c) => ({ key: c.id, label: c.name, onClick: () => navigate(`/resident/categories/${c.id}`), emoji: c.icon as string | null, Icon: null as null | typeof Triangle }))
+                    : stageMeta.defaults.map((d, i) => ({ key: `d-${i}`, label: d.label, onClick: () => navigate(`/resident/categories?stage=${currentStage}`), emoji: null as string | null, Icon: d.Icon }))
+                  ).map((c) => (
+                    <button
+                      key={c.key}
+                      onClick={c.onClick}
+                      className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+                    >
+                      <span className="h-8 w-8 rounded-full border border-[#C9A961]/35 bg-[#C9A961]/[0.08] flex items-center justify-center">
+                        {c.emoji ? (
+                          <span className="text-[16px] leading-none">{c.emoji}</span>
+                        ) : c.Icon ? (
+                          <c.Icon className="h-[15px] w-[15px] text-[#C9A961]" strokeWidth={2} />
+                        ) : null}
+                      </span>
+                      <span className="text-[10px] text-white/70 text-center line-clamp-1 leading-tight">{c.label}</span>
+                    </button>
+                  ))}
+                </div>
 
                 <button
                   onClick={() => navigate(`/resident/categories?stage=${currentStage}`)}
@@ -386,41 +372,53 @@ export default function ResidentDashboard() {
                   צפה בהצעות
                 </button>
               </div>
+
+              {/* image side (left in RTL) */}
+              <div className="relative h-full min-h-[220px] bg-[#0A1F3D]">
+                {heroDeal?.cover_image_url ? (
+                  <img src={heroDeal.cover_image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_30%_30%,#1B3E73_0%,#0E2A55_50%,#04122A_100%)]">
+                    <StageIcon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-14 w-14 text-[#C9A961]/35" strokeWidth={1.5} />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#04122A]/85 via-transparent to-transparent" />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur text-[10px] font-bold text-[#C9A961] border border-[#C9A961]/40">
+                  שלב נוכחי
+                </span>
+                <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/55 backdrop-blur rounded-full px-2.5 py-1">
+                  <Users className="h-3 w-3 text-[#C9A961]" strokeWidth={2.5} />
+                  <span className="text-[11px] font-bold text-white gb-num">{groupResidents}</span>
+                  <span className="text-[10px] text-white/70">דיירים בקבוצה</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* === Recommended offers entry === */}
+        {/* === Recommended offers entry / empty state === */}
         <section className="px-5 mt-3.5">
-          {areaDeals.length > 0 ? (
-            <button
-              onClick={() => navigate("/resident/deals")}
-              className="w-full rounded-2xl bg-white/[0.04] border border-white/10 px-4 py-3 flex items-center justify-between gap-3 active:scale-[0.99] transition-transform"
-            >
-              <ChevronLeft className="h-4 w-4 text-white/55" strokeWidth={2} />
-              <div className="flex items-center gap-3 min-w-0 text-right">
-                <div className="min-w-0">
-                  <div className="text-[14px] font-bold leading-tight">עסקאות מומלצות עבורך</div>
-                  <div className="text-[11px] text-white/55 mt-0.5 truncate">הצעות שנבחרו במיוחד עבורך</div>
+          <button
+            onClick={() => (areaDeals.length > 0 ? navigate("/resident/deals") : handleSubscribe())}
+            className="w-full rounded-2xl bg-white/[0.04] border border-white/10 px-4 py-3 flex items-center justify-between gap-3 active:scale-[0.99] transition-transform"
+          >
+            <ChevronLeft className="h-4 w-4 text-white/55" strokeWidth={2} />
+            <div className="flex items-center gap-3 min-w-0 text-right">
+              <div className="min-w-0">
+                <div className="text-[14px] font-bold leading-tight">
+                  {areaDeals.length > 0 ? "עסקאות מומלצות עבורך" : "אין עדיין הצעות באזור שלך"}
                 </div>
-                <div className="h-9 w-9 rounded-xl bg-[#C9A961]/15 border border-[#C9A961]/30 flex items-center justify-center shrink-0">
-                  <Sparkles className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
+                <div className="text-[11px] text-white/55 mt-0.5 truncate">
+                  {areaDeals.length > 0 ? "הצעות שנבחרו במיוחד עבורך" : "עדכן אותי כשיש הצעה חדשה"}
                 </div>
               </div>
-            </button>
-          ) : (
-            <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-4 text-center">
-              <p className="text-[13px] font-bold">אין עדיין הצעות זמינות באזור שלך</p>
-              <p className="text-[11px] text-white/55 mt-1">נעדכן אותך מיד כשתופיע הצעה לשלב הנוכחי.</p>
-              <button
-                onClick={handleSubscribe}
-                className="mt-3 h-9 px-4 rounded-xl bg-[#C9A961] text-[#0A1F3D] text-[12px] font-bold inline-flex items-center gap-1.5"
-              >
-                <BellPlus className="h-3.5 w-3.5" strokeWidth={2.5} />
-                עדכן אותי כשיש הצעה חדשה
-              </button>
+              <div className="h-9 w-9 rounded-xl bg-[#C9A961]/15 border border-[#C9A961]/30 flex items-center justify-center shrink-0">
+                {areaDeals.length > 0
+                  ? <Sparkles className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />
+                  : <BellPlus className="h-4 w-4 text-[#C9A961]" strokeWidth={2} />}
+              </div>
             </div>
-          )}
+          </button>
         </section>
       </div>
 
