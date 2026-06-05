@@ -202,14 +202,22 @@ export default function ResidentDashboard() {
         {/* Construction Journey */}
         <section className="px-5 mt-6">
           <div className="flex items-end justify-between mb-3">
-            <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">
-              שלב {currentIdx + 1} מתוך {STAGES.length}
-            </span>
-            <h2 className="text-[18px] font-extrabold text-[#0A1F3D] tracking-tight">מסע הבנייה שלי</h2>
+            <button
+              onClick={() => navigate("/resident/categories")}
+              className="text-[12px] font-semibold text-[#D4AF37] hover:underline"
+            >
+              כל הקטגוריות ←
+            </button>
+            <div className="text-right">
+              <h2 className="text-[18px] font-extrabold text-[#0A1F3D] tracking-tight">מסע הבנייה שלי</h2>
+              <span className="text-[11px] font-semibold text-[#6B7280] tracking-wide">
+                שלב {currentIdx + 1} מתוך {STAGES.length}
+              </span>
+            </div>
           </div>
 
           {/* Progress track */}
-          <div className="relative h-2 rounded-full bg-[#ECEEF2] overflow-hidden mb-2">
+          <div className="relative h-1.5 rounded-full bg-[#ECEEF2] overflow-hidden mb-4">
             <div
               className="absolute inset-y-0 right-0 rounded-full transition-all duration-700"
               style={{
@@ -218,66 +226,59 @@ export default function ResidentDashboard() {
               }}
             />
           </div>
-          {/* Step dots */}
-          <div className="flex justify-between mb-5 px-0.5">
-            {STAGES.map((_, i) => {
-              const done = i < currentIdx;
-              const cur = i === currentIdx;
-              return (
-                <div key={i} className={`h-2.5 w-2.5 rounded-full transition-all ${
-                  done ? "bg-[#D4AF37]" : cur ? "bg-[#D4AF37] ring-4 ring-[#D4AF37]/20" : "bg-[#ECEEF2]"
-                }`} />
-              );
-            })}
-          </div>
 
-          {/* Stage cards */}
+          {/* Stage cards — unified typography */}
           <div className="space-y-2.5">
             {STAGES.map((stage, i) => {
               const done = i < currentIdx;
               const cur = i === currentIdx;
-              const future = i > currentIdx;
               const Icon = stage.icon;
               return (
                 <button
                   key={stage.id}
                   onClick={() => stage.dbStage && navigate(`/resident/categories?stage=${stage.dbStage}`)}
                   disabled={!stage.dbStage}
-                  className={`w-full text-right rounded-[24px] p-4 flex items-center gap-3 transition-all active:scale-[0.99] ${
+                  className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 transition-all active:scale-[0.99] ${
                     cur
-                      ? "bg-white border-2 border-[#D4AF37] shadow-[0_8px_24px_-8px_rgba(212,175,55,0.35)]"
-                      : done
-                        ? "bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)]"
-                        : "bg-white/60 border border-[#ECEEF2]"
-                  } ${!stage.dbStage ? "opacity-70 cursor-default" : ""}`}
+                      ? "bg-white border-2 border-[#D4AF37] shadow-[0_10px_28px_-10px_rgba(212,175,55,0.40)]"
+                      : "bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-6px_rgba(10,31,61,0.06)]"
+                  } ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
                 >
-                  {/* Stage number / status */}
-                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                    cur ? "bg-[#D4AF37] text-white shadow-[0_4px_12px_-4px_rgba(212,175,55,0.5)]"
-                    : done ? "bg-[#22C55E]/12 text-[#22C55E]"
-                    : "bg-[#F7F8FA] text-[#6B7280]"
+                  {/* Stage badge */}
+                  <div className={`h-11 w-11 rounded-[14px] flex items-center justify-center shrink-0 ${
+                    cur
+                      ? "bg-[#D4AF37] text-white shadow-[0_6px_14px_-4px_rgba(212,175,55,0.55)]"
+                      : done
+                        ? "bg-[#22C55E]/12 text-[#22C55E]"
+                        : "bg-[#F4F6FA] text-[#6B7280]"
                   }`}>
-                    {done ? <Check className="h-5 w-5" strokeWidth={2.8} /> : <span className="text-[17px] font-extrabold">{i + 1}</span>}
+                    {done ? <Check className="h-5 w-5" strokeWidth={2.8} /> : <span className="text-[15px] font-extrabold tabular-nums">{i + 1}</span>}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Icon className={`h-4 w-4 shrink-0 ${cur ? "text-[#D4AF37]" : future ? "text-[#9CA3AF]" : "text-[#0A1F3D]"}`} strokeWidth={2} />
-                      <h3 className={`text-[15px] font-bold tracking-tight ${future ? "text-[#6B7280]" : "text-[#0A1F3D]"}`}>
+                    <div className="flex items-center gap-1.5">
+                      <Icon className={`h-[14px] w-[14px] shrink-0 ${cur ? "text-[#D4AF37]" : "text-[#9CA3AF]"}`} strokeWidth={2} />
+                      <h3 className="text-[15px] font-bold leading-tight tracking-tight text-[#0A1F3D] truncate">
                         {stage.title}
                       </h3>
+                      {cur && (
+                        <span className="ml-auto inline-flex items-center gap-1 px-2 h-[18px] rounded-full bg-[#D4AF37]/12 text-[#B8923F] text-[10px] font-bold">
+                          השלב הנוכחי
+                        </span>
+                      )}
                     </div>
-                    <p className="text-[12px] text-[#6B7280] mt-0.5 line-clamp-1">{stage.description}</p>
+                    <p className="text-[12.5px] font-medium text-[#6B7280] mt-1 leading-snug line-clamp-1">{stage.description}</p>
                   </div>
 
                   {stage.dbStage && (
-                    <ChevronLeft className={`h-4 w-4 shrink-0 ${cur ? "text-[#D4AF37]" : "text-[#9CA3AF]"}`} strokeWidth={2.4} />
+                    <ChevronLeft className="h-[18px] w-[18px] shrink-0 text-[#9CA3AF]" strokeWidth={2.2} />
                   )}
                 </button>
               );
             })}
           </div>
         </section>
+
       </div>
       <BottomNav role="resident" />
     </div>
