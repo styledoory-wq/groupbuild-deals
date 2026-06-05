@@ -31,7 +31,10 @@ export default function DealsList() {
   const stageId = searchParams.get("stage") || "";
   const stageCategoryIds = stageId ? STAGE_CATEGORY_IDS[stageId] ?? [] : [];
   const { categories } = useApp();
+
   const cacheKey = `deals-list:v2:${categoryId ?? (stageId ? `stage-${stageId}` : "all")}`;
+
+  // ✅ טוען מה-cache מיד — בלי skeleton אם יש נתונים שמורים
   const cached = getCachedValue<{ deals: DealWithSupplier[]; counts: Record<string, number> }>(cacheKey, 5 * 60_000);
   const [deals, setDeals] = useState<DealWithSupplier[]>(() => cached?.deals ?? []);
   const [counts, setCounts] = useState<Record<string, number>>(() => cached?.counts ?? {});
@@ -43,65 +46,67 @@ export default function DealsList() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // ✅ אם יש cache — לא מציג skeleton, טוען ברקע בשקט
       if (!cached) setLoading(true);
       setError(null);
       try {
         const result = await cachedQuery(cacheKey, async () => {
-        let query = supabase
-          .from("deals")
-          .select(
-            "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images,visibility_type,visibility_project_id,target_participants,join_deadline,redemption_deadline,auto_closed_at,suppliers!inner(business_name,logo_url,is_active,approval_status)",
-          )
-          .in("status", ["active", "closed"])
-          .order("created_at", { ascending: false });
+          let query = supabase
+            .from("deals")
+            .select(
+              "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images,visibility_type,visibility_project_id,target_participants,join_deadline,redemption_deadline,auto_closed_at,suppliers!inner(business_name,logo_url,is_active,approval_status)",
+            )
+            .in("status", ["active", "closed"])
+            .order("created_at", { ascending: false });
 
-        if (categoryId) query = query.eq("category_id", categoryId);
-        else if (stageId && stageCategoryIds.length) query = query.in("category_id", stageCategoryIds);
+          if (categoryId) query = query.eq("category_id", categoryId);
+          else if (stageId && stageCategoryIds.length) query = query.in("category_id", stageCategoryIds);
 
-        const { data, error: dErr } = await query;
-        if (dErr) throw dErr;
+          const { data, error: dErr } = await query;
+          if (dErr) throw dErr;
 
-        const rows = (data ?? []) as Array<Record<string, unknown>>;
-        const mapped: DealWithSupplier[] = rows
-          .filter((r) => {
-            const s = r.suppliers as { is_active?: boolean; approval_status?: string } | null;
-            if (!s) return false;
-            return s.is_active === true && (s.approval_status === "approved" || s.approval_status === "active");
-          })
-          .map((r) => {
-            const s = r.suppliers as { business_name?: string; logo_url?: string | null } | null;
-            return {
-              id: String(r.id),
-              title: String(r.title ?? ""),
-              status: String(r.status ?? "active"),
-              category_id: (r.category_id as string | null) ?? null,
-              supplier_id: String(r.supplier_id),
-              supplier_name: s?.business_name ?? null,
-              supplier_logo_url: s?.logo_url ?? null,
-              offer_type: (r.offer_type as string | null) ?? "percentage",
-              original_price: (r.original_price as number | null) ?? null,
-              discounted_price: (r.discounted_price as number | null) ?? null,
-              discount_percentage: (r.discount_percentage as number | null) ?? null,
-              base_price: (r.base_price as number | null) ?? null,
-              tiers: (Array.isArray(r.tiers) ? (r.tiers as OfferTier[]) : []) as OfferTier[],
-              ends_at: (r.ends_at as string | null) ?? null,
-              visibility_type: (r.visibility_type as string | null) ?? "public",
-              visibility_project_id: (r.visibility_project_id as string | null) ?? null,
-              cover_image_url: (r.cover_image_url as string | null) ?? null,
-              gallery_images: (Array.isArray(r.gallery_images) ? (r.gallery_images as string[]) : []) as string[],
-              target_participants: (r.target_participants as number | null) ?? null,
-              join_deadline: (r.join_deadline as string | null) ?? null,
-              redemption_deadline: (r.redemption_deadline as string | null) ?? null,
-              auto_closed_at: (r.auto_closed_at as string | null) ?? null,
-            };
-          });
+          const rows = (data ?? []) as Array<Record<string, unknown>>;
+          const mapped: DealWithSupplier[] = rows
+            .filter((r) => {
+              const s = r.suppliers as { is_active?: boolean; approval_status?: string } | null;
+              if (!s) return false;
+              return s.is_active === true && (s.approval_status === "approved" || s.approval_status === "active");
+            })
+            .map((r) => {
+              const s = r.suppliers as { business_name?: string; logo_url?: string | null } | null;
+              return {
+                id: String(r.id),
+                title: String(r.title ?? ""),
+                status: String(r.status ?? "active"),
+                category_id: (r.category_id as string | null) ?? null,
+                supplier_id: String(r.supplier_id),
+                supplier_name: s?.business_name ?? null,
+                supplier_logo_url: s?.logo_url ?? null,
+                offer_type: (r.offer_type as string | null) ?? "percentage",
+                original_price: (r.original_price as number | null) ?? null,
+                discounted_price: (r.discounted_price as number | null) ?? null,
+                discount_percentage: (r.discount_percentage as number | null) ?? null,
+                base_price: (r.base_price as number | null) ?? null,
+                tiers: (Array.isArray(r.tiers) ? (r.tiers as OfferTier[]) : []) as OfferTier[],
+                ends_at: (r.ends_at as string | null) ?? null,
+                visibility_type: (r.visibility_type as string | null) ?? "public",
+                visibility_project_id: (r.visibility_project_id as string | null) ?? null,
+                cover_image_url: (r.cover_image_url as string | null) ?? null,
+                gallery_images: (Array.isArray(r.gallery_images) ? (r.gallery_images as string[]) : []) as string[],
+                target_participants: (r.target_participants as number | null) ?? null,
+                join_deadline: (r.join_deadline as string | null) ?? null,
+                redemption_deadline: (r.redemption_deadline as string | null) ?? null,
+                auto_closed_at: (r.auto_closed_at as string | null) ?? null,
+              };
+            });
 
-        let nextCounts: Record<string, number> = {};
-        if (mapped.length) {
-          nextCounts = await fetchDealJoinerCounts(mapped.map((d) => d.id));
-        }
-        return { deals: mapped, counts: nextCounts };
+          let nextCounts: Record<string, number> = {};
+          if (mapped.length) {
+            nextCounts = await fetchDealJoinerCounts(mapped.map((d) => d.id));
+          }
+          return { deals: mapped, counts: nextCounts };
         }, 5 * 60_000);
+
         if (!cancelled) {
           setDeals(result.deals);
           setCounts(result.counts);
@@ -113,9 +118,7 @@ export default function DealsList() {
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [categoryId, stageId, cacheKey]);
 
   const cat = categories.find((c) => c.id === categoryId);
@@ -144,7 +147,6 @@ export default function DealsList() {
         subtitle={loading ? "טוען עסקאות..." : `${filtered.length} עסקאות ${tab === "active" ? "פעילות" : "בארכיון"}`}
       />
 
-      {/* Pill toggle: Active / Archive */}
       <div className="px-5 -mt-5 relative z-10">
         <div className="bg-white border border-[#E2E8F0] rounded-full p-1 flex items-center shadow-[0_6px_18px_-10px_rgba(15,30,60,0.16)]">
           <button
