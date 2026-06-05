@@ -25,7 +25,6 @@ interface DbSupplier {
   offers_products: boolean | null;
 }
 
-const NORTH_REGION_NAMES = new Set(["צפון", "כל הצפון", "גליל עליון", "גליל תחתון", "רמת הגולן", "עמקים", "חיפה והקריות"]);
 const NATIONAL_AREA = "כל הארץ";
 
 export default function CategorySuppliers() {
@@ -46,6 +45,7 @@ export default function CategorySuppliers() {
   // search removed per UX request
   const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
   const [supplierCityIds, setSupplierCityIds] = useState<Record<string, string[]>>({});
+  const [supplierCouncilIds, setSupplierCouncilIds] = useState<Record<string, string[]>>({});
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
 
@@ -109,9 +109,10 @@ export default function CategorySuppliers() {
         setLoading(false); // Show suppliers immediately
 
         // Secondary queries — non-blocking, used for richer area filtering
-        const [regionsResult, citiesResult] = await Promise.all([
+        const [regionsResult, citiesResult, councilsResult] = await Promise.all([
           supabase.from("supplier_regions").select("supplier_id,region_id"),
           supabase.from("supplier_cities").select("supplier_id,city_id"),
+          supabase.from("supplier_councils").select("supplier_id,council_id"),
         ]);
         if (cancelled) return;
 
@@ -123,8 +124,13 @@ export default function CategorySuppliers() {
         (citiesResult.data ?? []).forEach((row: { supplier_id: string; city_id: string }) => {
           cityMap[row.supplier_id] = [...(cityMap[row.supplier_id] ?? []), row.city_id];
         });
+        const councilMap: Record<string, string[]> = {};
+        (councilsResult.data ?? []).forEach((row: { supplier_id: string; council_id: string }) => {
+          councilMap[row.supplier_id] = [...(councilMap[row.supplier_id] ?? []), row.council_id];
+        });
         setSupplierRegionIds(regionMap);
         setSupplierCityIds(cityMap);
+        setSupplierCouncilIds(councilMap);
       } catch (err) {
         if (cancelled) return;
         setLoadError(err instanceof Error ? err.message : "שגיאה בטעינה");
@@ -147,9 +153,12 @@ export default function CategorySuppliers() {
   const isNationalSupplier = (s: DbSupplier) => {
     const regionCount = supplierRegionIds[s.id]?.length ?? 0;
     const cityCount = supplierCityIds[s.id]?.length ?? 0;
-    return s.serves_all_country || s.service_areas.includes(NATIONAL_AREA) || (regionCount === 0 && cityCount === 0 && s.service_areas.length === 0);
+    const councilCount = supplierCouncilIds[s.id]?.length ?? 0;
+    return s.serves_all_country || s.service_areas.includes(NATIONAL_AREA) || (regionCount === 0 && cityCount === 0 && councilCount === 0 && s.service_areas.length === 0);
   };
 
+  // Strict hierarchy match: city → council → exact region → nationwide.
+  // No fuzzy "north matches any north" heuristic — Haifa ≠ Upper Galilee.
   const matchesArea = (s: DbSupplier) => {
     if (regionId === "all" && cityId === "all") return true;
     if (isNationalSupplier(s)) return true;
@@ -157,24 +166,26 @@ export default function CategorySuppliers() {
     const selectedRegion = regions.find((r) => r.id === regionId) ?? null;
     const selectedCity = cities.find((c) => c.id === cityId) ?? null;
     const selectedCityRegion = selectedCity ? regions.find((r) => r.id === selectedCity.region_id) ?? null : null;
+    const selectedCityCouncilId = selectedCity?.council_id ?? null;
     const serviceAreas = new Set(s.service_areas ?? []);
     const sRegionIds = supplierRegionIds[s.id] ?? [];
     const sCityIds = supplierCityIds[s.id] ?? [];
-    const supplierRegionNames = sRegionIds.map((id) => regions.find((r) => r.id === id)?.name_he).filter(Boolean) as string[];
+    const sCouncilIds = supplierCouncilIds[s.id] ?? [];
 
     if (cityId !== "all" && selectedCity) {
       if (sCityIds.includes(selectedCity.id) || serviceAreas.has(selectedCity.name_he)) return true;
+      if (selectedCityCouncilId && sCouncilIds.includes(selectedCityCouncilId)) return true;
       if (sRegionIds.includes(selectedCity.region_id) || (selectedCityRegion && serviceAreas.has(selectedCityRegion.name_he))) return true;
-      if (selectedCityRegion && NORTH_REGION_NAMES.has(selectedCityRegion.name_he) && (supplierRegionNames.some((name) => NORTH_REGION_NAMES.has(name)) || serviceAreas.has("צפון") || serviceAreas.has("כל הצפון"))) return true;
+      return false;
     }
 
     if (regionId !== "all" && selectedRegion) {
       if (sRegionIds.includes(selectedRegion.id) || serviceAreas.has(selectedRegion.name_he)) return true;
-      if (NORTH_REGION_NAMES.has(selectedRegion.name_he) && (supplierRegionNames.some((name) => NORTH_REGION_NAMES.has(name)) || serviceAreas.has("צפון") || serviceAreas.has("כל הצפון"))) return true;
     }
 
     return false;
   };
+
 
   const filteredSuppliers = useMemo(() => {
     const byCategory = activeCategoryId === "all"
@@ -192,7 +203,7 @@ export default function CategorySuppliers() {
     const byArea = byKind.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
     return byKind.filter(isNationalSupplier);
-  }, [suppliers, activeCategoryId, regionId, cityId, kindFilter, supplierRegionIds, supplierCityIds, regions, cities]);
+  }, [suppliers, activeCategoryId, regionId, cityId, kindFilter, supplierRegionIds, supplierCityIds, supplierCouncilIds, regions, cities]);
 
   const areaLabel =
     cityId !== "all"

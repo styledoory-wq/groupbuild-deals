@@ -13,6 +13,7 @@ export interface City {
   id: string;
   name_he: string;
   region_id: string;
+  council_id?: string | null;
 }
 
 const FALLBACK_REGIONS: Region[] = [
