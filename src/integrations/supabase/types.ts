@@ -773,6 +773,7 @@ export type Database = {
         Row: {
           address: string | null
           admin_notes: string | null
+          avatar_url: string | null
           business_name: string | null
           city: string | null
           city_id: string | null
@@ -799,6 +800,7 @@ export type Database = {
         Insert: {
           address?: string | null
           admin_notes?: string | null
+          avatar_url?: string | null
           business_name?: string | null
           city?: string | null
           city_id?: string | null
@@ -825,6 +827,7 @@ export type Database = {
         Update: {
           address?: string | null
           admin_notes?: string | null
+          avatar_url?: string | null
           business_name?: string | null
           city?: string | null
           city_id?: string | null

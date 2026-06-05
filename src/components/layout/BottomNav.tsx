@@ -30,61 +30,57 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
 };
 
 /**
- * Floating bottom navigation — fluid sized via design tokens.
- * - Height driven by --nav-h (clamp 60→72px) so MobileShell padding matches.
- * - Each tab is min 44×44 px tap target (WCAG / Apple HIG).
- * - Icon size + label size scale fluidly via the fs-* type tokens.
+ * Premium floating dock — Apple-style glass blur, rounded 28px, gold active.
+ * Sits above the safe area as a true floating pill (not a full-width bar).
  */
 function BottomNavImpl({ role }: { role: Role }) {
   const location = useLocation();
   return (
     <nav
       dir="rtl"
-      className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center pointer-events-none translate-y-0 transition-transform duration-200 [.keyboard-open_&]:translate-y-full [.keyboard-open_&]:pointer-events-none"
-      style={{ background: "#0A1F3D" }}
+      className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center pointer-events-none px-4 transition-transform duration-200 [.keyboard-open_&]:translate-y-full [.keyboard-open_&]:pointer-events-none"
+      style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}
     >
-      <div className="pointer-events-auto w-full bg-[#0A1F3D] pb-[max(env(safe-area-inset-bottom),10px)]">
-        <div
-          className="flex items-stretch justify-between gap-0.5"
-          style={{ minHeight: "var(--nav-h)" }}
-        >
-          {items[role].map(({ to, label, icon: Icon }) => {
-            const active = location.pathname === to || (to !== `/${role}` && location.pathname.startsWith(to));
-            return (
-              <NavLink
-                key={to}
-                to={to}
-                onFocus={() => preloadRoute(to)}
-                onMouseEnter={() => preloadRoute(to)}
-                onPointerDown={() => preloadRoute(to)}
-                onTouchStart={() => preloadRoute(to)}
-                className={cn(
-                  "flex-1 min-w-touch flex flex-col items-center justify-center gap-1 transition-colors duration-200 relative group",
-                  active ? "text-gold" : "text-white/65 hover:text-white",
-                )}
-                style={{ minHeight: "var(--tap)" }}
-              >
-                {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-10 rounded-b-full bg-[#C9A961]" />}
-                <Icon
-                  className={cn(
-                    "relative shrink-0 transition-transform duration-200",
-                    active && "text-gold scale-110",
-                  )}
-                  style={{ width: "clamp(18px, 4.5vw, 22px)", height: "clamp(18px, 4.5vw, 22px)" }}
-                  strokeWidth={active ? 2 : 1.7}
-                />
-                <span
-                  className={cn(
-                    "text-fs-xs leading-none relative truncate max-w-full px-0.5 font-medium",
-                    active ? "font-semibold text-gold" : "font-normal",
-                  )}
-                >
-                  {label}
-                </span>
-              </NavLink>
-            );
-          })}
-        </div>
+      <div
+        className="pointer-events-auto w-full max-w-md flex items-stretch justify-between gap-1 px-2"
+        style={{
+          height: "var(--nav-h)",
+          borderRadius: "28px",
+          background: "rgba(255,255,255,0.82)",
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          border: "1px solid rgba(236,238,242,0.9)",
+          boxShadow: "0 12px 32px -12px rgba(10,31,61,0.18), 0 2px 8px -2px rgba(10,31,61,0.06)",
+        }}
+      >
+        {items[role].map(({ to, label, icon: Icon }) => {
+          const active = location.pathname === to || (to !== `/${role}` && location.pathname.startsWith(to));
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              onFocus={() => preloadRoute(to)}
+              onMouseEnter={() => preloadRoute(to)}
+              onPointerDown={() => preloadRoute(to)}
+              onTouchStart={() => preloadRoute(to)}
+              className={cn(
+                "flex-1 min-w-touch flex flex-col items-center justify-center gap-1 transition-all duration-200 relative rounded-2xl",
+                active ? "text-[#D4AF37]" : "text-[#0A1F3D]/55 hover:text-[#0A1F3D]",
+              )}
+              style={{ minHeight: "var(--tap)" }}
+            >
+              <Icon
+                className={cn("shrink-0 transition-transform duration-200", active && "scale-110")}
+                style={{ width: "clamp(20px, 5vw, 24px)", height: "clamp(20px, 5vw, 24px)" }}
+                strokeWidth={active ? 2.4 : 1.8}
+              />
+              <span className={cn("text-[10px] leading-none truncate max-w-full px-0.5", active ? "font-bold" : "font-medium")}>
+                {label}
+              </span>
+              {active && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-[#D4AF37]" />}
+            </NavLink>
+          );
+        })}
       </div>
     </nav>
   );
