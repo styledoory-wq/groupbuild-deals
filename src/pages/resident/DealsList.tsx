@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Tag, Search as SearchIcon } from "lucide-react";
-import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { PremiumHeader } from "@/components/layout/PremiumHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
@@ -141,81 +140,82 @@ export default function DealsList() {
   }, [deals, tab, q]);
 
   return (
-    <MobileShell>
-      <PageHeader
-        title={cat ? `${cat.icon}  ${cat.name}` : stageTitle ? `הצעות — ${stageTitle}` : "כל העסקאות"}
-        subtitle={loading ? "טוען עסקאות..." : `${filtered.length} עסקאות ${tab === "active" ? "פעילות" : "בארכיון"}`}
-      />
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F8FA" }}>
+      <div
+        className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
+      >
+        <PremiumHeader
+          title={cat ? `${cat.icon} ${cat.name}` : stageTitle ? stageTitle : "כל ההצעות"}
+          subtitle={loading ? "טוען..." : `${filtered.length} הצעות ${tab === "active" ? "פעילות" : "בארכיון"}`}
+        />
 
-      <div className="px-5 -mt-5 relative z-10">
-        <div className="bg-white border border-[#E2E8F0] rounded-full p-1 flex items-center shadow-[0_6px_18px_-10px_rgba(15,30,60,0.16)]">
-          <button
-            onClick={() => setTab("active")}
-            className={
-              "flex-1 h-10 rounded-full text-fs-sm font-bold transition-all " +
-              (tab === "active"
-                ? "bg-[#0A1F3D] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-                : "text-[#475569]")
-            }
-          >
-            פעילות
-          </button>
-          <button
-            onClick={() => setTab("archive")}
-            className={
-              "flex-1 h-10 rounded-full text-fs-sm font-bold transition-all " +
-              (tab === "archive"
-                ? "bg-[#0A1F3D] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-                : "text-[#475569]")
-            }
-          >
-            ארכיון
-          </button>
+        {/* Tabs — segmented control */}
+        <div className="px-5 mt-3">
+          <div className="bg-white border border-[#ECEEF2] rounded-full p-1 flex items-center shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)]">
+            <button
+              onClick={() => setTab("active")}
+              className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all ${
+                tab === "active" ? "bg-[#0A1F3D] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
+              }`}
+            >
+              פעילות
+            </button>
+            <button
+              onClick={() => setTab("archive")}
+              className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all ${
+                tab === "archive" ? "bg-[#0A1F3D] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
+              }`}
+            >
+              ארכיון
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="px-5 mt-4 relative z-10">
-        <div className="relative">
-          <SearchIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="חפש עסקה לפי שם..."
-            className="w-full h-11 rounded-2xl bg-white border border-[#E2E8F0] pr-11 pl-4 text-fs-sm text-[#0D1B2E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#C9A84C] focus:ring-[3px] focus:ring-[#C9A84C]/15 transition"
-            dir="rtl"
-          />
+        {/* Search */}
+        <div className="px-5 mt-3">
+          <div className="relative">
+            <SearchIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#6B7280]" strokeWidth={2} />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="חפש הצעה לפי שם..."
+              className="w-full h-12 rounded-[18px] bg-white border border-[#ECEEF2] pr-11 pl-4 text-[14px] font-medium text-[#0A1F3D] placeholder:text-[#6B7280] focus:outline-none focus:border-[#D4AF37] focus:ring-[3px] focus:ring-[#D4AF37]/15 transition"
+              dir="rtl"
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="px-5 md:px-8 lg:px-10 mt-5 relative z-10">
-        <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
-          {loading && <DealCardSkeletonList count={4} />}
+        <div className="px-5 md:px-8 lg:px-10 mt-5">
+          <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+            {loading && <DealCardSkeletonList count={4} />}
 
-          {!loading && error && (
-            <div className="rounded-2xl border border-border/60 bg-card p-6 text-center md:col-span-2 lg:col-span-3 shadow-sm">
-              <p className="text-sm font-bold text-foreground">שגיאה בטעינה</p>
-              <p className="text-xs text-muted-foreground mt-1">{error}</p>
-            </div>
-          )}
+            {!loading && error && (
+              <div className="rounded-[20px] border border-[#ECEEF2] bg-white p-6 text-center md:col-span-2 lg:col-span-3">
+                <p className="text-[14px] font-bold text-[#0A1F3D]">שגיאה בטעינה</p>
+                <p className="text-[12px] text-[#6B7280] mt-1">{error}</p>
+              </div>
+            )}
 
-          {!loading && !error && filtered.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-border/70 bg-white/60 p-10 text-center md:col-span-2 lg:col-span-3">
-              <Tag className="h-8 w-8 mx-auto mb-3 text-muted-foreground/70" />
-              <p className="text-sm font-semibold text-foreground">
-                {tab === "active" ? "אין עדיין עסקאות פעילות" : "אין עסקאות בארכיון"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."}
-              </p>
-            </div>
-          )}
+            {!loading && !error && filtered.length === 0 && (
+              <div className="rounded-[24px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center md:col-span-2 lg:col-span-3">
+                <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
+                <p className="text-[14px] font-bold text-[#0A1F3D]">
+                  {tab === "active" ? "אין עדיין הצעות פעילות" : "אין הצעות בארכיון"}
+                </p>
+                <p className="text-[12px] text-[#6B7280] mt-1">
+                  {cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."}
+                </p>
+              </div>
+            )}
 
-          {!loading && !error && filtered.map((d) => (
-            <RealDealCard key={d.id} deal={d} joinersCount={counts[d.id] ?? 0} />
-          ))}
+            {!loading && !error && filtered.map((d) => (
+              <RealDealCard key={d.id} deal={d} joinersCount={counts[d.id] ?? 0} />
+            ))}
+          </div>
         </div>
       </div>
       <BottomNav role="resident" />
-    </MobileShell>
+    </div>
   );
 }
