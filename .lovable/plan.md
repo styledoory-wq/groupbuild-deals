@@ -1,100 +1,77 @@
-## שדרוג GroupBuild — מנגנון זכאות, שוברים דיגיטליים ומימוש ספקים
 
-מערכת ה-MVP תתווסף על הקוד הקיים מבלי לשבור תהליכים. כל המורכבות (אבטחה, audit, rotation של QR) מוסתרת — לדייר ולספק נשארת חוויה של 2-3 קליקים.
+# תיקון מסך הקטגוריות
 
----
+שינויים ממוקדים ב-`src/pages/resident/CategoriesList.tsx` בלבד. שאר האפליקציה והניווט לא משתנים.
 
-### 1. שינויי DB (migration אחת)
+## 1. איחוד שלבים ל-5
 
-**הרחבת `deals`:**
-- `target_participants` (int), `join_deadline` (timestamptz), `redemption_deadline` (timestamptz)
-- `service_areas` (text[]), `appointment_required` (bool), `offer_terms` (text)
-- `max_redemptions` (int), `restrictions` (text)
-- `auto_closed_at` (timestamptz) — מתי נסגרה אוטומטית
-- `supplier_commitment_accepted` (bool) — checkbox בעת יצירת הצעה
+מיזוג השלבים הקיימים ל-5 לפי הבקשה (כל הקטגוריות הקיימות נשמרות, רק קבוצות מאוחדות):
 
-**טבלה חדשה `vouchers` (שוברי זכאות):**
-- `id`, `code` (גיבוי קצר ייחודי), `deal_id`, `user_id`, `supplier_id`
-- `status` (`eligible` | `appointment` | `measured` | `ordered` | `installed` | `completed` | `redeemed` | `expired`)
-- `issued_at`, `expires_at`, `redeemed_at`, `redeemed_by_supplier_id`
-- `reference_number` (אסמכתא ייחודית מוצגת לדייר)
-- `rotation_secret` (משמש לחתימת QR דינמי)
+- **שלב 1 — תכנון ועיצוב** · כחול `#2F6BFF` · architect, interior-designer, consultant
+- **שלב 2 — שלד ובנייה** · כתום `#E8742C` · contractor, skeleton
+- **שלב 3 — מערכות הבית** · טורקיז `#0FB5C9` · electric, plumbing, ac, smart-home
+- **שלב 4 — גמרים** · סגול/זהב `#7A4FCF` · doors, security-door, windows, painting, flooring, cladding, carpentry, gypsum, closets, lighting, kitchen, bath, sanitary, showers
+- **שלב 5 — חוץ ופיתוח** · ירוק `#6E8A2E` · garden, pergola, cleaning
 
-**טבלה חדשה `voucher_audit_log`:**
-- `voucher_id`, `actor_id`, `action` (`issued`/`scanned`/`redeemed`/`duplicate_attempt`/`failed`/`status_changed`/`admin_override`)
-- `ip`, `user_agent`, `metadata jsonb`, `created_at`
+## 2. ראש המסך
 
-**טבלה חדשה `complaints`:**
-- `user_id`, `deal_id`, `supplier_id`, `issue_type`, `description`, `attachments jsonb`, `status`, `created_at`
+- שורת חיפוש קיימת נשארת (sticky, glass, נקייה).
+- מתחתיה בלוק "כל התחומים":
+  - כותרת קטנה "כל התחומים" + כפתור טקסט קטן "הצג הכל" בצד שמאל.
+  - **שתי שורות בלבד, 4 עמודות**:
+    - שורה 1: הכל / תכנון / בנייה / מערכות
+    - שורה 2: פתחים / גמר / מטבח ואמבט / חצר
+  - הצ'יפ "פתחים" / "מטבח ואמבט" יסננו לתת-קבוצות בתוך שלב 4 (filter פנימי לפי ids). "חצר" → שלב 5.
+- "הצג הכל" פותח **Bottom Sheet** (`@/components/ui/sheet` עם `side="bottom"`) שמציג רשימת כל הקטגוריות עם כמות ספקים, לחיצה מנווטת ל-`/resident/categories/:id`.
 
-**הרחבת `suppliers`:**
-- `trust_score` (numeric), `verified_supplier` (bool), `complaints_count` (int), `successful_redemptions` (int)
-- (`rating` כבר קיים דרך reviews; `redemption_rate` יחושב view)
+## 3. רשימת השלבים
 
-**פונקציות / triggers:**
-- `trg_auto_close_deal` — כשמספר ה-`paid` ב-`deposits` ≥ `target_participants` → סטטוס=`closed`, יצירת voucher לכל משתתף, `auto_closed_at=now()`.
-- `redeem_voucher(_code, _qr_token)` — security definer: אימות חתימת QR, חסימת duplicate, עדכון `redeemed_*`, audit log, עדכון מונה ספק.
-- `lock_closed_deal_fields` — מונע שינוי מחיר/תנאים אחרי `auto_closed_at` אלא ל-admin.
+תמיד מוצגות לפי סדר 1→5. בחירת צ'יפ מסננת לשלב יחיד (או תת-קבוצה בתוך השלב לפתחים/מטבח/חצר). "הכל" מציג את כל ה-5 לפי הסדר.
 
-**RLS:**
-- דייר רואה רק שוברים שלו; ספק רואה רק שוברים של ההצעות שלו; admin רואה הכול.
-- audit log — insert חופשי מ-definer functions, select admin בלבד.
+## 4. כרטיסי תת-קטגוריה (קומפקטיים)
 
----
+Grid 2 עמודות, גובה מינימלי `~104px` (במקום 148):
 
-### 2. Edge Functions
+```
+┌─────────────────┐
+│ [icon]      [n] │
+│                 │
+│ שם קטגוריה      │
+│ 12 ספקים        │
+└─────────────────┘
+```
 
-- **`voucher-qr-token`** — מחזיר JWT קצר מועד (60s) עם `voucher_id` חתום ב-`rotation_secret`. נקרא כל 45s מהלקוח.
-- **`voucher-redeem`** — מקבל token+supplier auth, מאמת, קורא ל-`redeem_voucher`, מחזיר תוצאה.
-- **`voucher-status-update`** — לעדכון סטטוסים על ידי הספק (נקבעה פגישה / הותקן וכו').
+- אייקון `36×36` עגול, צבע = צבע השלב.
+- שם בולד `13.5px`.
+- מתחת: "N ספקים" או תג "בקרוב".
+- ללא chips של שמות ספקים (הוסר).
+- רקע: `rgba(255,255,255,0.72)` + `backdrop-blur(10px)`.
+- מסגרת: `1px solid {stageAccent}` (הצבע של השלב, לא רק tint).
+- צל: `0 4px 16px -8px rgba(10,31,61,0.18)`.
+- פינות `18px`, `active:scale-[0.97]`.
 
----
+קטגוריות עם 0 ספקים:
+- `opacity: 0.55`, ללא צל.
+- תג "בקרוב" אפור במקום מספר.
+- לא ניתנות ללחיצה (או מנווטות אבל ויזואלית מוחלשות).
 
-### 3. שינויים בקוד / מסכים חדשים
+## 5. כותרת שלב
 
-**דייר:**
-- מסך חדש `/resident/my-vouchers` ("ההטבה שלי"): כרטיס שובר עם QR מתחדש, קוד גיבוי, אסמכתא, סטטוס, תוקף.
-- ב-`DealsList` ובכרטיסים: chip "X מ-Y הצטרפו · נשאר N", "K שכנים בבניין כבר מימשו".
-- ב-`MyOffers`: ברגע שעסקה נסגרת → CTA "צפה בשובר".
-- כפתור "דווח על בעיה" בעמוד עסקה / שובר.
+מינימלית: בר צבע אנכי דק בצבע השלב + "שלב N · שם" + ספירת ספקים בסוף השורה. ללא ריבוע אייקון גדול וללא progress (נקי יותר).
 
-**ספק (תוספות לאזור הקיים, לא דשבורד חדש):**
-- `/supplier/scan` — מסך סריקה: מצלמה (QR) + שדה קוד ידני → מסך ירוק "הדייר זכאי" → "אשר מימוש".
-- `/supplier/redemptions` — טבלת לקוחות זכאים: דייר, פרויקט, הצעה, מחיר, סטטוס (Select inline לעדכון), חיפוש/סינון.
-- בכרטיס הצעה: מונים — זכאים, מימשו, % מימוש, פוטנציאל הכנסה.
-- ב-`OfferEditor`: שדות חדשים (יעד משתתפים, deadlines, תקנון), checkbox התחייבות חובה.
+## 6. אחידות צבע פר שלב
 
-**Admin:**
-- הרחבת `AdminDeals`: עמודות זכאים/מומשו/תלונות/אחוז מימוש.
-- מסך חדש `/admin/complaints`.
-- בכרטיס ספק: כפתורי השעיה/חסימה/אימות + צפיית Audit Log.
-- Override ידני לשובר (פתיחה מחדש / שינוי תוקף) עם רישום ב-audit.
+מילון יחיד `STAGE_COLOR[stageId] = { accent, tint, text }` משמש לאייקון, מסגרת כרטיס, מספר, וכותרת השלב — אין יותר גוונים אקראיים.
 
----
+## 7. תחתית
 
-### 4. אבטחה ו-UX (מאחורי הקלעים)
+`BottomNav` כבר fixed עם safe-area. רק לוודא ש-`paddingBottom` של ה-container נשאר `calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)` כדי שכרטיסים לא ייכנסו מתחתיו. אין שינוי ב-`BottomNav.tsx`.
 
-- QR מתחדש כל 45-60s דרך React Query polling, חתימה HMAC עם `rotation_secret` (לא חשוף לקליינט).
-- ניסיון מימוש כפול → audit + תגובה "השובר כבר מומש" + notify_admins.
-- חסימת עריכת עסקה סגורה ברמת trigger.
-- כל הטפסים נקיים: שובר = QR גדול + 3 שדות. סריקה לספק = מסך אחד.
+## מה לא משתנה
 
----
+- ניווט, ראוטים, `BottomNav`, `PremiumHeader`, חיפוש סופקיים, שאר הדפים.
+- אין הוספת תמונות, אין גלילה אופקית.
 
-### Technical details
+## קבצים
 
-קבצים חדשים: `src/pages/resident/MyVouchers.tsx`, `VoucherCard.tsx`, `src/pages/supplier/SupplierScan.tsx`, `SupplierRedemptions.tsx`, `src/pages/admin/AdminComplaints.tsx`, `src/components/complaints/ReportIssueDialog.tsx`, `supabase/functions/voucher-qr-token/index.ts`, `voucher-redeem/index.ts`, `voucher-status-update/index.ts`. שינויים ב-`App.tsx` (routes), `BottomNav.tsx` (טאב "ההטבה שלי" לדייר, "סריקה" לספק), `OfferEditor.tsx`, `DealDetail.tsx`, `MyOffers.tsx`, `AdminDeals.tsx`.
-
-ספריות: `html5-qrcode` לסריקה, `qrcode.react` לתצוגה.
-
----
-
-### היקף MVP — מה דוחים לשלב ב'
-
-- חישוב trust_score אוטומטי (נשאיר עדכון ידני של admin בינתיים).
-- התראות SMS למימוש (יישאר רק push/email דרך מנגנון notifications הקיים).
-- ניתוח device fingerprint עמוק (נשמור IP+UA בלבד).
-
----
-
-האם לאשר את התוכנית ולהתחיל ביישום? אם תרצה — אפשר לחלק לשלבים (קודם DB+שובר, אחר כך מסכי ספק, אחר כך admin/תלונות).
+- `src/pages/resident/CategoriesList.tsx` — שכתוב פנימי בלבד.
