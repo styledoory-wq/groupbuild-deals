@@ -45,6 +45,7 @@ export default function CategorySuppliers() {
   // search removed per UX request
   const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
   const [supplierCityIds, setSupplierCityIds] = useState<Record<string, string[]>>({});
+  const [supplierCouncilIds, setSupplierCouncilIds] = useState<Record<string, string[]>>({});
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
 
