@@ -221,10 +221,6 @@ export default function CategoriesList() {
             {/* === LARGE APPLE-STYLE CATEGORY CARDS === */}
             <div className="px-5 mt-6 space-y-7">
               {visibleStages.map(({ stage, cats, totalSuppliers }) => {
-                const isExpanded = !!expanded[stage.id];
-                const visibleCats = isExpanded ? cats : cats.slice(0, INITIAL_VISIBLE);
-                const hasMore = cats.length > INITIAL_VISIBLE;
-
                 return (
                   <section key={stage.id}>
                     {/* Stage heading */}
@@ -249,30 +245,30 @@ export default function CategoriesList() {
                         קטגוריות יתווספו בקרוב
                       </div>
                     ) : (
-                      <>
-                        <div className="grid grid-cols-2 gap-3">
-                          {visibleCats.map((c) => (
-                            <CategoryCard
-                              key={c.id}
-                              id={c.id}
-                              name={c.name}
-                              icon={c.icon}
-                              count={counts[c.id] ?? 0}
-                              chips={chipsByCat[c.id] ?? []}
-                              stage={stage}
-                            />
+                      <div className="relative -mx-5">
+                        <div
+                          className="flex gap-3 overflow-x-auto px-5 pb-1 snap-x no-scrollbar"
+                          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
+                        >
+                          {cats.map((c) => (
+                            <div key={c.id} className="snap-start shrink-0 w-[150px]">
+                              <CategoryCard
+                                id={c.id}
+                                name={c.name}
+                                icon={c.icon}
+                                count={counts[c.id] ?? 0}
+                                chips={chipsByCat[c.id] ?? []}
+                                stage={stage}
+                              />
+                            </div>
                           ))}
+                          <div className="shrink-0 w-2" />
                         </div>
-
-                        {hasMore && (
-                          <button
-                            onClick={() => setExpanded((p) => ({ ...p, [stage.id]: !isExpanded }))}
-                            className="w-full mt-3 h-10 rounded-full bg-white border border-[#ECEEF2] text-[12.5px] font-bold text-[#0A1F3D] active:scale-[0.98] transition-transform shadow-[0_2px_8px_-4px_rgba(10,31,61,0.08)]"
-                          >
-                            {isExpanded ? "הצג פחות" : `הצג עוד (${cats.length - INITIAL_VISIBLE})`}
-                          </button>
-                        )}
-                      </>
+                        <div
+                          className="pointer-events-none absolute top-0 bottom-1 left-0 w-8"
+                          style={{ background: "linear-gradient(90deg, #F7F8FA, rgba(247,248,250,0))" }}
+                        />
+                      </div>
                     )}
                   </section>
                 );
@@ -342,52 +338,37 @@ function CategoryCard({
     <>
       <div className="flex items-start justify-between">
         <div
-          className="h-12 w-12 rounded-[16px] flex items-center justify-center text-[24px] bg-white shadow-[0_2px_6px_rgba(10,31,61,0.06)]"
+          className="h-10 w-10 rounded-[12px] flex items-center justify-center text-[20px] bg-white shadow-[0_2px_6px_rgba(10,31,61,0.06)]"
           style={{ border: `1px solid ${stage.border}` }}
         >
           <span>{icon}</span>
         </div>
         {dim ? (
-          <span className="text-[9.5px] font-extrabold px-2 py-0.5 rounded-full bg-[#F4F6FA] text-[#9CA3AF]">
+          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#F4F6FA] text-[#9CA3AF]">
             בקרוב
           </span>
         ) : (
           <span
-            className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white"
+            className="text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-white"
             style={{ color: stage.accent, border: `1px solid ${stage.border}` }}
           >
-            {count} ספקים
+            {count}
           </span>
         )}
       </div>
 
-      <p className="mt-3 text-[15px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
+      <p className="mt-2.5 text-[13px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
         {name}
       </p>
-
-      {/* Subcategory chips (top supplier names) */}
-      {!dim && chips.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1 overflow-hidden" style={{ maxHeight: 46 }}>
-          {chips.slice(0, 3).map((label, i) => (
-            <span
-              key={i}
-              className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-white/85 text-[#475569] truncate max-w-[96px]"
-              style={{ border: `1px solid ${stage.border}` }}
-            >
-              {label}
-            </span>
-          ))}
-        </div>
-      )}
     </>
   );
 
   const baseStyle: React.CSSProperties = {
-    background: `linear-gradient(180deg, ${stage.tint} 0%, rgba(255,255,255,0.92) 70%)`,
+    background: stage.tint,
     border: `1px solid ${stage.border}`,
     boxShadow: dim ? "none" : "0 6px 20px -10px rgba(10,31,61,0.18)",
-    minHeight: 168,
-    opacity: dim ? 0.6 : 1,
+    height: 128,
+    opacity: dim ? 0.55 : 1,
   };
 
   if (dim) {
