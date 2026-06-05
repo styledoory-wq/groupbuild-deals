@@ -30,28 +30,23 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
 };
 
 /**
- * Premium floating dock — Apple-style glass blur, rounded 28px, gold active.
- * Sits above the safe area as a true floating pill (not a full-width bar).
+ * Facebook-style persistent bottom nav — full-width white bar,
+ * fixed to the bottom, subtle hairline + shadow, respects iOS safe area.
  */
 function BottomNavImpl({ role }: { role: Role }) {
   const location = useLocation();
   return (
     <nav
       dir="rtl"
-      className="fixed bottom-0 left-0 right-0 z-[90] flex justify-center pointer-events-none px-4 transition-transform duration-200 [.keyboard-open_&]:translate-y-full [.keyboard-open_&]:pointer-events-none"
-      style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}
+      className="fixed bottom-0 left-0 right-0 z-[90] bg-white border-t border-[#ECEEF2] transition-transform duration-200 [.keyboard-open_&]:translate-y-full [.keyboard-open_&]:pointer-events-none"
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom)",
+        boxShadow: "0 -4px 16px -8px rgba(10,31,61,0.08)",
+      }}
     >
       <div
-        className="pointer-events-auto w-full max-w-md flex items-stretch justify-between gap-1 px-2"
-        style={{
-          height: "var(--nav-h)",
-          borderRadius: "28px",
-          background: "rgba(255,255,255,0.82)",
-          backdropFilter: "blur(24px) saturate(180%)",
-          WebkitBackdropFilter: "blur(24px) saturate(180%)",
-          border: "1px solid rgba(236,238,242,0.9)",
-          boxShadow: "0 12px 32px -12px rgba(10,31,61,0.18), 0 2px 8px -2px rgba(10,31,61,0.06)",
-        }}
+        className="mx-auto w-full max-w-[var(--app-max-w)] flex items-stretch justify-between px-1"
+        style={{ height: "var(--nav-h)" }}
       >
         {items[role].map(({ to, label, icon: Icon }) => {
           const active = location.pathname === to || (to !== `/${role}` && location.pathname.startsWith(to));
@@ -64,20 +59,26 @@ function BottomNavImpl({ role }: { role: Role }) {
               onPointerDown={() => preloadRoute(to)}
               onTouchStart={() => preloadRoute(to)}
               className={cn(
-                "flex-1 min-w-touch flex flex-col items-center justify-center gap-1 transition-all duration-200 relative rounded-2xl",
-                active ? "text-[#D4AF37]" : "text-[#0A1F3D]/55 hover:text-[#0A1F3D]",
+                "flex-1 flex flex-col items-center justify-center gap-[3px] relative transition-colors duration-150",
+                active ? "text-[#D4AF37]" : "text-[#6B7280] hover:text-[#0A1F3D]",
               )}
               style={{ minHeight: "var(--tap)" }}
             >
-              <Icon
-                className={cn("shrink-0 transition-transform duration-200", active && "scale-110")}
-                style={{ width: "clamp(20px, 5vw, 24px)", height: "clamp(20px, 5vw, 24px)" }}
-                strokeWidth={active ? 2.4 : 1.8}
+              {/* Top active indicator — Facebook style */}
+              <span
+                className={cn(
+                  "absolute top-0 left-1/2 -translate-x-1/2 h-[3px] rounded-b-full transition-all duration-200",
+                  active ? "w-10 bg-[#D4AF37]" : "w-0 bg-transparent",
+                )}
               />
-              <span className={cn("text-[10px] leading-none truncate max-w-full px-0.5", active ? "font-bold" : "font-medium")}>
+              <Icon
+                className={cn("shrink-0 transition-transform duration-200", active && "scale-[1.08]")}
+                style={{ width: 24, height: 24 }}
+                strokeWidth={active ? 2.4 : 1.9}
+              />
+              <span className={cn("text-[10.5px] leading-none truncate max-w-full px-0.5 tracking-tight", active ? "font-bold" : "font-semibold")}>
                 {label}
               </span>
-              {active && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-[#D4AF37]" />}
             </NavLink>
           );
         })}
