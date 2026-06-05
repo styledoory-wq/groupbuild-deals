@@ -1,38 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Sparkles, ArrowLeft, Search, X, Tag, Users, ChevronLeft } from "lucide-react";
-import { MobileShell } from "@/components/layout/MobileShell";
+import { ChevronLeft, Search, X, Tag, Users } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { PremiumHeader } from "@/components/layout/PremiumHeader";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import { CategoryTileSkeleton } from "@/components/deals/DealCardSkeleton";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
-// Stage → category IDs mapping (matches dashboard)
-const STAGE_CATEGORIES: Record<string, { title: string; ids: string[] }> = {
-  planning: { title: "תכנון ועיצוב", ids: ["architect", "interior-designer", "consultant"] },
-  structure: { title: "שלד ובנייה", ids: ["contractor", "skeleton", "gypsum"] },
-  systems: { title: "מערכות הבית", ids: ["electric", "plumbing", "ac", "smart-home"] },
-  finishes: {
-    title: "גמרים",
-    ids: [
-      "windows", "doors", "security-door",
-      "flooring", "cladding", "painting",
-      "kitchen", "bath", "showers", "sanitary",
-      "carpentry", "closets", "lighting",
-    ],
-  },
-  outdoor: { title: "חוץ ופיתוח", ids: ["garden", "pergola", "cleaning"] },
-};
+const STAGES: { id: string; title: string; ids: string[] }[] = [
+  { id: "planning",  title: "תכנון ועיצוב",       ids: ["architect", "interior-designer", "consultant"] },
+  { id: "structure", title: "שלד ובנייה",          ids: ["contractor", "skeleton", "gypsum"] },
+  { id: "systems",   title: "מערכות הבית",         ids: ["electric", "plumbing", "ac", "smart-home"] },
+  { id: "finishes",  title: "גמרים",                ids: ["windows","doors","security-door","flooring","cladding","painting","kitchen","bath","showers","sanitary","carpentry","closets","lighting"] },
+  { id: "furniture", title: "ריהוט והלבשת הבית",  ids: [] },
+  { id: "outdoor",   title: "חצר ופיתוח",          ids: ["garden", "pergola", "cleaning"] },
+];
+
+const STAGE_BY_ID: Record<string, typeof STAGES[number]> = Object.fromEntries(STAGES.map(s => [s.id, s]));
 
 interface SupplierLite {
-  id: string;
-  business_name: string;
-  short_description: string | null;
-  logo_url: string | null;
-  categories: string[];
-  service_areas: string[];
+  id: string; business_name: string; short_description: string | null;
+  logo_url: string | null; categories: string[]; service_areas: string[];
 }
 
 export default function CategoriesList() {
@@ -41,284 +30,212 @@ export default function CategoriesList() {
   const [searchParams] = useSearchParams();
   const stageId = searchParams.get("stage") || "";
   const view = searchParams.get("view") || "";
-  const stage = stageId ? STAGE_CATEGORIES[stageId] : null;
+  const stage = stageId ? STAGE_BY_ID[stageId] : null;
   const showStageChoice = !!stage && view !== "suppliers";
 
-  const visibleCategories = useMemo(() => {
-    if (!stage) return categories;
-    const allowed = new Set(stage.ids);
-    return categories.filter((c) => allowed.has(c.id));
-  }, [categories, stage]);
-
-  const cachedSuppliers = getCachedValue<SupplierLite[]>("categories:suppliers", 5 * 60_000);
-  const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cachedSuppliers ?? []);
-  const [loadingSuppliers, setLoadingSuppliers] = useState(() => !cachedSuppliers);
+  const cached = getCachedValue<SupplierLite[]>("categories:suppliers", 5 * 60_000);
+  const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      try {
-        const data = await cachedQuery<SupplierLite[]>("categories:suppliers", async () => {
-          const { data } = await supabase
-            .from("suppliers")
-            .select("id,business_name,short_description,logo_url,categories,service_areas")
-            .eq("is_active", true)
-            .eq("is_deleted", false)
-            .in("approval_status", ["approved", "active"])
-            .order("business_name");
-          return (data as SupplierLite[]) ?? [];
-        }, 5 * 60_000);
-        if (!cancelled) setSuppliers(data);
-      } finally {
-        if (!cancelled) setLoadingSuppliers(false);
-      }
+      const data = await cachedQuery<SupplierLite[]>("categories:suppliers", async () => {
+        const { data } = await supabase
+          .from("suppliers")
+          .select("id,business_name,short_description,logo_url,categories,service_areas")
+          .eq("is_active", true).eq("is_deleted", false)
+          .in("approval_status", ["approved", "active"])
+          .order("business_name");
+        return (data as SupplierLite[]) ?? [];
+      }, 5 * 60_000);
+      if (!cancelled) setSuppliers(data);
     })();
     return () => { cancelled = true; };
   }, []);
 
   const counts = useMemo(() => {
     const map: Record<string, number> = {};
-    suppliers.forEach((s) => {
-      (s.categories ?? []).forEach((c) => {
-        map[c] = (map[c] ?? 0) + 1;
-      });
-    });
+    suppliers.forEach((s) => (s.categories ?? []).forEach((c) => { map[c] = (map[c] ?? 0) + 1; }));
     return map;
   }, [suppliers]);
-
-  const totalSuppliers = suppliers.length;
 
   const q = search.trim().toLowerCase();
   const searchResults = useMemo(() => {
     if (!q) return [];
-    return suppliers
-      .filter((s) => {
-        const catNames = (s.categories ?? [])
-          .map((cid) => categories.find((c) => c.id === cid)?.name?.toLowerCase() ?? "")
-          .join(" ");
-        return (
-          s.business_name.toLowerCase().includes(q) ||
-          (s.short_description ?? "").toLowerCase().includes(q) ||
-          (s.service_areas ?? []).some((a) => a.toLowerCase().includes(q)) ||
-          catNames.includes(q)
-        );
-      })
-      .slice(0, 20);
+    return suppliers.filter((s) => {
+      const catNames = (s.categories ?? []).map((cid) => categories.find((c) => c.id === cid)?.name?.toLowerCase() ?? "").join(" ");
+      return s.business_name.toLowerCase().includes(q)
+        || (s.short_description ?? "").toLowerCase().includes(q)
+        || (s.service_areas ?? []).some((a) => a.toLowerCase().includes(q))
+        || catNames.includes(q);
+    }).slice(0, 20);
   }, [q, suppliers, categories]);
 
-  const matchingCategories = useMemo(() => {
-    if (!q) return [];
-    return categories.filter((c) => c.name.toLowerCase().includes(q));
-  }, [q, categories]);
+  // Categories visible for the current scope
+  const visibleCategories = useMemo(() => {
+    if (!stage) return categories;
+    const allowed = new Set(stage.ids);
+    return categories.filter((c) => allowed.has(c.id));
+  }, [categories, stage]);
+
+  // Group all categories by stage for hub view
+  const groupedByStage = useMemo(() => {
+    return STAGES.map((s) => ({
+      ...s,
+      categories: categories.filter((c) => s.ids.includes(c.id)),
+    })).filter((g) => g.categories.length > 0);
+  }, [categories]);
 
   return (
-    <MobileShell>
-      {/* Cinematic hero */}
-      <header className="gb-aurora text-primary-foreground px-6 pt-10 pb-16 rounded-b-[32px] relative overflow-hidden">
-        <span aria-hidden className="gb-particle gb-particle-1 h-1 w-1 top-16 left-10" />
-        <span aria-hidden className="gb-particle gb-particle-2 h-1.5 w-1.5 top-28 right-14" />
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-[0.05] pointer-events-none"
-          style={{
-            backgroundImage: "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-            maskImage: "radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)",
-            WebkitMaskImage: "radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)",
-          }}
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F8FA" }}>
+      <div
+        className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
+      >
+        <PremiumHeader
+          title={stage ? stage.title : "כל הקטגוריות"}
+          subtitle={stage ? "בחרו תחום או צפו בהצעות פעילות" : "מצא את הספק או הקטגוריה שאתה צריך"}
         />
 
-        <div className="relative animate-fade-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 mb-5">
-            <span className="gb-live-dot" />
-            <Sparkles className="h-3 w-3 text-gold" strokeWidth={2.5} />
-            <span className="text-fs-xs font-semibold tracking-wider uppercase">
-              {totalSuppliers > 0 ? `${totalSuppliers} ספקים מאושרים` : "ספקים נבחרים בקפידה"}
-            </span>
+        {/* Search */}
+        {!showStageChoice && (
+          <div className="px-5 mt-2">
+            <div className="relative">
+              <Search className="h-[18px] w-[18px] absolute right-4 top-1/2 -translate-y-1/2 text-[#6B7280]" strokeWidth={2} />
+              <input
+                type="text" dir="rtl" value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="חיפוש לפי ספק, קטגוריה או אזור"
+                className="w-full h-12 pr-11 pl-10 rounded-[16px] bg-white border border-[#ECEEF2] text-[14px] font-medium text-[#0A1F3D] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#D4AF37] shadow-[0_2px_8px_-4px_rgba(10,31,61,0.05)]"
+              />
+              {search && (
+                <button onClick={() => setSearch("")} className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-[#F4F6FA] flex items-center justify-center">
+                  <X className="h-4 w-4 text-[#6B7280]" />
+                </button>
+              )}
+            </div>
           </div>
+        )}
 
-          <h1 className="text-fs-2xl leading-[1.1] font-extrabold mb-3 tracking-tight">
-            {stage ? (
-              <>{stage.title}<br /><span className="gb-text-gold">תחומי השלב</span></>
-            ) : (
-              <>תחומי <span className="gb-text-gold">השדרוג</span><br />לדירה שלך</>
-            )}
-          </h1>
-          <div className="gb-divider-gold gb-glow-gold mb-3" />
-          <p className="text-primary-foreground/70 text-fs-sm leading-relaxed max-w-[88%]">
-            {stage ? "בחרו תחום כדי לראות את הספקים שמשרתים אותו." : "בחרו תחום, או חפשו ספק לפי שם, קטגוריה או אזור."}
-          </p>
-        </div>
-      </header>
-
-      {/* Stage chooser — 2 simple options */}
-      {showStageChoice ? (
-        <div className="px-5 -mt-9 relative z-10 pb-6 space-y-3 animate-fade-up">
-          <button
-            onClick={() => navigate(`/resident/deals?stage=${stageId}`)}
-            className="w-full bg-white/85 backdrop-blur border border-[#E2E8F0] hover:bg-white text-[#0A1F3D] rounded-2xl p-4 text-right group flex items-center gap-3 shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] transition-all"
-          >
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center shrink-0">
-              <Tag className="h-5 w-5 text-[#B8923F]" strokeWidth={2} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-fs-base font-bold leading-tight text-[#0A1F3D]">הצעות קבוצתיות</h3>
-              <p className="text-fs-xs text-[#475569] mt-1">הצעות פעילות בשלב {stage!.title}</p>
-            </div>
-            <ChevronLeft className="h-4 w-4 text-[#C9A961] group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
-          </button>
-
-          <button
-            onClick={() => navigate(`/resident/categories?stage=${stageId}&view=suppliers`)}
-            className="w-full bg-white/85 backdrop-blur border border-[#E2E8F0] hover:bg-white text-[#0A1F3D] rounded-2xl p-4 text-right group flex items-center gap-3 shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] transition-all"
-          >
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center shrink-0">
-              <Users className="h-5 w-5 text-[#B8923F]" strokeWidth={2} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-fs-base font-bold leading-tight text-[#0A1F3D]">ספקים בתחום</h3>
-              <p className="text-fs-xs text-[#475569] mt-1">בעלי מקצוע וספקים בשלב {stage!.title}</p>
-            </div>
-            <ChevronLeft className="h-4 w-4 text-[#C9A961] group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
-          </button>
-        </div>
-      ) : (
-      <div className="px-5 -mt-9 relative z-10 mb-4">
-        <div className="gb-card p-3">
-          <div className="relative">
-            <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              dir="rtl"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="חיפוש לפי ספק, קטגוריה או אזור"
-              className="w-full h-11 pr-10 pl-9 rounded-xl bg-cream/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-gold/40"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-muted flex items-center justify-center"
-                aria-label="נקה"
-              >
-                <X className="h-4 w-4 text-muted-foreground" />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-      )}
-
-      {/* Search results */}
-      {!showStageChoice && q && (
-        <div className="px-5 mb-6 space-y-3 animate-fade-up">
-          {matchingCategories.length > 0 && (
-            <div>
-              <p className="text-fs-xs font-bold text-muted-foreground mb-2">קטגוריות תואמות</p>
-              <div className="flex flex-wrap gap-2">
-                {matchingCategories.map((c) => (
-                  <Link
-                    key={c.id}
-                    to={`/resident/categories/${c.id}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-xs font-bold text-primary"
-                  >
-                    <span>{c.icon}</span>
-                    {c.name}
-                  </Link>
-                ))}
+        {/* Stage chooser (entered via dashboard stage click) */}
+        {showStageChoice && (
+          <div className="px-5 mt-4 space-y-2.5">
+            <button
+              onClick={() => navigate(`/resident/deals?stage=${stageId}`)}
+              className="w-full bg-white rounded-[20px] p-4 border border-[#ECEEF2] flex items-center gap-3 active:scale-[0.99] transition-transform shadow-[0_2px_10px_-6px_rgba(10,31,61,0.06)]"
+            >
+              <div className="h-12 w-12 rounded-[14px] bg-[#D4AF37]/12 flex items-center justify-center shrink-0">
+                <Tag className="h-5 w-5 text-[#D4AF37]" strokeWidth={2.2} />
               </div>
-            </div>
-          )}
+              <div className="flex-1 min-w-0 text-right">
+                <h3 className="text-[15px] font-bold text-[#0A1F3D] leading-tight">הצעות קבוצתיות</h3>
+                <p className="text-[12.5px] text-[#6B7280] mt-1 font-medium">הצעות פעילות בשלב {stage!.title}</p>
+              </div>
+              <ChevronLeft className="h-[18px] w-[18px] text-[#9CA3AF]" strokeWidth={2.2} />
+            </button>
+            <button
+              onClick={() => navigate(`/resident/categories?stage=${stageId}&view=suppliers`)}
+              className="w-full bg-white rounded-[20px] p-4 border border-[#ECEEF2] flex items-center gap-3 active:scale-[0.99] transition-transform shadow-[0_2px_10px_-6px_rgba(10,31,61,0.06)]"
+            >
+              <div className="h-12 w-12 rounded-[14px] bg-[#0A1F3D]/8 flex items-center justify-center shrink-0">
+                <Users className="h-5 w-5 text-[#0A1F3D]" strokeWidth={2.2} />
+              </div>
+              <div className="flex-1 min-w-0 text-right">
+                <h3 className="text-[15px] font-bold text-[#0A1F3D] leading-tight">ספקים בתחום</h3>
+                <p className="text-[12.5px] text-[#6B7280] mt-1 font-medium">בעלי מקצוע וספקים בשלב {stage!.title}</p>
+              </div>
+              <ChevronLeft className="h-[18px] w-[18px] text-[#9CA3AF]" strokeWidth={2.2} />
+            </button>
+          </div>
+        )}
 
-          <div>
-            <p className="text-fs-xs font-bold text-muted-foreground mb-2">
-              ספקים תואמים ({searchResults.length})
+        {/* Search results */}
+        {!showStageChoice && q && (
+          <div className="px-5 mt-4 space-y-2">
+            <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider mb-1">
+              {searchResults.length} ספקים תואמים
             </p>
             {searchResults.length === 0 ? (
-              <div className="gb-card p-5 text-center text-sm text-muted-foreground">
+              <div className="bg-white rounded-[16px] p-5 text-center text-[13px] text-[#6B7280] border border-[#ECEEF2]">
                 לא נמצאו ספקים מתאימים ל"{search}"
               </div>
-            ) : (
-              <div className="space-y-2">
-                {searchResults.map((s) => {
-                  const catNames = (s.categories ?? [])
-                    .map((cid) => categories.find((c) => c.id === cid)?.name)
-                    .filter(Boolean)
-                    .slice(0, 2)
-                    .join(" · ");
-                  return (
-                    <button
-                      key={s.id}
-                      onClick={() => navigate(`/suppliers/${s.id}`)}
-                      className="w-full gb-card p-3 flex items-center gap-3 text-right hover:shadow-elevated transition-smooth"
-                    >
-                      <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="sm" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm truncate">{s.business_name}</p>
-                        <p className="text-fs-xs text-muted-foreground truncate">
-                          {catNames || "ספק"}
-                          {s.service_areas?.length > 0 && ` · ${s.service_areas.slice(0, 2).join(", ")}`}
-                        </p>
-                      </div>
-                      <ArrowLeft className="h-4 w-4 text-gold shrink-0" />
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            ) : searchResults.map((s) => {
+              const catNames = (s.categories ?? []).map((cid) => categories.find((c) => c.id === cid)?.name).filter(Boolean).slice(0, 2).join(" · ");
+              return (
+                <button key={s.id} onClick={() => navigate(`/suppliers/${s.id}`)}
+                  className="w-full bg-white rounded-[16px] p-3 border border-[#ECEEF2] flex items-center gap-3 text-right active:scale-[0.99] transition-transform">
+                  <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[14px] text-[#0A1F3D] truncate">{s.business_name}</p>
+                    <p className="text-[12px] text-[#6B7280] truncate font-medium">{catNames || "ספק"}</p>
+                  </div>
+                  <ChevronLeft className="h-4 w-4 text-[#9CA3AF]" />
+                </button>
+              );
+            })}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Categories grid */}
-      {!showStageChoice && !q && (
-        <div className="px-5 grid grid-cols-2 gap-3 pb-6">
-          {loadingSuppliers
-            ? Array.from({ length: visibleCategories.length || 6 }).map((_, i) => (
-                <CategoryTileSkeleton key={i} />
-              ))
-            : visibleCategories.map((c, idx) => {
-                const count = counts[c.id] ?? 0;
-                const hasSuppliers = count > 0;
-                return (
-                  <Link
-                    key={c.id}
-                    to={`/resident/categories/${c.id}`}
-                    className="gb-card-premium p-4 group relative animate-fade-up active:scale-[0.98] transition-transform"
-                    style={{ animationDelay: `${idx * 30}ms` }}
-                  >
-                    <div className="flex items-start justify-between mb-3 relative">
-                      <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary-soft flex items-center justify-center text-2xl border border-gold/25 shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.15),0_8px_20px_-10px_hsl(217_56%_13%_/_0.4)] group-hover:scale-105 transition-transform">
-                        <span className="drop-shadow-[0_0_8px_hsl(44_53%_54%_/_0.4)]">{c.icon}</span>
-                      </div>
-                      {hasSuppliers ? (
-                        <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 inline-flex items-center gap-1">
-                          <span className="gb-live-dot" />
-                          {count}
-                        </span>
-                      ) : (
-                        <span className="text-fs-xs font-medium px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
-                          בקרוב
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="font-bold text-foreground text-fs-sm leading-tight relative tracking-tight">{c.name}</h3>
-                    <div className="flex items-center justify-between mt-2 relative">
-                      <p className="text-fs-xs text-muted-foreground">
-                        {hasSuppliers ? "צפו בספקים" : "אין ספקים זמינים"}
-                      </p>
-                      {hasSuppliers && (
-                        <ArrowLeft className="h-3 w-3 text-gold opacity-60 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-all" strokeWidth={2.5} />
-                      )}
-                    </div>
+        {/* HUB: all stages with their categories */}
+        {!showStageChoice && !q && !stage && (
+          <div className="px-5 mt-5 space-y-6">
+            {groupedByStage.map((g, gi) => (
+              <section key={g.id}>
+                <div className="flex items-center justify-between mb-3">
+                  <Link to={`/resident/categories?stage=${g.id}`} className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider">
+                    הצג הכל ←
                   </Link>
-                );
-              })}
-        </div>
-      )}
+                  <h2 className="text-[16px] font-extrabold text-[#0A1F3D] tracking-tight">
+                    <span className="text-[#9CA3AF] font-bold tabular-nums ml-1.5">{gi + 1}.</span>
+                    {g.title}
+                  </h2>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {g.categories.map((c) => {
+                    const count = counts[c.id] ?? 0;
+                    return (
+                      <Link key={c.id} to={`/resident/categories/${c.id}`}
+                        className="bg-white rounded-[18px] p-3.5 border border-[#ECEEF2] flex items-center gap-2.5 active:scale-[0.98] transition-transform shadow-[0_2px_8px_-4px_rgba(10,31,61,0.05)]">
+                        <div className="h-10 w-10 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center text-[18px] shrink-0">
+                          {c.icon}
+                        </div>
+                        <div className="flex-1 min-w-0 text-right">
+                          <p className="text-[13px] font-bold text-[#0A1F3D] truncate leading-tight">{c.name}</p>
+                          <p className="text-[11px] text-[#6B7280] mt-0.5 font-medium">
+                            {count > 0 ? `${count} ספקים` : "בקרוב"}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+
+        {/* Stage category grid */}
+        {!showStageChoice && !q && stage && (
+          <div className="px-5 mt-5 grid grid-cols-2 gap-3">
+            {visibleCategories.map((c) => {
+              const count = counts[c.id] ?? 0;
+              return (
+                <Link key={c.id} to={`/resident/categories/${c.id}`}
+                  className="bg-white rounded-[20px] p-4 border border-[#ECEEF2] active:scale-[0.98] transition-transform shadow-[0_2px_10px_-6px_rgba(10,31,61,0.06)]">
+                  <div className="h-12 w-12 rounded-[14px] bg-[#F4F6FA] flex items-center justify-center text-[22px] mb-3">{c.icon}</div>
+                  <h3 className="text-[14px] font-bold text-[#0A1F3D] leading-tight tracking-tight">{c.name}</h3>
+                  <p className="text-[11.5px] text-[#6B7280] mt-1 font-medium">
+                    {count > 0 ? `${count} ספקים זמינים` : "אין ספקים כרגע"}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       <BottomNav role="resident" />
-    </MobileShell>
+    </div>
   );
 }
