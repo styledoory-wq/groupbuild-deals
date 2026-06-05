@@ -58,19 +58,23 @@ export default function ResidentDashboard() {
 
         const { data: prof } = await supabase
           .from("profiles")
-          .select("full_name,city,project_id,city_id")
+          .select("full_name,city,project_id,city_id,region_id")
           .eq("id", uid)
           .maybeSingle();
 
         const fname = prof?.full_name ?? user.name ?? "דייר";
         const cityName = prof?.city ?? "";
         let councilName = "";
+        let councilId: string | null = null;
+        let regionId: string | null = (prof?.region_id as string | null) ?? null;
         if (prof?.city_id) {
           const { data: cityRow } = await supabase
             .from("cities")
-            .select("council_id")
+            .select("council_id,region_id")
             .eq("id", prof.city_id)
             .maybeSingle();
+          councilId = (cityRow?.council_id as string | null) ?? null;
+          regionId = (cityRow?.region_id as string | null) ?? regionId;
           if (cityRow?.council_id) {
             const { data: c } = await supabase
               .from("regional_councils")
@@ -110,8 +114,55 @@ export default function ResidentDashboard() {
         const dealIds = (matches ?? []).map((m: { deal_id: string }) => m.deal_id);
 
         let nextDeals: MiniDeal[] = [];
-        let suppliers = new Set<string>();
+        let matchedSuppliersCount = 0;
         let totalJoiners = 0;
+
+        const supplierIds = new Set<string>();
+
+        if (prof?.city_id) {
+          const { data: citySuppliers } = await supabase
+            .from("supplier_cities")
+            .select("supplier_id")
+            .eq("city_id", prof.city_id);
+          (citySuppliers ?? []).forEach((row) => supplierIds.add(row.supplier_id as string));
+        }
+
+        if (councilId) {
+          const { data: councilSuppliers } = await supabase
+            .from("supplier_councils")
+            .select("supplier_id")
+            .eq("council_id", councilId);
+          (councilSuppliers ?? []).forEach((row) => supplierIds.add(row.supplier_id as string));
+        }
+
+        if (regionId) {
+          const { data: regionSuppliers } = await supabase
+            .from("supplier_regions")
+            .select("supplier_id")
+            .eq("region_id", regionId);
+          (regionSuppliers ?? []).forEach((row) => supplierIds.add(row.supplier_id as string));
+        }
+
+        const { data: nationwideSuppliers } = await supabase
+          .from("suppliers")
+          .select("id")
+          .eq("serves_all_country", true)
+          .eq("is_active", true)
+          .eq("is_deleted", false)
+          .in("approval_status", ["approved", "active"]);
+        (nationwideSuppliers ?? []).forEach((row) => supplierIds.add(row.id as string));
+
+        if (supplierIds.size) {
+          const { count } = await supabase
+            .from("suppliers")
+            .select("id", { count: "exact", head: true })
+            .in("id", Array.from(supplierIds))
+            .eq("is_active", true)
+            .eq("is_deleted", false)
+            .in("approval_status", ["approved", "active"]);
+          matchedSuppliersCount = count ?? 0;
+        }
+
         if (dealIds.length) {
           const { data: deals } = await supabase
             .from("deals")
@@ -123,7 +174,6 @@ export default function ResidentDashboard() {
             : { data: [] as Array<{ id: string; business_name: string }> };
           const sMap = new Map((sups ?? []).map((s) => [s.id as string, s.business_name as string]));
           nextDeals = (deals ?? []).map((d) => {
-            suppliers.add(d.supplier_id as string);
             return {
               id: d.id as string,
               title: d.title as string,
@@ -158,7 +208,7 @@ export default function ResidentDashboard() {
         setStageProgress(progress);
         setStageCategories((cats ?? []).map((c) => ({ id: c.id, name: c.name, icon: c.icon })));
         setAreaDeals(nextDeals);
-        setAreaSuppliersCount(suppliers.size);
+        setAreaSuppliersCount(matchedSuppliersCount);
         setJoinedCount(joined);
         setGroupResidents(totalJoiners);
         setUnreadNotifications(notifCount ?? 0);
