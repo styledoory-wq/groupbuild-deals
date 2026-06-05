@@ -25,7 +25,6 @@ interface DbSupplier {
   offers_products: boolean | null;
 }
 
-const NORTH_REGION_NAMES = new Set(["צפון", "כל הצפון", "גליל עליון", "גליל תחתון", "רמת הגולן", "עמקים", "חיפה והקריות"]);
 const NATIONAL_AREA = "כל הארץ";
 
 export default function CategorySuppliers() {
