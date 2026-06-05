@@ -342,52 +342,37 @@ function CategoryCard({
     <>
       <div className="flex items-start justify-between">
         <div
-          className="h-12 w-12 rounded-[16px] flex items-center justify-center text-[24px] bg-white shadow-[0_2px_6px_rgba(10,31,61,0.06)]"
+          className="h-10 w-10 rounded-[12px] flex items-center justify-center text-[20px] bg-white shadow-[0_2px_6px_rgba(10,31,61,0.06)]"
           style={{ border: `1px solid ${stage.border}` }}
         >
           <span>{icon}</span>
         </div>
         {dim ? (
-          <span className="text-[9.5px] font-extrabold px-2 py-0.5 rounded-full bg-[#F4F6FA] text-[#9CA3AF]">
+          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#F4F6FA] text-[#9CA3AF]">
             בקרוב
           </span>
         ) : (
           <span
-            className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white"
+            className="text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-white"
             style={{ color: stage.accent, border: `1px solid ${stage.border}` }}
           >
-            {count} ספקים
+            {count}
           </span>
         )}
       </div>
 
-      <p className="mt-3 text-[15px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
+      <p className="mt-2.5 text-[13px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
         {name}
       </p>
-
-      {/* Subcategory chips (top supplier names) */}
-      {!dim && chips.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1 overflow-hidden" style={{ maxHeight: 46 }}>
-          {chips.slice(0, 3).map((label, i) => (
-            <span
-              key={i}
-              className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-white/85 text-[#475569] truncate max-w-[96px]"
-              style={{ border: `1px solid ${stage.border}` }}
-            >
-              {label}
-            </span>
-          ))}
-        </div>
-      )}
     </>
   );
 
   const baseStyle: React.CSSProperties = {
-    background: `linear-gradient(180deg, ${stage.tint} 0%, rgba(255,255,255,0.92) 70%)`,
+    background: stage.tint,
     border: `1px solid ${stage.border}`,
     boxShadow: dim ? "none" : "0 6px 20px -10px rgba(10,31,61,0.18)",
-    minHeight: 168,
-    opacity: dim ? 0.6 : 1,
+    height: 128,
+    opacity: dim ? 0.55 : 1,
   };
 
   if (dim) {
