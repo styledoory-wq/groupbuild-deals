@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -80,19 +80,42 @@ const queryClient = new QueryClient({
 
 const adminRoute = (el: React.ReactNode) => <RequireAdmin>{el}</RequireAdmin>;
 
-const SuspenseFallback = () => (
-  <div
-    role="status"
-    aria-label="טוען"
-    className="flex items-center justify-center"
-    style={{ minHeight: "100dvh", background: "#F4F6F9" }}
-  >
+/**
+ * Suspense fallback — שקוף לחלוטין עד 250ms (מונע "פלאש"),
+ * ואז בר זהב עדין למעלה. בלי לוגו/רקע כדי לא לקפוץ בין מעברים.
+ */
+const SuspenseFallback = () => {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setShow(true), 250);
+    return () => window.clearTimeout(t);
+  }, []);
+  if (!show) return null;
+  return (
     <div
-      className="h-8 w-8 rounded-full border-2 animate-spin"
-      style={{ borderColor: "#0A1F3D33", borderTopColor: "#C9A961" }}
-    />
-  </div>
-);
+      role="status"
+      aria-label="טוען"
+      className="fixed top-0 inset-x-0 z-[80] pointer-events-none"
+    >
+      <div className="h-[2px] w-full overflow-hidden">
+        <div
+          className="h-full"
+          style={{
+            width: "40%",
+            background: "linear-gradient(90deg, transparent, #C9A961, transparent)",
+            animation: "gb-route-progress 1.1s ease-in-out infinite",
+          }}
+        />
+      </div>
+      <style>{`
+        @keyframes gb-route-progress {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(350%); }
+        }
+      `}</style>
+    </div>
+  );
+};
 
 const PreloadImportantRoutes = () => {
   const { user, authReady } = useApp();
