@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
-  Search, X, Compass, HardHat, Plug, PaintBucket, Trees, ChevronLeft, LayoutGrid,
+  Search, X, Compass, HardHat, Plug, DoorOpen, PaintBucket, ChefHat, Trees,
+  ChevronLeft, LayoutGrid,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PremiumHeader } from "@/components/layout/PremiumHeader";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
-/* ---------- Stage definitions (5 stages) ---------- */
+/* ---------- 7 main stages ---------- */
 type StageDef = {
   id: string;
   index: number;
@@ -19,50 +19,33 @@ type StageDef = {
   shortTitle: string;
   ids: string[];
   Icon: typeof Compass;
-  accent: string;   // strong color (icon, number, header)
-  tint: string;     // soft tinted background
-  border: string;   // card border color
+  accent: string;
+  tint: string;
+  border: string;
 };
 
 const STAGES: StageDef[] = [
-  {
-    id: "planning", index: 1, title: "תכנון ועיצוב", shortTitle: "תכנון",
+  { id: "planning",    index: 1, title: "תכנון ועיצוב",     shortTitle: "תכנון",
     ids: ["architect", "interior-designer", "consultant"],
-    Icon: Compass, accent: "#2F6BFF", tint: "#EAF2FF", border: "#BFD7FF",
-  },
-  {
-    id: "structure", index: 2, title: "שלד ובנייה", shortTitle: "בנייה",
+    Icon: Compass,    accent: "#2F6BFF", tint: "#EAF2FF", border: "#BFD7FF" },
+  { id: "structure",   index: 2, title: "שלד ובנייה",        shortTitle: "בנייה",
     ids: ["contractor", "skeleton"],
-    Icon: HardHat, accent: "#E8742C", tint: "#FFF1E4", border: "#FFD4B0",
-  },
-  {
-    id: "systems", index: 3, title: "מערכות הבית", shortTitle: "מערכות",
+    Icon: HardHat,    accent: "#E8742C", tint: "#FFF1E4", border: "#FFD4B0" },
+  { id: "systems",     index: 3, title: "מערכות הבית",       shortTitle: "מערכות",
     ids: ["electric", "plumbing", "ac", "smart-home"],
-    Icon: Plug, accent: "#0FB5C9", tint: "#E7F8FB", border: "#B5E8EF",
-  },
-  {
-    id: "finishes", index: 4, title: "גמרים", shortTitle: "גמר",
-    ids: [
-      "doors", "security-door", "windows",
-      "painting", "flooring", "cladding", "carpentry", "gypsum", "closets", "lighting",
-      "kitchen", "bath", "sanitary", "showers",
-    ],
-    Icon: PaintBucket, accent: "#7A4FCF", tint: "#F2ECFB", border: "#D8C9F0",
-  },
-  {
-    id: "outdoor", index: 5, title: "חוץ ופיתוח", shortTitle: "חצר",
+    Icon: Plug,       accent: "#0FB5C9", tint: "#E7F8FB", border: "#B5E8EF" },
+  { id: "openings",    index: 4, title: "פתחים ואבטחה",      shortTitle: "פתחים",
+    ids: ["doors", "security-door", "windows"],
+    Icon: DoorOpen,   accent: "#2EA85A", tint: "#E8F7EC", border: "#BFE9C6" },
+  { id: "finishes",    index: 5, title: "עבודות גמר",         shortTitle: "גמר",
+    ids: ["painting", "flooring", "cladding", "carpentry", "gypsum", "closets", "lighting"],
+    Icon: PaintBucket,accent: "#7A4FCF", tint: "#F2ECFB", border: "#D8C9F0" },
+  { id: "kitchen-bath",index: 6, title: "מטבחים ואמבטיות",  shortTitle: "מטבח",
+    ids: ["kitchen", "bath", "sanitary", "showers"],
+    Icon: ChefHat,    accent: "#B07E2E", tint: "#F8F1E4", border: "#E9D9BD" },
+  { id: "outdoor",     index: 7, title: "חצר ופיתוח",         shortTitle: "חצר",
     ids: ["garden", "pergola", "cleaning"],
-    Icon: Trees, accent: "#6E8A2E", tint: "#F1F5E4", border: "#D2DEB5",
-  },
-];
-
-/* Quick-chips row 2 — sub-filters inside stages */
-type ChipDef = { id: string; label: string; stageId: string; ids?: string[] };
-const QUICK_CHIPS: ChipDef[] = [
-  { id: "openings",  label: "פתחים",       stageId: "finishes", ids: ["doors", "security-door", "windows"] },
-  { id: "finish",    label: "גמר",          stageId: "finishes", ids: ["painting", "flooring", "cladding", "carpentry", "gypsum", "closets", "lighting"] },
-  { id: "kitchbath", label: "מטבח ואמבט",   stageId: "finishes", ids: ["kitchen", "bath", "sanitary", "showers"] },
-  { id: "yard",      label: "חצר",          stageId: "outdoor" },
+    Icon: Trees,      accent: "#6E8A2E", tint: "#F1F5E4", border: "#D2DEB5" },
 ];
 
 interface SupplierLite {
@@ -70,24 +53,19 @@ interface SupplierLite {
   logo_url: string | null; categories: string[]; service_areas: string[];
 }
 
-type Filter =
-  | { kind: "all" }
-  | { kind: "stage"; stageId: string }
-  | { kind: "chip"; chipId: string };
+const INITIAL_VISIBLE = 4; // cats shown per stage before "show more"
 
 export default function CategoriesList() {
   const { categories } = useApp();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const initialStage = searchParams.get("stage") || "";
+  const initialStage = searchParams.get("stage") || "all";
 
   const cached = getCachedValue<SupplierLite[]>("categories:suppliers", 5 * 60_000);
   const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<Filter>(
-    initialStage ? { kind: "stage", stageId: initialStage } : { kind: "all" }
-  );
-  const [showAll, setShowAll] = useState(false);
+  const [activeStage, setActiveStage] = useState<string>(initialStage);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -112,6 +90,18 @@ export default function CategoriesList() {
     return map;
   }, [suppliers]);
 
+  // top supplier names per category — used as subcategory chips
+  const chipsByCat = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    suppliers.forEach((s) => {
+      (s.categories ?? []).forEach((cid) => {
+        if (!map[cid]) map[cid] = [];
+        if (map[cid].length < 4) map[cid].push(s.business_name);
+      });
+    });
+    return map;
+  }, [suppliers]);
+
   const q = search.trim().toLowerCase();
   const searchResults = useMemo(() => {
     if (!q) return [];
@@ -125,33 +115,19 @@ export default function CategoriesList() {
     }).slice(0, 20);
   }, [q, suppliers, categories]);
 
-  /** Build the rendered list of {stage, cats} groups, respecting filter (and chip sub-filter). */
-  const visibleGroups = useMemo(() => {
-    const groups = STAGES.map((s) => {
+  const stageGroups = useMemo(() => {
+    return STAGES.map((s) => {
       const cats = s.ids
         .map((id) => categories.find((c) => c.id === id))
         .filter(Boolean) as { id: string; name: string; icon: string }[];
-      return { stage: s, cats };
+      const totalSuppliers = cats.reduce((sum, c) => sum + (counts[c.id] ?? 0), 0);
+      return { stage: s, cats, totalSuppliers };
     });
-    if (filter.kind === "all") return groups;
-    if (filter.kind === "stage") return groups.filter((g) => g.stage.id === filter.stageId);
-    // chip — narrow inside a stage to a subset of ids
-    const chip = QUICK_CHIPS.find((c) => c.id === filter.chipId);
-    if (!chip) return groups;
-    return groups
-      .filter((g) => g.stage.id === chip.stageId)
-      .map((g) => ({
-        stage: g.stage,
-        cats: chip.ids ? g.cats.filter((c) => chip.ids!.includes(c.id)) : g.cats,
-      }));
-  }, [categories, filter]);
+  }, [categories, counts]);
 
-  const isActive = (key: string) => {
-    if (key === "all") return filter.kind === "all";
-    const stage = STAGES.find((s) => s.id === key);
-    if (stage) return filter.kind === "stage" && filter.stageId === key;
-    return filter.kind === "chip" && filter.chipId === key;
-  };
+  const visibleStages = activeStage === "all"
+    ? stageGroups
+    : stageGroups.filter((g) => g.stage.id === activeStage);
 
   return (
     <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F8FA" }}>
@@ -218,62 +194,42 @@ export default function CategoriesList() {
 
         {!q && (
           <>
-            {/* === COMPACT 2-ROW FILTER GRID === */}
+            {/* === COMPACT 2-ROW MAIN-CATEGORY GRID === */}
             <section className="px-5 mt-1">
-              <div className="flex items-center justify-between mb-2.5">
-                <h2 className="text-[12px] font-extrabold text-[#0A1F3D] tracking-tight">כל התחומים</h2>
-                <button
-                  onClick={() => setShowAll(true)}
-                  className="text-[11.5px] font-bold text-[#2F6BFF] active:opacity-70"
-                >
-                  הצג הכל
-                </button>
-              </div>
+              <h2 className="text-[12px] font-extrabold text-[#0A1F3D] tracking-tight mb-2.5">
+                כל התחומים
+              </h2>
 
               <div className="grid grid-cols-4 gap-2">
-                {/* Row 1 */}
                 <FilterTile
                   label="הכל" Icon={LayoutGrid}
-                  active={isActive("all")}
-                  onClick={() => setFilter({ kind: "all" })}
+                  active={activeStage === "all"}
+                  onClick={() => setActiveStage("all")}
                   accent="#0A1F3D" tint="#F4F6FA" border="#ECEEF2"
                 />
-                {STAGES.slice(0, 3).map((s) => (
+                {STAGES.map((s) => (
                   <FilterTile
                     key={s.id} label={s.shortTitle} Icon={s.Icon}
-                    active={isActive(s.id)}
-                    onClick={() => setFilter({ kind: "stage", stageId: s.id })}
+                    active={activeStage === s.id}
+                    onClick={() => setActiveStage(s.id)}
                     accent={s.accent} tint={s.tint} border={s.border}
                   />
                 ))}
-
-                {/* Row 2: chip-based filters */}
-                {QUICK_CHIPS.map((chip) => {
-                  const stage = STAGES.find((s) => s.id === chip.stageId)!;
-                  return (
-                    <FilterTile
-                      key={chip.id} label={chip.label} Icon={stage.Icon}
-                      active={isActive(chip.id)}
-                      onClick={() => setFilter({ kind: "chip", chipId: chip.id })}
-                      accent={stage.accent} tint={stage.tint} border={stage.border}
-                    />
-                  );
-                })}
               </div>
             </section>
 
-            {/* === STAGE SECTIONS === */}
-            <div className="px-5 mt-6 space-y-6">
-              {visibleGroups.map(({ stage, cats }) => {
-                const totalSuppliers = cats.reduce((sum, c) => sum + (counts[c.id] ?? 0), 0);
+            {/* === LARGE APPLE-STYLE CATEGORY CARDS === */}
+            <div className="px-5 mt-6 space-y-7">
+              {visibleStages.map(({ stage, cats, totalSuppliers }) => {
+                const isExpanded = !!expanded[stage.id];
+                const visibleCats = isExpanded ? cats : cats.slice(0, INITIAL_VISIBLE);
+                const hasMore = cats.length > INITIAL_VISIBLE;
+
                 return (
                   <section key={stage.id}>
-                    {/* Minimal stage heading: vertical color bar + title */}
+                    {/* Stage heading */}
                     <div className="flex items-center gap-2.5 mb-3">
-                      <span
-                        className="block h-5 w-[3px] rounded-full"
-                        style={{ background: stage.accent }}
-                      />
+                      <span className="block h-5 w-[3px] rounded-full" style={{ background: stage.accent }} />
                       <span
                         className="text-[10px] font-extrabold tracking-[0.08em] uppercase"
                         style={{ color: stage.accent }}
@@ -293,18 +249,30 @@ export default function CategoriesList() {
                         קטגוריות יתווספו בקרוב
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-3">
-                        {cats.map((c) => (
-                          <CategoryCard
-                            key={c.id}
-                            id={c.id}
-                            name={c.name}
-                            icon={c.icon}
-                            count={counts[c.id] ?? 0}
-                            stage={stage}
-                          />
-                        ))}
-                      </div>
+                      <>
+                        <div className="grid grid-cols-2 gap-3">
+                          {visibleCats.map((c) => (
+                            <CategoryCard
+                              key={c.id}
+                              id={c.id}
+                              name={c.name}
+                              icon={c.icon}
+                              count={counts[c.id] ?? 0}
+                              chips={chipsByCat[c.id] ?? []}
+                              stage={stage}
+                            />
+                          ))}
+                        </div>
+
+                        {hasMore && (
+                          <button
+                            onClick={() => setExpanded((p) => ({ ...p, [stage.id]: !isExpanded }))}
+                            className="w-full mt-3 h-10 rounded-full bg-white border border-[#ECEEF2] text-[12.5px] font-bold text-[#0A1F3D] active:scale-[0.98] transition-transform shadow-[0_2px_8px_-4px_rgba(10,31,61,0.08)]"
+                          >
+                            {isExpanded ? "הצג פחות" : `הצג עוד (${cats.length - INITIAL_VISIBLE})`}
+                          </button>
+                        )}
+                      </>
                     )}
                   </section>
                 );
@@ -313,57 +281,6 @@ export default function CategoriesList() {
           </>
         )}
       </div>
-
-      {/* ===== Bottom Sheet: all categories ===== */}
-      <Sheet open={showAll} onOpenChange={setShowAll}>
-        <SheetContent side="bottom" className="rounded-t-[24px] max-h-[85vh] overflow-y-auto p-0" dir="rtl">
-          <SheetHeader className="px-5 pt-5 pb-3 text-right">
-            <SheetTitle className="text-[18px] font-extrabold text-[#0A1F3D]">כל התחומים</SheetTitle>
-          </SheetHeader>
-          <div className="px-5 pb-8 space-y-5">
-            {STAGES.map((stage) => {
-              const cats = stage.ids
-                .map((id) => categories.find((c) => c.id === id))
-                .filter(Boolean) as { id: string; name: string; icon: string }[];
-              if (cats.length === 0) return null;
-              return (
-                <div key={stage.id}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="block h-4 w-[3px] rounded-full" style={{ background: stage.accent }} />
-                    <span className="text-[10px] font-extrabold tracking-[0.08em] uppercase" style={{ color: stage.accent }}>
-                      שלב {stage.index}
-                    </span>
-                    <span className="text-[13px] font-extrabold text-[#0A1F3D]">· {stage.title}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {cats.map((c) => {
-                      const n = counts[c.id] ?? 0;
-                      const dim = n === 0;
-                      return (
-                        <Link
-                          key={c.id}
-                          to={`/resident/categories/${c.id}`}
-                          onClick={() => setShowAll(false)}
-                          className="flex items-center gap-2 rounded-[12px] px-3 py-2.5 bg-white border border-[#ECEEF2] active:scale-[0.98] transition-transform"
-                          style={dim ? { opacity: 0.6 } : undefined}
-                        >
-                          <span className="text-[18px]">{c.icon}</span>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-[12.5px] font-bold text-[#0A1F3D] truncate">{c.name}</p>
-                            <p className="text-[10.5px] font-semibold" style={{ color: dim ? "#9CA3AF" : stage.accent }}>
-                              {n > 0 ? `${n} ספקים` : "בקרוב"}
-                            </p>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </SheetContent>
-      </Sheet>
 
       <BottomNav role="resident" />
     </div>
@@ -410,21 +327,23 @@ function FilterTile({
 }
 
 function CategoryCard({
-  id, name, icon, count, stage,
+  id, name, icon, count, chips, stage,
 }: {
   id: string;
   name: string;
   icon: string;
   count: number;
+  chips: string[];
   stage: StageDef;
 }) {
   const dim = count === 0;
+
   const content = (
     <>
       <div className="flex items-start justify-between">
         <div
-          className="h-9 w-9 rounded-full flex items-center justify-center text-[18px]"
-          style={{ background: stage.tint, border: `1px solid ${stage.border}` }}
+          className="h-12 w-12 rounded-[16px] flex items-center justify-center text-[24px] bg-white shadow-[0_2px_6px_rgba(10,31,61,0.06)]"
+          style={{ border: `1px solid ${stage.border}` }}
         >
           <span>{icon}</span>
         </div>
@@ -437,38 +356,43 @@ function CategoryCard({
             className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white"
             style={{ color: stage.accent, border: `1px solid ${stage.border}` }}
           >
-            {count}
+            {count} ספקים
           </span>
         )}
       </div>
-      <p className="mt-2 text-[13.5px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
+
+      <p className="mt-3 text-[15px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
         {name}
       </p>
-      <p
-        className="text-[11px] mt-0.5 font-semibold"
-        style={{ color: dim ? "#9CA3AF" : stage.accent }}
-      >
-        {dim ? "בקרוב" : `${count} ספקים`}
-      </p>
+
+      {/* Subcategory chips (top supplier names) */}
+      {!dim && chips.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1 overflow-hidden" style={{ maxHeight: 46 }}>
+          {chips.slice(0, 3).map((label, i) => (
+            <span
+              key={i}
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-white/85 text-[#475569] truncate max-w-[96px]"
+              style={{ border: `1px solid ${stage.border}` }}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      )}
     </>
   );
 
   const baseStyle: React.CSSProperties = {
-    background: "rgba(255,255,255,0.72)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
+    background: `linear-gradient(180deg, ${stage.tint} 0%, rgba(255,255,255,0.92) 70%)`,
     border: `1px solid ${stage.border}`,
-    boxShadow: dim ? "none" : "0 4px 16px -8px rgba(10,31,61,0.18)",
-    minHeight: 104,
+    boxShadow: dim ? "none" : "0 6px 20px -10px rgba(10,31,61,0.18)",
+    minHeight: 168,
     opacity: dim ? 0.6 : 1,
   };
 
   if (dim) {
     return (
-      <div
-        className="relative rounded-[18px] p-3 flex flex-col cursor-default"
-        style={baseStyle}
-      >
+      <div className="relative rounded-[22px] p-4 flex flex-col cursor-default" style={baseStyle}>
         {content}
       </div>
     );
@@ -477,7 +401,7 @@ function CategoryCard({
   return (
     <Link
       to={`/resident/categories/${id}`}
-      className="relative rounded-[18px] p-3 flex flex-col active:scale-[0.97] transition-transform"
+      className="relative rounded-[22px] p-4 flex flex-col active:scale-[0.97] transition-transform"
       style={baseStyle}
     >
       {content}
