@@ -249,30 +249,30 @@ export default function CategoriesList() {
                         קטגוריות יתווספו בקרוב
                       </div>
                     ) : (
-                      <>
-                        <div className="grid grid-cols-2 gap-3">
-                          {visibleCats.map((c) => (
-                            <CategoryCard
-                              key={c.id}
-                              id={c.id}
-                              name={c.name}
-                              icon={c.icon}
-                              count={counts[c.id] ?? 0}
-                              chips={chipsByCat[c.id] ?? []}
-                              stage={stage}
-                            />
+                      <div className="relative -mx-5">
+                        <div
+                          className="flex gap-3 overflow-x-auto px-5 pb-1 snap-x no-scrollbar"
+                          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
+                        >
+                          {cats.map((c) => (
+                            <div key={c.id} className="snap-start shrink-0 w-[150px]">
+                              <CategoryCard
+                                id={c.id}
+                                name={c.name}
+                                icon={c.icon}
+                                count={counts[c.id] ?? 0}
+                                chips={chipsByCat[c.id] ?? []}
+                                stage={stage}
+                              />
+                            </div>
                           ))}
+                          <div className="shrink-0 w-2" />
                         </div>
-
-                        {hasMore && (
-                          <button
-                            onClick={() => setExpanded((p) => ({ ...p, [stage.id]: !isExpanded }))}
-                            className="w-full mt-3 h-10 rounded-full bg-white border border-[#ECEEF2] text-[12.5px] font-bold text-[#0A1F3D] active:scale-[0.98] transition-transform shadow-[0_2px_8px_-4px_rgba(10,31,61,0.08)]"
-                          >
-                            {isExpanded ? "הצג פחות" : `הצג עוד (${cats.length - INITIAL_VISIBLE})`}
-                          </button>
-                        )}
-                      </>
+                        <div
+                          className="pointer-events-none absolute top-0 bottom-1 left-0 w-8"
+                          style={{ background: "linear-gradient(90deg, #F7F8FA, rgba(247,248,250,0))" }}
+                        />
+                      </div>
                     )}
                   </section>
                 );
