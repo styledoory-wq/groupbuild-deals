@@ -45,6 +45,11 @@ interface GalleryItem {
   caption: string | null;
 }
 
+type AreaJoinRow = {
+  regions?: { name_he?: string | null } | null;
+  cities?: { name_he?: string | null } | null;
+};
+
 const WhatsappIcon = (props: { className?: string }) => (
   <svg viewBox="0 0 24 24" className={props.className} fill="currentColor" aria-hidden="true">
     <path d="M20.52 3.48A11.86 11.86 0 0 0 12.05 0C5.5 0 .19 5.31.19 11.86a11.8 11.8 0 0 0 1.62 5.96L0 24l6.34-1.66a11.85 11.85 0 0 0 5.71 1.46h.01c6.55 0 11.86-5.31 11.86-11.86 0-3.17-1.23-6.15-3.4-8.46zM12.06 21.3a9.43 9.43 0 0 1-4.81-1.32l-.34-.2-3.76.98 1-3.66-.22-.37a9.46 9.46 0 1 1 8.13 4.57zm5.45-7.05c-.3-.15-1.77-.87-2.05-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.18.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.5-.9-.8-1.5-1.78-1.68-2.07-.18-.3-.02-.46.13-.61.13-.13.3-.34.45-.5.15-.18.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51-.18-.01-.37-.01-.57-.01-.2 0-.52.07-.8.37-.27.3-1.05 1.02-1.05 2.5 0 1.47 1.07 2.9 1.22 3.1.15.2 2.12 3.24 5.13 4.55.72.31 1.27.5 1.7.64.71.23 1.36.2 1.87.12.57-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.18-1.42-.08-.13-.27-.2-.57-.35z"/>
@@ -94,8 +99,8 @@ export default function SupplierProfile() {
       setSupplier(sup);
       setGallery((g as GalleryItem[] | null) ?? []);
 
-      const regionNames = (sregs ?? []).map((r: any) => r.regions?.name_he).filter(Boolean) as string[];
-      const cityNames = (scits ?? []).map((c: any) => c.cities?.name_he).filter(Boolean) as string[];
+      const regionNames = ((sregs ?? []) as AreaJoinRow[]).map((r) => r.regions?.name_he).filter(Boolean) as string[];
+      const cityNames = ((scits ?? []) as AreaJoinRow[]).map((c) => c.cities?.name_he).filter(Boolean) as string[];
       const fromTable = [...regionNames, ...cityNames];
       const fromArr = (sup?.service_areas ?? []).filter((x) => x && x !== "כל הארץ");
       const merged = Array.from(new Set([...fromTable, ...fromArr]));

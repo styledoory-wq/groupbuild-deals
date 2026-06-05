@@ -23,6 +23,13 @@ type SupplierLite = {
   user_id: string | null;
 };
 
+type ClaimSupplierRpc = {
+  rpc: (
+    fn: "claim_supplier_profile_by_email",
+    args: { _supplier_id: string },
+  ) => Promise<{ error: unknown }>;
+};
+
 type DepositLimits = {
   min: number | null;
   max: number | null;
@@ -157,7 +164,7 @@ export default function OfferEditor() {
               .maybeSingle();
             s = (byEmail.data as SupplierLite | null) ?? null;
             if (s && !s.user_id) {
-              const { error: claimError } = await (supabase.rpc as any)("claim_supplier_profile_by_email", {
+              const { error: claimError } = await (supabase as unknown as ClaimSupplierRpc).rpc("claim_supplier_profile_by_email", {
                 _supplier_id: s.id,
               });
               if (!claimError) {

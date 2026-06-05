@@ -34,6 +34,10 @@ const ALLOWED_TYPES = [
 ];
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+  return error instanceof Error && error.message ? error.message : fallback;
+};
+
 export default function MyDocuments() {
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,9 +110,9 @@ export default function MyDocuments() {
 
       toast.success("הקובץ הועלה בהצלחה");
       fetchDocs();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.message || "שגיאה בהעלאת הקובץ");
+      toast.error(getErrorMessage(err, "שגיאה בהעלאת הקובץ"));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -122,7 +126,7 @@ export default function MyDocuments() {
         .createSignedUrl(doc.file_url, 60 * 5); // 5 min
       if (error) throw error;
       window.open(data.signedUrl, "_blank");
-    } catch (err: any) {
+    } catch {
       toast.error("שגיאה בפתיחת הקובץ");
     }
   };
@@ -139,7 +143,7 @@ export default function MyDocuments() {
 
       toast.success("הקובץ נמחק");
       setDocs((prev) => prev.filter((d) => d.id !== doc.id));
-    } catch (err: any) {
+    } catch {
       toast.error("שגיאה במחיקה");
     }
   };

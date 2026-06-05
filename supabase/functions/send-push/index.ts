@@ -35,6 +35,10 @@ const EVENT_TO_PUSH_PREF: Record<EventType, string> = {
   system: "system_push_enabled",
 };
 
+type NotificationPushSettings = Record<string, boolean | null | undefined> & {
+  push_notifications_enabled?: boolean | null;
+};
+
 function hasFcm(): boolean {
   return !!Deno.env.get("FCM_SERVICE_ACCOUNT_JSON");
 }
@@ -75,8 +79,7 @@ Deno.serve(async (req) => {
     if (settings) {
       if (!settings.push_notifications_enabled)
         return json({ success: true, skipped: "user_master_off" });
-      // deno-lint-ignore no-explicit-any
-      if ((settings as any)[EVENT_TO_PUSH_PREF[body.event]] === false)
+      if ((settings as NotificationPushSettings)[EVENT_TO_PUSH_PREF[body.event]] === false)
         return json({ success: true, skipped: "user_event_off" });
     }
 

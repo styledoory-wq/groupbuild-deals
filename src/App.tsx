@@ -9,8 +9,8 @@ import { RequireAdmin } from "@/components/auth/RequireAdmin";
 import { RouteTransition } from "@/components/layout/RouteTransition";
 import { SplashScreen } from "@/components/SplashScreen";
 import { preloadRoleRoutes } from "@/lib/routePreload";
+import { isAdminEmail } from "@/lib/auth";
 import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
-import ResidentDashboard from "./pages/resident/ResidentDashboard";
 
 const Welcome = lazy(() => import("./pages/Welcome"));
 const Landing = lazy(() => import("./pages/Landing"));
@@ -25,6 +25,7 @@ const TermsSuppliers = lazy(() => import("./pages/TermsSuppliers"));
 const SharedDeal = lazy(() => import("./pages/SharedDeal"));
 const ProjectsList = lazy(() => import("./pages/resident/ProjectsList"));
 const CategoriesList = lazy(() => import("./pages/resident/CategoriesList"));
+const ResidentDashboard = lazy(() => import("./pages/resident/ResidentDashboard"));
 const DealsList = lazy(() => import("./pages/resident/DealsList"));
 const CategorySuppliers = lazy(() => import("./pages/resident/CategorySuppliers"));
 const DealDetail = lazy(() => import("./pages/resident/DealDetail"));
@@ -117,23 +118,42 @@ const SuspenseFallback = () => {
   );
 };
 
+const roleHome = (role: "resident" | "supplier" | "admin") => {
+  if (role === "admin") return "/admin";
+  return role === "supplier" ? "/supplier" : "/resident";
+};
+
+const RequireRole = ({ role, children }: { role: "resident" | "supplier"; children: React.ReactNode }) => {
+  const { user, authReady } = useApp();
+
+  if (!authReady) return <SuspenseFallback />;
+  if (!user) return <Navigate to="/auth" replace />;
+  if (isAdminEmail(user.email)) return <Navigate to="/admin" replace />;
+  if (user.role !== role) return <Navigate to={roleHome(user.role)} replace />;
+
+  return <>{children}</>;
+};
+
+const residentRoute = (el: React.ReactNode) => <RequireRole role="resident">{el}</RequireRole>;
+const supplierRoute = (el: React.ReactNode) => <RequireRole role="supplier">{el}</RequireRole>;
+
 const PreloadImportantRoutes = () => {
   const { user, authReady } = useApp();
+  const role = user?.role;
   useEffect(() => {
-    if (!authReady || !user) return;
+    if (!authReady || !role) return;
     const run = () => {
-      preloadRoleRoutes(user.role);
-      if (user.role === "resident") {
+      preloadRoleRoutes(role);
+      if (role === "resident") {
         void import("./pages/resident/DealDetail");
         void import("./pages/resident/CategorySuppliers");
-        void import("./lib/prefetchTabs").then((m) => m.prefetchResidentTabs());
       }
     };
     const idle = window.requestIdleCallback ?? ((cb: IdleRequestCallback) => window.setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 }), 1200));
     const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout;
     const id = idle(run);
     return () => cancelIdle(id as never);
-  }, [authReady, user?.role]);
+  }, [authReady, role]);
   return null;
 };
 
@@ -164,33 +184,33 @@ const App = () => (
                   <Route path="/terms/residents" element={<TermsResidents />} />
                   <Route path="/terms/suppliers" element={<TermsSuppliers />} />
                   <Route path="/suppliers/:supplierId" element={<SupplierProfile />} />
-                  <Route path="/resident" element={<ResidentDashboard />} />
-                  <Route path="/resident/projects" element={<ProjectsList />} />
-                  <Route path="/resident/categories" element={<CategoriesList />} />
-                  <Route path="/resident/categories/:categoryId" element={<CategorySuppliers />} />
-                  <Route path="/resident/deals" element={<DealsList />} />
-                  <Route path="/resident/deals/:dealId" element={<DealDetail />} />
+                  <Route path="/resident" element={residentRoute(<ResidentDashboard />)} />
+                  <Route path="/resident/projects" element={residentRoute(<ProjectsList />)} />
+                  <Route path="/resident/categories" element={residentRoute(<CategoriesList />)} />
+                  <Route path="/resident/categories/:categoryId" element={residentRoute(<CategorySuppliers />)} />
+                  <Route path="/resident/deals" element={residentRoute(<DealsList />)} />
+                  <Route path="/resident/deals/:dealId" element={residentRoute(<DealDetail />)} />
                   <Route path="/deals/:dealId" element={<SharedDeal />} />
                   <Route path="/share/deal/:dealId" element={<SharedDeal />} />
-                  <Route path="/resident/profile" element={<ResidentProfile />} />
-                  <Route path="/resident/profile/edit" element={<ResidentProfileEdit />} />
-                  <Route path="/resident/notifications" element={<Notifications />} />
-                  <Route path="/resident/my-offers" element={<MyOffers />} />
-                  <Route path="/resident/documents" element={<MyDocuments />} />
-                  <Route path="/resident/deposits" element={<MyDeposits />} />
-                  <Route path="/resident/my-vouchers" element={<MyVouchers />} />
-                  <Route path="/resident/search" element={<SearchPage />} />
-                  <Route path="/resident/privacy" element={<PrivacyPolicy />} />
-                  <Route path="/supplier" element={<SupplierDashboard />} />
-                  <Route path="/supplier/profile/edit" element={<SupplierProfileEdit />} />
-                  <Route path="/supplier/offers" element={<SupplierOffers />} />
-                  <Route path="/supplier/offers/new" element={<OfferEditor />} />
-                  <Route path="/supplier/offers/:dealId/marketing" element={<SupplierOfferMarketingEdit />} />
+                  <Route path="/resident/profile" element={residentRoute(<ResidentProfile />)} />
+                  <Route path="/resident/profile/edit" element={residentRoute(<ResidentProfileEdit />)} />
+                  <Route path="/resident/notifications" element={residentRoute(<Notifications />)} />
+                  <Route path="/resident/my-offers" element={residentRoute(<MyOffers />)} />
+                  <Route path="/resident/documents" element={residentRoute(<MyDocuments />)} />
+                  <Route path="/resident/deposits" element={residentRoute(<MyDeposits />)} />
+                  <Route path="/resident/my-vouchers" element={residentRoute(<MyVouchers />)} />
+                  <Route path="/resident/search" element={residentRoute(<SearchPage />)} />
+                  <Route path="/resident/privacy" element={residentRoute(<PrivacyPolicy />)} />
+                  <Route path="/supplier" element={supplierRoute(<SupplierDashboard />)} />
+                  <Route path="/supplier/profile/edit" element={supplierRoute(<SupplierProfileEdit />)} />
+                  <Route path="/supplier/offers" element={supplierRoute(<SupplierOffers />)} />
+                  <Route path="/supplier/offers/new" element={supplierRoute(<OfferEditor />)} />
+                  <Route path="/supplier/offers/:dealId/marketing" element={supplierRoute(<SupplierOfferMarketingEdit />)} />
                   <Route path="/settings/notifications" element={<NotificationSettings />} />
-                  <Route path="/supplier/leads" element={<SupplierLeads />} />
-                  <Route path="/supplier/reviews" element={<SupplierReviews />} />
-                  <Route path="/supplier/scan" element={<SupplierScan />} />
-                  <Route path="/supplier/redemptions" element={<SupplierRedemptions />} />
+                  <Route path="/supplier/leads" element={supplierRoute(<SupplierLeads />)} />
+                  <Route path="/supplier/reviews" element={supplierRoute(<SupplierReviews />)} />
+                  <Route path="/supplier/scan" element={supplierRoute(<SupplierScan />)} />
+                  <Route path="/supplier/redemptions" element={supplierRoute(<SupplierRedemptions />)} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/admin-login" element={<AdminLogin />} />
                   <Route path="/admin" element={adminRoute(<AdminDashboard />)} />

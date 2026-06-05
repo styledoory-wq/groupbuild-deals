@@ -10,8 +10,8 @@ export function normalizeWhatsappUrl(input: string | null | undefined): string |
   if (!raw) return null;
 
   // If a WhatsApp URL was given, extract the phone portion first.
-  const waMatch = raw.match(/wa\.me\/(\+?\d[\d\s\-]*)/i);
-  const sendMatch = raw.match(/[?&]phone=(\+?\d[\d\s\-]*)/i);
+  const waMatch = raw.match(/wa\.me\/(\+?\d[\d\s-]*)/i);
+  const sendMatch = raw.match(/[?&]phone=(\+?\d[\d\s-]*)/i);
   if (waMatch) raw = waMatch[1];
   else if (sendMatch) raw = sendMatch[1];
 

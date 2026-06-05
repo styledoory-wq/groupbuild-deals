@@ -12,6 +12,10 @@ const FROM = "GroupBuild <onboarding@resend.dev>";
 const BRAND_NAVY = "#0E2A47";
 const BRAND_GOLD = "#C9A24B";
 
+type NotificationEmailSettings = Record<string, boolean | null | undefined> & {
+  email_notifications_enabled?: boolean | null;
+};
+
 type Payload =
   | { type: "supplier_approved"; supplier_id: string }
   | { type: "resident_approved"; user_id: string }
@@ -117,8 +121,7 @@ Deno.serve(async (req) => {
         .select(`email_notifications_enabled, ${col}`)
         .eq("user_id", userId).maybeSingle();
       if (!data) return true;
-      // deno-lint-ignore no-explicit-any
-      const d = data as any;
+      const d = data as NotificationEmailSettings;
       if (!d.email_notifications_enabled) return false;
       return d[col] !== false;
     }
