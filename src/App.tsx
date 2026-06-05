@@ -81,14 +81,10 @@ const queryClient = new QueryClient({
 
 const adminRoute = (el: React.ReactNode) => <RequireAdmin>{el}</RequireAdmin>;
 
-/**
- * Suspense fallback — שקוף לחלוטין עד 250ms (מונע "פלאש"),
- * ואז בר זהב עדין למעלה. בלי לוגו/רקע כדי לא לקפוץ בין מעברים.
- */
 const SuspenseFallback = () => {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    const t = window.setTimeout(() => setShow(true), 250);
+    const t = window.setTimeout(() => setShow(true), 800);
     return () => window.clearTimeout(t);
   }, []);
   if (!show) return null;
