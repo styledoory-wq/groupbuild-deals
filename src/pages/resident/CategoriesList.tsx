@@ -221,10 +221,6 @@ export default function CategoriesList() {
             {/* === LARGE APPLE-STYLE CATEGORY CARDS === */}
             <div className="px-5 mt-6 space-y-7">
               {visibleStages.map(({ stage, cats, totalSuppliers }) => {
-                const isExpanded = !!expanded[stage.id];
-                const visibleCats = isExpanded ? cats : cats.slice(0, INITIAL_VISIBLE);
-                const hasMore = cats.length > INITIAL_VISIBLE;
-
                 return (
                   <section key={stage.id}>
                     {/* Stage heading */}
