@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search as SearchIcon, Store } from "lucide-react";
-import { MobileShell } from "@/components/layout/MobileShell";
+import { Search as SearchIcon, Store, X } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { PremiumHeader } from "@/components/layout/PremiumHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 
@@ -14,18 +13,16 @@ type SupplierRow = {
   logo_url: string | null;
 };
 
+const SUGGESTIONS = ["חשמלאי", "מטבחים", "ריצוף", "מיזוג אוויר", "אדריכל", "צבע"];
+
 export default function SearchPage() {
   const [q, setQ] = useState("");
   const [suppliers, setSuppliers] = useState<SupplierRow[]>([]);
   const [loading, setLoading] = useState(false);
-
   const term = q.trim();
 
   useEffect(() => {
-    if (!term) {
-      setSuppliers([]);
-      return;
-    }
+    if (!term) { setSuppliers([]); return; }
     let cancelled = false;
     const t = setTimeout(async () => {
       setLoading(true);
@@ -43,65 +40,95 @@ export default function SearchPage() {
         if (!cancelled) setLoading(false);
       }
     }, 250);
-    return () => {
-      cancelled = true;
-      clearTimeout(t);
-    };
+    return () => { cancelled = true; clearTimeout(t); };
   }, [term]);
 
-  const showEmpty = !term;
-
   return (
-    <MobileShell>
-      <PageHeader title="חיפוש ספקים" subtitle="מצא ספקים ובעלי מקצוע" />
-      <div className="px-5 pb-28 space-y-4">
-        <div className="relative">
-          <SearchIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8]" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="חפש ספקים, בעלי מקצוע..."
-            className="w-full h-12 rounded-2xl bg-white border border-[#E2E8F0] pr-11 pl-4 text-fs-base text-[#0D1B2E] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#C9A84C] focus:ring-[3px] focus:ring-[#C9A84C]/15 transition"
-            dir="rtl"
-          />
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F8FA" }}>
+      <div
+        className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
+      >
+        <PremiumHeader title="חיפוש" subtitle="מצא ספקים, בעלי מקצוע וקטגוריות" />
+
+        {/* Search field */}
+        <div className="px-5 mt-2">
+          <div className="relative">
+            <SearchIcon className="absolute right-5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#6B7280] pointer-events-none" strokeWidth={2} />
+            <input
+              autoFocus
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="חפש ספקים, בעלי מקצוע..."
+              className="w-full h-14 rounded-[20px] bg-white border border-[#ECEEF2] pr-12 pl-12 text-[15px] font-medium text-[#0A1F3D] placeholder:text-[#6B7280] focus:outline-none focus:border-[#D4AF37] focus:ring-[3px] focus:ring-[#D4AF37]/15 shadow-[0_4px_16px_-6px_rgba(10,31,61,0.08)] transition"
+              dir="rtl"
+            />
+            {q && (
+              <button
+                onClick={() => setQ("")}
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-[#F7F8FA] flex items-center justify-center active:scale-90 transition-transform"
+                aria-label="נקה"
+              >
+                <X className="h-4 w-4 text-[#6B7280]" strokeWidth={2.4} />
+              </button>
+            )}
+          </div>
         </div>
 
-        {showEmpty ? (
-          <div className="flex flex-col items-center justify-center text-center py-20 text-[#94A3B8]">
-            <div className="h-16 w-16 rounded-2xl bg-white border border-[#E2E8F0] flex items-center justify-center mb-4">
-              <SearchIcon className="h-7 w-7 text-[#C9A84C]" />
+        {/* Content */}
+        <div className="px-5 mt-5">
+          {!term ? (
+            <>
+              <h2 className="text-[12px] font-bold text-[#6B7280] uppercase tracking-wider mb-3">חיפושים פופולריים</h2>
+              <div className="flex flex-wrap gap-2">
+                {SUGGESTIONS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setQ(s)}
+                    className="h-9 px-4 rounded-full bg-white border border-[#ECEEF2] text-[13px] font-semibold text-[#0A1F3D] active:scale-95 transition-transform"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : loading ? (
+            <div className="space-y-3">
+              {[0,1,2].map((i) => <div key={i} className="h-20 rounded-[20px] bg-white border border-[#ECEEF2] animate-pulse" />)}
             </div>
-            <p className="text-fs-base font-semibold text-[#475569]">התחל לחפש ספקים...</p>
-          </div>
-        ) : loading ? (
-          <div className="space-y-3">
-            <div className="h-20 gb-skeleton rounded-2xl" />
-            <div className="h-20 gb-skeleton rounded-2xl" />
-          </div>
-        ) : suppliers.length === 0 ? (
-          <p className="text-center text-[#94A3B8] py-12 text-fs-sm">לא נמצאו ספקים</p>
-        ) : (
-          <div className="space-y-3">
-            {suppliers.map((s) => (
-              <Link
-                key={s.id}
-                to={`/suppliers/${s.id}`}
-                className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] hover:border-[#C9A84C]/40 transition"
-              >
-                <SupplierLogo logoUrl={s.logo_url} name={s.business_name} size="md" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-fs-base text-[#0D1B2E] truncate">{s.business_name}</p>
-                  {s.short_description && (
-                    <p className="text-fs-xs text-[#64748B] truncate">{s.short_description}</p>
-                  )}
-                </div>
-                <Store className="h-5 w-5 text-[#C9A84C]" />
-              </Link>
-            ))}
-          </div>
-        )}
+          ) : suppliers.length === 0 ? (
+            <div className="flex flex-col items-center text-center py-16">
+              <div className="h-16 w-16 rounded-2xl bg-white border border-[#ECEEF2] flex items-center justify-center mb-4 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)]">
+                <SearchIcon className="h-7 w-7 text-[#D4AF37]" />
+              </div>
+              <p className="text-[15px] font-bold text-[#0A1F3D]">לא נמצאו ספקים</p>
+              <p className="text-[13px] text-[#6B7280] mt-1">נסה לחפש בעזרת מילה אחרת</p>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {suppliers.map((s) => (
+                <Link
+                  key={s.id}
+                  to={`/suppliers/${s.id}`}
+                  className="flex items-center gap-3 bg-white rounded-[20px] p-3 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] active:scale-[0.99] transition-transform"
+                >
+                  <SupplierLogo logoUrl={s.logo_url} name={s.business_name} size="md" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[15px] text-[#0A1F3D] truncate tracking-tight">{s.business_name}</p>
+                    {s.short_description && (
+                      <p className="text-[12px] text-[#6B7280] truncate mt-0.5">{s.short_description}</p>
+                    )}
+                  </div>
+                  <span className="h-9 w-9 rounded-xl bg-[#D4AF37]/12 flex items-center justify-center">
+                    <Store className="h-4 w-4 text-[#D4AF37]" strokeWidth={2.2} />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       <BottomNav role="resident" />
-    </MobileShell>
+    </div>
   );
 }
