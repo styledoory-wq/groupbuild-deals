@@ -70,11 +70,9 @@
     direction: rtl;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    /* Mobile-first: shrink the rem base so every rem-based padding, gap,
-       font-size, and rounded-* scales down proportionally on phones. */
     font-size: 14px;
-    /* Top bounce shows brand navy; prevents white flash on overscroll-up */
-    background-color: #0A1F3D;
+    /* Light, continuous top — matches page surface so the safe-area blends in */
+    background-color: #F7F8FA;
     overscroll-behavior: none;
   }
   @media (min-width: 640px) { html { font-size: 16px; } }
@@ -95,7 +93,7 @@
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
     overscroll-behavior-y: none;
-    background: #F1F5F9;
+    background: #F7F8FA;
     min-height: 100svh;
     min-height: 100dvh;
     -webkit-overflow-scrolling: touch;
@@ -104,7 +102,7 @@
   #root {
     min-height: 100svh;
     min-height: 100dvh;
-    background: #F4F6F9;
+    background: #F7F8FA;
   }
 
   img, video, svg {
@@ -112,37 +110,25 @@
     height: auto;
   }
 
-  /* Allow flex/grid CHILDREN to shrink below their content size — without this
-     intrinsic min-content sizing causes phantom horizontal overflow. Scoped to
-     flex/grid descendants only (not every element, which broke layouts). */
   .flex > *, .grid > *, [class*="flex"] > *, [class*="grid"] > * { min-width: 0; }
 
-  /* Prevent iOS auto-zoom on input focus (requires 16px+ font-size) */
   input, select, textarea {
     font-size: 16px !important;
   }
 
-  body::before {
+  /* Auth pages keep the dark hero background */
+  body.auth-fullscreen,
+  body.auth-fullscreen #root {
+    background: #071C3B;
+  }
+  body.auth-fullscreen::before {
     content: "";
     position: fixed;
     top: 0; left: 0; right: 0;
     height: env(safe-area-inset-top);
-    background-color: #0A1F3D;
+    background-color: #071C3B;
     z-index: 100;
     pointer-events: none;
-  }
-
-  html:has(body.auth-fullscreen)::before,
-  body.auth-fullscreen::before,
-  #root:has(.auth-screen)::before,
-  .auth-screen::before {
-    display: none;
-    content: none;
-  }
-
-  body.auth-fullscreen,
-  body.auth-fullscreen #root {
-    background: #071C3B;
   }
 
   h1, h2, h3, h4, h5 {
