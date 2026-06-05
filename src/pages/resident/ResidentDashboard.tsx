@@ -49,13 +49,32 @@ export default function ResidentDashboard() {
   const [groupResidents, setGroupResidents] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
+ export default function ResidentDashboard() {
+  const navigate = useNavigate();
+  const { user, authReady } = useApp();
+
+  const [fullName, setFullName] = useState("");
+  const [city, setCity] = useState("");
+  const [council, setCouncil] = useState("");
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [currentStage, setCurrentStage] = useState<StageId>("planning");
+  const [stageProgress, setStageProgress] = useState(20);
+  const [stageCategories, setStageCategories] = useState<{ id: string; name: string; icon: string }[]>([]);
+  const [areaDeals, setAreaDeals] = useState<MiniDeal[]>([]);
+  const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
+  const [joinedCount, setJoinedCount] = useState(0);
+  const [groupResidents, setGroupResidents] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
   useEffect(() => {
     if (!authReady || !user?.id) return;
     let cancelled = false;
+
     (async () => {
       try {
         const uid = user.id;
 
+        // גל 1 — פרופיל (חובה ראשון)
         const { data: prof } = await supabase
           .from("profiles")
           .select("full_name,city,project_id,city_id,region_id")
@@ -64,154 +83,99 @@ export default function ResidentDashboard() {
 
         const fname = prof?.full_name ?? user.name ?? "דייר";
         const cityName = prof?.city ?? "";
-        let councilName = "";
-        let councilId: string | null = null;
         let regionId: string | null = (prof?.region_id as string | null) ?? null;
-        if (prof?.city_id) {
-          const { data: cityRow } = await supabase
-            .from("cities")
-            .select("council_id,region_id")
-            .eq("id", prof.city_id)
-            .maybeSingle();
-          councilId = (cityRow?.council_id as string | null) ?? null;
-          regionId = (cityRow?.region_id as string | null) ?? regionId;
-          if (cityRow?.council_id) {
-            const { data: c } = await supabase
-              .from("regional_councils")
-              .select("name_he")
-              .eq("id", cityRow.council_id)
-              .maybeSingle();
-            councilName = c?.name_he ?? "";
-          }
-        }
+
+        // גל 2 — עיר + פרויקט בו-זמנית
+        const [cityResult, projectResult] = await Promise.all([
+          prof?.city_id
+            ? supabase.from("cities").select("council_id,region_id").eq("id", prof.city_id).maybeSingle()
+            : Promise.resolve({ data: null }),
+          prof?.project_id
+            ? supabase.from("projects").select("current_stage").eq("id", prof.project_id).maybeSingle()
+            : Promise.resolve({ data: null }),
+        ]);
+
+        const cityRow = cityResult.data;
+        const councilId: string | null = (cityRow?.council_id as string | null) ?? null;
+        if (cityRow?.region_id) regionId = (cityRow.region_id as string | null) ?? regionId;
+
+        const [councilResult] = await Promise.all([
+          councilId
+            ? supabase.from("regional_councils").select("name_he").eq("id", councilId).maybeSingle()
+            : Promise.resolve({ data: null }),
+        ]);
+
+        const councilName = (councilResult.data?.name_he as string) ?? "";
 
         let stage: StageId = "planning";
-        if (prof?.project_id) {
-          const { data: proj } = await supabase
-            .from("projects")
-            .select("current_stage")
-            .eq("id", prof.project_id)
-            .maybeSingle();
-          const s = (proj?.current_stage as string | undefined) ?? "planning";
-          if (["planning","structure","systems","finishes","outdoor"].includes(s)) stage = s as StageId;
-        }
+        const s = (projectResult.data?.current_stage as string | undefined) ?? "planning";
+        if (["planning","structure","systems","finishes","outdoor"].includes(s)) stage = s as StageId;
+
         const idx = STAGES.findIndex((x) => x.id === stage);
         const progress = Math.round(((idx + 0.2) / STAGES.length) * 100);
 
-        const { data: cats } = await supabase
-          .from("categories")
-          .select("id,name,icon")
-          .eq("stage", stage)
-          .eq("is_active", true)
-          .eq("is_deleted", false)
-          .order("display_order")
-          .limit(3);
+        // גל 3 — 8 קריאות בו-זמנית
+        const [
+          catsResult, matchesResult,
+          citySupResult, councilSupResult, regionSupResult, nationwideResult,
+          interestsResult, notifResult,
+        ] = await Promise.all([
+          supabase.from("categories").select("id,name,icon").eq("stage", stage).eq("is_active", true).eq("is_deleted", false).order("display_order").limit(3),
+          supabase.rpc("get_matching_deals_for_user", { _stage_filter: stage, _limit: 12 }),
+          prof?.city_id ? supabase.from("supplier_cities").select("supplier_id").eq("city_id", prof.city_id) : Promise.resolve({ data: [] }),
+          councilId ? supabase.from("supplier_councils").select("supplier_id").eq("council_id", councilId) : Promise.resolve({ data: [] }),
+          regionId ? supabase.from("supplier_regions").select("supplier_id").eq("region_id", regionId) : Promise.resolve({ data: [] }),
+          supabase.from("suppliers").select("id").eq("serves_all_country", true).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]),
+          supabase.from("deal_interests").select("deal_id").eq("user_id", uid).eq("is_deleted", false),
+          supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", uid).eq("is_read", false).eq("is_deleted", false),
+        ]);
 
-        const { data: matches } = await supabase.rpc("get_matching_deals_for_user", {
-          _stage_filter: stage,
-          _limit: 12,
-        });
-        const dealIds = (matches ?? []).map((m: { deal_id: string }) => m.deal_id);
-
-        let nextDeals: MiniDeal[] = [];
-        let matchedSuppliersCount = 0;
-        let totalJoiners = 0;
+        const cats = catsResult.data ?? [];
+        const dealIds = ((matchesResult.data ?? []) as { deal_id: string }[]).map((m) => m.deal_id);
 
         const supplierIds = new Set<string>();
+        (citySupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
+        (councilSupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
+        (regionSupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
+        (nationwideResult.data ?? []).forEach((r: { id: string }) => supplierIds.add(r.id));
 
-        if (prof?.city_id) {
-          const { data: citySuppliers } = await supabase
-            .from("supplier_cities")
-            .select("supplier_id")
-            .eq("city_id", prof.city_id);
-          (citySuppliers ?? []).forEach((row) => supplierIds.add(row.supplier_id as string));
+        const joined = new Set(((interestsResult.data ?? []) as { deal_id: string }[]).map((i) => i.deal_id)).size;
+        const notifCount = notifResult.count ?? 0;
+
+        // גל 4 — ספירה + עסקאות בו-זמנית
+        const [suppliersCountResult, dealsDetailResult] = await Promise.all([
+          supplierIds.size
+            ? supabase.from("suppliers").select("id", { count: "exact", head: true }).in("id", Array.from(supplierIds)).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"])
+            : Promise.resolve({ count: 0 }),
+          dealIds.length
+            ? supabase.from("deals").select("id,title,supplier_id,cover_image_url").in("id", dealIds)
+            : Promise.resolve({ data: [] }),
+        ]);
+
+        const matchedSuppliersCount = suppliersCountResult.count ?? 0;
+        const deals = (dealsDetailResult.data ?? []) as { id: string; title: string; supplier_id: string; cover_image_url: string | null }[];
+
+        let nextDeals: MiniDeal[] = [];
+        let totalJoiners = 0;
+
+        if (deals.length) {
+          const supIds = Array.from(new Set(deals.map((d) => d.supplier_id)));
+          const [supsResult, countsResult] = await Promise.all([
+            supabase.from("suppliers").select("id,business_name").in("id", supIds),
+            fetchDealJoinerCounts(deals.map((d) => d.id)),
+          ]);
+          const sMap = new Map(((supsResult.data ?? []) as { id: string; business_name: string }[]).map((s) => [s.id, s.business_name]));
+          nextDeals = deals.map((d) => ({ id: d.id, title: d.title, cover_image_url: d.cover_image_url, supplier_name: sMap.get(d.supplier_id) ?? null }));
+          totalJoiners = Object.values(countsResult).reduce((a, b) => a + b, 0);
         }
-
-        if (councilId) {
-          const { data: councilSuppliers } = await supabase
-            .from("supplier_councils")
-            .select("supplier_id")
-            .eq("council_id", councilId);
-          (councilSuppliers ?? []).forEach((row) => supplierIds.add(row.supplier_id as string));
-        }
-
-        if (regionId) {
-          const { data: regionSuppliers } = await supabase
-            .from("supplier_regions")
-            .select("supplier_id")
-            .eq("region_id", regionId);
-          (regionSuppliers ?? []).forEach((row) => supplierIds.add(row.supplier_id as string));
-        }
-
-        const { data: nationwideSuppliers } = await supabase
-          .from("suppliers")
-          .select("id")
-          .eq("serves_all_country", true)
-          .eq("is_active", true)
-          .eq("is_deleted", false)
-          .in("approval_status", ["approved", "active"]);
-        (nationwideSuppliers ?? []).forEach((row) => supplierIds.add(row.id as string));
-
-        if (supplierIds.size) {
-          const { count } = await supabase
-            .from("suppliers")
-            .select("id", { count: "exact", head: true })
-            .in("id", Array.from(supplierIds))
-            .eq("is_active", true)
-            .eq("is_deleted", false)
-            .in("approval_status", ["approved", "active"]);
-          matchedSuppliersCount = count ?? 0;
-        }
-
-        if (dealIds.length) {
-          const { data: deals } = await supabase
-            .from("deals")
-            .select("id,title,supplier_id,cover_image_url")
-            .in("id", dealIds);
-          const supIds = Array.from(new Set((deals ?? []).map((d) => d.supplier_id as string)));
-          const { data: sups } = supIds.length
-            ? await supabase.from("suppliers").select("id,business_name").in("id", supIds)
-            : { data: [] as Array<{ id: string; business_name: string }> };
-          const sMap = new Map((sups ?? []).map((s) => [s.id as string, s.business_name as string]));
-          nextDeals = (deals ?? []).map((d) => {
-            return {
-              id: d.id as string,
-              title: d.title as string,
-              cover_image_url: (d.cover_image_url as string) ?? null,
-              supplier_name: sMap.get(d.supplier_id as string) ?? null,
-            };
-          });
-          const counts = await fetchDealJoinerCounts(nextDeals.map((d) => d.id));
-          totalJoiners = Object.values(counts).reduce((a, b) => a + b, 0);
-        }
-
-        const { data: interests } = await supabase
-          .from("deal_interests")
-          .select("deal_id")
-          .eq("user_id", uid)
-          .eq("is_deleted", false);
-        const joined = new Set((interests ?? []).map((i) => i.deal_id as string)).size;
-
-        const { count: notifCount } = await supabase
-          .from("notifications")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", uid)
-          .eq("is_read", false)
-          .eq("is_deleted", false);
 
         if (cancelled) return;
-        setFullName(fname);
-        setCity(cityName);
-        setCouncil(councilName);
-        setProjectId(prof?.project_id ?? null);
-        setCurrentStage(stage);
-        setStageProgress(progress);
-        setStageCategories((cats ?? []).map((c) => ({ id: c.id, name: c.name, icon: c.icon })));
-        setAreaDeals(nextDeals);
-        setAreaSuppliersCount(matchedSuppliersCount);
-        setJoinedCount(joined);
-        setGroupResidents(totalJoiners);
-        setUnreadNotifications(notifCount ?? 0);
+        setFullName(fname); setCity(cityName); setCouncil(councilName);
+        setProjectId(prof?.project_id ?? null); setCurrentStage(stage); setStageProgress(progress);
+        setStageCategories(cats.map((c: { id: string; name: string; icon: string }) => ({ id: c.id, name: c.name, icon: c.icon })));
+        setAreaDeals(nextDeals); setAreaSuppliersCount(matchedSuppliersCount);
+        setJoinedCount(joined); setGroupResidents(totalJoiners); setUnreadNotifications(notifCount);
+
       } catch (e) {
         console.error("[ResidentDashboard] load error", e);
       }
