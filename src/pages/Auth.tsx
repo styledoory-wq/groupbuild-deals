@@ -261,7 +261,7 @@ export default function Auth() {
           {mode === "signin" ? (
             <form onSubmit={handleSignIn} className="space-y-3.5 animate-fade-up">
               <div className={fieldWrap}>
-                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                 <Input
                   type="email"
                   value={email}
@@ -273,7 +273,7 @@ export default function Auth() {
                 />
               </div>
               <div className={fieldWrap}>
-                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -288,7 +288,7 @@ export default function Auth() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#0A1F3D] transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
@@ -299,7 +299,7 @@ export default function Auth() {
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={loading}
-                  className="text-xs text-white/70 hover:text-[#C9A961] transition-colors underline-offset-4 hover:underline"
+                  className="text-xs text-[#6B7280] hover:text-[#0A1F3D] transition-colors underline-offset-4 hover:underline"
                 >
                   שכחתי סיסמה ›
                 </button>
@@ -310,8 +310,8 @@ export default function Auth() {
               {/* Account type selector with explicit title */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 px-1">
-                  <span className="text-[12px] font-semibold tracking-wide text-[#E8C97D] uppercase">בחר סוג חשבון</span>
-                  <div className="flex-1 h-px bg-gradient-to-l from-transparent via-white/15 to-transparent" />
+                  <span className="text-[12px] font-bold tracking-wide text-[#6B7280] uppercase">בחר סוג חשבון</span>
+                  <div className="flex-1 h-px bg-[#ECEEF2]" />
                 </div>
                 <div className="grid grid-cols-2 gap-2.5">
                   {roles.map(({ id, label, icon: Icon, desc }) => (
@@ -320,28 +320,28 @@ export default function Auth() {
                       key={id}
                       onClick={() => setRole(id)}
                       className={cn(
-                        "p-3 rounded-2xl border text-right transition-all backdrop-blur-md flex items-center gap-3",
+                        "p-3 rounded-[16px] text-right transition-all flex items-center gap-3 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97]",
                         role === id
-                          ? "border-[#D4AF37] bg-[#D4AF37]/15 shadow-[0_0_0_2px_rgba(212,175,55,0.18),0_8px_24px_-12px_rgba(212,175,55,0.6)]"
-                          : "border-white/20 bg-white/[0.08] hover:bg-white/[0.12]"
+                          ? "bg-[#0A1F3D] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+                          : "bg-white text-[#0A1F3D]"
                       )}
                     >
                       <div
                         className={cn(
-                          "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                          role === id ? "bg-[#D4AF37] text-[#07172E]" : "bg-white/10 text-white/80"
+                           "h-10 w-10 rounded-[12px] flex items-center justify-center shrink-0 transition-colors",
+                          role === id ? "bg-white/15 text-white" : "bg-[#F4F6FA] text-[#D4AF37]"
                         )}
                       >
                         <Icon className="h-4.5 w-4.5" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-bold text-white leading-tight">{label}</div>
-                        <div className="text-[11px] text-white/65 leading-tight mt-0.5">{desc}</div>
+                        <div className={cn("text-sm font-bold leading-tight", role === id ? "text-white" : "text-[#0A1F3D]")}>{label}</div>
+                        <div className={cn("text-[11px] leading-tight mt-0.5", role === id ? "text-white/70" : "text-[#6B7280]")}>{desc}</div>
                       </div>
                     </button>
                   ))}
                 </div>
-                <div className="h-px bg-gradient-to-l from-transparent via-white/10 to-transparent mt-1" />
+                <div className="h-px bg-[#ECEEF2] mt-1" />
               </div>
 
 
