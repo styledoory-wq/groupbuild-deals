@@ -66,6 +66,7 @@ const AdminSupplierMedia = lazy(() => import("./pages/admin/AdminSupplierMedia")
 const AdminDbSuppliers = lazy(() => import("./pages/admin/AdminDbSuppliers"));
 const PaymentSuccess = lazy(() => import("./pages/payment/PaymentSuccess"));
 const PaymentCancel = lazy(() => import("./pages/payment/PaymentCancel"));
+const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
