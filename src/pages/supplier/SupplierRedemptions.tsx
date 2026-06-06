@@ -78,9 +78,9 @@ export default function SupplierRedemptions() {
           <StatCard icon={CheckCircle2} label="מומש" value={stats.redeemed.toString()} />
           <StatCard icon={TrendingUp} label="% מימוש" value={`${stats.rate}%`} />
         </div>
-        <div className="rounded-2xl bg-primary text-primary-foreground p-4">
-          <div className="text-fs-xs uppercase tracking-wider text-primary-foreground/60">פוטנציאל הכנסה</div>
-          <div className="text-2xl font-bold gb-gold-text mt-1">₪{stats.potential.toLocaleString("he-IL")}</div>
+        <div className="gb-card p-4">
+          <div className="text-fs-xs uppercase tracking-wider text-[#6B7280] font-bold">פוטנציאל הכנסה</div>
+          <div className="text-2xl font-extrabold text-[#0A1F3D] mt-1">₪{stats.potential.toLocaleString("he-IL")}</div>
         </div>
 
         <div className="relative">
@@ -89,13 +89,13 @@ export default function SupplierRedemptions() {
         </div>
 
         {loading ? (
-          <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-20 gb-skeleton rounded-2xl" />)}</div>
+          <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-20 gb-skeleton rounded-[20px]" />)}</div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-3xl bg-card border border-border/60 p-10 text-center text-muted-foreground">
+          <div className="gb-card p-10 text-center text-muted-foreground">
             אין עדיין מימושים להצגה
           </div>
         ) : filtered.map(r => (
-          <div key={r.id} className="rounded-2xl bg-card border border-border/60 p-4 space-y-2">
+          <div key={r.id} className="gb-card p-4 space-y-2">
             <div className="flex justify-between gap-2">
               <div className="min-w-0">
                 <div className="font-bold text-foreground truncate">{r.profiles?.full_name ?? "דייר"}</div>
@@ -119,7 +119,7 @@ export default function SupplierRedemptions() {
 
 function StatCard({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-card border border-border/60 p-3 text-center">
+    <div className="rounded-[20px] bg-white p-3 text-center shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
       <Icon className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
       <div className="text-lg font-bold text-foreground">{value}</div>
       <div className="text-fs-xs text-muted-foreground">{label}</div>

@@ -63,16 +63,16 @@ export function TermsAcceptanceGate({ children }: { children: React.ReactNode })
     <>
       {children}
       {needsAccept && (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4" dir="rtl">
-          <div className="w-full md:max-w-2xl bg-background rounded-t-3xl md:rounded-3xl shadow-elegant max-h-[92vh] flex flex-col">
-            <div className="px-6 pt-6 pb-3 border-b border-border">
+        <div className="fixed inset-0 z-[100] bg-[#0A1F3D]/45 backdrop-blur-[6px] flex items-end md:items-center justify-center p-0 md:p-4" dir="rtl">
+          <div className="w-full md:max-w-2xl bg-white rounded-t-[20px] md:rounded-[20px] shadow-[0_20px_44px_-18px_rgba(10,31,61,0.24)] max-h-[92vh] flex flex-col">
+            <div className="px-6 pt-6 pb-3 shadow-[0_1px_0_rgba(10,31,61,0.06)]">
               <h2 className="text-lg font-extrabold text-primary">עודכנו תנאי השימוש במערכת</h2>
               <p className="text-xs text-muted-foreground mt-1">לצורך המשך שימוש במערכת, יש לאשר את תנאי השימוש המעודכנים.</p>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-4">
               <TermsContent audience={audience} />
             </div>
-            <div className="px-6 py-4 border-t border-border space-y-3 bg-card rounded-b-3xl md:rounded-b-3xl">
+            <div className="px-6 py-4 space-y-3 bg-white rounded-b-[20px] md:rounded-b-[20px] shadow-[0_-1px_0_rgba(10,31,61,0.06)]">
               <label className="flex items-start gap-2 text-sm cursor-pointer">
                 <input
                   type="checkbox"
@@ -85,7 +85,7 @@ export function TermsAcceptanceGate({ children }: { children: React.ReactNode })
               <Button
                 onClick={handleAccept}
                 disabled={!checked || submitting}
-                className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold"
+                className="w-full h-12"
               >
                 {submitting ? "שומר…" : "קראתי ואני מאשר"}
               </Button>

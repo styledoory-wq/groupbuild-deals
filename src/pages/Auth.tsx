@@ -207,44 +207,23 @@ export default function Auth() {
     { id: "supplier", label: "ספק", icon: Briefcase, desc: "צרו הצעות" },
   ];
 
-  // Higher-contrast glassmorphism so inputs read clearly over the photo.
+  // Unified with Categories: light surface, white controls, soft shadows.
   const fieldWrap = "relative";
   const fieldInput =
-    "h-14 w-full rounded-2xl bg-white/[0.10] backdrop-blur-md border border-white/25 pr-12 pl-4 text-[15px] text-white placeholder:text-white/70 text-right shadow-[0_4px_18px_-8px_rgba(0,0,0,0.45)] focus:bg-white/[0.14] focus:border-[#D4AF37] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.18)] focus:outline-none focus:ring-0 transition-all duration-200";
+    "h-14 w-full rounded-[16px] bg-white pr-12 pl-4 text-[15px] text-[#0A1F3D] placeholder:text-[#9CA3AF] text-right shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.22),0_4px_14px_-4px_rgba(10,31,61,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
 
   return (
     <div
       dir="rtl"
-      className="auth-screen min-h-[100dvh] w-full flex justify-center text-white relative overflow-hidden"
-      style={{ background: "#071C3B" }}
+      className="auth-screen min-h-[100dvh] w-full flex justify-center text-[#0A1F3D] relative overflow-hidden"
+      style={{ background: "#F7F8FA" }}
     >
-      {/* Premium navy gradient + soft radial light — no photography */}
+      {/* Unified light app background */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div
           className="absolute inset-0"
           style={{
-            background:
-              "linear-gradient(180deg, #0A2147 0%, #081B38 55%, #050F25 100%)",
-          }}
-        />
-        {/* Soft luminous radial */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 50% at 50% 22%, rgba(212,175,55,0.10) 0%, rgba(212,175,55,0.04) 35%, transparent 70%)",
-          }}
-        />
-        {/* Subtle gold ambient orbs */}
-        <div className="absolute -top-32 -right-24 h-80 w-80 rounded-full bg-[#D4AF37]/8 blur-3xl" />
-        <div className="absolute top-1/2 -left-24 h-96 w-96 rounded-full bg-[#D4AF37]/6 blur-3xl" />
-        {/* Fine grain via subtle radial dots — premium texture */}
-        <div
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              "radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)",
-            backgroundSize: "3px 3px",
+            background: "#F7F8FA",
           }}
         />
       </div>
@@ -258,12 +237,12 @@ export default function Auth() {
       >
         {/* Brand header — minimal, product-focused */}
         <div className="pt-6 pb-2 animate-fade-up flex flex-col items-center text-center">
-          <BrandLogo variant="light" size="xl" className="opacity-100" />
+          <BrandLogo variant="dark" size="xl" className="opacity-100" />
           <h1 className="mt-7 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight">
             {mode === "signin" ? "מתחברים לעסקאות טובות יותר" : "בואו נצא לדרך"}
           </h1>
           <div className="mt-3 h-[2px] w-10 rounded-full bg-[#D4AF37]" />
-          <p className="mt-3 text-white/65 text-[13px] leading-relaxed max-w-[22rem]">
+          <p className="mt-3 text-[#6B7280] text-[13px] font-medium leading-relaxed max-w-[22rem]">
             {mode === "signin"
               ? "דיירים וספקים מתחברים לפלטפורמה אחת ויוצרים כוח קנייה שחוסך כסף לכולם"
               : "פתחו חשבון בדקות ספורות והצטרפו לכוח הקנייה של הפרויקט שלכם"}
@@ -272,7 +251,7 @@ export default function Auth() {
 
 
         {authError && (
-          <div className="mt-3 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-100 leading-relaxed">
+          <div className="mt-3 rounded-[16px] bg-[#FEE2E2] px-4 py-2.5 text-sm text-[#DC2626] leading-relaxed shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
             {authError}
           </div>
         )}
@@ -282,7 +261,7 @@ export default function Auth() {
           {mode === "signin" ? (
             <form onSubmit={handleSignIn} className="space-y-3.5 animate-fade-up">
               <div className={fieldWrap}>
-                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                 <Input
                   type="email"
                   value={email}
@@ -294,7 +273,7 @@ export default function Auth() {
                 />
               </div>
               <div className={fieldWrap}>
-                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -309,7 +288,7 @@ export default function Auth() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#0A1F3D] transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
@@ -320,7 +299,7 @@ export default function Auth() {
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={loading}
-                  className="text-xs text-white/70 hover:text-[#C9A961] transition-colors underline-offset-4 hover:underline"
+                  className="text-xs text-[#6B7280] hover:text-[#0A1F3D] transition-colors underline-offset-4 hover:underline"
                 >
                   שכחתי סיסמה ›
                 </button>
@@ -331,8 +310,8 @@ export default function Auth() {
               {/* Account type selector with explicit title */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 px-1">
-                  <span className="text-[12px] font-semibold tracking-wide text-[#E8C97D] uppercase">בחר סוג חשבון</span>
-                  <div className="flex-1 h-px bg-gradient-to-l from-transparent via-white/15 to-transparent" />
+                  <span className="text-[12px] font-bold tracking-wide text-[#6B7280] uppercase">בחר סוג חשבון</span>
+                  <div className="flex-1 h-px bg-[#ECEEF2]" />
                 </div>
                 <div className="grid grid-cols-2 gap-2.5">
                   {roles.map(({ id, label, icon: Icon, desc }) => (
@@ -341,33 +320,33 @@ export default function Auth() {
                       key={id}
                       onClick={() => setRole(id)}
                       className={cn(
-                        "p-3 rounded-2xl border text-right transition-all backdrop-blur-md flex items-center gap-3",
+                        "p-3 rounded-[16px] text-right transition-all flex items-center gap-3 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97]",
                         role === id
-                          ? "border-[#D4AF37] bg-[#D4AF37]/15 shadow-[0_0_0_2px_rgba(212,175,55,0.18),0_8px_24px_-12px_rgba(212,175,55,0.6)]"
-                          : "border-white/20 bg-white/[0.08] hover:bg-white/[0.12]"
+                          ? "bg-[#0A1F3D] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+                          : "bg-white text-[#0A1F3D]"
                       )}
                     >
                       <div
                         className={cn(
-                          "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                          role === id ? "bg-[#D4AF37] text-[#07172E]" : "bg-white/10 text-white/80"
+                           "h-10 w-10 rounded-[12px] flex items-center justify-center shrink-0 transition-colors",
+                          role === id ? "bg-white/15 text-white" : "bg-[#F4F6FA] text-[#D4AF37]"
                         )}
                       >
                         <Icon className="h-4.5 w-4.5" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-bold text-white leading-tight">{label}</div>
-                        <div className="text-[11px] text-white/65 leading-tight mt-0.5">{desc}</div>
+                        <div className={cn("text-sm font-bold leading-tight", role === id ? "text-white" : "text-[#0A1F3D]")}>{label}</div>
+                        <div className={cn("text-[11px] leading-tight mt-0.5", role === id ? "text-white/70" : "text-[#6B7280]")}>{desc}</div>
                       </div>
                     </button>
                   ))}
                 </div>
-                <div className="h-px bg-gradient-to-l from-transparent via-white/10 to-transparent mt-1" />
+                <div className="h-px bg-[#ECEEF2] mt-1" />
               </div>
 
 
               <div className={fieldWrap}>
-                <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                 <Input
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -381,7 +360,7 @@ export default function Auth() {
               {role === "resident" && (
                 <>
                   <div className={fieldWrap}>
-                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                     <Input
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
@@ -392,12 +371,12 @@ export default function Auth() {
                     />
                   </div>
                   <div className={fieldWrap}>
-                    <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                    <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                     <select
                       value={projectId}
                       onChange={(e) => setProjectId(e.target.value)}
                       className={cn(fieldInput, "appearance-none cursor-pointer")}
-                      style={{ color: projectId ? "#fff" : "rgba(255,255,255,0.45)" }}
+                      style={{ color: projectId ? "#0A1F3D" : "#9CA3AF" }}
                     >
                       <option value="" style={{ color: "#0A1F3D" }}>פרויקט (אופציונלי)</option>
                       {projects.map((p) => (
@@ -412,7 +391,7 @@ export default function Auth() {
 
               {role === "supplier" && (
                 <div className={fieldWrap}>
-                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                   <Input
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
@@ -425,7 +404,7 @@ export default function Auth() {
               )}
 
               <div className={fieldWrap}>
-                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                 <Input
                   type="email"
                   value={email}
@@ -438,7 +417,7 @@ export default function Auth() {
               </div>
 
               <div className={fieldWrap}>
-                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -453,26 +432,26 @@ export default function Auth() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#0A1F3D] transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
               </div>
 
 
-              <label className="flex items-start gap-2 text-xs text-white/75 cursor-pointer pt-1 px-1">
+              <label className="flex items-start gap-2 text-xs text-[#6B7280] cursor-pointer pt-1 px-1">
                 <input
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-[#C9A961]"
+                  className="mt-0.5 h-4 w-4 accent-[#D4AF37]"
                 />
                 <span>
                   קראתי ואני מאשר את{" "}
                   <Link
                     to={role === "supplier" ? "/terms/suppliers" : "/terms/residents"}
                     target="_blank"
-                    className="font-bold text-[#E8C97D] underline-offset-2 hover:underline"
+                    className="font-bold text-[#B8923F] underline-offset-2 hover:underline"
                   >
                     תנאי השימוש
                   </Link>
@@ -489,7 +468,7 @@ export default function Auth() {
               type="button"
               onClick={(e) => handleSignIn(e as unknown as React.FormEvent)}
               disabled={loading}
-              className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.6)] hover:brightness-105 flex items-center justify-center gap-2"
+              className="w-full h-14 text-base flex items-center justify-center gap-2"
             >
               {loading ? "מתחבר…" : "המשך לחשבון שלי"}
               <ArrowLeft className="h-4 w-4" />
@@ -499,7 +478,7 @@ export default function Auth() {
               type="button"
               onClick={(e) => handleSignUp(e as unknown as React.FormEvent)}
               disabled={loading || !termsAccepted}
-              className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.6)] hover:brightness-105 disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full h-14 text-base disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading ? "נרשם…" : "פתחו את החשבון"}
               <ArrowLeft className="h-4 w-4" />
@@ -508,14 +487,14 @@ export default function Auth() {
 
 
           {/* Register prompt — clearly separated below CTA */}
-          <div className="text-center text-sm text-white/70">
+          <div className="text-center text-sm text-[#6B7280]">
             {mode === "signin" ? (
               <>
                 עדיין אין לך חשבון?{" "}
                 <button
                   type="button"
                   onClick={() => setMode("signup")}
-                  className="font-bold text-[#E8C97D] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
+                  className="font-bold text-[#B8923F] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
                 >
                   הרשמה
                 </button>
@@ -526,7 +505,7 @@ export default function Auth() {
                 <button
                   type="button"
                   onClick={() => setMode("signin")}
-                  className="font-bold text-[#E8C97D] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
+                  className="font-bold text-[#B8923F] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
                 >
                   התחברות
                 </button>
@@ -538,7 +517,7 @@ export default function Auth() {
           <div className="flex items-center justify-center">
             <Link
               to="/about"
-              className="flex items-center gap-1.5 text-xs text-white/55 hover:text-[#C9A961] transition-colors"
+              className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#0A1F3D] transition-colors"
             >
               <HelpCircle className="h-3.5 w-3.5" />
               איך זה עובד?
