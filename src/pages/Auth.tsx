@@ -2,7 +2,7 @@ import { useState, useLayoutEffect, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Briefcase, Mail, ArrowLeft, User as UserIcon, MapPin, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
-import { WhatsAppHelpButton } from "@/components/WhatsAppHelpButton";
+import { SupportButton } from "@/components/SupportButton";
 
 import { useApp } from "@/store/AppStore";
 import { Button } from "@/components/ui/button";
@@ -527,7 +527,12 @@ export default function Auth() {
           </div>
         </div>
       </div>
-      <WhatsAppHelpButton bottomOffset={20} />
+      <div
+        className="fixed z-40 top-4 left-4"
+        style={{ top: "calc(env(safe-area-inset-top) + 12px)" }}
+      >
+        <SupportButton />
+      </div>
     </div>
   );
 }
