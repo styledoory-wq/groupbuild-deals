@@ -553,8 +553,8 @@ export default function OfferEditor() {
               onClick={() => switchOfferType("percentage")}
               className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
                 offerType === "percentage"
-                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
-                  : "border-border bg-card text-muted-foreground"
+                  ? "border-[#0A1F3D] bg-[#F4F6FA] text-[#0A1F3D]"
+                  : "border-[#ECEEF2] bg-white text-[#6B7280]"
               }`}
             >
               אחוז הנחה
@@ -564,8 +564,8 @@ export default function OfferEditor() {
               onClick={() => switchOfferType("price_comparison")}
               className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
                 offerType === "price_comparison"
-                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
-                  : "border-border bg-card text-muted-foreground"
+                  ? "border-[#0A1F3D] bg-[#F4F6FA] text-[#0A1F3D]"
+                  : "border-[#ECEEF2] bg-white text-[#6B7280]"
               }`}
             >
               מחיר לפני ואחרי
@@ -585,8 +585,8 @@ export default function OfferEditor() {
               onClick={() => setVisibilityType("public")}
               className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
                 visibilityType === "public"
-                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
-                  : "border-border bg-card text-muted-foreground"
+                  ? "border-[#0A1F3D] bg-[#F4F6FA] text-[#0A1F3D]"
+                  : "border-[#ECEEF2] bg-white text-[#6B7280]"
               }`}
             >
               לכל הדיירים
@@ -596,8 +596,8 @@ export default function OfferEditor() {
               onClick={() => setVisibilityType("project_only")}
               className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
                 visibilityType === "project_only"
-                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
-                  : "border-border bg-card text-muted-foreground"
+                  ? "border-[#0A1F3D] bg-[#F4F6FA] text-[#0A1F3D]"
+                  : "border-[#ECEEF2] bg-white text-[#6B7280]"
               }`}
             >
               לפרויקט מסוים
