@@ -222,33 +222,32 @@ export default function SupplierProfile() {
   return (
     <MobileShell>
       {/* Hero */}
-      <div className="bg-gradient-hero text-primary-foreground px-5 pt-4 pb-12 rounded-b-[32px] relative overflow-hidden">
-        <div className="absolute -top-12 -left-12 h-40 w-40 rounded-full bg-gold/10 blur-3xl" />
-        <PageHeader title="" subtitle="" back variant="navy" />
-        <div className="-mt-8 relative flex items-end gap-4">
-          <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" className="border-gold/40 shadow-elevated" />
+      <div className="px-5 pt-4 pb-4 relative">
+        <PageHeader title="" subtitle="" back />
+        <div className="gb-card p-4 flex items-end gap-4">
+          <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" className="shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]" />
           <div className="flex-1 min-w-0 pb-1">
             <div className="flex items-center gap-1.5 mb-1">
-              <h1 className="text-xl font-extrabold truncate">{supplier.business_name}</h1>
-              {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-gold shrink-0" />}
+              <h1 className="text-[20px] font-extrabold truncate text-[#0A1F3D] tracking-tight">{supplier.business_name}</h1>
+              {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-[#D4AF37] shrink-0" />}
             </div>
             <div className="mb-1 flex items-center gap-1.5 flex-wrap">
-              <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-primary-foreground/90 [&>b]:text-gold [&>span]:text-primary-foreground/70" />
+              <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-[#6B7280] [&>b]:text-[#0A1F3D] [&>span]:text-[#6B7280]" />
               {(() => {
                 const isSvc = Boolean(supplier.offers_services) || supplier.supplier_kind === "service";
                 const isProd = Boolean(supplier.offers_products) || supplier.supplier_kind === "product";
                 if (isSvc && isProd) return (
-                  <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/40">
+                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-white text-[#0A1F3D] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
                     שירות + מוצרים
                   </span>
                 );
                 if (isSvc) return (
-                  <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-blue-400/20 text-blue-100 border border-blue-300/30">
+                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#EAF2FF] text-[#2F6BFF] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
                     בעל מקצוע
                   </span>
                 );
                 if (isProd) return (
-                  <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-100 border border-emerald-300/30">
+                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#E8F7EC] text-[#2EA85A] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
                     ספק מוצרים
                   </span>
                 );
@@ -256,13 +255,13 @@ export default function SupplierProfile() {
               })()}
             </div>
             {supplier.short_description && (
-              <p className="text-primary-foreground/80 text-xs leading-relaxed line-clamp-2">{supplier.short_description}</p>
+              <p className="text-[#6B7280] text-xs font-medium leading-relaxed line-clamp-2">{supplier.short_description}</p>
             )}
           </div>
         </div>
       </div>
 
-      <div className="px-5 -mt-6 relative z-10 space-y-4 pb-32">
+      <div className="px-5 relative z-10 space-y-4 pb-32">
         {/* Quick links */}
         {links.length > 0 && (
           <div className="gb-card p-3">
@@ -273,9 +272,9 @@ export default function SupplierProfile() {
                   href={l.href}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="h-11 rounded-xl border border-border bg-card text-foreground text-xs font-bold inline-flex items-center justify-center gap-1.5 hover:border-gold/40 transition-smooth"
+                  className="h-11 rounded-[16px] bg-white text-[#0A1F3D] text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
                 >
-                  <l.Icon className="h-4 w-4 text-gold" />
+                  <l.Icon className="h-4 w-4 text-[#D4AF37]" />
                   {l.label}
                 </a>
               ))}
