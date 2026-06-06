@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, MapPin, Settings, UserCog, AlertTriangle, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
+import { PremiumHeader } from "@/components/layout/PremiumHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,94 +65,90 @@ export default function AdminDashboard() {
 
   return (
     <MobileShell>
-      <header className="relative">
-        <div className="relative h-[230px] overflow-hidden rounded-b-[28px] bg-[#0A1F3D]">
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#0A1F3D] via-[#0A1F3D] to-[#071427]" />
-          <div aria-hidden className="absolute -top-24 -right-20 h-72 w-72 rounded-full bg-[#C9A961]/10 blur-3xl" />
-          <div aria-hidden className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-[#C9A961]/5 blur-2xl" />
-
-          <div className="relative flex items-center justify-between gap-2 px-5 pt-4">
-            <span className="h-9 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur flex items-center text-white text-fs-xs font-semibold uppercase tracking-[0.14em]">
-              אזור ניהול
-            </span>
-            <button
-              onClick={handleLogout}
-              className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-fs-sm font-semibold"
-              aria-label="יציאה"
-            >
-              <LogOut className="h-[15px] w-[15px]" strokeWidth={2} />
-              <span>התנתקות</span>
-            </button>
-          </div>
-
-          <div className="relative px-5 mt-8 text-right">
-            <h1 className="text-fs-2xl sm:text-fs-2xl font-extrabold text-white leading-[1.15] tracking-tight">
-              GroupBuild Admin
-            </h1>
-            <p className="text-white/65 text-fs-sm mt-1">פאנל בקרה ראשי</p>
-          </div>
-        </div>
-      </header>
+      <PremiumHeader
+        title="פאנל ניהול"
+        subtitle="מבט-על על המערכת"
+        back={false}
+        rightSlot={
+          <button
+            onClick={handleLogout}
+            className="h-10 px-3 rounded-full bg-white border border-[#ECEEF2] flex items-center gap-1.5 text-[#0A1F3D] shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform text-[12px] font-bold"
+            aria-label="יציאה"
+          >
+            <LogOut className="h-[14px] w-[14px]" strokeWidth={2} />
+            <span>התנתקות</span>
+          </button>
+        }
+      />
 
       {stats.pendingSuppliers > 0 && (
-        <div className="px-5 mt-4">
+        <div className="px-5 mt-1 mb-3">
           <button
             onClick={() => navigate("/admin/suppliers")}
-            className="w-full bg-white rounded-2xl px-4 py-3 border border-[#C9A961]/40 ring-1 ring-[#C9A961]/20 shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] text-sm flex items-center gap-2.5 text-right hover:border-[#C9A961]/60 transition-all"
+            className="w-full bg-white rounded-[16px] px-4 py-3 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] text-[13px] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
           >
-            <ShieldCheck className="h-4 w-4 text-[#B8923F] shrink-0" strokeWidth={2} />
-            <span className="text-[#0A1F3D] flex-1"><b className="text-[#B8923F]">{stats.pendingSuppliers}</b> ספקים ממתינים לאישור</span>
-            <ChevronLeft className="h-4 w-4 text-[#475569]" strokeWidth={2} />
+            <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
+              <ShieldCheck className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
+            </span>
+            <span className="text-[#0A1F3D] flex-1 font-medium">
+              <b className="text-[#D4AF37]">{stats.pendingSuppliers}</b> ספקים ממתינים לאישור
+            </span>
+            <ChevronLeft className="h-4 w-4 text-[#9CA3AF]" strokeWidth={2} />
           </button>
         </div>
       )}
 
-      <div className="px-5 mt-4 grid grid-cols-2 gap-3 mb-4">
+      {/* Hero revenue card — light, premium, matches Categories */}
+      <div className="px-5 mt-2 mb-4">
+        <div className="rounded-[20px] bg-white p-5 border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0">
+              <div className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">פיקדונות ששולמו</div>
+              <div className="text-[26px] font-extrabold text-[#0A1F3D] mt-1 tracking-tight leading-none">
+                {formatILS(stats.paidDepositsAmount)}
+              </div>
+            </div>
+            <div className="h-11 w-11 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
+              <TrendingUp className="h-[18px] w-[18px] text-[#D4AF37]" strokeWidth={2.2} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-[#ECEEF2]">
+            <div>
+              <div className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">פיקדונות (סה״כ)</div>
+              <div className="font-extrabold text-[#0A1F3D] mt-1 text-[15px]">{stats.totalDeposits}</div>
+            </div>
+            <div>
+              <div className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">דירות</div>
+              <div className="font-extrabold text-[#0A1F3D] mt-1 text-[15px]">{stats.apartments}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats grid */}
+      <div className="px-5 grid grid-cols-2 gap-2.5 mb-5">
         <StatCard icon={Building2} label="פרויקטים" value={stats.projects || projects.length} />
         <StatCard icon={Users} label="ספקים" value={stats.suppliers} />
         <StatCard icon={Tag} label="עסקאות פעילות" value={stats.activeDeals} />
         <StatCard icon={LayoutGrid} label="קטגוריות" value={categories.length} />
       </div>
 
-      <div className="px-5 mb-8">
-        <div className="rounded-2xl bg-[#0A1F3D] text-white p-5 shadow-[0_8px_24px_-12px_rgba(10,31,61,0.40)] border border-[#0A1F3D] relative overflow-hidden">
-          <div aria-hidden className="absolute -top-10 -left-10 h-32 w-32 rounded-full bg-[#C9A961]/15 blur-2xl" />
-          <div className="flex items-center justify-between relative">
-            <div>
-              <div className="text-fs-xs text-white/60 uppercase tracking-[0.14em] font-semibold">פיקדונות ששולמו</div>
-              <div className="text-fs-2xl font-extrabold text-[#C9A961] mt-1.5 tracking-tight">{formatILS(stats.paidDepositsAmount)}</div>
-            </div>
-            <div className="h-11 w-11 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center">
-              <TrendingUp className="h-[18px] w-[18px] text-[#C9A961]" strokeWidth={2} />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-white/10 relative">
-            <div>
-              <div className="text-fs-xs text-white/55 uppercase tracking-[0.14em] font-semibold">פיקדונות (סה״כ)</div>
-              <div className="font-bold mt-1 text-white">{stats.totalDeposits}</div>
-            </div>
-            <div>
-              <div className="text-fs-xs text-white/55 uppercase tracking-[0.14em] font-semibold">דירות</div>
-              <div className="font-bold mt-1 text-white">{stats.apartments}</div>
-            </div>
-          </div>
+      <section className="px-5 pb-10">
+        <h2 className="text-[12px] font-extrabold text-[#0A1F3D] tracking-tight mb-2.5 px-1">ניהול מהיר</h2>
+        <div className="space-y-2">
+          <QuickLink onClick={() => navigate("/admin/projects")} icon={Building2} label="ניהול פרויקטים" desc="הוספה, עריכה ומחיקה" />
+          <QuickLink onClick={() => navigate("/admin/suppliers")} icon={ShieldCheck} label="ניהול ספקים" desc="אזורי שירות, מדיה וקישורים" badge={stats.pendingSuppliers} />
+          <QuickLink onClick={() => navigate("/admin/residents")} icon={Users} label="ניהול דיירים" desc="כל הדיירים והפרויקטים" />
+          <QuickLink onClick={() => navigate("/admin/users")} icon={UserCog} label="ניהול משתמשים" desc="עריכה מלאה לכל המשתמשים" />
+          <QuickLink onClick={() => navigate("/admin/categories")} icon={LayoutGrid} label="ניהול קטגוריות" desc={`${categories.length} קטגוריות פעילות`} />
+          <QuickLink onClick={() => navigate("/admin/deals")} icon={Tag} label="ניהול עסקאות" desc={`${stats.activeDeals} עסקאות פעילות`} />
+          <QuickLink onClick={() => navigate("/admin/deposits")} icon={Wallet} label="ניהול פיקדונות" desc={`${stats.totalDeposits} פיקדונות`} />
+          <QuickLink onClick={() => navigate("/admin/payment-settings")} icon={CreditCard} label="הגדרות תשלום" desc="ספק סליקה וברירות מחדל" />
+          <QuickLink onClick={() => navigate("/admin/regions")} icon={MapPin} label="אזורי שירות" desc="ניהול אזורים וערים" />
+          <QuickLink onClick={() => navigate("/admin/settings")} icon={Settings} label="הגדרות מערכת" desc="התראות ומייל אדמין" />
+          <QuickLink onClick={() => navigate("/admin/stats")} icon={BarChart3} label="סטטיסטיקות" desc="ניתוח מערכת מלא" />
+          <QuickLink onClick={() => navigate("/admin/complaints")} icon={AlertTriangle} label="תלונות דיירים" desc="דיווחי בעיות" />
         </div>
-      </div>
-
-      <section className="px-5 space-y-2.5 pb-10">
-        <h2 className="text-fs-xs uppercase tracking-[0.14em] text-[#475569] font-semibold mb-3 px-1">ניהול מהיר</h2>
-        <QuickLink onClick={() => navigate("/admin/projects")} icon={Building2} label="ניהול פרויקטים" desc="הוספה, עריכה ומחיקה" />
-        <QuickLink onClick={() => navigate("/admin/suppliers")} icon={ShieldCheck} label="ניהול ספקים" desc="הוספה, אזורי שירות, מדיה וקישורים" badge={stats.pendingSuppliers} />
-        <QuickLink onClick={() => navigate("/admin/residents")} icon={Users} label="ניהול דיירים" desc="כל הדיירים והפרויקטים" />
-        <QuickLink onClick={() => navigate("/admin/users")} icon={UserCog} label="ניהול משתמשים" desc="עריכה מלאה לכל המשתמשים" />
-        <QuickLink onClick={() => navigate("/admin/categories")} icon={LayoutGrid} label="ניהול קטגוריות" desc={`${categories.length} קטגוריות פעילות`} />
-        <QuickLink onClick={() => navigate("/admin/deals")} icon={Tag} label="ניהול עסקאות" desc={`${stats.activeDeals} עסקאות פעילות`} />
-        <QuickLink onClick={() => navigate("/admin/deposits")} icon={Wallet} label="ניהול פיקדונות" desc={`${stats.totalDeposits} פיקדונות`} />
-        <QuickLink onClick={() => navigate("/admin/payment-settings")} icon={CreditCard} label="הגדרות תשלום" desc="ספק סליקה וברירות מחדל" />
-        <QuickLink onClick={() => navigate("/admin/regions")} icon={MapPin} label="אזורי שירות" desc="ניהול אזורים וערים" />
-        <QuickLink onClick={() => navigate("/admin/settings")} icon={Settings} label="הגדרות מערכת" desc="התראות ומייל אדמין" />
-        <QuickLink onClick={() => navigate("/admin/stats")} icon={BarChart3} label="סטטיסטיקות" desc="ניתוח מערכת מלא" />
-        <QuickLink onClick={() => navigate("/admin/complaints")} icon={AlertTriangle} label="תלונות דיירים" desc="דיווחי בעיות" />
       </section>
 
       <BottomNav role="admin" />
@@ -161,32 +158,35 @@ export default function AdminDashboard() {
 
 function StatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: number }) {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)]">
-      <div className="flex items-center justify-between mb-3">
-        <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center">
-          <Icon className="h-[18px] w-[18px] text-[#B8923F]" strokeWidth={2} />
-        </span>
+    <div className="bg-white rounded-[16px] p-4 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
+      <div className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center mb-2.5">
+        <Icon className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
       </div>
-      <div className="text-fs-xl font-extrabold text-[#0A1F3D] leading-none tracking-tight">{value.toLocaleString("he-IL")}</div>
-      <div className="text-fs-sm text-[#475569] mt-2 font-medium">{label}</div>
+      <div className="text-[20px] font-extrabold text-[#0A1F3D] leading-none tracking-tight">
+        {value.toLocaleString("he-IL")}
+      </div>
+      <div className="text-[12px] text-[#6B7280] mt-1.5 font-medium">{label}</div>
     </div>
   );
 }
 
 function QuickLink({ onClick, icon: Icon, label, desc, badge }: { onClick: () => void; icon: LucideIcon; label: string; desc: string; badge?: number }) {
   return (
-    <button onClick={onClick} className="w-full bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] flex items-center gap-3 text-right hover:border-[#C9A961]/45 hover:shadow-[0_6px_18px_-10px_rgba(15,30,60,0.14)] transition-all active:scale-[0.99]">
-      <span className="h-11 w-11 rounded-xl bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center shrink-0">
-        <Icon className="h-[18px] w-[18px] text-[#B8923F]" strokeWidth={2} />
+    <button
+      onClick={onClick}
+      className="w-full bg-white rounded-[16px] p-3.5 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] flex items-center gap-3 text-right active:scale-[0.99] transition-transform"
+    >
+      <span className="h-10 w-10 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
+        <Icon className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
       </span>
       <div className="flex-1 min-w-0">
-        <div className="font-bold text-fs-sm text-[#0A1F3D]">{label}</div>
-        <div className="text-fs-xs text-[#475569] mt-0.5">{desc}</div>
+        <div className="font-extrabold text-[13.5px] text-[#0A1F3D] leading-tight">{label}</div>
+        <div className="text-[11.5px] text-[#6B7280] mt-0.5 font-medium leading-tight">{desc}</div>
       </div>
       {badge && badge > 0 ? (
-        <span className="text-fs-xs font-bold px-2 py-1 rounded-full bg-destructive/10 text-destructive border border-destructive/25">{badge}</span>
+        <span className="text-[11px] font-extrabold px-2 py-1 rounded-full bg-[#FEE2E2] text-[#DC2626]">{badge}</span>
       ) : (
-        <ChevronLeft className="h-4 w-4 text-[#94A3B8]" strokeWidth={2} />
+        <ChevronLeft className="h-4 w-4 text-[#9CA3AF]" strokeWidth={2} />
       )}
     </button>
   );
