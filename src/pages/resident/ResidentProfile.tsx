@@ -19,13 +19,19 @@ export default function ResidentProfile() {
 
   useEffect(() => {
     if (!user?.id) return;
+    const cacheKey = `avatar:${user.id}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) { setAvatarUrl(cached); return; }
     let cancelled = false;
     (async () => {
       const { data } = await supabase.from("profiles").select("avatar_url").eq("id", user.id).maybeSingle();
       const path = (data as { avatar_url?: string | null } | null)?.avatar_url;
       if (!path) return;
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 3600);
-      if (!cancelled && signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+      if (!cancelled && signed?.signedUrl) {
+        sessionStorage.setItem(cacheKey, signed.signedUrl);
+        setAvatarUrl(signed.signedUrl);
+      }
     })();
     return () => { cancelled = true; };
   }, [user?.id]);
@@ -47,7 +53,10 @@ export default function ResidentProfile() {
       if (upErr) throw upErr;
       await supabase.from("profiles").update({ avatar_url: path }).eq("id", user.id);
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 3600);
-      if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+      if (signed?.signedUrl) {
+        sessionStorage.setItem(`avatar:${user.id}`, signed.signedUrl);
+        setAvatarUrl(signed.signedUrl);
+      }
       toast.success("התמונה עודכנה");
     } catch (err) {
       toast.error("שגיאה בהעלאת תמונה");
