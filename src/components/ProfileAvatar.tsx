@@ -21,7 +21,9 @@ export function ProfileAvatar({
   const navigate = useNavigate();
   const { user, logout } = useApp();
   const [open, setOpen] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(avatarUrlProp ?? null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    avatarUrlProp ?? (user?.id ? sessionStorage.getItem(`avatar:${user.id}`) : null)
+  );
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -30,14 +32,20 @@ export function ProfileAvatar({
   useEffect(() => {
     if (avatarUrlProp !== undefined) { setAvatarUrl(avatarUrlProp); return; }
     if (!user?.id) return;
+    const cacheKey = `avatar:${user.id}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) { setAvatarUrl(cached); return; }
     let cancel = false;
     (async () => {
       const { data } = await supabase.from("profiles").select("avatar_url").eq("id", user.id).maybeSingle();
       const path = (data as { avatar_url: string | null } | null)?.avatar_url;
       if (!path || cancel) return;
-      if (path.startsWith("http")) { setAvatarUrl(path); return; }
+      if (path.startsWith("http")) { sessionStorage.setItem(cacheKey, path); setAvatarUrl(path); return; }
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 7);
-      if (signed?.signedUrl && !cancel) setAvatarUrl(signed.signedUrl);
+      if (signed?.signedUrl && !cancel) {
+        sessionStorage.setItem(cacheKey, signed.signedUrl);
+        setAvatarUrl(signed.signedUrl);
+      }
     })();
     return () => { cancel = true; };
   }, [user?.id, avatarUrlProp]);
@@ -66,7 +74,10 @@ export function ProfileAvatar({
       if (upErr) throw upErr;
       await supabase.from("profiles").update({ avatar_url: path }).eq("id", user.id);
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 7);
-      if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+      if (signed?.signedUrl) {
+        sessionStorage.setItem(`avatar:${user.id}`, signed.signedUrl);
+        setAvatarUrl(signed.signedUrl);
+      }
       toast.success("תמונת הפרופיל עודכנה");
     } catch (e) {
       console.error(e);
