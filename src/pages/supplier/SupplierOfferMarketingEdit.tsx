@@ -220,11 +220,11 @@ export default function SupplierOfferMarketingEdit() {
       </div>
 
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-background via-background to-background/0 flex gap-2">
-          <Button variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-xl">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#F7F8FA] via-[#F7F8FA]/95 to-transparent flex gap-2">
+          <Button variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-[16px]">
             ביטול
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground">
+          <Button onClick={handleSave} disabled={saving} className="flex-1 h-12 rounded-[16px] bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
             <Save className="h-4 w-4 ml-2" /> {saving ? "שומר..." : "שמירה"}
           </Button>
         </div>
