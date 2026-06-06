@@ -367,16 +367,18 @@ function CategoryCard({
   );
 
   const baseStyle: React.CSSProperties = {
-    background: stage.tint,
-    border: `1px solid ${stage.border}`,
-    boxShadow: dim ? "none" : "0 6px 20px -10px rgba(10,31,61,0.18)",
-    height: 128,
-    opacity: dim ? 0.55 : 1,
+    background: `linear-gradient(160deg, #FFFFFF 0%, #FFFFFF 40%, ${stage.tint} 100%)`,
+    border: `1px solid ${stage.border}80`,
+    boxShadow: dim
+      ? "0 1px 3px rgba(10,31,61,0.04)"
+      : "0 4px 14px -8px rgba(10,31,61,0.14), 0 1px 2px rgba(10,31,61,0.04)",
+    height: 110,
+    opacity: dim ? 0.68 : 1,
   };
 
   if (dim) {
     return (
-      <div className="relative rounded-[22px] p-4 flex flex-col cursor-default" style={baseStyle}>
+      <div className="relative rounded-[20px] p-3.5 flex flex-col cursor-default" style={baseStyle}>
         {content}
       </div>
     );
@@ -385,7 +387,7 @@ function CategoryCard({
   return (
     <Link
       to={`/resident/categories/${id}`}
-      className="relative rounded-[22px] p-4 flex flex-col active:scale-[0.97] transition-transform"
+      className="relative rounded-[20px] p-3.5 flex flex-col transition-all duration-150 active:scale-[0.98] active:shadow-[0_8px_22px_-8px_rgba(10,31,61,0.22)]"
       style={baseStyle}
     >
       {content}
