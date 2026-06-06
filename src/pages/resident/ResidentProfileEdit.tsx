@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { Save, ArrowRight, Mail, Phone, User as UserIcon, MapPin, Building2, Bell } from "lucide-react";
+import { Save, ArrowRight, Mail, Phone, User as UserIcon, MapPin, Building2, Bell, Hammer } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
+import { STAGE_THEMES, type StageId } from "@/lib/designSystem";
 import { toast } from "sonner";
 
 const profileSchema = z.object({
@@ -38,6 +39,7 @@ export default function ResidentProfileEdit() {
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [projectId, setProjectId] = useState("");
+  const [currentStage, setCurrentStage] = useState<StageId>("planning");
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifPush, setNotifPush] = useState(true);
   const [notifSms, setNotifSms] = useState(false);
@@ -61,6 +63,9 @@ export default function ResidentProfileEdit() {
         setCity(data.city ?? "");
         setAddress(data.address ?? "");
         setProjectId(data.project_id ?? "");
+        const validIds = STAGE_THEMES.map((s) => s.id) as string[];
+        const cs = (data as { current_stage?: string | null }).current_stage ?? "planning";
+        setCurrentStage((validIds.includes(cs) ? cs : "planning") as StageId);
         const np = (data.notification_prefs as { email?: boolean; push?: boolean; sms?: boolean } | null) ?? {};
         setNotifEmail(np.email ?? true);
         setNotifPush(np.push ?? true);
@@ -99,6 +104,7 @@ export default function ResidentProfileEdit() {
           region: regionSlug || null,
           address: address.trim() || null,
           project_id: projectId || null,
+          current_stage: currentStage,
           notification_prefs: { email: notifEmail, push: notifPush, sms: notifSms },
         })
         .eq("id", uid);
