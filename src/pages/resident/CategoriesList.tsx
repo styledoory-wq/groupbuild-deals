@@ -318,13 +318,12 @@ function StageSection({
       className="rounded-[22px] px-2 py-4"
       style={{
         background: `linear-gradient(180deg, ${stage.tint} 0%, ${stage.tint}cc 100%)`,
-        border: `1px solid ${stage.border}80`,
       }}
     >
       {/* Stage heading */}
       <div className="mb-3 px-3 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="text-[17px] font-extrabold text-[#0A1F3D] tracking-tight leading-tight">
+          <h3 className="text-[19px] font-extrabold text-[#0A1F3D] tracking-tight leading-tight">
             {stage.title}
           </h3>
           <p className="mt-1 text-[11.5px] font-bold" style={{ color: stage.accent }}>
@@ -332,10 +331,9 @@ function StageSection({
           </p>
         </div>
         <div
-          className="h-9 w-9 shrink-0 rounded-[12px] flex items-center justify-center bg-white shadow-[0_3px_8px_-4px_rgba(10,31,61,0.18)]"
-          style={{ border: `1px solid ${stage.border}` }}
+          className="h-10 w-10 shrink-0 rounded-[12px] flex items-center justify-center bg-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.18)]"
         >
-          <stage.Icon className="h-[18px] w-[18px]" strokeWidth={2.3} style={{ color: stage.accent }} />
+          <stage.Icon className="h-[19px] w-[19px]" strokeWidth={2.3} style={{ color: stage.accent }} />
         </div>
       </div>
 
