@@ -170,24 +170,21 @@
   }
 
   .gb-card {
-    @apply rounded-2xl relative;
+    @apply rounded-[20px] relative;
     background: #ffffff;
-    border: 1px solid rgba(201, 168, 76, 0.10);
-    box-shadow: 0 2px 12px rgba(13, 27, 46, 0.08);
+    box-shadow: 0 8px 20px -10px rgba(10,31,61,0.18), 0 2px 4px -2px rgba(10,31,61,0.05);
     padding: clamp(12px, 1.5vw, 20px);
-    transition: var(--transition-smooth);
+    transition: transform 180ms cubic-bezier(0.4,0,0.2,1), box-shadow 180ms cubic-bezier(0.4,0,0.2,1);
   }
   .gb-card:hover {
-    box-shadow: 0 6px 20px rgba(13, 27, 46, 0.12);
-    border-color: rgba(201, 168, 76, 0.30);
+    box-shadow: 0 14px 28px -10px rgba(10,31,61,0.20);
     transform: translateY(-1px);
   }
 
   .gb-card-flat {
-    @apply rounded-2xl;
+    @apply rounded-[20px];
     background: #ffffff;
-    border: 1px solid rgba(201, 168, 76, 0.10);
-    box-shadow: 0 2px 12px rgba(13, 27, 46, 0.08);
+    box-shadow: 0 2px 10px -4px rgba(10,31,61,0.08);
   }
 
   .gb-hero { background: var(--gradient-hero); @apply text-primary-foreground; }
