@@ -215,6 +215,37 @@ export default function ResidentProfileEdit() {
           </Field>
         </section>
 
+        {/* Build stage */}
+        <section className="gb-card p-4 space-y-3">
+          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Hammer className="h-3.5 w-3.5 text-gold" /> שלב נוכחי בבנייה
+          </h3>
+          <p className="text-[12px] text-muted-foreground -mt-1">השלב שתבחרו ישמש להמלצות, הצעות רלוונטיות וחישובי התקדמות.</p>
+          <div className="grid grid-cols-2 gap-2">
+            {STAGE_THEMES.map((s) => {
+              const active = s.id === currentStage;
+              return (
+                <button
+                  type="button"
+                  key={s.id}
+                  onClick={() => setCurrentStage(s.id)}
+                  className={`text-right rounded-[14px] p-3 border transition-all active:scale-[0.98] ${
+                    active
+                      ? "border-transparent text-white shadow-[0_6px_16px_-8px_rgba(10,31,61,0.35)]"
+                      : "bg-white border-[#ECEEF2] text-[#0A1F3D]"
+                  }`}
+                  style={active ? { background: s.accent } : undefined}
+                >
+                  <div className={`text-[10px] font-bold tracking-wide ${active ? "text-white/80" : "text-[#6B7280]"}`}>שלב {s.index}</div>
+                  <div className="text-[13px] font-extrabold leading-tight mt-0.5">{s.title}</div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+
+
         {/* Notifications */}
         <section className="gb-card p-4 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
