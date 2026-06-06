@@ -758,10 +758,10 @@ export default function OfferEditor() {
         {/* Supplier commitment - required */}
         <div
           ref={commitmentRef}
-          className={`gb-card p-4 border-2 transition-colors ${
+          className={`gb-card p-4 transition-colors ${
             commitmentError && !commitmentAccepted
-              ? "border-destructive bg-destructive/5 animate-pulse"
-              : "border-gold/40 bg-gold/5"
+              ? "border border-destructive bg-destructive/5 animate-pulse"
+              : "border border-[#D4AF37]/40 bg-[#FFF8E1]/40"
           }`}
         >
           <label className="flex items-start gap-3 cursor-pointer">
