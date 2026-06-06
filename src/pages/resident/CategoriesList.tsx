@@ -341,7 +341,7 @@ function CategoryCard({
     <>
       <div className="flex items-start justify-between">
         <div
-          className="h-10 w-10 rounded-[12px] flex items-center justify-center text-[20px] bg-white shadow-[0_2px_6px_rgba(10,31,61,0.06)]"
+          className="h-9 w-9 rounded-[10px] flex items-center justify-center text-[18px] bg-white shadow-[0_2px_5px_rgba(10,31,61,0.06)]"
           style={{ border: `1px solid ${stage.border}` }}
         >
           <span>{icon}</span>
@@ -355,12 +355,12 @@ function CategoryCard({
             className="text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-white"
             style={{ color: stage.accent, border: `1px solid ${stage.border}` }}
           >
-            {count}
+            {count} ספקים
           </span>
         )}
       </div>
 
-      <p className="mt-2.5 text-[13px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
+      <p className="mt-2 text-[12.5px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
         {name}
       </p>
     </>
