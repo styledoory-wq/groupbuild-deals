@@ -103,7 +103,7 @@ export function ReviewForm({ supplierId, dealId, dealCompleted, onSubmitted }: P
               className="p-1 transition-transform hover:scale-110"
               aria-label={`${i} כוכבים`}
             >
-              <Star className={cn("h-8 w-8 transition-colors", active ? "fill-gold text-gold" : "text-muted")} />
+              <Star className={cn("h-8 w-8 transition-colors", active ? "fill-[#D4AF37] text-[#D4AF37]" : "text-[#E5E7EB]")} />
             </button>
           );
         })}
@@ -120,7 +120,7 @@ export function ReviewForm({ supplierId, dealId, dealCompleted, onSubmitted }: P
       <Button
         onClick={submit}
         disabled={submitting || rating < 1}
-        className="w-full h-11 mt-3 rounded-xl bg-gradient-gold text-primary font-bold shadow-gold"
+        className="w-full h-11 mt-3"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : existing ? "עדכון ביקורת" : "שלח דירוג"}
       </Button>
