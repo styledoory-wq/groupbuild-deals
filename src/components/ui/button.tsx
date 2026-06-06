@@ -4,27 +4,51 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Unified app buttons — matches the Categories design language.
+ * 16px radius, soft shadow, 180ms transitions, premium press feedback.
+ */
 const buttonVariants = cva(
-  // text-fs-sm = fluid; min-h-touch = 44px WCAG/HIG tap target on every size
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-fs-sm font-semibold min-h-touch ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
+  [
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap",
+    "rounded-[16px] text-[14px] font-bold tracking-tight",
+    "min-h-touch ring-offset-background",
+    "transition-[transform,box-shadow,filter,background-color,color] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/40 focus-visible:ring-offset-1",
+    "disabled:pointer-events-none disabled:opacity-50",
+    "active:scale-[0.97]",
+    "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  ].join(" "),
   {
     variants: {
       variant: {
-        default: "ios-btn-navy",
-        destructive: "bg-destructive text-destructive-foreground rounded-2xl shadow-sm hover:bg-destructive/90",
-        outline: "ios-btn-secondary",
-        secondary: "ios-btn-secondary",
-        ghost: "hover:bg-muted text-foreground rounded-2xl",
-        link: "text-primary underline-offset-4 hover:underline min-h-0",
-        premium: "bg-gradient-to-l from-gold via-gold-light to-gold text-[#0A1F3D] font-bold rounded-2xl shadow-gold hover:brightness-105",
-        navy: "ios-btn-navy",
-        glass: "bg-white/10 backdrop-blur-md border border-white/15 text-primary-foreground hover:bg-white/15 rounded-2xl",
+        // Primary — deep navy CTA, app-wide default
+        default:
+          "bg-[#0A1F3D] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] hover:brightness-110",
+        // Gold accent — premium / hero actions
+        premium:
+          "bg-gradient-to-l from-[#C9A84C] via-[#E8C96B] to-[#C9A84C] text-[#0A1F3D] shadow-[0_8px_20px_-10px_rgba(201,168,76,0.55)] hover:brightness-105",
+        // Secondary — soft white surface, matches cards
+        secondary:
+          "bg-white text-[#0A1F3D] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.10)] hover:bg-[#F4F6FA]",
+        outline:
+          "bg-white text-[#0A1F3D] shadow-[0_2px_8px_-4px_rgba(10,31,61,0.08)] hover:bg-[#F4F6FA]",
+        ghost:
+          "bg-transparent text-[#0A1F3D] hover:bg-[#F4F6FA]",
+        destructive:
+          "bg-[#DC2626] text-white shadow-[0_8px_20px_-10px_rgba(220,38,38,0.55)] hover:brightness-110",
+        link:
+          "text-[#0A1F3D] underline-offset-4 hover:underline min-h-0 shadow-none",
+        navy:
+          "bg-[#0A1F3D] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] hover:brightness-110",
+        glass:
+          "bg-white/10 backdrop-blur-md border border-white/15 text-white hover:bg-white/15",
       },
       size: {
-        default: "h-11 px-5 py-2",
-        sm: "h-11 sm:h-9 rounded-xl px-3",
-        lg: "h-12 rounded-2xl px-8",
-        icon: "h-touch w-touch min-w-touch rounded-full",
+        default: "h-12 px-5",
+        sm: "h-10 px-3.5 text-[13px]",
+        lg: "h-13 px-7 text-[15px]",
+        icon: "h-11 w-11 min-w-[44px] rounded-full",
       },
     },
     defaultVariants: {
