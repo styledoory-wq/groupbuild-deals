@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   Tag,
   Inbox,
-  BadgeCheck,
   EyeOff,
   Eye,
   MoreVertical,
@@ -13,9 +12,9 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { Button } from "@/components/ui/button";
+import { ScreenHeader } from "@/components/ds/ScreenHeader";
+import { EmptyState } from "@/components/ds/EmptyState";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { toast } from "sonner";
 import { getCachedValue, setCachedValue } from "@/lib/clientCache";
+import { SHADOWS, MOTION } from "@/lib/designSystem";
 
 type InterestRow = {
   id: string;
@@ -74,6 +74,13 @@ type MyOfferItem = {
 
 const CACHE_KEY = "my-offers:items";
 
+const cardStyle: React.CSSProperties = {
+  background: "#FFFFFF",
+  borderRadius: 20,
+  boxShadow: SHADOWS.card,
+  transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
+};
+
 export default function MyOffers() {
   const cached = getCachedValue<MyOfferItem[]>(CACHE_KEY, 5 * 60_000);
   const [loading, setLoading] = useState(() => !cached);
@@ -121,7 +128,6 @@ export default function MyOffers() {
         (deals ?? []).forEach((d) => { dealsMap[(d as DealRow).id] = d as DealRow; });
       }
 
-      // Batch paid-count fetch (was N+1 RPC calls before)
       const counts: Record<string, number> = {};
       if (dealIds.length) {
         const { data: paidRows } = await supabase
@@ -184,7 +190,6 @@ export default function MyOffers() {
     toast.success(hide ? "הוסתר מהארכיון שלך" : "הוחזר לתצוגה");
   };
 
-  // Hide unavailable deals (deal missing or not active) from default view; admins/archive can still see hidden manually-archived ones
   const isUnavailable = (it: { deal: DealRow | null }) => !it.deal || it.deal.status !== "active";
   const visibleItems = items.filter((it) => {
     if (isUnavailable(it)) return false;
@@ -194,36 +199,42 @@ export default function MyOffers() {
 
   return (
     <MobileShell>
-      <PageHeader
+      <ScreenHeader
         title="ההצעות שלי"
         subtitle="כל ההצעות שהצטרפת אליהן — במקום אחד"
-        back={false}
       />
 
-      <div className="px-5 -mt-4 relative z-10 pb-24 space-y-3">
+      <div className="px-5 pb-24 space-y-3">
         {/* Toggle hidden / visible */}
         {items.length > 0 && (
-          <div className="flex items-center justify-between gap-2">
-            <div className="inline-flex rounded-2xl bg-card border border-border p-1 shadow-sm">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <div
+              className="inline-flex p-1 rounded-2xl bg-white"
+              style={{ boxShadow: SHADOWS.cardDim }}
+            >
               <button
                 onClick={() => setShowHidden(false)}
-                className={`px-3 py-1.5 rounded-xl text-fs-xs font-bold transition-smooth ${
-                  !showHidden ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all ${
+                  !showHidden
+                    ? "bg-[#0A1F3D] text-white"
+                    : "text-[#6B7280]"
                 }`}
               >
                 פעילות
               </button>
               <button
                 onClick={() => setShowHidden(true)}
-                className={`px-3 py-1.5 rounded-xl text-fs-xs font-bold transition-smooth ${
-                  showHidden ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all ${
+                  showHidden
+                    ? "bg-[#0A1F3D] text-white"
+                    : "text-[#6B7280]"
                 }`}
               >
                 ארכיון {hiddenCount > 0 && <span className="opacity-70">({hiddenCount})</span>}
               </button>
             </div>
-            <span className="inline-flex items-center gap-1 text-fs-xs font-bold text-muted-foreground">
-              <span className="gb-live-dot" />
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#6B7280]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
               עדכון בזמן אמת
             </span>
           </div>
@@ -232,60 +243,58 @@ export default function MyOffers() {
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="gb-card-premium p-4 space-y-3 animate-pulse">
+              <div key={i} className="p-4 space-y-3 animate-pulse" style={cardStyle}>
                 <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 rounded-2xl bg-muted" />
+                  <div className="h-11 w-11 rounded-2xl bg-[#F4F6FA]" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 w-3/4 bg-muted rounded" />
-                    <div className="h-3 w-1/2 bg-muted rounded" />
+                    <div className="h-4 w-3/4 bg-[#F4F6FA] rounded" />
+                    <div className="h-3 w-1/2 bg-[#F4F6FA] rounded" />
                   </div>
                 </div>
-                <div className="h-6 w-1/3 bg-muted rounded" />
+                <div className="h-6 w-1/3 bg-[#F4F6FA] rounded" />
               </div>
             ))}
           </div>
         ) : error ? (
-          <div className="gb-card p-6 text-center">
-            <p className="text-sm text-destructive font-bold">{error}</p>
+          <div className="p-6 text-center" style={cardStyle}>
+            <p className="text-sm text-[#DC2626] font-bold">{error}</p>
           </div>
         ) : visibleItems.length === 0 ? (
-          <div className="gb-card-premium p-8 flex flex-col items-center text-center">
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/30 flex items-center justify-center mb-3">
-              <Inbox className="h-7 w-7 text-gold" />
-            </div>
-            <h3 className="font-bold text-base mb-1">
-              {showHidden ? "הארכיון ריק" : "עדיין לא הצטרפת להצעות"}
-            </h3>
-            <p className="text-xs text-muted-foreground mb-4 max-w-xs">
-              {showHidden
+          <EmptyState
+            icon={Inbox}
+            title={showHidden ? "הארכיון ריק" : "עדיין לא הצטרפת להצעות"}
+            description={
+              showHidden
                 ? "כשתסתיר פיקדונות, הם יופיעו כאן."
-                : "כל מצטרף משפר את ההנחה לכולם — בואו תתחילו."}
-            </p>
-            {!showHidden && (
-              <Link to="/resident/deals">
-                <Button className="rounded-xl bg-gradient-gold text-primary font-bold shadow-gold">
-                  <Sparkles className="h-4 w-4 ml-1.5" />
+                : "כל מצטרף משפר את ההנחה לכולם — בואו תתחילו."
+            }
+            action={
+              !showHidden ? (
+                <Link
+                  to="/resident/deals"
+                  className="inline-flex items-center gap-1.5 h-11 px-5 rounded-2xl bg-[#0A1F3D] text-white text-[14px] font-bold active:scale-95 transition-transform"
+                  style={{ boxShadow: SHADOWS.pill }}
+                >
+                  <Sparkles className="h-4 w-4" strokeWidth={2.4} />
                   לעסקאות חיות
-                </Button>
-              </Link>
-            )}
-          </div>
+                </Link>
+              ) : undefined
+            }
+          />
         ) : (
           <div className="space-y-3">
             {visibleItems.map(({ interest, deal, count, deposit }) => {
               const hidden = (deposit?.is_hidden ?? false) || hiddenLocal.includes(interest.id);
               if (!deal) {
                 return (
-                  <div key={interest.id} className="gb-card p-4 opacity-70 flex items-center justify-between">
-                    <p className="text-sm text-muted-foreground">הצעה זו אינה זמינה יותר</p>
-                    <Button
-                      size="sm"
-                      variant="outline"
+                  <div key={interest.id} className="p-4 opacity-70 flex items-center justify-between" style={cardStyle}>
+                    <p className="text-sm text-[#6B7280]">הצעה זו אינה זמינה יותר</p>
+                    <button
                       onClick={() => toggleHide({ interest, deposit }, !hidden)}
-                      className="h-8 rounded-xl text-fs-xs"
+                      className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#F7F8FA] text-[#0A1F3D]"
                     >
                       {hidden ? "החזרה" : "הסתרה"}
-                    </Button>
+                    </button>
                   </div>
                 );
               }
@@ -308,35 +317,38 @@ export default function MyOffers() {
               const dealActive = deal.status === "active";
 
               return (
-                <div key={interest.id} className="gb-card-premium p-4 relative overflow-hidden">
-                  {/* live indicator */}
+                <div
+                  key={interest.id}
+                  className="p-4 relative overflow-hidden active:scale-[1.01]"
+                  style={cardStyle}
+                >
                   {dealActive && (
-                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-fs-xs font-bold text-success">
-                      <span className="gb-live-dot" /> LIVE
+                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[10px] font-extrabold text-[#10B981]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#10B981] animate-pulse" /> LIVE
                     </span>
                   )}
 
                   <div className="flex items-start gap-3 mb-3">
-                    <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-gold/25 via-gold/10 to-transparent border border-gold/30 flex items-center justify-center shrink-0">
-                      <Tag className="h-5 w-5 text-gold" />
+                    <div className="h-11 w-11 rounded-2xl bg-[#F4F6FA] flex items-center justify-center shrink-0">
+                      <Tag className="h-5 w-5 text-[#0A1F3D]" strokeWidth={2.2} />
                     </div>
                     <Link to={`/resident/deals/${deal.id}`} className="flex-1 min-w-0">
-                      <h3 className="font-bold text-sm text-foreground truncate flex items-center gap-1.5">
+                      <h3 className="font-bold text-[14px] text-[#0A1F3D] truncate flex items-center gap-1.5">
                         {deal.title}
-                        <ShieldCheck className="h-3.5 w-3.5 text-gold shrink-0" />
+                        <ShieldCheck className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
                       </h3>
-                      <p className="text-fs-xs text-muted-foreground mt-0.5 inline-flex items-center gap-1">
+                      <p className="text-[11px] text-[#6B7280] mt-0.5 inline-flex items-center gap-1 font-medium">
                         <span>{count} מצטרפים</span>
                         <span>·</span>
-                        <span className={dealActive ? "text-success font-bold" : ""}>
+                        <span className={dealActive ? "text-[#10B981] font-bold" : ""}>
                           {dealActive ? "פעילה" : deal.status}
                         </span>
                       </p>
                     </Link>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center" aria-label="פעולות">
-                          <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                        <button className="h-8 w-8 rounded-full hover:bg-[#F4F6FA] flex items-center justify-center" aria-label="פעולות">
+                          <MoreVertical className="h-4 w-4 text-[#6B7280]" />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -352,35 +364,34 @@ export default function MyOffers() {
                   </div>
 
                   <Link to={`/resident/deals/${deal.id}`} className="block">
-                    <div className="pt-3 border-t border-border/60 flex items-end justify-between gap-2">
+                    <div className="pt-3 border-t border-[#F0F2F5] flex items-end justify-between gap-2">
                       <div>
-                        <div className="text-fs-xs font-bold text-muted-foreground mb-0.5">המחיר הנוכחי שלך</div>
-                        <div className="text-fs-xl font-extrabold text-primary leading-none">{display.headline}</div>
+                        <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 uppercase tracking-wide">המחיר הנוכחי שלך</div>
+                        <div className="text-[20px] font-extrabold text-[#0A1F3D] leading-none tracking-tight">{display.headline}</div>
                         {display.savings && (
-                          <div className="text-fs-xs font-bold text-success mt-1">{display.savings}</div>
+                          <div className="text-[11px] font-bold text-[#10B981] mt-1">{display.savings}</div>
                         )}
                       </div>
                       <div className="flex flex-col items-end gap-1.5">
                         {paid && (
-                          <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-success/10 text-success border border-success/30">
+                          <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#10B981]/10 text-[#047857]">
                             <CheckCircle2 className="h-3 w-3" />
                             פיקדון אושר
                           </span>
                         )}
                         {pending && (
-                          <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gold/15 text-primary border border-gold/40">
+                          <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#EAF2FF] text-[#1E40AF]">
                             <Clock className="h-3 w-3" />
                             ממתין לאישור
                           </span>
                         )}
                         {refunded && (
-                          <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-muted-foreground border border-border">
+                          <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#F4F6FA] text-[#6B7280]">
                             הוחזר
                           </span>
                         )}
                         {interest.deposit_required && interest.deposit_amount > 0 && (
-                          <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-card text-primary border border-gold/30">
-                            <BadgeCheck className="h-3 w-3" />
+                          <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#F7F8FA] text-[#0A1F3D]">
                             {ils(Number(interest.deposit_amount))}
                           </span>
                         )}
