@@ -170,37 +170,30 @@ export default function SupplierDashboard() {
   const isRejected = dbSupplier?.approval_status === "rejected";
   const businessName = dbSupplier?.business_name || user?.name || "החשבון שלי";
 
-  const HeroBar = ({ height = 230 }: { height?: number }) => (
-    <header className="relative">
-      <div className="relative overflow-hidden rounded-b-[28px] bg-[#0A1F3D] w-full" style={{ height }}>
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#0A1F3D] via-[#0A1F3D] to-[#071427]" />
-        <div aria-hidden className="absolute -top-24 -right-20 h-72 w-72 rounded-full bg-[#C9A961]/10 blur-3xl" />
-        <div aria-hidden className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-[#C9A961]/5 blur-2xl" />
-
-        <div className="relative flex items-center justify-between gap-2 px-5 pt-4">
-          <span className="h-9 px-3 rounded-full bg-white/10 border border-white/20 backdrop-blur flex items-center text-white text-fs-xs font-semibold uppercase tracking-[0.14em]">
-            אזור ספק
-          </span>
-          <button
-            onClick={handleLogout}
-            className="h-9 px-3 rounded-full bg-white/12 border border-white/25 backdrop-blur flex items-center gap-1.5 text-white hover:bg-white/20 transition-smooth text-fs-sm font-semibold"
-            aria-label="יציאה"
-          >
-            <LogOut className="h-[15px] w-[15px]" strokeWidth={2} />
-            <span>התנתקות</span>
-          </button>
-        </div>
-
-        <div className="relative px-5 mt-8 text-right w-full">
-          <h1 className="text-fs-2xl sm:text-fs-2xl font-extrabold text-white leading-[1.15] tracking-tight break-words w-full">
-            {businessName}
-          </h1>
-          {dbSupplier && !isPending && !isRejected && (
-            <div className="mt-2">
-              <SupplierRatingBadge supplierId={dbSupplier.id} className="text-fs-xs text-[#C9A961]" />
-            </div>
-          )}
-        </div>
+  const HeroBar = () => (
+    <header className="px-5 pt-4 pb-3">
+      <div className="flex items-center justify-between mb-3">
+        <span className="h-8 px-3 rounded-full bg-white flex items-center text-[#0A1F3D] text-[11px] font-bold uppercase tracking-[0.14em] shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)]">
+          אזור ספק
+        </span>
+        <button
+          onClick={handleLogout}
+          className="h-9 px-3 rounded-full bg-white flex items-center gap-1.5 text-[#DC2626] text-[13px] font-bold shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform"
+          aria-label="יציאה"
+        >
+          <LogOut className="h-4 w-4" strokeWidth={2} />
+          <span>התנתקות</span>
+        </button>
+      </div>
+      <div className="text-right">
+        <h1 className="text-[24px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight break-words">
+          {businessName}
+        </h1>
+        {dbSupplier && !isPending && !isRejected && (
+          <div className="mt-1.5">
+            <SupplierRatingBadge supplierId={dbSupplier.id} className="text-[12px] text-[#B8923F]" />
+          </div>
+        )}
       </div>
     </header>
   );
