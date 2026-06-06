@@ -209,18 +209,15 @@
   }
 
   .gb-glass {
-    background: linear-gradient(180deg, hsl(0 0% 100% / 0.14), hsl(0 0% 100% / 0.04));
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    @apply rounded-2xl border border-white/15;
+    background: #ffffff;
+    box-shadow: 0 8px 20px -10px rgba(10,31,61,0.18), 0 2px 4px -2px rgba(10,31,61,0.05);
+    @apply rounded-[20px];
   }
 
   .gb-glass-light {
-    background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(247,249,252,0.66));
-    backdrop-filter: blur(22px) saturate(170%);
-    -webkit-backdrop-filter: blur(22px) saturate(170%);
-    @apply rounded-2xl border border-white/70;
-    box-shadow: var(--shadow-card);
+    background: #ffffff;
+    @apply rounded-[20px];
+    box-shadow: 0 8px 20px -10px rgba(10,31,61,0.18), 0 2px 4px -2px rgba(10,31,61,0.05);
   }
 
   .gb-card-premium {
@@ -253,33 +250,22 @@
   .gb-float { animation: gb-float 6s ease-in-out infinite; }
   .gb-float-shadow { box-shadow: var(--shadow-floating); }
 
-  .gb-text-gold {
-    background: linear-gradient(135deg, hsl(44 73% 66%) 0%, hsl(44 53% 54%) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
+  .gb-text-gold { color: #B8923F; }
 
-  .gb-section-fade { background: linear-gradient(180deg, transparent, hsl(42 33% 96% / 0.6) 50%, transparent); }
+  .gb-section-fade { background: linear-gradient(180deg, transparent, rgba(244,246,250,0.7) 50%, transparent); }
 
-  .gb-aurora {
-    background:
-      radial-gradient(70% 50% at 100% 0%, rgba(201,169,97,0.14) 0%, transparent 60%),
-      radial-gradient(80% 60% at 0% 100%, rgba(10,31,61,0.40) 0%, transparent 65%),
-      linear-gradient(160deg, #071427 0%, #0A1F3D 60%, #0B2247 100%);
-  }
+  .gb-aurora { background: #F7F8FA; }
 
   .gb-tile-dark {
-    background:
-      radial-gradient(80% 60% at 100% 0%, hsl(44 53% 54% / 0.18), transparent 60%),
-      linear-gradient(160deg, hsl(217 56% 14%) 0%, hsl(217 50% 19%) 100%);
-    @apply text-primary-foreground rounded-2xl border border-white/10 relative overflow-hidden;
-    box-shadow: 0 12px 32px -16px hsl(217 56% 13% / 0.55), inset 0 1px 0 hsl(0 0% 100% / 0.08);
+    background: #ffffff;
+    color: #0A1F3D;
+    @apply rounded-[20px] relative overflow-hidden;
+    box-shadow: 0 8px 20px -10px rgba(10,31,61,0.18), 0 2px 4px -2px rgba(10,31,61,0.05);
     transition: var(--transition-smooth);
   }
   .gb-tile-dark:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px -16px hsl(217 56% 13% / 0.65), inset 0 1px 0 hsl(0 0% 100% / 0.10), 0 0 0 1px hsl(44 53% 54% / 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px -10px rgba(10,31,61,0.22);
   }
 
   .gb-stat-pill {
