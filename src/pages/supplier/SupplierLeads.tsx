@@ -347,9 +347,9 @@ export default function SupplierLeads() {
             <>
               {(phone || wa) && (
                 <div className="flex gap-2 mt-2">
-                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-primary text-primary-foreground">חיוג</a>}
+                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#0A1F3D] text-white">חיוג</a>}
                   {wa && (
-                    <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-success/10 text-success border border-success/30 inline-flex items-center justify-center gap-1">
+                    <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] inline-flex items-center justify-center gap-1">
                       <MessageCircle className="h-3 w-3" /> וואטסאפ
                     </a>
                   )}
@@ -405,7 +405,7 @@ export default function SupplierLeads() {
             {i.lead_status && i.lead_status !== "new" && (
               <span className={
                 "inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold " +
-                (i.lead_status === "approved" ? "bg-success/10 text-success border border-success/30"
+                (i.lead_status === "approved" ? "bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"
                   : i.lead_status === "rejected" ? "bg-muted text-muted-foreground border border-border"
                   : "bg-[#FFF8E1] text-[#0A1F3D] border border-[#D4AF37]/30")
               }>
@@ -429,7 +429,7 @@ export default function SupplierLeads() {
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <button onClick={() => updateLeadStatus(i.id, "approved")}
                   disabled={statusBusy === i.id || i.lead_status === "approved"}
-                  className="h-8 rounded-lg bg-success text-success-foreground text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50">
+                  className="h-8 rounded-lg bg-[#059669] text-white text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50">
                   <Check className="h-3 w-3" /> מאושר
                 </button>
                 <button onClick={() => updateLeadStatus(i.id, "rejected")}
@@ -440,9 +440,9 @@ export default function SupplierLeads() {
               </div>
               {(phone || wa) && (
                 <div className="flex gap-2">
-                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-primary text-primary-foreground">חיוג</a>}
+                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#0A1F3D] text-white">חיוג</a>}
                   {wa && (
-                    <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-success/10 text-success border border-success/30 inline-flex items-center justify-center gap-1">
+                    <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] inline-flex items-center justify-center gap-1">
                       <MessageCircle className="h-3 w-3" /> וואטסאפ
                     </a>
                   )}
@@ -469,7 +469,7 @@ export default function SupplierLeads() {
       <div className="px-5 -mt-4 relative z-10 pb-24">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <Loader2 className="h-6 w-6 animate-spin text-[#D4AF37]" />
           </div>
         ) : error ? (
           <div className="gb-card p-6 text-center">
