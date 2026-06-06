@@ -150,9 +150,9 @@ export default function NotificationSettings() {
           />
         </div>
 
-        <div className="gb-card p-4 space-y-2">
-          <h3 className="font-bold text-sm mb-2">סוגי אירועים</h3>
-          <div className="flex items-center gap-1 text-fs-xs text-muted-foreground pb-2 border-b">
+        <div className="rounded-[20px] bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] p-4 space-y-2">
+          <h3 className="font-bold text-sm mb-2 text-[#0A1F3D]">סוגי אירועים</h3>
+          <div className="flex items-center gap-1 text-fs-xs text-[#6B7280] pb-2 border-b border-[#ECEEF2]">
             <div className="flex-1">אירוע</div>
             <div className="w-14 text-center flex items-center justify-center gap-1"><Mail className="h-3 w-3" />מייל</div>
             <div className="w-14 text-center flex items-center justify-center gap-1"><Smartphone className="h-3 w-3" />פוש</div>
@@ -160,8 +160,8 @@ export default function NotificationSettings() {
           {EVENTS.map((e) => (
             <div key={e.label} className="flex items-center gap-1 py-1.5">
               <div className="flex-1">
-                <div className="text-sm font-bold">{e.label}</div>
-                <div className="text-fs-xs text-muted-foreground">{e.desc}</div>
+                <div className="text-sm font-bold text-[#0A1F3D]">{e.label}</div>
+                <div className="text-fs-xs text-[#6B7280]">{e.desc}</div>
               </div>
               <div className="w-14 flex justify-center">
                 <Switch
@@ -184,7 +184,7 @@ export default function NotificationSettings() {
         <Button
           onClick={save}
           disabled={saving}
-          className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold flex items-center justify-center gap-2"
+          className="w-full h-12 rounded-[16px] bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
         >
           <Save className="h-4 w-4" />
           {saving ? "שומר…" : "שמירת הגדרות"}
