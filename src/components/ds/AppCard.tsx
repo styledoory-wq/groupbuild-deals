@@ -1,4 +1,4 @@
-import { forwardRef, HTMLAttributes } from "react";
+import { forwardRef, HTMLAttributes, AnchorHTMLAttributes } from "react";
 import { Link } from "react-router-dom";
 import { SHADOWS, MOTION } from "@/lib/designSystem";
 
