@@ -122,7 +122,7 @@ export default function AdminStats() {
   );
 }
 
-function Mini({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; label: string; value: number }) {
+function Mini({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: number }) {
   return (
     <div className="bg-white rounded-[16px] p-4 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
       <div className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center mb-2.5">
