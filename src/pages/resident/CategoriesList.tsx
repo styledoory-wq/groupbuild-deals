@@ -292,7 +292,7 @@ function StageSection({
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [scrollIdx, setScrollIdx] = useState(0);
-  const cardWidth = 138 + 10; // w + gap
+  const cardWidth = 160 + 10; // w + gap
 
   useEffect(() => {
     if (!nudge || !scrollerRef.current) return;
