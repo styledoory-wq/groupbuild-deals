@@ -9,6 +9,7 @@ import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
+import { SHADOWS, MOTION, STAGE_THEMES } from "@/lib/designSystem";
 
 type StageId = "planning" | "structure" | "systems" | "finishes" | "furniture" | "outdoor";
 
