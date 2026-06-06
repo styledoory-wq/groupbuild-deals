@@ -218,64 +218,19 @@ export default function CategoriesList() {
               </div>
             </section>
 
-            {/* === LARGE APPLE-STYLE CATEGORY CARDS === */}
-            <div className="px-5 mt-6 space-y-7">
-              {visibleStages.map(({ stage, cats, totalSuppliers }) => {
-                return (
-                  <section key={stage.id}>
-                    {/* Stage heading - clean right-aligned block */}
-                    <div className="mb-3 px-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="block h-4 w-[3px] rounded-full" style={{ background: stage.accent }} />
-                        <span className="text-[10px] font-extrabold tracking-[0.08em] uppercase" style={{ color: stage.accent }}>
-                          שלב {stage.index}
-                        </span>
-                        <span className="text-[14px] font-extrabold text-[#0A1F3D] tracking-tight">
-                          · {stage.title}
-                        </span>
-                      </div>
-                      <p className="mt-0.5 mr-[11px] text-[11px] font-semibold text-[#6B7280]">
-                        {totalSuppliers} ספקים פעילים
-                      </p>
-                    </div>
-
-                    {cats.length === 0 ? (
-                      <div className="bg-white rounded-[16px] p-4 text-center text-[12px] text-[#6B7280] font-medium border border-[#ECEEF2]">
-                        קטגוריות יתווספו בקרוב
-                      </div>
-                    ) : (
-                      <div className="relative -mx-5">
-                        <div
-                          className="flex gap-2.5 overflow-x-auto px-5 pb-2 pt-1 snap-x no-scrollbar"
-                          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
-                        >
-                          {cats.map((c) => (
-                            <div key={c.id} className="snap-start shrink-0 w-[138px]">
-                              <CategoryCard
-                                id={c.id}
-                                name={c.name}
-                                icon={c.icon}
-                                count={counts[c.id] ?? 0}
-                                chips={chipsByCat[c.id] ?? []}
-                                stage={stage}
-                              />
-                            </div>
-                          ))}
-                          <div className="shrink-0 w-2" />
-                        </div>
-                        <div
-                          className="pointer-events-none absolute top-0 bottom-2 right-0 w-6"
-                          style={{ background: "linear-gradient(270deg, #F7F8FA, rgba(247,248,250,0))" }}
-                        />
-                        <div
-                          className="pointer-events-none absolute top-0 bottom-2 left-0 w-8"
-                          style={{ background: "linear-gradient(90deg, #F7F8FA, rgba(247,248,250,0))" }}
-                        />
-                      </div>
-                    )}
-                  </section>
-                );
-              })}
+            {/* === STAGE TIMELINE SECTIONS === */}
+            <div className="px-3 mt-5 space-y-4">
+              {visibleStages.map(({ stage, cats, totalSuppliers }, idx) => (
+                <StageSection
+                  key={stage.id}
+                  stage={stage}
+                  cats={cats}
+                  totalSuppliers={totalSuppliers}
+                  counts={counts}
+                  chipsByCat={chipsByCat}
+                  nudge={idx === 0}
+                />
+              ))}
             </div>
           </>
         )}
