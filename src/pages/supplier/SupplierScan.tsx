@@ -174,14 +174,14 @@ export default function SupplierScan() {
         </div>
 
         {result.kind === "idle" && mode === "scan" && (
-          <div className="rounded-3xl bg-card border border-border/60 overflow-hidden">
+          <div className="rounded-[20px] bg-white overflow-hidden shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
             <div id="supplier-scan-region" className="w-full aspect-square bg-black" />
           </div>
         )}
 
         {result.kind === "idle" && mode === "manual" && (
-          <div className="rounded-3xl bg-card border border-border/60 p-5 space-y-3">
-            <label className="text-sm font-medium text-foreground">קוד שובר</label>
+          <div className="gb-card p-5 space-y-3">
+            <label className="text-sm font-bold text-[#0A1F3D]">קוד שובר</label>
             <Input
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value.toUpperCase())}
@@ -196,14 +196,14 @@ export default function SupplierScan() {
         )}
 
         {result.kind === "looking-up" && (
-          <div className="rounded-3xl bg-card border border-border/60 p-10 text-center">
+          <div className="gb-card p-10 text-center">
             <p className="text-muted-foreground">בודק...</p>
           </div>
         )}
 
         {result.kind === "eligible" && (
-          <div className="rounded-3xl bg-emerald-50 border-2 border-emerald-500/40 p-6 space-y-4">
-            <div className="flex items-center gap-2 text-emerald-700">
+          <div className="rounded-[20px] bg-[#E8F7EC] p-6 space-y-4 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
+            <div className="flex items-center gap-2 text-[#2EA85A]">
               <CheckCircle2 className="h-6 w-6" />
               <h3 className="font-bold text-lg">הדייר זכאי להטבה</h3>
             </div>
@@ -218,7 +218,7 @@ export default function SupplierScan() {
               } />
               <Row label="אסמכתא" value={result.voucher.reference_number} mono />
             </div>
-            <Button className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white" disabled={submitting} onClick={confirmRedeem}>
+            <Button className="w-full h-12 bg-[#2EA85A] text-white hover:brightness-110" disabled={submitting} onClick={confirmRedeem}>
               {submitting ? "מאשר..." : "אשר מימוש"}
             </Button>
             <button className="w-full text-xs text-muted-foreground underline" onClick={() => setResult({ kind: "idle" })}>
@@ -228,7 +228,7 @@ export default function SupplierScan() {
         )}
 
         {result.kind === "error" && (
-          <div className="rounded-3xl bg-destructive/5 border-2 border-destructive/30 p-6 text-center space-y-3">
+          <div className="rounded-[20px] bg-[#FEE2E2] p-6 text-center space-y-3 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
             <XCircle className="h-10 w-10 text-destructive mx-auto" />
             <p className="font-semibold text-destructive">{result.message}</p>
             <Button variant="outline" onClick={() => setResult({ kind: "idle" })}>נסה שוב</Button>
@@ -242,7 +242,7 @@ export default function SupplierScan() {
 
 function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex justify-between gap-3 border-b border-emerald-500/15 last:border-0 pb-2 last:pb-0">
+    <div className="flex justify-between gap-3 shadow-[0_1px_0_rgba(10,31,61,0.06)] last:shadow-none pb-2 last:pb-0">
       <span className="text-muted-foreground">{label}</span>
       <span className={`font-semibold text-foreground text-left ${mono ? "font-mono text-xs" : ""}`}>{value}</span>
     </div>
