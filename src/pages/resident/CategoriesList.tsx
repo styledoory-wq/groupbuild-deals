@@ -302,15 +302,17 @@ function CategoryCard({
           <span>{icon}</span>
         </div>
         {dim ? (
-          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#F4F6FA] text-[#9CA3AF]">
+          <span className="inline-flex items-center gap-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-white/80 text-[#9CA3AF] border border-[#ECEEF2]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#F59E0B]" />
             בקרוב
           </span>
         ) : (
           <span
-            className="text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-white"
+            className="inline-flex items-center gap-1 text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-white"
             style={{ color: stage.accent, border: `1px solid ${stage.border}` }}
           >
-            {count} ספקים
+            <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
+            {count} זמינים
           </span>
         )}
       </div>
@@ -322,13 +324,13 @@ function CategoryCard({
   );
 
   const baseStyle: React.CSSProperties = {
-    background: `linear-gradient(160deg, #FFFFFF 0%, #FFFFFF 40%, ${stage.tint} 100%)`,
-    border: `1px solid ${stage.border}80`,
+    background: "#FFFFFF",
+    border: `1px solid ${stage.border}`,
     boxShadow: dim
       ? "0 1px 3px rgba(10,31,61,0.04)"
-      : "0 4px 14px -8px rgba(10,31,61,0.14), 0 1px 2px rgba(10,31,61,0.04)",
+      : "0 6px 16px -10px rgba(10,31,61,0.16), 0 1px 2px rgba(10,31,61,0.04)",
     height: 110,
-    opacity: dim ? 0.68 : 1,
+    opacity: dim ? 0.62 : 1,
   };
 
   if (dim) {
