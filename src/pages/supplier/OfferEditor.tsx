@@ -632,7 +632,7 @@ export default function OfferEditor() {
 
           <div className="space-y-3">
             {tiers.map((t, i) => (
-              <div key={i} className="rounded-2xl border-2 border-border bg-muted/40 p-3">
+              <div key={i} className="rounded-[16px] border border-[#ECEEF2] bg-[#F4F6FA] p-3">
                 <div className="flex items-center justify-between mb-2 gap-2">
                   <Input
                     value={t.label}
