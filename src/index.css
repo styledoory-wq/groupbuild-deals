@@ -116,17 +116,17 @@
     font-size: 16px !important;
   }
 
-  /* Auth pages keep the dark hero background */
+  /* Auth pages use the same light app surface */
   body.auth-fullscreen,
   body.auth-fullscreen #root {
-    background: #071C3B;
+    background: #F7F8FA;
   }
   body.auth-fullscreen::before {
     content: "";
     position: fixed;
     top: 0; left: 0; right: 0;
     height: env(safe-area-inset-top);
-    background-color: #071C3B;
+    background-color: #F7F8FA;
     z-index: 100;
     pointer-events: none;
   }
