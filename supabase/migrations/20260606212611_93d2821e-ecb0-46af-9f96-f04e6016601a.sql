@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS current_stage text NOT NULL DEFAULT 'planning';
