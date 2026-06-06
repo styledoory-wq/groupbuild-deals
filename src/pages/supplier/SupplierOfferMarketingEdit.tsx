@@ -109,17 +109,18 @@ export default function SupplierOfferMarketingEdit() {
 
       <div className="px-5 -mt-4 relative z-10 space-y-4 pb-32">
         {/* Trust banner */}
-        <div className="rounded-2xl bg-gradient-to-l from-gold/10 via-gold/5 to-transparent border border-gold/30 p-3.5 flex items-start gap-2.5">
-          <div className="h-8 w-8 rounded-xl bg-gold/20 flex items-center justify-center shrink-0">
-            <Sparkles className="h-4 w-4 text-gold" />
+        <div className="rounded-[16px] bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] p-3.5 flex items-start gap-2.5">
+          <div className="h-8 w-8 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
+            <Sparkles className="h-4 w-4 text-[#D4AF37]" />
           </div>
           <div className="text-fs-sm leading-relaxed">
-            <div className="font-bold text-foreground mb-0.5">עריכה בטוחה</div>
-            <p className="text-muted-foreground">
+            <div className="font-bold text-[#0A1F3D] mb-0.5">עריכה בטוחה</div>
+            <p className="text-[#6B7280]">
               ניתן לעדכן את הטקסט השיווקי, הכותרת והתיאור — נתוני פיקדון, מדרגות ותנאים נעולים לשמירה על ההוגנות לדיירים.
             </p>
           </div>
         </div>
+
 
         {/* Editable */}
         <section className="gb-card p-4 space-y-3">
