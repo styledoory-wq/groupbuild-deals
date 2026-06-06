@@ -106,7 +106,7 @@ export default function AdminPaymentSettings() {
                     className={cn(
                       "p-4 rounded-2xl border-2 transition-smooth text-center",
                       provider === p
-                        ? "border-gold bg-gradient-to-b from-gold/10 to-transparent"
+                        ? "border-[#0A1F3D] bg-[#F4F6FA]"
                         : "border-border bg-card"
                     )}
                   >
@@ -195,7 +195,7 @@ export default function AdminPaymentSettings() {
                       onClick={() => setFeeAbsorber(value)}
                       className={cn(
                         "h-10 rounded-xl border text-xs font-bold transition-smooth",
-                        feeAbsorber === value ? "border-gold bg-gold/10 text-primary" : "border-border bg-card text-muted-foreground"
+                        feeAbsorber === value ? "border-gold bg-[#FFF8E1] text-primary" : "border-border bg-card text-muted-foreground"
                       )}
                     >
                       {label}

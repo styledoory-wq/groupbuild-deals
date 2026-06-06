@@ -138,7 +138,7 @@ export default function AdminProjects() {
       <div className="px-5 -mt-4 relative z-10 mb-4">
         <button
           onClick={openCreate}
-          className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold flex items-center justify-center gap-2"
+          className="w-full h-12 rounded-2xl bg-[#0A1F3D] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
         >
           <Plus className="h-5 w-5" /> הוספת פרויקט
         </button>
@@ -163,8 +163,8 @@ export default function AdminProjects() {
         {filteredProjects.map((p) => (
           <div key={p.id} className="gb-card p-4">
             <div className="flex items-start gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center shrink-0">
-                <Building2 className="h-6 w-6 text-gold" />
+              <div className="h-12 w-12 rounded-2xl bg-[#F4F6FA] flex items-center justify-center shrink-0">
+                <Building2 className="h-6 w-6 text-[#D4AF37]" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold truncate">{p.name}</h3>
@@ -330,7 +330,7 @@ function CityCombobox({ value, cities, onChange }: { value: string; cities: stri
 
 function Tag({ children, accent }: { children: React.ReactNode; accent?: boolean }) {
   return (
-    <span className={"text-fs-xs font-bold px-2 py-1 rounded-full " + (accent ? "bg-gold/15 text-primary" : "bg-muted text-muted-foreground")}>
+    <span className={"text-fs-xs font-bold px-2 py-1 rounded-full " + (accent ? "bg-[#FFF8E1] text-[#0A1F3D]" : "bg-muted text-muted-foreground")}>
       {children}
     </span>
   );

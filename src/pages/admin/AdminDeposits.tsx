@@ -31,7 +31,7 @@ type DealMap = Record<string, { title: string }>;
 type ProfileMap = Record<string, { name: string; email: string | null; phone: string | null }>;
 
 const STATUS_META: Record<string, { label: string; cls: string }> = {
-  pending: { label: "ממתין", cls: "bg-gold/15 text-primary" },
+  pending: { label: "ממתין", cls: "bg-[#FFF8E1] text-[#0A1F3D]" },
   paid: { label: "שולם", cls: "bg-success/10 text-success" },
   refunded: { label: "הוחזר", cls: "bg-muted text-muted-foreground" },
   cancelled: { label: "בוטל", cls: "bg-muted text-muted-foreground" },
@@ -208,7 +208,7 @@ export default function AdminDeposits() {
               return (
                 <div key={dep.id} className="gb-card p-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-11 w-11 rounded-xl bg-gradient-gold flex items-center justify-center text-primary">
+                    <div className="h-11 w-11 rounded-xl bg-[#0A1F3D] text-white flex items-center justify-center text-primary">
                       <Wallet className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
