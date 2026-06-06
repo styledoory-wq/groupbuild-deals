@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Building2, Users, Tag, DollarSign, ShieldCheck } from "lucide-react";
+import { TrendingUp, Building2, Users, Tag, DollarSign, ShieldCheck, type LucideIcon } from "lucide-react";
 
 type DealRow = { id: string; category_id: string | null; original_price: number | null; discounted_price: number | null; discount_percentage: number | null; base_price: number | null; offer_type: string | null };
 
