@@ -94,7 +94,7 @@ export default function SharedDeal() {
   })();
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gradient-to-b from-background via-background to-muted/40">
+    <div dir="rtl" className="min-h-screen bg-[#F7F8FA]">
       <div className="mx-auto max-w-xl px-5 pt-8 pb-24">
         <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" />
@@ -103,7 +103,7 @@ export default function SharedDeal() {
 
         {loading && (
           <div className="mt-10 space-y-4">
-            <div className="h-48 rounded-2xl gb-skeleton" />
+            <div className="h-48 rounded-[20px] gb-skeleton" />
             <div className="h-6 w-3/4 rounded gb-skeleton" />
             <div className="h-24 rounded-xl gb-skeleton" />
           </div>
@@ -113,13 +113,13 @@ export default function SharedDeal() {
           <div className="mt-16 text-center space-y-4">
             <h1 className="text-2xl font-bold">העסקה לא נמצאה</h1>
             <p className="text-sm text-muted-foreground">ייתכן שההצעה הסתיימה. גלו עסקאות פעילות נוספות.</p>
-            <Button asChild className="rounded-xl"><Link to="/">לדף הבית</Link></Button>
+            <Button asChild><Link to="/">לדף הבית</Link></Button>
           </div>
         )}
 
         {!loading && deal && (
           <>
-            <div className="mt-6 mb-3 inline-flex items-center gap-1.5 text-fs-xs font-bold px-3 py-1 rounded-full bg-gold/15 text-primary border border-gold/30">
+            <div className="mt-6 mb-3 inline-flex items-center gap-1.5 text-fs-xs font-extrabold px-3 py-1 rounded-full bg-white text-[#0A1F3D] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
               <Sparkles className="h-3 w-3" />
               שכן שיתף אתכם בעסקה קבוצתית
             </div>
@@ -129,23 +129,23 @@ export default function SharedDeal() {
             </h1>
             {supplier?.business_name && (
               <p className="text-sm text-muted-foreground mt-2 inline-flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-gold" />
+                <ShieldCheck className="h-4 w-4 text-[#D4AF37]" />
                 {supplier.business_name}
               </p>
             )}
 
             {deal.cover_image_url && (
-              <div className="mt-5 overflow-hidden rounded-2xl border border-border/60 shadow-sm">
+              <div className="mt-5 overflow-hidden rounded-[20px] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
                 <img src={deal.cover_image_url} alt={deal.title} className="w-full h-56 object-cover" />
               </div>
             )}
 
             {/* Price / savings card */}
             {display && (
-              <div className="mt-5 rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+              <div className="mt-5 gb-card p-5">
                 <div className="flex items-start gap-3">
-                  <div className="h-11 w-11 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center">
-                    <TagIcon className="h-5 w-5 text-gold" />
+                  <div className="h-11 w-11 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center">
+                    <TagIcon className="h-5 w-5 text-[#D4AF37]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xl font-extrabold text-primary leading-tight">{display.headline}</div>
@@ -167,7 +167,7 @@ export default function SharedDeal() {
             )}
 
             {/* App pitch */}
-            <div className="mt-7 rounded-2xl bg-primary/5 border border-primary/15 p-5">
+            <div className="mt-7 gb-card p-5">
               <div className="inline-flex items-center gap-2 text-sm font-bold text-primary">
                 <Users className="h-4 w-4" />
                 איך זה עובד?
@@ -181,7 +181,7 @@ export default function SharedDeal() {
 
             {/* CTA */}
             <div className="mt-7 space-y-2 sticky bottom-4">
-              <Button asChild size="lg" className="w-full h-12 rounded-xl text-base font-bold">
+              <Button asChild size="lg" className="w-full h-12 text-base font-bold">
                 <Link to={authHref}>הצטרפו לעסקה הקבוצתית</Link>
               </Button>
               <p className="text-fs-xs text-center text-muted-foreground">
