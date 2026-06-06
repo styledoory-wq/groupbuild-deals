@@ -304,7 +304,7 @@ export default function SupplierProfileEdit() {
           {/* Supplier kind: services / products / both (two checkboxes) */}
           <div className="space-y-1.5">
             <Label className="text-xs font-bold flex items-center gap-1.5">
-              <Tag className="h-3.5 w-3.5 text-gold" /> סוג הספק
+              <Tag className="h-3.5 w-3.5 text-[#D4AF37]" /> סוג הספק
             </Label>
             <div className="grid grid-cols-2 gap-2">
               {[
