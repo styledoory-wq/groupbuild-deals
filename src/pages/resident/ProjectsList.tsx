@@ -31,12 +31,12 @@ export default function ProjectsList() {
       <PageHeader title="בחרו את הפרויקט שלכם" subtitle="חברו את הדירה שלכם לעסקאות הקבוצתיות" />
       <div className="px-5 -mt-4 relative z-10 mb-4">
         <div className="relative">
-          <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
           <Input
             placeholder="חפשו פרויקט או עיר..."
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="h-12 pr-11 rounded-2xl bg-card border-border shadow-soft"
+            className="h-12 pr-11"
           />
         </div>
       </div>
@@ -49,31 +49,31 @@ export default function ProjectsList() {
               key={p.id}
               onClick={() => select(p.id)}
               className={cn(
-                "w-full text-right gb-card p-4 transition-smooth hover:shadow-elevated",
-                active && "border-gold ring-2 ring-gold/30"
+                "w-full text-right rounded-[20px] bg-white border p-4 transition-[transform,box-shadow] duration-200 active:scale-[0.99] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]",
+                active ? "border-[#D4AF37] ring-2 ring-[#D4AF37]/30" : "border-[#ECEEF2]"
               )}
             >
               <div className="flex items-start gap-3">
-                <div className="h-14 w-14 rounded-2xl bg-gradient-hero flex items-center justify-center shrink-0">
-                  <Building2 className="h-7 w-7 text-gold" />
+                <div className="h-14 w-14 rounded-[16px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
+                  <Building2 className="h-7 w-7 text-[#D4AF37]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-bold text-foreground truncate">{p.name}</h3>
-                    {active && <Check className="h-5 w-5 text-success shrink-0" />}
+                    <h3 className="font-bold text-[#0A1F3D] truncate">{p.name}</h3>
+                    {active && <Check className="h-5 w-5 text-[#10B981] shrink-0" />}
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+                  <div className="flex items-center gap-1 text-xs text-[#6B7280] mb-2">
                     <MapPin className="h-3 w-3" />
                     {p.city}
                   </div>
-                  <div className="flex items-center gap-2 text-fs-xs">
-                    <span className="px-2 py-0.5 rounded-full bg-primary/5 text-primary font-medium">
+                  <div className="flex items-center gap-2 text-fs-xs flex-wrap">
+                    <span className="px-2 py-0.5 rounded-full bg-[#EAF2FF] text-[#2F6BFF] font-medium">
                       {p.buildingCount} בניינים
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                    <span className="px-2 py-0.5 rounded-full bg-[#F4F6FA] text-[#6B7280]">
                       {p.apartmentCount} דירות
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-gold/15 text-primary font-medium">
+                    <span className="px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#0A1F3D] font-medium">
                       {statusLabel[p.status]}
                     </span>
                   </div>
