@@ -86,11 +86,11 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full h-11 rounded-xl justify-between font-normal text-right"
+            className="w-full h-11 rounded-[16px] justify-between font-medium text-right"
             disabled={loading}
           >
             <span className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4 text-gold" />
+              <MapPin className="h-4 w-4 text-[#D4AF37]" />
               {selectedChips.length > 0
                 ? `${selectedChips.length} אזורי שירות נבחרו`
                 : placeholder}
@@ -116,7 +116,7 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
                       value.servesAllCountry ? "opacity-100" : "opacity-0",
                     )}
                   />
-                  <Globe className="ml-2 h-4 w-4 text-gold" />
+                  <Globe className="ml-2 h-4 w-4 text-[#D4AF37]" />
                   כל הארץ
                 </CommandItem>
               </CommandGroup>
@@ -173,12 +173,12 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
             <span
               key={`${chip.type}-${chip.id}`}
               className={cn(
-                "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold border",
+                "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-extrabold shadow-[0_1px_3px_rgba(10,31,61,0.06)]",
                 chip.type === "all"
-                  ? "bg-gold/15 text-primary border-gold/40"
+                  ? "bg-[#F4F6FA] text-[#0A1F3D]"
                   : chip.type === "region"
-                    ? "bg-primary/10 text-primary border-primary/30"
-                    : "bg-card text-foreground border-border",
+                    ? "bg-[#EAF2FF] text-[#2F6BFF]"
+                    : "bg-white text-[#0A1F3D]",
               )}
             >
               {chip.label}
