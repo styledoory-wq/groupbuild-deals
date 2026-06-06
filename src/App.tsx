@@ -230,6 +230,7 @@ const App = () => (
                   <Route path="/admin/supplier-trust" element={adminRoute(<AdminSupplierTrust />)} />
                   <Route path="/payment/success" element={<PaymentSuccess />} />
                   <Route path="/payment/cancel" element={<PaymentCancel />} />
+                  <Route path="/design-system" element={<DesignSystem />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
