@@ -783,7 +783,7 @@ export default function OfferEditor() {
           </label>
         </div>
 
-        <Button onClick={save} disabled={saving} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card disabled:opacity-50">
+        <Button onClick={save} disabled={saving} className="w-full h-12 rounded-[16px] bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] disabled:opacity-50">
           {saving ? <Loader2 className="h-4 w-4 ml-2 animate-spin" /> : <Save className="h-4 w-4 ml-2" />}
           {saving ? "שומר..." : "שמירת ההצעה"}
         </Button>
