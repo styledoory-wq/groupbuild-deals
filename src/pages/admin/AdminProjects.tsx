@@ -178,16 +178,16 @@ export default function AdminProjects() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-border">
+            <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-[#ECEEF2]">
               <button
                 onClick={() => openEdit(p)}
-                className="h-9 rounded-xl bg-secondary text-secondary-foreground text-xs font-bold flex items-center justify-center gap-1"
+                className="h-9 rounded-[12px] bg-[#F4F6FA] text-[#0A1F3D] text-[12px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
               >
                 <Pencil className="h-3.5 w-3.5" /> עריכה
               </button>
               <button
                 onClick={() => setDeleteId(p.id)}
-                className="h-9 rounded-xl bg-destructive/10 text-destructive text-xs font-bold flex items-center justify-center gap-1"
+                className="h-9 rounded-[12px] bg-[#FEE2E2] text-[#DC2626] text-[12px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
               >
                 <Trash2 className="h-3.5 w-3.5" /> מחיקה
               </button>
@@ -235,8 +235,10 @@ export default function AdminProjects() {
                     type="button"
                     onClick={() => setForm({ ...form, status: st })}
                     className={
-                      "h-9 rounded-xl text-fs-xs font-bold border transition " +
-                      (form.status === st ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border")
+                      "h-9 rounded-[12px] text-[12px] font-bold border transition " +
+                      (form.status === st
+                        ? "bg-[#0A1F3D] text-white border-[#0A1F3D]"
+                        : "bg-white text-[#0A1F3D] border-[#ECEEF2]")
                     }
                   >
                     {statusLabel[st]}
@@ -246,8 +248,8 @@ export default function AdminProjects() {
             </div>
           </div>
           <DialogFooter className="mt-4 gap-2 sm:gap-2">
-            <button onClick={() => setOpen(false)} disabled={saving} className="h-10 px-4 rounded-xl bg-muted text-foreground text-sm font-bold flex-1 disabled:opacity-50">ביטול</button>
-            <button onClick={save} disabled={saving} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex-1 disabled:opacity-50">
+            <button onClick={() => setOpen(false)} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#F4F6FA] text-[#0A1F3D] text-sm font-bold flex-1 disabled:opacity-50">ביטול</button>
+            <button onClick={save} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#0A1F3D] text-white text-sm font-bold flex-1 disabled:opacity-50">
               {saving ? "שומר…" : form.id ? "שמירה" : "הוספה"}
             </button>
           </DialogFooter>
@@ -330,7 +332,7 @@ function CityCombobox({ value, cities, onChange }: { value: string; cities: stri
 
 function Tag({ children, accent }: { children: React.ReactNode; accent?: boolean }) {
   return (
-    <span className={"text-fs-xs font-bold px-2 py-1 rounded-full " + (accent ? "bg-[#FFF8E1] text-[#0A1F3D]" : "bg-muted text-muted-foreground")}>
+    <span className={"text-[11px] font-bold px-2 py-1 rounded-full " + (accent ? "bg-[#FFF8E1] text-[#0A1F3D]" : "bg-[#F4F6FA] text-[#6B7280]")}>
       {children}
     </span>
   );
