@@ -2,6 +2,7 @@ import { useState, useLayoutEffect, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Briefcase, Mail, ArrowLeft, User as UserIcon, MapPin, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { WhatsAppHelpButton } from "@/components/WhatsAppHelpButton";
 
 import { useApp } from "@/store/AppStore";
 import { Button } from "@/components/ui/button";
@@ -526,6 +527,7 @@ export default function Auth() {
           </div>
         </div>
       </div>
+      <WhatsAppHelpButton bottomOffset={20} />
     </div>
   );
 }
