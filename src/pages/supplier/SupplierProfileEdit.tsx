@@ -383,7 +383,7 @@ export default function SupplierProfileEdit() {
           {/* Links */}
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
-              <LinkIcon className="h-3.5 w-3.5 text-gold" /> קישורים
+              <LinkIcon className="h-3.5 w-3.5 text-[#D4AF37]" /> קישורים
             </Label>
             <Input dir="ltr" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://example.com (אתר)" className="h-10 rounded-xl text-sm" maxLength={500} />
             <Input dir="ltr" value={whatsappUrl} onChange={(e) => setWhatsappUrl(e.target.value)} placeholder="https://wa.me/972500000000" className="h-10 rounded-xl text-sm" maxLength={500} />
@@ -394,7 +394,7 @@ export default function SupplierProfileEdit() {
           {/* Catalogs */}
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5 text-gold" /> קטלוגים
+              <FileText className="h-3.5 w-3.5 text-[#D4AF37]" /> קטלוגים
             </Label>
             {supplierId ? (
               <SupplierCatalogsManager supplierId={supplierId} />
@@ -406,7 +406,7 @@ export default function SupplierProfileEdit() {
           {/* Gallery */}
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
-              <ImageIcon className="h-3.5 w-3.5 text-gold" /> גלריית עבודות
+              <ImageIcon className="h-3.5 w-3.5 text-[#D4AF37]" /> גלריית עבודות
             </Label>
             <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleGalleryUpload} />
             <Button type="button" variant="outline" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery} className="h-9 rounded-xl text-xs w-full">
@@ -415,7 +415,7 @@ export default function SupplierProfileEdit() {
             {gallery.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {gallery.map((g, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-border group">
+                  <div key={idx} className="relative aspect-square rounded-[16px] overflow-hidden shadow-[0_2px_10px_-4px_rgba(10,31,61,0.10)] group">
                     <img src={g.image_url} alt="" className="h-full w-full object-cover" />
                     <button
                       type="button"
@@ -434,7 +434,7 @@ export default function SupplierProfileEdit() {
 
         <section className="gb-card p-4 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Tag className="h-3.5 w-3.5 text-gold" /> קטגוריות שירות
+            <Tag className="h-3.5 w-3.5 text-[#D4AF37]" /> קטגוריות שירות
           </h3>
           <div className="flex flex-wrap gap-2">
             {categories.map((c) => {
@@ -444,8 +444,8 @@ export default function SupplierProfileEdit() {
                   type="button"
                   key={c.id}
                   onClick={() => toggle(selectedCategories, setSelectedCategories, c.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs border transition-smooth ${
-                    on ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"
+                  className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-transform active:scale-[0.97] shadow-[0_1px_3px_rgba(10,31,61,0.06)] ${
+                    on ? "bg-[#0A1F3D] text-white" : "bg-white text-[#0A1F3D]"
                   }`}
                 >
                   <span className="ml-1">{c.icon}</span>
@@ -458,7 +458,7 @@ export default function SupplierProfileEdit() {
 
         <section className="gb-card p-4 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Globe className="h-3.5 w-3.5 text-gold" /> אזורי שירות
+            <Globe className="h-3.5 w-3.5 text-[#D4AF37]" /> אזורי שירות
           </h3>
           <div className="flex items-center justify-between py-1">
             <span className="text-sm font-semibold">נותן שירות בכל הארץ</span>
@@ -477,8 +477,8 @@ export default function SupplierProfileEdit() {
                         type="button"
                         key={r.id}
                         onClick={() => toggle(selectedRegions, setSelectedRegions, r.id)}
-                        className={`px-3 py-1.5 rounded-full text-xs border transition-smooth ${
-                          on ? "bg-gradient-gold text-primary border-gold" : "bg-card text-foreground border-border"
+                        className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-transform active:scale-[0.97] shadow-[0_1px_3px_rgba(10,31,61,0.06)] ${
+                          on ? "bg-[#EAF2FF] text-[#2F6BFF]" : "bg-white text-[#0A1F3D]"
                         }`}
                       >
                         <MapPin className="h-3 w-3 inline ml-1" />
@@ -491,11 +491,11 @@ export default function SupplierProfileEdit() {
 
               <div>
                 <Label className="text-xs font-bold mb-2 block">ערים ספציפיות (אופציונלי)</Label>
-                <div className="max-h-56 overflow-y-auto border border-border rounded-xl p-2 space-y-1">
+                <div className="max-h-56 overflow-y-auto rounded-[16px] bg-white p-2 space-y-1 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
                   {cities.map((c) => {
                     const on = selectedCities.includes(c.id);
                     return (
-                      <label key={c.id} className="flex items-center gap-2 text-sm py-1 px-2 rounded hover:bg-muted/40 cursor-pointer">
+                      <label key={c.id} className="flex items-center gap-2 text-sm py-1 px-2 rounded-[12px] hover:bg-[#F4F6FA] cursor-pointer">
                         <input
                           type="checkbox"
                           checked={on}
@@ -516,7 +516,7 @@ export default function SupplierProfileEdit() {
           <Button type="button" variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-xl">
             <ArrowRight className="h-4 w-4 ml-2" /> ביטול
           </Button>
-          <Button type="submit" disabled={saving} className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground">
+          <Button type="submit" disabled={saving} className="flex-1 h-12 rounded-[16px]">
             <Save className="h-4 w-4 ml-2" /> {saving ? "שומר…" : "שמירה"}
           </Button>
         </div>
@@ -529,7 +529,7 @@ function Field({ label, icon: Icon, children }: { label: string; icon: React.Com
   return (
     <div>
       <Label className="text-xs font-bold flex items-center gap-1.5 mb-1.5">
-        <Icon className="h-3.5 w-3.5 text-gold" /> {label}
+        <Icon className="h-3.5 w-3.5 text-[#D4AF37]" /> {label}
       </Label>
       {children}
     </div>
