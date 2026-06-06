@@ -62,11 +62,11 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6FA] text-primary-foreground flex justify-center">
+    <div className="min-h-screen bg-[#F7F8FA] text-[#0A1F3D] flex justify-center">
       <div className="w-full max-w-screen-sm flex flex-col px-6 pt-16 pb-8">
         <button
           onClick={() => navigate("/")}
-          className="self-start text-xs text-primary-foreground/60 hover:text-[#D4AF37] transition-smooth flex items-center gap-1 mb-8"
+          className="self-start text-xs text-[#6B7280] hover:text-[#D4AF37] transition-smooth flex items-center gap-1 mb-8"
         >
           <ArrowRight className="h-3.5 w-3.5" />
           חזרה
@@ -80,7 +80,7 @@ export default function AdminLogin() {
             </div>
             <h1 className="text-3xl font-extrabold mb-2">כניסת ניהול</h1>
             <div className="gb-divider-gold mb-4" />
-            <p className="text-primary-foreground/70 text-sm leading-relaxed">
+            <p className="text-[#6B7280] text-sm leading-relaxed">
               אזור זה מוגבל. רק חשבון המנהל המורשה יכול להיכנס.
             </p>
           </div>
@@ -127,7 +127,7 @@ export default function AdminLogin() {
           </form>
         </div>
 
-        <p className="text-center text-fs-xs text-primary-foreground/50 mt-6">
+        <p className="text-center text-fs-xs text-[#0A1F3D]/50 mt-6">
           הגישה מתועדת ומאובטחת
         </p>
       </div>
