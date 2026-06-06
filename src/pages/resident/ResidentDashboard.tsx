@@ -9,6 +9,7 @@ import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
+import { SHADOWS, MOTION, STAGE_THEMES } from "@/lib/designSystem";
 
 type StageId = "planning" | "structure" | "systems" | "finishes" | "furniture" | "outdoor";
 
@@ -227,42 +228,50 @@ export default function ResidentDashboard() {
             />
           </div>
 
-          {/* Stage cards — unified typography */}
+          {/* Stage cards — unified DS tokens */}
           <div className="space-y-2.5">
             {STAGES.map((stage, i) => {
               const done = i < currentIdx;
               const cur = i === currentIdx;
               const Icon = stage.icon;
+              const theme = STAGE_THEMES.find((t) => t.id === (stage.id as unknown as typeof STAGE_THEMES[number]["id"]));
+              const accent = cur ? (theme?.accent ?? "#D4AF37") : null;
+              const tint = theme?.tint ?? "#F4F6FA";
               return (
                 <button
                   key={stage.id}
                   onClick={() => stage.dbStage && navigate(`/resident/categories?stage=${stage.dbStage}`)}
                   disabled={!stage.dbStage}
-                  className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 transition-all active:scale-[0.99] ${
-                    cur
-                      ? "bg-white border-2 border-[#D4AF37] shadow-[0_10px_28px_-10px_rgba(212,175,55,0.40)]"
-                      : "bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-6px_rgba(10,31,61,0.06)]"
-                  } ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
+                  className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
+                  style={{
+                    background: cur ? `linear-gradient(180deg,#FFFFFF 0%, ${tint} 100%)` : "#FFFFFF",
+                    boxShadow: cur ? SHADOWS.press : SHADOWS.card,
+                    transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
+                  }}
                 >
                   {/* Stage badge */}
-                  <div className={`h-11 w-11 rounded-[14px] flex items-center justify-center shrink-0 ${
-                    cur
-                      ? "bg-[#D4AF37] text-white shadow-[0_6px_14px_-4px_rgba(212,175,55,0.55)]"
-                      : done
-                        ? "bg-[#22C55E]/12 text-[#22C55E]"
-                        : "bg-[#F4F6FA] text-[#6B7280]"
-                  }`}>
+                  <div
+                    className="h-11 w-11 rounded-[14px] flex items-center justify-center shrink-0"
+                    style={{
+                      background: cur ? accent! : done ? "#22C55E1F" : tint,
+                      color: cur ? "#FFFFFF" : done ? "#22C55E" : (theme?.accent ?? "#6B7280"),
+                      boxShadow: cur ? SHADOWS.pill : "none",
+                    }}
+                  >
                     {done ? <Check className="h-5 w-5" strokeWidth={2.8} /> : <span className="text-[15px] font-extrabold tabular-nums">{i + 1}</span>}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <Icon className={`h-[14px] w-[14px] shrink-0 ${cur ? "text-[#D4AF37]" : "text-[#9CA3AF]"}`} strokeWidth={2} />
+                      <Icon className="h-[14px] w-[14px] shrink-0" strokeWidth={2} style={{ color: cur ? (theme?.accent ?? "#D4AF37") : "#9CA3AF" }} />
                       <h3 className="text-[15px] font-bold leading-tight tracking-tight text-[#0A1F3D] truncate">
                         {stage.title}
                       </h3>
                       {cur && (
-                        <span className="ml-auto inline-flex items-center gap-1 px-2 h-[18px] rounded-full bg-[#D4AF37]/12 text-[#B8923F] text-[10px] font-bold">
+                        <span
+                          className="ml-auto inline-flex items-center gap-1 px-2 h-[18px] rounded-full text-[10px] font-bold"
+                          style={{ background: `${accent}1F`, color: accent! }}
+                        >
                           השלב הנוכחי
                         </span>
                       )}
