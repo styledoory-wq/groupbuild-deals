@@ -346,7 +346,7 @@ export default function Auth() {
 
 
               <div className={fieldWrap}>
-                <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                 <Input
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -360,7 +360,7 @@ export default function Auth() {
               {role === "resident" && (
                 <>
                   <div className={fieldWrap}>
-                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                     <Input
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
@@ -371,12 +371,12 @@ export default function Auth() {
                     />
                   </div>
                   <div className={fieldWrap}>
-                    <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                    <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                     <select
                       value={projectId}
                       onChange={(e) => setProjectId(e.target.value)}
                       className={cn(fieldInput, "appearance-none cursor-pointer")}
-                      style={{ color: projectId ? "#fff" : "rgba(255,255,255,0.45)" }}
+                      style={{ color: projectId ? "#0A1F3D" : "#9CA3AF" }}
                     >
                       <option value="" style={{ color: "#0A1F3D" }}>פרויקט (אופציונלי)</option>
                       {projects.map((p) => (
@@ -391,7 +391,7 @@ export default function Auth() {
 
               {role === "supplier" && (
                 <div className={fieldWrap}>
-                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                   <Input
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
@@ -404,7 +404,7 @@ export default function Auth() {
               )}
 
               <div className={fieldWrap}>
-                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                 <Input
                   type="email"
                   value={email}
@@ -417,7 +417,7 @@ export default function Auth() {
               </div>
 
               <div className={fieldWrap}>
-                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A961]/80 pointer-events-none" />
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -432,26 +432,26 @@ export default function Auth() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/55 hover:text-[#C9A961] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#0A1F3D] transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
               </div>
 
 
-              <label className="flex items-start gap-2 text-xs text-white/75 cursor-pointer pt-1 px-1">
+              <label className="flex items-start gap-2 text-xs text-[#6B7280] cursor-pointer pt-1 px-1">
                 <input
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-[#C9A961]"
+                  className="mt-0.5 h-4 w-4 accent-[#D4AF37]"
                 />
                 <span>
                   קראתי ואני מאשר את{" "}
                   <Link
                     to={role === "supplier" ? "/terms/suppliers" : "/terms/residents"}
                     target="_blank"
-                    className="font-bold text-[#E8C97D] underline-offset-2 hover:underline"
+                    className="font-bold text-[#B8923F] underline-offset-2 hover:underline"
                   >
                     תנאי השימוש
                   </Link>
