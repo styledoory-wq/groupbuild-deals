@@ -223,21 +223,20 @@ export default function CategoriesList() {
               {visibleStages.map(({ stage, cats, totalSuppliers }) => {
                 return (
                   <section key={stage.id}>
-                    {/* Stage heading */}
-                    <div className="flex items-center gap-2.5 mb-3">
-                      <span className="block h-5 w-[3px] rounded-full" style={{ background: stage.accent }} />
-                      <span
-                        className="text-[10px] font-extrabold tracking-[0.08em] uppercase"
-                        style={{ color: stage.accent }}
-                      >
-                        שלב {stage.index}
-                      </span>
-                      <span className="text-[14px] font-extrabold text-[#0A1F3D] tracking-tight">
-                        · {stage.title}
-                      </span>
-                      <span className="mr-auto text-[11px] font-bold text-[#6B7280]">
-                        {totalSuppliers} ספקים
-                      </span>
+                    {/* Stage heading - clean right-aligned block */}
+                    <div className="mb-3 px-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="block h-4 w-[3px] rounded-full" style={{ background: stage.accent }} />
+                        <span className="text-[10px] font-extrabold tracking-[0.08em] uppercase" style={{ color: stage.accent }}>
+                          שלב {stage.index}
+                        </span>
+                        <span className="text-[14px] font-extrabold text-[#0A1F3D] tracking-tight">
+                          · {stage.title}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 mr-[11px] text-[11px] font-semibold text-[#6B7280]">
+                        {totalSuppliers} ספקים פעילים
+                      </p>
                     </div>
 
                     {cats.length === 0 ? (
@@ -247,11 +246,11 @@ export default function CategoriesList() {
                     ) : (
                       <div className="relative -mx-5">
                         <div
-                          className="flex gap-3 overflow-x-auto px-5 pb-1 snap-x no-scrollbar"
+                          className="flex gap-2.5 overflow-x-auto px-5 pb-2 pt-1 snap-x no-scrollbar"
                           style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
                         >
                           {cats.map((c) => (
-                            <div key={c.id} className="snap-start shrink-0 w-[150px]">
+                            <div key={c.id} className="snap-start shrink-0 w-[138px]">
                               <CategoryCard
                                 id={c.id}
                                 name={c.name}
@@ -265,7 +264,11 @@ export default function CategoriesList() {
                           <div className="shrink-0 w-2" />
                         </div>
                         <div
-                          className="pointer-events-none absolute top-0 bottom-1 left-0 w-8"
+                          className="pointer-events-none absolute top-0 bottom-2 right-0 w-6"
+                          style={{ background: "linear-gradient(270deg, #F7F8FA, rgba(247,248,250,0))" }}
+                        />
+                        <div
+                          className="pointer-events-none absolute top-0 bottom-2 left-0 w-8"
                           style={{ background: "linear-gradient(90deg, #F7F8FA, rgba(247,248,250,0))" }}
                         />
                       </div>
