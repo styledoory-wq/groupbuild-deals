@@ -468,7 +468,7 @@ export default function Auth() {
               type="button"
               onClick={(e) => handleSignIn(e as unknown as React.FormEvent)}
               disabled={loading}
-              className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.6)] hover:brightness-105 flex items-center justify-center gap-2"
+              className="w-full h-14 text-base flex items-center justify-center gap-2"
             >
               {loading ? "מתחבר…" : "המשך לחשבון שלי"}
               <ArrowLeft className="h-4 w-4" />
@@ -478,7 +478,7 @@ export default function Auth() {
               type="button"
               onClick={(e) => handleSignUp(e as unknown as React.FormEvent)}
               disabled={loading || !termsAccepted}
-              className="w-full h-14 rounded-2xl bg-gradient-to-l from-[#E8C97D] via-[#C9A961] to-[#B8954A] text-[#0A1F3D] font-bold text-base shadow-[0_14px_44px_-14px_rgba(201,169,97,0.6)] hover:brightness-105 disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full h-14 text-base disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading ? "נרשם…" : "פתחו את החשבון"}
               <ArrowLeft className="h-4 w-4" />
@@ -487,14 +487,14 @@ export default function Auth() {
 
 
           {/* Register prompt — clearly separated below CTA */}
-          <div className="text-center text-sm text-white/70">
+          <div className="text-center text-sm text-[#6B7280]">
             {mode === "signin" ? (
               <>
                 עדיין אין לך חשבון?{" "}
                 <button
                   type="button"
                   onClick={() => setMode("signup")}
-                  className="font-bold text-[#E8C97D] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
+                  className="font-bold text-[#B8923F] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
                 >
                   הרשמה
                 </button>
@@ -505,7 +505,7 @@ export default function Auth() {
                 <button
                   type="button"
                   onClick={() => setMode("signin")}
-                  className="font-bold text-[#E8C97D] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
+                  className="font-bold text-[#B8923F] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
                 >
                   התחברות
                 </button>
@@ -517,7 +517,7 @@ export default function Auth() {
           <div className="flex items-center justify-center">
             <Link
               to="/about"
-              className="flex items-center gap-1.5 text-xs text-white/55 hover:text-[#C9A961] transition-colors"
+              className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#0A1F3D] transition-colors"
             >
               <HelpCircle className="h-3.5 w-3.5" />
               איך זה עובד?
