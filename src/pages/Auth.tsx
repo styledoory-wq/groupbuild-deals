@@ -207,44 +207,23 @@ export default function Auth() {
     { id: "supplier", label: "ספק", icon: Briefcase, desc: "צרו הצעות" },
   ];
 
-  // Higher-contrast glassmorphism so inputs read clearly over the photo.
+  // Unified with Categories: light surface, white controls, soft shadows.
   const fieldWrap = "relative";
   const fieldInput =
-    "h-14 w-full rounded-2xl bg-white/[0.10] backdrop-blur-md border border-white/25 pr-12 pl-4 text-[15px] text-white placeholder:text-white/70 text-right shadow-[0_4px_18px_-8px_rgba(0,0,0,0.45)] focus:bg-white/[0.14] focus:border-[#D4AF37] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.18)] focus:outline-none focus:ring-0 transition-all duration-200";
+    "h-14 w-full rounded-[16px] bg-white pr-12 pl-4 text-[15px] text-[#0A1F3D] placeholder:text-[#9CA3AF] text-right shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.22),0_4px_14px_-4px_rgba(10,31,61,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
 
   return (
     <div
       dir="rtl"
-      className="auth-screen min-h-[100dvh] w-full flex justify-center text-white relative overflow-hidden"
-      style={{ background: "#071C3B" }}
+      className="auth-screen min-h-[100dvh] w-full flex justify-center text-[#0A1F3D] relative overflow-hidden"
+      style={{ background: "#F7F8FA" }}
     >
-      {/* Premium navy gradient + soft radial light — no photography */}
+      {/* Unified light app background */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div
           className="absolute inset-0"
           style={{
-            background:
-              "linear-gradient(180deg, #0A2147 0%, #081B38 55%, #050F25 100%)",
-          }}
-        />
-        {/* Soft luminous radial */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 50% at 50% 22%, rgba(212,175,55,0.10) 0%, rgba(212,175,55,0.04) 35%, transparent 70%)",
-          }}
-        />
-        {/* Subtle gold ambient orbs */}
-        <div className="absolute -top-32 -right-24 h-80 w-80 rounded-full bg-[#D4AF37]/8 blur-3xl" />
-        <div className="absolute top-1/2 -left-24 h-96 w-96 rounded-full bg-[#D4AF37]/6 blur-3xl" />
-        {/* Fine grain via subtle radial dots — premium texture */}
-        <div
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              "radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)",
-            backgroundSize: "3px 3px",
+            background: "#F7F8FA",
           }}
         />
       </div>
@@ -258,12 +237,12 @@ export default function Auth() {
       >
         {/* Brand header — minimal, product-focused */}
         <div className="pt-6 pb-2 animate-fade-up flex flex-col items-center text-center">
-          <BrandLogo variant="light" size="xl" className="opacity-100" />
+          <BrandLogo variant="dark" size="xl" className="opacity-100" />
           <h1 className="mt-7 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight">
             {mode === "signin" ? "מתחברים לעסקאות טובות יותר" : "בואו נצא לדרך"}
           </h1>
           <div className="mt-3 h-[2px] w-10 rounded-full bg-[#D4AF37]" />
-          <p className="mt-3 text-white/65 text-[13px] leading-relaxed max-w-[22rem]">
+          <p className="mt-3 text-[#6B7280] text-[13px] font-medium leading-relaxed max-w-[22rem]">
             {mode === "signin"
               ? "דיירים וספקים מתחברים לפלטפורמה אחת ויוצרים כוח קנייה שחוסך כסף לכולם"
               : "פתחו חשבון בדקות ספורות והצטרפו לכוח הקנייה של הפרויקט שלכם"}
@@ -272,7 +251,7 @@ export default function Auth() {
 
 
         {authError && (
-          <div className="mt-3 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-100 leading-relaxed">
+          <div className="mt-3 rounded-[16px] bg-[#FEE2E2] px-4 py-2.5 text-sm text-[#DC2626] leading-relaxed shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
             {authError}
           </div>
         )}
