@@ -2,7 +2,6 @@ import { ArrowRight, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/store/AppStore";
-import { AppContainer } from "./AppContainer";
 
 interface Props {
   title: string;
@@ -14,84 +13,58 @@ interface Props {
 }
 
 /**
- * PageHeader — fluid spacing + typography via design tokens.
- * - Title uses gb-h1 (fluid clamp scale).
- * - Icon buttons are 44×44 tap targets on every breakpoint.
- * - Horizontal padding follows the global --pad-x token via AppContainer.
+ * Unified PageHeader — light, clean, aligned with the resident DS.
+ * `variant` is accepted for backward compat but always renders the light style.
  */
-export function PageHeader({ title, subtitle, back = true, showBell = false, variant = "navy", rightSlot }: Props) {
+export function PageHeader({ title, subtitle, back = true, showBell = false, rightSlot }: Props) {
   const navigate = useNavigate();
   const { unreadCount } = useApp();
 
-  const isNavy = variant === "navy";
-
   return (
-    <header
-      className={cn(
-        "rounded-b-[clamp(20px,3vw,36px)] relative overflow-hidden",
-        "pt-[clamp(12px,2vw,32px)] pb-[clamp(20px,3vw,48px)]",
-        isNavy ? "gb-hero-calm" : "bg-background text-foreground border-b border-border",
-      )}
-    >
-      <AppContainer>
-        <div className="flex items-center justify-between mb-[clamp(12px,1.5vw,24px)] relative">
-          {back ? (
-            <button
-              onClick={() => navigate(-1)}
-              className={cn(
-                "h-touch w-touch min-w-touch min-h-touch rounded-full flex items-center justify-center transition-smooth",
-                isNavy ? "bg-white/12 hover:bg-white/20 border border-white/20 backdrop-blur text-white" : "bg-card border border-border hover:bg-muted text-foreground",
-              )}
-              aria-label="חזרה"
-            >
-              <ArrowRight className="w-[18px] h-[18px]" strokeWidth={1.75} />
-            </button>
-          ) : (
-            <div className="h-touch w-touch" />
-          )}
-
-          <div className="flex items-center gap-2">
-            {rightSlot}
-            {showBell && (
-              <button
-                onClick={() => navigate("/resident/notifications")}
-                className={cn(
-                  "relative h-touch w-touch min-w-touch min-h-touch rounded-full flex items-center justify-center transition-smooth",
-                  isNavy ? "bg-white/12 hover:bg-white/20 border border-white/20 backdrop-blur text-white" : "bg-card border border-border text-foreground",
-                )}
-                aria-label="התראות"
-              >
-                <Bell className="w-[18px] h-[18px]" strokeWidth={1.75} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-2.5 left-2.5 h-2 w-2 rounded-full bg-gold" />
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-2 animate-fade-up relative text-right">
-          <div className="gb-divider-gold mr-0 ml-auto" />
-          <h1
+    <header className="px-5 pt-4 pb-3">
+      <div className="flex items-center justify-between mb-2">
+        {back ? (
+          <button
+            onClick={() => navigate(-1)}
             className={cn(
-              "gb-h1 break-words",
-              isNavy ? "text-white" : "text-foreground",
+              "h-10 w-10 rounded-full flex items-center justify-center bg-white",
+              "shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform",
             )}
+            aria-label="חזרה"
           >
-            {title}
-          </h1>
-          {subtitle && (
-            <p
-              className={cn(
-                "text-fs-sm leading-relaxed font-medium",
-                isNavy ? "text-white/85" : "text-muted-foreground",
-              )}
+            <ArrowRight className="h-[18px] w-[18px] text-[#0A1F3D]" strokeWidth={2} />
+          </button>
+        ) : (
+          <div className="h-10 w-10" />
+        )}
+
+        <div className="flex items-center gap-2">
+          {rightSlot}
+          {showBell && (
+            <button
+              onClick={() => navigate("/resident/notifications")}
+              className="relative h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform"
+              aria-label="התראות"
             >
-              {subtitle}
-            </p>
+              <Bell className="h-[18px] w-[18px] text-[#0A1F3D]" strokeWidth={2} />
+              {unreadCount > 0 && (
+                <span className="absolute top-2.5 left-2.5 h-2 w-2 rounded-full bg-[#D4AF37]" />
+              )}
+            </button>
           )}
         </div>
-      </AppContainer>
+      </div>
+
+      <div className="text-right">
+        <h1 className="text-[24px] font-extrabold text-[#0A1F3D] tracking-tight leading-tight break-words">
+          {title}
+        </h1>
+        {subtitle && (
+          <p className="mt-1 text-[13px] font-medium text-[#6B7280] leading-relaxed">
+            {subtitle}
+          </p>
+        )}
+      </div>
     </header>
   );
 }
