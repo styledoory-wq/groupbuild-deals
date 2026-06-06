@@ -81,7 +81,7 @@ export default function SupplierOffers() {
 
       <div className="px-5 -mt-4 relative z-10 mb-4">
         <Link to="/supplier/offers/new">
-          <Button className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold">
+          <Button className="w-full h-12 rounded-[16px] bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
             <Plus className="h-4 w-4 ml-2" /> צרו הצעה חדשה
           </Button>
         </Link>
