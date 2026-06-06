@@ -2,25 +2,26 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search as SearchIcon, ChevronLeft, MapPin, Sparkles, Store, Briefcase,
-  PencilRuler, Hammer, Plug, Palette, Trees, Armchair, Check,
+  PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, Check, PiggyBank,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { WhatsAppHelpButton } from "@/components/WhatsAppHelpButton";
+import { SupportButton } from "@/components/SupportButton";
+import { DocumentsButton } from "@/components/DocumentsButton";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { useApp } from "@/store/AppStore";
+import { useApp, formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
-import { SHADOWS, MOTION, STAGE_THEMES } from "@/lib/designSystem";
-
-type StageId = "planning" | "structure" | "systems" | "finishes" | "furniture" | "outdoor";
+import { SHADOWS, MOTION, STAGE_THEMES, type StageId } from "@/lib/designSystem";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
-  { id: "planning",  title: "תכנון ועיצוב",       description: "אדריכלות, עיצוב פנים והחלטות הבסיס",   icon: PencilRuler, dbStage: "planning" },
-  { id: "structure", title: "שלד ובנייה",          description: "קונסטרוקציה, איטום וגג",                icon: Hammer,      dbStage: "structure" },
-  { id: "systems",   title: "מערכות הבית",         description: "חשמל, אינסטלציה ומיזוג",                icon: Plug,        dbStage: "systems" },
-  { id: "finishes",  title: "גמרים",                description: "ריצוף, צבע, מטבח וחדרי רחצה",            icon: Palette,     dbStage: "finishes" },
-  { id: "furniture", title: "ריהוט והלבשת הבית",  description: "ריהוט, טקסטיל ועיצוב מוגמר",            icon: Armchair },
-  { id: "outdoor",   title: "חצר ופיתוח",          description: "גינון, גדרות ותאורת חוץ",                 icon: Trees,       dbStage: "outdoor" },
+  { id: "planning",     title: "תכנון ועיצוב",       description: "אדריכלות, עיצוב פנים והחלטות הבסיס", icon: PencilRuler, dbStage: "planning" },
+  { id: "structure",    title: "שלד ובנייה",          description: "קונסטרוקציה, איטום וגג",              icon: Hammer,      dbStage: "structure" },
+  { id: "systems",      title: "מערכות הבית",         description: "חשמל, אינסטלציה ומיזוג",              icon: Plug,        dbStage: "systems" },
+  { id: "openings",     title: "פתחים ובטחון",        description: "דלתות, חלונות ומערכות אבטחה",        icon: ShieldCheck, dbStage: "openings" },
+  { id: "finishes",     title: "גמרים",                description: "ריצוף, צבע ועבודות גמר",              icon: Palette,     dbStage: "finishes" },
+  { id: "kitchen-bath", title: "מטבחים ואמבטיות",     description: "מטבח, חדרי רחצה וכלים סניטריים",     icon: ChefHat,     dbStage: "kitchen-bath" },
+  { id: "outdoor",      title: "חצר ופיתוח",          description: "גינון, גדרות ותאורת חוץ",             icon: Trees,       dbStage: "outdoor" },
+  { id: "moving",       title: "כניסה לבית",          description: "הובלה, ריהוט וטקסי כניסה",            icon: KeyRound,    dbStage: "moving" },
 ];
 
 const FILTERS = ["הכל", "מבצעים", "פופולרי", "חדש", "הנחות", "ספקים מומלצים"];
@@ -37,6 +38,7 @@ export default function ResidentDashboard() {
   const [areaDeals, setAreaDeals] = useState<MiniDeal[]>([]);
   const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
   const [joinedCount, setJoinedCount] = useState(0);
+  const [estimatedSavings, setEstimatedSavings] = useState(0);
   const [activeFilter, setActiveFilter] = useState("הכל");
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export default function ResidentDashboard() {
         const uid = user.id;
         const { data: prof } = await supabase
           .from("profiles")
-          .select("full_name,city,project_id,city_id,region_id")
+          .select("full_name,city,project_id,city_id,region_id,current_stage")
           .eq("id", uid).maybeSingle();
 
         const fname = prof?.full_name ?? user.name ?? "דייר";
@@ -67,9 +69,13 @@ export default function ResidentDashboard() {
         const councilId: string | null = (cityRow?.council_id as string | null) ?? null;
         if (cityRow?.region_id) regionId = (cityRow.region_id as string | null) ?? regionId;
 
+        // Stage: prefer resident profile.current_stage, then project, then default.
+        const validIds = STAGES.map((s) => s.id) as string[];
         let stage: StageId = "planning";
-        const s = (projectResult.data?.current_stage as string | undefined) ?? "planning";
-        if (["planning","structure","systems","finishes","outdoor"].includes(s)) stage = s as StageId;
+        const profStage = (prof?.current_stage as string | undefined) ?? "";
+        const projStage = (projectResult.data?.current_stage as string | undefined) ?? "";
+        const chosen = (validIds.includes(profStage) ? profStage : validIds.includes(projStage) ? projStage : "planning") as StageId;
+        stage = chosen;
 
         const [matchesResult, citySupResult, councilSupResult, regionSupResult, nationwideResult, interestsResult] = await Promise.all([
           supabase.rpc("get_matching_deals_for_user", { _stage_filter: stage, _limit: 8 }),
@@ -86,15 +92,29 @@ export default function ResidentDashboard() {
         (councilSupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
         (regionSupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
         (nationwideResult.data ?? []).forEach((r: { id: string }) => supplierIds.add(r.id));
-        const joined = new Set(((interestsResult.data ?? []) as { deal_id: string }[]).map((i) => i.deal_id)).size;
+        const joinedIds = Array.from(new Set(((interestsResult.data ?? []) as { deal_id: string }[]).map((i) => i.deal_id)));
+        const joined = joinedIds.length;
 
-        const [supCountRes, dealsRes] = await Promise.all([
+        const [supCountRes, dealsRes, joinedDealsRes] = await Promise.all([
           supplierIds.size
             ? supabase.from("suppliers").select("id", { count: "exact", head: true })
                 .in("id", Array.from(supplierIds)).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"])
             : Promise.resolve({ count: 0 }),
           dealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url").in("id", dealIds) : Promise.resolve({ data: [] }),
+          joinedIds.length
+            ? supabase.from("deals").select("price_after_discount,price_before_discount").in("id", joinedIds)
+            : Promise.resolve({ data: [] }),
         ]);
+
+        // Estimated savings = sum of (before - after) across joined deals.
+        // Placeholder formula — easy to swap when real savings data lands.
+        const savings = ((joinedDealsRes.data ?? []) as { price_after_discount: number | null; price_before_discount: number | null }[])
+          .reduce((sum, d) => {
+            const before = Number(d.price_before_discount ?? 0);
+            const after = Number(d.price_after_discount ?? 0);
+            const diff = before > after ? before - after : 0;
+            return sum + diff;
+          }, 0);
 
         const deals = (dealsRes.data ?? []) as { id: string; title: string; supplier_id: string; cover_image_url: string | null }[];
         let nextDeals: MiniDeal[] = [];
@@ -111,6 +131,7 @@ export default function ResidentDashboard() {
         if (cancelled) return;
         setFullName(fname); setCity(cityName); setCurrentStage(stage);
         setAreaDeals(nextDeals); setAreaSuppliersCount(supCountRes.count ?? 0); setJoinedCount(joined);
+        setEstimatedSavings(savings);
       } catch (e) {
         console.error("[ResidentDashboard] load error", e);
       }
@@ -119,6 +140,7 @@ export default function ResidentDashboard() {
   }, [authReady, user?.id, user?.name]);
 
   const currentIdx = useMemo(() => Math.max(0, STAGES.findIndex((s) => s.id === currentStage)), [currentStage]);
+  const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
 
   return (
     <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F8FA" }}>
@@ -126,17 +148,21 @@ export default function ResidentDashboard() {
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
-        {/* Top bar: avatar (right RTL) — no logo */}
+        {/* Top bar: action cluster (right RTL → bell, support, docs) + avatar (left) */}
         <header className="px-5 pt-4 pb-3 flex items-center justify-between">
-          <button
-            onClick={() => navigate("/resident/notifications")}
-            className="h-10 w-10 rounded-full bg-white border border-[#ECEEF2] flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform"
-            aria-label="התראות"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0A1F3D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate("/resident/notifications")}
+              className="h-10 w-10 rounded-full bg-white border border-[#ECEEF2] flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform"
+              aria-label="התראות"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0A1F3D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+              </svg>
+            </button>
+            <SupportButton />
+            <DocumentsButton />
+          </div>
           <ProfileAvatar fallbackName={fullName} />
         </header>
 
@@ -161,7 +187,7 @@ export default function ResidentDashboard() {
           </div>
         )}
 
-        {/* Search bar — Wolt style */}
+        {/* Search bar */}
         <div className="px-5 mt-4">
           <button
             onClick={() => navigate("/resident/search")}
@@ -171,6 +197,33 @@ export default function ResidentDashboard() {
             <span className="text-[14px] font-medium text-[#6B7280] flex-1 truncate">חפש ספקים, הצעות וקטגוריות</span>
           </button>
         </div>
+
+        {/* Estimated savings — premium hero card */}
+        <section className="px-5 mt-4">
+          <button
+            onClick={() => navigate("/resident/my-offers")}
+            className="w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] transition-transform"
+            style={{
+              background: "linear-gradient(135deg,#0A1F3D 0%, #14305F 100%)",
+              boxShadow: SHADOWS.press,
+            }}
+          >
+            <div
+              className="h-12 w-12 rounded-[14px] flex items-center justify-center shrink-0"
+              style={{ background: "rgba(212,175,55,0.18)" }}
+            >
+              <PiggyBank className="h-[22px] w-[22px] text-[#D4AF37]" strokeWidth={2.2} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[11px] font-bold tracking-wider uppercase text-[#D4AF37]/90">חיסכון משוער</div>
+              <div className="text-[24px] font-extrabold text-white mt-0.5 leading-none tabular-nums">
+                {formatILS(estimatedSavings)}
+              </div>
+              <div className="text-[12px] text-white/70 mt-1.5 font-medium">נחסכו בזכות רכישות קבוצתיות</div>
+            </div>
+            <ChevronLeft className="h-[18px] w-[18px] text-white/60 shrink-0" strokeWidth={2.2} />
+          </button>
+        </section>
 
         {/* Stats — 3 mini cards */}
         <section className="px-5 mt-4 grid grid-cols-3 gap-3">
@@ -211,31 +264,32 @@ export default function ResidentDashboard() {
               כל הקטגוריות ←
             </button>
             <div className="text-right">
-              <h2 className="text-[18px] font-extrabold text-[#0A1F3D] tracking-tight">מסע הבנייה שלי</h2>
+              <h2 className="text-[18px] font-extrabold text-[#0A1F3D] tracking-tight">התקדמות הפרויקט</h2>
               <span className="text-[11px] font-semibold text-[#6B7280] tracking-wide">
-                שלב {currentIdx + 1} מתוך {STAGES.length}
+                שלב {currentIdx + 1} מתוך {STAGES.length} · {completionPct}% הושלם
               </span>
             </div>
           </div>
 
           {/* Progress track */}
-          <div className="relative h-1.5 rounded-full bg-[#ECEEF2] overflow-hidden mb-4">
+          <div className="relative h-2 rounded-full bg-[#ECEEF2] overflow-hidden mb-4">
             <div
               className="absolute inset-y-0 right-0 rounded-full transition-all duration-700"
               style={{
-                width: `${((currentIdx + 1) / STAGES.length) * 100}%`,
+                width: `${completionPct}%`,
                 background: "linear-gradient(90deg,#D4AF37,#E8C96B)",
+                boxShadow: "0 0 10px rgba(212,175,55,0.45)",
               }}
             />
           </div>
 
-          {/* Stage cards — unified DS tokens */}
+          {/* Stage cards */}
           <div className="space-y-2.5">
             {STAGES.map((stage, i) => {
               const done = i < currentIdx;
               const cur = i === currentIdx;
               const Icon = stage.icon;
-              const theme = STAGE_THEMES.find((t) => t.id === (stage.id as unknown as typeof STAGE_THEMES[number]["id"]));
+              const theme = STAGE_THEMES.find((t) => t.id === stage.id);
               const accent = cur ? (theme?.accent ?? "#D4AF37") : null;
               const tint = theme?.tint ?? "#F4F6FA";
               return (
@@ -250,7 +304,6 @@ export default function ResidentDashboard() {
                     transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
                   }}
                 >
-                  {/* Stage badge */}
                   <div
                     className="h-11 w-11 rounded-[14px] flex items-center justify-center shrink-0"
                     style={{
@@ -290,7 +343,6 @@ export default function ResidentDashboard() {
         </section>
 
       </div>
-      <WhatsAppHelpButton />
       <BottomNav role="resident" />
     </div>
   );
