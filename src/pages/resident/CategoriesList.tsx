@@ -351,7 +351,7 @@ function StageSection({
               style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
             >
               {cats.map((c) => (
-                <div key={c.id} className="snap-start shrink-0 w-[138px]">
+                <div key={c.id} className="snap-start shrink-0 w-[160px]">
                   <CategoryCard
                     id={c.id}
                     name={c.name}
@@ -370,14 +370,11 @@ function StageSection({
               style={{ background: `linear-gradient(270deg, ${stage.tint}, ${stage.tint}00)` }}
             />
             <div
-              className="pointer-events-none absolute top-0 bottom-1 left-0 w-8 flex items-center justify-start pl-1"
+              className="pointer-events-none absolute top-0 bottom-1 left-0 w-9 flex items-center justify-start pl-1"
               style={{ background: `linear-gradient(90deg, ${stage.tint}, ${stage.tint}00)` }}
             >
               {cats.length > 2 && (
-                <div
-                  className="h-6 w-6 rounded-full bg-white flex items-center justify-center shadow-[0_2px_6px_rgba(10,31,61,0.15)] animate-pulse"
-                  style={{ border: `1px solid ${stage.border}` }}
-                >
+                <div className="h-6 w-6 rounded-full bg-white flex items-center justify-center shadow-[0_3px_8px_rgba(10,31,61,0.18)] animate-pulse">
                   <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.5} style={{ color: stage.accent }} />
                 </div>
               )}
