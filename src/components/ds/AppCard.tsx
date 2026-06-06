@@ -37,13 +37,14 @@ export const AppCard = forwardRef<HTMLElement, AppCardProps>(function AppCard(
   } ${className}`;
 
   if (to && !dim) {
+    const anchorRest = rest as AnchorHTMLAttributes<HTMLAnchorElement>;
     return (
       <Link
         ref={ref as React.Ref<HTMLAnchorElement>}
         to={to}
         className={cls}
         style={baseStyle}
-        {...(rest as never)}
+        {...anchorRest}
       >
         {children}
       </Link>
