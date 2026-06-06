@@ -44,35 +44,35 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero text-primary-foreground flex justify-center">
+    <div className="min-h-screen bg-[#F7F8FA] text-[#0A1F3D] flex justify-center">
       <div className="w-full max-w-screen-sm flex flex-col safe-top">
         <div className="px-6 pt-12 pb-8">
           <h1 className="text-3xl font-extrabold mb-2">איפוס סיסמה</h1>
-          <p className="text-primary-foreground/70 text-sm">בחרו סיסמה חדשה לחשבון שלכם.</p>
+          <p className="text-[#6B7280] text-sm font-medium">בחרו סיסמה חדשה לחשבון שלכם.</p>
         </div>
-        <div className="flex-1 bg-background text-foreground rounded-t-[32px] px-6 pt-8 pb-8">
+        <div className="flex-1 px-6 pt-2 pb-8">
           {!ready ? (
             <p className="text-sm text-muted-foreground text-center">טוען קישור איפוס…</p>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold flex items-center gap-1.5">
-                  <Lock className="h-3.5 w-3.5 gb-gold-text" /> סיסמה חדשה
+                  <Lock className="h-3.5 w-3.5 text-[#D4AF37]" /> סיסמה חדשה
                 </Label>
                 <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                   required minLength={6} dir="ltr" placeholder="לפחות 6 תווים"
-                  className="h-12 rounded-2xl bg-card border-border" />
+                  className="h-12" />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold flex items-center gap-1.5">
-                  <Lock className="h-3.5 w-3.5 gb-gold-text" /> אישור סיסמה
+                  <Lock className="h-3.5 w-3.5 text-[#D4AF37]" /> אישור סיסמה
                 </Label>
                 <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
                   required minLength={6} dir="ltr"
-                  className="h-12 rounded-2xl bg-card border-border" />
+                  className="h-12" />
               </div>
               <Button type="submit" disabled={loading}
-                className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold">
+                className="w-full h-12">
                 {loading ? "מעדכן…" : "עדכון סיסמה"}
               </Button>
             </form>

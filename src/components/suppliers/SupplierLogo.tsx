@@ -25,8 +25,8 @@ export function SupplierLogo({ name, logoUrl, size = "md", className }: Supplier
   return (
     <div
       className={cn(
-        "shrink-0 rounded-2xl overflow-hidden flex items-center justify-center font-extrabold border border-gold/20",
-        "bg-gradient-to-br from-primary to-primary-soft text-primary-foreground shadow-soft",
+        "shrink-0 rounded-[16px] overflow-hidden flex items-center justify-center font-extrabold",
+        "bg-[#F4F6FA] text-[#0A1F3D] shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]",
         sizeMap[size],
         className,
       )}
@@ -35,7 +35,7 @@ export function SupplierLogo({ name, logoUrl, size = "md", className }: Supplier
       {logoUrl ? (
         <img src={logoUrl} alt={name ?? "לוגו ספק"} className="h-full w-full object-cover" loading="lazy" />
       ) : (
-        <span className="gb-gold-text">{initials}</span>
+        <span className="text-[#B8923F]">{initials}</span>
       )}
     </div>
   );
