@@ -292,7 +292,7 @@ function StageSection({
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [scrollIdx, setScrollIdx] = useState(0);
-  const cardWidth = 138 + 10; // w + gap
+  const cardWidth = 160 + 10; // w + gap
 
   useEffect(() => {
     if (!nudge || !scrollerRef.current) return;
@@ -318,13 +318,12 @@ function StageSection({
       className="rounded-[22px] px-2 py-4"
       style={{
         background: `linear-gradient(180deg, ${stage.tint} 0%, ${stage.tint}cc 100%)`,
-        border: `1px solid ${stage.border}80`,
       }}
     >
       {/* Stage heading */}
       <div className="mb-3 px-3 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="text-[17px] font-extrabold text-[#0A1F3D] tracking-tight leading-tight">
+          <h3 className="text-[19px] font-extrabold text-[#0A1F3D] tracking-tight leading-tight">
             {stage.title}
           </h3>
           <p className="mt-1 text-[11.5px] font-bold" style={{ color: stage.accent }}>
@@ -332,10 +331,9 @@ function StageSection({
           </p>
         </div>
         <div
-          className="h-9 w-9 shrink-0 rounded-[12px] flex items-center justify-center bg-white shadow-[0_3px_8px_-4px_rgba(10,31,61,0.18)]"
-          style={{ border: `1px solid ${stage.border}` }}
+          className="h-10 w-10 shrink-0 rounded-[12px] flex items-center justify-center bg-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.18)]"
         >
-          <stage.Icon className="h-[18px] w-[18px]" strokeWidth={2.3} style={{ color: stage.accent }} />
+          <stage.Icon className="h-[19px] w-[19px]" strokeWidth={2.3} style={{ color: stage.accent }} />
         </div>
       </div>
 
@@ -353,7 +351,7 @@ function StageSection({
               style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
             >
               {cats.map((c) => (
-                <div key={c.id} className="snap-start shrink-0 w-[138px]">
+                <div key={c.id} className="snap-start shrink-0 w-[160px]">
                   <CategoryCard
                     id={c.id}
                     name={c.name}
@@ -372,14 +370,11 @@ function StageSection({
               style={{ background: `linear-gradient(270deg, ${stage.tint}, ${stage.tint}00)` }}
             />
             <div
-              className="pointer-events-none absolute top-0 bottom-1 left-0 w-8 flex items-center justify-start pl-1"
+              className="pointer-events-none absolute top-0 bottom-1 left-0 w-9 flex items-center justify-start pl-1"
               style={{ background: `linear-gradient(90deg, ${stage.tint}, ${stage.tint}00)` }}
             >
               {cats.length > 2 && (
-                <div
-                  className="h-6 w-6 rounded-full bg-white flex items-center justify-center shadow-[0_2px_6px_rgba(10,31,61,0.15)] animate-pulse"
-                  style={{ border: `1px solid ${stage.border}` }}
-                >
+                <div className="h-6 w-6 rounded-full bg-white flex items-center justify-center shadow-[0_3px_8px_rgba(10,31,61,0.18)] animate-pulse">
                   <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.5} style={{ color: stage.accent }} />
                 </div>
               )}
@@ -423,21 +418,18 @@ function CategoryCard({
   const content = (
     <>
       <div className="flex items-start justify-between">
-        <div
-          className="h-9 w-9 rounded-[10px] flex items-center justify-center text-[18px] bg-white shadow-[0_2px_5px_rgba(10,31,61,0.06)]"
-          style={{ border: `1px solid ${stage.border}` }}
-        >
+        <div className="h-10 w-10 rounded-[12px] flex items-center justify-center text-[20px] bg-white shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]">
           <span>{icon}</span>
         </div>
         {dim ? (
-          <span className="inline-flex items-center gap-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-white/80 text-[#9CA3AF] border border-[#ECEEF2]">
+          <span className="inline-flex items-center gap-1 text-[9.5px] font-extrabold px-2 py-0.5 rounded-full bg-white/90 text-[#9CA3AF] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#F59E0B]" />
             בקרוב
           </span>
         ) : (
           <span
-            className="inline-flex items-center gap-1 text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-white"
-            style={{ color: stage.accent, border: `1px solid ${stage.border}` }}
+            className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white shadow-[0_1px_3px_rgba(10,31,61,0.08)]"
+            style={{ color: stage.accent }}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
             {count} זמינים
@@ -445,7 +437,7 @@ function CategoryCard({
         )}
       </div>
 
-      <p className="mt-2 text-[12.5px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
+      <p className="mt-2.5 text-[13.5px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
         {name}
       </p>
     </>
@@ -453,11 +445,10 @@ function CategoryCard({
 
   const baseStyle: React.CSSProperties = {
     background: "#FFFFFF",
-    border: `1px solid ${stage.border}`,
     boxShadow: dim
-      ? "0 1px 3px rgba(10,31,61,0.04)"
-      : "0 6px 16px -10px rgba(10,31,61,0.16), 0 1px 2px rgba(10,31,61,0.04)",
-    height: 110,
+      ? "0 2px 6px -2px rgba(10,31,61,0.06)"
+      : "0 8px 20px -10px rgba(10,31,61,0.18), 0 2px 4px -2px rgba(10,31,61,0.05)",
+    height: 124,
     opacity: dim ? 0.62 : 1,
   };
 
@@ -472,7 +463,7 @@ function CategoryCard({
   return (
     <Link
       to={`/resident/categories/${id}`}
-      className="relative rounded-[20px] p-3.5 flex flex-col transition-all duration-150 active:scale-[0.98] active:shadow-[0_8px_22px_-8px_rgba(10,31,61,0.22)]"
+      className="relative rounded-[20px] p-3.5 flex flex-col transition-all duration-200 ease-out active:scale-[1.02] active:shadow-[0_14px_28px_-10px_rgba(10,31,61,0.28)]"
       style={baseStyle}
     >
       {content}
