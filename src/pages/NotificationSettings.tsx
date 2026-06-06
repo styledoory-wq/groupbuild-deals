@@ -125,16 +125,16 @@ export default function NotificationSettings() {
       <PageHeader title="הגדרות התראות" subtitle="ניהול מייל והתראות פוש" />
 
       <div className="px-5 -mt-4 relative z-10 space-y-4 pb-24">
-        <div className="gb-card p-3 bg-gold/10 border-gold/30">
-          <p className="text-fs-xs text-primary leading-relaxed">
-            <Mail className="inline h-3.5 w-3.5 ml-1" />
+        <div className="rounded-[16px] p-3 bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
+          <p className="text-fs-xs text-[#0A1F3D] leading-relaxed">
+            <Mail className="inline h-3.5 w-3.5 ml-1 text-[#D4AF37]" />
             מיילים נשלחים דרך Resend. התראות פוש פעילות באפליקציה הנייטיב כשהאישורים מוגדרים.
           </p>
         </div>
 
-        <div className="gb-card p-4 space-y-3">
-          <h3 className="font-bold text-sm flex items-center gap-2">
-            <Bell className="h-4 w-4 text-gold" />ערוצים ראשיים
+        <div className="rounded-[20px] bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] p-4 space-y-3">
+          <h3 className="font-bold text-sm flex items-center gap-2 text-[#0A1F3D]">
+            <Bell className="h-4 w-4 text-[#D4AF37]" />ערוצים ראשיים
           </h3>
           <Row
             label="קבלת מיילים"
