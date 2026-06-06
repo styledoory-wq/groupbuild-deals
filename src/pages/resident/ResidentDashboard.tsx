@@ -5,6 +5,7 @@ import {
   PencilRuler, Hammer, Plug, Palette, Trees, Armchair, Check,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { WhatsAppHelpButton } from "@/components/WhatsAppHelpButton";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
@@ -289,6 +290,7 @@ export default function ResidentDashboard() {
         </section>
 
       </div>
+      <WhatsAppHelpButton />
       <BottomNav role="resident" />
     </div>
   );
