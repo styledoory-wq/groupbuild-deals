@@ -185,13 +185,13 @@ export default function SupplierOfferMarketingEdit() {
               {highlights.map((h, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1.5 text-fs-sm font-bold px-2.5 py-1.5 rounded-full bg-gold/10 text-primary border border-gold/30"
+                  className="inline-flex items-center gap-1.5 text-fs-sm font-bold px-2.5 py-1.5 rounded-full bg-[#F4F6FA] text-[#0A1F3D] border border-[#ECEEF2]"
                 >
                   {h}
                   <button
                     type="button"
                     onClick={() => setHighlights((arr) => arr.filter((_, idx) => idx !== i))}
-                    className="h-4 w-4 rounded-full bg-card border border-border hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center"
+                    className="h-4 w-4 rounded-full bg-white border border-[#ECEEF2] hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -202,18 +202,18 @@ export default function SupplierOfferMarketingEdit() {
         </section>
 
         {/* Locked fields */}
-        <section className="rounded-2xl border border-border bg-muted/40 p-4 space-y-2">
-          <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+        <section className="rounded-[20px] border border-[#ECEEF2] bg-[#F4F6FA] p-4 space-y-2">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#6B7280]">
             <Lock className="h-3.5 w-3.5" /> שדות נעולים לעריכה
           </div>
-          <ul className="text-fs-sm text-muted-foreground space-y-1 pr-5 list-disc">
+          <ul className="text-fs-sm text-[#6B7280] space-y-1 pr-5 list-disc">
             <li>סכום פיקדון ודרישת פיקדון</li>
             <li>מדרגות מחיר / הנחה</li>
             <li>סטטוס ההצעה ותנאי הצטרפות</li>
             <li>קטגוריה ונראות (ציבורי / פרויקט)</li>
           </ul>
-          <p className="text-fs-xs text-muted-foreground flex items-start gap-1.5 pt-1">
-            <ShieldAlert className="h-3.5 w-3.5 text-gold shrink-0 mt-0.5" />
+          <p className="text-fs-xs text-[#6B7280] flex items-start gap-1.5 pt-1">
+            <ShieldAlert className="h-3.5 w-3.5 text-[#D4AF37] shrink-0 mt-0.5" />
             לשינויים בשדות אלו יש לפנות למנהל המערכת. נועד למניעת שינויים לאחר שדיירים כבר הצטרפו.
           </p>
         </section>
