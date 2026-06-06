@@ -2,17 +2,23 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Unified app card — matches the Categories design system.
+ * White bg, 20px radius, soft layered shadow, smooth press.
+ */
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl bg-white text-card-foreground p-4 transition-all duration-300 hover:-translate-y-0.5 border border-[rgba(201,168,76,0.10)] shadow-[0_2px_12px_rgba(13,27,46,0.08)] hover:shadow-[0_6px_20px_rgba(13,27,46,0.12)]",
+      "rounded-[20px] bg-white text-card-foreground p-4",
+      "shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]",
+      "transition-[transform,box-shadow] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+      "hover:-translate-y-[1px] hover:shadow-[0_14px_28px_-10px_rgba(10,31,61,0.22)]",
+      "active:scale-[0.99]",
       className,
     )}
     {...props}
   />
-
-
 ));
 Card.displayName = "Card";
 
@@ -25,14 +31,18 @@ CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn("text-2xl font-semibold leading-none tracking-tight", className)} {...props} />
+    <h3
+      ref={ref}
+      className={cn("text-[18px] font-extrabold leading-tight tracking-tight text-[#0A1F3D]", className)}
+      {...props}
+    />
   ),
 );
 CardTitle.displayName = "CardTitle";
 
 const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
+    <p ref={ref} className={cn("text-[13px] font-medium text-[#6B7280]", className)} {...props} />
   ),
 );
 CardDescription.displayName = "CardDescription";
