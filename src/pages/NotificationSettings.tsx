@@ -125,16 +125,16 @@ export default function NotificationSettings() {
       <PageHeader title="הגדרות התראות" subtitle="ניהול מייל והתראות פוש" />
 
       <div className="px-5 -mt-4 relative z-10 space-y-4 pb-24">
-        <div className="gb-card p-3 bg-gold/10 border-gold/30">
-          <p className="text-fs-xs text-primary leading-relaxed">
-            <Mail className="inline h-3.5 w-3.5 ml-1" />
+        <div className="rounded-[16px] p-3 bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
+          <p className="text-fs-xs text-[#0A1F3D] leading-relaxed">
+            <Mail className="inline h-3.5 w-3.5 ml-1 text-[#D4AF37]" />
             מיילים נשלחים דרך Resend. התראות פוש פעילות באפליקציה הנייטיב כשהאישורים מוגדרים.
           </p>
         </div>
 
-        <div className="gb-card p-4 space-y-3">
-          <h3 className="font-bold text-sm flex items-center gap-2">
-            <Bell className="h-4 w-4 text-gold" />ערוצים ראשיים
+        <div className="rounded-[20px] bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] p-4 space-y-3">
+          <h3 className="font-bold text-sm flex items-center gap-2 text-[#0A1F3D]">
+            <Bell className="h-4 w-4 text-[#D4AF37]" />ערוצים ראשיים
           </h3>
           <Row
             label="קבלת מיילים"
@@ -150,9 +150,9 @@ export default function NotificationSettings() {
           />
         </div>
 
-        <div className="gb-card p-4 space-y-2">
-          <h3 className="font-bold text-sm mb-2">סוגי אירועים</h3>
-          <div className="flex items-center gap-1 text-fs-xs text-muted-foreground pb-2 border-b">
+        <div className="rounded-[20px] bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] p-4 space-y-2">
+          <h3 className="font-bold text-sm mb-2 text-[#0A1F3D]">סוגי אירועים</h3>
+          <div className="flex items-center gap-1 text-fs-xs text-[#6B7280] pb-2 border-b border-[#ECEEF2]">
             <div className="flex-1">אירוע</div>
             <div className="w-14 text-center flex items-center justify-center gap-1"><Mail className="h-3 w-3" />מייל</div>
             <div className="w-14 text-center flex items-center justify-center gap-1"><Smartphone className="h-3 w-3" />פוש</div>
@@ -160,8 +160,8 @@ export default function NotificationSettings() {
           {EVENTS.map((e) => (
             <div key={e.label} className="flex items-center gap-1 py-1.5">
               <div className="flex-1">
-                <div className="text-sm font-bold">{e.label}</div>
-                <div className="text-fs-xs text-muted-foreground">{e.desc}</div>
+                <div className="text-sm font-bold text-[#0A1F3D]">{e.label}</div>
+                <div className="text-fs-xs text-[#6B7280]">{e.desc}</div>
               </div>
               <div className="w-14 flex justify-center">
                 <Switch
@@ -184,7 +184,7 @@ export default function NotificationSettings() {
         <Button
           onClick={save}
           disabled={saving}
-          className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold flex items-center justify-center gap-2"
+          className="w-full h-12 rounded-[16px] bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
         >
           <Save className="h-4 w-4" />
           {saving ? "שומר…" : "שמירת הגדרות"}

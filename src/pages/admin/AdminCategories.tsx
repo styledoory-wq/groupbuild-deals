@@ -121,7 +121,7 @@ export default function AdminCategories() {
         <div className="gb-card p-3 flex items-center gap-2">
           <Input value={icon} onChange={(e) => setIcon(e.target.value)} className="h-11 w-14 text-center text-xl rounded-xl" />
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="שם קטגוריה" className="h-11 rounded-xl flex-1" />
-          <Button onClick={add} disabled={busy} className="h-11 rounded-xl bg-gradient-gold text-primary font-bold px-3 disabled:opacity-50">
+          <Button onClick={add} disabled={busy} className="h-11 rounded-xl bg-[#0A1F3D] text-white font-bold px-3 disabled:opacity-50">
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           </Button>
         </div>

@@ -553,8 +553,8 @@ export default function OfferEditor() {
               onClick={() => switchOfferType("percentage")}
               className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
                 offerType === "percentage"
-                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
-                  : "border-border bg-card text-muted-foreground"
+                  ? "border-[#0A1F3D] bg-[#F4F6FA] text-[#0A1F3D]"
+                  : "border-[#ECEEF2] bg-white text-[#6B7280]"
               }`}
             >
               אחוז הנחה
@@ -564,8 +564,8 @@ export default function OfferEditor() {
               onClick={() => switchOfferType("price_comparison")}
               className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
                 offerType === "price_comparison"
-                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
-                  : "border-border bg-card text-muted-foreground"
+                  ? "border-[#0A1F3D] bg-[#F4F6FA] text-[#0A1F3D]"
+                  : "border-[#ECEEF2] bg-white text-[#6B7280]"
               }`}
             >
               מחיר לפני ואחרי
@@ -585,8 +585,8 @@ export default function OfferEditor() {
               onClick={() => setVisibilityType("public")}
               className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
                 visibilityType === "public"
-                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
-                  : "border-border bg-card text-muted-foreground"
+                  ? "border-[#0A1F3D] bg-[#F4F6FA] text-[#0A1F3D]"
+                  : "border-[#ECEEF2] bg-white text-[#6B7280]"
               }`}
             >
               לכל הדיירים
@@ -596,8 +596,8 @@ export default function OfferEditor() {
               onClick={() => setVisibilityType("project_only")}
               className={`h-12 rounded-xl border-2 text-sm font-bold transition-smooth ${
                 visibilityType === "project_only"
-                  ? "border-gold bg-gradient-to-l from-gold/10 to-transparent text-primary"
-                  : "border-border bg-card text-muted-foreground"
+                  ? "border-[#0A1F3D] bg-[#F4F6FA] text-[#0A1F3D]"
+                  : "border-[#ECEEF2] bg-white text-[#6B7280]"
               }`}
             >
               לפרויקט מסוים
@@ -632,7 +632,7 @@ export default function OfferEditor() {
 
           <div className="space-y-3">
             {tiers.map((t, i) => (
-              <div key={i} className="rounded-2xl border-2 border-border bg-muted/40 p-3">
+              <div key={i} className="rounded-[16px] border border-[#ECEEF2] bg-[#F4F6FA] p-3">
                 <div className="flex items-center justify-between mb-2 gap-2">
                   <Input
                     value={t.label}
@@ -758,10 +758,10 @@ export default function OfferEditor() {
         {/* Supplier commitment - required */}
         <div
           ref={commitmentRef}
-          className={`gb-card p-4 border-2 transition-colors ${
+          className={`gb-card p-4 transition-colors ${
             commitmentError && !commitmentAccepted
-              ? "border-destructive bg-destructive/5 animate-pulse"
-              : "border-gold/40 bg-gold/5"
+              ? "border border-destructive bg-destructive/5 animate-pulse"
+              : "border border-[#D4AF37]/40 bg-[#FFF8E1]/40"
           }`}
         >
           <label className="flex items-start gap-3 cursor-pointer">
@@ -783,7 +783,7 @@ export default function OfferEditor() {
           </label>
         </div>
 
-        <Button onClick={save} disabled={saving} className="w-full h-12 rounded-2xl bg-primary hover:bg-primary-soft text-primary-foreground font-bold shadow-card disabled:opacity-50">
+        <Button onClick={save} disabled={saving} className="w-full h-12 rounded-[16px] bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] disabled:opacity-50">
           {saving ? <Loader2 className="h-4 w-4 ml-2 animate-spin" /> : <Save className="h-4 w-4 ml-2" />}
           {saving ? "שומר..." : "שמירת ההצעה"}
         </Button>

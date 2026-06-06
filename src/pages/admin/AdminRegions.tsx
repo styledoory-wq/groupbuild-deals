@@ -96,7 +96,7 @@ export default function AdminRegions() {
         <div className="space-y-1.5">
           {localRegions.map((r) => (
             <div key={r.id} className="gb-card p-3 flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-gold" />
+              <MapPin className="h-4 w-4 text-[#D4AF37]" />
               <div className="flex-1">
                 <div className="text-sm font-semibold">{r.name_he}</div>
                 <div className="text-fs-xs text-muted-foreground" dir="ltr">{r.slug}</div>

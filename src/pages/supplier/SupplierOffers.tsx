@@ -81,7 +81,7 @@ export default function SupplierOffers() {
 
       <div className="px-5 -mt-4 relative z-10 mb-4">
         <Link to="/supplier/offers/new">
-          <Button className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold shadow-gold">
+          <Button className="w-full h-12 rounded-[16px] bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
             <Plus className="h-4 w-4 ml-2" /> צרו הצעה חדשה
           </Button>
         </Link>
@@ -155,8 +155,8 @@ export default function SupplierOffers() {
                 </p>
 
                 {hasTiers && (
-                  <div className="mt-3 rounded-xl border border-border bg-muted/30 overflow-hidden">
-                    <div className="grid grid-cols-2 gap-1 px-3 py-2 bg-muted/60 text-fs-xs font-bold text-muted-foreground">
+                  <div className="mt-3 rounded-[16px] border border-[#ECEEF2] bg-[#F4F6FA] overflow-hidden">
+                    <div className="grid grid-cols-2 gap-1 px-3 py-2 bg-white text-fs-xs font-bold text-[#6B7280]">
                       <span>מצטרפים</span>
                       <span className="text-left">הנחה</span>
                     </div>
@@ -166,26 +166,26 @@ export default function SupplierOffers() {
                       return (
                         <div
                           key={idx}
-                          className={`grid grid-cols-2 gap-1 px-3 py-2 text-fs-xs border-t border-border ${
-                            isFirst ? "bg-gold/5" : ""
+                          className={`grid grid-cols-2 gap-1 px-3 py-2 text-fs-xs border-t border-[#ECEEF2] ${
+                            isFirst ? "bg-white" : ""
                           }`}
                         >
-                          <span className="font-medium text-foreground">{tierRange(t)}</span>
-                          <span className="text-left font-bold text-primary">{td.headline}</span>
+                          <span className="font-medium text-[#0A1F3D]">{tierRange(t)}</span>
+                          <span className="text-left font-bold text-[#0A1F3D]">{td.headline}</span>
                         </div>
                       );
                     })}
                   </div>
                 )}
 
-                <div className="flex items-center justify-between mt-3 pt-2 border-t border-border">
+                <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#ECEEF2]">
                   <Link
                     to={`/supplier/offers/${d.id}/marketing`}
-                    className="inline-flex items-center gap-1.5 text-fs-sm font-bold px-3 py-1.5 rounded-xl bg-gold/10 text-primary border border-gold/30 hover:bg-gold/20 transition-smooth"
+                    className="inline-flex items-center gap-1.5 text-fs-sm font-bold px-3 py-1.5 rounded-[12px] bg-[#F4F6FA] text-[#0A1F3D] border border-[#ECEEF2] hover:bg-white transition-colors"
                   >
                     <Pencil className="h-3.5 w-3.5" /> עריכה שיווקית
                   </Link>
-                  <div className="text-fs-xs text-muted-foreground">
+                  <div className="text-fs-xs text-[#9CA3AF]">
                     {new Date(d.created_at).toLocaleDateString("he-IL")}
                   </div>
                 </div>

@@ -62,31 +62,31 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero text-primary-foreground flex justify-center">
+    <div className="min-h-screen bg-[#F7F8FA] text-[#0A1F3D] flex justify-center">
       <div className="w-full max-w-screen-sm flex flex-col px-6 pt-16 pb-8">
         <button
           onClick={() => navigate("/")}
-          className="self-start text-xs text-primary-foreground/60 hover:text-gold transition-smooth flex items-center gap-1 mb-8"
+          className="self-start text-xs text-[#6B7280] hover:text-[#D4AF37] transition-smooth flex items-center gap-1 mb-8"
         >
           <ArrowRight className="h-3.5 w-3.5" />
           חזרה
         </button>
 
         <div className="relative animate-fade-up">
-          <div className="absolute -top-10 -left-10 h-48 w-48 rounded-full bg-gold/10 blur-3xl" />
+          <div className="absolute -top-10 -left-10 h-48 w-48 rounded-full bg-[#FFF8E1] blur-3xl" />
           <div className="relative">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-gold flex items-center justify-center shadow-gold mb-6">
+            <div className="h-16 w-16 rounded-2xl bg-[#0A1F3D] text-white flex items-center justify-center shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] mb-6">
               <ShieldCheck className="h-8 w-8 text-primary" />
             </div>
             <h1 className="text-3xl font-extrabold mb-2">כניסת ניהול</h1>
             <div className="gb-divider-gold mb-4" />
-            <p className="text-primary-foreground/70 text-sm leading-relaxed">
+            <p className="text-[#6B7280] text-sm leading-relaxed">
               אזור זה מוגבל. רק חשבון המנהל המורשה יכול להיכנס.
             </p>
           </div>
         </div>
 
-        <div className="mt-10 bg-background text-foreground rounded-3xl p-6 shadow-elevated animate-fade-up">
+        <div className="mt-10 bg-background text-foreground rounded-3xl p-6 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] animate-fade-up">
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="text-xs font-bold text-muted-foreground mb-2 block flex items-center gap-1.5">
@@ -120,14 +120,14 @@ export default function AdminLogin() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-2xl bg-gradient-gold text-primary font-bold text-base shadow-gold"
+              className="w-full h-12 rounded-2xl bg-[#0A1F3D] text-white font-bold text-base shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
             >
               {loading ? "מתחבר…" : "כניסה לפאנל הניהול"}
             </Button>
           </form>
         </div>
 
-        <p className="text-center text-fs-xs text-primary-foreground/50 mt-6">
+        <p className="text-center text-fs-xs text-[#0A1F3D]/50 mt-6">
           הגישה מתועדת ומאובטחת
         </p>
       </div>

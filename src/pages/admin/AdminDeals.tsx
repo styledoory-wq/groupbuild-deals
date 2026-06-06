@@ -153,7 +153,7 @@ export default function AdminDeals() {
             return (
               <div key={d.id} className="gb-card p-4">
                 <div className="flex items-start gap-3 mb-2">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-hero flex items-center justify-center text-lg">{category?.icon ?? "🏷️"}</div>
+                  <div className="h-10 w-10 rounded-xl bg-[#F4F6FA] flex items-center justify-center text-lg">{category?.icon ?? "🏷️"}</div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-sm truncate">{d.title}</h3>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">

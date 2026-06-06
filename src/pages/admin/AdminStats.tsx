@@ -63,21 +63,21 @@ export default function AdminStats() {
       <PageHeader title="סטטיסטיקות מערכת" subtitle="מבט-על על ביצועי הפלטפורמה" back={false} />
 
       <div className="px-5 -mt-4 relative z-10 mb-5">
-        <div className="gb-card p-5 bg-gradient-hero text-primary-foreground">
+        <div className="gb-card p-5 bg-white text-[#0A1F3D] border border-[#ECEEF2]">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-fs-xs text-primary-foreground/60">הכנסה מוערכת</div>
-              <div className="text-3xl font-extrabold gb-gold-text mt-1">{formatILS(revenue)}</div>
+              <div className="text-fs-xs text-[#6B7280]">הכנסה מוערכת</div>
+              <div className="text-3xl font-extrabold text-[#D4AF37] mt-1">{formatILS(revenue)}</div>
             </div>
-            <TrendingUp className="h-10 w-10 text-gold" />
+            <TrendingUp className="h-10 w-10 text-[#D4AF37]" />
           </div>
-          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/10 text-sm">
+          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-[#ECEEF2] text-sm">
             <div>
-              <div className="text-fs-xs text-primary-foreground/60">חיסכון לדיירים</div>
-              <div className="font-bold gb-gold-text">{formatILS(totalSavings)}</div>
+              <div className="text-fs-xs text-[#6B7280]">חיסכון לדיירים</div>
+              <div className="font-bold text-[#D4AF37]">{formatILS(totalSavings)}</div>
             </div>
             <div>
-              <div className="text-fs-xs text-primary-foreground/60">שווי עסקה ממוצע</div>
+              <div className="text-fs-xs text-[#6B7280]">שווי עסקה ממוצע</div>
               <div className="font-bold">{formatILS(avgDealSize)}</div>
             </div>
           </div>
@@ -106,7 +106,7 @@ export default function AdminStats() {
                 <span className="text-muted-foreground">{c.count} עסקאות · {formatILS(c.revenue)}</span>
               </div>
               <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div className="h-full bg-gradient-gold" style={{ width: `${(c.count / maxCount) * 100}%` }} />
+                <div className="h-full bg-[#0A1F3D] text-white" style={{ width: `${(c.count / maxCount) * 100}%` }} />
               </div>
             </div>
           ))}
