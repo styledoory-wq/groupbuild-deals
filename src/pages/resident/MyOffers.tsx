@@ -261,7 +261,7 @@ export default function MyOffers() {
           </div>
         ) : visibleItems.length === 0 ? (
           <EmptyState
-            icon={Inbox}
+            icon={<Inbox className="h-7 w-7 text-[#9CA3AF]" strokeWidth={2} />}
             title={showHidden ? "הארכיון ריק" : "עדיין לא הצטרפת להצעות"}
             description={
               showHidden
