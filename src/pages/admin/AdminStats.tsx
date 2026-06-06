@@ -62,29 +62,33 @@ export default function AdminStats() {
     <MobileShell>
       <PageHeader title="סטטיסטיקות מערכת" subtitle="מבט-על על ביצועי הפלטפורמה" back={false} />
 
-      <div className="px-5 -mt-4 relative z-10 mb-5">
-        <div className="gb-card p-5 bg-white text-[#0A1F3D] border border-[#ECEEF2]">
+      <div className="px-5 mb-4">
+        <div className="rounded-[20px] bg-white p-5 border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
           <div className="flex items-center justify-between">
-            <div>
-              <div className="text-fs-xs text-[#6B7280]">הכנסה מוערכת</div>
-              <div className="text-3xl font-extrabold text-[#D4AF37] mt-1">{formatILS(revenue)}</div>
+            <div className="min-w-0">
+              <div className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">הכנסה מוערכת</div>
+              <div className="text-[26px] font-extrabold text-[#0A1F3D] mt-1 tracking-tight leading-none">
+                {formatILS(revenue)}
+              </div>
             </div>
-            <TrendingUp className="h-10 w-10 text-[#D4AF37]" />
+            <div className="h-11 w-11 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
+              <TrendingUp className="h-[18px] w-[18px] text-[#D4AF37]" strokeWidth={2.2} />
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-[#ECEEF2] text-sm">
+          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-[#ECEEF2]">
             <div>
-              <div className="text-fs-xs text-[#6B7280]">חיסכון לדיירים</div>
-              <div className="font-bold text-[#D4AF37]">{formatILS(totalSavings)}</div>
+              <div className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">חיסכון לדיירים</div>
+              <div className="font-extrabold text-[#0A1F3D] mt-1 text-[15px]">{formatILS(totalSavings)}</div>
             </div>
             <div>
-              <div className="text-fs-xs text-[#6B7280]">שווי עסקה ממוצע</div>
-              <div className="font-bold">{formatILS(avgDealSize)}</div>
+              <div className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">שווי עסקה ממוצע</div>
+              <div className="font-extrabold text-[#0A1F3D] mt-1 text-[15px]">{formatILS(avgDealSize)}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-5 grid grid-cols-2 gap-3 mb-5">
+      <div className="px-5 grid grid-cols-2 gap-2.5 mb-5">
         <Mini icon={Building2} label="פרויקטים" value={projects.length} />
         <Mini icon={Users} label="ספקים מאושרים" value={counts.approvedSuppliers} />
         <Mini icon={Tag} label="עסקאות" value={deals.length} />
@@ -94,19 +98,19 @@ export default function AdminStats() {
       </div>
 
       <section className="px-5 mb-5">
-        <h2 className="text-sm font-bold mb-3">קטגוריות מובילות</h2>
-        <div className="gb-card p-4 space-y-3">
+        <h2 className="text-[12px] font-extrabold text-[#0A1F3D] tracking-tight mb-2.5 px-1">קטגוריות מובילות</h2>
+        <div className="rounded-[20px] bg-white p-4 border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)] space-y-3">
           {catStats.map((c) => (
             <div key={c.id}>
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-bold flex items-center gap-1.5">
+              <div className="flex items-center justify-between text-[12px] mb-1.5">
+                <span className="font-extrabold text-[#0A1F3D] flex items-center gap-1.5">
                   <span className="text-base">{c.icon}</span>
                   {c.name}
                 </span>
-                <span className="text-muted-foreground">{c.count} עסקאות · {formatILS(c.revenue)}</span>
+                <span className="text-[#6B7280] font-medium">{c.count} · {formatILS(c.revenue)}</span>
               </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div className="h-full bg-[#0A1F3D] text-white" style={{ width: `${(c.count / maxCount) * 100}%` }} />
+              <div className="h-2 rounded-full bg-[#F4F6FA] overflow-hidden">
+                <div className="h-full bg-[#D4AF37]" style={{ width: `${(c.count / maxCount) * 100}%` }} />
               </div>
             </div>
           ))}
@@ -118,16 +122,15 @@ export default function AdminStats() {
   );
 }
 
-function Mini({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: number }) {
+function Mini({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; label: string; value: number }) {
   return (
-    <div className="gb-card p-3">
-      <div className="flex items-center gap-2 mb-1">
-        <div className="h-8 w-8 rounded-lg bg-primary/5 text-primary flex items-center justify-center">
-          <Icon className="h-4 w-4" />
-        </div>
+    <div className="bg-white rounded-[16px] p-4 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
+      <div className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center mb-2.5">
+        <Icon className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
       </div>
-      <div className="text-xl font-extrabold text-primary">{value.toLocaleString("he-IL")}</div>
-      <div className="text-fs-xs text-muted-foreground">{label}</div>
+      <div className="text-[20px] font-extrabold text-[#0A1F3D] leading-none tracking-tight">{value.toLocaleString("he-IL")}</div>
+      <div className="text-[12px] text-[#6B7280] mt-1.5 font-medium">{label}</div>
     </div>
   );
 }
+
