@@ -201,7 +201,7 @@ export default function SupplierDashboard() {
   if (!dbSupplier || isPending || isRejected) {
     return (
       <MobileShell>
-        <HeroBar height={210} />
+        <HeroBar />
         <div className="px-5 mt-5">
           <div className="bg-white rounded-2xl p-6 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] text-center">
             <div className="h-14 w-14 mx-auto rounded-2xl bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center mb-4">
