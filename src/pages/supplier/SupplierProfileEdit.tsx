@@ -317,15 +317,15 @@ export default function SupplierProfileEdit() {
                   onClick={() => opt.set(!opt.checked)}
                   aria-pressed={opt.checked}
                   className={
-                    "rounded-2xl border p-3 text-right transition-all relative " +
+                    "rounded-[16px] p-3 text-right transition-all relative shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] " +
                     (opt.checked
-                      ? "border-gold bg-gradient-to-br from-gold/15 to-gold/5 shadow-[0_0_0_3px_hsl(var(--gold)/0.18)]"
-                      : "border-border bg-card hover:border-gold/40")
+                      ? "bg-[#EAF2FF] text-[#0A1F3D] ring-2 ring-[#D4AF37]/30"
+                      : "bg-white text-[#0A1F3D]")
                   }
                 >
                   <div className={"text-sm font-bold " + (opt.checked ? "text-primary" : "text-foreground")}>{opt.label}</div>
                   <div className="text-fs-xs text-muted-foreground mt-0.5 leading-tight">{opt.sub}</div>
-                  <span className={"absolute top-2 left-2 h-4 w-4 rounded-md border flex items-center justify-center text-fs-xs " + (opt.checked ? "bg-gold border-gold text-gold-foreground" : "border-border")}>{opt.checked ? "✓" : ""}</span>
+                  <span className={"absolute top-2 left-2 h-4 w-4 rounded-md flex items-center justify-center text-fs-xs shadow-[0_1px_3px_rgba(10,31,61,0.06)] " + (opt.checked ? "bg-[#D4AF37] text-[#0A1F3D]" : "bg-[#F4F6FA]")}>{opt.checked ? "✓" : ""}</span>
                 </button>
               ))}
             </div>
@@ -343,7 +343,7 @@ export default function SupplierProfileEdit() {
           <Field label="אימייל" icon={Mail}>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-11 rounded-xl" />
             {email.trim().toLowerCase() !== originalEmail.toLowerCase() && (
-              <p className="text-fs-xs text-gold mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
+              <p className="text-fs-xs text-[#B8923F] mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
             )}
           </Field>
           <Field label="תיאור קצר (יוצג בכרטיס)" icon={FileText}>
@@ -361,7 +361,7 @@ export default function SupplierProfileEdit() {
         {/* Branding & Media */}
         <section className="gb-card p-4 space-y-4">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <ImageIcon className="h-3.5 w-3.5 text-gold" /> מיתוג ומדיה
+              <ImageIcon className="h-3.5 w-3.5 text-[#D4AF37]" /> מיתוג ומדיה
           </h3>
 
           {/* Logo */}
