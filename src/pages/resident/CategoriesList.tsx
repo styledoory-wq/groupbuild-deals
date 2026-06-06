@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search, X, Compass, HardHat, Plug, DoorOpen, PaintBucket, ChefHat, Trees,
@@ -218,64 +218,19 @@ export default function CategoriesList() {
               </div>
             </section>
 
-            {/* === LARGE APPLE-STYLE CATEGORY CARDS === */}
-            <div className="px-5 mt-6 space-y-7">
-              {visibleStages.map(({ stage, cats, totalSuppliers }) => {
-                return (
-                  <section key={stage.id}>
-                    {/* Stage heading - clean right-aligned block */}
-                    <div className="mb-3 px-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="block h-4 w-[3px] rounded-full" style={{ background: stage.accent }} />
-                        <span className="text-[10px] font-extrabold tracking-[0.08em] uppercase" style={{ color: stage.accent }}>
-                          שלב {stage.index}
-                        </span>
-                        <span className="text-[14px] font-extrabold text-[#0A1F3D] tracking-tight">
-                          · {stage.title}
-                        </span>
-                      </div>
-                      <p className="mt-0.5 mr-[11px] text-[11px] font-semibold text-[#6B7280]">
-                        {totalSuppliers} ספקים פעילים
-                      </p>
-                    </div>
-
-                    {cats.length === 0 ? (
-                      <div className="bg-white rounded-[16px] p-4 text-center text-[12px] text-[#6B7280] font-medium border border-[#ECEEF2]">
-                        קטגוריות יתווספו בקרוב
-                      </div>
-                    ) : (
-                      <div className="relative -mx-5">
-                        <div
-                          className="flex gap-2.5 overflow-x-auto px-5 pb-2 pt-1 snap-x no-scrollbar"
-                          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
-                        >
-                          {cats.map((c) => (
-                            <div key={c.id} className="snap-start shrink-0 w-[138px]">
-                              <CategoryCard
-                                id={c.id}
-                                name={c.name}
-                                icon={c.icon}
-                                count={counts[c.id] ?? 0}
-                                chips={chipsByCat[c.id] ?? []}
-                                stage={stage}
-                              />
-                            </div>
-                          ))}
-                          <div className="shrink-0 w-2" />
-                        </div>
-                        <div
-                          className="pointer-events-none absolute top-0 bottom-2 right-0 w-6"
-                          style={{ background: "linear-gradient(270deg, #F7F8FA, rgba(247,248,250,0))" }}
-                        />
-                        <div
-                          className="pointer-events-none absolute top-0 bottom-2 left-0 w-8"
-                          style={{ background: "linear-gradient(90deg, #F7F8FA, rgba(247,248,250,0))" }}
-                        />
-                      </div>
-                    )}
-                  </section>
-                );
-              })}
+            {/* === STAGE TIMELINE SECTIONS === */}
+            <div className="px-3 mt-5 space-y-4">
+              {visibleStages.map(({ stage, cats, totalSuppliers }, idx) => (
+                <StageSection
+                  key={stage.id}
+                  stage={stage}
+                  cats={cats}
+                  totalSuppliers={totalSuppliers}
+                  counts={counts}
+                  chipsByCat={chipsByCat}
+                  nudge={idx === 0}
+                />
+              ))}
             </div>
           </>
         )}
@@ -305,23 +260,151 @@ function FilterTile({
       className="flex flex-col items-center justify-center gap-1.5 rounded-[16px] py-2.5 px-1 transition-all active:scale-[0.96]"
       style={
         active
-          ? { background: tint, border: `1px solid ${accent}`, boxShadow: `0 4px 14px -8px ${accent}66` }
+          ? { background: accent, border: `1px solid ${accent}`, boxShadow: `0 6px 16px -8px ${accent}99` }
           : { background: "#FFFFFF", border: `1px solid ${border}` }
       }
     >
       <div
         className="h-8 w-8 rounded-[10px] flex items-center justify-center"
-        style={{ background: active ? "rgba(255,255,255,0.85)" : tint }}
+        style={{ background: active ? "rgba(255,255,255,0.22)" : tint }}
       >
-        <Icon className="h-[16px] w-[16px]" strokeWidth={2.3} style={{ color: accent }} />
+        <Icon className="h-[16px] w-[16px]" strokeWidth={2.3} style={{ color: active ? "#FFFFFF" : accent }} />
       </div>
       <span
         className="text-[11px] font-extrabold leading-tight text-center line-clamp-1"
-        style={{ color: active ? accent : "#0A1F3D" }}
+        style={{ color: active ? "#FFFFFF" : "#0A1F3D" }}
       >
         {label}
       </span>
     </button>
+  );
+}
+
+function StageSection({
+  stage, cats, totalSuppliers, counts, chipsByCat, nudge,
+}: {
+  stage: StageDef;
+  cats: { id: string; name: string; icon: string }[];
+  totalSuppliers: number;
+  counts: Record<string, number>;
+  chipsByCat: Record<string, string[]>;
+  nudge: boolean;
+}) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [scrollIdx, setScrollIdx] = useState(0);
+  const cardWidth = 138 + 10; // w + gap
+
+  useEffect(() => {
+    if (!nudge || !scrollerRef.current) return;
+    const el = scrollerRef.current;
+    const t1 = setTimeout(() => el.scrollBy({ left: -40, behavior: "smooth" }), 450);
+    const t2 = setTimeout(() => el.scrollBy({ left: 40, behavior: "smooth" }), 950);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [nudge]);
+
+  const onScroll = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // RTL: scrollLeft is negative or positive depending on browser; use absolute
+    const offset = Math.abs(el.scrollLeft);
+    setScrollIdx(Math.round(offset / cardWidth));
+  };
+
+  const dotCount = Math.min(cats.length, 6);
+  const activeDot = Math.min(scrollIdx, dotCount - 1);
+
+  return (
+    <section
+      className="rounded-[22px] px-2 py-4"
+      style={{
+        background: `linear-gradient(180deg, ${stage.tint} 0%, ${stage.tint}cc 100%)`,
+        border: `1px solid ${stage.border}80`,
+      }}
+    >
+      {/* Stage heading */}
+      <div className="mb-3 px-3 flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="text-[17px] font-extrabold text-[#0A1F3D] tracking-tight leading-tight">
+            {stage.title}
+          </h3>
+          <p className="mt-1 text-[11.5px] font-bold" style={{ color: stage.accent }}>
+            שלב {stage.index} · {totalSuppliers} ספקים פעילים
+          </p>
+        </div>
+        <div
+          className="h-9 w-9 shrink-0 rounded-[12px] flex items-center justify-center bg-white shadow-[0_3px_8px_-4px_rgba(10,31,61,0.18)]"
+          style={{ border: `1px solid ${stage.border}` }}
+        >
+          <stage.Icon className="h-[18px] w-[18px]" strokeWidth={2.3} style={{ color: stage.accent }} />
+        </div>
+      </div>
+
+      {cats.length === 0 ? (
+        <div className="mx-3 bg-white/70 rounded-[16px] p-4 text-center text-[12px] text-[#6B7280] font-medium border border-white">
+          קטגוריות יתווספו בקרוב
+        </div>
+      ) : (
+        <>
+          <div className="relative">
+            <div
+              ref={scrollerRef}
+              onScroll={onScroll}
+              className="flex gap-2.5 overflow-x-auto px-3 pb-1 pt-1 snap-x no-scrollbar scroll-smooth"
+              style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
+            >
+              {cats.map((c) => (
+                <div key={c.id} className="snap-start shrink-0 w-[138px]">
+                  <CategoryCard
+                    id={c.id}
+                    name={c.name}
+                    icon={c.icon}
+                    count={counts[c.id] ?? 0}
+                    chips={chipsByCat[c.id] ?? []}
+                    stage={stage}
+                  />
+                </div>
+              ))}
+              <div className="shrink-0 w-1" />
+            </div>
+            {/* Edge fades */}
+            <div
+              className="pointer-events-none absolute top-0 bottom-1 right-0 w-5"
+              style={{ background: `linear-gradient(270deg, ${stage.tint}, ${stage.tint}00)` }}
+            />
+            <div
+              className="pointer-events-none absolute top-0 bottom-1 left-0 w-8 flex items-center justify-start pl-1"
+              style={{ background: `linear-gradient(90deg, ${stage.tint}, ${stage.tint}00)` }}
+            >
+              {cats.length > 2 && (
+                <div
+                  className="h-6 w-6 rounded-full bg-white flex items-center justify-center shadow-[0_2px_6px_rgba(10,31,61,0.15)] animate-pulse"
+                  style={{ border: `1px solid ${stage.border}` }}
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.5} style={{ color: stage.accent }} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Scroll dots indicator */}
+          {cats.length > 2 && (
+            <div className="mt-3 flex items-center justify-center gap-1.5">
+              {Array.from({ length: dotCount }).map((_, i) => (
+                <span
+                  key={i}
+                  className="rounded-full transition-all duration-200"
+                  style={{
+                    height: 5,
+                    width: i === activeDot ? 14 : 5,
+                    background: i === activeDot ? stage.accent : `${stage.accent}40`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </section>
   );
 }
 
@@ -347,15 +430,17 @@ function CategoryCard({
           <span>{icon}</span>
         </div>
         {dim ? (
-          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#F4F6FA] text-[#9CA3AF]">
+          <span className="inline-flex items-center gap-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-white/80 text-[#9CA3AF] border border-[#ECEEF2]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#F59E0B]" />
             בקרוב
           </span>
         ) : (
           <span
-            className="text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-white"
+            className="inline-flex items-center gap-1 text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-white"
             style={{ color: stage.accent, border: `1px solid ${stage.border}` }}
           >
-            {count} ספקים
+            <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
+            {count} זמינים
           </span>
         )}
       </div>
@@ -367,13 +452,13 @@ function CategoryCard({
   );
 
   const baseStyle: React.CSSProperties = {
-    background: `linear-gradient(160deg, #FFFFFF 0%, #FFFFFF 40%, ${stage.tint} 100%)`,
-    border: `1px solid ${stage.border}80`,
+    background: "#FFFFFF",
+    border: `1px solid ${stage.border}`,
     boxShadow: dim
       ? "0 1px 3px rgba(10,31,61,0.04)"
-      : "0 4px 14px -8px rgba(10,31,61,0.14), 0 1px 2px rgba(10,31,61,0.04)",
+      : "0 6px 16px -10px rgba(10,31,61,0.16), 0 1px 2px rgba(10,31,61,0.04)",
     height: 110,
-    opacity: dim ? 0.68 : 1,
+    opacity: dim ? 0.62 : 1,
   };
 
   if (dim) {
