@@ -109,13 +109,13 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
             <div className="absolute top-2 right-2 flex flex-wrap items-center gap-1.5">
               {isHot && (
-                <span className="inline-flex items-center gap-0.5 text-fs-xs font-bold px-2 py-1 rounded-full bg-orange-500/95 text-white shadow">
+                <span className="inline-flex items-center gap-0.5 text-fs-xs font-extrabold px-2 py-1 rounded-full bg-[#FFF1E4] text-[#E8742C] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
                   <Flame className="h-3 w-3" strokeWidth={2.5} />
                   HOT
                 </span>
               )}
               {discountBadge && (
-                <span className="text-fs-sm font-extrabold px-2.5 py-1.5 rounded-full bg-gradient-to-r from-gold to-gold-light text-primary shadow-md ring-1 ring-gold/40">
+                <span className="text-fs-sm font-extrabold px-2.5 py-1.5 rounded-full bg-white text-[#0A1F3D] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
                   עד {discountBadge} הנחה
                 </span>
               )}
@@ -144,14 +144,14 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
         <div className="p-5">
         {/* Top row: icon + title + visibility (only badges shown if no cover) */}
         <div className="flex items-start gap-3 mb-3 relative">
-          <div className="h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-gold/25 to-gold/5 border border-gold/30 flex items-center justify-center shadow-[inset_0_1px_0_hsl(0_0%_100%_/_0.5)]">
-            <TagIcon className="h-5 w-5 text-gold" strokeWidth={2} />
+          <div className="h-12 w-12 shrink-0 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]">
+            <TagIcon className="h-5 w-5 text-[#D4AF37]" strokeWidth={2} />
           </div>
           <div className="flex-1 min-w-0">
             {!cover && (
               <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
                 {isHot && (
-                  <span className="inline-flex items-center gap-0.5 text-fs-xs font-bold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-700 border border-orange-500/30">
+                    <span className="inline-flex items-center gap-0.5 text-fs-xs font-extrabold px-1.5 py-0.5 rounded-full bg-[#FFF1E4] text-[#E8742C] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
                     <Flame className="h-2.5 w-2.5" strokeWidth={2.5} />
                     HOT
                   </span>
@@ -172,7 +172,7 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
             <h3 className="font-bold text-fs-base text-foreground leading-snug truncate">{deal.title}</h3>
             {deal.supplier_name && (
               <p className="text-fs-xs text-muted-foreground mt-0.5 inline-flex items-center gap-1 truncate">
-                <ShieldCheck className="h-3 w-3 text-gold shrink-0" strokeWidth={2.5} />
+                <ShieldCheck className="h-3 w-3 text-[#D4AF37] shrink-0" strokeWidth={2.5} />
                 <span className="truncate">{deal.supplier_name}</span>
               </p>
             )}
@@ -197,7 +197,7 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
               ) : null}
             </div>
             {tiers.length > 0 && (
-              <span className="text-fs-xs font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-gold/25 to-gold/10 text-primary border border-gold/30 shrink-0">
+              <span className="text-fs-xs font-extrabold px-2.5 py-1 rounded-full bg-[#F4F6FA] text-[#0A1F3D] shadow-[0_1px_3px_rgba(10,31,61,0.06)] shrink-0">
                 {tiers.length} מדרגות
               </span>
             )}
