@@ -74,7 +74,7 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
   );
 
   return (
-    <div className="rounded-3xl bg-card border border-border/60 p-6 space-y-5 shadow-soft">
+    <div className="rounded-[20px] bg-white p-6 space-y-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-fs-xs uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">
@@ -87,16 +87,16 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
             </div>
           )}
         </div>
-        <span className={`text-fs-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
-          isRedeemed ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20"
-          : isExpired ? "bg-muted text-muted-foreground border border-border"
-          : "bg-gold/15 text-amber-700 border border-gold/30"
+        <span className={`text-fs-xs font-extrabold px-2.5 py-1 rounded-full whitespace-nowrap shadow-[0_1px_3px_rgba(10,31,61,0.06)] ${
+          isRedeemed ? "bg-[#E8F7EC] text-[#2EA85A]"
+          : isExpired ? "bg-[#F4F6FA] text-[#6B7280]"
+          : "bg-white text-[#0A1F3D]"
         }`}>
           {STATUS_LABEL[voucher.status] ?? voucher.status}
         </span>
       </div>
 
-      <div className="rounded-2xl bg-primary text-primary-foreground p-4 space-y-3">
+      <div className="rounded-[20px] bg-[#0A1F3D] text-white p-4 space-y-3 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-fs-xs text-primary-foreground/65">מחיר רגיל</div>
@@ -104,17 +104,17 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
           </div>
           <div className="text-left">
             <div className="text-fs-xs text-primary-foreground/65">מחיר הטבה</div>
-            <div className="text-2xl font-extrabold gb-gold-text leading-none">{formatIls(benefitPrice)}</div>
+            <div className="text-2xl font-extrabold text-[#D4AF37] leading-none">{formatIls(benefitPrice)}</div>
           </div>
         </div>
-        <div className="rounded-xl bg-primary-foreground/10 border border-primary-foreground/15 px-3 py-2 flex items-center justify-between gap-2">
+        <div className="rounded-[16px] bg-white/10 px-3 py-2 flex items-center justify-between gap-2">
           <span className="text-fs-xs text-primary-foreground/70 inline-flex items-center gap-1"><ReceiptText className="h-3 w-3" /> גובה החיסכון</span>
           <span className="font-bold text-primary-foreground">{formatIls(savings)}</span>
         </div>
       </div>
 
       {!isRedeemed && !isExpired ? (
-        <div className="bg-white rounded-2xl p-5 flex flex-col items-center gap-3 border border-border">
+        <div className="bg-white rounded-[20px] p-5 flex flex-col items-center gap-3 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
           <QRCodeSVG value={buildQrPayload(voucher, tick)} size={200} level="M" includeMargin={false} />
           <div className="flex items-center gap-1.5 text-fs-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
@@ -122,7 +122,7 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
           </div>
         </div>
       ) : (
-        <div className="bg-muted/40 rounded-2xl p-8 flex flex-col items-center gap-2 border border-border">
+        <div className="bg-[#F4F6FA] rounded-[20px] p-8 flex flex-col items-center gap-2">
           <CheckCircle2 className={`h-12 w-12 ${isRedeemed ? "text-emerald-600" : "text-muted-foreground"}`} />
           <p className="font-semibold text-foreground">
             {isRedeemed ? "השובר מומש" : "השובר פג תוקף"}
@@ -136,13 +136,13 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
       )}
 
       <div className="grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-xl bg-muted/30 border border-border p-3">
+        <div className="rounded-[16px] bg-[#F4F6FA] p-3">
           <div className="text-fs-xs uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
             <ShieldCheck className="h-3 w-3" /> קוד מימוש
           </div>
           <div className="font-mono font-bold text-base tracking-wider text-foreground">{voucher.code}</div>
         </div>
-        <div className="rounded-xl bg-muted/30 border border-border p-3">
+        <div className="rounded-[16px] bg-[#F4F6FA] p-3">
           <div className="text-fs-xs uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
             <Hash className="h-3 w-3" /> אסמכתא
           </div>
