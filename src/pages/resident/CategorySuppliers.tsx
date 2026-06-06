@@ -215,29 +215,29 @@ export default function CategorySuppliers() {
   return (
     <MobileShell>
       {/* Luxury hero */}
-      <header className="bg-[#F4F6FA] text-primary-foreground px-6 pt-9 pb-16 rounded-b-[28px] relative overflow-hidden">
+      <header className="bg-white text-[#0A1F3D] px-6 pt-9 pb-16 rounded-b-[28px] relative overflow-hidden">
         <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-gold/5 blur-3xl pointer-events-none" />
 
         <button
           onClick={() => navigate(-1)}
-          className="relative inline-flex items-center gap-1 text-fs-xs text-primary-foreground/70 hover:text-gold transition-smooth mb-5"
+          className="relative inline-flex items-center gap-1 text-fs-xs text-[#6B7280] hover:text-gold transition-smooth mb-5"
         >
           <ArrowRight className="h-3.5 w-3.5" />
           חזרה לתחומים
         </button>
 
         <div className="relative animate-fade-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/8 border border-white/12 mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F4F6FA] border border-[#ECEEF2] mb-4">
             <Sparkles className="h-3.5 w-3.5 text-gold" />
-            <span className="text-fs-xs font-medium text-primary-foreground/90">
+            <span className="text-fs-xs font-medium text-[#0A1F3D]/85">
               {filteredSuppliers.length} ספקים זמינים · {areaLabel}
             </span>
           </div>
 
           <div className="flex items-center gap-3 mb-3">
             {activeCategory?.icon && (
-              <div className="h-12 w-12 rounded-2xl bg-white/8 border border-gold/20 flex items-center justify-center text-2xl shadow-soft">
+              <div className="h-12 w-12 rounded-2xl bg-[#F4F6FA] border border-gold/20 flex items-center justify-center text-2xl shadow-soft">
                 {activeCategory.icon}
               </div>
             )}
@@ -245,7 +245,7 @@ export default function CategorySuppliers() {
               <h1 className="text-fs-xl leading-[1.15] font-extrabold">
                 <span className="gb-gold-text">{activeCategory?.name ?? "ספקים"}</span>
               </h1>
-              <p className="text-primary-foreground/65 text-fs-xs mt-0.5">ספקים מובילים בתחום</p>
+              <p className="text-[#0A1F3D]/65 text-fs-xs mt-0.5">ספקים מובילים בתחום</p>
             </div>
           </div>
           <div className="gb-divider-gold" />
