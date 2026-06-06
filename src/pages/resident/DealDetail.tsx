@@ -893,7 +893,7 @@ export default function DealDetail() {
             <Button
               onClick={submitJoin}
               disabled={!acceptedTerms || submittingInterest}
-              className="rounded-xl bg-gradient-gold text-primary font-bold"
+              className="rounded-xl bg-[#0A1F3D] text-white font-bold"
             >
               {submittingInterest ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

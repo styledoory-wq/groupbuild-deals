@@ -215,7 +215,7 @@ export default function CategorySuppliers() {
   return (
     <MobileShell>
       {/* Luxury hero */}
-      <header className="bg-gradient-hero text-primary-foreground px-6 pt-9 pb-16 rounded-b-[28px] relative overflow-hidden">
+      <header className="bg-[#F4F6FA] text-primary-foreground px-6 pt-9 pb-16 rounded-b-[28px] relative overflow-hidden">
         <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-gold/5 blur-3xl pointer-events-none" />
 
@@ -344,7 +344,7 @@ export default function CategorySuppliers() {
             <button
               type="button"
               onClick={() => { setRegionId("all"); setCityId("all"); }}
-              className="mt-4 h-10 px-4 rounded-xl bg-gradient-gold text-primary text-xs font-bold shadow-gold"
+              className="mt-4 h-10 px-4 rounded-xl bg-[#0A1F3D] text-white text-xs font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
             >
               שנה אזור
             </button>

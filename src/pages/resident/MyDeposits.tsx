@@ -137,7 +137,7 @@ export default function MyDeposits() {
           </button>
         )}
         <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-2xl bg-gradient-hero flex items-center justify-center text-xl shrink-0">🛒</div>
+          <div className="h-12 w-12 rounded-2xl bg-[#F4F6FA] flex items-center justify-center text-xl shrink-0">🛒</div>
           <div className="flex-1 min-w-0">
             <div className={"font-bold text-sm truncate " + (dealMissing ? "text-muted-foreground italic" : "")}>{dealTitle}</div>
             <div className="text-fs-xs text-muted-foreground">
