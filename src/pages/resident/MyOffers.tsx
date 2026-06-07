@@ -49,6 +49,7 @@ type DealRow = {
   id: string;
   title: string;
   status: string;
+  auto_closed_at: string | null;
   offer_type: string | null;
   original_price: number | null;
   discounted_price: number | null;
@@ -123,7 +124,7 @@ export default function MyOffers() {
       if (dealIds.length) {
         const { data: deals } = await supabase
           .from("deals")
-          .select("id,title,status,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers")
+          .select("id,title,status,auto_closed_at,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers")
           .in("id", dealIds);
         (deals ?? []).forEach((d) => { dealsMap[(d as DealRow).id] = d as DealRow; });
       }
@@ -190,12 +191,12 @@ export default function MyOffers() {
     toast.success(hide ? "הוסתר מהארכיון שלך" : "הוחזר לתצוגה");
   };
 
-  const isUnavailable = (it: { deal: DealRow | null }) => !it.deal || it.deal.status !== "active";
+  const isArchived = (it: { deal: DealRow | null }) => !it.deal || it.deal.status !== "active" || Boolean(it.deal.auto_closed_at);
   const visibleItems = items.filter((it) => {
-    if (isUnavailable(it)) return false;
-    return showHidden ? isHidden(it) : !isHidden(it);
+    const archived = isArchived(it) || isHidden(it);
+    return showHidden ? archived : !archived;
   });
-  const hiddenCount = items.filter((it) => !isUnavailable(it) && isHidden(it)).length;
+  const hiddenCount = items.filter((it) => isArchived(it) || isHidden(it)).length;
 
   return (
     <MobileShell>
