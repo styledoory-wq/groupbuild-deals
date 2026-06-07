@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck, Pencil, TrendingDown, Sparkles, Clock, CheckCircle2, XCircle, PauseCircle } from "lucide-react";
+import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck, Pencil, Wallet, Sparkles, Clock, CheckCircle2, XCircle, PauseCircle, Users } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -58,6 +58,11 @@ const statusBadge = (status: string) => {
   }
 };
 
+function extractPriceNum(headline: string): number {
+  const m = headline.replace(/,/g, "").match(/[\d.]+/);
+  return m ? parseFloat(m[0]) : 0;
+}
+
 export default function SupplierOffers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,18 +116,19 @@ export default function SupplierOffers() {
   }, [supplierId, loadDeals]);
 
   const activeDeals = deals.filter((d) => d.status === "active").length;
-  const totalSavings = deals.reduce((sum, d) => {
-    const display = describeOffer({
-      offer_type: ((d.offer_type as OfferType | null) ?? "percentage") as OfferType,
-      original_price: d.original_price,
-      discounted_price: d.discounted_price,
-      discount_percentage: d.discount_percentage,
-      base_price: d.base_price,
-      tiers: Array.isArray(d.tiers) ? d.tiers : [],
+  const potentialIncome = deals
+    .filter((d) => d.status === "active")
+    .reduce((sum, d) => {
+      const display = describeOffer({
+        offer_type: ((d.offer_type as OfferType | null) ?? "percentage") as OfferType,
+        original_price: d.original_price,
+        discounted_price: d.discounted_price,
+        discount_percentage: d.discount_percentage,
+        base_price: d.base_price,
+        tiers: Array.isArray(d.tiers) ? d.tiers : [],
+      }, 0);
+      return sum + extractPriceNum(display.headline);
     }, 0);
-    const match = display.savings?.match(/[\d,.]+/);
-    return sum + (match ? parseFloat(match[0].replace(/,/g, "")) : 0);
-  }, 0);
 
   return (
     <MobileShell>
@@ -150,15 +156,15 @@ export default function SupplierOffers() {
               </div>
               <div className="text-2xl font-extrabold">{activeDeals}</div>
             </div>
-            <div className="flex-1 rounded-[16px] bg-gradient-to-br from-[#ECFDF5] to-[#D1FAE5] p-4 border border-[#A7F3D0] shadow-[0_8px_24px_-10px_rgba(6,95,46,0.15)]">
+            <div className="flex-1 rounded-[16px] bg-gradient-to-br from-[#FFFBEB] to-[#FEF3C7] p-4 border border-[#FDE68A] shadow-[0_8px_24px_-10px_rgba(146,64,14,0.12)]">
               <div className="flex items-center gap-2 mb-1">
-                <div className="h-7 w-7 rounded-full bg-[#065F46]/10 flex items-center justify-center">
-                  <TrendingDown className="h-3.5 w-3.5 text-[#065F46]" />
+                <div className="h-7 w-7 rounded-full bg-[#92400E]/10 flex items-center justify-center">
+                  <Wallet className="h-3.5 w-3.5 text-[#92400E]" />
                 </div>
-                <span className="text-xs font-medium text-[#065F46]/80">חיסכון כולל</span>
+                <span className="text-xs font-medium text-[#92400E]/80">פוטנציאל הכנסה</span>
               </div>
-              <div className="text-2xl font-extrabold text-[#065F46]">
-                ₪{totalSavings.toLocaleString("he-IL")}
+              <div className="text-2xl font-extrabold text-[#92400E]">
+                ₪{potentialIncome.toLocaleString("he-IL")}
               </div>
             </div>
           </div>
@@ -209,21 +215,17 @@ export default function SupplierOffers() {
             tiers,
           }, 0);
           const badge = statusBadge(d.status);
+          const currentTier = hasTiers ? describeTier(offerType, tiers[0]) : null;
           return (
             <div
               key={d.id}
-              className="rounded-[20px] bg-gradient-to-br from-white to-[#FAFBFC] border border-[#ECEEF2] p-5 shadow-[0_2px_12px_-4px_rgba(10,31,61,0.08)] hover:shadow-[0_8px_28px_-10px_rgba(10,31,61,0.14)] hover:-translate-y-0.5 transition-all duration-300"
+              className="rounded-[20px] bg-white border border-[#ECEEF2] p-5 shadow-[0_2px_12px_-4px_rgba(10,31,61,0.06)] hover:shadow-[0_8px_28px_-10px_rgba(10,31,61,0.12)] hover:-translate-y-0.5 transition-all duration-300"
             >
-              {/* Header: Title + Status + Actions */}
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-[15px] truncate leading-snug mb-1">{d.title}</h3>
-                  <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
-                    <ShieldCheck className="h-3 w-3 text-[#D4AF37]" /> ספק מאומת
-                  </p>
-                </div>
+              {/* Row 1: Title + Status + Actions */}
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <h3 className="font-bold text-[15px] truncate leading-snug flex-1 min-w-0">{d.title}</h3>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full border whitespace-nowrap ${badge.class}`}>
+                  <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full border whitespace-nowrap ${badge.class}`}>
                     {badge.icon}
                     {badge.label}
                   </span>
@@ -231,63 +233,40 @@ export default function SupplierOffers() {
                 </div>
               </div>
 
-              {/* Pricing Block */}
-              <div className="rounded-[16px] bg-[#F4F6FA] border border-[#ECEEF2] p-4 mb-4">
-                <div className="flex items-baseline gap-2 mb-1">
-                  {d.original_price && d.discounted_price && (
-                    <span className="text-sm text-muted-foreground line-through">
+              {/* Row 2: Big Price */}
+              <div className="mb-4">
+                <div className="flex items-baseline gap-2">
+                  {d.original_price && (
+                    <span className="text-sm text-[#9CA3AF] line-through">
                       ₪{d.original_price.toLocaleString("he-IL")}
                     </span>
                   )}
-                  <span className="text-xl font-extrabold text-[#0A1F3D]">
+                  <span className="text-2xl font-extrabold text-[#0A1F3D]">
                     {display.headline}
                   </span>
                 </div>
-                {display.savings && (
-                  <div className="inline-flex items-center gap-1.5 text-sm font-bold text-[#065F46] bg-[#ECFDF5] px-3 py-1.5 rounded-full mt-1">
-                    <TrendingDown className="h-4 w-4" />
-                    {display.savings}
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground mt-2.5">
-                  ככל שיותר דיירים מצטרפים — ההנחה גדלה
-                </p>
               </div>
 
-              {/* Tiers Table */}
-              {hasTiers && (
-                <div className="rounded-[16px] border border-[#ECEEF2] bg-white overflow-hidden mb-4">
-                  <div className="grid grid-cols-2 gap-1 px-4 py-2.5 bg-[#F4F6FA] text-xs font-bold text-[#6B7280]">
-                    <span>מצטרפים</span>
-                    <span className="text-left">הנחה</span>
+              {/* Row 3: Participants info (if tiers) */}
+              {hasTiers && currentTier && (
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#065F46] bg-[#ECFDF5] px-3 py-1.5 rounded-full">
+                    <Users className="h-3.5 w-3.5" />
+                    {tierRange(tiers[0])} מצטרפים — {currentTier.headline}
                   </div>
-                  {tiers.map((t, idx) => {
-                    const td = describeTier(offerType, t);
-                    const isFirst = idx === 0;
-                    return (
-                      <div
-                        key={idx}
-                        className={`grid grid-cols-2 gap-1 px-4 py-2.5 text-xs border-t border-[#ECEEF2] ${
-                          isFirst ? "bg-[#FAFBFC]" : ""
-                        }`}
-                      >
-                        <span className="font-medium text-[#0A1F3D]">{tierRange(t)}</span>
-                        <span className="text-left font-bold text-[#0A1F3D]">{td.headline}</span>
-                      </div>
-                    );
-                  })}
                 </div>
               )}
 
-              {/* Footer: Edit + Date */}
+              {/* Row 4: Bottom row — Edit + Date */}
               <div className="flex items-center justify-between pt-3 border-t border-[#ECEEF2]">
                 <Link
                   to={`/supplier/offers/${d.id}/marketing`}
-                  className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-[12px] bg-[#0A1F3D] text-white hover:bg-[#0A1F3D]/90 transition-colors shadow-[0_4px_12px_-4px_rgba(10,31,61,0.3)]"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-[#0A1F3D] text-white hover:bg-[#0A1F3D]/90 transition-colors"
                 >
-                  <Pencil className="h-3.5 w-3.5" /> עריכה שיווקית
+                  <Pencil className="h-3 w-3" /> עריכה
                 </Link>
-                <div className="text-xs text-[#9CA3AF] font-medium">
+                <div className="flex items-center gap-1.5 text-xs text-[#9CA3AF]">
+                  <Clock className="h-3 w-3" />
                   {new Date(d.created_at).toLocaleDateString("he-IL")}
                 </div>
               </div>
