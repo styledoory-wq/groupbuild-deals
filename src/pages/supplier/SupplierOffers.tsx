@@ -282,15 +282,32 @@ export default function SupplierOffers() {
                 </div>
               </div>
 
-              {/* Row 3: Participants info (if tiers) */}
-              {hasTiers && currentTier && (
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#065F46] bg-[#ECFDF5] px-3 py-1.5 rounded-full">
-                    <Users className="h-3.5 w-3.5" />
-                    {tierRange(tiers[0])} מצטרפים — {currentTier.headline}
+              {/* Row 3: Income (closed = generated, active = potential) */}
+              {showIncome && (
+                <div className={`flex items-center justify-between gap-2 mb-3 px-3 py-2.5 rounded-[12px] border ${incomeClass}`}>
+                  <div className="inline-flex items-center gap-1.5 text-xs font-semibold">
+                    {incomeIcon}
+                    {incomeLabel}
+                  </div>
+                  <div className="text-sm font-extrabold">
+                    ₪{incomeAmount.toLocaleString("he-IL")}
                   </div>
                 </div>
               )}
+
+              {/* Row 4: Participants */}
+              <div className="flex items-center gap-2 mb-4 flex-wrap">
+                <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#0A1F3D] bg-[#EFF6FF] px-3 py-1.5 rounded-full">
+                  <Users className="h-3.5 w-3.5" />
+                  {participants} {participants === 1 ? "מצטרף" : "מצטרפים"}
+                </div>
+                {hasTiers && currentTier && (
+                  <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#065F46] bg-[#ECFDF5] px-3 py-1.5 rounded-full">
+                    יעד {tierRange(tiers[0])} — {currentTier.headline}
+                  </div>
+                )}
+              </div>
+
 
               {/* Row 4: Bottom row — Edit + Date */}
               <div className="flex items-center justify-between pt-3 border-t border-[#ECEEF2]">
