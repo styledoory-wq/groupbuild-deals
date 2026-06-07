@@ -43,12 +43,11 @@ export class AppErrorBoundary extends Component<{ children: ReactNode }, State> 
         url.searchParams.delete("__lovable_load_id");
         url.searchParams.set("_r", Date.now().toString());
         // Best-effort: clear caches before reload to avoid serving stale chunks again.
-        if ("caches" in window) {
-          caches.keys().then((names) => Promise.all(names.map((n) => caches.delete(n)))).finally(() => {
-            window.location.replace(url.toString());
-          });
+        const doReload = () => window.location.replace(url.toString());
+        if (typeof caches !== "undefined") {
+          caches.keys().then((names) => Promise.all(names.map((n) => caches.delete(n)))).finally(doReload);
         } else {
-          window.location.replace(url.toString());
+          doReload();
         }
       }
     }
