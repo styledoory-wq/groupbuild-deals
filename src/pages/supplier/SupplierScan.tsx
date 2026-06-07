@@ -121,11 +121,14 @@ export default function SupplierScan() {
     if (!supplier) { setResult({ kind: "error", message: "לא נמצא פרופיל ספק מחובר" }); return; }
     const { data, error } = await supabase
       .from("vouchers")
-      .select("id, code, reference_number, status, deal_id, profiles:user_id(full_name, project_id)")
-      .eq("code", code)
-      .eq("supplier_id", supplier.id)
+      .select("id, code, reference_number, status, deal_id, supplier_id, profiles:user_id(full_name, project_id)")
+      .ilike("code", code)
       .maybeSingle();
     if (error || !data) { setResult({ kind: "error", message: "שובר לא נמצא" }); return; }
+    if ((data as { supplier_id?: string }).supplier_id !== supplier.id) {
+      setResult({ kind: "error", message: "השובר אינו שייך לעסק זה" });
+      return;
+    }
     if (data.status === "redeemed") { setResult({ kind: "error", message: "השובר כבר מומש" }); return; }
     if (data.status === "expired") { setResult({ kind: "error", message: "השובר פג תוקף" }); return; }
     const raw = data as unknown as RawVoucherInfo;
