@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck, Pencil, Wallet, Sparkles, Clock, CheckCircle2, XCircle, PauseCircle, Users } from "lucide-react";
+import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck, Pencil, Wallet, Sparkles, Clock, CheckCircle2, XCircle, PauseCircle, Users, TrendingUp, Coins } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -68,6 +68,7 @@ export default function SupplierOffers() {
   const [error, setError] = useState<string | null>(null);
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [deals, setDeals] = useState<DealRow[]>([]);
+  const [participantsByDeal, setParticipantsByDeal] = useState<Record<string, number>>({});
 
   const loadDeals = useCallback(async (sid: string) => {
     const { data, error: dErr } = await supabase
@@ -77,7 +78,24 @@ export default function SupplierOffers() {
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
     if (dErr) throw dErr;
-    setDeals(((data ?? []) as unknown) as DealRow[]);
+    const rows = ((data ?? []) as unknown) as DealRow[];
+    setDeals(rows);
+
+    const ids = rows.map((r) => r.id);
+    if (ids.length > 0) {
+      const { data: interests } = await supabase
+        .from("deal_interests")
+        .select("deal_id")
+        .in("deal_id", ids)
+        .eq("is_deleted", false);
+      const counts: Record<string, number> = {};
+      (interests ?? []).forEach((row: { deal_id: string }) => {
+        counts[row.deal_id] = (counts[row.deal_id] ?? 0) + 1;
+      });
+      setParticipantsByDeal(counts);
+    } else {
+      setParticipantsByDeal({});
+    }
   }, []);
 
   useEffect(() => {
@@ -115,20 +133,26 @@ export default function SupplierOffers() {
     if (supplierId) loadDeals(supplierId).catch((e) => console.error(e));
   }, [supplierId, loadDeals]);
 
+  const unitPriceForDeal = (d: DealRow): number => {
+    const display = describeOffer({
+      offer_type: ((d.offer_type as OfferType | null) ?? "percentage") as OfferType,
+      original_price: d.original_price,
+      discounted_price: d.discounted_price,
+      discount_percentage: d.discount_percentage,
+      base_price: d.base_price,
+      tiers: Array.isArray(d.tiers) ? d.tiers : [],
+    }, 0);
+    return extractPriceNum(display.headline);
+  };
+
   const activeDeals = deals.filter((d) => d.status === "active").length;
   const potentialIncome = deals
     .filter((d) => d.status === "active")
-    .reduce((sum, d) => {
-      const display = describeOffer({
-        offer_type: ((d.offer_type as OfferType | null) ?? "percentage") as OfferType,
-        original_price: d.original_price,
-        discounted_price: d.discounted_price,
-        discount_percentage: d.discount_percentage,
-        base_price: d.base_price,
-        tiers: Array.isArray(d.tiers) ? d.tiers : [],
-      }, 0);
-      return sum + extractPriceNum(display.headline);
-    }, 0);
+    .reduce((sum, d) => sum + unitPriceForDeal(d) * (participantsByDeal[d.id] ?? 0), 0);
+  const generatedIncome = deals
+    .filter((d) => d.status === "closed")
+    .reduce((sum, d) => sum + unitPriceForDeal(d) * (participantsByDeal[d.id] ?? 0), 0);
+
 
   return (
     <MobileShell>
@@ -161,10 +185,12 @@ export default function SupplierOffers() {
                 <div className="h-7 w-7 rounded-full bg-[#92400E]/10 flex items-center justify-center">
                   <Wallet className="h-3.5 w-3.5 text-[#92400E]" />
                 </div>
-                <span className="text-xs font-medium text-[#92400E]/80">פוטנציאל הכנסה</span>
+                <span className="text-xs font-medium text-[#92400E]/80">
+                  {activeDeals > 0 ? "פוטנציאל הכנסה" : "הכנסה שנוצרה"}
+                </span>
               </div>
               <div className="text-2xl font-extrabold text-[#92400E]">
-                ₪{potentialIncome.toLocaleString("he-IL")}
+                ₪{(activeDeals > 0 ? potentialIncome : generatedIncome).toLocaleString("he-IL")}
               </div>
             </div>
           </div>
@@ -216,6 +242,17 @@ export default function SupplierOffers() {
           }, 0);
           const badge = statusBadge(d.status);
           const currentTier = hasTiers ? describeTier(offerType, tiers[0]) : null;
+          const participants = participantsByDeal[d.id] ?? 0;
+          const unitPrice = extractPriceNum(display.headline);
+          const isClosed = d.status === "closed";
+          const isActive = d.status === "active";
+          const incomeAmount = unitPrice * participants;
+          const showIncome = (isClosed || isActive) && participants > 0;
+          const incomeLabel = isClosed ? "הכנסה שנוצרה" : "פוטנציאל הכנסה";
+          const incomeIcon = isClosed ? <Coins className="h-3.5 w-3.5" /> : <TrendingUp className="h-3.5 w-3.5" />;
+          const incomeClass = isClosed
+            ? "text-[#065F46] bg-[#ECFDF5] border-[#A7F3D0]"
+            : "text-[#92400E] bg-[#FFFBEB] border-[#FDE68A]";
           return (
             <div
               key={d.id}
@@ -247,15 +284,32 @@ export default function SupplierOffers() {
                 </div>
               </div>
 
-              {/* Row 3: Participants info (if tiers) */}
-              {hasTiers && currentTier && (
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#065F46] bg-[#ECFDF5] px-3 py-1.5 rounded-full">
-                    <Users className="h-3.5 w-3.5" />
-                    {tierRange(tiers[0])} מצטרפים — {currentTier.headline}
+              {/* Row 3: Income (closed = generated, active = potential) */}
+              {showIncome && (
+                <div className={`flex items-center justify-between gap-2 mb-3 px-3 py-2.5 rounded-[12px] border ${incomeClass}`}>
+                  <div className="inline-flex items-center gap-1.5 text-xs font-semibold">
+                    {incomeIcon}
+                    {incomeLabel}
+                  </div>
+                  <div className="text-sm font-extrabold">
+                    ₪{incomeAmount.toLocaleString("he-IL")}
                   </div>
                 </div>
               )}
+
+              {/* Row 4: Participants */}
+              <div className="flex items-center gap-2 mb-4 flex-wrap">
+                <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#0A1F3D] bg-[#EFF6FF] px-3 py-1.5 rounded-full">
+                  <Users className="h-3.5 w-3.5" />
+                  {participants} {participants === 1 ? "מצטרף" : "מצטרפים"}
+                </div>
+                {hasTiers && currentTier && (
+                  <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#065F46] bg-[#ECFDF5] px-3 py-1.5 rounded-full">
+                    יעד {tierRange(tiers[0])} — {currentTier.headline}
+                  </div>
+                )}
+              </div>
+
 
               {/* Row 4: Bottom row — Edit + Date */}
               <div className="flex items-center justify-between pt-3 border-t border-[#ECEEF2]">
