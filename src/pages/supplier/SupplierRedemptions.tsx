@@ -16,7 +16,7 @@ type Row = {
   profiles?: { full_name: string | null; project_id: string | null } | null;
 };
 
-type RawVoucherRow = Omit<Row, "deals">;
+type RawVoucherRow = Omit<Row, "deals" | "profiles">;
 
 const STATUSES = ["eligible","appointment","measured","ordered","installed","completed","redeemed"] as const;
 const STATUS_LABEL: Record<string, string> = {
@@ -34,18 +34,30 @@ export default function SupplierRedemptions() {
     (async () => {
       const { supplier } = await getCurrentSupplier<{ id: string }>("id");
       if (!supplier) { setLoading(false); return; }
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("vouchers")
-        .select("id, code, status, reference_number, user_id, deal_id, redeemed_at, profiles:user_id(full_name, project_id)")
+        .select("id, code, status, reference_number, user_id, deal_id, redeemed_at")
         .eq("supplier_id", supplier.id)
         .order("created_at", { ascending: false });
-      const rawRows = (data ?? []) as unknown as RawVoucherRow[];
+      if (error) { console.error("vouchers fetch error", error); toast.error("שגיאה בטעינת מימושים"); setLoading(false); return; }
+      const rawRows = (data ?? []) as RawVoucherRow[];
       const dealIds = Array.from(new Set(rawRows.map((r) => r.deal_id).filter(Boolean)));
-      const { data: deals } = dealIds.length
-        ? await supabase.from("deals").select("id, title, discounted_price, original_price").in("id", dealIds)
-        : { data: [] };
-      const dealsById = new Map((deals ?? []).map((d) => [String(d.id), d]));
-      setRows(rawRows.map((r) => ({ ...r, deals: dealsById.get(r.deal_id) ?? null })));
+      const userIds = Array.from(new Set(rawRows.map((r) => r.user_id).filter(Boolean)));
+      const [dealsRes, profilesRes] = await Promise.all([
+        dealIds.length
+          ? supabase.from("deals").select("id, title, discounted_price, original_price").in("id", dealIds)
+          : Promise.resolve({ data: [] as any[] } as any),
+        userIds.length
+          ? supabase.from("profiles").select("id, full_name, project_id").in("id", userIds)
+          : Promise.resolve({ data: [] as any[] } as any),
+      ]);
+      const dealsById = new Map(((dealsRes.data ?? []) as any[]).map((d) => [String(d.id), d]));
+      const profilesById = new Map(((profilesRes.data ?? []) as any[]).map((p) => [String(p.id), p]));
+      setRows(rawRows.map((r) => ({
+        ...r,
+        deals: dealsById.get(r.deal_id) ?? null,
+        profiles: profilesById.get(r.user_id) ?? null,
+      })));
       setLoading(false);
     })();
   }, []);
