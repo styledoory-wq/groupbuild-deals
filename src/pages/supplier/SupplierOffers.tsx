@@ -253,16 +253,7 @@ export default function SupplierOffers() {
           const badge = statusBadge(d.status);
           const currentTier = hasTiers ? describeTier(offerType, tiers[0]) : null;
           const participants = participantsByDeal[d.id] ?? 0;
-          const unitPrice = extractPriceNum(display.headline);
-          const isClosed = d.status === "closed";
-          const isActive = d.status === "active";
-          const incomeAmount = unitPrice * participants;
-          const showIncome = (isClosed || isActive) && participants > 0;
-          const incomeLabel = isClosed ? "הכנסה שנוצרה" : "פוטנציאל הכנסה";
-          const incomeIcon = isClosed ? <Coins className="h-3.5 w-3.5" /> : <TrendingUp className="h-3.5 w-3.5" />;
-          const incomeClass = isClosed
-            ? "text-[#065F46] bg-[#ECFDF5] border-[#A7F3D0]"
-            : "text-[#92400E] bg-[#FFFBEB] border-[#FDE68A]";
+
           return (
             <div
               key={d.id}
