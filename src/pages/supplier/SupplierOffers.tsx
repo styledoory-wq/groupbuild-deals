@@ -294,18 +294,6 @@ export default function SupplierOffers() {
                 </div>
               </div>
 
-              {/* Row 3: Income (closed = generated, active = potential) */}
-              {showIncome && (
-                <div className={`flex items-center justify-between gap-2 mb-3 px-3 py-2.5 rounded-[12px] border ${incomeClass}`}>
-                  <div className="inline-flex items-center gap-1.5 text-xs font-semibold">
-                    {incomeIcon}
-                    {incomeLabel}
-                  </div>
-                  <div className="text-sm font-extrabold">
-                    ₪{incomeAmount.toLocaleString("he-IL")}
-                  </div>
-                </div>
-              )}
 
               {/* Row 4: Participants */}
               <div className="flex items-center gap-2 mb-4 flex-wrap">
