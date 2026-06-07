@@ -747,7 +747,7 @@ export default function DealDetail() {
               <Button
                 onClick={handleJoinClick}
                 disabled={submittingInterest}
-                className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-extrabold text-fs-base hover:bg-primary/90"
+                className="w-full h-16 rounded-2xl bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white font-extrabold text-base shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border-2 border-[#D4AF37]/30"
               >
                 {submittingInterest ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -759,6 +759,7 @@ export default function DealDetail() {
                   "הצטרף להצעה"
                 )}
               </Button>
+
               {/* Secondary outline actions */}
               <SecondaryActions deal={deal} supplier={supplier} />
             </div>
@@ -946,65 +947,110 @@ function SecondaryActions({
 }) {
   const wa = supplier ? normalizeWhatsappUrl(supplier.whatsapp_url || supplier.phone) : null;
   const tel = supplier?.phone ? `tel:${supplier.phone.replace(/\s+/g, "")}` : null;
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const shareUrl = `${window.location.origin}/share/deal/${deal.id}`;
+  const shareText = `מצטרפים יחד למחיר משתלם: ${deal.title}\n${shareUrl}`;
 
   const handleInvite = async () => {
-    const url = `${window.location.origin}/share/deal/${deal.id}`;
-    const shareData = { title: deal.title, text: `מצטרפים יחד למחיר משתלם: ${deal.title}`, url };
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title: deal.title, text: `מצטרפים יחד למחיר משתלם: ${deal.title}`, url: shareUrl });
+        return;
+      } catch (err) {
+        if ((err as Error)?.name === "AbortError") return;
+      }
+    }
+    setShareOpen(true);
+  };
+
+  const copyLink = async () => {
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(url);
-        toast.success("הקישור הועתק", { description: "אפשר לשתף עם השכנים" });
-      }
-    } catch (err) {
-      if ((err as Error)?.name !== "AbortError") {
-        try {
-          await navigator.clipboard.writeText(url);
-          toast.success("הקישור הועתק", { description: "אפשר לשתף עם השכנים" });
-        } catch { /* ignore */ }
-      }
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("הקישור הועתק", { description: "אפשר להדביק ולשלוח לשכנים" });
+      setShareOpen(false);
+    } catch {
+      toast.error("העתקה נכשלה");
     }
   };
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      <button
-        type="button"
-        onClick={handleInvite}
-        className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
-      >
-        <Share2 className="h-4 w-4 text-gold" strokeWidth={1.5} />
-        הזמן שכן
-      </button>
-      {wa ? (
-        <a
-          href={wa}
-          target="_blank"
-          rel="noopener noreferrer"
+    <>
+      <div className="grid grid-cols-3 gap-2">
+        <button
+          type="button"
+          onClick={handleInvite}
           className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
         >
-          <MessageCircle className="h-4 w-4 text-gold" strokeWidth={1.5} />
-          וואטסאפ
-        </a>
-      ) : (
-        <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-fs-xs text-muted-foreground">
-          לא זמין
-        </div>
-      )}
-      {tel ? (
-        <a
-          href={tel}
-          className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
-        >
-          <Phone className="h-4 w-4 text-gold" strokeWidth={1.5} />
-          התקשר
-        </a>
-      ) : (
-        <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-fs-xs text-muted-foreground">
-          לא זמין
-        </div>
-      )}
-    </div>
+          <Share2 className="h-4 w-4 text-gold" strokeWidth={1.5} />
+          הזמן שכן
+        </button>
+        {wa ? (
+          <a
+            href={wa}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
+          >
+            <MessageCircle className="h-4 w-4 text-gold" strokeWidth={1.5} />
+            וואטסאפ
+          </a>
+        ) : (
+          <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-fs-xs text-muted-foreground">
+            לא זמין
+          </div>
+        )}
+        {tel ? (
+          <a
+            href={tel}
+            className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
+          >
+            <Phone className="h-4 w-4 text-gold" strokeWidth={1.5} />
+            התקשר
+          </a>
+        ) : (
+          <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-fs-xs text-muted-foreground">
+            לא זמין
+          </div>
+        )}
+      </div>
+
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent dir="rtl" className="text-right max-w-sm">
+          <DialogHeader>
+            <DialogTitle>שיתוף ההצעה</DialogTitle>
+            <DialogDescription className="text-right">בחרו איך לשלוח את ההצעה לשכנים</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-2 mt-2">
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setShareOpen(false)}
+              className="h-12 rounded-xl bg-[#25D366] text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"
+            >
+              <MessageCircle className="h-5 w-5" />
+              שיתוף בוואטסאפ
+            </a>
+            <a
+              href={`sms:?&body=${encodeURIComponent(shareText)}`}
+              onClick={() => setShareOpen(false)}
+              className="h-12 rounded-xl bg-[#0A1F3D] text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"
+            >
+              <Phone className="h-5 w-5" />
+              שליחה ב-SMS
+            </a>
+            <button
+              type="button"
+              onClick={copyLink}
+              className="h-12 rounded-xl border-2 border-[#D4AF37] bg-white text-[#0A1F3D] font-bold flex items-center justify-center gap-2 hover:bg-[#FFFBEB] transition"
+            >
+              <Share2 className="h-5 w-5" />
+              העתק קישור
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
