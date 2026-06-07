@@ -49,6 +49,7 @@ type DealRow = {
   id: string;
   title: string;
   status: string;
+  auto_closed_at: string | null;
   offer_type: string | null;
   original_price: number | null;
   discounted_price: number | null;
@@ -123,7 +124,7 @@ export default function MyOffers() {
       if (dealIds.length) {
         const { data: deals } = await supabase
           .from("deals")
-          .select("id,title,status,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers")
+          .select("id,title,status,auto_closed_at,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers")
           .in("id", dealIds);
         (deals ?? []).forEach((d) => { dealsMap[(d as DealRow).id] = d as DealRow; });
       }
@@ -190,12 +191,12 @@ export default function MyOffers() {
     toast.success(hide ? "הוסתר מהארכיון שלך" : "הוחזר לתצוגה");
   };
 
-  const isUnavailable = (it: { deal: DealRow | null }) => !it.deal || it.deal.status !== "active";
+  const isArchived = (it: { deal: DealRow | null }) => !it.deal || it.deal.status !== "active" || Boolean(it.deal.auto_closed_at);
   const visibleItems = items.filter((it) => {
-    if (isUnavailable(it)) return false;
-    return showHidden ? isHidden(it) : !isHidden(it);
+    const archived = isArchived(it) || isHidden(it);
+    return showHidden ? archived : !archived;
   });
-  const hiddenCount = items.filter((it) => !isUnavailable(it) && isHidden(it)).length;
+  const hiddenCount = items.filter((it) => isArchived(it) || isHidden(it)).length;
 
   return (
     <MobileShell>
@@ -265,7 +266,7 @@ export default function MyOffers() {
             title={showHidden ? "הארכיון ריק" : "עדיין לא הצטרפת להצעות"}
             description={
               showHidden
-                ? "כשתסתיר פיקדונות, הם יופיעו כאן."
+                ? "עסקאות שנסגרו או הוסתרו יופיעו כאן."
                 : "כל מצטרף משפר את ההנחה לכולם — בואו תתחילו."
             }
             action={
@@ -314,7 +315,8 @@ export default function MyOffers() {
               const paid = deposit?.status === "paid" || interest.deposit_status === "paid";
               const pending = deposit?.status === "pending" || interest.deposit_status === "pending";
               const refunded = deposit?.status === "refunded";
-              const dealActive = deal.status === "active";
+              const dealClosed = deal.status === "closed" || Boolean(deal.auto_closed_at);
+              const dealActive = deal.status === "active" && !dealClosed;
 
               return (
                 <div
@@ -341,7 +343,7 @@ export default function MyOffers() {
                         <span>{count} מצטרפים</span>
                         <span>·</span>
                         <span className={dealActive ? "text-[#10B981] font-bold" : ""}>
-                          {dealActive ? "פעילה" : deal.status}
+                          {dealClosed ? "נסגרה" : dealActive ? "פעילה" : deal.status}
                         </span>
                       </p>
                     </Link>
