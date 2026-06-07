@@ -68,6 +68,7 @@ export default function SupplierOffers() {
   const [error, setError] = useState<string | null>(null);
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [deals, setDeals] = useState<DealRow[]>([]);
+  const [participantsByDeal, setParticipantsByDeal] = useState<Record<string, number>>({});
 
   const loadDeals = useCallback(async (sid: string) => {
     const { data, error: dErr } = await supabase
@@ -77,7 +78,24 @@ export default function SupplierOffers() {
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
     if (dErr) throw dErr;
-    setDeals(((data ?? []) as unknown) as DealRow[]);
+    const rows = ((data ?? []) as unknown) as DealRow[];
+    setDeals(rows);
+
+    const ids = rows.map((r) => r.id);
+    if (ids.length > 0) {
+      const { data: interests } = await supabase
+        .from("deal_interests")
+        .select("deal_id")
+        .in("deal_id", ids)
+        .eq("is_deleted", false);
+      const counts: Record<string, number> = {};
+      (interests ?? []).forEach((row: { deal_id: string }) => {
+        counts[row.deal_id] = (counts[row.deal_id] ?? 0) + 1;
+      });
+      setParticipantsByDeal(counts);
+    } else {
+      setParticipantsByDeal({});
+    }
   }, []);
 
   useEffect(() => {
@@ -115,20 +133,26 @@ export default function SupplierOffers() {
     if (supplierId) loadDeals(supplierId).catch((e) => console.error(e));
   }, [supplierId, loadDeals]);
 
+  const unitPriceForDeal = (d: DealRow): number => {
+    const display = describeOffer({
+      offer_type: ((d.offer_type as OfferType | null) ?? "percentage") as OfferType,
+      original_price: d.original_price,
+      discounted_price: d.discounted_price,
+      discount_percentage: d.discount_percentage,
+      base_price: d.base_price,
+      tiers: Array.isArray(d.tiers) ? d.tiers : [],
+    }, 0);
+    return extractPriceNum(display.headline);
+  };
+
   const activeDeals = deals.filter((d) => d.status === "active").length;
   const potentialIncome = deals
     .filter((d) => d.status === "active")
-    .reduce((sum, d) => {
-      const display = describeOffer({
-        offer_type: ((d.offer_type as OfferType | null) ?? "percentage") as OfferType,
-        original_price: d.original_price,
-        discounted_price: d.discounted_price,
-        discount_percentage: d.discount_percentage,
-        base_price: d.base_price,
-        tiers: Array.isArray(d.tiers) ? d.tiers : [],
-      }, 0);
-      return sum + extractPriceNum(display.headline);
-    }, 0);
+    .reduce((sum, d) => sum + unitPriceForDeal(d) * (participantsByDeal[d.id] ?? 0), 0);
+  const generatedIncome = deals
+    .filter((d) => d.status === "closed")
+    .reduce((sum, d) => sum + unitPriceForDeal(d) * (participantsByDeal[d.id] ?? 0), 0);
+
 
   return (
     <MobileShell>
