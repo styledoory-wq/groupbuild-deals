@@ -80,7 +80,7 @@ export default function SupplierRedemptions() {
           ? supabase.from("deals").select("id, title, discounted_price, original_price, is_deleted").in("id", dealIds)
           : Promise.resolve({ data: [] as any[] } as any),
         userIds.length
-          ? supabase.from("profiles").select("id, full_name, project_id").in("id", userIds)
+          ? supabase.rpc("get_voucher_resident_profiles", { _user_ids: userIds })
           : Promise.resolve({ data: [] as any[] } as any),
       ]);
       const dealsById = new Map(((dealsRes.data ?? []) as any[]).map((d) => [String(d.id), d]));

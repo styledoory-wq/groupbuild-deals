@@ -1584,6 +1584,14 @@ export type Database = {
           review_count: number
         }[]
       }
+      get_voucher_resident_profiles: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          full_name: string
+          id: string
+          project_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
