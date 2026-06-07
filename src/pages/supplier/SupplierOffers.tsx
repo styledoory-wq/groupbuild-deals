@@ -134,16 +134,26 @@ export default function SupplierOffers() {
   }, [supplierId, loadDeals]);
 
   const unitPriceForDeal = (d: DealRow): number => {
-    const display = describeOffer({
-      offer_type: ((d.offer_type as OfferType | null) ?? "percentage") as OfferType,
-      original_price: d.original_price,
-      discounted_price: d.discounted_price,
-      discount_percentage: d.discount_percentage,
-      base_price: d.base_price,
-      tiers: Array.isArray(d.tiers) ? d.tiers : [],
-    }, 0);
-    return extractPriceNum(display.headline);
+    if (d.discounted_price && d.discounted_price > 0) return Number(d.discounted_price);
+    const base = Number(d.base_price ?? d.original_price ?? 0);
+    if (d.discount_percentage && base > 0) {
+      return base * (1 - Number(d.discount_percentage) / 100);
+    }
+    const tiers = Array.isArray(d.tiers) ? d.tiers : [];
+    if (tiers.length > 0) {
+      const display = describeOffer({
+        offer_type: ((d.offer_type as OfferType | null) ?? "percentage") as OfferType,
+        original_price: d.original_price,
+        discounted_price: d.discounted_price,
+        discount_percentage: d.discount_percentage,
+        base_price: d.base_price,
+        tiers,
+      }, 0);
+      return extractPriceNum(display.headline);
+    }
+    return base;
   };
+
 
   const activeDeals = deals.filter((d) => d.status === "active").length;
   const potentialIncome = deals
@@ -243,16 +253,7 @@ export default function SupplierOffers() {
           const badge = statusBadge(d.status);
           const currentTier = hasTiers ? describeTier(offerType, tiers[0]) : null;
           const participants = participantsByDeal[d.id] ?? 0;
-          const unitPrice = extractPriceNum(display.headline);
-          const isClosed = d.status === "closed";
-          const isActive = d.status === "active";
-          const incomeAmount = unitPrice * participants;
-          const showIncome = (isClosed || isActive) && participants > 0;
-          const incomeLabel = isClosed ? "הכנסה שנוצרה" : "פוטנציאל הכנסה";
-          const incomeIcon = isClosed ? <Coins className="h-3.5 w-3.5" /> : <TrendingUp className="h-3.5 w-3.5" />;
-          const incomeClass = isClosed
-            ? "text-[#065F46] bg-[#ECFDF5] border-[#A7F3D0]"
-            : "text-[#92400E] bg-[#FFFBEB] border-[#FDE68A]";
+
           return (
             <div
               key={d.id}
@@ -284,18 +285,6 @@ export default function SupplierOffers() {
                 </div>
               </div>
 
-              {/* Row 3: Income (closed = generated, active = potential) */}
-              {showIncome && (
-                <div className={`flex items-center justify-between gap-2 mb-3 px-3 py-2.5 rounded-[12px] border ${incomeClass}`}>
-                  <div className="inline-flex items-center gap-1.5 text-xs font-semibold">
-                    {incomeIcon}
-                    {incomeLabel}
-                  </div>
-                  <div className="text-sm font-extrabold">
-                    ₪{incomeAmount.toLocaleString("he-IL")}
-                  </div>
-                </div>
-              )}
 
               {/* Row 4: Participants */}
               <div className="flex items-center gap-2 mb-4 flex-wrap">
