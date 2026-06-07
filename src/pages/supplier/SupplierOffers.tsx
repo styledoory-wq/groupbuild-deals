@@ -185,10 +185,12 @@ export default function SupplierOffers() {
                 <div className="h-7 w-7 rounded-full bg-[#92400E]/10 flex items-center justify-center">
                   <Wallet className="h-3.5 w-3.5 text-[#92400E]" />
                 </div>
-                <span className="text-xs font-medium text-[#92400E]/80">פוטנציאל הכנסה</span>
+                <span className="text-xs font-medium text-[#92400E]/80">
+                  {activeDeals > 0 ? "פוטנציאל הכנסה" : "הכנסה שנוצרה"}
+                </span>
               </div>
               <div className="text-2xl font-extrabold text-[#92400E]">
-                ₪{potentialIncome.toLocaleString("he-IL")}
+                ₪{(activeDeals > 0 ? potentialIncome : generatedIncome).toLocaleString("he-IL")}
               </div>
             </div>
           </div>
