@@ -37,7 +37,19 @@ export class AppErrorBoundary extends Component<{ children: ReactNode }, State> 
 
       if (canRetry) {
         sessionStorage.setItem(CHUNK_RECOVERY_KEY, String(Date.now()));
-        window.location.replace(window.location.href);
+        // Strip stale build hash params so the browser fetches the latest index.html / chunks.
+        const url = new URL(window.location.href);
+        url.searchParams.delete("__lovable_sha");
+        url.searchParams.delete("__lovable_load_id");
+        url.searchParams.set("_r", Date.now().toString());
+        // Best-effort: clear caches before reload to avoid serving stale chunks again.
+        if ("caches" in window) {
+          caches.keys().then((names) => Promise.all(names.map((n) => caches.delete(n)))).finally(() => {
+            window.location.replace(url.toString());
+          });
+        } else {
+          window.location.replace(url.toString());
+        }
       }
     }
   }
