@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck, Pencil, Wallet, Sparkles, Clock, CheckCircle2, XCircle, PauseCircle, Users } from "lucide-react";
+import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck, Pencil, Wallet, Sparkles, Clock, CheckCircle2, XCircle, PauseCircle, Users, TrendingUp, Coins } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
