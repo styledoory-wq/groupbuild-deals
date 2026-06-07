@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const FROM = "GroupBuild <onboarding@resend.dev>";
+const FROM = "GroupBuild <noreply@groupbuild.co.il>";
 const BRAND_NAVY = "#0E2A47";
 const BRAND_GOLD = "#C9A24B";
 
@@ -26,6 +26,9 @@ type Payload =
   | { type: "deal_status_changed"; user_id: string; deal_title: string; status: string }
   | { type: "welcome"; user_id: string }
   | { type: "admin_notification"; subject: string; message: string }
+  | { type: "deal_joined"; user_id: string; deal_id: string; deal_title: string }
+  | { type: "tier_unlocked"; deal_id: string }
+  | { type: "raw"; to: string; subject: string; html: string }
   | { type: "test"; to: string };
 
 function escapeHtml(value: unknown): string {
@@ -277,6 +280,87 @@ Deno.serve(async (req) => {
       if (!to) return json({ success: false, error: "no_admin_email" });
       const html = wrap(body.subject, `<p>${escapeHtml(body.message)}</p>`);
       await sendResend(to, body.subject, html);
+      return json({ success: true });
+    }
+
+    if (body.type === "deal_joined") {
+      if (body.user_id !== u.user.id && !isAdmin) return json({ success: false, error: "forbidden" }, 200);
+      const { email, name } = await getUserEmail(body.user_id);
+      if (!email) return json({ success: false, error: "no_email" }, 200);
+      if (!(await prefAllows(body.user_id, "new_offer"))) return json({ success: true, skipped: "user_pref" });
+      const html = wrap(
+        `אישור הצטרפות: ${escapeHtml(body.deal_title)}`,
+        `<p>שלום ${escapeHtml(name)},</p>
+         <p>הצטרפת בהצלחה לעסקה הקבוצתית <b>${escapeHtml(body.deal_title)}</b>.</p>
+         <p>הספק יצור איתך קשר בקרוב עם פרטים נוספים.</p>`,
+        "https://groupbuild.co.il/resident/my-offers",
+        "הצעות שלי",
+      );
+      await sendResend(email, `אישור הצטרפות: ${body.deal_title}`, html);
+      return json({ success: true });
+    }
+
+    if (body.type === "tier_unlocked") {
+      const { data: deal } = await admin
+        .from("deals")
+        .select("title, tiers, offer_type")
+        .eq("id", body.deal_id)
+        .maybeSingle();
+      if (!deal) return json({ success: false, error: "deal_not_found" }, 200);
+
+      const { data: interests } = await admin
+        .from("deal_interests")
+        .select("user_id")
+        .eq("deal_id", body.deal_id)
+        .eq("is_deleted", false);
+      if (!interests?.length) return json({ success: true, sent: 0 });
+
+      const userIds = [...new Set((interests as { user_id: string }[]).map((i) => i.user_id))];
+      const participantCount = userIds.length;
+
+      // Compute active tier inline (mirrors getActiveTier from offerPricing.ts)
+      type Tier = { minParticipants: number; discount_percentage?: number | null; discounted_price?: number | null };
+      const tiers = ((deal.tiers ?? []) as Tier[]).sort((a, b) => a.minParticipants - b.minParticipants);
+      let activeTier: Tier | null = tiers[0] ?? null;
+      for (const t of tiers) { if (participantCount >= t.minParticipants) activeTier = t; }
+
+      const offerType = (deal.offer_type ?? "percentage") as string;
+      let tierLabel = "";
+      if (activeTier) {
+        if (offerType === "percentage" && activeTier.discount_percentage) tierLabel = `${activeTier.discount_percentage}% הנחה`;
+        else if (offerType === "price_comparison" && activeTier.discounted_price) tierLabel = `₪${Number(activeTier.discounted_price).toLocaleString("he-IL")}`;
+      }
+
+      const { data: profiles } = await admin
+        .from("profiles")
+        .select("id, email, full_name")
+        .in("id", userIds);
+
+      let sent = 0;
+      for (const prof of (profiles ?? []) as { id: string; email: string | null; full_name: string | null }[]) {
+        if (!prof.email) continue;
+        if (!(await prefAllows(prof.id, "deal_status"))) continue;
+        const tierLine = tierLabel ? `<p>המחיר החדש: <b>${escapeHtml(tierLabel)}</b></p>` : "";
+        const html = wrap(
+          `המחיר ירד! ${escapeHtml(deal.title)}`,
+          `<p>שלום ${escapeHtml(prof.full_name ?? "")},</p>
+           <p>הצטרפו מספיק משתתפים ועסקת <b>${escapeHtml(deal.title)}</b> עלתה למדרגת מחיר חדשה.</p>
+           ${tierLine}
+           <p>כל הנרשמים לעסקה יקבלו את המחיר החדש אוטומטית.</p>`,
+          "https://groupbuild.co.il/resident/my-offers",
+          "הצעות שלי",
+        );
+        await sendResend(prof.email, `המחיר ירד — ${deal.title}`, html);
+        sent++;
+      }
+      return json({ success: true, sent });
+    }
+
+    if (body.type === "raw") {
+      if (!isAdmin) return json({ success: false, error: "forbidden" }, 200);
+      const { to, subject, html } = body as unknown as { type: "raw"; to: string; subject: string; html: string };
+      if (!to || !subject || !html) return json({ success: false, error: "missing to/subject/html" }, 200);
+      await sendResend(to, subject, html);
       return json({ success: true });
     }
 

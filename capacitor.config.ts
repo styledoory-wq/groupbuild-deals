@@ -9,7 +9,17 @@ const config: CapacitorConfig = {
     contentInset: 'never',
   },
   plugins: {
-    Keyboard: {
+    SplashScreen: {
+  launchShowDuration: 2000,
+  launchAutoHide: true,
+  backgroundColor: "#0A1F3D",
+  androidSplashResourceName: "splash",
+  androidScaleType: "CENTER_CROP",
+  showSpinner: false,
+  splashFullScreen: true,
+  splashImmersive: true,
+},
+Keyboard: {
       // "native" lets iOS smoothly resize the webview so inputs stay visible
       // and the page slides up instead of getting covered.
       resize: KeyboardResize.Native,

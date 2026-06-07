@@ -416,6 +416,30 @@ export default function DealDetail() {
           .catch((e) => console.warn("[email] new_lead failed", e));
       }
 
+      // Confirmation email to resident
+      supabase.functions
+        .invoke("send-email", {
+          body: {
+            type: "deal_joined",
+            user_id: session.session.user.id,
+            deal_id: deal.id,
+            deal_title: deal.title,
+          },
+        })
+        .catch((e) => console.warn("[email] deal_joined failed", e));
+
+      // Check if joining pushed the deal to a new price tier
+      if (tiersNow.length > 0) {
+        const { data: newCount } = await supabase.rpc("get_deal_paid_count", { _deal_id: deal.id });
+        const newCountNum = typeof newCount === "number" ? newCount : 0;
+        const activeTierAfter = getActiveTier(tiersNow, newCountNum);
+        if (activeTierAfter && activeTierNow && activeTierAfter.minParticipants !== activeTierNow.minParticipants) {
+          supabase.functions
+            .invoke("send-email", { body: { type: "tier_unlocked", deal_id: deal.id } })
+            .catch((e) => console.warn("[email] tier_unlocked failed", e));
+        }
+      }
+
       if (paymentUrl) {
         window.location.href = paymentUrl;
       }
