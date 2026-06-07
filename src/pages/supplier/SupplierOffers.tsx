@@ -134,16 +134,26 @@ export default function SupplierOffers() {
   }, [supplierId, loadDeals]);
 
   const unitPriceForDeal = (d: DealRow): number => {
-    const display = describeOffer({
-      offer_type: ((d.offer_type as OfferType | null) ?? "percentage") as OfferType,
-      original_price: d.original_price,
-      discounted_price: d.discounted_price,
-      discount_percentage: d.discount_percentage,
-      base_price: d.base_price,
-      tiers: Array.isArray(d.tiers) ? d.tiers : [],
-    }, 0);
-    return extractPriceNum(display.headline);
+    if (d.discounted_price && d.discounted_price > 0) return Number(d.discounted_price);
+    const base = Number(d.base_price ?? d.original_price ?? 0);
+    if (d.discount_percentage && base > 0) {
+      return base * (1 - Number(d.discount_percentage) / 100);
+    }
+    const tiers = Array.isArray(d.tiers) ? d.tiers : [];
+    if (tiers.length > 0) {
+      const display = describeOffer({
+        offer_type: ((d.offer_type as OfferType | null) ?? "percentage") as OfferType,
+        original_price: d.original_price,
+        discounted_price: d.discounted_price,
+        discount_percentage: d.discount_percentage,
+        base_price: d.base_price,
+        tiers,
+      }, 0);
+      return extractPriceNum(display.headline);
+    }
+    return base;
   };
+
 
   const activeDeals = deals.filter((d) => d.status === "active").length;
   const potentialIncome = deals
