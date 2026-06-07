@@ -747,7 +747,7 @@ export default function DealDetail() {
               <Button
                 onClick={handleJoinClick}
                 disabled={submittingInterest}
-                className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-extrabold text-fs-base hover:bg-primary/90"
+                className="w-full h-16 rounded-2xl bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white font-extrabold text-base shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border-2 border-[#D4AF37]/30"
               >
                 {submittingInterest ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -759,6 +759,7 @@ export default function DealDetail() {
                   "הצטרף להצעה"
                 )}
               </Button>
+
               {/* Secondary outline actions */}
               <SecondaryActions deal={deal} supplier={supplier} />
             </div>
