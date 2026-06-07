@@ -45,7 +45,7 @@ export default function SupplierRedemptions() {
       const userIds = Array.from(new Set(rawRows.map((r) => r.user_id).filter(Boolean)));
       const [dealsRes, profilesRes] = await Promise.all([
         dealIds.length
-          ? supabase.from("deals").select("id, title, discounted_price, original_price").in("id", dealIds)
+          ? supabase.from("deals").select("id, title, discounted_price, original_price, is_deleted").in("id", dealIds)
           : Promise.resolve({ data: [] as any[] } as any),
         userIds.length
           ? supabase.from("profiles").select("id, full_name, project_id").in("id", userIds)
@@ -53,11 +53,14 @@ export default function SupplierRedemptions() {
       ]);
       const dealsById = new Map(((dealsRes.data ?? []) as any[]).map((d) => [String(d.id), d]));
       const profilesById = new Map(((profilesRes.data ?? []) as any[]).map((p) => [String(p.id), p]));
-      setRows(rawRows.map((r) => ({
-        ...r,
-        deals: dealsById.get(r.deal_id) ?? null,
-        profiles: profilesById.get(r.user_id) ?? null,
-      })));
+      const filtered = rawRows
+        .map((r) => ({
+          ...r,
+          deals: dealsById.get(r.deal_id) ?? null,
+          profiles: profilesById.get(r.user_id) ?? null,
+        }))
+        .filter((r) => r.deals && !(r.deals as any).is_deleted);
+      setRows(filtered);
       setLoading(false);
     })();
   }, []);
