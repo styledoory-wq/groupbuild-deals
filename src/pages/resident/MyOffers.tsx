@@ -266,7 +266,7 @@ export default function MyOffers() {
             title={showHidden ? "הארכיון ריק" : "עדיין לא הצטרפת להצעות"}
             description={
               showHidden
-                ? "כשתסתיר פיקדונות, הם יופיעו כאן."
+                ? "עסקאות שנסגרו או הוסתרו יופיעו כאן."
                 : "כל מצטרף משפר את ההנחה לכולם — בואו תתחילו."
             }
             action={
@@ -315,7 +315,8 @@ export default function MyOffers() {
               const paid = deposit?.status === "paid" || interest.deposit_status === "paid";
               const pending = deposit?.status === "pending" || interest.deposit_status === "pending";
               const refunded = deposit?.status === "refunded";
-              const dealActive = deal.status === "active";
+              const dealClosed = deal.status === "closed" || Boolean(deal.auto_closed_at);
+              const dealActive = deal.status === "active" && !dealClosed;
 
               return (
                 <div
@@ -342,7 +343,7 @@ export default function MyOffers() {
                         <span>{count} מצטרפים</span>
                         <span>·</span>
                         <span className={dealActive ? "text-[#10B981] font-bold" : ""}>
-                          {dealActive ? "פעילה" : deal.status}
+                          {dealClosed ? "נסגרה" : dealActive ? "פעילה" : deal.status}
                         </span>
                       </p>
                     </Link>
