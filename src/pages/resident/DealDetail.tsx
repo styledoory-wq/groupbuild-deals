@@ -507,127 +507,258 @@ export default function DealDetail() {
   const category = categories.find((c) => c.id === deal.category_id);
   const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
 
+  // Computed display values for premium hero stats
+  const daysRemaining = (() => {
+    if (!deal.ends_at) return null;
+    const diff = new Date(deal.ends_at).getTime() - Date.now();
+    if (Number.isNaN(diff)) return null;
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  })();
+  const savingsAmount =
+    display.referencePrice && display.effectivePrice
+      ? Math.max(0, display.referencePrice - display.effectivePrice)
+      : null;
+  const discountPct = display.discountPercent ?? null;
+  const progressPct = progressTarget > 0
+    ? Math.min(100, Math.round((participantCount / progressTarget) * 100))
+    : 0;
+  const heroImages = [deal.cover_image_url, ...((deal.gallery_images ?? []))].filter(Boolean) as string[];
+
+  const statusMeta = (() => {
+    if (deal.status === "closed" || deal.status === "completed") {
+      return { label: "הסתיימה", dot: "#6B7280", fg: "#6B7280", bg: "#F4F6FA" };
+    }
+    if (deal.status === "closing-soon") {
+      return { label: "נסגרת בקרוב", dot: "#F59E0B", fg: "#0A1F3D", bg: "#FFF8E1" };
+    }
+    return { label: "פעילה", dot: "#10B981", fg: "#0A1F3D", bg: "#FFFFFF" };
+  })();
+
+  const benefits: Array<{ icon: typeof Tag; title: string; subtitle: string; accent: string; tint: string }> = [
+    { icon: Tag,         title: "מחיר משופר",      subtitle: "תמחור קבוצתי שמשתפר ככל שמצטרפים", accent: "#0FB5C9", tint: "#E7F8FB" },
+    { icon: Users,       title: "כוח קנייה",        subtitle: "דיירים מהפרויקט קונים יחד",        accent: "#2F6BFF", tint: "#EAF2FF" },
+    { icon: ShieldCheck, title: "ספקים מאומתים",    subtitle: "כל ספק נבדק ומאושר ידנית",        accent: "#2EA85A", tint: "#E8F7EC" },
+    { icon: Award,       title: "תנאים בלעדיים",    subtitle: "הצעה זמינה רק לחברי הקהילה",      accent: "#B07E2E", tint: "#F8F1E4" },
+  ];
+
+  const timeline: Array<{ icon: typeof Tag; title: string; subtitle: string }> = [
+    { icon: Handshake, title: "מצטרפים להצעה",  subtitle: "ממלאים פרטים, ההצטרפות תוקפת מיד" },
+    { icon: Target,    title: "מגיעים ליעד",     subtitle: "הקבוצה ממלאת את מדרגת המחיר" },
+    { icon: PhoneCall, title: "הספק יוצר קשר",   subtitle: "תיאום פרטים והצעת מחיר אישית" },
+    { icon: Wrench,    title: "ביצוע והתקנה",    subtitle: "הספק מבצע את העבודה אצלכם" },
+  ];
+
   return (
     <MobileShell>
-      {/* Top bar */}
+      {/* Slim back header */}
       <div className="px-2 pt-2">
         <PageHeader title="" subtitle="" back variant="navy" />
       </div>
 
-      {/* HERO — clean white card with cover image */}
+      {/* ===== SECTION 1 — HERO ===== */}
       <div className="px-4 mt-2">
-        <div className="relative bg-card rounded-[28px] overflow-hidden border border-border/60">
-          {deal.cover_image_url ? (
-            <img
-              src={deal.cover_image_url}
-              alt={deal.title}
-              className="w-full h-[220px] object-cover"
-            />
+        <div className="relative rounded-[28px] overflow-hidden bg-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
+          {heroImages.length > 0 ? (
+            <div className="relative">
+              <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
+                {heroImages.map((url, i) => (
+                  <img
+                    key={url + i}
+                    src={url}
+                    alt={`${deal.title} ${i + 1}`}
+                    className="w-full h-[240px] object-cover shrink-0 snap-start"
+                    style={{ flex: "0 0 100%" }}
+                  />
+                ))}
+              </div>
+              {heroImages.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-full">
+                  {heroImages.map((_, i) => (
+                    <span key={i} className="w-1.5 h-1.5 rounded-full bg-white/90" />
+                  ))}
+                </div>
+              )}
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/35 to-transparent pointer-events-none" />
+            </div>
           ) : (
-            <div className="w-full h-[160px] bg-gradient-to-br from-primary/10 to-gold/10" />
+            <div className="w-full h-[180px] bg-gradient-to-br from-[#EAF2FF] to-[#FFF8E1]" />
           )}
 
-          {/* Success badge when joined */}
+          <span
+            className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-[0_2px_6px_rgba(10,31,61,0.18)]"
+            style={{ color: statusMeta.fg, background: statusMeta.bg }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: statusMeta.dot }} />
+            {statusMeta.label}
+          </span>
+
           {interested && (
-            <div className="absolute top-4 right-4 bg-gradient-to-l from-gold to-gold-light text-primary px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
-              <CheckCircle2 className="h-4 w-4" />
-              <span className="text-xs font-extrabold">כבר הצטרפת</span>
+            <div className="absolute top-4 left-4 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] text-[#0A1F3D] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span className="text-[11px] font-extrabold">הצטרפת</span>
             </div>
           )}
 
           <div className="p-5">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 text-fs-xs font-bold uppercase tracking-[0.08em] text-success">
-                <span className="gb-live-dot" />
-                עסקה פעילה
-              </span>
-              {category?.name && (
-                <span className="text-fs-xs font-bold text-muted-foreground">· {category.icon ?? "🏷️"} {category.name}</span>
-              )}
-            </div>
-            <h1 className="text-fs-xl font-extrabold text-foreground leading-tight tracking-tight">
+            {category?.name && (
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#6B7280] mb-2">
+                <span>{category.icon ?? "🏷️"}</span>
+                <span>{category.name}</span>
+              </div>
+            )}
+            <h1 className="text-[24px] leading-[1.15] font-extrabold text-[#0A1F3D] tracking-tight">
               {deal.title}
             </h1>
-            {deal.description && (
-              <p className="text-fs-sm text-muted-foreground leading-relaxed mt-3 whitespace-pre-line line-clamp-3">
-                {deal.description}
-              </p>
+            {supplier && (
+              <div className="flex items-center gap-2 mt-2.5">
+                <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="sm" />
+                <span className="text-[13px] font-bold text-[#0A1F3D]">{supplier.business_name}</span>
+                {supplier.approval_status === "approved" && (
+                  <BadgeCheck className="h-4 w-4 text-[#2EA85A]" strokeWidth={2.4} />
+                )}
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* GALLERY */}
-      {Array.isArray(deal.gallery_images) && deal.gallery_images.length > 0 && (
-        <div className="mt-4">
-          <div className="flex gap-2 overflow-x-auto px-4 pb-1 snap-x snap-mandatory no-scrollbar">
-            {deal.gallery_images.map((url, i) => (
-              <a
-                key={url + i}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative shrink-0 w-32 h-24 rounded-2xl overflow-hidden border border-border/60 snap-start"
-              >
-                <img src={url} alt={`gallery-${i}`} loading="lazy" className="w-full h-full object-cover" />
-              </a>
-            ))}
+      {/* ===== SECTION 1b — SUMMARY STAT CARDS ===== */}
+      <div className="px-4 mt-4 grid grid-cols-2 gap-3">
+        <StatCard icon={Percent}      accent="#E8742C" tint="#FFF1E4" label="הנחה"          value={discountPct ? `${discountPct}%` : "—"} />
+        <StatCard icon={PiggyBank}    accent="#2EA85A" tint="#E8F7EC" label="חיסכון משוער"  value={savingsAmount ? ils(savingsAmount) : "—"} />
+        <StatCard icon={Users}        accent="#2F6BFF" tint="#EAF2FF" label="הצטרפו"         value={`${participantCount}`} sub={progressTarget > 0 ? `מתוך ${progressTarget}` : undefined} />
+        <StatCard icon={CalendarDays} accent="#7A4FCF" tint="#F2ECFB" label="ימים שנותרו"    value={daysRemaining !== null ? `${daysRemaining}` : "—"} sub={daysRemaining !== null ? "עד סגירה" : undefined} />
+      </div>
+
+      {/* ===== SECTION 2 — PROGRESS ===== */}
+      {progressTarget > 0 && (
+        <div className="px-4 mt-5">
+          <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B7280]">התקדמות הקבוצה</p>
+                <p className="text-[20px] font-extrabold text-[#0A1F3D] mt-1 tracking-tight">
+                  {participantCount} מתוך {progressTarget} הצטרפו
+                </p>
+              </div>
+              <div className="text-left">
+                <div className="text-[28px] font-black text-[#0A1F3D] leading-none">{progressPct}%</div>
+                <div className="text-[10px] font-bold text-[#6B7280] mt-1">הושלם</div>
+              </div>
+            </div>
+            <div className="h-3 bg-[#F4F6FA] rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${progressPct}%`,
+                  background: "linear-gradient(90deg, #C9A84C 0%, #E8C96B 50%, #C9A84C 100%)",
+                  boxShadow: "0 0 12px rgba(201,168,76,0.45)",
+                }}
+              />
+            </div>
+            {nextTier && peopleNeeded > 0 && (
+              <p className="text-[12px] font-bold text-[#0A1F3D] mt-3 flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5 text-[#C9A84C]" />
+                עוד {peopleNeeded} דיירים פותחים את המדרגה הבאה
+              </p>
+            )}
           </div>
         </div>
       )}
 
-      {/* Stacked info cards — generous whitespace */}
-      <div className="px-4 mt-5 space-y-4">
-
-        {/* PRICING + LIVE PROGRESS */}
-        <div className="bg-card rounded-3xl p-6 border border-border/60">
-          <div className="flex justify-between items-end mb-6">
-            <div className="space-y-1">
-              <p className="text-fs-xs font-medium text-muted-foreground">מחיר קבוצתי נוכחי</p>
-              <div className="text-fs-3xl font-black text-primary leading-none tracking-tight">
-                {display.headline}
+      {/* ===== SECTION 3 — WHY JOIN ===== */}
+      <div className="px-4 mt-5">
+        <h2 className="text-[15px] font-extrabold text-[#0A1F3D] mb-3 px-1">למה כדאי להצטרף</h2>
+        <div className="grid grid-cols-2 gap-3">
+          {benefits.map((b) => (
+            <div key={b.title} className="bg-white rounded-[20px] p-4 shadow-[0_4px_12px_-6px_rgba(10,31,61,0.12)]">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-2.5" style={{ background: b.tint }}>
+                <b.icon className="w-5 h-5" style={{ color: b.accent }} strokeWidth={2} />
               </div>
+              <p className="text-[13px] font-extrabold text-[#0A1F3D] leading-tight">{b.title}</p>
+              <p className="text-[11px] text-[#6B7280] leading-snug mt-1">{b.subtitle}</p>
             </div>
-            {(display.savings || display.discountPercent) && (
-              <div className="bg-gold/10 px-3 py-1.5 rounded-xl">
-                <span className="text-gold font-bold text-xs">
-                  {display.savings
-                    ? display.savings.replace("חיסכון:", "חיסכון")
-                    : `חיסכון ${display.discountPercent}%`}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {progressTarget > 0 && (
-            <div className="space-y-2.5">
-              <div className="flex justify-between items-center">
-                <span className="text-fs-xs font-bold text-foreground">
-                  {participantCount} דיירים הצטרפו
-                </span>
-                {nextTier ? (
-                  <span className="text-fs-xs font-medium text-gold">
-                    עוד {peopleNeeded} למדרגה הבאה
-                  </span>
-                ) : (
-                  <span className="text-fs-xs font-bold text-success">המדרגה הטובה ביותר</span>
-                )}
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gold rounded-full transition-all duration-700"
-                  style={{ width: `${Math.min(100, Math.round((participantCount / progressTarget) * 100))}%` }}
-                />
-              </div>
-            </div>
-          )}
+          ))}
         </div>
+      </div>
 
-        {/* TIERS LADDER */}
-        {tiers.length > 0 && (
-          <div className="bg-card rounded-3xl p-6 border border-border/60">
-            <h3 className="text-fs-sm font-extrabold text-foreground mb-4">מדרגות מחיר לפי כמות</h3>
-            <div className="space-y-3">
+      {/* ===== SECTION 4 — OFFER DETAILS GRID ===== */}
+      <div className="px-4 mt-5">
+        <h2 className="text-[15px] font-extrabold text-[#0A1F3D] mb-3 px-1">פרטי ההצעה</h2>
+        <div className="grid grid-cols-2 gap-3">
+          {depositRequired && <DetailCell icon={Shield} label="פיקדון" value={ils(Number(deal.deposit_amount))} />}
+          {savingsAmount && <DetailCell icon={Tag} label="חיסכון" value={ils(savingsAmount)} />}
+          {daysRemaining !== null && <DetailCell icon={Clock} label="משך" value={`${daysRemaining} ימים`} />}
+          {supplier?.service_areas?.length ? (
+            <DetailCell icon={MapPin} label="אזור" value={supplier.service_areas.slice(0, 2).join(", ")} />
+          ) : null}
+          {category?.name && <DetailCell icon={Layers} label="קטגוריה" value={category.name} />}
+          {supplier?.business_name && <DetailCell icon={Store} label="ספק" value={supplier.business_name} />}
+        </div>
+      </div>
+
+      {/* ===== SECTION 5 — HOW IT WORKS ===== */}
+      <div className="px-4 mt-5">
+        <h2 className="text-[15px] font-extrabold text-[#0A1F3D] mb-3 px-1">איך זה עובד</h2>
+        <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
+          <ol className="relative">
+            {timeline.map((step, idx) => {
+              const last = idx === timeline.length - 1;
+              return (
+                <li key={step.title} className="relative flex gap-3 pb-5 last:pb-0">
+                  {!last && <span aria-hidden className="absolute right-[19px] top-10 bottom-0 w-px bg-[#ECEEF2]" />}
+                  <div className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: "#0A1F3D" }}>
+                    <step.icon className="w-[18px] h-[18px] text-white" strokeWidth={2.2} />
+                  </div>
+                  <div className="flex-1 pt-1">
+                    <p className="text-[13px] font-extrabold text-[#0A1F3D] leading-tight">
+                      <span className="text-[#C9A84C] font-black mr-1">{idx + 1}.</span>
+                      {step.title}
+                    </p>
+                    <p className="text-[11px] text-[#6B7280] leading-snug mt-1">{step.subtitle}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
+
+      {/* ===== SECTION 6 — SUPPLIER CARD ===== */}
+      {supplier && (
+        <div className="px-4 mt-5">
+          <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
+            <div className="flex items-center gap-3">
+              <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="md" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[15px] font-extrabold text-[#0A1F3D] truncate">{supplier.business_name}</p>
+                  {supplier.approval_status === "approved" && (
+                    <BadgeCheck className="h-4 w-4 text-[#2EA85A] shrink-0" strokeWidth={2.4} />
+                  )}
+                </div>
+                <div className="text-[11px] text-[#6B7280] mt-0.5">
+                  <SupplierRatingBadge supplierId={supplier.id} showEmpty />
+                </div>
+              </div>
+            </div>
+            <Link
+              to={`/suppliers/${supplier.id}`}
+              className="mt-4 flex items-center justify-center gap-1 h-11 rounded-2xl bg-[#F4F6FA] text-[#0A1F3D] text-[13px] font-bold active:scale-[0.98] transition-transform"
+            >
+              צפייה בפרופיל הספק
+              <ChevronLeft className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* ===== TIERS LADDER (transparency) ===== */}
+      {tiers.length > 0 && (
+        <div className="px-4 mt-5">
+          <h2 className="text-[15px] font-extrabold text-[#0A1F3D] mb-3 px-1">מדרגות מחיר</h2>
+          <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
+            <div className="space-y-2.5">
               {tiers.map((t, idx) => {
                 const td = describeTier(offerType, t);
                 const isActive = !!activeTier && t.minParticipants === activeTier.minParticipants;
@@ -636,35 +767,22 @@ export default function DealDetail() {
                   <div
                     key={idx}
                     className={cn(
-                      "flex items-center justify-between transition-colors",
-                      isActive
-                        ? "p-3 bg-muted/60 rounded-2xl border border-gold/30"
-                        : isPast
-                          ? "opacity-40"
-                          : "opacity-70",
+                      "flex items-center justify-between rounded-2xl px-3 py-2.5 transition-colors",
+                      isActive ? "bg-[#FFF8E1] border border-[#EBD79A]" : isPast ? "opacity-50" : "bg-[#F7F8FA]",
                     )}
                   >
-                    <div className="flex items-center gap-3">
-                      <div
+                    <div className="flex items-center gap-2">
+                      <span
                         className={cn(
                           "rounded-full",
-                          isActive
-                            ? "w-2.5 h-2.5 bg-gold ring-4 ring-gold/15"
-                            : isPast
-                              ? "w-1.5 h-1.5 bg-muted-foreground"
-                              : "w-1.5 h-1.5 border border-border",
+                          isActive ? "w-2.5 h-2.5 bg-[#C9A84C] ring-4 ring-[#C9A84C]/20" : "w-1.5 h-1.5 bg-[#6B7280]",
                         )}
                       />
-                      <span className={cn("text-fs-sm", isActive ? "font-bold text-foreground" : "text-foreground")}>
-                        {tierRange(t)} דיירים{isActive ? " (פעיל)" : ""}
+                      <span className={cn("text-[13px]", isActive ? "font-extrabold text-[#0A1F3D]" : "font-bold text-[#0A1F3D]")}>
+                        {tierRange(t)} דיירים{isActive ? " · פעיל" : ""}
                       </span>
                     </div>
-                    <span
-                      className={cn(
-                        "text-fs-sm gb-num",
-                        isActive ? "font-black text-primary" : isPast ? "font-bold" : "font-bold text-gold",
-                      )}
-                    >
+                    <span className={cn("text-[13px] gb-num", isActive ? "font-black text-[#0A1F3D]" : "font-bold text-[#C9A84C]")}>
                       {td.headline}
                     </span>
                   </div>
@@ -672,100 +790,58 @@ export default function DealDetail() {
               })}
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* DEPOSIT */}
-        {depositRequired && (
-          <div className="bg-card rounded-3xl p-5 border border-border/60 flex items-center gap-4">
-            <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center shrink-0">
-              <Shield className="w-6 h-6 text-gold" strokeWidth={1.5} />
-            </div>
-            <div className="space-y-0.5 min-w-0">
-              <p className="text-fs-xs text-muted-foreground">פיקדון להבטחת המקום</p>
-              <p className="text-fs-sm font-bold text-foreground">
-                {ils(Number(deal.deposit_amount))} · מאושר ידנית על ידי המערכת
-              </p>
-            </div>
-          </div>
-        )}
+      {/* Spacer for sticky CTA */}
+      <div aria-hidden className="h-40" />
 
-        {/* SUPPLIER */}
-        {supplier && (
-          <Link
-            to={`/suppliers/${supplier.id}`}
-            className="block bg-card rounded-3xl p-5 border border-border/60 flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="md" />
-              <div className="min-w-0">
-                <p className="text-fs-sm font-bold text-foreground truncate">{supplier.business_name}</p>
-                <div className="text-fs-xs text-muted-foreground">
-                  <SupplierRatingBadge supplierId={supplier.id} showEmpty />
-                </div>
-              </div>
-            </div>
-            <span className="text-fs-xs font-bold text-primary px-3 py-1.5 bg-muted rounded-lg shrink-0">
-              פרופיל ספק
-            </span>
-          </Link>
-        )}
-      </div>
-
-      {/* Spacer for fixed CTA + BottomNav */}
-      <div aria-hidden className="h-64" />
-
-      {/* FIXED ACTION DOCK */}
+      {/* ===== SECTION 7 — STICKY CTA ===== */}
       <div
         className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
       >
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-4 pb-2 bg-gradient-to-t from-background via-background to-background/0">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F7F8FA] via-[#F7F8FA]/95 to-transparent">
           {interested ? (
-            <div className="space-y-3">
-              {/* Festive joined card */}
-              <div className="bg-primary text-primary-foreground p-4 rounded-2xl flex items-center justify-center gap-3 border border-gold/30">
-                <div className="w-9 h-9 bg-gradient-to-l from-gold to-gold-light rounded-full flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-5 h-5 text-primary" strokeWidth={2.5} />
-                </div>
-                <div className="text-right">
-                  <p className="text-fs-sm font-extrabold leading-tight">הצטרפת בהצלחה!</p>
-                  <p className="text-fs-xs text-primary-foreground/70 leading-tight mt-0.5">
-                    {interestDepositStatus === "paid"
-                      ? "פיקדון שולם — המקום מובטח"
-                      : interestStatus === "pending_deposit"
-                        ? "ממתין לאישור פיקדון"
-                        : "הספק יצור קשר בהקדם"}
-                  </p>
-                </div>
+            <div className="flex items-center gap-2.5 bg-[#0A1F3D] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
+              <div className="w-10 h-10 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] rounded-full flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-5 h-5 text-[#0A1F3D]" strokeWidth={2.6} />
               </div>
-              {/* Secondary outline actions */}
-              <SecondaryActions deal={deal} supplier={supplier} />
+              <div className="flex-1 text-right">
+                <p className="text-[14px] font-extrabold leading-tight">הצטרפת בהצלחה!</p>
+                <p className="text-[11px] text-white/70 leading-tight mt-0.5">
+                  {interestDepositStatus === "paid"
+                    ? "פיקדון שולם — המקום מובטח"
+                    : interestStatus === "pending_deposit"
+                      ? "ממתין לאישור פיקדון"
+                      : "הספק יצור קשר בהקדם"}
+                </p>
+              </div>
+              <ShareButton deal={deal} compact />
             </div>
           ) : (
-            <div className="space-y-3">
-              {/* Primary dominant CTA */}
+            <div className="flex items-stretch gap-2">
               <Button
                 onClick={handleJoinClick}
                 disabled={submittingInterest}
-                className="w-full h-16 rounded-2xl bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white font-extrabold text-base shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border-2 border-[#D4AF37]/30"
+                className="flex-1 h-14 rounded-2xl bg-[#0A1F3D] hover:bg-[#0A1F3D]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#D4AF37]/40"
               >
                 {submittingInterest ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : isGuest ? (
                   "התחבר כדי להצטרף"
                 ) : depositRequired ? (
-                  `הצטרף להצעה · פיקדון ${ils(Number(deal.deposit_amount))}`
+                  `הצטרף · ${ils(Number(deal.deposit_amount))}`
                 ) : (
                   "הצטרף להצעה"
                 )}
               </Button>
-
-              {/* Secondary outline actions */}
-              <SecondaryActions deal={deal} supplier={supplier} />
+              <ShareButton deal={deal} />
             </div>
           )}
         </div>
       </div>
+
 
 
       {/* Join modal */}
