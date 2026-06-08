@@ -24,9 +24,18 @@ const STAGES: { id: StageId; title: string; description: string; icon: typeof Pe
   { id: "moving",       title: "כניסה לבית",          description: "הובלה, ריהוט וטקסי כניסה",            icon: KeyRound,    dbStage: "moving" },
 ];
 
-const FILTERS = ["הכל", "מבצעים", "פופולרי", "חדש", "הנחות", "ספקים מומלצים"];
+const FILTERS = ["הכל", "מבצעים", "פופולרי", "חדש", "פיקדון נמוך", "ספקים מומלצים"];
 
-interface MiniDeal { id: string; title: string; cover_image_url: string | null; supplier_name: string | null }
+interface MiniDeal { 
+  id: string; 
+  title: string; 
+  cover_image_url: string | null; 
+  supplier_name: string | null;
+  discount_percentage?: number | null;
+  deposit_required?: boolean | null;
+  deposit_amount?: number | null;
+  created_at?: string;
+}
 
 export default function ResidentDashboard() {
   const navigate = useNavigate();
@@ -40,6 +49,16 @@ export default function ResidentDashboard() {
   const [joinedCount, setJoinedCount] = useState(0);
   const [estimatedSavings, setEstimatedSavings] = useState(0);
   const [activeFilter, setActiveFilter] = useState("הכל");
+const filteredDeals = useMemo(() => {
+  if (activeFilter === "הכל") return areaDeals;
+  if (activeFilter === "מבצעים") return areaDeals.filter((d) => d.discount_percentage && d.discount_percentage > 0);
+  if (activeFilter === "חדש") {
+    const week = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return areaDeals.filter((d) => new Date(d.created_at).getTime() > week);
+  }
+  if (activeFilter === "פיקדון נמוך") return areaDeals.filter((d) => !d.deposit_required || (d.deposit_amount ?? 999) < 500);
+  return areaDeals;
+}, [activeFilter, areaDeals]);
 
   useEffect(() => {
     if (!authReady || !user?.id) return;
@@ -100,7 +119,7 @@ export default function ResidentDashboard() {
             ? supabase.from("suppliers").select("id", { count: "exact", head: true })
                 .in("id", Array.from(supplierIds)).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"])
             : Promise.resolve({ count: 0 }),
-          dealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url").in("id", dealIds) : Promise.resolve({ data: [] }),
+          dealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url,discount_percentage,deposit_required,deposit_amount,created_at").in("id", dealIds).eq("is_deleted", false) : Promise.resolve({ data: [] }),
           joinedIds.length
             ? supabase.from("deals").select("price_after_discount,price_before_discount").in("id", joinedIds)
             : Promise.resolve({ data: [] }),
