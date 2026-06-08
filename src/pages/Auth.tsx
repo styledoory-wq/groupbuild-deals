@@ -111,6 +111,8 @@ export default function Auth() {
       return;
     }
     setAdminSession(false);
+    const redirect = searchParams.get("redirect");
+    if (redirect) { navigate(redirect); return; }
     if (resolvedRole === "supplier") navigate("/supplier");
     else navigate("/resident");
   };

@@ -204,6 +204,7 @@ const App = () => (
                   <Route path="/supplier/profile/edit" element={supplierRoute(<SupplierProfileEdit />)} />
                   <Route path="/supplier/offers" element={supplierRoute(<SupplierOffers />)} />
                   <Route path="/supplier/offers/new" element={supplierRoute(<OfferEditor />)} />
+                  <Route path="/supplier/offers/:dealId/edit" element={supplierRoute(<OfferEditor />)} />
                   <Route path="/supplier/offers/:dealId/marketing" element={supplierRoute(<SupplierOfferMarketingEdit />)} />
                   <Route path="/settings/notifications" element={<NotificationSettings />} />
                   <Route path="/supplier/leads" element={supplierRoute(<SupplierLeads />)} />

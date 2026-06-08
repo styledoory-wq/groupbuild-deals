@@ -302,12 +302,20 @@ export default function SupplierOffers() {
 
               {/* Row 4: Bottom row — Edit + Date */}
               <div className="flex items-center justify-between pt-3 border-t border-[#ECEEF2]">
-                <Link
-                  to={`/supplier/offers/${d.id}/marketing`}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-[#0A1F3D] text-white hover:bg-[#0A1F3D]/90 transition-colors"
-                >
-                  <Pencil className="h-3 w-3" /> עריכה
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to={`/supplier/offers/${d.id}/edit`}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-[#0A1F3D] text-white hover:bg-[#0A1F3D]/90 transition-colors"
+                  >
+                    <Pencil className="h-3 w-3" /> עריכת הצעה
+                  </Link>
+                  <Link
+                    to={`/supplier/offers/${d.id}/marketing`}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-white border border-[#ECEEF2] text-[#0A1F3D] hover:bg-[#F4F6FA] transition-colors"
+                  >
+                    <Pencil className="h-3 w-3" /> שיווק
+                  </Link>
+                </div>
                 <div className="flex items-center gap-1.5 text-xs text-[#9CA3AF]">
                   <Clock className="h-3 w-3" />
                   {new Date(d.created_at).toLocaleDateString("he-IL")}

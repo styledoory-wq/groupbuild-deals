@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { verifyAdminFromSession } from "@/lib/auth";
 import { Save, AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -72,6 +72,8 @@ const defaultPriceTiers = (): TierRow[] => [
 
 export default function OfferEditor() {
   const navigate = useNavigate();
+  const { dealId } = useParams<{ dealId: string }>();
+  const isEditing = !!dealId;
   const [searchParams] = useSearchParams();
   const adminTargetSupplierId = searchParams.get("supplierId");
   const { categories, projects } = useApp();
@@ -196,6 +198,49 @@ export default function OfferEditor() {
           } else if (categories.length) {
             setCategoryId(categories[0].id);
           }
+
+          // If editing, load existing deal and populate fields
+          if (dealId) {
+            const { data: deal } = await supabase
+              .from("deals")
+              .select("*")
+              .eq("id", dealId)
+              .maybeSingle();
+            if (deal && !cancelled) {
+              setTitle(deal.title ?? "");
+              setDescription(deal.description ?? "");
+              if (deal.category_id) setCategoryId(deal.category_id);
+              setDepositRequired(!!deal.deposit_required);
+              if (deal.deposit_amount != null) setDepositAmount(String(deal.deposit_amount));
+              const rawType = (deal.offer_type ?? "percentage") as OfferType;
+              setOfferType(rawType);
+              const rawTiers = (Array.isArray(deal.tiers) ? deal.tiers : []) as import("@/lib/offerPricing").OfferTier[];
+              if (rawTiers.length) {
+                setTiers(rawTiers.map((t) => ({
+                  minParticipants: String(t.minParticipants ?? ""),
+                  maxParticipants: t.maxParticipants != null ? String(t.maxParticipants) : "",
+                  discount_percentage: t.discount_percentage != null ? String(t.discount_percentage) : "",
+                  original_price: t.original_price != null ? String(t.original_price) : "",
+                  discounted_price: t.discounted_price != null ? String(t.discounted_price) : "",
+                  label: t.label ?? "",
+                })));
+              }
+              setCoverImage(deal.cover_image_url ?? null);
+              setGalleryImages((deal.gallery_images as string[] | null) ?? []);
+              setVisibilityType((deal.visibility_type as "public" | "project_only") ?? "public");
+              setVisibilityProjectId(deal.visibility_project_id ?? "");
+              setTargetParticipants(deal.target_participants != null ? String(deal.target_participants) : "");
+              setJoinDeadline(deal.join_deadline ? deal.join_deadline.split("T")[0] : "");
+              setRedemptionDeadline(deal.redemption_deadline ? deal.redemption_deadline.split("T")[0] : "");
+              setOfferTerms(deal.offer_terms ?? "");
+              setRestrictions(deal.restrictions ?? "");
+              setMaxRedemptions(deal.max_redemptions != null ? String(deal.max_redemptions) : "");
+              setAppointmentRequired(!!deal.appointment_required);
+              setServiceAreasInput(Array.isArray(deal.service_areas) ? (deal.service_areas as string[]).join(", ") : "");
+              setCommitmentAccepted(true);
+            }
+          }
+
           setBootLoading(false);
         }
       } catch (e) {
@@ -207,7 +252,7 @@ export default function OfferEditor() {
       }
     })();
     return () => { cancelled = true; };
-  }, [categories, adminTargetSupplierId]);
+  }, [categories, adminTargetSupplierId, dealId]);
 
   const updateTier = (i: number, patch: Partial<TierRow>) => {
     setTiers((prev) => prev.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
@@ -391,16 +436,18 @@ export default function OfferEditor() {
 
     setSaving(true);
     try {
-      const { error } = await supabase.from("deals").insert([payload as never]);
+      const { error } = isEditing
+        ? await supabase.from("deals").update(payload as never).eq("id", dealId!)
+        : await supabase.from("deals").insert([payload as never]);
       if (error) {
-        console.error("[OfferEditor] insert error", error);
+        console.error("[OfferEditor] save error", error);
         const msg = error.message?.includes("row-level")
-          ? "אין הרשאה ליצור הצעה. ודא שהספק אושר על ידי מנהל המערכת."
+          ? "אין הרשאה לשמור הצעה. ודא שהספק אושר על ידי מנהל המערכת."
           : `שמירת ההצעה נכשלה: ${error.message}`;
         toast.error(msg);
         return;
       }
-      toast.success("ההצעה נשמרה בהצלחה!");
+      toast.success(isEditing ? "ההצעה עודכנה בהצלחה!" : "ההצעה נשמרה בהצלחה!");
       navigate("/supplier/offers", { replace: true });
     } catch (err: unknown) {
       console.error("[OfferEditor] save exception", err);
@@ -413,7 +460,7 @@ export default function OfferEditor() {
   if (bootLoading) {
     return (
       <MobileShell>
-        <PageHeader title="הצעה חדשה" subtitle="טוען…" back />
+        <PageHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} subtitle="טוען…" back />
         <div className="px-5 mt-10 flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
@@ -425,7 +472,7 @@ export default function OfferEditor() {
   if (bootError) {
     return (
       <MobileShell>
-        <PageHeader title="הצעה חדשה" back />
+        <PageHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} back />
         <div className="px-5 mt-6">
           <div className="gb-card p-6 text-center">
             <div className="h-12 w-12 mx-auto rounded-full bg-destructive/10 flex items-center justify-center mb-3">
@@ -446,7 +493,7 @@ export default function OfferEditor() {
   if (!supplier) {
     return (
       <MobileShell>
-        <PageHeader title="הצעה חדשה" back />
+        <PageHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} back />
         <div className="px-5 mt-6">
           <div className="gb-card p-6 text-center">
             <h2 className="font-bold text-base mb-2">חסר פרופיל ספק</h2>
@@ -482,7 +529,7 @@ export default function OfferEditor() {
 
   return (
     <MobileShell>
-      <PageHeader title="הצעה חדשה" subtitle="הגדירו מדרגות הנחה לפי כמות מצטרפים" back />
+      <PageHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} subtitle="הגדירו מדרגות הנחה לפי כמות מצטרפים" back />
 
       <div className="px-5 -mt-4 relative z-10 space-y-4">
         <div className="gb-card p-4 space-y-3">
@@ -785,7 +832,7 @@ export default function OfferEditor() {
 
         <Button onClick={save} disabled={saving} className="w-full h-12 rounded-[16px] bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] disabled:opacity-50">
           {saving ? <Loader2 className="h-4 w-4 ml-2 animate-spin" /> : <Save className="h-4 w-4 ml-2" />}
-          {saving ? "שומר..." : "שמירת ההצעה"}
+          {saving ? "שומר..." : isEditing ? "עדכון ההצעה" : "שמירת ההצעה"}
         </Button>
 
       </div>
