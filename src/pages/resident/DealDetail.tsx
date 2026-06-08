@@ -1013,22 +1013,50 @@ export default function DealDetail() {
   );
 }
 
-/** Outline secondary actions row: invite neighbor + whatsapp + call. */
-function SecondaryActions({
-  deal,
-  supplier,
-}: {
-  deal: { id: string; title: string };
-  supplier: SupplierRow | null;
-}) {
-  const wa = supplier ? normalizeWhatsappUrl(supplier.whatsapp_url || supplier.phone) : null;
-  const tel = supplier?.phone ? `tel:${supplier.phone.replace(/\s+/g, "")}` : null;
-  const [shareOpen, setShareOpen] = useState(false);
+/* ===== Small presentational helpers ===== */
 
+function StatCard({
+  icon: Icon, accent, tint, label, value, sub,
+}: {
+  icon: typeof Tag; accent: string; tint: string; label: string; value: string; sub?: string;
+}) {
+  return (
+    <div className="bg-white rounded-[20px] p-4 shadow-[0_4px_12px_-6px_rgba(10,31,61,0.12)]">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: tint }}>
+          <Icon className="w-4 h-4" style={{ color: accent }} strokeWidth={2.2} />
+        </div>
+        <p className="text-[11px] font-bold text-[#6B7280]">{label}</p>
+      </div>
+      <p className="text-[20px] font-black text-[#0A1F3D] leading-none tracking-tight gb-num">{value}</p>
+      {sub && <p className="text-[10px] font-bold text-[#6B7280] mt-1.5">{sub}</p>}
+    </div>
+  );
+}
+
+function DetailCell({
+  icon: Icon, label, value,
+}: { icon: typeof Tag; label: string; value: string }) {
+  return (
+    <div className="bg-white rounded-[18px] p-3.5 shadow-[0_4px_12px_-6px_rgba(10,31,61,0.10)] flex items-center gap-3">
+      <div className="w-9 h-9 rounded-xl bg-[#F4F6FA] flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-[#0A1F3D]" strokeWidth={2} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">{label}</p>
+        <p className="text-[13px] font-extrabold text-[#0A1F3D] truncate">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+/** Share button — Web Share API with fallback dialog (WhatsApp / SMS / copy link). */
+function ShareButton({ deal, compact = false }: { deal: { id: string; title: string }; compact?: boolean }) {
+  const [shareOpen, setShareOpen] = useState(false);
   const shareUrl = `${window.location.origin}/share/deal/${deal.id}`;
   const shareText = `מצטרפים יחד למחיר משתלם: ${deal.title}\n${shareUrl}`;
 
-  const handleInvite = async () => {
+  const handleShare = async () => {
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({ title: deal.title, text: `מצטרפים יחד למחיר משתלם: ${deal.title}`, url: shareUrl });
@@ -1043,7 +1071,7 @@ function SecondaryActions({
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast.success("הקישור הועתק", { description: "אפשר להדביק ולשלוח לשכנים" });
+      toast.success("הקישור הועתק");
       setShareOpen(false);
     } catch {
       toast.error("העתקה נכשלה");
@@ -1052,44 +1080,17 @@ function SecondaryActions({
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-2">
-        <button
-          type="button"
-          onClick={handleInvite}
-          className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
-        >
-          <Share2 className="h-4 w-4 text-gold" strokeWidth={1.5} />
-          הזמן שכן
-        </button>
-        {wa ? (
-          <a
-            href={wa}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
-          >
-            <MessageCircle className="h-4 w-4 text-gold" strokeWidth={1.5} />
-            וואטסאפ
-          </a>
-        ) : (
-          <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-fs-xs text-muted-foreground">
-            לא זמין
-          </div>
+      <button
+        type="button"
+        onClick={handleShare}
+        aria-label="שתפו את ההצעה"
+        className={cn(
+          "rounded-2xl bg-white text-[#0A1F3D] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-transform shadow-[0_4px_12px_-6px_rgba(10,31,61,0.18)]",
+          compact ? "h-10 w-10" : "h-14 w-14",
         )}
-        {tel ? (
-          <a
-            href={tel}
-            className="h-11 rounded-2xl border border-border bg-card text-foreground text-fs-xs font-bold flex flex-col items-center justify-center gap-0.5 hover:border-gold/40 transition-colors"
-          >
-            <Phone className="h-4 w-4 text-gold" strokeWidth={1.5} />
-            התקשר
-          </a>
-        ) : (
-          <div className="h-11 rounded-2xl border border-dashed border-border/60 opacity-40 flex items-center justify-center text-fs-xs text-muted-foreground">
-            לא זמין
-          </div>
-        )}
-      </div>
+      >
+        <Share2 className={compact ? "h-4 w-4" : "h-5 w-5"} strokeWidth={2.2} />
+      </button>
 
       <Dialog open={shareOpen} onOpenChange={setShareOpen}>
         <DialogContent dir="rtl" className="text-right max-w-sm">
@@ -1130,3 +1131,4 @@ function SecondaryActions({
     </>
   );
 }
+
