@@ -24,6 +24,7 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
+import { EditableField } from "@/components/admin/EditableField";
 import {
   describeOffer,
   describeTier,
@@ -608,9 +609,14 @@ export default function DealDetail() {
                 <span>{category.name}</span>
               </div>
             )}
-            <h1 className="text-[24px] leading-[1.15] font-extrabold text-[#0A1F3D] tracking-tight">
-              {deal.title}
-            </h1>
+            <EditableField
+              table="deals"
+              id={deal.id}
+              field="title"
+              value={deal.title}
+              as="h1"
+              className="text-[24px] leading-[1.15] font-extrabold text-[#0A1F3D] tracking-tight"
+            />
             {supplier && (
               <div className="flex items-center gap-2 mt-2.5">
                 <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="sm" />
