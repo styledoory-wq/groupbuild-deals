@@ -142,6 +142,8 @@ export default function SupplierScan() {
 
   async function confirmRedeem() {
     if (result.kind !== "eligible") return;
+    const { guardPreview } = await import("@/lib/previewMode");
+    if (guardPreview(toast)) return;
     setSubmitting(true);
     const { error } = await supabase.rpc("redeem_voucher", { _code: result.voucher.code });
     setSubmitting(false);
