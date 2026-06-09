@@ -319,7 +319,9 @@ const filteredDeals = useMemo(() => {
                   className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
                   style={{
                     background: cur ? `linear-gradient(180deg,#FFFFFF 0%, ${tint} 100%)` : "#FFFFFF",
-                    boxShadow: cur ? SHADOWS.press : SHADOWS.card,
+                    boxShadow: cur
+                      ? "0 14px 32px -12px rgba(10,31,61,0.28), 0 4px 10px -4px rgba(10,31,61,0.12)"
+                      : "0 10px 24px -10px rgba(10,31,61,0.22), 0 2px 6px -2px rgba(10,31,61,0.08)",
                     transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
                   }}
                 >
@@ -331,13 +333,13 @@ const filteredDeals = useMemo(() => {
                       boxShadow: cur ? SHADOWS.pill : "none",
                     }}
                   >
-                    {done ? <Check className="h-5 w-5" strokeWidth={2.8} /> : <span className="text-[15px] font-extrabold tabular-nums">{i + 1}</span>}
+                    {done ? <Check className="h-5 w-5" strokeWidth={2.8} /> : <span className="text-[16px] font-extrabold tabular-nums">{i + 1}</span>}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <Icon className="h-[14px] w-[14px] shrink-0" strokeWidth={2} style={{ color: cur ? (theme?.accent ?? "#D4AF37") : "#9CA3AF" }} />
-                      <h3 className="text-[15px] font-bold leading-tight tracking-tight text-[#0A1F3D] truncate">
+                      <Icon className="h-[16px] w-[16px] shrink-0" strokeWidth={2} style={{ color: cur ? (theme?.accent ?? "#D4AF37") : "#9CA3AF" }} />
+                      <h3 className="text-[16px] font-bold leading-tight tracking-tight text-[#0A1F3D] truncate">
                         {stage.title}
                       </h3>
                       {cur && (
@@ -349,7 +351,7 @@ const filteredDeals = useMemo(() => {
                         </span>
                       )}
                     </div>
-                    <p className="text-[12.5px] font-medium text-[#6B7280] mt-1 leading-snug line-clamp-1">{stage.description}</p>
+                    <p className="text-[13px] font-medium text-[#5B6675] mt-1 leading-snug line-clamp-1">{stage.description}</p>
                   </div>
 
                   {stage.dbStage && (
