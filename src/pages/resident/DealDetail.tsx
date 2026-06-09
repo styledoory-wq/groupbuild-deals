@@ -636,7 +636,9 @@ export default function DealDetail() {
       {/* ===== SECTION 1b — SUMMARY STAT CARDS ===== */}
       <div className="px-4 mt-4 grid grid-cols-2 gap-3">
         <StatCard icon={Percent}      accent="#E8742C" tint="#FFF1E4" label="הנחה"          value={discountPct ? `${discountPct}%` : "—"} />
-        <StatCard icon={PiggyBank}    accent="#2EA85A" tint="#E8F7EC" label="חיסכון משוער"  value={savingsAmount ? ils(savingsAmount) : "—"} />
+        {savingsAmount ? (
+          <StatCard icon={PiggyBank}    accent="#2EA85A" tint="#E8F7EC" label="חיסכון משוער"  value={ils(savingsAmount)} />
+        ) : null}
         <StatCard icon={Users}        accent="#2F6BFF" tint="#EAF2FF" label="הצטרפו"         value={`${participantCount}`} sub={progressTarget > 0 ? `מתוך ${progressTarget}` : undefined} />
         <StatCard icon={CalendarDays} accent="#7A4FCF" tint="#F2ECFB" label="ימים שנותרו"    value={daysRemaining !== null ? `${daysRemaining}` : "—"} sub={daysRemaining !== null ? "עד סגירה" : undefined} />
       </div>
