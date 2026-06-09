@@ -334,9 +334,9 @@ export default function DealDetail() {
           toast.error(paymentResponse.message ?? "לא הצלחנו ליצור קישור תשלום.");
           return;
         }
-        paymentUrl = typeof cardcomResponse?.payment_url === "string" ? cardcomResponse.payment_url : null;
+        paymentUrl = typeof paymentResponse?.payment_url === "string" ? paymentResponse.payment_url : null;
         if (!paymentUrl) {
-          console.error("[create_cardcom_payment_missing_url]", cardcomResponse);
+          console.error("[create_deposit_missing_url]", paymentResponse);
           toast.error("לא התקבל קישור תשלום. נסו שוב או פנו לתמיכה.");
           return;
         }
