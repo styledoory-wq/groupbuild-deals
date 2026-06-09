@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
     // 1. Reuse an existing pending deposit when present; otherwise create one.
     let deposit = existingDeposit;
     if (!deposit) {
-      const { data: insertedDeposit, error: insErr } = await admin
+      const { data: insertedDeposit, error: insErr } = await supabase
         .from("deposits")
         .insert({
           user_id: userId,
