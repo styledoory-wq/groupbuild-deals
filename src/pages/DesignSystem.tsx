@@ -19,7 +19,7 @@ export default function DesignSystemPage() {
   const [q, setQ] = useState("");
 
   return (
-    <div dir="rtl" className="min-h-screen w-full" style={{ background: "#F0F2F5" }}>
+    <div dir="rtl" className="min-h-screen w-full" style={{ background: "#E8ECF0" }}>
       <div className="mx-auto w-full max-w-[var(--app-max-w)] pb-24">
         <ScreenHeader
           title="מערכת העיצוב"

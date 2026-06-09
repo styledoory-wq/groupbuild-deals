@@ -162,7 +162,7 @@ const filteredDeals = useMemo(() => {
   const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F0F2F5" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#E8ECF0" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -246,9 +246,9 @@ const filteredDeals = useMemo(() => {
 
         {/* Stats — 3 mini cards */}
         <section className="px-5 mt-4 grid grid-cols-3 gap-3">
-          <StatCard icon={Sparkles} label="הצעות פעילות" value={areaDeals.length} accent="#D4AF37" onClick={() => navigate("/resident/deals")} />
-          <StatCard icon={Store} label="ספקים באזור" value={areaSuppliersCount} accent="#0A1F3D" onClick={() => navigate("/resident/categories")} />
-          <StatCard icon={Briefcase} label="הצעות שלי" value={joinedCount} accent="#22C55E" onClick={() => navigate("/resident/my-offers")} />
+          <StatCard icon={Store} label="ספקים באזור" value={areaSuppliersCount} accent="#0A1F3D" tint="rgba(10,31,61,0.05)" onClick={() => navigate("/resident/categories")} />
+          <StatCard icon={Sparkles} label="הצעות פעילות" value={areaDeals.length} accent="#D4AF37" tint="rgba(212,175,55,0.08)" onClick={() => navigate("/resident/deals")} />
+          <StatCard icon={Briefcase} label="הצעות שלי" value={joinedCount} accent="#22C55E" tint="rgba(34,197,94,0.08)" onClick={() => navigate("/resident/my-offers")} />
         </section>
 
         {/* Quick filter chips */}
@@ -263,7 +263,7 @@ const filteredDeals = useMemo(() => {
                   className={`shrink-0 h-9 px-4 rounded-full text-[13px] font-semibold transition-all ${
                     active
                       ? "bg-[#0A1F3D] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]"
-                      : "bg-white text-[#0A1F3D] border border-[#ECEEF2]"
+                      : "bg-white text-[#0A1F3D] shadow-[0_2px_6px_rgba(0,0,0,0.06)]"
                   }`}
                 >
                   {f}
@@ -316,10 +316,10 @@ const filteredDeals = useMemo(() => {
                   key={stage.id}
                   onClick={() => stage.dbStage && navigate(`/resident/categories?stage=${stage.dbStage}`)}
                   disabled={!stage.dbStage}
-                  className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] border border-[#E8EAED] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
+                  className={`w-full text-right rounded-[16px] p-4 flex items-center gap-4 active:scale-[0.99] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
                   style={{
                     background: cur ? `linear-gradient(180deg,#FFFFFF 0%, ${tint} 100%)` : "#FFFFFF",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                    boxShadow: "0 6px 18px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06)",
                     transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
                   }}
                 >
@@ -367,17 +367,18 @@ const filteredDeals = useMemo(() => {
   );
 }
 
-function StatCard({ icon: Icon, label, value, accent, onClick }: { icon: typeof Sparkles; label: string; value: number; accent: string; onClick: () => void }) {
+function StatCard({ icon: Icon, label, value, accent, tint, onClick }: { icon: typeof Sparkles; label: string; value: number; accent: string; tint?: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-[20px] p-3.5 border border-[#E8EAED] shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] flex flex-col items-start gap-2 active:scale-[0.97] transition-[transform,box-shadow] text-right"
+      className="rounded-[16px] p-3.5 shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.12)] flex flex-col items-start gap-2 active:scale-[0.97] transition-[transform,box-shadow] text-right"
+      style={{ background: tint ? `linear-gradient(180deg, #FFFFFF 0%, ${tint} 100%)` : "#FFFFFF" }}
     >
       <span
-        className="h-8 w-8 rounded-xl flex items-center justify-center"
-        style={{ background: `${accent}15` }}
+        className="h-11 w-11 rounded-xl flex items-center justify-center"
+        style={{ background: `${accent}1A` }}
       >
-        <Icon className="h-4 w-4" strokeWidth={2.2} style={{ color: accent }} />
+        <Icon className="h-7 w-7" strokeWidth={2.2} style={{ color: accent }} />
       </span>
       <div className="w-full">
         <div className="text-[22px] font-extrabold text-[#0A1F3D] leading-none tracking-tight gb-num">{value}</div>

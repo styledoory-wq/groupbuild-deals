@@ -219,14 +219,14 @@ export default function Auth() {
     <div
       dir="rtl"
       className="auth-screen min-h-[100dvh] w-full flex justify-center text-[#0A1F3D] relative overflow-hidden"
-      style={{ background: "#F0F2F5" }}
+      style={{ background: "#E8ECF0" }}
     >
       {/* Unified light app background */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div
           className="absolute inset-0"
           style={{
-            background: "#F0F2F5",
+            background: "#E8ECF0",
           }}
         />
       </div>

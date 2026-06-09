@@ -78,7 +78,7 @@ export default function ResidentProfile() {
   ];
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F0F2F5" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#E8ECF0" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -107,7 +107,7 @@ export default function ResidentProfile() {
         {/* Info card */}
         {(user?.phone || user?.email || user?.apartment) && (
           <div className="px-5">
-            <div className="bg-white rounded-[24px] border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] divide-y divide-[#F0F2F5]">
+            <div className="bg-white rounded-[24px] border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] divide-y divide-[#E8ECF0]">
               {user?.phone && (
                 <InfoRow icon={Phone} label="טלפון" value={user.phone} />
               )}
@@ -130,7 +130,7 @@ export default function ResidentProfile() {
               className="w-full h-[60px] rounded-[20px] px-4 flex items-center justify-between bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.05)] active:scale-[0.99] transition-transform"
             >
               <span className="flex items-center gap-3">
-                <span className="h-10 w-10 rounded-xl bg-[#F0F2F5] flex items-center justify-center">
+                <span className="h-10 w-10 rounded-xl bg-[#E8ECF0] flex items-center justify-center">
                   <Icon className="h-[18px] w-[18px] text-[#0A1F3D]" strokeWidth={2} />
                 </span>
                 <span className="text-[15px] font-bold text-[#0A1F3D] tracking-tight">{label}</span>

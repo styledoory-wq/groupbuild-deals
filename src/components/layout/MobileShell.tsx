@@ -16,7 +16,7 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
   return (
     <div
       className="min-h-screen min-h-[100dvh] flex justify-center relative overflow-x-hidden"
-      style={{ overscrollBehavior: "none", backgroundColor: "#F0F2F5" }}
+      style={{ overscrollBehavior: "none", backgroundColor: "#E8ECF0" }}
     >
       <div
         className={cn(

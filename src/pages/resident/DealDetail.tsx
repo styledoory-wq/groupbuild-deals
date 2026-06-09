@@ -781,7 +781,7 @@ export default function DealDetail() {
                     key={idx}
                     className={cn(
                       "flex items-center justify-between rounded-2xl px-3 py-2.5 transition-colors",
-                      isActive ? "bg-[#FFF8E1] border border-[#EBD79A]" : isPast ? "opacity-50" : "bg-[#F0F2F5]",
+                      isActive ? "bg-[#FFF8E1] border border-[#EBD79A]" : isPast ? "opacity-50" : "bg-[#E8ECF0]",
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -814,7 +814,7 @@ export default function DealDetail() {
         className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
       >
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F0F2F5] via-[#F0F2F5]/95 to-transparent">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#E8ECF0] via-[#E8ECF0]/95 to-transparent">
           {interested ? (
             <div className="flex items-center gap-2.5 bg-[#0A1F3D] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
               <div className="w-10 h-10 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] rounded-full flex items-center justify-center shrink-0">
