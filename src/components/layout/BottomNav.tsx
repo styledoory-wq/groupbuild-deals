@@ -38,7 +38,7 @@ function BottomNavImpl({ role }: { role: Role }) {
   return (
     <nav
       dir="rtl"
-      className="fixed bottom-0 left-0 right-0 z-[90] bg-white border-t border-[#ECEEF2] transition-transform duration-200 [.keyboard-open_&]:translate-y-full [.keyboard-open_&]:pointer-events-none"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[90] w-full max-w-[var(--app-max-w)] bg-white border-t border-x border-[#ECEEF2] rounded-t-2xl transition-transform duration-200 [.keyboard-open_&]:translate-y-full [.keyboard-open_&]:pointer-events-none"
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
         boxShadow: "0 -4px 16px -8px rgba(10,31,61,0.08)",
