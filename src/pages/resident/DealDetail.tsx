@@ -321,22 +321,22 @@ export default function DealDetail() {
 
       let paymentUrl: string | null = null;
       if (depositRequired) {
-        const { data: cardcomResponse, error: cardcomErr } = await supabase.functions.invoke("create-cardcom-payment", {
+        const { data: paymentResponse, error: paymentErr } = await supabase.functions.invoke("create-deposit", {
           body: { deal_id: deal.id, user_id: session.session.user.id },
         });
-        if (cardcomErr) {
-          console.error("[create_cardcom_payment_failed]", cardcomErr);
+        if (paymentErr) {
+          console.error("[create_deposit_failed]", paymentErr);
           toast.error("לא הצלחנו ליצור קישור תשלום. נסו שוב או פנו לתמיכה.");
           return;
         }
-        if (cardcomResponse?.error) {
-          console.error("[create_cardcom_payment_error_response]", cardcomResponse);
-          toast.error(cardcomResponse.message ?? "לא הצלחנו ליצור קישור תשלום.");
+        if (paymentResponse?.error) {
+          console.error("[create_deposit_error_response]", paymentResponse);
+          toast.error(paymentResponse.message ?? "לא הצלחנו ליצור קישור תשלום.");
           return;
         }
-        paymentUrl = typeof cardcomResponse?.payment_url === "string" ? cardcomResponse.payment_url : null;
+        paymentUrl = typeof paymentResponse?.payment_url === "string" ? paymentResponse.payment_url : null;
         if (!paymentUrl) {
-          console.error("[create_cardcom_payment_missing_url]", cardcomResponse);
+          console.error("[create_deposit_missing_url]", paymentResponse);
           toast.error("לא התקבל קישור תשלום. נסו שוב או פנו לתמיכה.");
           return;
         }
