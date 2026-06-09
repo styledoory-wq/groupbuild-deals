@@ -246,9 +246,9 @@ const filteredDeals = useMemo(() => {
 
         {/* Stats — 3 mini cards */}
         <section className="px-5 mt-4 grid grid-cols-3 gap-3">
-          <StatCard icon={Sparkles} label="הצעות פעילות" value={areaDeals.length} accent="#D4AF37" onClick={() => navigate("/resident/deals")} />
-          <StatCard icon={Store} label="ספקים באזור" value={areaSuppliersCount} accent="#0A1F3D" onClick={() => navigate("/resident/categories")} />
-          <StatCard icon={Briefcase} label="הצעות שלי" value={joinedCount} accent="#22C55E" onClick={() => navigate("/resident/my-offers")} />
+          <StatCard icon={Store} label="ספקים באזור" value={areaSuppliersCount} accent="#0A1F3D" tint="rgba(10,31,61,0.05)" onClick={() => navigate("/resident/categories")} />
+          <StatCard icon={Sparkles} label="הצעות פעילות" value={areaDeals.length} accent="#D4AF37" tint="rgba(212,175,55,0.08)" onClick={() => navigate("/resident/deals")} />
+          <StatCard icon={Briefcase} label="הצעות שלי" value={joinedCount} accent="#22C55E" tint="rgba(34,197,94,0.08)" onClick={() => navigate("/resident/my-offers")} />
         </section>
 
         {/* Quick filter chips */}
