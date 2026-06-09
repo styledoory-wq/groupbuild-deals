@@ -20,7 +20,7 @@
     --tap: 44px;
 
     /* GroupBuild brand surface */
-    --background: 214 22% 96%;         /* #F4F6F9 */
+    --background: 214 20% 95%;         /* #F0F2F5 */
     --foreground: 215 56% 12%;         /* #0D1B2E */
     --card: 0 0% 100%;
     --card-foreground: 215 56% 12%;
@@ -46,11 +46,11 @@
     --input: 214 22% 92%;
     --ring: 43 54% 54%;
     --radius: 1rem;
-    --gradient-hero: linear-gradient(180deg, #FFFFFF 0%, #F7F8FA 100%);
+    --gradient-hero: linear-gradient(180deg, #FFFFFF 0%, #F0F2F5 100%);
     --gradient-gold: linear-gradient(135deg, #0A1F3D 0%, #123456 100%);
     --gradient-card: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
     --gradient-navy-deep: linear-gradient(160deg, #0D1B2E 0%, #1A2F4E 100%);
-    --gradient-page: #F4F6F9;
+    --gradient-page: #F0F2F5;
     --shadow-soft: 0 1px 2px rgba(15,30,60,0.04), 0 4px 12px -6px rgba(15,30,60,0.06);
     --shadow-card: 0 1px 2px rgba(15,30,60,0.04), 0 12px 32px -16px rgba(15,30,60,0.10), 0 2px 6px -2px rgba(15,30,60,0.04);
     --shadow-elevated: 0 20px 48px -24px rgba(15,30,60,0.16), 0 6px 18px -10px rgba(15,30,60,0.08);
@@ -72,7 +72,7 @@
     text-size-adjust: 100%;
     font-size: 14px;
     /* Light, continuous top — matches page surface so the safe-area blends in */
-    background-color: #F7F8FA;
+    background-color: #F0F2F5;
     overscroll-behavior: none;
   }
   @media (min-width: 640px) { html { font-size: 16px; } }
@@ -93,7 +93,7 @@
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
     overscroll-behavior-y: none;
-    background: #F7F8FA;
+    background: #F0F2F5;
     min-height: 100svh;
     min-height: 100dvh;
     -webkit-overflow-scrolling: touch;
@@ -102,7 +102,7 @@
   #root {
     min-height: 100svh;
     min-height: 100dvh;
-    background: #F7F8FA;
+    background: #F0F2F5;
   }
 
   img, video, svg {
@@ -119,14 +119,14 @@
   /* Auth pages use the same light app surface */
   body.auth-fullscreen,
   body.auth-fullscreen #root {
-    background: #F7F8FA;
+    background: #F0F2F5;
   }
   body.auth-fullscreen::before {
     content: "";
     position: fixed;
     top: 0; left: 0; right: 0;
     height: env(safe-area-inset-top);
-    background-color: #F7F8FA;
+    background-color: #F0F2F5;
     z-index: 100;
     pointer-events: none;
   }
@@ -172,21 +172,21 @@
   .gb-card {
     @apply rounded-[20px] relative;
     background: #ffffff;
-    border: 1px solid #F1F3F6;
-    box-shadow: 0 12px 28px -14px rgba(10,31,61,0.22), 0 4px 10px -4px rgba(10,31,61,0.08);
+    border: 1px solid #E8EAED;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     padding: clamp(12px, 1.5vw, 20px);
     transition: transform 180ms cubic-bezier(0.4,0,0.2,1), box-shadow 180ms cubic-bezier(0.4,0,0.2,1);
   }
   .gb-card:hover {
-    box-shadow: 0 18px 36px -14px rgba(10,31,61,0.26), 0 6px 14px -6px rgba(10,31,61,0.10);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.10);
     transform: translateY(-1px);
   }
 
   .gb-card-flat {
     @apply rounded-[20px];
     background: #ffffff;
-    border: 1px solid #F1F3F6;
-    box-shadow: 0 6px 16px -8px rgba(10,31,61,0.14);
+    border: 1px solid #E8EAED;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
 
 
@@ -225,12 +225,12 @@
 
   .gb-card-premium {
     @apply rounded-[20px] bg-white relative;
-    border: 1px solid #F1F3F6;
-    box-shadow: 0 12px 28px -14px rgba(10,31,61,0.22), 0 4px 10px -4px rgba(10,31,61,0.08);
+    border: 1px solid #E8EAED;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     transition: transform 180ms cubic-bezier(0.4,0,0.2,1), box-shadow 180ms cubic-bezier(0.4,0,0.2,1);
   }
   .gb-card-premium:hover {
-    box-shadow: 0 18px 36px -14px rgba(10,31,61,0.26), 0 6px 14px -6px rgba(10,31,61,0.10);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.10);
     transform: translateY(-1px);
   }
 
@@ -259,7 +259,7 @@
 
   .gb-section-fade { background: linear-gradient(180deg, transparent, rgba(244,246,250,0.7) 50%, transparent); }
 
-  .gb-aurora { background: #F7F8FA; }
+  .gb-aurora { background: #F0F2F5; }
 
   .gb-tile-dark {
     background: #ffffff;
@@ -276,8 +276,8 @@
   .gb-stat-pill {
     @apply rounded-[20px] px-3 py-4 flex flex-col items-center justify-center gap-1;
     background: #ffffff;
-    border: 1px solid #F1F3F6;
-    box-shadow: 0 6px 16px -8px rgba(10,31,61,0.14), 0 2px 4px -2px rgba(10,31,61,0.06);
+    border: 1px solid #E8EAED;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
 
   .gb-particle { @apply absolute rounded-full pointer-events-none; background: #D4AF37; box-shadow: 0 1px 3px rgba(10,31,61,0.06); }
@@ -287,8 +287,8 @@
   .ios-card {
     background: #ffffff;
     border-radius: 20px;
-    border: 1px solid #F1F3F6;
-    box-shadow: 0 12px 28px -14px rgba(10,31,61,0.22), 0 4px 10px -4px rgba(10,31,61,0.08);
+    border: 1px solid #E8EAED;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     transition: transform 180ms cubic-bezier(0.4,0,0.2,1), box-shadow 180ms cubic-bezier(0.4,0,0.2,1);
   }
 

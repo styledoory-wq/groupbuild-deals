@@ -162,7 +162,7 @@ const filteredDeals = useMemo(() => {
   const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F8FA" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F0F2F5" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -316,12 +316,10 @@ const filteredDeals = useMemo(() => {
                   key={stage.id}
                   onClick={() => stage.dbStage && navigate(`/resident/categories?stage=${stage.dbStage}`)}
                   disabled={!stage.dbStage}
-                  className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
+                  className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] border border-[#E8EAED] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
                   style={{
                     background: cur ? `linear-gradient(180deg,#FFFFFF 0%, ${tint} 100%)` : "#FFFFFF",
-                    boxShadow: cur
-                      ? "0 14px 32px -12px rgba(10,31,61,0.28), 0 4px 10px -4px rgba(10,31,61,0.12)"
-                      : "0 10px 24px -10px rgba(10,31,61,0.22), 0 2px 6px -2px rgba(10,31,61,0.08)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
                     transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
                   }}
                 >
@@ -373,7 +371,7 @@ function StatCard({ icon: Icon, label, value, accent, onClick }: { icon: typeof 
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-[20px] p-3.5 border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_6px_-2px_rgba(10,31,61,0.08)] hover:shadow-[0_14px_28px_-12px_rgba(10,31,61,0.22)] flex flex-col items-start gap-2 active:scale-[0.97] transition-[transform,box-shadow] text-right"
+      className="bg-white rounded-[20px] p-3.5 border border-[#E8EAED] shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] flex flex-col items-start gap-2 active:scale-[0.97] transition-[transform,box-shadow] text-right"
     >
       <span
         className="h-8 w-8 rounded-xl flex items-center justify-center"
