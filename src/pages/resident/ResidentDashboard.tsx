@@ -373,7 +373,7 @@ function StatCard({ icon: Icon, label, value, accent, onClick }: { icon: typeof 
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-[20px] p-3.5 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] flex flex-col items-start gap-2 active:scale-[0.97] transition-transform text-right"
+      className="bg-white rounded-[20px] p-3.5 border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_6px_-2px_rgba(10,31,61,0.08)] hover:shadow-[0_14px_28px_-12px_rgba(10,31,61,0.22)] flex flex-col items-start gap-2 active:scale-[0.97] transition-[transform,box-shadow] text-right"
     >
       <span
         className="h-8 w-8 rounded-xl flex items-center justify-center"
