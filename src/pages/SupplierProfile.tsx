@@ -13,6 +13,7 @@ import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
 import type { OfferTier } from "@/lib/offerPricing";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
+import { EditableField } from "@/components/admin/EditableField";
 
 interface DbSupplier {
   id: string;
