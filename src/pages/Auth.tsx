@@ -213,20 +213,20 @@ export default function Auth() {
   // Unified with Categories: light surface, white controls, soft shadows.
   const fieldWrap = "relative";
   const fieldInput =
-    "h-14 w-full rounded-[16px] bg-white pr-12 pl-4 text-[15px] text-[#0A1F3D] placeholder:text-[#9CA3AF] text-right shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.22),0_4px_14px_-4px_rgba(10,31,61,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
+    "h-[56px] w-full rounded-[14px] bg-white pr-12 pl-4 text-[15px] text-[#0A1F3D] placeholder:text-[#9CA3AF] text-right border border-[#E0E4E8] shadow-[0_2px_8px_rgba(0,0,0,0.08)] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.22),0_4px_14px_-4px_rgba(10,31,61,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
 
   return (
     <div
       dir="rtl"
       className="auth-screen min-h-[100dvh] w-full flex justify-center text-[#0A1F3D] relative overflow-hidden"
-      style={{ background: "#E8ECF0" }}
+      style={{ background: "linear-gradient(160deg, #EEF1F5 0%, #E4E8EE 100%)" }}
     >
       {/* Unified light app background */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div
           className="absolute inset-0"
           style={{
-            background: "#E8ECF0",
+            background: "linear-gradient(160deg, #EEF1F5 0%, #E4E8EE 100%)",
           }}
         />
       </div>
@@ -241,7 +241,7 @@ export default function Auth() {
         {/* Brand header — minimal, product-focused */}
         <div className="pt-6 pb-2 animate-fade-up flex flex-col items-center text-center">
           <BrandLogo variant="dark" size="xl" className="opacity-100" />
-          <h1 className="mt-7 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight">
+          <h1 className="mt-10 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight">
             {mode === "signin" ? "מתחברים לעסקאות טובות יותר" : "בואו נצא לדרך"}
           </h1>
           <div className="mt-3 h-[2px] w-10 rounded-full bg-[#D4AF37]" />
@@ -471,7 +471,7 @@ export default function Auth() {
               type="button"
               onClick={(e) => handleSignIn(e as unknown as React.FormEvent)}
               disabled={loading}
-              className="w-full h-14 text-base flex items-center justify-center gap-2"
+              className="w-full h-[56px] rounded-[14px] text-base flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(10,31,61,0.35)]"
             >
               {loading ? "מתחבר…" : "המשך לחשבון שלי"}
               <ArrowLeft className="h-4 w-4" />
@@ -481,7 +481,7 @@ export default function Auth() {
               type="button"
               onClick={(e) => handleSignUp(e as unknown as React.FormEvent)}
               disabled={loading || !termsAccepted}
-              className="w-full h-14 text-base disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full h-[56px] rounded-[14px] text-base disabled:opacity-60 flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(10,31,61,0.35)]"
             >
               {loading ? "נרשם…" : "פתחו את החשבון"}
               <ArrowLeft className="h-4 w-4" />
