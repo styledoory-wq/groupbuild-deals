@@ -391,7 +391,7 @@ export default function SupplierProfile() {
 
       {/* CTA */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#F0F2F5] via-[#F0F2F5] to-transparent">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#E8ECF0] via-[#E8ECF0] to-transparent">
           <Button
             onClick={handleInterest}
             disabled={submitting || interested}

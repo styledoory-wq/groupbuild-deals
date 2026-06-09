@@ -162,7 +162,7 @@ const filteredDeals = useMemo(() => {
   const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F0F2F5" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#E8ECF0" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -316,10 +316,10 @@ const filteredDeals = useMemo(() => {
                   key={stage.id}
                   onClick={() => stage.dbStage && navigate(`/resident/categories?stage=${stage.dbStage}`)}
                   disabled={!stage.dbStage}
-                  className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] border border-[#E8EAED] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
+                  className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
                   style={{
                     background: cur ? `linear-gradient(180deg,#FFFFFF 0%, ${tint} 100%)` : "#FFFFFF",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)",
                     transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
                   }}
                 >
@@ -371,7 +371,7 @@ function StatCard({ icon: Icon, label, value, accent, onClick }: { icon: typeof 
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-[20px] p-3.5 border border-[#E8EAED] shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] flex flex-col items-start gap-2 active:scale-[0.97] transition-[transform,box-shadow] text-right"
+      className="bg-white rounded-[20px] p-3.5 shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] flex flex-col items-start gap-2 active:scale-[0.97] transition-[transform,box-shadow] text-right"
     >
       <span
         className="h-8 w-8 rounded-xl flex items-center justify-center"

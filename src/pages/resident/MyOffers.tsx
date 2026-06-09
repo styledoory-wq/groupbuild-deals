@@ -292,7 +292,7 @@ export default function MyOffers() {
                     <p className="text-sm text-[#6B7280]">הצעה זו אינה זמינה יותר</p>
                     <button
                       onClick={() => toggleHide({ interest, deposit }, !hidden)}
-                      className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#F0F2F5] text-[#0A1F3D]"
+                      className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#E8ECF0] text-[#0A1F3D]"
                     >
                       {hidden ? "החזרה" : "הסתרה"}
                     </button>
@@ -366,7 +366,7 @@ export default function MyOffers() {
                   </div>
 
                   <Link to={`/resident/deals/${deal.id}`} className="block">
-                    <div className="pt-3 border-t border-[#F0F2F5] flex items-end justify-between gap-2">
+                    <div className="pt-3 border-t border-[#E8ECF0] flex items-end justify-between gap-2">
                       <div>
                         <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 uppercase tracking-wide">המחיר הנוכחי שלך</div>
                         <div className="text-[20px] font-extrabold text-[#0A1F3D] leading-none tracking-tight">{display.headline}</div>
@@ -393,7 +393,7 @@ export default function MyOffers() {
                           </span>
                         )}
                         {interest.deposit_required && interest.deposit_amount > 0 && (
-                          <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#F0F2F5] text-[#0A1F3D]">
+                          <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#E8ECF0] text-[#0A1F3D]">
                             {ils(Number(interest.deposit_amount))}
                           </span>
                         )}

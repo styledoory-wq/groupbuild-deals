@@ -130,7 +130,7 @@ export default function CategoriesList() {
     : stageGroups.filter((g) => g.stage.id === activeStage);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F0F2F5" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#E8ECF0" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -142,7 +142,7 @@ export default function CategoriesList() {
           className="sticky z-20 px-5 pt-2 pb-3"
           style={{
             top: "env(safe-area-inset-top)",
-            background: "linear-gradient(180deg,#F0F2F5 60%, rgba(247,248,250,0.0))",
+            background: "linear-gradient(180deg,#E8ECF0 60%, rgba(247,248,250,0.0))",
             backdropFilter: "saturate(180%) blur(8px)",
             WebkitBackdropFilter: "saturate(180%) blur(8px)",
           }}
