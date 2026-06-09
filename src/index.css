@@ -13,7 +13,7 @@
     /* Fluid horizontal page padding — scales 16px → 32px */
     --pad-x: clamp(1rem, 0.5rem + 2vw, 2rem);
     /* App content max width */
-    --app-max-w: 1280px;
+    --app-max-w: 480px;
     /* Bottom navigation height (used by shells for padding offset) */
     --nav-h: clamp(60px, 56px + 1.2vw, 72px);
     /* Min touch target per WCAG / Apple HIG */
