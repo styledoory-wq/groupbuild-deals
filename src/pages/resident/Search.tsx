@@ -94,11 +94,11 @@ export default function SearchPage() {
             </>
           ) : loading ? (
             <div className="space-y-3">
-              {[0,1,2].map((i) => <div key={i} className="h-20 rounded-[20px] bg-white border border-[#ECEEF2] animate-pulse" />)}
+              {[0,1,2].map((i) => <div key={i} className="h-20 rounded-[20px] bg-white border border-[#E8EAED] animate-pulse" />)}
             </div>
           ) : suppliers.length === 0 ? (
             <div className="flex flex-col items-center text-center py-16">
-              <div className="h-16 w-16 rounded-2xl bg-white border border-[#ECEEF2] flex items-center justify-center mb-4 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)]">
+              <div className="h-16 w-16 rounded-2xl bg-white border border-[#E8EAED] flex items-center justify-center mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
                 <SearchIcon className="h-7 w-7 text-[#D4AF37]" />
               </div>
               <p className="text-[15px] font-bold text-[#0A1F3D]">לא נמצאו ספקים</p>
@@ -110,7 +110,7 @@ export default function SearchPage() {
                 <Link
                   key={s.id}
                   to={`/suppliers/${s.id}`}
-                  className="flex items-center gap-3 bg-white rounded-[20px] p-3 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] active:scale-[0.99] transition-transform"
+                  className="flex items-center gap-3 bg-white rounded-[20px] p-3 border border-[#E8EAED] shadow-[0_2px_8px_rgba(0,0,0,0.08)] active:scale-[0.99] transition-transform"
                 >
                   <SupplierLogo logoUrl={s.logo_url} name={s.business_name} size="md" />
                   <div className="flex-1 min-w-0">
