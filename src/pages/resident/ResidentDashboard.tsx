@@ -263,7 +263,7 @@ const filteredDeals = useMemo(() => {
                   className={`shrink-0 h-9 px-4 rounded-full text-[13px] font-semibold transition-all ${
                     active
                       ? "bg-[#0A1F3D] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]"
-                      : "bg-white text-[#0A1F3D] border border-[#ECEEF2]"
+                      : "bg-white text-[#0A1F3D] shadow-[0_2px_6px_rgba(0,0,0,0.06)]"
                   }`}
                 >
                   {f}
