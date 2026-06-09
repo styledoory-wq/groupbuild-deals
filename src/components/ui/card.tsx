@@ -10,15 +10,16 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   <div
     ref={ref}
     className={cn(
-      "rounded-[20px] bg-white text-card-foreground p-4",
-      "shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]",
+      "rounded-[20px] bg-white text-card-foreground p-4 border border-[#F1F3F6]",
+      "shadow-[0_12px_28px_-14px_rgba(10,31,61,0.22),0_4px_10px_-4px_rgba(10,31,61,0.08)]",
       "transition-[transform,box-shadow] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
-      "hover:-translate-y-[1px] hover:shadow-[0_14px_28px_-10px_rgba(10,31,61,0.22)]",
+      "hover:-translate-y-[1px] hover:shadow-[0_18px_36px_-14px_rgba(10,31,61,0.26),0_6px_14px_-6px_rgba(10,31,61,0.10)]",
       "active:scale-[0.99]",
       className,
     )}
     {...props}
   />
+
 ));
 Card.displayName = "Card";
 

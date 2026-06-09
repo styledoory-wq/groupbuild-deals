@@ -172,20 +172,23 @@
   .gb-card {
     @apply rounded-[20px] relative;
     background: #ffffff;
-    box-shadow: 0 8px 20px -10px rgba(10,31,61,0.18), 0 2px 4px -2px rgba(10,31,61,0.05);
+    border: 1px solid #F1F3F6;
+    box-shadow: 0 12px 28px -14px rgba(10,31,61,0.22), 0 4px 10px -4px rgba(10,31,61,0.08);
     padding: clamp(12px, 1.5vw, 20px);
     transition: transform 180ms cubic-bezier(0.4,0,0.2,1), box-shadow 180ms cubic-bezier(0.4,0,0.2,1);
   }
   .gb-card:hover {
-    box-shadow: 0 14px 28px -10px rgba(10,31,61,0.20);
+    box-shadow: 0 18px 36px -14px rgba(10,31,61,0.26), 0 6px 14px -6px rgba(10,31,61,0.10);
     transform: translateY(-1px);
   }
 
   .gb-card-flat {
     @apply rounded-[20px];
     background: #ffffff;
-    box-shadow: 0 2px 10px -4px rgba(10,31,61,0.08);
+    border: 1px solid #F1F3F6;
+    box-shadow: 0 6px 16px -8px rgba(10,31,61,0.14);
   }
+
 
   .gb-hero { background: var(--gradient-hero); color: #0A1F3D; }
   .gb-gold-text { @apply text-secondary; }
@@ -222,13 +225,15 @@
 
   .gb-card-premium {
     @apply rounded-[20px] bg-white relative;
-    box-shadow: 0 8px 20px -10px rgba(10,31,61,0.18), 0 2px 4px -2px rgba(10,31,61,0.05);
+    border: 1px solid #F1F3F6;
+    box-shadow: 0 12px 28px -14px rgba(10,31,61,0.22), 0 4px 10px -4px rgba(10,31,61,0.08);
     transition: transform 180ms cubic-bezier(0.4,0,0.2,1), box-shadow 180ms cubic-bezier(0.4,0,0.2,1);
   }
   .gb-card-premium:hover {
-    box-shadow: 0 14px 28px -10px rgba(10,31,61,0.22);
+    box-shadow: 0 18px 36px -14px rgba(10,31,61,0.26), 0 6px 14px -6px rgba(10,31,61,0.10);
     transform: translateY(-1px);
   }
+
 
   .gb-dock {
     background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(247,249,252,0.72));
@@ -271,7 +276,8 @@
   .gb-stat-pill {
     @apply rounded-[20px] px-3 py-4 flex flex-col items-center justify-center gap-1;
     background: #ffffff;
-    box-shadow: 0 2px 10px -4px rgba(10,31,61,0.08);
+    border: 1px solid #F1F3F6;
+    box-shadow: 0 6px 16px -8px rgba(10,31,61,0.14), 0 2px 4px -2px rgba(10,31,61,0.06);
   }
 
   .gb-particle { @apply absolute rounded-full pointer-events-none; background: #D4AF37; box-shadow: 0 1px 3px rgba(10,31,61,0.06); }
@@ -281,9 +287,11 @@
   .ios-card {
     background: #ffffff;
     border-radius: 20px;
-    box-shadow: 0 8px 20px -10px rgba(10,31,61,0.18), 0 2px 4px -2px rgba(10,31,61,0.05);
+    border: 1px solid #F1F3F6;
+    box-shadow: 0 12px 28px -14px rgba(10,31,61,0.22), 0 4px 10px -4px rgba(10,31,61,0.08);
     transition: transform 180ms cubic-bezier(0.4,0,0.2,1), box-shadow 180ms cubic-bezier(0.4,0,0.2,1);
   }
+
 
   .ios-btn-navy {
     background: #0A1F3D; color: #ffffff; border-radius: 16px;
