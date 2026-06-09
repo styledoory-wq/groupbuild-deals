@@ -46,7 +46,7 @@
     --input: 214 22% 92%;
     --ring: 43 54% 54%;
     --radius: 1rem;
-    --gradient-hero: linear-gradient(180deg, #FFFFFF 0%, #F7F8FA 100%);
+    --gradient-hero: linear-gradient(180deg, #FFFFFF 0%, #F0F2F5 100%);
     --gradient-gold: linear-gradient(135deg, #0A1F3D 0%, #123456 100%);
     --gradient-card: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
     --gradient-navy-deep: linear-gradient(160deg, #0D1B2E 0%, #1A2F4E 100%);
@@ -259,7 +259,7 @@
 
   .gb-section-fade { background: linear-gradient(180deg, transparent, rgba(244,246,250,0.7) 50%, transparent); }
 
-  .gb-aurora { background: #F7F8FA; }
+  .gb-aurora { background: #F0F2F5; }
 
   .gb-tile-dark {
     background: #ffffff;

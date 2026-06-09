@@ -316,12 +316,10 @@ const filteredDeals = useMemo(() => {
                   key={stage.id}
                   onClick={() => stage.dbStage && navigate(`/resident/categories?stage=${stage.dbStage}`)}
                   disabled={!stage.dbStage}
-                  className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
+                  className={`w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] border border-[#E8EAED] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
                   style={{
                     background: cur ? `linear-gradient(180deg,#FFFFFF 0%, ${tint} 100%)` : "#FFFFFF",
-                    boxShadow: cur
-                      ? "0 14px 32px -12px rgba(10,31,61,0.28), 0 4px 10px -4px rgba(10,31,61,0.12)"
-                      : "0 10px 24px -10px rgba(10,31,61,0.22), 0 2px 6px -2px rgba(10,31,61,0.08)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
                     transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
                   }}
                 >
