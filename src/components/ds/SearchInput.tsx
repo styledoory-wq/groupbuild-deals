@@ -18,7 +18,7 @@ export function SearchInput({
   const stickyStyle: React.CSSProperties = sticky
     ? {
         top: "env(safe-area-inset-top)",
-        background: "linear-gradient(180deg,#F7F8FA 60%, rgba(247,248,250,0))",
+        background: "linear-gradient(180deg,#F0F2F5 60%, rgba(247,248,250,0))",
         backdropFilter: "saturate(180%) blur(8px)",
         WebkitBackdropFilter: "saturate(180%) blur(8px)",
       }
