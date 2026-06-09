@@ -367,17 +367,18 @@ const filteredDeals = useMemo(() => {
   );
 }
 
-function StatCard({ icon: Icon, label, value, accent, onClick }: { icon: typeof Sparkles; label: string; value: number; accent: string; onClick: () => void }) {
+function StatCard({ icon: Icon, label, value, accent, tint, onClick }: { icon: typeof Sparkles; label: string; value: number; accent: string; tint?: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-[20px] p-3.5 shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] flex flex-col items-start gap-2 active:scale-[0.97] transition-[transform,box-shadow] text-right"
+      className="rounded-[16px] p-3.5 shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.12)] flex flex-col items-start gap-2 active:scale-[0.97] transition-[transform,box-shadow] text-right"
+      style={{ background: tint ? `linear-gradient(180deg, #FFFFFF 0%, ${tint} 100%)` : "#FFFFFF" }}
     >
       <span
-        className="h-8 w-8 rounded-xl flex items-center justify-center"
-        style={{ background: `${accent}15` }}
+        className="h-11 w-11 rounded-xl flex items-center justify-center"
+        style={{ background: `${accent}1A` }}
       >
-        <Icon className="h-4 w-4" strokeWidth={2.2} style={{ color: accent }} />
+        <Icon className="h-7 w-7" strokeWidth={2.2} style={{ color: accent }} />
       </span>
       <div className="w-full">
         <div className="text-[22px] font-extrabold text-[#0A1F3D] leading-none tracking-tight gb-num">{value}</div>
