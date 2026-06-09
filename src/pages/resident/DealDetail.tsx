@@ -321,21 +321,24 @@ export default function DealDetail() {
 
       let paymentUrl: string | null = null;
       if (depositRequired) {
-        const { data: depositResponse, error: depositErr } = await supabase.functions.invoke("create-deposit", {
-          body: { deal_id: deal.id },
+        const { data: cardcomResponse, error: cardcomErr } = await supabase.functions.invoke("create-cardcom-payment", {
+          body: { deal_id: deal.id, user_id: session.session.user.id },
         });
-        if (depositErr) {
-          console.error("[create_deposit_failed]", depositErr);
-          throw new Error("לא הצלחנו ליצור קישור תשלום. נסו שוב או פנו לתמיכה.");
+        if (cardcomErr) {
+          console.error("[create_cardcom_payment_failed]", cardcomErr);
+          toast.error("לא הצלחנו ליצור קישור תשלום. נסו שוב או פנו לתמיכה.");
+          return;
         }
-        if (depositResponse?.error) {
-          console.error("[create_deposit_error_response]", depositResponse);
-          throw new Error(depositResponse.message ?? "לא הצלחנו ליצור קישור תשלום.");
+        if (cardcomResponse?.error) {
+          console.error("[create_cardcom_payment_error_response]", cardcomResponse);
+          toast.error(cardcomResponse.message ?? "לא הצלחנו ליצור קישור תשלום.");
+          return;
         }
-        paymentUrl = typeof depositResponse?.payment_url === "string" ? depositResponse.payment_url : null;
+        paymentUrl = typeof cardcomResponse?.payment_url === "string" ? cardcomResponse.payment_url : null;
         if (!paymentUrl) {
-          console.error("[create_deposit_missing_payment_url]", depositResponse);
-          throw new Error("לא התקבל קישור תשלום. נסו שוב או פנו לתמיכה.");
+          console.error("[create_cardcom_payment_missing_url]", cardcomResponse);
+          toast.error("לא התקבל קישור תשלום. נסו שוב או פנו לתמיכה.");
+          return;
         }
       }
 
