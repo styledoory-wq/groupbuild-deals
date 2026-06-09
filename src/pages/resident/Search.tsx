@@ -85,7 +85,7 @@ export default function SearchPage() {
                   <button
                     key={s}
                     onClick={() => setQ(s)}
-                    className="h-9 px-4 rounded-full bg-white border border-[#ECEEF2] text-[13px] font-semibold text-[#0A1F3D] active:scale-95 transition-transform"
+                    className="h-9 px-4 rounded-full bg-white border border-[#E5E7EB] shadow-[0_2px_8px_-3px_rgba(10,31,61,0.10)] hover:shadow-[0_6px_14px_-6px_rgba(10,31,61,0.18)] text-[13px] font-semibold text-[#0A1F3D] active:scale-95 transition-[transform,box-shadow]"
                   >
                     {s}
                   </button>
