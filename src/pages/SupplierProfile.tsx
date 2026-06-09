@@ -228,7 +228,14 @@ export default function SupplierProfile() {
           <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" className="shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]" />
           <div className="flex-1 min-w-0 pb-1">
             <div className="flex items-center gap-1.5 mb-1">
-              <h1 className="text-[20px] font-extrabold truncate text-[#0A1F3D] tracking-tight">{supplier.business_name}</h1>
+              <EditableField
+                table="suppliers"
+                id={supplier.id}
+                field="business_name"
+                value={supplier.business_name}
+                as="h1"
+                className="text-[20px] font-extrabold truncate text-[#0A1F3D] tracking-tight"
+              />
               {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-[#D4AF37] shrink-0" />}
             </div>
             <div className="mb-1 flex items-center gap-1.5 flex-wrap">
@@ -286,10 +293,19 @@ export default function SupplierProfile() {
         <SupplierCatalogsList supplierId={supplier.id} legacyUrl={supplier.catalog_url} />
 
         {/* Description */}
-        {supplier.description && (
+        {(supplier.description || true) && (
           <section className="gb-card p-4">
             <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">על העסק</h2>
-            <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{supplier.description}</p>
+            <EditableField
+              table="suppliers"
+              id={supplier.id}
+              field="description"
+              value={supplier.description ?? ""}
+              type="textarea"
+              as="p"
+              className="text-sm text-foreground whitespace-pre-line leading-relaxed block"
+              placeholder="—"
+            />
           </section>
         )}
 

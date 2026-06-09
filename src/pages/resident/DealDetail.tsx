@@ -24,6 +24,7 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
+import { EditableField } from "@/components/admin/EditableField";
 import {
   describeOffer,
   describeTier,
