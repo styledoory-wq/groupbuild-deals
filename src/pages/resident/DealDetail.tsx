@@ -255,6 +255,8 @@ export default function DealDetail() {
 
   const submitJoin = async () => {
     if (!deal) return;
+    const { guardPreview } = await import("@/lib/previewMode");
+    if (guardPreview(toast)) return;
     if (!joinForm.full_name.trim() || !joinForm.phone.trim()) {
       toast.error("נא למלא שם וטלפון");
       return;

@@ -11,6 +11,8 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { preloadRoleRoutes } from "@/lib/routePreload";
 import { isAdminEmail } from "@/lib/auth";
 import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
+import { PreviewModeBanner } from "./components/PreviewModeBanner";
+import { getPreviewRole } from "./lib/previewMode";
 
 const Welcome = lazy(() => import("./pages/Welcome"));
 const Landing = lazy(() => import("./pages/Landing"));
@@ -125,7 +127,12 @@ const RequireRole = ({ role, children }: { role: "resident" | "supplier"; childr
 
   if (!authReady) return <SuspenseFallback />;
   if (!user) return <Navigate to="/auth" replace />;
-  if (isAdminEmail(user.email)) return <Navigate to="/admin" replace />;
+  // Admins can preview the resident/supplier UI when previewRole is set in sessionStorage
+  const previewRole = getPreviewRole();
+  if (isAdminEmail(user.email) || user.role === "admin") {
+    if (previewRole === role) return <>{children}</>;
+    return <Navigate to="/admin" replace />;
+  }
   if (user.role !== role) return <Navigate to={roleHome(user.role)} replace />;
 
   return <>{children}</>;
@@ -167,6 +174,7 @@ const App = () => (
         <Sonner position="top-center" dir="rtl" />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AppSplash />
+          <PreviewModeBanner />
           <PreloadImportantRoutes />
           <TermsAcceptanceGate>
             <RouteTransition>

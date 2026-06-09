@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, MapPin, Settings, UserCog, AlertTriangle, type LucideIcon } from "lucide-react";
+import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, MapPin, Settings, UserCog, AlertTriangle, Eye, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PremiumHeader } from "@/components/layout/PremiumHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
+import { setPreviewRole } from "@/lib/previewMode";
 import { toast } from "sonner";
 
 type Stats = {
@@ -131,6 +132,34 @@ export default function AdminDashboard() {
         <StatCard icon={Users} label="ספקים" value={stats.suppliers} />
         <StatCard icon={Tag} label="עסקאות פעילות" value={stats.activeDeals} />
         <StatCard icon={LayoutGrid} label="קטגוריות" value={categories.length} />
+      </div>
+
+      {/* Preview-mode quick switchers */}
+      <div className="px-5 mb-4 grid grid-cols-2 gap-2.5">
+        <button
+          onClick={() => { setPreviewRole("resident"); navigate("/resident"); }}
+          className="bg-white rounded-[16px] p-3.5 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
+        >
+          <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
+            <Eye className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="font-extrabold text-[13px] text-[#0A1F3D] leading-tight">תצוגת דייר</div>
+            <div className="text-[11px] text-[#6B7280] mt-0.5 font-medium">צפייה בממשק הדייר</div>
+          </div>
+        </button>
+        <button
+          onClick={() => { setPreviewRole("supplier"); navigate("/supplier"); }}
+          className="bg-white rounded-[16px] p-3.5 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
+        >
+          <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
+            <Eye className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="font-extrabold text-[13px] text-[#0A1F3D] leading-tight">תצוגת ספק</div>
+            <div className="text-[11px] text-[#6B7280] mt-0.5 font-medium">צפייה בממשק הספק</div>
+          </div>
+        </button>
       </div>
 
       <section className="px-5 pb-10">
