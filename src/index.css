@@ -354,17 +354,17 @@
     from { opacity: 0; transform: translateY(4px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .gb-card, .gb-card-flat, .gb-card-premium, .ios-card { animation: gb-card-enter 0.18s ease-out both; }
-  .route-transition, .gb-card, .gb-card-flat, .gb-card-premium, .ios-card, button, a { -webkit-tap-highlight-color: transparent; }
+  .gb-card, .gb-card-flat, .gb-card-premium { animation: gb-card-enter 0.18s ease-out both; }
+  .route-transition, .gb-card, .gb-card-flat, .gb-card-premium, button, a { -webkit-tap-highlight-color: transparent; }
   .gb-cv-auto { content-visibility: auto; contain-intrinsic-size: 1px 320px; }
 
   @media (max-width: 640px) {
-    .gb-card, .gb-card-flat, .gb-card-premium, .ios-card { animation: none; }
+    .gb-card, .gb-card-flat, .gb-card-premium { animation: none; }
     .gb-float { animation: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .route-transition, .gb-card, .gb-card-flat, .gb-card-premium, .ios-card,
+    .route-transition, .gb-card, .gb-card-flat, .gb-card-premium,
     .gb-float, .gb-pulse-glow, .gb-shimmer,
     .gb-particle-1, .gb-particle-2, .gb-particle-3,
     .splash-logo-frame { animation: none !important; }
