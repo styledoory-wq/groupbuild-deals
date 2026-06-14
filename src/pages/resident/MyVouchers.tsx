@@ -164,7 +164,7 @@ export default function MyVouchers() {
         {loading ? (
           <div className="h-72 gb-skeleton rounded-3xl" />
         ) : vouchers.length === 0 && pending.length === 0 ? (
-          <div className="ios-card p-10 text-center">
+          <div className="gb-card p-10 text-center">
             <div
               className="h-16 w-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
               style={{

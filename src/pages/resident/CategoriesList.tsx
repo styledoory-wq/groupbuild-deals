@@ -5,7 +5,7 @@ import {
   ChevronLeft, LayoutGrid,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { PremiumHeader } from "@/components/layout/PremiumHeader";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
@@ -135,7 +135,7 @@ export default function CategoriesList() {
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
-        <PremiumHeader title="בנו את הבית שלכם" subtitle="כל הקטגוריות במקום אחד" />
+        <PageHeader size="large" title="בנו את הבית שלכם" subtitle="כל הקטגוריות במקום אחד" />
 
         {/* Sticky search */}
         <div

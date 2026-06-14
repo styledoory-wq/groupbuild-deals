@@ -11,7 +11,7 @@ import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useApp, formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
-import { SHADOWS, MOTION, STAGE_THEMES, type StageId } from "@/lib/designSystem";
+import { MOTION, STAGE_THEMES, type StageId } from "@/lib/designSystem";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
   { id: "planning",     title: "תכנון ועיצוב",       description: "אדריכלות, עיצוב פנים והחלטות הבסיס", icon: PencilRuler, dbStage: "planning" },
@@ -24,7 +24,7 @@ const STAGES: { id: StageId; title: string; description: string; icon: typeof Pe
   { id: "moving",       title: "כניסה לבית",          description: "הובלה, ריהוט וטקסי כניסה",            icon: KeyRound,    dbStage: "moving" },
 ];
 
-const FILTERS = ["הכל", "מבצעים", "פופולרי", "חדש", "פיקדון נמוך", "ספקים מומלצים"];
+const FILTERS = ["הכל", "מבצעים", "חדש", "פיקדון נמוך"];
 
 interface MiniDeal { 
   id: string; 
@@ -224,7 +224,7 @@ const filteredDeals = useMemo(() => {
             className="w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] transition-transform"
             style={{
               background: "linear-gradient(135deg,#0A1F3D 0%, #14305F 100%)",
-              boxShadow: SHADOWS.press,
+              boxShadow: "var(--shadow-elevated)",
             }}
           >
             <div
@@ -328,7 +328,7 @@ const filteredDeals = useMemo(() => {
                     style={{
                       background: cur ? accent! : done ? "#22C55E1F" : tint,
                       color: cur ? "#FFFFFF" : done ? "#22C55E" : (theme?.accent ?? "#6B7280"),
-                      boxShadow: cur ? SHADOWS.pill : "none",
+                      boxShadow: cur ? "var(--shadow-soft)" : "none",
                     }}
                   >
                     {done ? <Check className="h-5 w-5" strokeWidth={2.8} /> : <span className="text-[16px] font-extrabold tabular-nums">{i + 1}</span>}

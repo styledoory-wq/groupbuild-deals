@@ -224,13 +224,12 @@
   }
 
   .gb-card-premium {
-    @apply rounded-[16px] bg-white relative;
-    
-    box-shadow: 0 4px 12px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+    @apply rounded-[var(--radius)] bg-card relative;
+    box-shadow: var(--shadow-card);
     transition: transform 180ms cubic-bezier(0.4,0,0.2,1), box-shadow 180ms cubic-bezier(0.4,0,0.2,1);
   }
   .gb-card-premium:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+    box-shadow: var(--shadow-elevated);
     transform: translateY(-1px);
   }
 
@@ -282,46 +281,7 @@
 
   .gb-particle { @apply absolute rounded-full pointer-events-none; background: #D4AF37; box-shadow: 0 1px 3px rgba(10,31,61,0.06); }
 
-  .ios-bg { background: #F4F6F9; min-height: 100vh; color: hsl(var(--foreground)); }
-
-  .ios-card {
-    background: #ffffff;
-    border-radius: 20px;
-    
-    box-shadow: 0 4px 12px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
-    transition: transform 180ms cubic-bezier(0.4,0,0.2,1), box-shadow 180ms cubic-bezier(0.4,0,0.2,1);
-  }
-
-
-  .ios-btn-navy {
-    background: #0A1F3D; color: #ffffff; border-radius: 16px;
-    font-weight: 700;
-    box-shadow: 0 8px 20px -10px rgba(10,31,61,0.45);
-    transition: transform 180ms cubic-bezier(0.4,0,0.2,1), filter 180ms ease, box-shadow 180ms ease;
-  }
-  .ios-btn-navy:hover { filter: brightness(1.10); }
-  .ios-btn-navy:active { transform: scale(0.97); }
-
-  .ios-btn-secondary {
-    background: #ffffff; color: #0A1F3D; border-radius: 16px;
-    box-shadow: 0 2px 10px -4px rgba(10,31,61,0.10);
-    transition: transform 180ms cubic-bezier(0.4,0,0.2,1), background-color 180ms ease;
-  }
-  .ios-btn-secondary:hover { background: #F4F6FA; }
-  .ios-btn-secondary:active { transform: scale(0.97); }
-
-  .ios-avatar-gold {
-    background: #D4AF37;
-    box-shadow: 0 3px 8px -2px rgba(10,31,61,0.10);
-  }
-
-  .ios-dock {
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 8px 20px -10px rgba(10,31,61,0.18), 0 2px 4px -2px rgba(10,31,61,0.05);
-  }
-
-  .ios-meta-row { @apply flex items-center justify-center gap-2 text-[13px]; color: #6B7280; }
+  /* ios-* classes removed — use gb-* equivalents (gb-card, gb-card-premium, etc.) */
 
   .gb-input {
     border: 0; background: #ffffff; border-radius: 16px; padding: 14px 16px;
@@ -394,17 +354,17 @@
     from { opacity: 0; transform: translateY(4px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .gb-card, .gb-card-flat, .gb-card-premium, .ios-card { animation: gb-card-enter 0.18s ease-out both; }
-  .route-transition, .gb-card, .gb-card-flat, .gb-card-premium, .ios-card, button, a { -webkit-tap-highlight-color: transparent; }
+  .gb-card, .gb-card-flat, .gb-card-premium { animation: gb-card-enter 0.18s ease-out both; }
+  .route-transition, .gb-card, .gb-card-flat, .gb-card-premium, button, a { -webkit-tap-highlight-color: transparent; }
   .gb-cv-auto { content-visibility: auto; contain-intrinsic-size: 1px 320px; }
 
   @media (max-width: 640px) {
-    .gb-card, .gb-card-flat, .gb-card-premium, .ios-card { animation: none; }
+    .gb-card, .gb-card-flat, .gb-card-premium { animation: none; }
     .gb-float { animation: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .route-transition, .gb-card, .gb-card-flat, .gb-card-premium, .ios-card,
+    .route-transition, .gb-card, .gb-card-flat, .gb-card-premium,
     .gb-float, .gb-pulse-glow, .gb-shimmer,
     .gb-particle-1, .gb-particle-2, .gb-particle-3,
     .splash-logo-frame { animation: none !important; }

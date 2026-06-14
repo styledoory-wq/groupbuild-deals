@@ -1,41 +1,53 @@
-import { ArrowRight, Bell } from "lucide-react";
+import { ChevronRight, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/store/AppStore";
+import { ReactNode } from "react";
 
 interface Props {
   title: string;
   subtitle?: string;
   back?: boolean;
   showBell?: boolean;
+  /** "default" = standard PageHeader. "large" = premium-style hero header. */
+  size?: "large" | "default";
+  /** Accepted for backward compatibility — visual variant is no longer used. */
   variant?: "navy" | "cream";
-  rightSlot?: React.ReactNode;
+  rightSlot?: ReactNode;
 }
 
 /**
- * Unified PageHeader — light, clean, aligned with the resident DS.
- * `variant` is accepted for backward compat but always renders the light style.
+ * Unified PageHeader — light, clean, semantic-token based.
+ * Merges the former PremiumHeader via the `size="large"` prop.
  */
-export function PageHeader({ title, subtitle, back = true, showBell = false, rightSlot }: Props) {
+export function PageHeader({
+  title,
+  subtitle,
+  back = true,
+  showBell = false,
+  size = "default",
+  rightSlot,
+}: Props) {
   const navigate = useNavigate();
   const { unreadCount } = useApp();
+  const large = size === "large";
 
   return (
-    <header className="px-5 pt-4 pb-3">
-      <div className="flex items-center justify-between mb-2">
+    <header className={cn("px-5 pt-4", large ? "pb-2" : "pb-3")}>
+      <div className={cn("flex items-center justify-between", large ? "mb-3" : "mb-2")}>
         {back ? (
           <button
             onClick={() => navigate(-1)}
             className={cn(
-              "h-10 w-10 rounded-full flex items-center justify-center bg-white",
-              "shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform",
+              "h-11 w-11 rounded-full flex items-center justify-center bg-card",
+              "shadow-[var(--shadow-soft)] active:scale-95 transition-transform",
             )}
             aria-label="חזרה"
           >
-            <ArrowRight className="h-[18px] w-[18px] text-[#0A1F3D]" strokeWidth={2} />
+            <ChevronRight className="h-[18px] w-[18px] text-foreground" strokeWidth={2.2} />
           </button>
         ) : (
-          <div className="h-10 w-10" />
+          <div className="h-11 w-11" />
         )}
 
         <div className="flex items-center gap-2">
@@ -43,24 +55,34 @@ export function PageHeader({ title, subtitle, back = true, showBell = false, rig
           {showBell && (
             <button
               onClick={() => navigate("/resident/notifications")}
-              className="relative h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform"
+              className="relative h-11 w-11 rounded-full bg-card flex items-center justify-center shadow-[var(--shadow-soft)] active:scale-95 transition-transform"
               aria-label="התראות"
             >
-              <Bell className="h-[18px] w-[18px] text-[#0A1F3D]" strokeWidth={2} />
+              <Bell className="h-[18px] w-[18px] text-foreground" strokeWidth={2} />
               {unreadCount > 0 && (
-                <span className="absolute top-2.5 left-2.5 h-2 w-2 rounded-full bg-[#D4AF37]" />
+                <span className="absolute top-2.5 left-2.5 h-2 w-2 rounded-full bg-secondary" />
               )}
             </button>
           )}
         </div>
       </div>
 
-      <div className="text-right">
-        <h1 className="text-[24px] font-extrabold text-[#0A1F3D] tracking-tight leading-tight break-words">
+      <div className={large ? "" : "text-right"}>
+        <h1
+          className={cn(
+            "font-extrabold tracking-tight text-foreground",
+            large ? "text-[26px] leading-[1.15]" : "text-[24px] leading-tight break-words",
+          )}
+        >
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-1 text-[13px] font-medium text-[#6B7280] leading-relaxed">
+          <p
+            className={cn(
+              "text-muted-foreground font-medium",
+              large ? "text-[13px] mt-1" : "mt-1 text-[13px] leading-relaxed",
+            )}
+          >
             {subtitle}
           </p>
         )}
