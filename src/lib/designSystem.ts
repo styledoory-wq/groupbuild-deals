@@ -71,11 +71,8 @@ export const MOTION = {
   ease: "cubic-bezier(0.4, 0, 0.2, 1)",
 } as const;
 
-/* ---------- Shadows ---------- */
-export const SHADOWS = {
-  card:    "0 8px 20px -10px rgba(10,31,61,0.18), 0 2px 4px -2px rgba(10,31,61,0.05)",
-  cardDim: "0 2px 6px -2px rgba(10,31,61,0.06)",
-  press:   "0 14px 28px -10px rgba(10,31,61,0.28)",
-  chip:    "0 1px 3px rgba(10,31,61,0.06)",
-  pill:    "0 3px 8px -2px rgba(10,31,61,0.10)",
-} as const;
+/* ---------- Shadows ----------
+ * Shadows live in CSS variables (see index.css):
+ *   --shadow-soft, --shadow-card, --shadow-elevated, --shadow-floating, --shadow-gold
+ * Use them via `boxShadow: "var(--shadow-card)"` or Tailwind arbitrary values.
+ */

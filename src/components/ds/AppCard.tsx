@@ -1,6 +1,6 @@
 import { forwardRef, HTMLAttributes, AnchorHTMLAttributes } from "react";
 import { Link } from "react-router-dom";
-import { SHADOWS, MOTION } from "@/lib/designSystem";
+import { MOTION } from "@/lib/designSystem";
 
 type Variant = "default" | "tinted" | "dim";
 
@@ -13,8 +13,8 @@ interface AppCardProps extends HTMLAttributes<HTMLElement> {
 }
 
 /**
- * Unified card primitive. Soft shadow, rounded-[20px], no border by default.
- * Press: scale(1.02) + stronger shadow at 200ms.
+ * Unified card primitive. Soft shadow, rounded-[var(--radius)], no border by default.
+ * Press: scale(0.98) at 180ms.
  */
 export const AppCard = forwardRef<HTMLElement, AppCardProps>(function AppCard(
   { variant = "default", tint, to, padded = true, className = "", style, children, ...rest },
@@ -24,16 +24,16 @@ export const AppCard = forwardRef<HTMLElement, AppCardProps>(function AppCard(
   const baseStyle: React.CSSProperties = {
     background:
       variant === "tinted" && tint
-        ? `linear-gradient(180deg, #FFFFFF 0%, ${tint} 100%)`
-        : "#FFFFFF",
-    boxShadow: dim ? SHADOWS.cardDim : SHADOWS.card,
+        ? `linear-gradient(180deg, hsl(var(--card)) 0%, ${tint} 100%)`
+        : "hsl(var(--card))",
+    boxShadow: dim ? "var(--shadow-soft)" : "var(--shadow-card)",
     opacity: dim ? 0.62 : 1,
     transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
     ...style,
   };
 
-  const cls = `relative rounded-[20px] ${padded ? "p-4" : ""} ${
-    to && !dim ? "active:scale-[1.02]" : ""
+  const cls = `relative rounded-[var(--radius)] ${padded ? "p-4" : ""} ${
+    to && !dim ? "active:scale-[0.98]" : ""
   } ${className}`;
 
   if (to && !dim) {
