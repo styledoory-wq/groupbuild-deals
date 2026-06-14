@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search as SearchIcon, Store, X } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { PremiumHeader } from "@/components/layout/PremiumHeader";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 
@@ -49,7 +49,7 @@ export default function SearchPage() {
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
-        <PremiumHeader title="חיפוש" subtitle="מצא ספקים, בעלי מקצוע וקטגוריות" />
+        <PageHeader size="large" title="חיפוש" subtitle="מצא ספקים, בעלי מקצוע וקטגוריות" />
 
         {/* Search field */}
         <div className="px-5 mt-2">

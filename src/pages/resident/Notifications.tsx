@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Bell, Tag, Wallet, Info } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ScreenHeader, EmptyState } from "@/components/ds";
-import { SHADOWS, MOTION } from "@/lib/designSystem";
+import { MOTION } from "@/lib/designSystem";
 import { useApp } from "@/store/AppStore";
 
 const iconFor = { deal: Tag, deposit: Wallet, system: Info } as const;
@@ -44,7 +44,7 @@ export default function Notifications() {
                   background: unread
                     ? "linear-gradient(180deg,#FFFFFF 0%, #FFFBEB 100%)"
                     : "#FFFFFF",
-                  boxShadow: unread ? SHADOWS.card : SHADOWS.cardDim,
+                  boxShadow: unread ? "var(--shadow-card)" : "var(--shadow-soft)",
                   transition: `box-shadow ${MOTION.base} ${MOTION.ease}`,
                 }}
               >
@@ -53,7 +53,7 @@ export default function Notifications() {
                   style={{
                     background: unread ? "#D4AF37" : "#F4F6FA",
                     color: unread ? "#FFFFFF" : "#6B7280",
-                    boxShadow: unread ? SHADOWS.pill : "none",
+                    boxShadow: unread ? "var(--shadow-soft)" : "none",
                   }}
                 >
                   <Icon className="h-5 w-5" strokeWidth={2.2} />

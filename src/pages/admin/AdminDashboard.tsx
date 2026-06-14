@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, MapPin, Settings, UserCog, AlertTriangle, Eye, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PremiumHeader } from "@/components/layout/PremiumHeader";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
 
   return (
     <MobileShell>
-      <PremiumHeader
+      <PageHeader size="large"
         title="פאנל ניהול"
         subtitle="מבט-על על המערכת"
         back={false}

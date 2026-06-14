@@ -25,7 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { toast } from "sonner";
 import { getCachedValue, setCachedValue } from "@/lib/clientCache";
-import { SHADOWS, MOTION } from "@/lib/designSystem";
+import { MOTION } from "@/lib/designSystem";
 
 type InterestRow = {
   id: string;
@@ -78,7 +78,7 @@ const CACHE_KEY = "my-offers:items";
 const cardStyle: React.CSSProperties = {
   background: "#FFFFFF",
   borderRadius: 20,
-  boxShadow: SHADOWS.card,
+  boxShadow: "var(--shadow-card)",
   transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
 };
 
@@ -211,7 +211,7 @@ export default function MyOffers() {
           <div className="flex items-center justify-between gap-2 mb-1">
             <div
               className="inline-flex p-1 rounded-2xl bg-white"
-              style={{ boxShadow: SHADOWS.cardDim }}
+              style={{ boxShadow: "var(--shadow-soft)" }}
             >
               <button
                 onClick={() => setShowHidden(false)}
@@ -274,7 +274,7 @@ export default function MyOffers() {
                 <Link
                   to="/resident/deals"
                   className="inline-flex items-center gap-1.5 h-11 px-5 rounded-2xl bg-[#0A1F3D] text-white text-[14px] font-bold active:scale-95 transition-transform"
-                  style={{ boxShadow: SHADOWS.pill }}
+                  style={{ boxShadow: "var(--shadow-soft)" }}
                 >
                   <Sparkles className="h-4 w-4" strokeWidth={2.4} />
                   לעסקאות חיות
