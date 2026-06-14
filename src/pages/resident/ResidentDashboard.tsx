@@ -24,7 +24,7 @@ const STAGES: { id: StageId; title: string; description: string; icon: typeof Pe
   { id: "moving",       title: "כניסה לבית",          description: "הובלה, ריהוט וטקסי כניסה",            icon: KeyRound,    dbStage: "moving" },
 ];
 
-const FILTERS = ["הכל", "מבצעים", "פופולרי", "חדש", "פיקדון נמוך", "ספקים מומלצים"];
+const FILTERS = ["הכל", "מבצעים", "חדש", "פיקדון נמוך"];
 
 interface MiniDeal { 
   id: string; 
