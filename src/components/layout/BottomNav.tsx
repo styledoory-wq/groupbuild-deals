@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, ScanLine, CheckSquare, Search, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { preloadRoute } from "@/lib/routePreload";
+import { DesktopSidebar } from "./DesktopSidebar";
 import type { Role } from "@/types";
 
 const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
