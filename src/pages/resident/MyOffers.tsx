@@ -100,6 +100,22 @@ export default function MyOffers() {
   const [items, setItems] = useState<MyOfferItem[]>(() => cached ?? []);
   const [showHidden, setShowHidden] = useState(false);
   const [hiddenLocal, setHiddenLocal] = useState<string[]>(loadHiddenLocal());
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    setDeleting(true);
+    const { error } = await supabase.from("deal_interests").delete().eq("id", pendingDeleteId);
+    setDeleting(false);
+    if (error) {
+      toast.error("המחיקה נכשלה");
+      return;
+    }
+    setItems((prev) => prev.filter((x) => x.interest.id !== pendingDeleteId));
+    setPendingDeleteId(null);
+    toast.success("הפריט נמחק בהצלחה");
+  };
 
   const load = async () => {
     if (!cached) setLoading(true);
