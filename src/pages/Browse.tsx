@@ -234,10 +234,7 @@ export default function Browse() {
                 <div className="flex items-center justify-between text-[11px] text-[#6B7280]">
                   <span className="inline-flex items-center gap-1">
                     <Star className="h-3 w-3 fill-[#D4AF37] text-[#D4AF37]" />
-                    <span className="font-bold text-[#0A1F3D]">
-                      {s.avg_rating ? Number(s.avg_rating).toFixed(1) : "—"}
-                    </span>
-                    {s.review_count ? <span>({s.review_count})</span> : null}
+                    <span className="font-bold text-[#0A1F3D]">מאומת</span>
                   </span>
                   {s.service_areas?.[0] && <span className="truncate max-w-[60%]">{s.service_areas[0]}</span>}
                 </div>
