@@ -44,6 +44,33 @@ export default function MyVouchers() {
   const [vouchers, setVouchers] = useState<VoucherRow[]>([]);
   const [pending, setPending] = useState<PendingRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingDelete, setPendingDelete] = useState<
+    | { kind: "voucher"; id: string }
+    | { kind: "interest"; id: string }
+    | null
+  >(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    const { error } =
+      pendingDelete.kind === "voucher"
+        ? await supabase.from("vouchers").delete().eq("id", pendingDelete.id)
+        : await supabase.from("deal_interests").delete().eq("id", pendingDelete.id);
+    setDeleting(false);
+    if (error) {
+      toast.error("המחיקה נכשלה");
+      return;
+    }
+    if (pendingDelete.kind === "voucher") {
+      setVouchers((prev) => prev.filter((v) => v.id !== pendingDelete.id));
+    } else {
+      setPending((prev) => prev.filter((p) => p.interest_id !== pendingDelete.id));
+    }
+    setPendingDelete(null);
+    toast.success("הפריט נמחק בהצלחה");
+  };
 
   useEffect(() => {
     (async () => {
