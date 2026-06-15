@@ -403,6 +403,7 @@ export default function CategorySuppliers() {
             </Link>
           ))
         )}
+        </div>
       </div>
 
       <BottomNav role="resident" />
