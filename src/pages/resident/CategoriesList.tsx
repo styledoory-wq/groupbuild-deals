@@ -200,7 +200,7 @@ export default function CategoriesList() {
                 כל התחומים
               </h2>
 
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 <FilterTile
                   label="הכל" Icon={LayoutGrid}
                   active={activeStage === "all"}
@@ -347,11 +347,11 @@ function StageSection({
             <div
               ref={scrollerRef}
               onScroll={onScroll}
-              className="flex gap-2.5 overflow-x-auto px-3 pb-1 pt-1 snap-x no-scrollbar scroll-smooth"
+              className="flex lg:grid lg:grid-cols-4 xl:grid-cols-5 gap-2.5 overflow-x-auto lg:overflow-visible px-3 pb-1 pt-1 snap-x lg:snap-none no-scrollbar scroll-smooth"
               style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
             >
               {cats.map((c) => (
-                <div key={c.id} className="snap-start shrink-0 w-[160px]">
+                <div key={c.id} className="snap-start shrink-0 w-[160px] lg:w-auto">
                   <CategoryCard
                     id={c.id}
                     name={c.name}

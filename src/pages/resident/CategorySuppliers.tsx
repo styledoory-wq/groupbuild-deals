@@ -322,6 +322,7 @@ export default function CategorySuppliers() {
         </div>
 
         {/* List */}
+        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3">
         {loading ? (
           <div className="gb-card p-10 text-center">
             <div className="h-8 w-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin mx-auto mb-3" />
@@ -402,6 +403,7 @@ export default function CategorySuppliers() {
             </Link>
           ))
         )}
+        </div>
       </div>
 
       <BottomNav role="resident" />

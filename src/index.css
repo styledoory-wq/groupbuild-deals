@@ -77,6 +77,12 @@
   }
   @media (min-width: 640px) { html { font-size: 16px; } }
   @media (min-width: 768px) { html { font-size: 17px; } }
+  @media (min-width: 1024px) {
+    html { font-size: 18px; }
+    :root { --app-max-w: 1200px; --pad-x: clamp(1.5rem, 1rem + 1.5vw, 2.5rem); }
+    body.has-desktop-sidebar { padding-right: 248px; }
+    body.has-desktop-sidebar.auth-fullscreen { padding-right: 0; }
+  }
 
   html, body, #root {
     width: 100%;
