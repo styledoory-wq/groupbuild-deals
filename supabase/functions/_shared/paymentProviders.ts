@@ -435,7 +435,17 @@ class GrowMakeProviderAdapter extends PlaceholderProviderAdapter {
       stringFromPayload(responseJson.grow_payment_url) ??
       stringFromPayload(responseJson.url);
     if (!paymentUrl) {
-      throw new PaymentProviderError("make_missing_payment_url", "Make response is missing payment_url", 502);
+      // JSON came back without a URL — assume the Make scenario will post the
+      // URL asynchronously to /payment-webhook. Treat as pending.
+      return {
+        payment_url: null,
+        provider_transaction_id:
+          stringFromPayload(responseJson.provider_transaction_id) ??
+          stringFromPayload(responseJson.transaction_id) ??
+          null,
+        pending: true,
+        raw_response: responseJson,
+      };
     }
 
     return {
