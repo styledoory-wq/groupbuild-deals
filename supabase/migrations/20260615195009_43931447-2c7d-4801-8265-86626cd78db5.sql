@@ -1,0 +1,2 @@
+CREATE POLICY "Users delete own interests" ON public.deal_interests FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "Users delete own vouchers" ON public.vouchers FOR DELETE USING (auth.uid() = user_id);
