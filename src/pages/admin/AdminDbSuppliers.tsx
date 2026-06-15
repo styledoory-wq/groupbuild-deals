@@ -170,16 +170,18 @@ export default function AdminDbSuppliers() {
     setEditOpen(true);
     setEditLoading(true);
     try {
-      const [{ data: s, error }, { data: sregs }, { data: scits }] = await Promise.all([
+      const [{ data: s, error }, { data: sregs }, { data: scits }, { data: billing }] = await Promise.all([
         supabase
           .from("suppliers")
-          .select("*")
+          .select("business_name,contact_name,phone,email,short_description,description,website_url,whatsapp_url,instagram_url,facebook_url,logo_url,catalog_url,approval_status,is_active,categories,serves_all_country")
           .eq("id", supplierId)
           .single(),
         supabase.from("supplier_regions").select("region_id").eq("supplier_id", supplierId),
         supabase.from("supplier_cities").select("city_id").eq("supplier_id", supplierId),
+        supabase.rpc("admin_get_supplier_billing", { _supplier_id: supplierId }),
       ]);
       if (error || !s) throw error ?? new Error("לא נמצא ספק");
+      const b = (billing && billing[0]) || { commission_percent: null, monthly_subscription: null, billing_status: null, billing_notes: null };
       setEditForm({
         business_name: s.business_name ?? "",
         contact_name: s.contact_name ?? "",
@@ -196,10 +198,10 @@ export default function AdminDbSuppliers() {
         approval_status: (s.approval_status as NewForm["approval_status"]) ?? "pending",
         is_active: !!s.is_active,
         categoryIds: s.categories ?? [],
-        commission_percent: s.commission_percent != null ? String(s.commission_percent) : "",
-        monthly_subscription: s.monthly_subscription != null ? String(s.monthly_subscription) : "",
-        billing_status: ((s.billing_status as NewForm["billing_status"]) ?? "none"),
-        billing_notes: s.billing_notes ?? "",
+        commission_percent: b.commission_percent != null ? String(b.commission_percent) : "",
+        monthly_subscription: b.monthly_subscription != null ? String(b.monthly_subscription) : "",
+        billing_status: ((b.billing_status as NewForm["billing_status"]) ?? "none"),
+        billing_notes: b.billing_notes ?? "",
       });
       setEditPrevApproval((s.approval_status as string) ?? "pending");
       setEditAreas({
