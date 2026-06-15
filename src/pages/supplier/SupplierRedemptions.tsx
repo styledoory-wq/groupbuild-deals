@@ -61,41 +61,61 @@ export default function SupplierRedemptions() {
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
+  const [supplierId, setSupplierId] = useState<string | null>(null);
+
+  const loadRows = async (sid: string) => {
+    const { data, error } = await supabase
+      .from("vouchers")
+      .select("id, code, status, reference_number, user_id, deal_id, redeemed_at")
+      .eq("supplier_id", sid)
+      .order("created_at", { ascending: false });
+    if (error) { console.error("vouchers fetch error", error); toast.error("שגיאה בטעינת מימושים"); return; }
+    const rawRows = (data ?? []) as RawVoucherRow[];
+    const dealIds = Array.from(new Set(rawRows.map((r) => r.deal_id).filter(Boolean)));
+    const userIds = Array.from(new Set(rawRows.map((r) => r.user_id).filter(Boolean)));
+    const [dealsRes, profilesRes] = await Promise.all([
+      dealIds.length
+        ? supabase.from("deals").select("id, title, discounted_price, original_price, is_deleted").in("id", dealIds)
+        : Promise.resolve({ data: [] as any[] } as any),
+      userIds.length
+        ? supabase.rpc("get_voucher_resident_profiles", { _user_ids: userIds })
+        : Promise.resolve({ data: [] as any[] } as any),
+    ]);
+    const dealsById = new Map(((dealsRes.data ?? []) as any[]).map((d) => [String(d.id), d]));
+    const profilesById = new Map(((profilesRes.data ?? []) as any[]).map((p) => [String(p.id), p]));
+    const filtered = rawRows
+      .map((r) => ({
+        ...r,
+        deals: dealsById.get(r.deal_id) ?? null,
+        profiles: profilesById.get(r.user_id) ?? null,
+      }))
+      .filter((r) => r.deals && !(r.deals as any).is_deleted);
+    setRows(filtered);
+  };
 
   useEffect(() => {
     (async () => {
       const { supplier } = await getCurrentSupplier<{ id: string }>("id");
       if (!supplier) { setLoading(false); return; }
-      const { data, error } = await supabase
-        .from("vouchers")
-        .select("id, code, status, reference_number, user_id, deal_id, redeemed_at")
-        .eq("supplier_id", supplier.id)
-        .order("created_at", { ascending: false });
-      if (error) { console.error("vouchers fetch error", error); toast.error("שגיאה בטעינת מימושים"); setLoading(false); return; }
-      const rawRows = (data ?? []) as RawVoucherRow[];
-      const dealIds = Array.from(new Set(rawRows.map((r) => r.deal_id).filter(Boolean)));
-      const userIds = Array.from(new Set(rawRows.map((r) => r.user_id).filter(Boolean)));
-      const [dealsRes, profilesRes] = await Promise.all([
-        dealIds.length
-          ? supabase.from("deals").select("id, title, discounted_price, original_price, is_deleted").in("id", dealIds)
-          : Promise.resolve({ data: [] as any[] } as any),
-        userIds.length
-          ? supabase.rpc("get_voucher_resident_profiles", { _user_ids: userIds })
-          : Promise.resolve({ data: [] as any[] } as any),
-      ]);
-      const dealsById = new Map(((dealsRes.data ?? []) as any[]).map((d) => [String(d.id), d]));
-      const profilesById = new Map(((profilesRes.data ?? []) as any[]).map((p) => [String(p.id), p]));
-      const filtered = rawRows
-        .map((r) => ({
-          ...r,
-          deals: dealsById.get(r.deal_id) ?? null,
-          profiles: profilesById.get(r.user_id) ?? null,
-        }))
-        .filter((r) => r.deals && !(r.deals as any).is_deleted);
-      setRows(filtered);
+      setSupplierId(supplier.id);
+      await loadRows(supplier.id);
       setLoading(false);
     })();
   }, []);
+
+  // Realtime: refresh whenever a voucher for this supplier changes
+  useEffect(() => {
+    if (!supplierId) return;
+    const channel = supabase
+      .channel(`supplier-vouchers-${supplierId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "vouchers", filter: `supplier_id=eq.${supplierId}` },
+        () => { void loadRows(supplierId); },
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [supplierId]);
 
   const stats = useMemo(() => {
     const total = rows.length;

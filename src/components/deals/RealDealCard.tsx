@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
-import { ShieldCheck, Tag as TagIcon, TrendingDown, Globe2, Building2, Flame, Users, Clock, Image as ImageIcon } from "lucide-react";
+import { ShieldCheck, Tag as TagIcon, TrendingDown, Flame, Users, Clock, Image as ImageIcon } from "lucide-react";
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
+import { FavoriteButton } from "@/components/deals/FavoriteButton";
 
 export interface RealDealCardData {
   id: string;
@@ -28,7 +29,6 @@ export interface RealDealCardData {
   auto_closed_at?: string | null;
 }
 
-
 function timeLeft(endsAt: string | null): string | null {
   if (!endsAt) return null;
   const end = new Date(endsAt).getTime();
@@ -40,7 +40,19 @@ function timeLeft(endsAt: string | null): string | null {
   return `${hours} שעות`;
 }
 
-function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; joinersCount?: number }) {
+/**
+ * Square grid deal card — fits into grid-cols-2 lg:grid-cols-3 xl:grid-cols-4.
+ * Top half: cover image (aspect-square). Bottom: supplier, title, price, status.
+ */
+function RealDealCardImpl({
+  deal,
+  joinersCount = 0,
+  isFavorite = false,
+}: {
+  deal: RealDealCardData;
+  joinersCount?: number;
+  isFavorite?: boolean;
+}) {
   const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(deal.tiers) ? deal.tiers : [];
   const display = describeOffer(
@@ -57,36 +69,18 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
 
   let bestSavings: number | null = null;
   if (offerType === "price_comparison" && tiers.length > 0) {
-    const savingsList = tiers
+    const list = tiers
       .map((t) => (t.original_price && t.discounted_price ? Number(t.original_price) - Number(t.discounted_price) : 0))
       .filter((s) => s > 0);
-    if (savingsList.length) bestSavings = Math.max(...savingsList);
+    if (list.length) bestSavings = Math.max(...list);
   } else if (offerType === "price_comparison" && deal.original_price && deal.discounted_price) {
     bestSavings = Number(deal.original_price) - Number(deal.discounted_price);
   }
 
-  const isProjectOnly = deal.visibility_type === "project_only";
   const left = timeLeft(deal.ends_at);
   const realJoiners = Math.max(0, joinersCount);
   const isHot = realJoiners >= 5 || (left !== null && left.includes("שעות"));
-
-  // Progress: prefer real target_participants when supplied
-  const minTier = tiers[0]?.minParticipants ?? 0;
-  const maxTier = tiers[tiers.length - 1]?.minParticipants ?? Math.max(minTier + 1, 10);
-  const target = deal.target_participants && deal.target_participants > 0
-    ? deal.target_participants
-    : maxTier;
-  const progressPct = realJoiners > 0
-    ? Math.min(100, Math.max(4, Math.round((realJoiners / Math.max(1, target)) * 100)))
-    : 0;
-  const remaining = Math.max(0, target - realJoiners);
   const isClosed = deal.status === "closed" || !!deal.auto_closed_at;
-  const isRedeemed = deal.status === "redeemed";
-  const joinDeadline = deal.join_deadline ? new Date(deal.join_deadline) : null;
-  const redemptionDeadline = deal.redemption_deadline ? new Date(deal.redemption_deadline) : null;
-  const fmtDate = (d: Date) => d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit" });
-
-
   const cover = deal.cover_image_url ?? null;
   const galleryCount = Array.isArray(deal.gallery_images) ? deal.gallery_images.length : 0;
   const discountBadge =
@@ -96,170 +90,91 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
 
   return (
     <Link to={`/resident/deals/${deal.id}`} className="block group">
-      <article className="gb-card-premium gb-deal-card overflow-hidden p-0 transition-all duration-300">
-        {/* Hero image (if exists) */}
-        {cover && (
-          <div className="relative h-40 w-full overflow-hidden">
+      <article className="bg-white rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(10,31,61,0.06)] hover:shadow-[0_8px_24px_-10px_rgba(10,31,61,0.18)] hover:scale-[1.02] transition-all duration-200 flex flex-col h-full">
+        {/* Square image top half */}
+        <div className="relative aspect-square w-full overflow-hidden bg-[#F4F6FA]">
+          {cover ? (
             <img
               src={cover}
               alt={deal.title}
               loading="lazy"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
-            <div className="absolute top-2 right-2 flex flex-wrap items-center gap-1.5">
-              {isHot && (
-                <span className="inline-flex items-center gap-0.5 text-fs-xs font-extrabold px-2 py-1 rounded-full bg-[#FFF1E4] text-[#E8742C] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
-                  <Flame className="h-3 w-3" strokeWidth={2.5} />
-                  HOT
-                </span>
-              )}
-              {discountBadge && (
-                <span className="text-fs-sm font-extrabold px-2.5 py-1.5 rounded-full bg-white text-[#0A1F3D] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
-                  עד {discountBadge} הנחה
-                </span>
-              )}
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <TagIcon className="h-10 w-10 text-[#D4AF37]/40" strokeWidth={1.5} />
             </div>
-            {galleryCount > 0 && (
-              <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 text-fs-xs font-bold px-2 py-1 rounded-full bg-black/55 text-white">
-                <ImageIcon className="h-3 w-3" /> {galleryCount + 1}
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+
+          {/* Badges row */}
+          <div className="absolute top-2 right-2 flex flex-wrap items-center gap-1.5 max-w-[calc(100%-56px)]">
+            {isHot && (
+              <span className="inline-flex items-center gap-0.5 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#FFF1E4] text-[#E8742C]">
+                <Flame className="h-2.5 w-2.5" strokeWidth={2.5} /> HOT
               </span>
             )}
-            <div className="absolute bottom-2 left-2">
-              <span
-                className={
-                  "text-fs-xs font-bold px-2 py-1 rounded-full inline-flex items-center gap-1 " +
-                  (isProjectOnly
-                    ? "bg-blue-500/90 text-white"
-                    : "bg-success/90 text-white")
-                }
-              >
-                {isProjectOnly ? <Building2 className="h-2.5 w-2.5" /> : <Globe2 className="h-2.5 w-2.5" />}
-                {isProjectOnly ? "פרויקט" : "פתוח לכולם"}
-              </span>
-            </div>
-          </div>
-        )}
-
-        <div className="p-5">
-        {/* Top row: icon + title + visibility (only badges shown if no cover) */}
-        <div className="flex items-start gap-3 mb-3 relative">
-          <div className="h-12 w-12 shrink-0 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]">
-            <TagIcon className="h-5 w-5 text-[#D4AF37]" strokeWidth={2} />
-          </div>
-          <div className="flex-1 min-w-0">
-            {!cover && (
-              <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                {isHot && (
-                    <span className="inline-flex items-center gap-0.5 text-fs-xs font-extrabold px-1.5 py-0.5 rounded-full bg-[#FFF1E4] text-[#E8742C] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
-                    <Flame className="h-2.5 w-2.5" strokeWidth={2.5} />
-                    HOT
-                  </span>
-                )}
-                <span
-                  className={
-                    "text-fs-xs font-bold px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5 " +
-                    (isProjectOnly
-                      ? "bg-blue-500/10 text-blue-600 border border-blue-500/30"
-                      : "bg-success/10 text-success border border-success/30")
-                  }
-                >
-                  {isProjectOnly ? <Building2 className="h-2.5 w-2.5" /> : <Globe2 className="h-2.5 w-2.5" />}
-                  {isProjectOnly ? "פרויקט" : "פתוח"}
-                </span>
-              </div>
-            )}
-            <h3 className="font-bold text-fs-base text-foreground leading-snug truncate">{deal.title}</h3>
-            {deal.supplier_name && (
-              <p className="text-fs-xs text-muted-foreground mt-0.5 inline-flex items-center gap-1 truncate">
-                <ShieldCheck className="h-3 w-3 text-[#D4AF37] shrink-0" strokeWidth={2.5} />
-                <span className="truncate">{deal.supplier_name}</span>
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Price block */}
-        <div className="pt-3 border-t border-border/50 relative">
-          <div className="flex items-end justify-between gap-3">
-            <div className="min-w-0">
-              <div className="text-fs-xl font-extrabold text-primary leading-tight tracking-tight">{display.headline}</div>
-              {bestSavings && bestSavings > 0 ? (
-                <div className="text-fs-xs font-bold text-success mt-1 inline-flex items-center gap-1">
-                  <TrendingDown className="h-3 w-3" strokeWidth={2.5} />
-                  חוסכים עד {ils(bestSavings)}
-                </div>
-              ) : display.savings ? (
-                <div className="text-fs-xs font-bold text-success mt-1 inline-flex items-center gap-1">
-                  <TrendingDown className="h-3 w-3" strokeWidth={2.5} />
-                  {display.savings}
-                </div>
-              ) : null}
-            </div>
-            {tiers.length > 0 && (
-              <span className="text-fs-xs font-extrabold px-2.5 py-1 rounded-full bg-[#F4F6FA] text-[#0A1F3D] shadow-[0_1px_3px_rgba(10,31,61,0.06)] shrink-0">
-                {tiers.length} מדרגות
+            {discountBadge && (
+              <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-[#D4AF37] text-[#0A1F3D]">
+                {discountBadge} הנחה
               </span>
             )}
           </div>
 
-          {/* Live progress bar */}
-          {tiers.length > 0 && (
-            <div className="mt-3">
-              <div className="h-1.5 w-full rounded-full bg-muted/80 overflow-hidden ring-1 ring-border/40 relative">
-                <div
-                  className="h-full rounded-full relative overflow-hidden"
-                  style={{
-                    width: `${progressPct}%`,
-                    background: "linear-gradient(90deg, hsl(44 53% 54%), hsl(44 73% 66%))",
-                    boxShadow: "0 0 8px hsl(44 53% 54% / 0.6)",
-                  }}
-                >
-                  <div className="absolute inset-0 gb-shimmer opacity-70" />
-                </div>
-              </div>
-              <div className="flex items-center justify-between mt-2 text-fs-xs">
-                <span className="inline-flex items-center gap-1 text-muted-foreground">
-                  <span className="gb-live-dot" />
-                  <Users className="h-2.5 w-2.5" strokeWidth={2.5} />
-                  {deal.target_participants ? (
-                    <>
-                      <span className="font-semibold text-foreground">{realJoiners}/{target}</span>
-                      {!isClosed && remaining > 0 ? (
-                        <span className="text-muted-foreground">· עוד {remaining} לסגירה</span>
-                      ) : null}
-                    </>
-                  ) : realJoiners > 0 ? (
-                    <><span className="font-semibold text-foreground">{realJoiners}</span> דיירים הצטרפו</>
-                  ) : (
-                    <span className="font-semibold text-foreground">היו הראשונים להצטרף</span>
-                  )}
-                </span>
-                {isClosed ? (
-                  <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
-                    {isRedeemed ? "מומשה" : "נסגרה"}
-                  </span>
-                ) : joinDeadline ? (
-                  <span className="inline-flex items-center gap-1 text-muted-foreground">
-                    <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
-                    עד <span className="font-semibold text-foreground">{fmtDate(joinDeadline)}</span>
-                  </span>
-                ) : left ? (
-                  <span className="inline-flex items-center gap-1 text-muted-foreground">
-                    <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
-                    נסגר בעוד <span className="font-semibold text-foreground">{left}</span>
-                  </span>
-                ) : null}
-              </div>
-              {redemptionDeadline && isClosed && !isRedeemed && (
-                <div className="mt-1.5 text-fs-xs text-amber-700">
-                  מימוש עד {fmtDate(redemptionDeadline)}
-                </div>
-              )}
+          {/* Favorite */}
+          <FavoriteButton dealId={deal.id} initial={isFavorite} className="absolute top-2 left-2 h-8 w-8" />
 
+          {galleryCount > 0 && (
+            <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/55 text-white">
+              <ImageIcon className="h-2.5 w-2.5" /> {galleryCount + 1}
+            </span>
+          )}
+
+          {isClosed && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <span className="text-white font-extrabold text-sm px-3 py-1 rounded-full bg-emerald-600">נסגרה</span>
             </div>
           )}
         </div>
+
+        {/* Bottom info */}
+        <div className="p-3 flex-1 flex flex-col gap-1.5">
+          {deal.supplier_name && (
+            <div className="flex items-center gap-1.5 text-[11px] text-[#6B7280]">
+              {deal.supplier_logo_url ? (
+                <img src={deal.supplier_logo_url} alt="" className="h-5 w-5 rounded-full object-cover border border-[#ECEEF2]" />
+              ) : (
+                <ShieldCheck className="h-3 w-3 text-[#D4AF37]" strokeWidth={2.5} />
+              )}
+              <span className="truncate font-medium">{deal.supplier_name}</span>
+            </div>
+          )}
+          <h3 className="font-semibold text-[13px] text-[#0A1F3D] leading-snug line-clamp-2 min-h-[2.4em]">
+            {deal.title}
+          </h3>
+
+          <div className="mt-auto pt-1.5 flex items-end justify-between gap-2 border-t border-[#F4F6F9]">
+            <div className="min-w-0">
+              <div className="text-[14px] font-extrabold text-[#0A1F3D] leading-tight truncate">{display.headline}</div>
+              {bestSavings && bestSavings > 0 ? (
+                <div className="text-[10px] font-bold text-emerald-600 inline-flex items-center gap-0.5 mt-0.5">
+                  <TrendingDown className="h-2.5 w-2.5" /> חוסכים {ils(bestSavings)}
+                </div>
+              ) : null}
+            </div>
+            <div className="flex flex-col items-end gap-0.5 text-[10px]">
+              {realJoiners > 0 && (
+                <span className="inline-flex items-center gap-0.5 text-[#6B7280] font-bold">
+                  <Users className="h-2.5 w-2.5" /> {realJoiners}
+                </span>
+              )}
+              {!isClosed && left && (
+                <span className="inline-flex items-center gap-0.5 text-[#6B7280]">
+                  <Clock className="h-2.5 w-2.5" /> {left}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </article>
     </Link>
@@ -267,4 +182,3 @@ function RealDealCardImpl({ deal, joinersCount = 0 }: { deal: RealDealCardData; 
 }
 
 export const RealDealCard = memo(RealDealCardImpl);
-

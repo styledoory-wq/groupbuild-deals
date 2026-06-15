@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, ScanLine, CheckSquare, Search, type LucideIcon } from "lucide-react";
+import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, ScanLine, CheckSquare, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { preloadRoute } from "@/lib/routePreload";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -10,8 +10,8 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
   resident: [
     { to: "/resident", label: "בית", icon: Home },
     { to: "/resident/deals", label: "עסקאות", icon: Tag },
-    { to: "/resident/search", label: "חיפוש", icon: Search },
-    { to: "/resident/my-offers", label: "ההצעות שלי", icon: Heart },
+    { to: "/resident/favorites", label: "מועדפים", icon: Heart },
+    { to: "/resident/my-offers", label: "ההצעות שלי", icon: CheckSquare },
     { to: "/resident/profile", label: "פרופיל", icon: User },
   ],
   supplier: [
