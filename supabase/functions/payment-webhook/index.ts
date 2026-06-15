@@ -185,6 +185,11 @@ async function parseRequestBody(reqForForm: Request, rawBody: string): Promise<R
   }
 }
 
+function stringOrNull(v: unknown): string | null {
+  if (v === null || v === undefined || v === "") return null;
+  return String(v);
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
