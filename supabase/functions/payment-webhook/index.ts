@@ -51,6 +51,23 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    // Async URL delivery: Make may post just { deposit_id, payment_url } after
+    // creating the Grow link. Detect that and store the URL without requiring
+    // a full status payload.
+    const inlineUrl =
+      stringOrNull((payload as Record<string, unknown>).payment_url) ??
+      stringOrNull((payload as Record<string, unknown>).paymentUrl) ??
+      stringOrNull(((payload as Record<string, unknown>).data as Record<string, unknown> | undefined)?.payment_url);
+    if (inlineUrl && (parsed.providerStatus === null || parsed.depositStatus === "pending")) {
+      const { error: urlErr } = await admin
+        .from("deposits")
+        .update({ provider_payment_url: inlineUrl })
+        .eq("id", parsed.depositId);
+      if (urlErr) throw urlErr;
+      console.log("[payment_webhook_url_stored]", { deposit_id: parsed.depositId, url: inlineUrl });
+      return json({ ok: true, url_stored: true });
+    }
+
     const { data: deposit, error: depErr } = await admin
       .from("deposits")
       .select("id,status,payment_provider,provider_transaction_id,is_deleted,supplier_deduction_basis,gross_deposit_amount")
@@ -166,6 +183,11 @@ async function parseRequestBody(reqForForm: Request, rawBody: string): Promise<R
   } catch {
     return null;
   }
+}
+
+function stringOrNull(v: unknown): string | null {
+  if (v === null || v === undefined || v === "") return null;
+  return String(v);
 }
 
 function json(body: unknown, status = 200) {

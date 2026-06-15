@@ -18,8 +18,9 @@ export interface CheckoutSessionInput {
 }
 
 export interface CheckoutSessionResult {
-  payment_url: string;
+  payment_url: string | null;
   provider_transaction_id: string | null;
+  pending?: boolean;
   raw_response?: unknown;
 }
 
@@ -393,15 +394,18 @@ class GrowMakeProviderAdapter extends PlaceholderProviderAdapter {
 
     const trimmedBody = (responseText ?? "").trim();
 
-    // Make.com returns the literal string "Accepted" (200) when the scenario
-    // has no Webhook Response module returning JSON. Detect this and surface
-    // a clear, actionable Hebrew error so the operator can fix the scenario.
+    // Make.com's default behavior (no "Webhook Response" module) is to
+    // immediately return the literal string "Accepted" while continuing the
+    // scenario asynchronously. In that case we treat the checkout as pending:
+    // Make will POST the actual payment_url back to /payment-webhook later,
+    // and the client polls the deposit row for it.
     if (!trimmedBody || /^accepted$/i.test(trimmedBody)) {
-      throw new PaymentProviderError(
-        "make_webhook_missing_response_module",
-        "תרחיש Make.com לא מחזיר קישור תשלום. יש להוסיף בסוף התרחיש מודול 'Webhook Response' שמחזיר JSON בפורמט { \"payment_url\": \"https://...\" }.",
-        502,
-      );
+      return {
+        payment_url: null,
+        provider_transaction_id: null,
+        pending: true,
+        raw_response: { accepted: true },
+      };
     }
 
     let responseJson: Record<string, unknown>;
@@ -431,7 +435,17 @@ class GrowMakeProviderAdapter extends PlaceholderProviderAdapter {
       stringFromPayload(responseJson.grow_payment_url) ??
       stringFromPayload(responseJson.url);
     if (!paymentUrl) {
-      throw new PaymentProviderError("make_missing_payment_url", "Make response is missing payment_url", 502);
+      // JSON came back without a URL — assume the Make scenario will post the
+      // URL asynchronously to /payment-webhook. Treat as pending.
+      return {
+        payment_url: null,
+        provider_transaction_id:
+          stringFromPayload(responseJson.provider_transaction_id) ??
+          stringFromPayload(responseJson.transaction_id) ??
+          null,
+        pending: true,
+        raw_response: responseJson,
+      };
     }
 
     return {

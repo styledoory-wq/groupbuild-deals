@@ -320,27 +320,51 @@ export default function DealDetail() {
       }
 
       let paymentUrl: string | null = null;
+      let depositId: string | null = null;
       if (depositRequired) {
         const { data: paymentResponse, error: paymentErr } = await supabase.functions.invoke("create-deposit", {
           body: { deal_id: deal.id, user_id: session.session.user.id },
         });
         if (paymentErr) {
           console.error("[create_deposit_failed]", paymentErr);
-          toast.error("לא הצלחנו ליצור קישור תשלום. נסו שוב או פנו לתמיכה.");
+          toast.error("התשלום נכשל, נסה שנית");
           return;
         }
         if (paymentResponse?.error) {
           console.error("[create_deposit_error_response]", paymentResponse);
-          toast.error(paymentResponse.message ?? "לא הצלחנו ליצור קישור תשלום.");
+          toast.error(paymentResponse.message ?? "התשלום נכשל, נסה שנית");
           return;
         }
         paymentUrl = typeof paymentResponse?.payment_url === "string" ? paymentResponse.payment_url : null;
+        depositId = typeof paymentResponse?.deposit_id === "string" ? paymentResponse.deposit_id : null;
+
+        // Async Make scenario: poll for provider_payment_url for up to ~30s.
+        if (!paymentUrl && depositId) {
+          toast.loading("ממתינים לקישור התשלום מהספק...", { id: "wait-payment-url" });
+          const started = Date.now();
+          while (Date.now() - started < 30000) {
+            await new Promise((r) => setTimeout(r, 1500));
+            const { data: depRow } = await supabase
+              .from("deposits")
+              .select("provider_payment_url,status")
+              .eq("id", depositId)
+              .maybeSingle();
+            if (depRow?.provider_payment_url) {
+              paymentUrl = depRow.provider_payment_url;
+              break;
+            }
+            if (depRow?.status === "failed" || depRow?.status === "cancelled") break;
+          }
+          toast.dismiss("wait-payment-url");
+        }
+
         if (!paymentUrl) {
           console.error("[create_deposit_missing_url]", paymentResponse);
-          toast.error("לא התקבל קישור תשלום. נסו שוב או פנו לתמיכה.");
+          toast.error("לא התקבל קישור תשלום מהספק. נסה שוב בעוד מספר רגעים.");
           return;
         }
       }
+
 
       setInterested(true);
       setInterestStatus(depositRequired ? "pending_deposit" : "interested");
