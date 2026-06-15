@@ -10,8 +10,8 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
   resident: [
     { to: "/resident", label: "בית", icon: Home },
     { to: "/resident/deals", label: "עסקאות", icon: Tag },
+    { to: "/resident/budget-planner", label: "תקציב", icon: Calculator },
     { to: "/resident/favorites", label: "מועדפים", icon: Heart },
-    { to: "/resident/my-offers", label: "הצעות", icon: CheckSquare },
     { to: "/resident/profile", label: "פרופיל", icon: User },
   ],
   supplier: [
