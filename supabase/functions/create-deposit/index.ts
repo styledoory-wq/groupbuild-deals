@@ -253,18 +253,22 @@ Deno.serve(async (req) => {
         description: visibleDeal.title ?? null,
       });
     } catch (provErr) {
-      const reason = provErr instanceof PaymentProviderError
+      const isProvErr = provErr instanceof PaymentProviderError;
+      const reason = isProvErr
         ? provErr.code
         : provErr instanceof Error
           ? provErr.message
           : String(provErr);
+      const message = isProvErr
+        ? provErr.message
+        : "שגיאה ביצירת תשלום מול ספק הסליקה. נסו שוב מאוחר יותר.";
       await admin
         .from("deposits")
         .update({ status: "failed", metadata: { reason } })
         .eq("id", deposit.id);
       return json({
-        error: "provider_error",
-        message: "שגיאה ביצירת תשלום מול ספק הסליקה. נסו שוב מאוחר יותר.",
+        error: isProvErr ? provErr.code : "provider_error",
+        message,
         provider,
       }, 200);
     }
