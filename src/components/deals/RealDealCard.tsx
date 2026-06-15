@@ -126,7 +126,9 @@ function RealDealCardImpl({
           </div>
 
           {/* Favorite */}
-          <FavoriteButton dealId={deal.id} initial={isFavorite} className="absolute top-2 left-2 h-8 w-8" />
+          {!hideFavorite && (
+            <FavoriteButton dealId={deal.id} initial={isFavorite} className="absolute top-2 left-2 h-8 w-8" />
+          )}
 
           {galleryCount > 0 && (
             <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/55 text-white">
