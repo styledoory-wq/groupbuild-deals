@@ -48,10 +48,14 @@ function RealDealCardImpl({
   deal,
   joinersCount = 0,
   isFavorite = false,
+  to,
+  hideFavorite = false,
 }: {
   deal: RealDealCardData;
   joinersCount?: number;
   isFavorite?: boolean;
+  to?: string;
+  hideFavorite?: boolean;
 }) {
   const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(deal.tiers) ? deal.tiers : [];
