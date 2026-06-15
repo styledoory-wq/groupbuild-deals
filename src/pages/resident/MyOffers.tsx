@@ -315,14 +315,23 @@ export default function MyOffers() {
               const hidden = (deposit?.is_hidden ?? false) || hiddenLocal.includes(interest.id);
               if (!deal) {
                 return (
-                  <div key={interest.id} className="p-4 opacity-70 flex items-center justify-between" style={cardStyle}>
+                  <div key={interest.id} className="p-4 opacity-70 flex items-center justify-between gap-2" style={cardStyle}>
                     <p className="text-sm text-[#6B7280]">הצעה זו אינה זמינה יותר</p>
-                    <button
-                      onClick={() => toggleHide({ interest, deposit }, !hidden)}
-                      className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#E8ECF0] text-[#0A1F3D]"
-                    >
-                      {hidden ? "החזרה" : "הסתרה"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => toggleHide({ interest, deposit }, !hidden)}
+                        className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#E8ECF0] text-[#0A1F3D]"
+                      >
+                        {hidden ? "החזרה" : "הסתרה"}
+                      </button>
+                      <button
+                        onClick={() => setPendingDeleteId(interest.id)}
+                        className="h-8 w-8 rounded-xl flex items-center justify-center bg-[#FEE2E2] text-[#DC2626]"
+                        aria-label="מחיקה"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 );
               }
