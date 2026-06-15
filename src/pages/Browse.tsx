@@ -76,15 +76,16 @@ export default function Browse() {
         // Suppliers
         const { data: sRows } = await supabase
           .from("suppliers")
-          .select("id,business_name,logo_url,service_areas,category_id,avg_rating,review_count")
+          .select("id,business_name,logo_url,service_areas,categories")
           .eq("is_active", true)
           .in("approval_status", ["approved", "active"])
-          .order("avg_rating", { ascending: false, nullsFirst: false })
+          .order("business_name", { ascending: true })
           .limit(60);
 
-        const supplierList = (sRows ?? []) as SupplierRow[];
-        // Resolve category names
-        const catIds = Array.from(new Set(supplierList.map((s) => s.category_id).filter(Boolean) as string[]));
+        const supplierList = (sRows ?? []) as unknown as SupplierRow[];
+        const catIds = Array.from(
+          new Set(supplierList.flatMap((s) => (Array.isArray(s.categories) ? s.categories : [])).filter(Boolean)),
+        );
         const catMap = new Map<string, string>();
         if (catIds.length) {
           const { data: cats } = await supabase.from("categories").select("id,name").in("id", catIds);
@@ -92,7 +93,7 @@ export default function Browse() {
         }
         const enrichedSuppliers = supplierList.map((s) => ({
           ...s,
-          category_name: s.category_id ? catMap.get(s.category_id) ?? null : null,
+          category_name: Array.isArray(s.categories) && s.categories[0] ? catMap.get(s.categories[0]) ?? null : null,
         }));
 
         let nextCounts: Record<string, number> = {};
