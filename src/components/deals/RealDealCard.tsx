@@ -48,10 +48,14 @@ function RealDealCardImpl({
   deal,
   joinersCount = 0,
   isFavorite = false,
+  to,
+  hideFavorite = false,
 }: {
   deal: RealDealCardData;
   joinersCount?: number;
   isFavorite?: boolean;
+  to?: string;
+  hideFavorite?: boolean;
 }) {
   const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(deal.tiers) ? deal.tiers : [];
@@ -89,7 +93,7 @@ function RealDealCardImpl({
       : null;
 
   return (
-    <Link to={`/resident/deals/${deal.id}`} className="block group">
+    <Link to={to ?? `/resident/deals/${deal.id}`} className="block group">
       <article className="bg-white rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(10,31,61,0.06)] hover:shadow-[0_8px_24px_-10px_rgba(10,31,61,0.18)] hover:scale-[1.02] transition-all duration-200 flex flex-col h-full">
         {/* Square image top half */}
         <div className="relative aspect-square w-full overflow-hidden bg-[#F4F6FA]">
@@ -122,7 +126,9 @@ function RealDealCardImpl({
           </div>
 
           {/* Favorite */}
-          <FavoriteButton dealId={deal.id} initial={isFavorite} className="absolute top-2 left-2 h-8 w-8" />
+          {!hideFavorite && (
+            <FavoriteButton dealId={deal.id} initial={isFavorite} className="absolute top-2 left-2 h-8 w-8" />
+          )}
 
           {galleryCount > 0 && (
             <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/55 text-white">

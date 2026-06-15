@@ -112,7 +112,7 @@ export default function Auth() {
       return;
     }
     setAdminSession(false);
-    const redirect = searchParams.get("redirect");
+    const redirect = searchParams.get("redirect") ?? searchParams.get("return");
     if (redirect) { navigate(redirect); return; }
     if (resolvedRole === "supplier") navigate("/supplier");
     else navigate("/resident");

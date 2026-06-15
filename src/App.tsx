@@ -40,6 +40,8 @@ const MyDeposits = lazy(() => import("./pages/resident/MyDeposits"));
 const MyVouchers = lazy(() => import("./pages/resident/MyVouchers"));
 const SearchPage = lazy(() => import("./pages/resident/Search"));
 const Favorites = lazy(() => import("./pages/resident/Favorites"));
+const BudgetPlanner = lazy(() => import("./pages/resident/BudgetPlanner"));
+const Browse = lazy(() => import("./pages/Browse"));
 const PrivacyPolicy = lazy(() => import("./pages/resident/PrivacyPolicy"));
 const SupplierScan = lazy(() => import("./pages/supplier/SupplierScan"));
 const SupplierRedemptions = lazy(() => import("./pages/supplier/SupplierRedemptions"));
@@ -198,7 +200,9 @@ const App = () => (
                   <Route path="/resident/deals/:dealId" element={residentRoute(<DealDetail />)} />
                   <Route path="/deals/:dealId" element={<DealDetail />} />
                   <Route path="/share/deal/:dealId" element={<SharedDeal />} />
+                  <Route path="/browse" element={<Browse />} />
                   <Route path="/resident/favorites" element={residentRoute(<Favorites />)} />
+                  <Route path="/resident/budget-planner" element={residentRoute(<BudgetPlanner />)} />
                   <Route path="/resident/profile" element={residentRoute(<ResidentProfile />)} />
                   <Route path="/resident/profile/edit" element={residentRoute(<ResidentProfileEdit />)} />
                   <Route path="/resident/notifications" element={residentRoute(<Notifications />)} />

@@ -145,6 +145,12 @@ export default function Landing() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <button
+            onClick={() => navigate("/browse")}
+            className="mt-3 w-full h-12 rounded-[14px] border border-[#0A1F3D]/15 bg-white text-[14px] font-bold text-[#0A1F3D] hover:bg-[#F4F6FA] transition-colors"
+          >
+            צפה בעסקאות ללא הרשמה
+          </button>
+          <button
             onClick={() => navigate("/auth")}
             className="mt-3 w-full text-center text-[13px] font-semibold text-[#6B7280] hover:text-[#0A1F3D] transition-colors"
           >
