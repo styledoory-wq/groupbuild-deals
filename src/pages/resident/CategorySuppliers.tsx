@@ -252,7 +252,7 @@ export default function CategorySuppliers() {
         </div>
       </header>
 
-      <div className="px-5 -mt-10 relative z-10 space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 pb-6">
+      <div className="px-5 -mt-10 relative z-10 space-y-3 pb-6">
         {/* Marketplace controls */}
         <div className="gb-card p-4 animate-fade-up space-y-3">
           {/* Kind filter */}
