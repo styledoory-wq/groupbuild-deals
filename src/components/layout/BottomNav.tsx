@@ -87,6 +87,7 @@ function BottomNavImpl({ role }: { role: Role }) {
         })}
       </div>
     </nav>
+    </>
   );
 }
 
