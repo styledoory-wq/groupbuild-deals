@@ -31,14 +31,12 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
       className="min-h-screen min-h-[100dvh] relative"
       style={{ overscrollBehavior: "none", backgroundColor: "#F4F6F9" }}
     >
-      {/* Desktop top header */}
+      {/* Desktop top header — sits to the LEFT of the right sidebar (248px) */}
       <header
         dir="rtl"
-        className="hidden lg:flex fixed top-0 right-0 left-0 h-14 bg-white border-b border-[#ECEEF2] z-[70] items-center px-6 gap-6"
+        className="hidden lg:flex fixed top-0 left-0 h-14 bg-white border-b border-[#ECEEF2] z-[70] items-center px-6 gap-6"
+        style={{ right: 248 }}
       >
-        <div className="w-[216px] shrink-0 flex items-center">
-          <BrandLogo />
-        </div>
         <div className="flex-1 max-w-xl">
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
