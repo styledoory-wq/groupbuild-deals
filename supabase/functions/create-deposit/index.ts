@@ -274,21 +274,25 @@ Deno.serve(async (req) => {
     }
 
     // 3. Save provider info on the deposit
-    const providerUpdate: Record<string, unknown> = {
-      provider_payment_url: providerRes.payment_url,
-    };
+    const providerUpdate: Record<string, unknown> = {};
+    if (providerRes.payment_url) {
+      providerUpdate.provider_payment_url = providerRes.payment_url;
+    }
     if (providerRes.provider_transaction_id) {
       providerUpdate.provider_transaction_id = providerRes.provider_transaction_id;
     }
-    await admin
-      .from("deposits")
-      .update(providerUpdate)
-      .eq("id", deposit.id);
+    if (Object.keys(providerUpdate).length > 0) {
+      await admin
+        .from("deposits")
+        .update(providerUpdate)
+        .eq("id", deposit.id);
+    }
 
     return json({
       ok: true,
       deposit_id: deposit.id,
       payment_url: providerRes.payment_url,
+      pending: !providerRes.payment_url,
       provider,
       provider_response: providerRes.raw_response ?? null,
     });
