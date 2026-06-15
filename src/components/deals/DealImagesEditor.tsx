@@ -15,7 +15,7 @@ type Props = {
  * Reusable cover + gallery editor for deals.
  * Uploads to the `deal-images` bucket and propagates URLs upward.
  */
-export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 8 }: Props) {
+export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: Props) {
   const coverInput = useRef<HTMLInputElement>(null);
   const galleryInput = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<"cover" | "gallery" | null>(null);
@@ -36,9 +36,16 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 8 }: P
 
   const pickGallery = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
+    const remaining = Math.max(0, maxGallery - gallery.length);
+    if (remaining === 0) {
+      toast.error(`ניתן להעלות עד ${maxGallery} תמונות בלבד`);
+      return;
+    }
+    if (files.length > remaining) {
+      toast.error(`ניתן להעלות עד ${maxGallery} תמונות בלבד`);
+    }
     setUploading("gallery");
     try {
-      const remaining = Math.max(0, maxGallery - gallery.length);
       const list = Array.from(files).slice(0, remaining);
       const urls: string[] = [];
       for (const f of list) {
