@@ -10,7 +10,18 @@ import {
   CheckCircle2,
   Clock,
   ShieldCheck,
+  Trash2,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ScreenHeader } from "@/components/ds/ScreenHeader";
@@ -89,6 +100,22 @@ export default function MyOffers() {
   const [items, setItems] = useState<MyOfferItem[]>(() => cached ?? []);
   const [showHidden, setShowHidden] = useState(false);
   const [hiddenLocal, setHiddenLocal] = useState<string[]>(loadHiddenLocal());
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    setDeleting(true);
+    const { error } = await supabase.from("deal_interests").delete().eq("id", pendingDeleteId);
+    setDeleting(false);
+    if (error) {
+      toast.error("המחיקה נכשלה");
+      return;
+    }
+    setItems((prev) => prev.filter((x) => x.interest.id !== pendingDeleteId));
+    setPendingDeleteId(null);
+    toast.success("הפריט נמחק בהצלחה");
+  };
 
   const load = async () => {
     if (!cached) setLoading(true);
@@ -288,14 +315,23 @@ export default function MyOffers() {
               const hidden = (deposit?.is_hidden ?? false) || hiddenLocal.includes(interest.id);
               if (!deal) {
                 return (
-                  <div key={interest.id} className="p-4 opacity-70 flex items-center justify-between" style={cardStyle}>
+                  <div key={interest.id} className="p-4 opacity-70 flex items-center justify-between gap-2" style={cardStyle}>
                     <p className="text-sm text-[#6B7280]">הצעה זו אינה זמינה יותר</p>
-                    <button
-                      onClick={() => toggleHide({ interest, deposit }, !hidden)}
-                      className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#E8ECF0] text-[#0A1F3D]"
-                    >
-                      {hidden ? "החזרה" : "הסתרה"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => toggleHide({ interest, deposit }, !hidden)}
+                        className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#E8ECF0] text-[#0A1F3D]"
+                      >
+                        {hidden ? "החזרה" : "הסתרה"}
+                      </button>
+                      <button
+                        onClick={() => setPendingDeleteId(interest.id)}
+                        className="h-8 w-8 rounded-xl flex items-center justify-center bg-[#FEE2E2] text-[#DC2626]"
+                        aria-label="מחיקה"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 );
               }
@@ -361,6 +397,12 @@ export default function MyOffers() {
                             <><EyeOff className="h-4 w-4 ml-2" /> הסתרה / העברה לארכיון</>
                           )}
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setPendingDeleteId(interest.id)}
+                          className="text-[#DC2626] focus:text-[#DC2626]"
+                        >
+                          <Trash2 className="h-4 w-4 ml-2" /> מחיקה לצמיתות
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -406,6 +448,21 @@ export default function MyOffers() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={pendingDeleteId !== null} onOpenChange={(o) => !o && setPendingDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>האם למחוק פריט זה?</AlertDialogTitle>
+            <AlertDialogDescription>פעולה זו אינה ניתנת לביטול</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>ביטול</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="bg-[#DC2626] hover:bg-[#B91C1C]">
+              {deleting ? "מוחק..." : "מחיקה"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <BottomNav role="resident" />
     </MobileShell>

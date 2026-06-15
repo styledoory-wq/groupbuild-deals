@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Ticket, Users, Share2, Clock, Hourglass } from "lucide-react";
+import { Ticket, Users, Share2, Clock, Hourglass, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -34,6 +44,33 @@ export default function MyVouchers() {
   const [vouchers, setVouchers] = useState<VoucherRow[]>([]);
   const [pending, setPending] = useState<PendingRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingDelete, setPendingDelete] = useState<
+    | { kind: "voucher"; id: string }
+    | { kind: "interest"; id: string }
+    | null
+  >(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    const { error } =
+      pendingDelete.kind === "voucher"
+        ? await supabase.from("vouchers").delete().eq("id", pendingDelete.id)
+        : await supabase.from("deal_interests").delete().eq("id", pendingDelete.id);
+    setDeleting(false);
+    if (error) {
+      toast.error("המחיקה נכשלה");
+      return;
+    }
+    if (pendingDelete.kind === "voucher") {
+      setVouchers((prev) => prev.filter((v) => v.id !== pendingDelete.id));
+    } else {
+      setPending((prev) => prev.filter((p) => p.interest_id !== pendingDelete.id));
+    }
+    setPendingDelete(null);
+    toast.success("הפריט נמחק בהצלחה");
+  };
 
   useEffect(() => {
     (async () => {
@@ -195,10 +232,19 @@ export default function MyVouchers() {
                       <div className="text-fs-xs uppercase tracking-wider text-muted-foreground">{p.supplier_name ?? "ספק"}</div>
                       <h3 className="text-lg font-bold text-foreground mt-1 leading-tight">{p.title}</h3>
                     </div>
-                    <span className="text-fs-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap bg-gold/15 text-amber-700 border border-gold/30 inline-flex items-center gap-1">
-                      <Hourglass className="h-3 w-3" />
-                      ממתין לסגירת הקבוצה
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-fs-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap bg-gold/15 text-amber-700 border border-gold/30 inline-flex items-center gap-1">
+                        <Hourglass className="h-3 w-3" />
+                        ממתין לסגירת הקבוצה
+                      </span>
+                      <button
+                        onClick={() => setPendingDelete({ kind: "interest", id: p.interest_id })}
+                        className="h-8 w-8 rounded-xl flex items-center justify-center bg-[#FEE2E2] text-[#DC2626]"
+                        aria-label="מחיקה"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="rounded-2xl bg-muted/30 border border-border p-4 space-y-3">
@@ -254,28 +300,52 @@ export default function MyVouchers() {
 
             {/* Active vouchers — deal closed */}
             {vouchers.map((v) => (
-              <VoucherCard
-                key={v.id}
-                voucher={{
-                  id: v.id, code: v.code, reference_number: v.reference_number,
-                  status: v.status, expires_at: v.expires_at, redeemed_at: v.redeemed_at,
-                  rotation_secret: v.rotation_secret,
-                  deal_id: v.deal_id, supplier_id: v.supplier_id,
-                  deal_title: v.deals?.title ?? undefined,
-                  supplier_name: v.suppliers?.business_name ?? undefined,
-                  category_name: v.category_name ?? undefined,
-                  price: v.deals?.discounted_price ?? v.deals?.original_price ?? null,
-                  original_price: v.deals?.original_price ?? v.deals?.base_price ?? null,
-                  benefit_price: v.deals?.discounted_price ?? null,
-                  savings: v.deals?.original_price != null && v.deals?.discounted_price != null
-                    ? Math.max(0, Number(v.deals.original_price) - Number(v.deals.discounted_price))
-                    : null,
-                }}
-              />
+              <div key={v.id} className="relative">
+                <button
+                  onClick={() => setPendingDelete({ kind: "voucher", id: v.id })}
+                  className="absolute top-3 left-3 z-10 h-8 w-8 rounded-xl flex items-center justify-center bg-[#FEE2E2] text-[#DC2626] shadow-sm"
+                  aria-label="מחיקה"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+                <VoucherCard
+                  voucher={{
+                    id: v.id, code: v.code, reference_number: v.reference_number,
+                    status: v.status, expires_at: v.expires_at, redeemed_at: v.redeemed_at,
+                    rotation_secret: v.rotation_secret,
+                    deal_id: v.deal_id, supplier_id: v.supplier_id,
+                    deal_title: v.deals?.title ?? undefined,
+                    supplier_name: v.suppliers?.business_name ?? undefined,
+                    category_name: v.category_name ?? undefined,
+                    price: v.deals?.discounted_price ?? v.deals?.original_price ?? null,
+                    original_price: v.deals?.original_price ?? v.deals?.base_price ?? null,
+                    benefit_price: v.deals?.discounted_price ?? null,
+                    savings: v.deals?.original_price != null && v.deals?.discounted_price != null
+                      ? Math.max(0, Number(v.deals.original_price) - Number(v.deals.discounted_price))
+                      : null,
+                  }}
+                />
+              </div>
             ))}
           </>
         )}
       </div>
+
+      <AlertDialog open={pendingDelete !== null} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>האם למחוק פריט זה?</AlertDialogTitle>
+            <AlertDialogDescription>פעולה זו אינה ניתנת לביטול</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>ביטול</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="bg-[#DC2626] hover:bg-[#B91C1C]">
+              {deleting ? "מוחק..." : "מחיקה"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <BottomNav role="resident" />
     </MobileShell>
   );
