@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Bell, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BrandLogo } from "@/components/BrandLogo";
+
 import { useApp } from "@/store/AppStore";
 
 /**
