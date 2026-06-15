@@ -93,7 +93,7 @@ function RealDealCardImpl({
       : null;
 
   return (
-    <Link to={`/resident/deals/${deal.id}`} className="block group">
+    <Link to={to ?? `/resident/deals/${deal.id}`} className="block group">
       <article className="bg-white rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(10,31,61,0.06)] hover:shadow-[0_8px_24px_-10px_rgba(10,31,61,0.18)] hover:scale-[1.02] transition-all duration-200 flex flex-col h-full">
         {/* Square image top half */}
         <div className="relative aspect-square w-full overflow-hidden bg-[#F4F6FA]">
