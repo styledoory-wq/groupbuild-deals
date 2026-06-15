@@ -449,6 +449,21 @@ export default function MyOffers() {
         )}
       </div>
 
+      <AlertDialog open={pendingDeleteId !== null} onOpenChange={(o) => !o && setPendingDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>האם למחוק פריט זה?</AlertDialogTitle>
+            <AlertDialogDescription>פעולה זו אינה ניתנת לביטול</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>ביטול</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="bg-[#DC2626] hover:bg-[#B91C1C]">
+              {deleting ? "מוחק..." : "מחיקה"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <BottomNav role="resident" />
     </MobileShell>
   );
