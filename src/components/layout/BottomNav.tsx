@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, ScanLine, CheckSquare, type LucideIcon } from "lucide-react";
+import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, ScanLine, CheckSquare, Calculator, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { preloadRoute } from "@/lib/routePreload";
 import { DesktopSidebar } from "./DesktopSidebar";
