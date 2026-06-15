@@ -388,6 +388,12 @@ export default function MyOffers() {
                             <><EyeOff className="h-4 w-4 ml-2" /> הסתרה / העברה לארכיון</>
                           )}
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setPendingDeleteId(interest.id)}
+                          className="text-[#DC2626] focus:text-[#DC2626]"
+                        >
+                          <Trash2 className="h-4 w-4 ml-2" /> מחיקה לצמיתות
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
