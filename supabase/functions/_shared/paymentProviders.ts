@@ -18,8 +18,9 @@ export interface CheckoutSessionInput {
 }
 
 export interface CheckoutSessionResult {
-  payment_url: string;
+  payment_url: string | null;
   provider_transaction_id: string | null;
+  pending?: boolean;
   raw_response?: unknown;
 }
 
