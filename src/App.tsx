@@ -200,7 +200,9 @@ const App = () => (
                   <Route path="/resident/deals/:dealId" element={residentRoute(<DealDetail />)} />
                   <Route path="/deals/:dealId" element={<DealDetail />} />
                   <Route path="/share/deal/:dealId" element={<SharedDeal />} />
+                  <Route path="/browse" element={<Browse />} />
                   <Route path="/resident/favorites" element={residentRoute(<Favorites />)} />
+                  <Route path="/resident/budget-planner" element={residentRoute(<BudgetPlanner />)} />
                   <Route path="/resident/profile" element={residentRoute(<ResidentProfile />)} />
                   <Route path="/resident/profile/edit" element={residentRoute(<ResidentProfileEdit />)} />
                   <Route path="/resident/notifications" element={residentRoute(<Notifications />)} />
