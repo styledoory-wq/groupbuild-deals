@@ -88,8 +88,11 @@
     width: 100%;
     min-height: 100%;
   }
-  /* Allow the page itself to scroll vertically; only block horizontal overflow */
-  html, body { overflow-x: hidden; overflow-y: auto; }
+  /* Page scroll: the viewport (html) is the scroll container. Body only blocks
+     horizontal overflow. Never set overflow-y on html/body — it can suppress
+     viewport scroll on some browsers and trap long pages. */
+  body { overflow-x: hidden; }
+  #root { overflow-x: hidden; }
 
   body {
     @apply text-foreground;
