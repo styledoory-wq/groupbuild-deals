@@ -300,28 +300,52 @@ export default function MyVouchers() {
 
             {/* Active vouchers — deal closed */}
             {vouchers.map((v) => (
-              <VoucherCard
-                key={v.id}
-                voucher={{
-                  id: v.id, code: v.code, reference_number: v.reference_number,
-                  status: v.status, expires_at: v.expires_at, redeemed_at: v.redeemed_at,
-                  rotation_secret: v.rotation_secret,
-                  deal_id: v.deal_id, supplier_id: v.supplier_id,
-                  deal_title: v.deals?.title ?? undefined,
-                  supplier_name: v.suppliers?.business_name ?? undefined,
-                  category_name: v.category_name ?? undefined,
-                  price: v.deals?.discounted_price ?? v.deals?.original_price ?? null,
-                  original_price: v.deals?.original_price ?? v.deals?.base_price ?? null,
-                  benefit_price: v.deals?.discounted_price ?? null,
-                  savings: v.deals?.original_price != null && v.deals?.discounted_price != null
-                    ? Math.max(0, Number(v.deals.original_price) - Number(v.deals.discounted_price))
-                    : null,
-                }}
-              />
+              <div key={v.id} className="relative">
+                <button
+                  onClick={() => setPendingDelete({ kind: "voucher", id: v.id })}
+                  className="absolute top-3 left-3 z-10 h-8 w-8 rounded-xl flex items-center justify-center bg-[#FEE2E2] text-[#DC2626] shadow-sm"
+                  aria-label="מחיקה"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+                <VoucherCard
+                  voucher={{
+                    id: v.id, code: v.code, reference_number: v.reference_number,
+                    status: v.status, expires_at: v.expires_at, redeemed_at: v.redeemed_at,
+                    rotation_secret: v.rotation_secret,
+                    deal_id: v.deal_id, supplier_id: v.supplier_id,
+                    deal_title: v.deals?.title ?? undefined,
+                    supplier_name: v.suppliers?.business_name ?? undefined,
+                    category_name: v.category_name ?? undefined,
+                    price: v.deals?.discounted_price ?? v.deals?.original_price ?? null,
+                    original_price: v.deals?.original_price ?? v.deals?.base_price ?? null,
+                    benefit_price: v.deals?.discounted_price ?? null,
+                    savings: v.deals?.original_price != null && v.deals?.discounted_price != null
+                      ? Math.max(0, Number(v.deals.original_price) - Number(v.deals.discounted_price))
+                      : null,
+                  }}
+                />
+              </div>
             ))}
           </>
         )}
       </div>
+
+      <AlertDialog open={pendingDelete !== null} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>האם למחוק פריט זה?</AlertDialogTitle>
+            <AlertDialogDescription>פעולה זו אינה ניתנת לביטול</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>ביטול</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="bg-[#DC2626] hover:bg-[#B91C1C]">
+              {deleting ? "מוחק..." : "מחיקה"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <BottomNav role="resident" />
     </MobileShell>
   );
