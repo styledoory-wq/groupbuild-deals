@@ -394,15 +394,18 @@ class GrowMakeProviderAdapter extends PlaceholderProviderAdapter {
 
     const trimmedBody = (responseText ?? "").trim();
 
-    // Make.com returns the literal string "Accepted" (200) when the scenario
-    // has no Webhook Response module returning JSON. Detect this and surface
-    // a clear, actionable Hebrew error so the operator can fix the scenario.
+    // Make.com's default behavior (no "Webhook Response" module) is to
+    // immediately return the literal string "Accepted" while continuing the
+    // scenario asynchronously. In that case we treat the checkout as pending:
+    // Make will POST the actual payment_url back to /payment-webhook later,
+    // and the client polls the deposit row for it.
     if (!trimmedBody || /^accepted$/i.test(trimmedBody)) {
-      throw new PaymentProviderError(
-        "make_webhook_missing_response_module",
-        "תרחיש Make.com לא מחזיר קישור תשלום. יש להוסיף בסוף התרחיש מודול 'Webhook Response' שמחזיר JSON בפורמט { \"payment_url\": \"https://...\" }.",
-        502,
-      );
+      return {
+        payment_url: null,
+        provider_transaction_id: null,
+        pending: true,
+        raw_response: { accepted: true },
+      };
     }
 
     let responseJson: Record<string, unknown>;
