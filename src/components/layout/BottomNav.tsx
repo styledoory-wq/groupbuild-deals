@@ -37,14 +37,16 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
 function BottomNavImpl({ role }: { role: Role }) {
   const location = useLocation();
   return (
-    <nav
-      dir="rtl"
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[90] w-full max-w-[var(--app-max-w)] bg-white border-t border-x border-[#ECEEF2] rounded-t-2xl transition-transform duration-200 [.keyboard-open_&]:translate-y-full [.keyboard-open_&]:pointer-events-none"
-      style={{
-        paddingBottom: "env(safe-area-inset-bottom)",
-        boxShadow: "0 -4px 16px -8px rgba(10,31,61,0.08)",
-      }}
-    >
+    <>
+      <DesktopSidebar role={role} />
+      <nav
+        dir="rtl"
+        className="lg:hidden fixed bottom-0 left-1/2 -translate-x-1/2 z-[90] w-full max-w-[480px] bg-white border-t border-x border-[#ECEEF2] rounded-t-2xl transition-transform duration-200 [.keyboard-open_&]:translate-y-full [.keyboard-open_&]:pointer-events-none"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          boxShadow: "0 -4px 16px -8px rgba(10,31,61,0.08)",
+        }}
+      >
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] flex items-stretch justify-between px-1"
         style={{ height: "var(--nav-h)" }}
