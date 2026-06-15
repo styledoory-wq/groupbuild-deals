@@ -117,6 +117,20 @@ export default function Auth() {
     else navigate("/resident");
   };
 
+  const translateAuthError = (msg: string): string => {
+    const m = msg.toLowerCase();
+    if (m.includes("invalid login") || m.includes("invalid credentials") || m.includes("wrong password")) return "סיסמה שגויה, נסה שוב";
+    if (m.includes("user not found")) return "המשתמש לא נמצא";
+    if (m.includes("invalid email")) return "כתובת מייל לא תקינה";
+    if (m.includes("already registered") || m.includes("already in use") || m.includes("user already")) return "כתובת המייל כבר רשומה במערכת";
+    if (m.includes("password should be") || m.includes("password is too short") || m.includes("at least 6")) return "הסיסמה קצרה מדי — נדרשים לפחות 6 תווים";
+    if (m.includes("weak password")) return "הסיסמה חלשה מדי — הוסף מספרים או סימנים";
+    if (m.includes("rate limit") || m.includes("too many")) return "יותר מדי ניסיונות, נסה שוב בעוד כמה דקות";
+    if (m.includes("email not confirmed")) return "המייל לא אומת — בדוק את תיבת הדואר שלך";
+    if (m.includes("network")) return "אין חיבור לאינטרנט, נסה שוב";
+    return msg;
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -125,7 +139,8 @@ export default function Auth() {
       if (error) throw error;
       // Redirect handled by onAuthStateChange
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "התחברות נכשלה");
+      const raw = err instanceof Error ? err.message : "התחברות נכשלה";
+      toast.error(translateAuthError(raw));
     } finally {
       setLoading(false);
     }
@@ -194,11 +209,10 @@ export default function Auth() {
           details: { full_name: fullName, email, phone: "", city, business_name: businessName, role },
         },
       }).catch(() => { /* ignore */ });
-      toast.success("נרשמתם בהצלחה! מתחברים…");
+      toast.success("נרשמתם בהצלחה! שלחנו לך מייל אישור — בדוק את תיבת הדואר שלך");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "הרשמה נכשלה";
-      if (msg.includes("already registered")) toast.error("המייל הזה כבר רשום");
-      else toast.error(msg);
+      const raw = err instanceof Error ? err.message : "הרשמה נכשלה";
+      toast.error(translateAuthError(raw));
     } finally {
       setLoading(false);
     }
