@@ -232,10 +232,19 @@ export default function MyVouchers() {
                       <div className="text-fs-xs uppercase tracking-wider text-muted-foreground">{p.supplier_name ?? "ספק"}</div>
                       <h3 className="text-lg font-bold text-foreground mt-1 leading-tight">{p.title}</h3>
                     </div>
-                    <span className="text-fs-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap bg-gold/15 text-amber-700 border border-gold/30 inline-flex items-center gap-1">
-                      <Hourglass className="h-3 w-3" />
-                      ממתין לסגירת הקבוצה
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-fs-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap bg-gold/15 text-amber-700 border border-gold/30 inline-flex items-center gap-1">
+                        <Hourglass className="h-3 w-3" />
+                        ממתין לסגירת הקבוצה
+                      </span>
+                      <button
+                        onClick={() => setPendingDelete({ kind: "interest", id: p.interest_id })}
+                        className="h-8 w-8 rounded-xl flex items-center justify-center bg-[#FEE2E2] text-[#DC2626]"
+                        aria-label="מחיקה"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="rounded-2xl bg-muted/30 border border-border p-4 space-y-3">
