@@ -334,10 +334,26 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories,commission_percent,monthly_subscription,billing_status,billing_notes,updated_at,created_at")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories,updated_at,created_at")
       .order("business_name");
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
+
+    // Admin-only billing fields fetched via SECURITY DEFINER RPC (columns are revoked from authenticated)
+    const { data: billingRows } = await supabase.rpc("admin_list_supplier_billing");
+    const billingMap = new Map<string, { commission_percent: number | null; monthly_subscription: number | null; billing_status: string | null; billing_notes: string | null }>();
+    (billingRows ?? []).forEach((b: { id: string; commission_percent: number | null; monthly_subscription: number | null; billing_status: string | null; billing_notes: string | null }) => {
+      billingMap.set(b.id, b);
+    });
+    base.forEach((r) => {
+      const b = billingMap.get(r.id);
+      if (b) {
+        r.commission_percent = b.commission_percent;
+        r.monthly_subscription = b.monthly_subscription;
+        r.billing_status = b.billing_status;
+        r.billing_notes = b.billing_notes;
+      }
+    });
 
     // Pull region/city/deals/leads counts in parallel
     const [{ data: regs }, { data: cits }, { data: dls }, { data: ints }] = await Promise.all([
