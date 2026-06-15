@@ -40,6 +40,8 @@ const MyDeposits = lazy(() => import("./pages/resident/MyDeposits"));
 const MyVouchers = lazy(() => import("./pages/resident/MyVouchers"));
 const SearchPage = lazy(() => import("./pages/resident/Search"));
 const Favorites = lazy(() => import("./pages/resident/Favorites"));
+const BudgetPlanner = lazy(() => import("./pages/resident/BudgetPlanner"));
+const Browse = lazy(() => import("./pages/Browse"));
 const PrivacyPolicy = lazy(() => import("./pages/resident/PrivacyPolicy"));
 const SupplierScan = lazy(() => import("./pages/supplier/SupplierScan"));
 const SupplierRedemptions = lazy(() => import("./pages/supplier/SupplierRedemptions"));
