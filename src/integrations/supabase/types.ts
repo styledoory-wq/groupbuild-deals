@@ -1546,6 +1546,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_supplier_billing: {
+        Args: { _supplier_id: string }
+        Returns: {
+          billing_notes: string
+          billing_status: string
+          commission_percent: number
+          monthly_subscription: number
+        }[]
+      }
+      admin_list_supplier_billing: {
+        Args: never
+        Returns: {
+          billing_notes: string
+          billing_status: string
+          commission_percent: number
+          id: string
+          monthly_subscription: number
+        }[]
+      }
       approve_lead_and_deposit: {
         Args: { _interest_id: string; _lead_status: string }
         Returns: undefined
@@ -1560,6 +1579,15 @@ export type Database = {
       }
       get_deal_interest_count: { Args: { _deal_id: string }; Returns: number }
       get_deal_paid_count: { Args: { _deal_id: string }; Returns: number }
+      get_deal_reviews_public: {
+        Args: { _deal_id: string }
+        Returns: {
+          comment: string
+          created_at: string
+          id: string
+          rating: number
+        }[]
+      }
       get_landing_stats: {
         Args: never
         Returns: {
