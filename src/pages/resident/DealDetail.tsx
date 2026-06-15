@@ -359,8 +359,8 @@ export default function DealDetail() {
         }
 
         if (!paymentUrl) {
-          console.error("[create_deposit_missing_url]", paymentResponse);
-          toast.error("לא התקבל קישור תשלום מהספק. נסה שוב בעוד מספר רגעים.");
+          console.error("[create_deposit_missing_url] full response:", paymentResponse);
+          toast.error("שגיאה בחיבור לספק התשלום — פנה לתמיכה");
           return;
         }
       }

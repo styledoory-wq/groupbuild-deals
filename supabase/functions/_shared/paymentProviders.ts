@@ -376,14 +376,45 @@ class GrowMakeProviderAdapter extends PlaceholderProviderAdapter {
       deposit_amount: input.amount,
     });
 
-    const res = await fetch(Deno.env.get("MAKE_CREATE_PAYMENT_LINK_WEBHOOK_URL")!, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${Deno.env.get("MAKE_CALLBACK_SECRET")!}`,
-      },
-      body: JSON.stringify(makePayload),
-    });
+    const webhookUrl = Deno.env.get("MAKE_CREATE_PAYMENT_LINK_WEBHOOK_URL");
+    if (!webhookUrl || webhookUrl.trim() === "") {
+      throw new PaymentProviderError(
+        "make_webhook_url_missing",
+        "הגדרות תשלום חסרות — פנה לאדמין",
+        503,
+        ["MAKE_CREATE_PAYMENT_LINK_WEBHOOK_URL"],
+      );
+    }
+
+    // 10-second timeout on the Make.com call.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    let res: Response;
+    try {
+      res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Deno.env.get("MAKE_CALLBACK_SECRET")!}`,
+        },
+        body: JSON.stringify(makePayload),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      clearTimeout(timeoutId);
+      const aborted = err instanceof Error && err.name === "AbortError";
+      console.error("[grow_make_create_checkout_fetch_error]", {
+        deposit_id: input.depositId,
+        aborted,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      throw new PaymentProviderError(
+        aborted ? "make_timeout" : "make_fetch_failed",
+        aborted ? "השרת לא הגיב, נסה שנית" : "שגיאה בחיבור לספק התשלום — פנה לתמיכה",
+        504,
+      );
+    }
+    clearTimeout(timeoutId);
 
     const responseText = await res.text();
     console.log("[grow_make_create_checkout_response]", {
@@ -412,29 +443,45 @@ class GrowMakeProviderAdapter extends PlaceholderProviderAdapter {
     try {
       responseJson = JSON.parse(trimmedBody) as Record<string, unknown>;
     } catch {
+      console.error("[grow_make_invalid_json]", { deposit_id: input.depositId, body: trimmedBody });
       throw new PaymentProviderError(
         "make_invalid_response",
-        "תגובת Make.com אינה JSON תקין. ודאו שמודול ה-Webhook Response מחזיר אובייקט JSON עם payment_url.",
+        "שגיאה בחיבור לספק התשלום — פנה לתמיכה",
         502,
       );
     }
+
+    console.log("[grow_make_parsed_response]", { deposit_id: input.depositId, response: responseJson });
 
     if (!res.ok || responseJson.error) {
       throw new PaymentProviderError(
         "make_checkout_failed",
         stringFromPayload(responseJson.error) ??
           stringFromPayload(responseJson.message) ??
-          "Make failed to create Grow payment link",
+          "שגיאה בחיבור לספק התשלום — פנה לתמיכה",
         502,
       );
     }
 
+    // Accept many possible field names Make/Grow may use for the URL.
+    const nested = extractNestedRecord(responseJson);
     const paymentUrl =
       stringFromPayload(responseJson.payment_url) ??
       stringFromPayload(responseJson.paymentUrl) ??
       stringFromPayload(responseJson.grow_payment_url) ??
-      stringFromPayload(responseJson.url);
+      stringFromPayload(responseJson.url) ??
+      stringFromPayload(responseJson.link) ??
+      stringFromPayload(responseJson.checkout_url) ??
+      stringFromPayload(nested.payment_url) ??
+      stringFromPayload(nested.paymentUrl) ??
+      stringFromPayload(nested.url) ??
+      stringFromPayload(nested.link) ??
+      stringFromPayload(nested.checkout_url);
     if (!paymentUrl) {
+      console.warn("[grow_make_missing_url_in_response]", {
+        deposit_id: input.depositId,
+        keys: Object.keys(responseJson),
+      });
       // JSON came back without a URL — assume the Make scenario will post the
       // URL asynchronously to /payment-webhook. Treat as pending.
       return {
@@ -447,6 +494,7 @@ class GrowMakeProviderAdapter extends PlaceholderProviderAdapter {
         raw_response: responseJson,
       };
     }
+
 
     return {
       payment_url: paymentUrl,
