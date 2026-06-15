@@ -209,11 +209,10 @@ export default function Auth() {
           details: { full_name: fullName, email, phone: "", city, business_name: businessName, role },
         },
       }).catch(() => { /* ignore */ });
-      toast.success("נרשמתם בהצלחה! מתחברים…");
+      toast.success("נרשמתם בהצלחה! שלחנו לך מייל אישור — בדוק את תיבת הדואר שלך");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "הרשמה נכשלה";
-      if (msg.includes("already registered")) toast.error("המייל הזה כבר רשום");
-      else toast.error(msg);
+      const raw = err instanceof Error ? err.message : "הרשמה נכשלה";
+      toast.error(translateAuthError(raw));
     } finally {
       setLoading(false);
     }
