@@ -10,7 +10,18 @@ import {
   CheckCircle2,
   Clock,
   ShieldCheck,
+  Trash2,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ScreenHeader } from "@/components/ds/ScreenHeader";
