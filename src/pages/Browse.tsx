@@ -14,10 +14,8 @@ type SupplierRow = {
   business_name: string;
   logo_url: string | null;
   service_areas: string[] | null;
-  category_id: string | null;
+  categories: string[] | null;
   category_name?: string | null;
-  avg_rating?: number | null;
-  review_count?: number | null;
 };
 
 export default function Browse() {
