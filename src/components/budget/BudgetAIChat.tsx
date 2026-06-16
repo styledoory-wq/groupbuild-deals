@@ -116,7 +116,8 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
         <Button
           type="submit"
           disabled={loading || !input.trim()}
-          className="h-11 px-4 bg-[#1F2937] hover:bg-[#111827] text-white"
+          className="h-11 px-4 text-white hover:opacity-90"
+          style={{ background: "#C9A227" }}
         >
           <Send className="h-4 w-4" />
         </Button>
