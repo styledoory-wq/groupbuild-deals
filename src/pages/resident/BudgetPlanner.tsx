@@ -27,6 +27,10 @@ const TRACKS: { key: Track; label: string; desc: string; icon: typeof Home; tint
 const finishOptions: FinishLevel[] = ["basic", "standard", "premium", "luxury"];
 const regionOptions: Region[] = ["north", "haifa", "sharon", "center", "jerusalem", "south"];
 
+const FIELD_LABEL = "block text-[11.5px] font-extrabold text-[#6B7280] mb-1.5 tracking-wide";
+const FIELD_INPUT = "h-12 bg-white border border-[#E5E7EB] rounded-xl text-[14px] font-bold text-[#1F2937] text-right shadow-[0_1px_2px_rgba(31,41,55,0.04)] focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-[#C9A227]/30 focus-visible:border-[#C9A227]";
+const FIELD_TRIGGER = "h-12 bg-white border border-[#E5E7EB] rounded-xl text-[14px] font-bold text-[#1F2937] shadow-[0_1px_2px_rgba(31,41,55,0.04)] focus:ring-2 focus:ring-[#C9A227]/30";
+
 function FieldGrid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-3">{children}</div>;
 }
@@ -34,9 +38,9 @@ function FieldGrid({ children }: { children: React.ReactNode }) {
 function FinishSelect({ value, onChange }: { value: FinishLevel; onChange: (v: FinishLevel) => void }) {
   return (
     <div>
-      <Label>רמת גמר</Label>
+      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>רמת גמר</Label>
       <Select value={value} onValueChange={(v) => onChange(v as FinishLevel)}>
-        <SelectTrigger><SelectValue /></SelectTrigger>
+        <SelectTrigger className={FIELD_TRIGGER}><SelectValue /></SelectTrigger>
         <SelectContent>
           {finishOptions.map((f) => <SelectItem key={f} value={f}>{FINISH_LABELS[f]}</SelectItem>)}
         </SelectContent>
@@ -47,9 +51,9 @@ function FinishSelect({ value, onChange }: { value: FinishLevel; onChange: (v: F
 function RegionSelect({ value, onChange }: { value: Region; onChange: (v: Region) => void }) {
   return (
     <div>
-      <Label>אזור בארץ</Label>
+      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>אזור בארץ</Label>
       <Select value={value} onValueChange={(v) => onChange(v as Region)}>
-        <SelectTrigger><SelectValue /></SelectTrigger>
+        <SelectTrigger className={FIELD_TRIGGER}><SelectValue /></SelectTrigger>
         <SelectContent>
           {regionOptions.map((r) => <SelectItem key={r} value={r}>{REGION_LABELS[r]}</SelectItem>)}
         </SelectContent>
