@@ -998,7 +998,7 @@ export default function DealDetail() {
               <div className="rounded-xl border border-gold/40 bg-gold/5 px-3 py-2 text-fs-xs text-foreground">
                 <div className="font-bold mb-0.5">פיקדון נדרש: {ils(Number(deal.deposit_amount ?? 0))}</div>
                 <div className="text-muted-foreground">
-                  הצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת.
+                  ההצטרפות תושלם אוטומטית רק לאחר תשלום הפיקדון בפועל.
                 </div>
               </div>
             )}
@@ -1079,7 +1079,7 @@ export default function DealDetail() {
               {submittingInterest ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : depositRequired ? (
-                "אישור הצטרפות + שמירת פיקדון"
+                "המשך לתשלום פיקדון"
               ) : (
                 "אשר הצטרפות"
               )}
