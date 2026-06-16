@@ -187,7 +187,7 @@ export default function DealsList() {
         </div>
 
         <div className="px-5 md:px-8 lg:px-10 mt-5">
-          <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6">
             {loading && <DealCardSkeletonList count={4} />}
 
             {!loading && error && (
