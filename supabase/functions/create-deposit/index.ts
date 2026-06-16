@@ -164,18 +164,25 @@ Deno.serve(async (req) => {
     const cancelUrl = `${siteUrl}/payment/cancel?dep=${depositId}${
       body.interest_id ? `&interest_id=${encodeURIComponent(body.interest_id)}` : ""
     }`;
+    const callbackSecret = Deno.env.get("MAKE_CALLBACK_SECRET") ?? "";
+    const webhookUrl = `${Deno.env.get("SUPABASE_URL")!.replace(/\/+$/, "")}/functions/v1/payment-webhook?provider=cardcom${
+      callbackSecret ? `&secret=${encodeURIComponent(callbackSecret)}` : ""
+    }`;
 
     const cardcomPayload: Record<string, unknown> = {
       TerminalNumber: terminal,
       ApiName: apiName,
+      Operation: "ChargeOnly",
       Amount: amount,
       CoinID: 1, // ILS
+      ISOCoinId: 1,
       MaxPayments: 1,
       Language: "he",
       ProductName: "פיקדון השתתפות בעסקה קבוצתית",
       SuccessRedirectUrl: successUrl,
       FailedRedirectUrl: cancelUrl,
       ReturnValue: depositId,
+      WebHookUrl: webhookUrl,
       Customer: {
         FullName: fullName,
         Phone: phone,

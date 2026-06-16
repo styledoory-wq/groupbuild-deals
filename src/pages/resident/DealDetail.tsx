@@ -81,6 +81,7 @@ export default function DealDetail() {
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [participantCount, setParticipantCount] = useState<number>(0);
   const [isGuest, setIsGuest] = useState<boolean>(false);
+  const [pendingPaymentUrl, setPendingPaymentUrl] = useState<string | null>(null);
 
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
@@ -164,7 +165,7 @@ export default function DealDetail() {
             if (activeInterest.status === "pending_deposit") {
               const { data: dep } = await supabase
                 .from("deposits")
-                .select("id,status")
+                .select("id,status,provider_payment_url")
                 .eq("user_id", session.session.user.id)
                 .eq("deal_id", d.id)
                 .eq("is_deleted", false)
@@ -174,12 +175,14 @@ export default function DealDetail() {
                 setInterested(true);
                 setInterestStatus(activeInterest.status);
                 setInterestDepositStatus(dep.status ?? activeInterest.deposit_status ?? "pending");
+                setPendingPaymentUrl(dep.status === "pending" ? dep.provider_payment_url ?? null : null);
               }
               // else: stale pending_deposit without deposit row → treat as not joined
             } else {
               setInterested(true);
               setInterestStatus(activeInterest.status);
               setInterestDepositStatus(activeInterest.deposit_status ?? "none");
+              setPendingPaymentUrl(null);
             }
           }
 
@@ -231,6 +234,17 @@ export default function DealDetail() {
         setInterestStatus(interest.status);
         setInterestDepositStatus(interest.deposit_status ?? "none");
       }
+      const { data: deposit } = await supabase
+        .from("deposits")
+        .select("status,provider_payment_url")
+        .eq("user_id", uid)
+        .eq("deal_id", dealId)
+        .eq("is_deleted", false)
+        .in("status", ["pending", "paid"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setPendingPaymentUrl(deposit?.status === "pending" ? deposit.provider_payment_url ?? null : null);
     };
     const channel = supabase
       .channel(`deal-deposits-${dealId}`)
@@ -366,16 +380,26 @@ export default function DealDetail() {
       }
 
 
-      setInterested(true);
-      setInterestStatus(depositRequired ? "pending_deposit" : "interested");
-      setInterestDepositStatus(depositRequired ? "pending" : "none");
-      setShowJoinModal(false);
-      toast.success(
-        depositRequired
-          ? "בקשת ההצטרפות נקלטה, ממתינה לאישור פיקדון"
-          : "נרשמת בהצלחה! הספק יצור איתך קשר בהקדם.",
-      );
-      await loadParticipantCount(deal.id);
+      if (depositRequired) {
+        setInterested(true);
+        setInterestStatus("pending_deposit");
+        setInterestDepositStatus("pending");
+        setPendingPaymentUrl(paymentUrl);
+        setShowJoinModal(false);
+        toast.success("פרטי הבקשה נשמרו — ההצטרפות תושלם רק אחרי תשלום הפיקדון");
+        if (paymentUrl) {
+          window.location.href = paymentUrl;
+          return;
+        }
+      } else {
+        setInterested(true);
+        setInterestStatus("interested");
+        setInterestDepositStatus("none");
+        setPendingPaymentUrl(null);
+        setShowJoinModal(false);
+        toast.success("נרשמת בהצלחה! הספק יצור איתך קשר בהקדם.");
+        await loadParticipantCount(deal.id);
+      }
 
       // In-app notification to the supplier (best-effort, don't break the flow).
       try {
@@ -446,7 +470,7 @@ export default function DealDetail() {
           .catch((e) => console.warn("[email] new_lead failed", e));
       }
 
-      // Confirmation email to resident
+      // Confirmation email to resident is sent immediately only when no deposit is required.
       supabase.functions
         .invoke("send-email", {
           body: {
@@ -470,9 +494,6 @@ export default function DealDetail() {
         }
       }
 
-      if (paymentUrl) {
-        window.location.href = paymentUrl;
-      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
     } finally {
@@ -536,6 +557,14 @@ export default function DealDetail() {
       : 0;
   const category = categories.find((c) => c.id === deal.category_id);
   const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
+  const hasCompletedJoin = interested && (
+    !depositRequired ||
+    interestDepositStatus === "paid" ||
+    interestStatus === "paid" ||
+    interestStatus === "joined" ||
+    interestStatus === "committed"
+  );
+  const hasPendingDeposit = interested && depositRequired && !hasCompletedJoin;
 
   // Computed display values for premium hero stats
   const daysRemaining = (() => {
@@ -572,7 +601,7 @@ export default function DealDetail() {
   ];
 
   const timeline: Array<{ icon: typeof Tag; title: string; subtitle: string }> = [
-    { icon: Handshake, title: "מצטרפים להצעה",  subtitle: "ממלאים פרטים, ההצטרפות תוקפת מיד" },
+    { icon: Handshake, title: "משלמים פיקדון",  subtitle: "ממלאים פרטים וההצטרפות מושלמת רק אחרי תשלום" },
     { icon: Target,    title: "מגיעים ליעד",     subtitle: "הקבוצה ממלאת את מדרגת המחיר" },
     { icon: PhoneCall, title: "הספק יוצר קשר",   subtitle: "תיאום פרטים והצעת מחיר אישית" },
     { icon: Wrench,    title: "ביצוע והתקנה",    subtitle: "הספק מבצע את העבודה אצלכם" },
@@ -622,10 +651,10 @@ export default function DealDetail() {
             {statusMeta.label}
           </span>
 
-          {interested && (
+          {(hasCompletedJoin || hasPendingDeposit) && (
             <div className="absolute top-4 left-4 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] text-[#0A1F3D] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span className="text-[11px] font-extrabold">הצטרפת</span>
+              {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
+              <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
             </div>
           )}
 
@@ -842,19 +871,33 @@ export default function DealDetail() {
           {interested ? (
             <div className="flex items-center gap-2.5 bg-[#0A1F3D] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
               <div className="w-10 h-10 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] rounded-full flex items-center justify-center shrink-0">
-                <CheckCircle2 className="w-5 h-5 text-[#0A1F3D]" strokeWidth={2.6} />
+                {hasCompletedJoin ? (
+                  <CheckCircle2 className="w-5 h-5 text-[#0A1F3D]" strokeWidth={2.6} />
+                ) : (
+                  <Clock className="w-5 h-5 text-[#0A1F3D]" strokeWidth={2.6} />
+                )}
               </div>
               <div className="flex-1 text-right">
-                <p className="text-[14px] font-extrabold leading-tight">הצטרפת בהצלחה!</p>
+                <p className="text-[14px] font-extrabold leading-tight">{hasCompletedJoin ? "הצטרפת בהצלחה!" : "ממתין לתשלום פיקדון"}</p>
                 <p className="text-[11px] text-white/70 leading-tight mt-0.5">
                   {interestDepositStatus === "paid"
                     ? "פיקדון שולם — המקום מובטח"
                     : interestStatus === "pending_deposit"
-                      ? "ממתין לאישור פיקדון"
+                      ? "ההצטרפות תושלם אוטומטית אחרי התשלום"
                       : "הספק יצור קשר בהקדם"}
                 </p>
               </div>
-              <ShareButton deal={deal} compact />
+              {hasPendingDeposit && pendingPaymentUrl ? (
+                <button
+                  type="button"
+                  onClick={() => { window.location.href = pendingPaymentUrl; }}
+                  className="h-10 px-3 rounded-2xl bg-white text-[#0A1F3D] text-[11px] font-extrabold active:scale-[0.97] transition-transform"
+                >
+                  לתשלום
+                </button>
+              ) : (
+                <ShareButton deal={deal} compact />
+              )}
             </div>
           ) : (
             <div className="flex items-stretch gap-2">
@@ -955,7 +998,7 @@ export default function DealDetail() {
               <div className="rounded-xl border border-gold/40 bg-gold/5 px-3 py-2 text-fs-xs text-foreground">
                 <div className="font-bold mb-0.5">פיקדון נדרש: {ils(Number(deal.deposit_amount ?? 0))}</div>
                 <div className="text-muted-foreground">
-                  הצטרפות כרוכה בפיקדון אשר יאושר ידנית על ידי מנהל המערכת.
+                  ההצטרפות תושלם אוטומטית רק לאחר תשלום הפיקדון בפועל.
                 </div>
               </div>
             )}
@@ -1036,7 +1079,7 @@ export default function DealDetail() {
               {submittingInterest ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : depositRequired ? (
-                "אישור הצטרפות + שמירת פיקדון"
+                "המשך לתשלום פיקדון"
               ) : (
                 "אשר הצטרפות"
               )}
