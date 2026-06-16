@@ -96,13 +96,14 @@ const filteredDeals = useMemo(() => {
         const chosen = (validIds.includes(profStage) ? profStage : validIds.includes(projStage) ? projStage : "planning") as StageId;
         stage = chosen;
 
-        const [matchesResult, citySupResult, councilSupResult, regionSupResult, nationwideResult, interestsResult] = await Promise.all([
+        const [matchesResult, citySupResult, councilSupResult, regionSupResult, nationwideResult, paidDepositsResult, freeInterestsResult] = await Promise.all([
           supabase.rpc("get_matching_deals_for_user", { _stage_filter: stage, _limit: 8 }),
           prof?.city_id ? supabase.from("supplier_cities").select("supplier_id").eq("city_id", prof.city_id) : Promise.resolve({ data: [] }),
           councilId ? supabase.from("supplier_councils").select("supplier_id").eq("council_id", councilId) : Promise.resolve({ data: [] }),
           regionId ? supabase.from("supplier_regions").select("supplier_id").eq("region_id", regionId) : Promise.resolve({ data: [] }),
           supabase.from("suppliers").select("id").eq("serves_all_country", true).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]),
-          supabase.from("deal_interests").select("deal_id").eq("user_id", uid).eq("is_deleted", false),
+          supabase.from("deposits").select("deal_id").eq("user_id", uid).eq("status", "paid").eq("is_deleted", false),
+          supabase.from("deal_interests").select("deal_id").eq("user_id", uid).eq("is_deleted", false).eq("deposit_required", false).in("status", ["interested", "approved", "committed", "joined"]),
         ]);
 
         const dealIds = ((matchesResult.data ?? []) as { deal_id: string }[]).map((m) => m.deal_id);
@@ -111,7 +112,10 @@ const filteredDeals = useMemo(() => {
         (councilSupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
         (regionSupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
         (nationwideResult.data ?? []).forEach((r: { id: string }) => supplierIds.add(r.id));
-        const joinedIds = Array.from(new Set(((interestsResult.data ?? []) as { deal_id: string }[]).map((i) => i.deal_id)));
+        const joinedIds = Array.from(new Set([
+          ...((paidDepositsResult.data ?? []) as { deal_id: string }[]).map((i) => i.deal_id),
+          ...((freeInterestsResult.data ?? []) as { deal_id: string }[]).map((i) => i.deal_id),
+        ]));
         const joined = joinedIds.length;
 
         const [supCountRes, dealsRes, joinedDealsRes] = await Promise.all([
