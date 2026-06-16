@@ -194,10 +194,14 @@ const App = () => (
                   <Route path="/suppliers/:supplierId" element={<SupplierProfile />} />
                   <Route path="/resident" element={residentRoute(<ResidentDashboard />)} />
                   <Route path="/resident/projects" element={residentRoute(<ProjectsList />)} />
-                  <Route path="/resident/categories" element={residentRoute(<CategoriesList />)} />
-                  <Route path="/resident/categories/:categoryId" element={residentRoute(<CategorySuppliers />)} />
-                  <Route path="/resident/deals" element={residentRoute(<DealsList />)} />
-                  <Route path="/resident/deals/:dealId" element={residentRoute(<DealDetail />)} />
+                  {/* Public read-only browsing — no auth required */}
+                  <Route path="/resident/categories" element={<CategoriesList />} />
+                  <Route path="/resident/categories/:categoryId" element={<CategorySuppliers />} />
+                  <Route path="/resident/deals" element={<DealsList />} />
+                  <Route path="/resident/deals/:dealId" element={<DealDetail />} />
+                  <Route path="/categories" element={<CategoriesList />} />
+                  <Route path="/categories/:categoryId" element={<CategorySuppliers />} />
+                  <Route path="/deals" element={<DealsList />} />
                   <Route path="/deals/:dealId" element={<DealDetail />} />
                   <Route path="/share/deal/:dealId" element={<SharedDeal />} />
                   <Route path="/browse" element={<Browse />} />
