@@ -234,6 +234,17 @@ export default function DealDetail() {
         setInterestStatus(interest.status);
         setInterestDepositStatus(interest.deposit_status ?? "none");
       }
+      const { data: deposit } = await supabase
+        .from("deposits")
+        .select("status,provider_payment_url")
+        .eq("user_id", uid)
+        .eq("deal_id", dealId)
+        .eq("is_deleted", false)
+        .in("status", ["pending", "paid"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setPendingPaymentUrl(deposit?.status === "pending" ? deposit.provider_payment_url ?? null : null);
     };
     const channel = supabase
       .channel(`deal-deposits-${dealId}`)
@@ -369,16 +380,26 @@ export default function DealDetail() {
       }
 
 
-      setInterested(true);
-      setInterestStatus(depositRequired ? "pending_deposit" : "interested");
-      setInterestDepositStatus(depositRequired ? "pending" : "none");
-      setShowJoinModal(false);
-      toast.success(
-        depositRequired
-          ? "בקשת ההצטרפות נקלטה, ממתינה לאישור פיקדון"
-          : "נרשמת בהצלחה! הספק יצור איתך קשר בהקדם.",
-      );
-      await loadParticipantCount(deal.id);
+      if (depositRequired) {
+        setInterested(true);
+        setInterestStatus("pending_deposit");
+        setInterestDepositStatus("pending");
+        setPendingPaymentUrl(paymentUrl);
+        setShowJoinModal(false);
+        toast.success("פרטי הבקשה נשמרו — ההצטרפות תושלם רק אחרי תשלום הפיקדון");
+        if (paymentUrl) {
+          window.location.href = paymentUrl;
+          return;
+        }
+      } else {
+        setInterested(true);
+        setInterestStatus("interested");
+        setInterestDepositStatus("none");
+        setPendingPaymentUrl(null);
+        setShowJoinModal(false);
+        toast.success("נרשמת בהצלחה! הספק יצור איתך קשר בהקדם.");
+        await loadParticipantCount(deal.id);
+      }
 
       // In-app notification to the supplier (best-effort, don't break the flow).
       try {
@@ -449,7 +470,7 @@ export default function DealDetail() {
           .catch((e) => console.warn("[email] new_lead failed", e));
       }
 
-      // Confirmation email to resident
+      // Confirmation email to resident is sent immediately only when no deposit is required.
       supabase.functions
         .invoke("send-email", {
           body: {
@@ -473,9 +494,6 @@ export default function DealDetail() {
         }
       }
 
-      if (paymentUrl) {
-        window.location.href = paymentUrl;
-      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
     } finally {
