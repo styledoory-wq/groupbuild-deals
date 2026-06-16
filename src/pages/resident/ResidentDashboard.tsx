@@ -244,6 +244,27 @@ const filteredDeals = useMemo(() => {
           </button>
         </section>
 
+        {/* Budget Calculator */}
+        <section className="px-5 mt-4">
+          <button
+            onClick={() => navigate("/resident/budget-planner")}
+            className="w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] transition-transform bg-white border border-[#ECEEF2]"
+            style={{ boxShadow: "var(--shadow-elevated)" }}
+          >
+            <div
+              className="h-12 w-12 rounded-[14px] flex items-center justify-center shrink-0"
+              style={{ background: "rgba(10,31,61,0.06)" }}
+            >
+              <Calculator className="h-[22px] w-[22px] text-[#0A1F3D]" strokeWidth={2.2} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[16px] font-extrabold text-[#0A1F3D] leading-tight">מחשבון תקציב</div>
+              <div className="text-[13px] text-[#6B7280] mt-1 font-medium">חשב עלויות בנייה, שיפוץ ושדרוג</div>
+            </div>
+            <ChevronLeft className="h-[18px] w-[18px] text-[#9CA3AF] shrink-0" strokeWidth={2.2} />
+          </button>
+        </section>
+
         {/* Stats — 3 mini cards */}
         <section className="px-5 mt-4 grid grid-cols-3 gap-3">
           <StatCard icon={Store} label="ספקים באזור" value={areaSuppliersCount} accent="#0A1F3D" tint="rgba(10,31,61,0.05)" onClick={() => navigate("/resident/categories")} />
