@@ -3,7 +3,8 @@ import { cachedQuery } from "@/lib/clientCache";
 
 /**
  * Fetches real joiners count per deal in a single query.
- * Counts distinct users with active interest (interested/committed/paid/pending_deposit/joined).
+ * Counts distinct users who actually joined — paid deposit, or approved when no deposit is required.
+ * Excludes pending_deposit / interested — those haven't completed payment yet.
  */
 export async function fetchDealJoinerCounts(dealIds: string[]): Promise<Record<string, number>> {
   const result: Record<string, number> = {};
@@ -15,7 +16,7 @@ export async function fetchDealJoinerCounts(dealIds: string[]): Promise<Record<s
       .from("deal_interests")
       .select("deal_id,user_id,status,is_deleted")
       .in("deal_id", ids)
-      .in("status", ["interested", "committed", "paid", "pending_deposit", "joined"])
+      .in("status", ["paid", "committed", "joined", "approved"])
       .eq("is_deleted", false);
     if (error) throw error;
     const seen: Record<string, Set<string>> = {};
