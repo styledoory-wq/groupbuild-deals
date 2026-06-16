@@ -172,7 +172,7 @@ class GrowProviderAdapter extends PlaceholderProviderAdapter {
     ]);
   }
 
-  async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSessionResult> {
+  override async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSessionResult> {
     const missing = this.getMissingSecrets();
     if (missing.length > 0) {
       throw new PaymentProviderError(
@@ -329,9 +329,9 @@ class GrowMakeProviderAdapter extends PlaceholderProviderAdapter {
     ]);
   }
 
-  implemented = true;
+  override implemented = true;
 
-  async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSessionResult> {
+  override async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSessionResult> {
     const missing = this.getMissingSecrets();
     if (missing.length > 0) {
       throw new PaymentProviderError(
@@ -507,7 +507,7 @@ class GrowMakeProviderAdapter extends PlaceholderProviderAdapter {
     };
   }
 
-  async verifyWebhookSignature(input: {
+  override async verifyWebhookSignature(input: {
     req: Request;
     url: URL;
     rawBody: string;
