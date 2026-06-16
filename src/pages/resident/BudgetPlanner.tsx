@@ -282,14 +282,15 @@ export default function BudgetPlanner() {
 
               <button
                 onClick={calculate}
-                className="w-full h-12 rounded-xl text-white font-extrabold text-[14px] shadow-[0_8px_20px_-6px_rgba(201,162,39,0.55)] active:scale-[0.99] transition-transform"
-                style={{ fontFamily: "'Urbanist'", background: "#C9A227" }}
+                className="w-full h-12 rounded-xl text-white font-extrabold text-[14px] active:scale-[0.99] transition-transform"
+                style={{ fontFamily: "'Urbanist'", background: theme.accent, boxShadow: `0 10px 24px -8px ${theme.ring}` }}
               >
                 חשב תקציב
               </button>
             </div>
           </>
-        )}
+          );
+        })()}
 
         {result && (
           <div id="budget-result" className="space-y-5">
