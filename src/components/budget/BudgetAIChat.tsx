@@ -86,9 +86,10 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
               key={i}
               className={`text-[13px] leading-relaxed p-3 rounded-2xl whitespace-pre-wrap ${
                 m.role === "user"
-                  ? "bg-[#1F2937] text-white mr-6"
+                  ? "text-white mr-6 shadow-[0_6px_16px_-6px_rgba(201,162,39,0.55)]"
                   : "bg-[#F8F8F6] border border-[#E5E7EB] text-[#1F2937] ml-6"
               }`}
+              style={m.role === "user" ? { background: "#C9A227" } : undefined}
             >
               {m.content}
             </div>
@@ -115,7 +116,8 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
         <Button
           type="submit"
           disabled={loading || !input.trim()}
-          className="h-11 px-4 bg-[#1F2937] hover:bg-[#111827] text-white"
+          className="h-11 px-4 text-white hover:opacity-90"
+          style={{ background: "#C9A227" }}
         >
           <Send className="h-4 w-4" />
         </Button>
