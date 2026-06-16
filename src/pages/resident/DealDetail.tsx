@@ -390,7 +390,7 @@ export default function DealDetail() {
         setShowJoinModal(false);
         toast.success("פרטי הבקשה נשמרו — ההצטרפות תושלם רק אחרי תשלום הפיקדון");
         if (paymentUrl) {
-          setShowPaymentModal(true);
+          window.location.href = paymentUrl;
           return;
         }
       } else {
