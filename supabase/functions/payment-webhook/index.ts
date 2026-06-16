@@ -168,16 +168,19 @@ Deno.serve(async (req) => {
 });
 
 async function parseRequestBody(reqForForm: Request, rawBody: string): Promise<Record<string, unknown> | null> {
+  const url = new URL(reqForForm.url);
+  const queryPayload = Object.fromEntries(url.searchParams);
   const ctype = reqForForm.headers.get("content-type") ?? "";
+  if (!rawBody && Object.keys(queryPayload).length > 0) return queryPayload;
   if (ctype.includes("application/json")) {
-    return JSON.parse(rawBody || "{}") as Record<string, unknown>;
+    return { ...queryPayload, ...(JSON.parse(rawBody || "{}") as Record<string, unknown>) };
   }
   if (ctype.includes("application/x-www-form-urlencoded")) {
-    return Object.fromEntries(new URLSearchParams(rawBody));
+    return { ...queryPayload, ...Object.fromEntries(new URLSearchParams(rawBody)) };
   }
   try {
     const form = await reqForForm.formData();
-    const payload: Record<string, unknown> = {};
+    const payload: Record<string, unknown> = { ...queryPayload };
     form.forEach((v, k) => (payload[k] = String(v)));
     return payload;
   } catch {
