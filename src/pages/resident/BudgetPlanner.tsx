@@ -279,8 +279,8 @@ export default function BudgetPlanner() {
 
               <button
                 onClick={calculate}
-                className="w-full h-12 rounded-xl bg-[#1F2937] text-white font-extrabold text-[14px] shadow-md active:scale-[0.99] transition-transform"
-                style={{ fontFamily: "'Urbanist'" }}
+                className="w-full h-12 rounded-xl text-white font-extrabold text-[14px] shadow-[0_8px_20px_-6px_rgba(201,162,39,0.55)] active:scale-[0.99] transition-transform"
+                style={{ fontFamily: "'Urbanist'", background: "#C9A227" }}
               >
                 חשב תקציב
               </button>
