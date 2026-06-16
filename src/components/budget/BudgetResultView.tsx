@@ -4,7 +4,7 @@ import { TrendingDown } from "lucide-react";
 import { BudgetResult, ILS } from "@/lib/budgetPricing";
 
 const COLORS = [
-  "#0A1F3D", "#D4AF37", "#1E40AF", "#B45309", "#0F766E", "#7C3AED",
+  "#C9A227", "#16A34A", "#7C3AED", "#2563EB", "#EA580C", "#0FB5C9",
   "#DC2626", "#0891B2", "#65A30D", "#DB2777", "#9333EA", "#475569",
 ];
 
@@ -16,18 +16,17 @@ export function BudgetResultView({ result }: { result: BudgetResult }) {
   const maxCat = Math.max(...result.categories.map((c) => c.max));
 
   return (
-    <div className="bg-white rounded-3xl p-5 space-y-5 border border-[#ECEEF2]">
+    <div className="bg-white rounded-3xl p-5 space-y-5 border border-[#E5E7EB] shadow-sm" style={{ fontFamily: "'Epilogue', system-ui, sans-serif" }}>
       <div className="text-center">
         <div className="text-[12px] font-bold text-[#6B7280] uppercase tracking-wider">הערכת עלות כוללת</div>
-        <div className="text-[26px] font-extrabold text-[#0A1F3D] mt-1">
+        <div className="text-[26px] font-extrabold text-[#1F2937] mt-1" style={{ fontFamily: "'Urbanist'" }}>
           {ILS(result.total.min)} – {ILS(result.total.max)}
         </div>
         <div className="text-[13px] text-[#6B7280] mt-1">
-          ממוצע צפוי: <span className="font-bold text-[#0A1F3D]">{ILS(result.total.avg)}</span>
+          ממוצע צפוי: <span className="font-bold text-[#1F2937]">{ILS(result.total.avg)}</span>
         </div>
         <div
-          className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-extrabold text-[12px]"
-          style={{ background: "linear-gradient(145deg, #FFF8E1, #FBEFC4)", color: "#8A6A1C", border: "1px solid #E8D89A" }}
+          className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-extrabold text-[12px] bg-[#F0FDF4] text-[#16A34A] border border-[#DCFCE7]"
         >
           <TrendingDown className="h-3.5 w-3.5" />
           חיסכון משוער דרך GroupBuild: 12%–22%
@@ -46,20 +45,20 @@ export function BudgetResultView({ result }: { result: BudgetResult }) {
       </div>
 
       <div className="space-y-3">
-        <div className="text-[13px] font-bold text-[#0A1F3D]">פירוט לפי קטגוריות</div>
+        <div className="text-[13px] font-bold text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>פירוט לפי קטגוריות</div>
         {result.categories.map((c, i) => {
           const pct = Math.max(8, Math.round((c.max / maxCat) * 100));
           return (
             <div key={i} className="space-y-1">
               <div className="flex items-center justify-between text-[12px]">
-                <span className="font-bold text-[#0A1F3D] flex items-center gap-1.5">
+                <span className="font-bold text-[#1F2937] flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
                   {c.name}
                   {c.note && <span className="text-[11px] font-medium text-[#9CA3AF]">· {c.note}</span>}
                 </span>
                 <span className="text-[#6B7280] font-medium">{ILS(c.min)} – {ILS(c.max)}</span>
               </div>
-              <div className="h-2 rounded-full bg-[#F4F6FA] overflow-hidden">
+              <div className="h-2 rounded-full bg-[#F8F8F6] overflow-hidden">
                 <div className="h-full" style={{ width: `${pct}%`, background: COLORS[i % COLORS.length] }} />
               </div>
             </div>
