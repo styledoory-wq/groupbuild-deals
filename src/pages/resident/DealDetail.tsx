@@ -557,6 +557,14 @@ export default function DealDetail() {
       : 0;
   const category = categories.find((c) => c.id === deal.category_id);
   const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
+  const hasCompletedJoin = interested && (
+    !depositRequired ||
+    interestDepositStatus === "paid" ||
+    interestStatus === "paid" ||
+    interestStatus === "joined" ||
+    interestStatus === "committed"
+  );
+  const hasPendingDeposit = interested && depositRequired && !hasCompletedJoin;
 
   // Computed display values for premium hero stats
   const daysRemaining = (() => {
@@ -593,7 +601,7 @@ export default function DealDetail() {
   ];
 
   const timeline: Array<{ icon: typeof Tag; title: string; subtitle: string }> = [
-    { icon: Handshake, title: "מצטרפים להצעה",  subtitle: "ממלאים פרטים, ההצטרפות תוקפת מיד" },
+    { icon: Handshake, title: "משלמים פיקדון",  subtitle: "ממלאים פרטים וההצטרפות מושלמת רק אחרי תשלום" },
     { icon: Target,    title: "מגיעים ליעד",     subtitle: "הקבוצה ממלאת את מדרגת המחיר" },
     { icon: PhoneCall, title: "הספק יוצר קשר",   subtitle: "תיאום פרטים והצעת מחיר אישית" },
     { icon: Wrench,    title: "ביצוע והתקנה",    subtitle: "הספק מבצע את העבודה אצלכם" },
