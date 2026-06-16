@@ -81,6 +81,7 @@ export default function DealDetail() {
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [participantCount, setParticipantCount] = useState<number>(0);
   const [isGuest, setIsGuest] = useState<boolean>(false);
+  const [pendingPaymentUrl, setPendingPaymentUrl] = useState<string | null>(null);
 
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
@@ -164,7 +165,7 @@ export default function DealDetail() {
             if (activeInterest.status === "pending_deposit") {
               const { data: dep } = await supabase
                 .from("deposits")
-                .select("id,status")
+                .select("id,status,provider_payment_url")
                 .eq("user_id", session.session.user.id)
                 .eq("deal_id", d.id)
                 .eq("is_deleted", false)
@@ -174,12 +175,14 @@ export default function DealDetail() {
                 setInterested(true);
                 setInterestStatus(activeInterest.status);
                 setInterestDepositStatus(dep.status ?? activeInterest.deposit_status ?? "pending");
+                setPendingPaymentUrl(dep.status === "pending" ? dep.provider_payment_url ?? null : null);
               }
               // else: stale pending_deposit without deposit row → treat as not joined
             } else {
               setInterested(true);
               setInterestStatus(activeInterest.status);
               setInterestDepositStatus(activeInterest.deposit_status ?? "none");
+              setPendingPaymentUrl(null);
             }
           }
 
