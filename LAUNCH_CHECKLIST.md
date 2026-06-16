@@ -7,7 +7,7 @@
 - [x] Implement Make.com + Grow adapter in `supabase/functions/_shared/paymentProviders.ts`.
 - [x] Keep direct Grow API, Cardcom, and Stripe as disabled/not implemented placeholders.
 - [x] Set `grow_make` as implemented.
-- [ ] Wire resident deposit flow in `src/pages/resident/DealDetail.tsx` to call `create-deposit` and open the returned Grow payment URL from Make.
+- [x] Wire resident deposit flow in `src/pages/resident/DealDetail.tsx` to call `create-deposit` and open the returned Grow payment URL from Make.
 - [ ] Configure Make scenario to create Grow payment links.
 - [ ] Configure Make scenario to receive Grow payment notifications.
 - [ ] Configure Make scenario to call Supabase `payment-webhook?provider=grow_make` with `MAKE_CALLBACK_SECRET`.
@@ -19,7 +19,7 @@
   - Supplier absorbs: resident is charged deposit only; supplier credit/deduction uses net after fee.
   - GroupBuild absorbs: resident is charged deposit only; supplier credit/deduction uses gross deposit.
 - [ ] Test later fee reconciliation by updating `payment_processing_fee_amount` and `payment_processing_fee_status`.
-- [ ] Set production frontend env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
+- [x] Set production frontend env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
 - [ ] Set Supabase function secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PAYMENT_WEBHOOK_SECRET`.
 - [ ] Set email secret: `RESEND_API_KEY`.
 - [ ] Set Make/Grow MVP function secrets:
@@ -31,10 +31,12 @@
 - [ ] Apply `20260531193000_add_stripe_payment_provider.sql` if Stripe remains an allowed provider option.
 - [ ] Apply `20260531195000_add_grow_make_payment_provider.sql`.
 - [ ] Deploy updated Supabase Edge Functions.
-- [ ] Run `npm run build`.
-- [ ] Run `npm test`.
+- [x] Run `npm run build`.
+- [x] Run `npm test`.
 - [ ] Test resident signup, supplier signup, admin login, deal creation, deal joining, and full deposit payment flow.
 - [ ] Test iOS and Android mobile layouts, bottom navigation, modals, keyboard states, and payment return pages.
+- [x] Fix iOS bundle ID (`com.groupbuild.app`).
+- [x] Add iOS 17+ Privacy Manifest (`PrivacyInfo.xcprivacy`).
 - [ ] Add App Store review notes explaining deposits are for real-world goods/services and do not require Apple IAP.
 - [ ] Add Google Play review notes explaining deposits are for real-world goods/services and do not use Google Play Billing.
 
