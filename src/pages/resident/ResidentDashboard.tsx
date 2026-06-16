@@ -103,7 +103,7 @@ const filteredDeals = useMemo(() => {
           regionId ? supabase.from("supplier_regions").select("supplier_id").eq("region_id", regionId) : Promise.resolve({ data: [] }),
           supabase.from("suppliers").select("id").eq("serves_all_country", true).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]),
           supabase.from("deposits").select("deal_id").eq("user_id", uid).eq("status", "paid").eq("is_deleted", false),
-          supabase.from("deal_interests").select("deal_id").eq("user_id", uid).eq("is_deleted", false).eq("deposit_required", false).in("status", ["interested", "approved", "committed", "joined"]),
+          supabase.from("deal_interests").select("deal_id").eq("user_id", uid).eq("is_deleted", false).in("status", ["interested", "approved", "committed", "joined"]),
         ]);
 
         const dealIds = ((matchesResult.data ?? []) as { deal_id: string }[]).map((m) => m.deal_id);
@@ -112,10 +112,20 @@ const filteredDeals = useMemo(() => {
         (councilSupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
         (regionSupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
         (nationwideResult.data ?? []).forEach((r: { id: string }) => supplierIds.add(r.id));
-        const joinedIds = Array.from(new Set([
-          ...((paidDepositsResult.data ?? []) as { deal_id: string }[]).map((i) => i.deal_id),
-          ...((freeInterestsResult.data ?? []) as { deal_id: string }[]).map((i) => i.deal_id),
-        ]));
+        const paidDealIds = ((paidDepositsResult.data ?? []) as { deal_id: string }[]).map((i) => i.deal_id);
+        const candidateFreeDealIds = Array.from(new Set(((freeInterestsResult.data ?? []) as { deal_id: string }[]).map((i) => i.deal_id)));
+        let freeDealIds: string[] = [];
+        if (candidateFreeDealIds.length) {
+          const { data: freeDeals } = await supabase
+            .from("deals")
+            .select("id,deposit_required,deposit_amount")
+            .in("id", candidateFreeDealIds)
+            .eq("is_deleted", false);
+          freeDealIds = ((freeDeals ?? []) as { id: string; deposit_required: boolean | null; deposit_amount: number | null }[])
+            .filter((d) => !d.deposit_required || Number(d.deposit_amount ?? 0) <= 0)
+            .map((d) => d.id);
+        }
+        const joinedIds = Array.from(new Set([...paidDealIds, ...freeDealIds]));
         const joined = joinedIds.length;
 
         const [supCountRes, dealsRes, joinedDealsRes] = await Promise.all([
