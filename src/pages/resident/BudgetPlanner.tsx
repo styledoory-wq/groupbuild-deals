@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Hammer, DoorOpen, Wrench, ArrowRight, RefreshCw } from "lucide-react";
+import { Home, Hammer, DoorOpen, Wrench, RefreshCw } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
