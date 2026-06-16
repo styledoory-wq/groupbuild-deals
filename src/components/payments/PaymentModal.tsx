@@ -44,17 +44,17 @@ export function PaymentModal({ open, paymentUrl, onClose, onSuccess, onCancel }:
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-2xl w-[95vw] h-[85vh] p-0 gap-0 overflow-hidden">
-        <DialogHeader className="px-4 py-3 border-b">
-          <DialogTitle className="text-base">תשלום פיקדון מאובטח</DialogTitle>
+      <DialogContent className="max-w-2xl w-screen sm:w-[95vw] h-[100dvh] sm:h-[85vh] max-h-[100dvh] p-0 gap-0 overflow-hidden flex flex-col rounded-none sm:rounded-lg">
+        <DialogHeader className="px-4 py-3 border-b shrink-0">
+          <DialogTitle className="text-base text-right">תשלום פיקדון מאובטח</DialogTitle>
         </DialogHeader>
-        <div className="relative flex-1 h-full bg-muted">
+        <div className="relative flex-1 min-h-0 bg-muted">
           {paymentUrl ? (
             <iframe
               ref={iframeRef}
               src={paymentUrl}
               title="Cardcom Payment"
-              className="w-full h-full border-0"
+              className="absolute inset-0 w-full h-full border-0"
               allow="payment *"
             />
           ) : (
