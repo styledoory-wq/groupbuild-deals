@@ -9,6 +9,8 @@ export default function PaymentSuccess() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const depositId = params.get("dep");
+  const directDealId = params.get("deal_id");
+  const [dealId, setDealId] = useState<string | null>(directDealId);
   const [status, setStatus] = useState<"checking" | "paid" | "pending">("checking");
 
   useEffect(() => {
@@ -16,7 +18,8 @@ export default function PaymentSuccess() {
     let attempts = 0;
     const poll = async () => {
       attempts++;
-      const { data } = await supabase.from("deposits").select("status").eq("id", depositId).maybeSingle();
+      const { data } = await supabase.from("deposits").select("status,deal_id").eq("id", depositId).maybeSingle();
+      if (data?.deal_id) setDealId(data.deal_id);
       if (data?.status === "paid") setStatus("paid");
       else if (attempts < 8) setTimeout(poll, 1500);
       else setStatus("pending");
@@ -49,8 +52,8 @@ export default function PaymentSuccess() {
             <p className="text-sm text-muted-foreground mb-6">נעדכן ברגע שספק הסליקה יסיים את העיבוד.</p>
           </>
         )}
-        <Button onClick={() => navigate("/resident")} className="h-12 rounded-2xl px-8 bg-primary text-primary-foreground font-bold">
-          חזרה לעסקאות
+        <Button onClick={() => navigate(dealId ? `/resident/deals/${dealId}` : "/resident/deals", { replace: true })} className="h-12 rounded-2xl px-8 bg-primary text-primary-foreground font-bold">
+          חזרה לעסקה
         </Button>
       </div>
     </MobileShell>
