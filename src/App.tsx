@@ -43,6 +43,8 @@ const Favorites = lazy(() => import("./pages/resident/Favorites"));
 const BudgetPlanner = lazy(() => import("./pages/resident/BudgetPlanner"));
 const Browse = lazy(() => import("./pages/Browse"));
 const PrivacyPolicy = lazy(() => import("./pages/resident/PrivacyPolicy"));
+const PublicPrivacy = lazy(() => import("./pages/Privacy"));
+const PublicSupport = lazy(() => import("./pages/Support"));
 const SupplierScan = lazy(() => import("./pages/supplier/SupplierScan"));
 const SupplierRedemptions = lazy(() => import("./pages/supplier/SupplierRedemptions"));
 const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
@@ -220,6 +222,8 @@ const App = () => (
                   <Route path="/resident/search" element={<SearchPage />} />
                   <Route path="/search" element={<SearchPage />} />
                   <Route path="/resident/privacy" element={residentRoute(<PrivacyPolicy />)} />
+                  <Route path="/privacy" element={<PublicPrivacy />} />
+                  <Route path="/support" element={<PublicSupport />} />
                   <Route path="/supplier" element={supplierRoute(<SupplierDashboard />)} />
                   <Route path="/supplier/profile/edit" element={supplierRoute(<SupplierProfileEdit />)} />
                   <Route path="/supplier/offers" element={supplierRoute(<SupplierOffers />)} />
