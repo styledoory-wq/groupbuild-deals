@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
+import { PaymentModal } from "@/components/payments/PaymentModal";
 import { useApp } from "@/store/AppStore";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
@@ -82,6 +83,7 @@ export default function DealDetail() {
   const [participantCount, setParticipantCount] = useState<number>(0);
   const [isGuest, setIsGuest] = useState<boolean>(false);
   const [pendingPaymentUrl, setPendingPaymentUrl] = useState<string | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
@@ -388,7 +390,7 @@ export default function DealDetail() {
         setShowJoinModal(false);
         toast.success("פרטי הבקשה נשמרו — ההצטרפות תושלם רק אחרי תשלום הפיקדון");
         if (paymentUrl) {
-          window.location.href = paymentUrl;
+          setShowPaymentModal(true);
           return;
         }
       } else {
@@ -890,7 +892,7 @@ export default function DealDetail() {
               {hasPendingDeposit && pendingPaymentUrl ? (
                 <button
                   type="button"
-                  onClick={() => { window.location.href = pendingPaymentUrl; }}
+                  onClick={() => setShowPaymentModal(true)}
                   className="h-10 px-3 rounded-2xl bg-white text-[#0A1F3D] text-[11px] font-extrabold active:scale-[0.97] transition-transform"
                 >
                   לתשלום
