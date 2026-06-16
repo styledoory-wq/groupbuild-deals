@@ -651,10 +651,10 @@ export default function DealDetail() {
             {statusMeta.label}
           </span>
 
-          {interested && (
+          {(hasCompletedJoin || hasPendingDeposit) && (
             <div className="absolute top-4 left-4 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] text-[#0A1F3D] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span className="text-[11px] font-extrabold">הצטרפת</span>
+              {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
+              <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
             </div>
           )}
 
@@ -871,19 +871,33 @@ export default function DealDetail() {
           {interested ? (
             <div className="flex items-center gap-2.5 bg-[#0A1F3D] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
               <div className="w-10 h-10 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] rounded-full flex items-center justify-center shrink-0">
-                <CheckCircle2 className="w-5 h-5 text-[#0A1F3D]" strokeWidth={2.6} />
+                {hasCompletedJoin ? (
+                  <CheckCircle2 className="w-5 h-5 text-[#0A1F3D]" strokeWidth={2.6} />
+                ) : (
+                  <Clock className="w-5 h-5 text-[#0A1F3D]" strokeWidth={2.6} />
+                )}
               </div>
               <div className="flex-1 text-right">
-                <p className="text-[14px] font-extrabold leading-tight">הצטרפת בהצלחה!</p>
+                <p className="text-[14px] font-extrabold leading-tight">{hasCompletedJoin ? "הצטרפת בהצלחה!" : "ממתין לתשלום פיקדון"}</p>
                 <p className="text-[11px] text-white/70 leading-tight mt-0.5">
                   {interestDepositStatus === "paid"
                     ? "פיקדון שולם — המקום מובטח"
                     : interestStatus === "pending_deposit"
-                      ? "ממתין לאישור פיקדון"
+                      ? "ההצטרפות תושלם אוטומטית אחרי התשלום"
                       : "הספק יצור קשר בהקדם"}
                 </p>
               </div>
-              <ShareButton deal={deal} compact />
+              {hasPendingDeposit && pendingPaymentUrl ? (
+                <button
+                  type="button"
+                  onClick={() => { window.location.href = pendingPaymentUrl; }}
+                  className="h-10 px-3 rounded-2xl bg-white text-[#0A1F3D] text-[11px] font-extrabold active:scale-[0.97] transition-transform"
+                >
+                  לתשלום
+                </button>
+              ) : (
+                <ShareButton deal={deal} compact />
+              )}
             </div>
           ) : (
             <div className="flex items-stretch gap-2">
