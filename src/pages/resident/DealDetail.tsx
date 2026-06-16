@@ -946,13 +946,14 @@ export default function DealDetail() {
                       : "הספק יצור קשר בהקדם"}
                 </p>
               </div>
-              {hasPendingDeposit && pendingPaymentUrl ? (
+              {hasPendingDeposit ? (
                 <button
                   type="button"
-                  onClick={() => navigate(`/payment/checkout?url=${encodeURIComponent(pendingPaymentUrl)}&deal_id=${encodeURIComponent(deal.id)}`)}
-                  className="h-10 px-3 rounded-2xl bg-white text-[#0A1F3D] text-[11px] font-extrabold active:scale-[0.97] transition-transform"
+                  onClick={handleResumePayment}
+                  disabled={resumingPayment}
+                  className="h-10 px-3 rounded-2xl bg-white text-[#0A1F3D] text-[11px] font-extrabold active:scale-[0.97] transition-transform disabled:opacity-60"
                 >
-                  לתשלום
+                  {resumingPayment ? "..." : "לתשלום"}
                 </button>
               ) : (
                 <ShareButton deal={deal} compact />
