@@ -175,21 +175,26 @@ const filteredDeals = useMemo(() => {
   const currentIdx = useMemo(() => Math.max(0, STAGES.findIndex((s) => s.id === currentStage)), [currentStage]);
   const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
 
+  const STAGE_TINTS: Record<string, string> = {
+    planning: "#EEF4FF", structure: "#FFF5EB", systems: "#ECFEFF", openings: "#F0FDF4",
+    finishes: "#F5F3FF", "kitchen-bath": "#FFF7ED", outdoor: "#F7FEE7", moving: "#FEF2F2",
+  };
+
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#E8ECF0" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F8F8F6", fontFamily: "'Epilogue', system-ui, sans-serif" }}>
       <div
-        className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
+        className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)] px-5"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
-        {/* Top bar: action cluster (right RTL → bell, support, docs) + avatar (left) */}
-        <header className="px-5 pt-4 pb-3 flex items-center justify-between">
+        {/* Top bar */}
+        <header className="pt-4 pb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate("/resident/notifications")}
-              className="h-10 w-10 rounded-full bg-white border border-[#ECEEF2] flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform"
+              className="h-10 w-10 rounded-full bg-white border border-[#E5E7EB] flex items-center justify-center shadow-sm active:scale-95 transition-transform"
               aria-label="התראות"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0A1F3D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
               </svg>
             </button>
@@ -199,163 +204,174 @@ const filteredDeals = useMemo(() => {
           <ProfileAvatar fallbackName={fullName} />
         </header>
 
-        {/* Greeting */}
-        <section className="px-5 mt-1">
-          <h1 className="text-[28px] leading-[1.15] font-extrabold tracking-tight text-[#0A1F3D]">
-            שלום, {fullName || "דייר"}
-          </h1>
-          <p className="text-[14px] text-[#6B7280] mt-1.5">מצא הצעות קבוצתיות חדשות באזור שלך</p>
-        </section>
-
-        {/* Location pill */}
-        {city && (
-          <div className="px-5 mt-4">
+        {/* Greeting + city pill */}
+        <section className="mt-1 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-[26px] leading-[1.15] font-extrabold tracking-tight text-[#1F2937]" style={{ fontFamily: "'Urbanist', system-ui, sans-serif" }}>
+              שלום, {fullName || "דייר"}
+            </h1>
+            <p className="text-[13px] text-[#6B7280] mt-1">מצא הצעות קבוצתיות חדשות באזור שלך</p>
+          </div>
+          {city && (
             <button
               onClick={() => navigate("/resident/profile/edit")}
-              className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-white border border-[#ECEEF2] text-[13px] font-semibold text-[#0A1F3D] shadow-[0_2px_8px_-2px_rgba(10,31,61,0.05)] active:scale-95 transition-transform"
+              className="shrink-0 inline-flex items-center gap-2 h-8 px-3 rounded-full bg-white border border-[#E5E7EB] text-[12px] font-semibold text-[#1F2937] shadow-sm active:scale-95 transition-transform"
             >
-              <MapPin className="h-3.5 w-3.5 text-[#D4AF37]" strokeWidth={2.4} />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#C9A227]" />
+              <MapPin className="h-3 w-3 text-[#6B7280]" strokeWidth={2.4} />
               <span>{city}</span>
             </button>
-          </div>
-        )}
+          )}
+        </section>
 
         {/* Search bar */}
-        <div className="px-5 mt-4">
+        <div className="mt-4">
           <button
             onClick={() => navigate("/resident/search")}
-            className="w-full h-14 rounded-[20px] bg-white border border-[#ECEEF2] flex items-center gap-3 px-5 text-right shadow-[0_4px_16px_-6px_rgba(10,31,61,0.08)] active:scale-[0.99] transition-transform"
+            className="w-full h-13 py-3.5 rounded-2xl bg-white border border-[#E5E7EB] flex items-center gap-3 px-4 text-right shadow-sm active:scale-[0.99] transition-transform"
           >
-            <SearchIcon className="h-5 w-5 text-[#6B7280] shrink-0" strokeWidth={2} />
-            <span className="text-[14px] font-medium text-[#6B7280] flex-1 truncate">חפש ספקים, הצעות וקטגוריות</span>
+            <SearchIcon className="h-[18px] w-[18px] text-[#6B7280] shrink-0" strokeWidth={2} />
+            <span className="text-[13px] font-medium text-[#6B7280] flex-1 truncate">חפש ספקים, הצעות וקטגוריות</span>
           </button>
         </div>
 
-        {/* Estimated savings — premium hero card */}
-        <section className="px-5 mt-4">
+        {/* Bento Grid */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          {/* Savings Hero - full width */}
           <button
             onClick={() => navigate("/resident/my-offers")}
-            className="w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] transition-transform"
-            style={{
-              background: "linear-gradient(135deg,#0A1F3D 0%, #14305F 100%)",
-              boxShadow: "var(--shadow-elevated)",
-            }}
+            className="col-span-2 bg-white border border-[#E5E7EB] p-5 rounded-[24px] shadow-sm relative overflow-hidden text-right active:scale-[0.99] transition-transform"
           >
-            <div
-              className="h-12 w-12 rounded-[14px] flex items-center justify-center shrink-0"
-              style={{ background: "rgba(212,175,55,0.18)" }}
-            >
-              <PiggyBank className="h-[22px] w-[22px] text-[#D4AF37]" strokeWidth={2.2} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-bold tracking-wider uppercase text-[#D4AF37]/90">חיסכון משוער</div>
-              <div className="text-[24px] font-extrabold text-white mt-0.5 leading-none tabular-nums">
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[#16A34A] bg-[#F0FDF4] px-3 py-1 rounded-full text-[11px] font-bold border border-[#DCFCE7]">חסכון קבוצתי</span>
+                <PiggyBank className="h-5 w-5 text-[#16A34A]/30" strokeWidth={2} />
+              </div>
+              <div className="text-[28px] font-extrabold text-[#1F2937] leading-none tabular-nums" style={{ fontFamily: "'Urbanist'" }}>
                 {formatILS(estimatedSavings)}
               </div>
-              <div className="text-[12px] text-white/70 mt-1.5 font-medium">נחסכו בזכות רכישות קבוצתיות</div>
+              <p className="text-[12px] text-[#6B7280] mt-1 mb-4">נחסכו בזכות רכישות קבוצתיות</p>
+              <div className="w-full bg-[#1F2937] text-white py-2.5 rounded-xl font-bold text-[13px] shadow-md border border-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
+                פירוט החסכון המלא
+              </div>
             </div>
-            <ChevronLeft className="h-[18px] w-[18px] text-white/60 shrink-0" strokeWidth={2.2} />
+            <div className="absolute -left-4 -bottom-4 w-32 h-32 bg-[#16A34A]/5 rounded-full blur-3xl" />
           </button>
-        </section>
 
-        {/* Budget Calculator */}
-        <section className="px-5 mt-4">
+          {/* Budget Card - left */}
           <button
             onClick={() => navigate("/resident/budget-planner")}
-            className="w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] transition-transform bg-white border border-[#ECEEF2]"
-            style={{ boxShadow: "var(--shadow-elevated)" }}
+            className="bg-white border border-[#E5E7EB] p-4 rounded-[24px] shadow-sm flex flex-col justify-between text-right active:scale-[0.98] transition-transform min-h-[160px]"
           >
-            <div
-              className="h-12 w-12 rounded-[14px] flex items-center justify-center shrink-0"
-              style={{ background: "rgba(10,31,61,0.06)" }}
-            >
-              <Calculator className="h-[22px] w-[22px] text-[#0A1F3D]" strokeWidth={2.2} />
+            <div>
+              <div className="w-9 h-9 bg-[#F5F3FF] rounded-xl flex items-center justify-center mb-2">
+                <Calculator className="h-[18px] w-[18px] text-[#7C3AED]" strokeWidth={2.2} />
+              </div>
+              <div className="font-extrabold text-[14px] text-[#1F2937] leading-tight" style={{ fontFamily: "'Urbanist'" }}>מחשבון תקציב</div>
+              <div className="text-[11px] text-[#6B7280] mt-1">חשב עלויות שיפוץ</div>
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[16px] font-extrabold text-[#0A1F3D] leading-tight">מחשבון תקציב</div>
-              <div className="text-[13px] text-[#6B7280] mt-1 font-medium">חשב עלויות בנייה, שיפוץ ושדרוג</div>
+            <div className="mt-3 border-2 border-[#7C3AED] text-[#7C3AED] py-1.5 rounded-lg text-[12px] font-bold bg-[#F5F3FF] text-center" style={{ fontFamily: "'Urbanist'" }}>
+              נהל תקציב
             </div>
-            <ChevronLeft className="h-[18px] w-[18px] text-[#9CA3AF] shrink-0" strokeWidth={2.2} />
           </button>
-        </section>
 
-        {/* Stats — 3 mini cards */}
-        <section className="px-5 mt-4 grid grid-cols-3 gap-3">
-          <StatCard icon={Store} label="ספקים באזור" value={areaSuppliersCount} accent="#0A1F3D" tint="rgba(10,31,61,0.05)" onClick={() => navigate("/resident/categories")} />
-          <StatCard icon={Sparkles} label="הצעות פעילות" value={areaDeals.length} accent="#D4AF37" tint="rgba(212,175,55,0.08)" onClick={() => navigate("/resident/deals")} />
-          <StatCard icon={Briefcase} label="הצעות שלי" value={joinedCount} accent="#22C55E" tint="rgba(34,197,94,0.08)" onClick={() => navigate("/resident/my-offers")} />
-        </section>
-
-        {/* Quick filter chips */}
-        <div className="mt-5">
-          <div className="px-5 flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {FILTERS.map((f) => {
-              const active = f === activeFilter;
-              return (
-                <button
-                  key={f}
-                  onClick={() => setActiveFilter(f)}
-                  className={`shrink-0 h-9 px-4 rounded-full text-[13px] font-semibold transition-all ${
-                    active
-                      ? "bg-[#0A1F3D] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]"
-                      : "bg-white text-[#0A1F3D] shadow-[0_2px_6px_rgba(0,0,0,0.06)]"
-                  }`}
-                >
-                  {f}
-                </button>
-              );
-            })}
+          {/* Stats stack - right column */}
+          <div className="flex flex-col gap-2">
+            <BentoStat icon={Store} label="ספקים באזור" value={areaSuppliersCount} tint="#FFF5EB" color="#EA580C" onClick={() => navigate("/resident/categories")} />
+            <BentoStat icon={Sparkles} label="הצעות פעילות" value={areaDeals.length} tint="#FFFBEB" color="#C9A227" onClick={() => navigate("/resident/deals")} />
+            <BentoStat icon={Briefcase} label="הצעות שלי" value={joinedCount} tint="#F0FDF4" color="#16A34A" onClick={() => navigate("/resident/my-offers")} />
           </div>
         </div>
 
-        {/* Project Progress — compact */}
-        <section className="px-5 mt-6">
+        {/* Filter chips */}
+        <div className="mt-4 flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          {FILTERS.map((f) => {
+            const active = f === activeFilter;
+            return (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className={`shrink-0 h-9 px-4 rounded-full text-[12px] font-bold transition-all border ${
+                  active
+                    ? "bg-[#C9A227] text-white border-[#C9A227] shadow-md shadow-[#C9A227]/25"
+                    : "bg-white text-[#1F2937] border-[#E5E7EB] shadow-sm"
+                }`}
+              >
+                {f}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Project Progress */}
+        <section className="mt-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[18px] font-extrabold text-[#0A1F3D] tracking-tight">התקדמות הפרויקט</h2>
-            <span className="text-[11px] font-semibold text-[#6B7280] tracking-wide">
-              שלב {currentIdx + 1} מתוך {STAGES.length} · {completionPct}%
+            <h2 className="text-[17px] font-extrabold text-[#1F2937] tracking-tight" style={{ fontFamily: "'Urbanist'" }}>שלבי הפרויקט</h2>
+            <span className="text-[11px] font-bold text-[#6B7280]">
+              {currentIdx + 1}/{STAGES.length} · {completionPct}%
             </span>
           </div>
-          <div className="relative h-2 rounded-full bg-[#ECEEF2] overflow-hidden">
+
+          <div className="relative h-2 rounded-full bg-[#E5E7EB] overflow-hidden mb-3">
             <div
               className="absolute inset-y-0 right-0 rounded-full transition-all duration-700"
               style={{
                 width: `${completionPct}%`,
-                background: "linear-gradient(90deg,#D4AF37,#E8C96B)",
-                boxShadow: "0 0 10px rgba(212,175,55,0.45)",
+                background: "linear-gradient(90deg,#C9A227,#E8C96B)",
               }}
             />
           </div>
-          <div className="mt-3 flex items-center gap-3">
-            {(() => {
-              const stage = STAGES[currentIdx];
+
+          <div className="grid grid-cols-3 gap-2.5">
+            {STAGES.map((stage, idx) => {
+              const isCurrent = stage.id === currentStage;
+              const isPast = idx < currentIdx;
+              const tint = STAGE_TINTS[stage.id] ?? "#F4F6FA";
               const Icon = stage.icon;
-              const theme = STAGE_THEMES.find((t) => t.id === stage.id);
               return (
                 <button
+                  key={stage.id}
                   onClick={() => navigate("/resident/categories")}
-                  className="flex-1 text-right rounded-[16px] p-4 bg-white border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:scale-[0.99] transition-transform flex items-center gap-3"
+                  className={`relative p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all active:scale-95 ${
+                    isCurrent
+                      ? "border-2 border-[#2563EB] shadow-sm"
+                      : isPast
+                      ? "border border-[#E5E7EB] opacity-90"
+                      : "border border-[#E5E7EB] opacity-70"
+                  }`}
+                  style={{ background: tint, minHeight: 78 }}
                 >
-                  <div
-                    className="h-10 w-10 rounded-[12px] flex items-center justify-center shrink-0"
-                    style={{ background: theme?.tint ?? "#F4F6FA", color: theme?.accent ?? "#6B7280" }}
-                  >
-                    <Icon className="h-5 w-5" strokeWidth={2.2} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[14px] font-bold text-[#0A1F3D]">{stage.title}</div>
-                    <div className="text-[12px] text-[#6B7280] mt-0.5">{stage.description}</div>
-                  </div>
-                  <ChevronLeft className="h-[18px] w-[18px] shrink-0 text-[#9CA3AF]" strokeWidth={2.2} />
+                  {isCurrent && (
+                    <span className="absolute -top-1.5 right-1/2 translate-x-1/2 bg-[#2563EB] text-white text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider whitespace-nowrap">נוכחי</span>
+                  )}
+                  <Icon className="h-4 w-4 mb-1 text-[#1F2937]" strokeWidth={2.2} />
+                  <span className="text-[11px] font-bold text-[#1F2937] leading-tight">{stage.title}</span>
                 </button>
               );
-            })()}
+            })}
           </div>
         </section>
 
       </div>
       <BottomNav role="resident" />
     </div>
+  );
+}
+
+function BentoStat({ icon: Icon, label, value, tint, color, onClick }: { icon: typeof Sparkles; label: string; value: number; tint: string; color: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="bg-white border border-[#E5E7EB] p-2.5 rounded-2xl flex items-center gap-2.5 shadow-sm active:scale-[0.97] transition-transform text-right flex-1"
+    >
+      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: tint }}>
+        <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} style={{ color }} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-[16px] font-extrabold text-[#1F2937] leading-none tabular-nums" style={{ fontFamily: "'Urbanist'" }}>{value}</div>
+        <div className="text-[10px] text-[#6B7280] font-medium leading-tight mt-0.5">{label}</div>
+      </div>
+    </button>
   );
 }
 
