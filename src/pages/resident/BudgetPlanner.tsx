@@ -17,11 +17,11 @@ import {
   BudgetResult, calcNewBuild, calcFullReno, calcSingleRoom, calcSingleService,
 } from "@/lib/budgetPricing";
 
-const TRACKS: { key: Track; label: string; desc: string; icon: typeof Home }[] = [
-  { key: "new_build", label: "בנייה חדשה", desc: "וילה / בית פרטי מהיסוד", icon: Home },
-  { key: "full_renovation", label: "שיפוץ בית מלא", desc: "שיפוץ דירה / בית קיים", icon: Hammer },
-  { key: "single_room", label: "שיפוץ חדר בודד", desc: "מטבח / אמבטיה / סלון ועוד", icon: DoorOpen },
-  { key: "single_service", label: "שירות בודד", desc: "דלתות / ריצוף / מיזוג ועוד", icon: Wrench },
+const TRACKS: { key: Track; label: string; desc: string; icon: typeof Home; tint: string; accent: string; ring: string }[] = [
+  { key: "new_build",       label: "בנייה חדשה",       desc: "וילה / בית פרטי מהיסוד",          icon: Home,   tint: "#EEF4FF", accent: "#2563EB", ring: "rgba(37,99,235,0.18)" },
+  { key: "full_renovation", label: "שיפוץ בית מלא",     desc: "שיפוץ דירה / בית קיים",            icon: Hammer, tint: "#FFF5EB", accent: "#E8742C", ring: "rgba(232,116,44,0.18)" },
+  { key: "single_room",     label: "שיפוץ חדר בודד",    desc: "מטבח / אמבטיה / סלון ועוד",        icon: DoorOpen, tint: "#F0FDF4", accent: "#16A34A", ring: "rgba(22,163,74,0.18)" },
+  { key: "single_service",  label: "שירות בודד",        desc: "דלתות / ריצוף / מיזוג ועוד",       icon: Wrench, tint: "#F5F3FF", accent: "#7C3AED", ring: "rgba(124,58,237,0.18)" },
 ];
 
 const finishOptions: FinishLevel[] = ["basic", "standard", "premium", "luxury"];
