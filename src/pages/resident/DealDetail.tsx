@@ -892,7 +892,7 @@ export default function DealDetail() {
               {hasPendingDeposit && pendingPaymentUrl ? (
                 <button
                   type="button"
-                  onClick={() => setShowPaymentModal(true)}
+                  onClick={() => { window.location.href = pendingPaymentUrl; }}
                   className="h-10 px-3 rounded-2xl bg-white text-[#0A1F3D] text-[11px] font-extrabold active:scale-[0.97] transition-transform"
                 >
                   לתשלום
