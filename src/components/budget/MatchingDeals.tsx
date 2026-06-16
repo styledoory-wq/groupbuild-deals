@@ -30,11 +30,22 @@ export function MatchingDeals({ result }: { result: BudgetResult }) {
           .limit(30);
         if (error) throw error;
         const slugs = new Set(result.matchedSlugs);
-        const list = (data ?? [])
-          .map((d) => {
-            const slug = (d as unknown as { categories?: { slug?: string } | null }).categories?.slug ?? null;
-            return { ...d, category_slug: slug } as Deal;
-          })
+        const rows = (data ?? []) as unknown as Array<{
+          id: string; title: string;
+          original_price: number | null; discounted_price: number | null;
+          discount_percentage: number | null; image_url: string | null;
+          categories?: { slug?: string } | null;
+        }>;
+        const list: Deal[] = rows
+          .map((d) => ({
+            id: d.id,
+            title: d.title,
+            original_price: d.original_price,
+            discounted_price: d.discounted_price,
+            discount_percentage: d.discount_percentage,
+            image_url: d.image_url,
+            category_slug: d.categories?.slug ?? null,
+          }))
           .filter((d) => !d.category_slug || slugs.has(d.category_slug))
           .slice(0, 6);
         if (!cancelled) setDeals(list);
