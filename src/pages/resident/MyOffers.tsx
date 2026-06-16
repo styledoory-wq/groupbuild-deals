@@ -142,11 +142,6 @@ export default function MyOffers() {
       ]);
       if (iErr) throw iErr;
 
-      const list = ((ints ?? []) as InterestRow[]).filter((interest) => {
-        const depositRequired = interest.deposit_required && Number(interest.deposit_amount ?? 0) > 0;
-        if (!depositRequired) return !["rejected", "cancelled", "refunded", "left"].includes(interest.status);
-        return interest.deposit_status === "paid" || ["paid", "committed", "joined"].includes(interest.status);
-      });
       const depMap: Record<string, DepositRow> = {};
       (deps ?? []).forEach((row) => {
         const d = row as DepositRow;
@@ -154,6 +149,11 @@ export default function MyOffers() {
         if (!current || d.status === "paid" || (current.status !== "paid" && d.status === "pending")) {
           depMap[d.deal_id] = d;
         }
+      });
+      const list = ((ints ?? []) as InterestRow[]).filter((interest) => {
+        const depositRequired = interest.deposit_required && Number(interest.deposit_amount ?? 0) > 0;
+        if (!depositRequired) return !["rejected", "cancelled", "refunded", "left"].includes(interest.status);
+        return depMap[interest.deal_id]?.status === "paid" || interest.deposit_status === "paid" || ["paid", "committed", "joined"].includes(interest.status);
       });
 
       const dealIds = Array.from(new Set(list.map((i) => i.deal_id)));
