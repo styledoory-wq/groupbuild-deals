@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, MessageCircle, Phone, CheckCircle2, CreditCard, Clock, Share2, Percent, PiggyBank, CalendarDays, MapPin, Layers, Store, Handshake, Target, PhoneCall, Wrench, BadgeCheck, Award, ChevronLeft } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -22,7 +22,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
-import { PaymentModal } from "@/components/payments/PaymentModal";
 import { useApp } from "@/store/AppStore";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
@@ -70,6 +69,7 @@ interface SupplierRow {
 
 export default function DealDetail() {
   const { dealId } = useParams();
+  const navigate = useNavigate();
   const { categories } = useApp();
 
   const [loading, setLoading] = useState(true);
@@ -83,7 +83,6 @@ export default function DealDetail() {
   const [participantCount, setParticipantCount] = useState<number>(0);
   const [isGuest, setIsGuest] = useState<boolean>(false);
   const [pendingPaymentUrl, setPendingPaymentUrl] = useState<string | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
