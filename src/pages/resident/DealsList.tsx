@@ -191,7 +191,7 @@ export default function DealsList() {
             {loading && <DealCardSkeletonList count={4} />}
 
             {!loading && error && (
-              <div className="rounded-[20px] border border-[#ECEEF2] bg-white p-6 text-center md:col-span-2 lg:col-span-3">
+              <div className="rounded-[20px] border border-[#ECEEF2] bg-white p-6 text-center col-span-2 md:col-span-3">
                 <p className="text-[14px] font-bold text-[#0A1F3D]">שגיאה בטעינה</p>
                 <p className="text-[12px] text-[#6B7280] mt-1">{error}</p>
               </div>
