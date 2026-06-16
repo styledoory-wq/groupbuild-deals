@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Hammer, DoorOpen, Wrench, ArrowRight, RefreshCw } from "lucide-react";
+import { Home, Hammer, DoorOpen, Wrench, RefreshCw } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -17,11 +17,11 @@ import {
   BudgetResult, calcNewBuild, calcFullReno, calcSingleRoom, calcSingleService,
 } from "@/lib/budgetPricing";
 
-const TRACKS: { key: Track; label: string; desc: string; icon: typeof Home }[] = [
-  { key: "new_build", label: "בנייה חדשה", desc: "וילה / בית פרטי מהיסוד", icon: Home },
-  { key: "full_renovation", label: "שיפוץ בית מלא", desc: "שיפוץ דירה / בית קיים", icon: Hammer },
-  { key: "single_room", label: "שיפוץ חדר בודד", desc: "מטבח / אמבטיה / סלון ועוד", icon: DoorOpen },
-  { key: "single_service", label: "שירות בודד", desc: "דלתות / ריצוף / מיזוג ועוד", icon: Wrench },
+const TRACKS: { key: Track; label: string; desc: string; icon: typeof Home; tint: string; accent: string; ring: string }[] = [
+  { key: "new_build",       label: "בנייה חדשה",       desc: "וילה / בית פרטי מהיסוד",          icon: Home,   tint: "#EEF4FF", accent: "#2563EB", ring: "rgba(37,99,235,0.18)" },
+  { key: "full_renovation", label: "שיפוץ בית מלא",     desc: "שיפוץ דירה / בית קיים",            icon: Hammer, tint: "#FFF5EB", accent: "#E8742C", ring: "rgba(232,116,44,0.18)" },
+  { key: "single_room",     label: "שיפוץ חדר בודד",    desc: "מטבח / אמבטיה / סלון ועוד",        icon: DoorOpen, tint: "#F0FDF4", accent: "#16A34A", ring: "rgba(22,163,74,0.18)" },
+  { key: "single_service",  label: "שירות בודד",        desc: "דלתות / ריצוף / מיזוג ועוד",       icon: Wrench, tint: "#F5F3FF", accent: "#7C3AED", ring: "rgba(124,58,237,0.18)" },
 ];
 
 const finishOptions: FinishLevel[] = ["basic", "standard", "premium", "luxury"];
@@ -115,33 +115,36 @@ export default function BudgetPlanner() {
         {!track && (
           <div className="space-y-3">
             <div className="text-[13px] font-bold text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>בחר מסלול</div>
-            {TRACKS.map((t) => {
-              const Icon = t.icon;
-              return (
-                <button
-                  key={t.key}
-                  onClick={() => { setTrack(t.key); setResult(null); }}
-                  className="w-full bg-white rounded-2xl p-4 border border-[#E5E7EB] flex items-center gap-3 text-right hover:border-[#C9A227] shadow-sm transition"
-                >
-                  <div className="h-12 w-12 rounded-xl bg-[#FFFBEB] flex items-center justify-center shrink-0">
-                    <Icon className="h-6 w-6 text-[#C9A227]" strokeWidth={2.2} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-extrabold text-[15px] text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>{t.label}</div>
-                    <div className="text-[12px] text-[#6B7280] mt-0.5">{t.desc}</div>
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-[#9CA3AF]" />
-                </button>
-              );
-            })}
+            <div className="grid grid-cols-2 gap-3">
+              {TRACKS.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <button
+                    key={t.key}
+                    onClick={() => { setTrack(t.key); setResult(null); }}
+                    className="rounded-2xl p-4 text-right transition active:scale-[0.98] flex flex-col gap-2.5 min-h-[140px]"
+                    style={{ background: t.tint, boxShadow: `0 6px 18px -10px ${t.ring}, inset 0 0 0 1px ${t.ring}` }}
+                  >
+                    <div className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FFFFFF", boxShadow: `0 4px 10px -4px ${t.ring}` }}>
+                      <Icon className="h-5 w-5" strokeWidth={2.2} style={{ color: t.accent }} />
+                    </div>
+                    <div className="font-extrabold text-[14px] text-[#1F2937] leading-tight" style={{ fontFamily: "'Urbanist'" }}>{t.label}</div>
+                    <div className="text-[11px] text-[#6B7280] leading-snug">{t.desc}</div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
-        {track && (
+        {track && (() => {
+          const theme = TRACKS.find((t) => t.key === track)!;
+          return (
           <>
             <div className="flex items-center justify-between">
-              <div className="text-[14px] font-extrabold text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
-                {TRACKS.find((t) => t.key === track)?.label}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[12px] font-extrabold" style={{ background: theme.tint, color: theme.accent, fontFamily: "'Urbanist'" }}>
+                <span className="h-2 w-2 rounded-full" style={{ background: theme.accent }} />
+                {theme.label}
               </div>
               <button onClick={reset} className="text-[12px] text-[#6B7280] flex items-center gap-1 hover:text-[#1F2937] bg-white border border-[#E5E7EB] rounded-full px-3 py-1.5 shadow-sm">
                 <RefreshCw className="h-3.5 w-3.5" /> החלף מסלול
@@ -279,14 +282,15 @@ export default function BudgetPlanner() {
 
               <button
                 onClick={calculate}
-                className="w-full h-12 rounded-xl text-white font-extrabold text-[14px] shadow-[0_8px_20px_-6px_rgba(201,162,39,0.55)] active:scale-[0.99] transition-transform"
-                style={{ fontFamily: "'Urbanist'", background: "#C9A227" }}
+                className="w-full h-12 rounded-xl text-white font-extrabold text-[14px] active:scale-[0.99] transition-transform"
+                style={{ fontFamily: "'Urbanist'", background: theme.accent, boxShadow: `0 10px 24px -8px ${theme.ring}` }}
               >
                 חשב תקציב
               </button>
             </div>
           </>
-        )}
+          );
+        })()}
 
         {result && (
           <div id="budget-result" className="space-y-5">
