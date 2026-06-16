@@ -115,25 +115,25 @@ export default function BudgetPlanner() {
         {!track && (
           <div className="space-y-3">
             <div className="text-[13px] font-bold text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>בחר מסלול</div>
-            {TRACKS.map((t) => {
-              const Icon = t.icon;
-              return (
-                <button
-                  key={t.key}
-                  onClick={() => { setTrack(t.key); setResult(null); }}
-                  className="w-full bg-white rounded-2xl p-4 border border-[#E5E7EB] flex items-center gap-3 text-right hover:border-[#C9A227] shadow-sm transition"
-                >
-                  <div className="h-12 w-12 rounded-xl bg-[#FFFBEB] flex items-center justify-center shrink-0">
-                    <Icon className="h-6 w-6 text-[#C9A227]" strokeWidth={2.2} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-extrabold text-[15px] text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>{t.label}</div>
-                    <div className="text-[12px] text-[#6B7280] mt-0.5">{t.desc}</div>
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-[#9CA3AF]" />
-                </button>
-              );
-            })}
+            <div className="grid grid-cols-2 gap-3">
+              {TRACKS.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <button
+                    key={t.key}
+                    onClick={() => { setTrack(t.key); setResult(null); }}
+                    className="rounded-2xl p-4 text-right transition active:scale-[0.98] flex flex-col gap-2.5 min-h-[140px]"
+                    style={{ background: t.tint, boxShadow: `0 6px 18px -10px ${t.ring}, inset 0 0 0 1px ${t.ring}` }}
+                  >
+                    <div className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FFFFFF", boxShadow: `0 4px 10px -4px ${t.ring}` }}>
+                      <Icon className="h-5 w-5" strokeWidth={2.2} style={{ color: t.accent }} />
+                    </div>
+                    <div className="font-extrabold text-[14px] text-[#1F2937] leading-tight" style={{ fontFamily: "'Urbanist'" }}>{t.label}</div>
+                    <div className="text-[11px] text-[#6B7280] leading-snug">{t.desc}</div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
