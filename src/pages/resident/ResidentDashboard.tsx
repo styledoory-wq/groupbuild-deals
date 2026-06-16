@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search as SearchIcon, ChevronLeft, MapPin, Sparkles, Store, Briefcase,
-  PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, Check, PiggyBank, Calculator,
+  PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, PiggyBank, Calculator,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupportButton } from "@/components/SupportButton";
