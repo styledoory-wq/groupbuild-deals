@@ -331,7 +331,7 @@ const filteredDeals = useMemo(() => {
               return (
                 <button
                   key={stage.id}
-                  onClick={() => navigate("/resident/categories")}
+                  onClick={() => navigate(`/resident/categories?stage=${stage.id}`)}
                   className={`relative p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all active:scale-95 ${
                     isCurrent
                       ? "border-2 border-[#2563EB] shadow-sm"
