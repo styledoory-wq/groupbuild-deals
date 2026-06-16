@@ -22,6 +22,11 @@ export function FavoriteButton({
     e.preventDefault();
     e.stopPropagation();
     if (busy) return;
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      window.location.href = `/auth?redirect=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
     const next = !on;
     setOn(next);
     setBusy(true);
