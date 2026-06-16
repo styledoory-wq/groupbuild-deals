@@ -158,10 +158,10 @@ Deno.serve(async (req) => {
     const email = body.email || profile?.email || userEmail || "";
     const phone = body.phone || profile?.phone || "";
 
-    const successUrl = `${siteUrl}/payment/success?dep=${depositId}${
+    const successUrl = `${siteUrl}/payment/success?dep=${depositId}&deal_id=${encodeURIComponent(body.deal_id)}${
       body.interest_id ? `&interest_id=${encodeURIComponent(body.interest_id)}` : ""
     }`;
-    const cancelUrl = `${siteUrl}/payment/cancel?dep=${depositId}${
+    const cancelUrl = `${siteUrl}/payment/cancel?dep=${depositId}&deal_id=${encodeURIComponent(body.deal_id)}${
       body.interest_id ? `&interest_id=${encodeURIComponent(body.interest_id)}` : ""
     }`;
     const callbackSecret = Deno.env.get("MAKE_CALLBACK_SECRET") ?? "";
