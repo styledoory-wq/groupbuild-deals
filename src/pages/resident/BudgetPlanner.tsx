@@ -3,7 +3,7 @@ import { Home, Hammer, DoorOpen, Wrench, ArrowRight, RefreshCw } from "lucide-re
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -108,26 +108,27 @@ export default function BudgetPlanner() {
 
   return (
     <MobileShell>
+      <div style={{ background: "#F8F8F6", fontFamily: "'Epilogue', system-ui, sans-serif" }}>
       <PageHeader title="מחשבון תקציב מקצועי" subtitle="הערכת עלות מדויקת ב-4 מסלולים — עם יועץ AI ועסקאות מתאימות" />
       <div className="px-5 pb-28 space-y-5">
 
         {!track && (
           <div className="space-y-3">
-            <div className="text-[13px] font-bold text-[#0A1F3D]">בחר מסלול</div>
+            <div className="text-[13px] font-bold text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>בחר מסלול</div>
             {TRACKS.map((t) => {
               const Icon = t.icon;
               return (
                 <button
                   key={t.key}
                   onClick={() => { setTrack(t.key); setResult(null); }}
-                  className="w-full bg-white rounded-2xl p-4 border border-[#ECEEF2] flex items-center gap-3 text-right hover:border-[#D4AF37] transition"
+                  className="w-full bg-white rounded-2xl p-4 border border-[#E5E7EB] flex items-center gap-3 text-right hover:border-[#C9A227] shadow-sm transition"
                 >
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#0A1F3D] to-[#1E40AF] flex items-center justify-center">
-                    <Icon className="h-6 w-6 text-[#D4AF37]" />
+                  <div className="h-12 w-12 rounded-xl bg-[#FFFBEB] flex items-center justify-center shrink-0">
+                    <Icon className="h-6 w-6 text-[#C9A227]" strokeWidth={2.2} />
                   </div>
                   <div className="flex-1">
-                    <div className="font-extrabold text-[15px] text-[#0A1F3D]">{t.label}</div>
-                    <div className="text-[12px] text-[#6B7280]">{t.desc}</div>
+                    <div className="font-extrabold text-[15px] text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>{t.label}</div>
+                    <div className="text-[12px] text-[#6B7280] mt-0.5">{t.desc}</div>
                   </div>
                   <ArrowRight className="h-5 w-5 text-[#9CA3AF]" />
                 </button>
@@ -139,15 +140,15 @@ export default function BudgetPlanner() {
         {track && (
           <>
             <div className="flex items-center justify-between">
-              <div className="text-[13px] font-bold text-[#0A1F3D]">
+              <div className="text-[14px] font-extrabold text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
                 {TRACKS.find((t) => t.key === track)?.label}
               </div>
-              <button onClick={reset} className="text-[12px] text-[#6B7280] flex items-center gap-1 hover:text-[#0A1F3D]">
+              <button onClick={reset} className="text-[12px] text-[#6B7280] flex items-center gap-1 hover:text-[#1F2937] bg-white border border-[#E5E7EB] rounded-full px-3 py-1.5 shadow-sm">
                 <RefreshCw className="h-3.5 w-3.5" /> החלף מסלול
               </button>
             </div>
 
-            <div className="bg-white rounded-3xl p-5 border border-[#ECEEF2] space-y-4">
+            <div className="bg-white rounded-3xl p-5 border border-[#E5E7EB] shadow-sm space-y-4">
               {track === "new_build" && (
                 <>
                   <FieldGrid>
@@ -162,11 +163,11 @@ export default function BudgetPlanner() {
                     <FinishSelect value={finish} onChange={setFinish} />
                     <RegionSelect value={region} onChange={setRegion} />
                   </FieldGrid>
-                  <div className="flex items-center justify-between bg-[#F4F6FA] rounded-xl p-3">
+                  <div className="flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3">
                     <Label className="m-0">מרתף</Label>
                     <Switch checked={basement} onCheckedChange={setBasement} />
                   </div>
-                  <div className="flex items-center justify-between bg-[#F4F6FA] rounded-xl p-3">
+                  <div className="flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3">
                     <Label className="m-0">ממ"ד</Label>
                     <Switch checked={safeRoom} onCheckedChange={setSafeRoom} />
                   </div>
@@ -201,7 +202,7 @@ export default function BudgetPlanner() {
                     ["doors", "החלפת דלתות"],
                     ["windows", "החלפת חלונות"],
                   ] as const).map(([key, label]) => (
-                    <div key={key} className="flex items-center justify-between bg-[#F4F6FA] rounded-xl p-3">
+                    <div key={key} className="flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3">
                       <Label className="m-0">{label}</Label>
                       <Switch
                         checked={renoFlags[key]}
@@ -234,13 +235,13 @@ export default function BudgetPlanner() {
                     <RegionSelect value={region} onChange={setRegion} />
                   </FieldGrid>
                   {["kitchen", "bathroom", "toilet"].includes(room) && (
-                    <div className="flex items-center justify-between bg-[#F4F6FA] rounded-xl p-3">
+                    <div className="flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3">
                       <Label className="m-0">החלפת תשתיות אינסטלציה</Label>
                       <Switch checked={replacePlumbing} onCheckedChange={setReplacePlumbing} />
                     </div>
                   )}
                   {["kitchen", "living", "bedroom"].includes(room) && (
-                    <div className="flex items-center justify-between bg-[#F4F6FA] rounded-xl p-3">
+                    <div className="flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3">
                       <Label className="m-0">ריהוט חדש</Label>
                       <Switch checked={newFurniture} onCheckedChange={setNewFurniture} />
                     </div>
@@ -276,9 +277,13 @@ export default function BudgetPlanner() {
                 </>
               )}
 
-              <Button onClick={calculate} variant="premium" className="w-full h-12">
+              <button
+                onClick={calculate}
+                className="w-full h-12 rounded-xl bg-[#1F2937] text-white font-extrabold text-[14px] shadow-md active:scale-[0.99] transition-transform"
+                style={{ fontFamily: "'Urbanist'" }}
+              >
                 חשב תקציב
-              </Button>
+              </button>
             </div>
           </>
         )}
@@ -296,6 +301,7 @@ export default function BudgetPlanner() {
             כל החישובים מבוססים טווחי שוק 2026 בישראל ומיועדים להתמצאות בלבד.
           </p>
         )}
+      </div>
       </div>
       <BottomNav role="resident" />
     </MobileShell>

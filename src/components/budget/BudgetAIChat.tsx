@@ -53,10 +53,12 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-5 border border-[#ECEEF2] space-y-3">
+    <div className="bg-white rounded-3xl p-5 border border-[#E5E7EB] shadow-sm space-y-3" style={{ fontFamily: "'Epilogue', system-ui, sans-serif" }}>
       <div className="flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-[#D4AF37]" />
-        <h3 className="font-extrabold text-[#0A1F3D] text-[15px]">יועץ התקציב החכם</h3>
+        <div className="h-8 w-8 rounded-xl bg-[#FFFBEB] flex items-center justify-center">
+          <Sparkles className="h-4 w-4 text-[#C9A227]" />
+        </div>
+        <h3 className="font-extrabold text-[#1F2937] text-[15px]" style={{ fontFamily: "'Urbanist'" }}>יועץ התקציב החכם</h3>
       </div>
       <p className="text-[12px] text-[#6B7280]">
         מבוסס על הערכת העלות שלך ({ILS(result.total.avg)}). שואל, מסביר וממליץ — לא ממציא מחירים.
@@ -69,7 +71,7 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
               key={q}
               onClick={() => send(q)}
               disabled={loading}
-              className="text-right text-[12px] font-medium bg-[#F4F6FA] hover:bg-[#E9ECF2] rounded-xl p-3 text-[#0A1F3D] transition disabled:opacity-50"
+              className="text-right text-[12px] font-medium bg-[#F8F8F6] hover:bg-white border border-[#E5E7EB] rounded-xl p-3 text-[#1F2937] transition disabled:opacity-50"
             >
               {q}
             </button>
@@ -84,8 +86,8 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
               key={i}
               className={`text-[13px] leading-relaxed p-3 rounded-2xl whitespace-pre-wrap ${
                 m.role === "user"
-                  ? "bg-[#0A1F3D] text-white mr-6"
-                  : "bg-[#F4F6FA] text-[#0A1F3D] ml-6"
+                  ? "bg-[#1F2937] text-white mr-6"
+                  : "bg-[#F8F8F6] border border-[#E5E7EB] text-[#1F2937] ml-6"
               }`}
             >
               {m.content}
@@ -107,10 +109,14 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="שאל שאלה..."
-          className="flex-1 h-11"
+          className="flex-1 h-11 bg-white border-[#E5E7EB]"
           disabled={loading}
         />
-        <Button type="submit" disabled={loading || !input.trim()} variant="premium" className="h-11 px-4">
+        <Button
+          type="submit"
+          disabled={loading || !input.trim()}
+          className="h-11 px-4 bg-[#1F2937] hover:bg-[#111827] text-white"
+        >
           <Send className="h-4 w-4" />
         </Button>
       </form>
