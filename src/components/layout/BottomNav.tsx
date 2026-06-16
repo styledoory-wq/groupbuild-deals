@@ -12,8 +12,6 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
     { to: "/resident/deals", label: "עסקאות", icon: Tag },
     { to: "/resident/categories", label: "קטגוריות", icon: LayoutGrid },
     { to: "/resident/search", label: "חיפוש", icon: Search },
-    { to: "/resident/budget-planner", label: "תקציב", icon: Calculator },
-    { to: "/resident/favorites", label: "מועדפים", icon: Heart },
     { to: "/resident/profile", label: "פרופיל", icon: User },
   ],
   supplier: [
