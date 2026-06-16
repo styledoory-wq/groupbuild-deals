@@ -389,7 +389,7 @@ export default function DealDetail() {
         setShowJoinModal(false);
         toast.success("פרטי הבקשה נשמרו — ההצטרפות תושלם רק אחרי תשלום הפיקדון");
         if (paymentUrl) {
-          window.location.href = paymentUrl;
+          navigate(`/payment/checkout?url=${encodeURIComponent(paymentUrl)}&deal_id=${encodeURIComponent(deal.id)}`);
           return;
         }
       } else {
@@ -891,7 +891,7 @@ export default function DealDetail() {
               {hasPendingDeposit && pendingPaymentUrl ? (
                 <button
                   type="button"
-                  onClick={() => { window.location.href = pendingPaymentUrl; }}
+                  onClick={() => navigate(`/payment/checkout?url=${encodeURIComponent(pendingPaymentUrl)}&deal_id=${encodeURIComponent(deal.id)}`)}
                   className="h-10 px-3 rounded-2xl bg-white text-[#0A1F3D] text-[11px] font-extrabold active:scale-[0.97] transition-transform"
                 >
                   לתשלום
@@ -1088,20 +1088,6 @@ export default function DealDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <PaymentModal
-        open={showPaymentModal}
-        paymentUrl={pendingPaymentUrl}
-        onClose={() => setShowPaymentModal(false)}
-        onSuccess={async () => {
-          toast.success("התשלום התקבל — ההצטרפות הושלמה!");
-          setInterestStatus("paid");
-          setInterestDepositStatus("paid");
-          setPendingPaymentUrl(null);
-          if (deal) await loadParticipantCount(deal.id);
-        }}
-        onCancel={() => toast.info("התשלום בוטל. ניתן לנסות שוב.")}
-      />
 
       <BottomNav role="resident" />
     </MobileShell>
