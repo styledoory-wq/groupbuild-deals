@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
 import { toggleFavorite } from "@/lib/favorites";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 export function FavoriteButton({
@@ -21,6 +22,11 @@ export function FavoriteButton({
     e.preventDefault();
     e.stopPropagation();
     if (busy) return;
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      window.location.href = `/auth?redirect=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
     const next = !on;
     setOn(next);
     setBusy(true);

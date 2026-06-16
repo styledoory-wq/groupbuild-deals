@@ -194,10 +194,14 @@ const App = () => (
                   <Route path="/suppliers/:supplierId" element={<SupplierProfile />} />
                   <Route path="/resident" element={residentRoute(<ResidentDashboard />)} />
                   <Route path="/resident/projects" element={residentRoute(<ProjectsList />)} />
-                  <Route path="/resident/categories" element={residentRoute(<CategoriesList />)} />
-                  <Route path="/resident/categories/:categoryId" element={residentRoute(<CategorySuppliers />)} />
-                  <Route path="/resident/deals" element={residentRoute(<DealsList />)} />
-                  <Route path="/resident/deals/:dealId" element={residentRoute(<DealDetail />)} />
+                  {/* Public read-only browsing — no auth required */}
+                  <Route path="/resident/categories" element={<CategoriesList />} />
+                  <Route path="/resident/categories/:categoryId" element={<CategorySuppliers />} />
+                  <Route path="/resident/deals" element={<DealsList />} />
+                  <Route path="/resident/deals/:dealId" element={<DealDetail />} />
+                  <Route path="/categories" element={<CategoriesList />} />
+                  <Route path="/categories/:categoryId" element={<CategorySuppliers />} />
+                  <Route path="/deals" element={<DealsList />} />
                   <Route path="/deals/:dealId" element={<DealDetail />} />
                   <Route path="/share/deal/:dealId" element={<SharedDeal />} />
                   <Route path="/browse" element={<Browse />} />
@@ -212,7 +216,8 @@ const App = () => (
                   <Route path="/resident/my-vouchers" element={residentRoute(<MyVouchers />)} />
                   <Route path="/my-offers" element={<Navigate to="/resident/my-offers" replace />} />
                   <Route path="/my-vouchers" element={<Navigate to="/resident/my-vouchers" replace />} />
-                  <Route path="/resident/search" element={residentRoute(<SearchPage />)} />
+                  <Route path="/resident/search" element={<SearchPage />} />
+                  <Route path="/search" element={<SearchPage />} />
                   <Route path="/resident/privacy" element={residentRoute(<PrivacyPolicy />)} />
                   <Route path="/supplier" element={supplierRoute(<SupplierDashboard />)} />
                   <Route path="/supplier/profile/edit" element={supplierRoute(<SupplierProfileEdit />)} />
