@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search as SearchIcon, ChevronLeft, MapPin, Sparkles, Store, Briefcase,
-  PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, Check, PiggyBank,
+  PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, PiggyBank, Calculator,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupportButton } from "@/components/SupportButton";
@@ -244,6 +244,27 @@ const filteredDeals = useMemo(() => {
           </button>
         </section>
 
+        {/* Budget Calculator */}
+        <section className="px-5 mt-4">
+          <button
+            onClick={() => navigate("/resident/budget-planner")}
+            className="w-full text-right rounded-[22px] p-4 flex items-center gap-4 active:scale-[0.99] transition-transform bg-white border border-[#ECEEF2]"
+            style={{ boxShadow: "var(--shadow-elevated)" }}
+          >
+            <div
+              className="h-12 w-12 rounded-[14px] flex items-center justify-center shrink-0"
+              style={{ background: "rgba(10,31,61,0.06)" }}
+            >
+              <Calculator className="h-[22px] w-[22px] text-[#0A1F3D]" strokeWidth={2.2} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[16px] font-extrabold text-[#0A1F3D] leading-tight">מחשבון תקציב</div>
+              <div className="text-[13px] text-[#6B7280] mt-1 font-medium">חשב עלויות בנייה, שיפוץ ושדרוג</div>
+            </div>
+            <ChevronLeft className="h-[18px] w-[18px] text-[#9CA3AF] shrink-0" strokeWidth={2.2} />
+          </button>
+        </section>
+
         {/* Stats — 3 mini cards */}
         <section className="px-5 mt-4 grid grid-cols-3 gap-3">
           <StatCard icon={Store} label="ספקים באזור" value={areaSuppliersCount} accent="#0A1F3D" tint="rgba(10,31,61,0.05)" onClick={() => navigate("/resident/categories")} />
@@ -273,25 +294,15 @@ const filteredDeals = useMemo(() => {
           </div>
         </div>
 
-        {/* Construction Journey */}
+        {/* Project Progress — compact */}
         <section className="px-5 mt-6">
-          <div className="flex items-end justify-between mb-3">
-            <button
-              onClick={() => navigate("/resident/categories")}
-              className="text-[12px] font-semibold text-[#D4AF37] hover:underline"
-            >
-              כל הקטגוריות ←
-            </button>
-            <div className="text-right">
-              <h2 className="text-[18px] font-extrabold text-[#0A1F3D] tracking-tight">התקדמות הפרויקט</h2>
-              <span className="text-[11px] font-semibold text-[#6B7280] tracking-wide">
-                שלב {currentIdx + 1} מתוך {STAGES.length} · {completionPct}% הושלם
-              </span>
-            </div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[18px] font-extrabold text-[#0A1F3D] tracking-tight">התקדמות הפרויקט</h2>
+            <span className="text-[11px] font-semibold text-[#6B7280] tracking-wide">
+              שלב {currentIdx + 1} מתוך {STAGES.length} · {completionPct}%
+            </span>
           </div>
-
-          {/* Progress track */}
-          <div className="relative h-2 rounded-full bg-[#ECEEF2] overflow-hidden mb-4">
+          <div className="relative h-2 rounded-full bg-[#ECEEF2] overflow-hidden">
             <div
               className="absolute inset-y-0 right-0 rounded-full transition-all duration-700"
               style={{
@@ -301,63 +312,30 @@ const filteredDeals = useMemo(() => {
               }}
             />
           </div>
-
-          {/* Stage cards */}
-          <div className="space-y-2.5">
-            {STAGES.map((stage, i) => {
-              const done = i < currentIdx;
-              const cur = i === currentIdx;
+          <div className="mt-3 flex items-center gap-3">
+            {(() => {
+              const stage = STAGES[currentIdx];
               const Icon = stage.icon;
               const theme = STAGE_THEMES.find((t) => t.id === stage.id);
-              const accent = cur ? (theme?.accent ?? "#D4AF37") : null;
-              const tint = theme?.tint ?? "#F4F6FA";
               return (
                 <button
-                  key={stage.id}
-                  onClick={() => stage.dbStage && navigate(`/resident/categories?stage=${stage.dbStage}`)}
-                  disabled={!stage.dbStage}
-                  className={`w-full text-right rounded-[16px] p-4 flex items-center gap-4 active:scale-[0.99] ${!stage.dbStage ? "opacity-80 cursor-default" : ""}`}
-                  style={{
-                    background: cur ? `linear-gradient(180deg,#FFFFFF 0%, ${tint} 100%)` : "#FFFFFF",
-                    boxShadow: "0 6px 18px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06)",
-                    transition: `transform ${MOTION.base} ${MOTION.ease}, box-shadow ${MOTION.base} ${MOTION.ease}`,
-                  }}
+                  onClick={() => navigate("/resident/categories")}
+                  className="flex-1 text-right rounded-[16px] p-4 bg-white border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:scale-[0.99] transition-transform flex items-center gap-3"
                 >
                   <div
-                    className="h-11 w-11 rounded-[14px] flex items-center justify-center shrink-0"
-                    style={{
-                      background: cur ? accent! : done ? "#22C55E1F" : tint,
-                      color: cur ? "#FFFFFF" : done ? "#22C55E" : (theme?.accent ?? "#6B7280"),
-                      boxShadow: cur ? "var(--shadow-soft)" : "none",
-                    }}
+                    className="h-10 w-10 rounded-[12px] flex items-center justify-center shrink-0"
+                    style={{ background: theme?.tint ?? "#F4F6FA", color: theme?.accent ?? "#6B7280" }}
                   >
-                    {done ? <Check className="h-5 w-5" strokeWidth={2.8} /> : <span className="text-[16px] font-extrabold tabular-nums">{i + 1}</span>}
+                    <Icon className="h-5 w-5" strokeWidth={2.2} />
                   </div>
-
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <Icon className="h-[16px] w-[16px] shrink-0" strokeWidth={2} style={{ color: cur ? (theme?.accent ?? "#D4AF37") : "#9CA3AF" }} />
-                      <h3 className="text-[16px] font-bold leading-tight tracking-tight text-[#0A1F3D] truncate">
-                        {stage.title}
-                      </h3>
-                      {cur && (
-                        <span
-                          className="ml-auto inline-flex items-center gap-1 px-2 h-[18px] rounded-full text-[10px] font-bold"
-                          style={{ background: `${accent}1F`, color: accent! }}
-                        >
-                          השלב הנוכחי
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[13px] font-medium text-[#5B6675] mt-1 leading-snug line-clamp-1">{stage.description}</p>
+                    <div className="text-[14px] font-bold text-[#0A1F3D]">{stage.title}</div>
+                    <div className="text-[12px] text-[#6B7280] mt-0.5">{stage.description}</div>
                   </div>
-
-                  {stage.dbStage && (
-                    <ChevronLeft className="h-[18px] w-[18px] shrink-0 text-[#9CA3AF]" strokeWidth={2.2} />
-                  )}
+                  <ChevronLeft className="h-[18px] w-[18px] shrink-0 text-[#9CA3AF]" strokeWidth={2.2} />
                 </button>
               );
-            })}
+            })()}
           </div>
         </section>
 
