@@ -1090,6 +1090,20 @@ export default function DealDetail() {
         </DialogContent>
       </Dialog>
 
+      <PaymentModal
+        open={showPaymentModal}
+        paymentUrl={pendingPaymentUrl}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={async () => {
+          toast.success("התשלום התקבל — ההצטרפות הושלמה!");
+          setInterestStatus("paid");
+          setInterestDepositStatus("paid");
+          setPendingPaymentUrl(null);
+          if (deal) await loadParticipantCount(deal.id);
+        }}
+        onCancel={() => toast.info("התשלום בוטל. ניתן לנסות שוב.")}
+      />
+
       <BottomNav role="resident" />
     </MobileShell>
   );
