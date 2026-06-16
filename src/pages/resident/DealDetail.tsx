@@ -83,6 +83,64 @@ export default function DealDetail() {
   const [participantCount, setParticipantCount] = useState<number>(0);
   const [isGuest, setIsGuest] = useState<boolean>(false);
   const [pendingPaymentUrl, setPendingPaymentUrl] = useState<string | null>(null);
+  const [resumingPayment, setResumingPayment] = useState(false);
+
+  const handleResumePayment = async () => {
+    if (!deal) return;
+    if (pendingPaymentUrl) {
+      navigate(`/payment/checkout?url=${encodeURIComponent(pendingPaymentUrl)}&deal_id=${encodeURIComponent(deal.id)}`);
+      return;
+    }
+    setResumingPayment(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) { toast.error("נדרשת התחברות"); return; }
+      const uid = session.session.user.id;
+      // Try existing deposit first
+      const { data: dep } = await supabase
+        .from("deposits")
+        .select("id,status,provider_payment_url")
+        .eq("user_id", uid)
+        .eq("deal_id", deal.id)
+        .eq("is_deleted", false)
+        .in("status", ["pending"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      let url = dep?.provider_payment_url ?? null;
+      if (!url) {
+        const { data: paymentResponse, error: paymentErr } = await supabase.functions.invoke("create-deposit", {
+          body: { deal_id: deal.id, user_id: uid },
+        });
+        if (paymentErr || paymentResponse?.error) {
+          toast.error(paymentResponse?.message ?? "התשלום נכשל, נסה שנית");
+          return;
+        }
+        url = typeof paymentResponse?.payment_url === "string" ? paymentResponse.payment_url : null;
+        const depositId = typeof paymentResponse?.deposit_id === "string" ? paymentResponse.deposit_id : null;
+        if (!url && depositId) {
+          toast.loading("ממתינים לקישור התשלום מהספק...", { id: "wait-payment-url" });
+          const started = Date.now();
+          while (Date.now() - started < 30000) {
+            await new Promise((r) => setTimeout(r, 1500));
+            const { data: depRow } = await supabase
+              .from("deposits")
+              .select("provider_payment_url,status")
+              .eq("id", depositId)
+              .maybeSingle();
+            if (depRow?.provider_payment_url) { url = depRow.provider_payment_url; break; }
+            if (depRow?.status === "failed" || depRow?.status === "cancelled") break;
+          }
+          toast.dismiss("wait-payment-url");
+        }
+      }
+      if (!url) { toast.error("שגיאה בחיבור לספק התשלום — פנה לתמיכה"); return; }
+      setPendingPaymentUrl(url);
+      navigate(`/payment/checkout?url=${encodeURIComponent(url)}&deal_id=${encodeURIComponent(deal.id)}`);
+    } finally {
+      setResumingPayment(false);
+    }
+  };
 
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
