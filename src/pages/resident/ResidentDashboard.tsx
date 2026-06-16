@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Search as SearchIcon, ChevronLeft, MapPin, Sparkles, Store, Briefcase,
+  Search as SearchIcon, MapPin, Sparkles, Store, Briefcase,
   PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, PiggyBank, Calculator,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -11,7 +11,7 @@ import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useApp, formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
-import { MOTION, STAGE_THEMES, type StageId } from "@/lib/designSystem";
+import { type StageId } from "@/lib/designSystem";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
   { id: "planning",     title: "תכנון ועיצוב",       description: "אדריכלות, עיצוב פנים והחלטות הבסיס", icon: PencilRuler, dbStage: "planning" },
