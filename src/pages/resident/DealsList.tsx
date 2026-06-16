@@ -198,7 +198,7 @@ export default function DealsList() {
             )}
 
             {!loading && !error && filtered.length === 0 && (
-              <div className="rounded-[24px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center md:col-span-2 lg:col-span-3">
+              <div className="rounded-[24px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center col-span-2 md:col-span-3">
                 <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
                 <p className="text-[14px] font-bold text-[#0A1F3D]">
                   {tab === "active" ? "אין עדיין הצעות פעילות" : "אין הצעות בארכיון"}
