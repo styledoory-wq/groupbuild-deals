@@ -277,7 +277,7 @@ const filteredDeals = useMemo(() => {
 
           {/* Stats stack - right column */}
           <div className="flex flex-col gap-2">
-            <BentoStat icon={Store} label="ספקים באזור" value={areaSuppliersCount} tint="#FFF5EB" color="#EA580C" onClick={() => navigate("/resident/categories")} />
+            <BentoStat icon={Store} label="ספקים באזור" value={areaSuppliersCount} tint="#FFF5EB" color="#EA580C" onClick={() => navigate("/resident/search")} />
             <BentoStat icon={Sparkles} label="הצעות פעילות" value={areaDeals.length} tint="#FFFBEB" color="#C9A227" onClick={() => navigate("/resident/deals")} />
             <BentoStat icon={Briefcase} label="הצעות שלי" value={joinedCount} tint="#F0FDF4" color="#16A34A" onClick={() => navigate("/resident/my-offers")} />
           </div>
