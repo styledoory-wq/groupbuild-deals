@@ -137,11 +137,14 @@ export default function BudgetPlanner() {
           </div>
         )}
 
-        {track && (
+        {track && (() => {
+          const theme = TRACKS.find((t) => t.key === track)!;
+          return (
           <>
             <div className="flex items-center justify-between">
-              <div className="text-[14px] font-extrabold text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
-                {TRACKS.find((t) => t.key === track)?.label}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[12px] font-extrabold" style={{ background: theme.tint, color: theme.accent, fontFamily: "'Urbanist'" }}>
+                <span className="h-2 w-2 rounded-full" style={{ background: theme.accent }} />
+                {theme.label}
               </div>
               <button onClick={reset} className="text-[12px] text-[#6B7280] flex items-center gap-1 hover:text-[#1F2937] bg-white border border-[#E5E7EB] rounded-full px-3 py-1.5 shadow-sm">
                 <RefreshCw className="h-3.5 w-3.5" /> החלף מסלול
