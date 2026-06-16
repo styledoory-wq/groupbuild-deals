@@ -27,6 +27,10 @@ const TRACKS: { key: Track; label: string; desc: string; icon: typeof Home; tint
 const finishOptions: FinishLevel[] = ["basic", "standard", "premium", "luxury"];
 const regionOptions: Region[] = ["north", "haifa", "sharon", "center", "jerusalem", "south"];
 
+const FIELD_LABEL = "block text-[11.5px] font-extrabold text-[#6B7280] mb-1.5 tracking-wide";
+const FIELD_INPUT = "h-12 bg-white border border-[#E5E7EB] rounded-xl text-[14px] font-bold text-[#1F2937] text-right shadow-[0_1px_2px_rgba(31,41,55,0.04)] focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-[#C9A227]/30 focus-visible:border-[#C9A227]";
+const FIELD_TRIGGER = "h-12 bg-white border border-[#E5E7EB] rounded-xl text-[14px] font-bold text-[#1F2937] shadow-[0_1px_2px_rgba(31,41,55,0.04)] focus:ring-2 focus:ring-[#C9A227]/30";
+
 function FieldGrid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-3">{children}</div>;
 }
@@ -34,9 +38,9 @@ function FieldGrid({ children }: { children: React.ReactNode }) {
 function FinishSelect({ value, onChange }: { value: FinishLevel; onChange: (v: FinishLevel) => void }) {
   return (
     <div>
-      <Label>רמת גמר</Label>
+      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>רמת גמר</Label>
       <Select value={value} onValueChange={(v) => onChange(v as FinishLevel)}>
-        <SelectTrigger><SelectValue /></SelectTrigger>
+        <SelectTrigger className={FIELD_TRIGGER}><SelectValue /></SelectTrigger>
         <SelectContent>
           {finishOptions.map((f) => <SelectItem key={f} value={f}>{FINISH_LABELS[f]}</SelectItem>)}
         </SelectContent>
@@ -47,9 +51,9 @@ function FinishSelect({ value, onChange }: { value: FinishLevel; onChange: (v: F
 function RegionSelect({ value, onChange }: { value: Region; onChange: (v: Region) => void }) {
   return (
     <div>
-      <Label>אזור בארץ</Label>
+      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>אזור בארץ</Label>
       <Select value={value} onValueChange={(v) => onChange(v as Region)}>
-        <SelectTrigger><SelectValue /></SelectTrigger>
+        <SelectTrigger className={FIELD_TRIGGER}><SelectValue /></SelectTrigger>
         <SelectContent>
           {regionOptions.map((r) => <SelectItem key={r} value={r}>{REGION_LABELS[r]}</SelectItem>)}
         </SelectContent>
@@ -151,29 +155,41 @@ export default function BudgetPlanner() {
               </button>
             </div>
 
-            <div className="bg-white rounded-3xl p-5 border border-[#E5E7EB] shadow-sm space-y-4">
+            <div className="bg-white rounded-3xl p-5 border border-[#E5E7EB] shadow-[0_4px_20px_-12px_rgba(31,41,55,0.12)] space-y-4">
+              {(() => {
+                const SwitchRow = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) => (
+                  <button
+                    type="button"
+                    onClick={() => onChange(!checked)}
+                    className="w-full flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3.5 hover:border-[#D1D5DB] transition text-right"
+                  >
+                    <span className="text-[13.5px] font-bold text-[#1F2937]">{label}</span>
+                    <Switch
+                      checked={checked}
+                      onCheckedChange={onChange}
+                      className="data-[state=checked]:bg-[#C9A227] data-[state=unchecked]:bg-[#E5E7EB]"
+                    />
+                  </button>
+                );
+
+                return (
+                  <>
               {track === "new_build" && (
                 <>
                   <FieldGrid>
                     <div>
-                      <Label>שטח בנוי (מ"ר)</Label>
-                      <Input type="number" min={40} value={builtSqm} onChange={(e) => setBuiltSqm(+e.target.value)} />
+                      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>שטח בנוי (מ"ר)</Label>
+                      <Input type="number" min={40} value={builtSqm} onChange={(e) => setBuiltSqm(+e.target.value)} className={FIELD_INPUT} />
                     </div>
                     <div>
-                      <Label>מספר קומות</Label>
-                      <Input type="number" min={1} max={5} value={floors} onChange={(e) => setFloors(+e.target.value)} />
+                      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>מספר קומות</Label>
+                      <Input type="number" min={1} max={5} value={floors} onChange={(e) => setFloors(+e.target.value)} className={FIELD_INPUT} />
                     </div>
                     <FinishSelect value={finish} onChange={setFinish} />
                     <RegionSelect value={region} onChange={setRegion} />
                   </FieldGrid>
-                  <div className="flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3">
-                    <Label className="m-0">מרתף</Label>
-                    <Switch checked={basement} onCheckedChange={setBasement} />
-                  </div>
-                  <div className="flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3">
-                    <Label className="m-0">ממ"ד</Label>
-                    <Switch checked={safeRoom} onCheckedChange={setSafeRoom} />
-                  </div>
+                  <SwitchRow label="מרתף" checked={basement} onChange={setBasement} />
+                  <SwitchRow label={'ממ"ד'} checked={safeRoom} onChange={setSafeRoom} />
                 </>
               )}
 
@@ -181,13 +197,13 @@ export default function BudgetPlanner() {
                 <>
                   <FieldGrid>
                     <div>
-                      <Label>גודל הבית (מ"ר)</Label>
-                      <Input type="number" min={30} value={renoSqm} onChange={(e) => setRenoSqm(+e.target.value)} />
+                      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>גודל הבית (מ"ר)</Label>
+                      <Input type="number" min={30} value={renoSqm} onChange={(e) => setRenoSqm(+e.target.value)} className={FIELD_INPUT} />
                     </div>
                     <div>
-                      <Label>סוג שיפוץ</Label>
+                      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>סוג שיפוץ</Label>
                       <Select value={renoType} onValueChange={(v) => setRenoType(v as RenovationType)}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className={FIELD_TRIGGER}><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {(Object.keys(RENO_LABELS) as RenovationType[]).map((r) => (
                             <SelectItem key={r} value={r}>{RENO_LABELS[r]}</SelectItem>
@@ -205,13 +221,7 @@ export default function BudgetPlanner() {
                     ["doors", "החלפת דלתות"],
                     ["windows", "החלפת חלונות"],
                   ] as const).map(([key, label]) => (
-                    <div key={key} className="flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3">
-                      <Label className="m-0">{label}</Label>
-                      <Switch
-                        checked={renoFlags[key]}
-                        onCheckedChange={(v) => setRenoFlags({ ...renoFlags, [key]: v })}
-                      />
-                    </div>
+                    <SwitchRow key={key} label={label} checked={renoFlags[key]} onChange={(v) => setRenoFlags({ ...renoFlags, [key]: v })} />
                   ))}
                 </>
               )}
@@ -220,9 +230,9 @@ export default function BudgetPlanner() {
                 <>
                   <FieldGrid>
                     <div>
-                      <Label>חדר</Label>
+                      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>חדר</Label>
                       <Select value={room} onValueChange={(v) => setRoom(v as RoomKind)}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className={FIELD_TRIGGER}><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {(Object.keys(ROOM_LABELS) as RoomKind[]).map((r) => (
                             <SelectItem key={r} value={r}>{ROOM_LABELS[r]}</SelectItem>
@@ -231,23 +241,17 @@ export default function BudgetPlanner() {
                       </Select>
                     </div>
                     <div>
-                      <Label>גודל החדר (מ"ר)</Label>
-                      <Input type="number" min={2} value={roomSize} onChange={(e) => setRoomSize(+e.target.value)} />
+                      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>גודל החדר (מ"ר)</Label>
+                      <Input type="number" min={2} value={roomSize} onChange={(e) => setRoomSize(+e.target.value)} className={FIELD_INPUT} />
                     </div>
                     <FinishSelect value={finish} onChange={setFinish} />
                     <RegionSelect value={region} onChange={setRegion} />
                   </FieldGrid>
                   {["kitchen", "bathroom", "toilet"].includes(room) && (
-                    <div className="flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3">
-                      <Label className="m-0">החלפת תשתיות אינסטלציה</Label>
-                      <Switch checked={replacePlumbing} onCheckedChange={setReplacePlumbing} />
-                    </div>
+                    <SwitchRow label="החלפת תשתיות אינסטלציה" checked={replacePlumbing} onChange={setReplacePlumbing} />
                   )}
                   {["kitchen", "living", "bedroom"].includes(room) && (
-                    <div className="flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3">
-                      <Label className="m-0">ריהוט חדש</Label>
-                      <Switch checked={newFurniture} onCheckedChange={setNewFurniture} />
-                    </div>
+                    <SwitchRow label="ריהוט חדש" checked={newFurniture} onChange={setNewFurniture} />
                   )}
                 </>
               )}
@@ -256,22 +260,23 @@ export default function BudgetPlanner() {
                 <>
                   <FieldGrid>
                     <div className="col-span-2">
-                      <Label>בחר שירות</Label>
+                      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>בחר שירות</Label>
                       <Select value={svc} onValueChange={(v) => setSvc(v as ServiceKind)}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className={FIELD_TRIGGER}><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {SERVICES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <Label>כמות ({svcDef.unitLabel})</Label>
+                      <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>כמות ({svcDef.unitLabel})</Label>
                       <Input
                         type="number"
                         min={1}
                         step={svcDef.unit === "sqm" ? "1" : "1"}
                         value={qty}
                         onChange={(e) => setQty(+e.target.value)}
+                        className={FIELD_INPUT}
                       />
                     </div>
                     <FinishSelect value={finish} onChange={setFinish} />
@@ -282,11 +287,18 @@ export default function BudgetPlanner() {
 
               <button
                 onClick={calculate}
-                className="w-full h-12 rounded-xl text-white font-extrabold text-[14px] active:scale-[0.99] transition-transform"
-                style={{ fontFamily: "'Urbanist'", background: theme.accent, boxShadow: `0 10px 24px -8px ${theme.ring}` }}
+                className="w-full h-14 rounded-2xl text-white font-extrabold text-[15px] active:scale-[0.99] transition-transform"
+                style={{
+                  fontFamily: "'Urbanist'",
+                  background: `linear-gradient(135deg, ${theme.accent} 0%, ${theme.accent}E0 100%)`,
+                  boxShadow: `0 14px 28px -10px ${theme.ring}, inset 0 1px 0 rgba(255,255,255,0.25)`,
+                }}
               >
                 חשב תקציב
               </button>
+                  </>
+                );
+              })()}
             </div>
           </>
           );
