@@ -457,7 +457,6 @@ export default function Auth() {
                   קראתי ואני מאשר את{" "}
                   <Link
                     to={role === "supplier" ? "/terms/suppliers" : "/terms/residents"}
-                    target="_blank"
                     className="font-bold text-[#0A5446] underline-offset-2 hover:underline"
                   >
                     תנאי השימוש

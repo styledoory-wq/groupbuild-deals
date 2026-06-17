@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowRight,
   ShieldCheck,
@@ -440,13 +440,13 @@ export default function CheckoutSummary() {
               />
               <span className="text-xs leading-relaxed">
                 אני מאשר/ת את{" "}
-                <a className="underline font-bold" href="/terms/residents" target="_blank" rel="noopener noreferrer">
+                <Link className="underline font-bold" to="/terms/residents">
                   תנאי השימוש
-                </a>{" "}
+                </Link>{" "}
                 ו
-                <a className="underline font-bold" href="/privacy" target="_blank" rel="noopener noreferrer">
+                <Link className="underline font-bold" to="/privacy">
                   מדיניות הפרטיות
-                </a>
+                </Link>
                 , ומסכים/ה שגרופבילד תיצור קשר בנוגע להצעה.
               </span>
             </label>
