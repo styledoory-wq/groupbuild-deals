@@ -1,4 +1,4 @@
-export const CURRENT_TERMS_VERSION = "v2";
+export const CURRENT_TERMS_VERSION = "v3";
 
 export const RESIDENT_TERMS_TITLE = "תנאי שימוש – דיירים | GroupBuild";
 export const SUPPLIER_TERMS_TITLE = "תנאי שימוש – ספקים | GroupBuild";
