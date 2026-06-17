@@ -94,7 +94,7 @@ export default function SharedDeal() {
   })();
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#F8F8F6]">
+    <div dir="rtl" className="min-h-screen bg-[#F7F5F0]">
       <div className="mx-auto max-w-xl px-5 pt-8 pb-24">
         <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" />

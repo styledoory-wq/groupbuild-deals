@@ -12,7 +12,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div dir="rtl" className="min-h-[100dvh] w-full" style={{ backgroundColor: "#F8F8F6" }}>
+    <div dir="rtl" className="min-h-[100dvh] w-full" style={{ backgroundColor: "#F7F5F0" }}>
       <div
         className="relative z-10 w-full max-w-[var(--app-max-w,640px)] mx-auto flex flex-col"
         style={{

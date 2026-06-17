@@ -275,7 +275,7 @@ export default function SupplierDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-[12px] pt-3 border-t border-[#ECEEF2]">
-                  <span className="px-2.5 py-1 rounded-full bg-[#F8F8F6] text-[#1F2937] border border-[#ECEEF2] font-semibold">{c.interests} לידים</span>
+                  <span className="px-2.5 py-1 rounded-full bg-[#F7F5F0] text-[#1F2937] border border-[#ECEEF2] font-semibold">{c.interests} לידים</span>
                   <span className="px-2.5 py-1 rounded-full bg-[#0E6B5A]/12 text-[#0E6B5A] border border-[#0E6B5A]/30 font-semibold">{c.paid} פיקדונות</span>
                 </div>
               </div>

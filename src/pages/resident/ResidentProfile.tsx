@@ -78,7 +78,7 @@ export default function ResidentProfile() {
   ];
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F8F8F6" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -107,7 +107,7 @@ export default function ResidentProfile() {
         {/* Info card */}
         {(user?.phone || user?.email || user?.apartment) && (
           <div className="px-5">
-            <div className="bg-white rounded-[24px] border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] divide-y divide-[#F8F8F6]">
+            <div className="bg-white rounded-[24px] border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] divide-y divide-[#F7F5F0]">
               {user?.phone && (
                 <InfoRow icon={Phone} label="טלפון" value={user.phone} />
               )}
