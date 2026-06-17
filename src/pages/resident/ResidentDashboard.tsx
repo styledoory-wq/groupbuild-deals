@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Search as SearchIcon, MapPin, Sparkles, Store, Briefcase,
+  Search as SearchIcon, MapPin, Sparkles, Store, Users, Flame,
   PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, PiggyBank, Calculator,
+  TrendingUp, Check,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupportButton } from "@/components/SupportButton";
@@ -14,28 +15,31 @@ import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import { type StageId } from "@/lib/designSystem";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
-  { id: "planning",     title: "תכנון ועיצוב",       description: "אדריכלות, עיצוב פנים והחלטות הבסיס", icon: PencilRuler, dbStage: "planning" },
-  { id: "structure",    title: "שלד ובנייה",          description: "קונסטרוקציה, איטום וגג",              icon: Hammer,      dbStage: "structure" },
-  { id: "systems",      title: "מערכות הבית",         description: "חשמל, אינסטלציה ומיזוג",              icon: Plug,        dbStage: "systems" },
-  { id: "openings",     title: "פתחים ובטחון",        description: "דלתות, חלונות ומערכות אבטחה",        icon: ShieldCheck, dbStage: "openings" },
-  { id: "finishes",     title: "גמרים",                description: "ריצוף, צבע ועבודות גמר",              icon: Palette,     dbStage: "finishes" },
-  { id: "kitchen-bath", title: "מטבחים ואמבטיות",     description: "מטבח, חדרי רחצה וכלים סניטריים",     icon: ChefHat,     dbStage: "kitchen-bath" },
-  { id: "outdoor",      title: "חצר ופיתוח",          description: "גינון, גדרות ותאורת חוץ",             icon: Trees,       dbStage: "outdoor" },
-  { id: "moving",       title: "כניסה לבית",          description: "הובלה, ריהוט וטקסי כניסה",            icon: KeyRound,    dbStage: "moving" },
+  { id: "planning",     title: "תכנון ועיצוב",       description: "אדריכלות ועיצוב פנים",            icon: PencilRuler, dbStage: "planning" },
+  { id: "structure",    title: "שלד ובנייה",          description: "קונסטרוקציה ואיטום",              icon: Hammer,      dbStage: "structure" },
+  { id: "systems",      title: "מערכות הבית",         description: "חשמל, אינסטלציה, מיזוג",          icon: Plug,        dbStage: "systems" },
+  { id: "openings",     title: "פתחים ובטחון",        description: "דלתות וחלונות",                    icon: ShieldCheck, dbStage: "openings" },
+  { id: "finishes",     title: "גמרים",                description: "ריצוף וצבע",                        icon: Palette,     dbStage: "finishes" },
+  { id: "kitchen-bath", title: "מטבחים ואמבטיות",     description: "מטבח וחדרי רחצה",                 icon: ChefHat,     dbStage: "kitchen-bath" },
+  { id: "outdoor",      title: "חצר ופיתוח",          description: "גינון וגדרות",                     icon: Trees,       dbStage: "outdoor" },
+  { id: "moving",       title: "כניסה לבית",          description: "הובלה וריהוט",                     icon: KeyRound,    dbStage: "moving" },
 ];
 
-const FILTERS = ["הכל", "מבצעים", "חדש", "פיקדון נמוך"];
-
-interface MiniDeal { 
-  id: string; 
-  title: string; 
-  cover_image_url: string | null; 
+interface MiniDeal {
+  id: string;
+  title: string;
+  cover_image_url: string | null;
   supplier_name: string | null;
   discount_percentage?: number | null;
   deposit_required?: boolean | null;
   deposit_amount?: number | null;
   created_at?: string;
+  joiners?: number;
 }
+
+type FeedItem =
+  | { kind: "deal"; deal: MiniDeal }
+  | { kind: "activity"; dealId: string; dealTitle: string; joiners: number };
 
 export default function ResidentDashboard() {
   const navigate = useNavigate();
@@ -48,17 +52,6 @@ export default function ResidentDashboard() {
   const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
   const [joinedCount, setJoinedCount] = useState(0);
   const [estimatedSavings, setEstimatedSavings] = useState(0);
-  const [activeFilter, setActiveFilter] = useState("הכל");
-const filteredDeals = useMemo(() => {
-  if (activeFilter === "הכל") return areaDeals;
-  if (activeFilter === "מבצעים") return areaDeals.filter((d) => d.discount_percentage && d.discount_percentage > 0);
-  if (activeFilter === "חדש") {
-    const week = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    return areaDeals.filter((d) => new Date(d.created_at).getTime() > week);
-  }
-  if (activeFilter === "פיקדון נמוך") return areaDeals.filter((d) => !d.deposit_required || (d.deposit_amount ?? 999) < 500);
-  return areaDeals;
-}, [activeFilter, areaDeals]);
 
   useEffect(() => {
     if (!authReady || !user?.id) return;
@@ -88,13 +81,11 @@ const filteredDeals = useMemo(() => {
         const councilId: string | null = (cityRow?.council_id as string | null) ?? null;
         if (cityRow?.region_id) regionId = (cityRow.region_id as string | null) ?? regionId;
 
-        // Stage: prefer resident profile.current_stage, then project, then default.
         const validIds = STAGES.map((s) => s.id) as string[];
-        let stage: StageId = "planning";
         const profStage = (prof?.current_stage as string | undefined) ?? "";
         const projStage = (projectResult.data?.current_stage as string | undefined) ?? "";
         const chosen = (validIds.includes(profStage) ? profStage : validIds.includes(projStage) ? projStage : "planning") as StageId;
-        stage = chosen;
+        const stage: StageId = chosen;
 
         const [matchesResult, citySupResult, councilSupResult, regionSupResult, nationwideResult, paidDepositsResult, freeInterestsResult] = await Promise.all([
           supabase.rpc("get_matching_deals_for_user", { _stage_filter: stage, _limit: 8 }),
@@ -133,14 +124,12 @@ const filteredDeals = useMemo(() => {
             ? supabase.from("suppliers").select("id", { count: "exact", head: true })
                 .in("id", Array.from(supplierIds)).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"])
             : Promise.resolve({ count: 0 }),
-          dealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url,discount_percentage,deposit_required,deposit_amount,created_at").in("id", dealIds).eq("is_deleted", false) : Promise.resolve({ data: [] }),
+          dealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url,discount_percentage,deposit_required,deposit_amount,created_at,price_before_discount,price_after_discount").in("id", dealIds).eq("is_deleted", false) : Promise.resolve({ data: [] }),
           joinedIds.length
             ? supabase.from("deals").select("price_after_discount,price_before_discount").in("id", joinedIds)
             : Promise.resolve({ data: [] }),
         ]);
 
-        // Estimated savings = sum of (before - after) across joined deals.
-        // Placeholder formula — easy to swap when real savings data lands.
         const savings = ((joinedDealsRes.data ?? []) as { price_after_discount: number | null; price_before_discount: number | null }[])
           .reduce((sum, d) => {
             const before = Number(d.price_before_discount ?? 0);
@@ -149,16 +138,26 @@ const filteredDeals = useMemo(() => {
             return sum + diff;
           }, 0);
 
-        const deals = (dealsRes.data ?? []) as { id: string; title: string; supplier_id: string; cover_image_url: string | null }[];
+        const deals = (dealsRes.data ?? []) as { id: string; title: string; supplier_id: string; cover_image_url: string | null; discount_percentage: number | null; deposit_required: boolean | null; deposit_amount: number | null; created_at: string }[];
         let nextDeals: MiniDeal[] = [];
         if (deals.length) {
           const supIds = Array.from(new Set(deals.map((d) => d.supplier_id)));
-          const [sups] = await Promise.all([
+          const [sups, joinerCounts] = await Promise.all([
             supabase.from("suppliers").select("id,business_name").in("id", supIds),
             fetchDealJoinerCounts(deals.map((d) => d.id)),
           ]);
           const sMap = new Map(((sups.data ?? []) as { id: string; business_name: string }[]).map((s) => [s.id, s.business_name]));
-          nextDeals = deals.map((d) => ({ id: d.id, title: d.title, cover_image_url: d.cover_image_url, supplier_name: sMap.get(d.supplier_id) ?? null }));
+          nextDeals = deals.map((d) => ({
+            id: d.id,
+            title: d.title,
+            cover_image_url: d.cover_image_url,
+            supplier_name: sMap.get(d.supplier_id) ?? null,
+            discount_percentage: d.discount_percentage,
+            deposit_required: d.deposit_required,
+            deposit_amount: d.deposit_amount,
+            created_at: d.created_at,
+            joiners: joinerCounts[d.id] ?? 0,
+          }));
         }
 
         if (cancelled) return;
@@ -174,6 +173,19 @@ const filteredDeals = useMemo(() => {
 
   const currentIdx = useMemo(() => Math.max(0, STAGES.findIndex((s) => s.id === currentStage)), [currentStage]);
   const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
+
+  // Interleave deals + activity items (FB-style mixed feed)
+  const feedItems = useMemo<FeedItem[]>(() => {
+    const out: FeedItem[] = [];
+    areaDeals.forEach((d, i) => {
+      out.push({ kind: "deal", deal: d });
+      // Every 2 deals, insert an activity card if there are joiners
+      if (i % 2 === 1 && d.joiners && d.joiners > 0) {
+        out.push({ kind: "activity", dealId: d.id, dealTitle: d.title, joiners: d.joiners });
+      }
+    });
+    return out;
+  }, [areaDeals]);
 
   const STAGE_TINTS: Record<string, string> = {
     planning: "#EEF4FF", structure: "#FFF5EB", systems: "#ECFEFF", openings: "#F0FDF4",
@@ -210,7 +222,7 @@ const filteredDeals = useMemo(() => {
             <h1 className="text-[26px] leading-[1.15] font-extrabold tracking-tight text-[#1F2937]" style={{ fontFamily: "'Urbanist', system-ui, sans-serif" }}>
               שלום, {fullName || "דייר"}
             </h1>
-            <p className="text-[13px] text-[#6B7280] mt-1">מצא הצעות קבוצתיות חדשות באזור שלך</p>
+            <p className="text-[13px] text-[#6B7280] mt-1">הקהילה שלך קונה יחד וחוסכת</p>
           </div>
           {city && (
             <button
@@ -224,105 +236,9 @@ const filteredDeals = useMemo(() => {
           )}
         </section>
 
-        {/* Search bar */}
-        <div className="mt-4">
-          <button
-            onClick={() => navigate("/resident/search")}
-            className="w-full h-14 rounded-[20px] bg-white border border-[#ECEEF2] flex items-center gap-3 px-4 text-right shadow-[0_4px_16px_-6px_rgba(10,31,61,0.08)] active:scale-[0.99] transition-transform"
-          >
-            <SearchIcon className="h-[18px] w-[18px] text-[#6B7280] shrink-0" strokeWidth={2} />
-            <span className="text-[13px] font-medium text-[#6B7280] flex-1 truncate">חפש ספקים, הצעות וקטגוריות</span>
-          </button>
-        </div>
-
-        {/* Bento Grid */}
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          {/* Savings Hero - full width */}
-          <button
-            onClick={() => navigate("/resident/my-offers")}
-            className="col-span-2 bg-white border border-[#ECEEF2] p-5 rounded-[24px] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] relative overflow-hidden text-right active:scale-[0.99] transition-transform"
-          >
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-[#16A34A] bg-[#F0FDF4] px-3 py-1 rounded-full text-[11px] font-bold border border-[#DCFCE7]">חסכון קבוצתי</span>
-                <PiggyBank className="h-5 w-5 text-[#16A34A]/30" strokeWidth={2} />
-              </div>
-              <div className="text-[28px] font-extrabold text-[#1F2937] leading-none tabular-nums" style={{ fontFamily: "'Urbanist'" }}>
-                {formatILS(estimatedSavings)}
-              </div>
-              <p className="text-[12px] text-[#6B7280] mt-1 mb-4">נחסכו בזכות רכישות קבוצתיות</p>
-              <div className="w-full bg-[#0E6B5A] text-white py-2.5 rounded-xl font-bold text-[13px] shadow-md border border-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
-                פירוט החסכון המלא
-              </div>
-            </div>
-            <div className="absolute -left-4 -bottom-4 w-32 h-32 bg-[#16A34A]/5 rounded-full blur-3xl" />
-          </button>
-
-          {/* Budget Card - left */}
-          <button
-            onClick={() => navigate("/resident/budget-planner")}
-            className="bg-white border border-[#ECEEF2] p-4 rounded-[24px] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] flex flex-col justify-between text-right active:scale-[0.98] transition-transform min-h-[160px]"
-          >
-            <div>
-              <div className="w-9 h-9 bg-[#F5F3FF] rounded-xl flex items-center justify-center mb-2">
-                <Calculator className="h-[18px] w-[18px] text-[#7C3AED]" strokeWidth={2.2} />
-              </div>
-              <div className="font-extrabold text-[14px] text-[#1F2937] leading-tight" style={{ fontFamily: "'Urbanist'" }}>מחשבון תקציב</div>
-              <div className="text-[11px] text-[#6B7280] mt-1">חשב עלויות שיפוץ</div>
-            </div>
-            <div className="mt-3 border-2 border-[#7C3AED] text-[#7C3AED] py-1.5 rounded-lg text-[12px] font-bold bg-[#F5F3FF] text-center" style={{ fontFamily: "'Urbanist'" }}>
-              נהל תקציב
-            </div>
-          </button>
-
-          {/* Stats stack - right column */}
-          <div className="flex flex-col gap-2">
-            <BentoStat icon={Store} label="ספקים באזור" value={areaSuppliersCount} tint="#FFF5EB" color="#EA580C" onClick={() => navigate("/resident/search")} />
-            <BentoStat icon={Sparkles} label="הצעות פעילות" value={areaDeals.length} tint="#FFFBEB" color="#0E6B5A" onClick={() => navigate("/resident/deals")} />
-            <BentoStat icon={Briefcase} label="הצעות שלי" value={joinedCount} tint="#F0FDF4" color="#16A34A" onClick={() => navigate("/resident/my-offers")} />
-          </div>
-        </div>
-
-        {/* Filter chips */}
-        <div className="mt-4 flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          {FILTERS.map((f) => {
-            const active = f === activeFilter;
-            return (
-              <button
-                key={f}
-                onClick={() => setActiveFilter(f)}
-                className={`shrink-0 h-9 px-4 rounded-full text-[12px] font-bold transition-all border ${
-                  active
-                    ? "bg-[#0E6B5A] text-white border-[#0E6B5A] shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]"
-                    : "bg-white text-[#1F2937] border-[#ECEEF2] shadow-[0_2px_8px_-3px_rgba(10,31,61,0.10)]"
-                }`}
-              >
-                {f}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Project Progress */}
-        <section className="mt-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[17px] font-extrabold text-[#1F2937] tracking-tight" style={{ fontFamily: "'Urbanist'" }}>שלבי הפרויקט</h2>
-            <span className="text-[11px] font-bold text-[#6B7280]">
-              {currentIdx + 1}/{STAGES.length} · {completionPct}%
-            </span>
-          </div>
-
-          <div className="relative h-2 rounded-full bg-[#E5E7EB] overflow-hidden mb-3">
-            <div
-              className="absolute inset-y-0 right-0 rounded-full transition-all duration-700"
-              style={{
-                width: `${completionPct}%`,
-                background: "linear-gradient(90deg,#0E6B5A,#34A88E)",
-              }}
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-2.5">
+        {/* === STORIES: project stages (Instagram-style) === */}
+        <section className="mt-4 -mx-5 px-5">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
             {STAGES.map((stage, idx) => {
               const isCurrent = stage.id === currentStage;
               const isPast = idx < currentIdx;
@@ -332,46 +248,245 @@ const filteredDeals = useMemo(() => {
                 <button
                   key={stage.id}
                   onClick={() => navigate(`/resident/categories?stage=${stage.id}`)}
-                  className={`relative p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all active:scale-95 ${
-                    isCurrent
-                      ? "border-2 border-[#0E6B5A] shadow-sm"
-                      : isPast
-                      ? "border border-[#ECEEF2] opacity-90"
-                      : "border border-[#ECEEF2] opacity-70"
-                  }`}
-                  style={{ background: tint, minHeight: 78 }}
+                  className="shrink-0 flex flex-col items-center gap-1.5 w-[68px] active:scale-95 transition-transform"
+                  aria-label={stage.title}
                 >
-                  {isCurrent && (
-                    <span className="absolute -top-1.5 right-1/2 translate-x-1/2 bg-[#0E6B5A] text-white text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider whitespace-nowrap">נוכחי</span>
-                  )}
-                  <Icon className="h-4 w-4 mb-1 text-[#1F2937]" strokeWidth={2.2} />
-                  <span className="text-[11px] font-bold text-[#1F2937] leading-tight">{stage.title}</span>
+                  <div
+                    className={`relative h-[64px] w-[64px] rounded-full flex items-center justify-center ${
+                      isCurrent
+                        ? "p-[2.5px] bg-gradient-to-tr from-[#0E6B5A] to-[#34A88E]"
+                        : isPast
+                        ? "p-[2px] bg-[#0E6B5A]/30"
+                        : "p-[2px] bg-[#E5E7EB]"
+                    }`}
+                  >
+                    <div
+                      className="h-full w-full rounded-full flex items-center justify-center"
+                      style={{ background: tint }}
+                    >
+                      {isPast ? (
+                        <Check className="h-5 w-5 text-[#0E6B5A]" strokeWidth={3} />
+                      ) : (
+                        <Icon className="h-5 w-5 text-[#1F2937]" strokeWidth={2.2} />
+                      )}
+                    </div>
+                    {isCurrent && (
+                      <span className="absolute -bottom-0.5 right-1/2 translate-x-1/2 bg-[#0E6B5A] text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold leading-none whitespace-nowrap shadow-md">
+                        עכשיו
+                      </span>
+                    )}
+                  </div>
+                  <span className={`text-[10.5px] font-bold leading-tight text-center px-0.5 line-clamp-2 ${isCurrent ? "text-[#0E6B5A]" : "text-[#1F2937]"}`}>
+                    {stage.title}
+                  </span>
                 </button>
               );
             })}
           </div>
+          {/* Progress bar under stories */}
+          <div className="mt-1 flex items-center gap-2">
+            <div className="flex-1 h-1.5 rounded-full bg-[#E5E7EB] overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{ width: `${completionPct}%`, background: "linear-gradient(90deg,#0E6B5A,#34A88E)" }}
+              />
+            </div>
+            <span className="text-[10px] font-bold text-[#6B7280] tabular-nums">{completionPct}%</span>
+          </div>
         </section>
 
+        {/* === HERO: Savings === */}
+        <section className="mt-4">
+          <button
+            onClick={() => navigate("/resident/my-offers")}
+            className="w-full text-right relative overflow-hidden rounded-[28px] p-6 shadow-[0_10px_40px_-12px_rgba(14,107,90,0.35)] active:scale-[0.99] transition-transform"
+            style={{ background: "linear-gradient(135deg,#0E6B5A 0%,#0A5547 60%,#063C33 100%)" }}
+          >
+            {/* decorative blobs */}
+            <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-16 -right-8 w-56 h-56 rounded-full bg-[#34A88E]/20 blur-3xl pointer-events-none" />
+
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <span className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm border border-white/25 text-white text-[11px] font-bold px-3 py-1 rounded-full">
+                  <Flame className="h-3 w-3" strokeWidth={2.6} />
+                  חיסכון מצטבר
+                </span>
+                <PiggyBank className="h-6 w-6 text-white/40" strokeWidth={2} />
+              </div>
+
+              <div className="text-white/70 text-[12px] font-medium mb-1">סך הכל חסכת</div>
+              <div className="text-white text-[40px] font-extrabold leading-none tabular-nums tracking-tight animate-fade-in" style={{ fontFamily: "'Urbanist'" }}>
+                {formatILS(estimatedSavings)}
+              </div>
+
+              <div className="mt-5 grid grid-cols-3 gap-2">
+                <HeroStat value={joinedCount} label="הצעות שלי" />
+                <HeroStat value={areaDeals.length} label="פעילות עכשיו" />
+                <HeroStat value={areaSuppliersCount} label="ספקים באזור" />
+              </div>
+            </div>
+          </button>
+        </section>
+
+        {/* === Quick actions === */}
+        <section className="mt-3 grid grid-cols-3 gap-2.5">
+          <QuickAction icon={SearchIcon} label="חפש" tint="#EEF4FF" color="#2563EB" onClick={() => navigate("/resident/search")} />
+          <QuickAction icon={Calculator} label="תקציב" tint="#F5F3FF" color="#7C3AED" onClick={() => navigate("/resident/budget-planner")} />
+          <QuickAction icon={Store} label="ספקים" tint="#FFF5EB" color="#EA580C" onClick={() => navigate("/resident/search")} />
+        </section>
+
+        {/* === FEED: deals + community activity === */}
+        <section className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-[18px] font-extrabold text-[#1F2937] tracking-tight" style={{ fontFamily: "'Urbanist'" }}>
+                בשבילך עכשיו
+              </h2>
+              <p className="text-[12px] text-[#6B7280] mt-0.5">הצעות חמות ופעילות הקהילה שלך</p>
+            </div>
+            <button
+              onClick={() => navigate("/resident/deals")}
+              className="text-[12px] font-bold text-[#0E6B5A] hover:underline"
+            >
+              הכל ←
+            </button>
+          </div>
+
+          {feedItems.length === 0 ? (
+            <div className="bg-white border border-[#ECEEF2] rounded-2xl p-8 text-center">
+              <Sparkles className="h-8 w-8 text-[#6B7280] mx-auto mb-2" />
+              <p className="text-[13px] text-[#6B7280] font-medium">עדיין אין הצעות פעילות באזור שלך</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {feedItems.map((item, idx) =>
+                item.kind === "deal" ? (
+                  <DealFeedCard key={`d-${item.deal.id}-${idx}`} deal={item.deal} onClick={() => navigate(`/resident/deals/${item.deal.id}`)} />
+                ) : (
+                  <ActivityFeedCard key={`a-${item.dealId}-${idx}`} title={item.dealTitle} joiners={item.joiners} onClick={() => navigate(`/resident/deals/${item.dealId}`)} />
+                )
+              )}
+            </div>
+          )}
+        </section>
       </div>
       <BottomNav role="resident" />
     </div>
   );
 }
 
-function BentoStat({ icon: Icon, label, value, tint, color, onClick }: { icon: typeof Sparkles; label: string; value: number; tint: string; color: string; onClick: () => void }) {
+/* ============ Sub-components ============ */
+
+function HeroStat({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-3 py-2.5 border border-white/15">
+      <div className="text-white text-[18px] font-extrabold leading-none tabular-nums" style={{ fontFamily: "'Urbanist'" }}>{value}</div>
+      <div className="text-white/70 text-[10px] font-medium mt-1 leading-tight">{label}</div>
+    </div>
+  );
+}
+
+function QuickAction({ icon: Icon, label, tint, color, onClick }: { icon: typeof SearchIcon; label: string; tint: string; color: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="bg-white border border-[#ECEEF2] p-2.5 rounded-2xl flex items-center gap-2.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] active:scale-[0.97] transition-transform text-right flex-1"
+      className="bg-white border border-[#ECEEF2] rounded-2xl p-3 flex flex-col items-center gap-1.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] active:scale-[0.96] transition-transform"
     >
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: tint }}>
+      <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: tint }}>
         <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} style={{ color }} />
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[16px] font-extrabold text-[#1F2937] leading-none tabular-nums" style={{ fontFamily: "'Urbanist'" }}>{value}</div>
-        <div className="text-[10px] text-[#6B7280] font-medium leading-tight mt-0.5">{label}</div>
+      <span className="text-[12px] font-bold text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>{label}</span>
+    </button>
+  );
+}
+
+function DealFeedCard({ deal, onClick }: { deal: MiniDeal; onClick: () => void }) {
+  const discount = deal.discount_percentage ?? 0;
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-right bg-white border border-[#ECEEF2] rounded-[22px] overflow-hidden shadow-[0_4px_16px_-8px_rgba(10,31,61,0.12)] hover:shadow-[0_8px_28px_-10px_rgba(10,31,61,0.20)] hover:-translate-y-0.5 transition-all active:scale-[0.99] animate-fade-in"
+    >
+      {/* Image */}
+      <div className="relative h-44 bg-[#F4F6FA] overflow-hidden">
+        {deal.cover_image_url ? (
+          <img src={deal.cover_image_url} alt={deal.title} className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Sparkles className="h-10 w-10 text-[#D1D5DB]" />
+          </div>
+        )}
+        {discount > 0 && (
+          <div className="absolute top-3 right-3 bg-[#0E6B5A] text-white text-[12px] font-extrabold px-2.5 py-1 rounded-full shadow-md tabular-nums" style={{ fontFamily: "'Urbanist'" }}>
+            {discount}%- 
+          </div>
+        )}
+        {deal.joiners && deal.joiners > 0 ? (
+          <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur text-[#1F2937] text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md inline-flex items-center gap-1">
+            <Users className="h-3 w-3 text-[#0E6B5A]" strokeWidth={2.6} />
+            {deal.joiners} הצטרפו
+          </div>
+        ) : null}
+      </div>
+
+      {/* Body */}
+      <div className="p-4">
+        {deal.supplier_name && (
+          <div className="text-[11px] text-[#6B7280] font-semibold mb-1">{deal.supplier_name}</div>
+        )}
+        <div className="text-[15px] font-extrabold text-[#1F2937] leading-tight line-clamp-2" style={{ fontFamily: "'Urbanist'" }}>
+          {deal.title}
+        </div>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="inline-flex items-center gap-1 text-[11px] text-[#0E6B5A] font-bold">
+            <TrendingUp className="h-3 w-3" strokeWidth={2.6} />
+            פעיל עכשיו
+          </span>
+          <span className="text-[12px] font-bold text-[#0E6B5A]">לפרטים ←</span>
+        </div>
       </div>
     </button>
   );
 }
 
+function ActivityFeedCard({ title, joiners, onClick }: { title: string; joiners: number; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-right bg-[#F0FAF7] border border-[#0E6B5A]/15 rounded-[20px] p-4 flex items-center gap-3 hover:bg-[#E6F4EF] transition-colors active:scale-[0.99] animate-fade-in"
+    >
+      {/* Avatar stack */}
+      <div className="relative shrink-0 flex">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="h-9 w-9 rounded-full border-2 border-[#F0FAF7] flex items-center justify-center text-white text-[11px] font-bold"
+            style={{
+              background: ["#0E6B5A", "#34A88E", "#1F4D45"][i],
+              marginRight: i === 0 ? 0 : -12,
+              zIndex: 3 - i,
+              fontFamily: "'Urbanist'",
+            }}
+          >
+            {["א", "ר", "מ"][i]}
+          </div>
+        ))}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="text-[12px] text-[#0E6B5A] font-bold mb-0.5 inline-flex items-center gap-1">
+          <Users className="h-3 w-3" strokeWidth={2.6} />
+          {joiners} שכנים הצטרפו
+        </div>
+        <div className="text-[13px] font-bold text-[#1F2937] leading-tight line-clamp-1" style={{ fontFamily: "'Urbanist'" }}>
+          {title}
+        </div>
+      </div>
+
+      <div className="shrink-0 text-[11px] font-bold text-[#0E6B5A] bg-white border border-[#0E6B5A]/20 px-3 py-1.5 rounded-full">
+        הצטרף
+      </div>
+    </button>
+  );
+}
