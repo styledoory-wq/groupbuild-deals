@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Hammer, DoorOpen, Wrench, RefreshCw } from "lucide-react";
+import { Home, Hammer, DoorOpen, Wrench, RefreshCw, Zap, Sparkles } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BudgetResultView } from "@/components/budget/BudgetResultView";
 import { BudgetAIChat } from "@/components/budget/BudgetAIChat";
 import { MatchingDeals } from "@/components/budget/MatchingDeals";
+import { BudgetWizard } from "@/components/budget/BudgetWizard";
+import { applyWizardAnswers, getWizardQuestions, WizardAnswers } from "@/lib/budgetWizard";
 import {
   Track, FinishLevel, Region, RenovationType, RoomKind, ServiceKind,
   REGION_LABELS, FINISH_LABELS, RENO_LABELS, ROOM_LABELS, SERVICES,
