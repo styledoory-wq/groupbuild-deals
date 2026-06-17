@@ -177,7 +177,7 @@ const filteredDeals = useMemo(() => {
 
   const STAGE_TINTS: Record<string, string> = {
     planning: "#EEF4FF", structure: "#FFF5EB", systems: "#ECFEFF", openings: "#F0FDF4",
-    finishes: "#F5F3FF", "kitchen-bath": "#FFF7ED", outdoor: "#F7FEE7", moving: "#FEF2F2",
+    finishes: "#F5F3FF", "kitchen-bath": "#EAF7F2", outdoor: "#F7FEE7", moving: "#FEF2F2",
   };
 
   return (
@@ -278,7 +278,7 @@ const filteredDeals = useMemo(() => {
           {/* Stats stack - right column */}
           <div className="flex flex-col gap-2">
             <BentoStat icon={Store} label="ספקים באזור" value={areaSuppliersCount} tint="#FFF5EB" color="#EA580C" onClick={() => navigate("/resident/search")} />
-            <BentoStat icon={Sparkles} label="הצעות פעילות" value={areaDeals.length} tint="#FFFBEB" color="#C9A227" onClick={() => navigate("/resident/deals")} />
+            <BentoStat icon={Sparkles} label="הצעות פעילות" value={areaDeals.length} tint="#FFFBEB" color="#0E6B5A" onClick={() => navigate("/resident/deals")} />
             <BentoStat icon={Briefcase} label="הצעות שלי" value={joinedCount} tint="#F0FDF4" color="#16A34A" onClick={() => navigate("/resident/my-offers")} />
           </div>
         </div>
@@ -317,7 +317,7 @@ const filteredDeals = useMemo(() => {
               className="absolute inset-y-0 right-0 rounded-full transition-all duration-700"
               style={{
                 width: `${completionPct}%`,
-                background: "linear-gradient(90deg,#C9A227,#E8C96B)",
+                background: "linear-gradient(90deg,#0E6B5A,#34A88E)",
               }}
             />
           </div>

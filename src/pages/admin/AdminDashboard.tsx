@@ -89,10 +89,10 @@ export default function AdminDashboard() {
             className="w-full bg-white rounded-[16px] px-4 py-3 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] text-[13px] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
           >
             <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-              <ShieldCheck className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
+              <ShieldCheck className="h-[16px] w-[16px] text-[#0E6B5A]" strokeWidth={2.2} />
             </span>
             <span className="text-[#1F2937] flex-1 font-medium">
-              <b className="text-[#C9A227]">{stats.pendingSuppliers}</b> ספקים ממתינים לאישור
+              <b className="text-[#0E6B5A]">{stats.pendingSuppliers}</b> ספקים ממתינים לאישור
             </span>
             <ChevronLeft className="h-4 w-4 text-[#9CA3AF]" strokeWidth={2} />
           </button>
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="h-11 w-11 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-              <TrendingUp className="h-[18px] w-[18px] text-[#C9A227]" strokeWidth={2.2} />
+              <TrendingUp className="h-[18px] w-[18px] text-[#0E6B5A]" strokeWidth={2.2} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-[#ECEEF2]">
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
           className="bg-white rounded-[16px] p-3.5 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
         >
           <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-            <Eye className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
+            <Eye className="h-[16px] w-[16px] text-[#0E6B5A]" strokeWidth={2.2} />
           </span>
           <div className="flex-1 min-w-0">
             <div className="font-extrabold text-[13px] text-[#1F2937] leading-tight">תצוגת דייר</div>
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
           className="bg-white rounded-[16px] p-3.5 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
         >
           <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-            <Eye className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
+            <Eye className="h-[16px] w-[16px] text-[#0E6B5A]" strokeWidth={2.2} />
           </span>
           <div className="flex-1 min-w-0">
             <div className="font-extrabold text-[13px] text-[#1F2937] leading-tight">תצוגת ספק</div>
@@ -189,7 +189,7 @@ function StatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: strin
   return (
     <div className="bg-white rounded-[16px] p-4 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
       <div className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center mb-2.5">
-        <Icon className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
+        <Icon className="h-[16px] w-[16px] text-[#0E6B5A]" strokeWidth={2.2} />
       </div>
       <div className="text-[20px] font-extrabold text-[#1F2937] leading-none tracking-tight">
         {value.toLocaleString("he-IL")}
@@ -206,7 +206,7 @@ function QuickLink({ onClick, icon: Icon, label, desc, badge }: { onClick: () =>
       className="w-full bg-white rounded-[16px] p-3.5 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] flex items-center gap-3 text-right active:scale-[0.99] transition-transform"
     >
       <span className="h-10 w-10 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-        <Icon className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
+        <Icon className="h-[16px] w-[16px] text-[#0E6B5A]" strokeWidth={2.2} />
       </span>
       <div className="flex-1 min-w-0">
         <div className="font-extrabold text-[13.5px] text-[#1F2937] leading-tight">{label}</div>

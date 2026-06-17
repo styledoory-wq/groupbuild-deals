@@ -99,7 +99,7 @@ export function ProfileAvatar({
       <button
         onClick={() => setOpen((v) => !v)}
         className="relative rounded-full overflow-hidden ring-2 ring-white shadow-[0_4px_14px_-4px_rgba(10,31,61,0.25)] active:scale-95 transition-transform"
-        style={{ width: size, height: size, background: "linear-gradient(135deg,#C9A227,#B8923F)" }}
+        style={{ width: size, height: size, background: "linear-gradient(135deg,#0E6B5A,#0A5446)" }}
         aria-label="פרופיל"
       >
         {avatarUrl ? (
@@ -119,14 +119,14 @@ export function ProfileAvatar({
       {open && (
         <div className="absolute top-[calc(100%+8px)] left-0 w-60 bg-white rounded-2xl shadow-[0_20px_40px_-12px_rgba(10,31,61,0.18)] border border-[#ECEEF2] overflow-hidden z-50 origin-top-left animate-in fade-in zoom-in-95 duration-150">
           <div className="p-4 border-b border-[#ECEEF2] flex items-center gap-3">
-            <div className="h-11 w-11 rounded-full overflow-hidden flex items-center justify-center" style={{ background: "linear-gradient(135deg,#C9A227,#B8923F)" }}>
+            <div className="h-11 w-11 rounded-full overflow-hidden flex items-center justify-center" style={{ background: "linear-gradient(135deg,#0E6B5A,#0A5446)" }}>
               {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : <span className="text-white font-bold text-sm">{initials}</span>}
             </div>
             <div className="min-w-0 flex-1 text-right">
               <div className="font-bold text-[#1F2937] text-sm truncate">{user?.name || "משתמש"}</div>
               <button
                 onClick={() => fileRef.current?.click()}
-                className="text-[11px] text-[#C9A227] font-semibold flex items-center gap-1 mr-auto"
+                className="text-[11px] text-[#0E6B5A] font-semibold flex items-center gap-1 mr-auto"
               >
                 <Camera className="h-3 w-3" /> שנה תמונה
               </button>

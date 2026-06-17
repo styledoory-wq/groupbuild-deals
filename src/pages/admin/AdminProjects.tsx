@@ -164,7 +164,7 @@ export default function AdminProjects() {
           <div key={p.id} className="gb-card p-4">
             <div className="flex items-start gap-3">
               <div className="h-12 w-12 rounded-2xl bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                <Building2 className="h-6 w-6 text-[#C9A227]" />
+                <Building2 className="h-6 w-6 text-[#0E6B5A]" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold truncate">{p.name}</h3>

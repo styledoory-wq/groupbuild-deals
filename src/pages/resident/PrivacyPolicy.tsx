@@ -69,7 +69,7 @@ const SECTIONS: Section[] = [
         <li>למחוק את חשבונך ואת כל המידע הקשור אליו</li>
         <li>
           לפנות אלינו בכתובת:{" "}
-          <a href="mailto:support@groupbuild.co.il" className="text-[#C9A84C] font-semibold underline">
+          <a href="mailto:support@groupbuild.co.il" className="text-[#1A8870] font-semibold underline">
             support@groupbuild.co.il
           </a>
         </li>
@@ -81,7 +81,7 @@ const SECTIONS: Section[] = [
     body: (
       <p>
         לשאלות בנושא פרטיות:{" "}
-        <a href="mailto:support@groupbuild.co.il" className="text-[#C9A84C] font-semibold underline">
+        <a href="mailto:support@groupbuild.co.il" className="text-[#1A8870] font-semibold underline">
           support@groupbuild.co.il
         </a>
       </p>
@@ -112,7 +112,7 @@ export default function PrivacyPolicy() {
             <h1 className="text-fs-xl font-extrabold leading-tight tracking-tight" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>
               מדיניות פרטיות
             </h1>
-            <div className="mt-2 h-[2px] w-10 rounded-full bg-[#C9A84C]" />
+            <div className="mt-2 h-[2px] w-10 rounded-full bg-[#1A8870]" />
             <p className="mt-3 text-fs-sm text-white/75">עודכן לאחרונה: יוני 2025</p>
           </div>
         </header>
@@ -127,7 +127,7 @@ export default function PrivacyPolicy() {
               <h2 className="text-fs-base font-extrabold text-[#1F2937] leading-snug">
                 {s.title}
               </h2>
-              <div className="mt-1 h-[2px] w-8 rounded-full bg-[#C9A84C]" />
+              <div className="mt-1 h-[2px] w-8 rounded-full bg-[#1A8870]" />
               <div className="mt-3 text-fs-sm leading-relaxed text-[#334155]">
                 {s.body}
               </div>

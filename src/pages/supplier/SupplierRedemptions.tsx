@@ -143,15 +143,15 @@ export default function SupplierRedemptions() {
         {/* Hero Banner — Navy/Gold */}
         <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-[#1F2937] to-[#1A3A5C] p-5 text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
-               style={{ backgroundImage: "radial-gradient(circle at 80% 20%, #C9A227, transparent 60%)" }} />
+               style={{ backgroundImage: "radial-gradient(circle at 80% 20%, #0E6B5A, transparent 60%)" }} />
           <div className="relative z-10 flex items-center justify-between gap-4">
             <div>
-              <div className="text-fs-xs font-bold text-[#C9A227] uppercase tracking-wider mb-1">סה"כ זכאים</div>
+              <div className="text-fs-xs font-bold text-[#0E6B5A] uppercase tracking-wider mb-1">סה"כ זכאים</div>
               <div className="text-3xl font-extrabold">{stats.total}</div>
               <div className="text-fs-sm text-white/70 mt-0.5">לקוחות פעילים</div>
             </div>
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#2563EB]/20 border border-[#C9A227]/30">
-              <Users className="h-7 w-7 text-[#C9A227]" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#2563EB]/20 border border-[#0E6B5A]/30">
+              <Users className="h-7 w-7 text-[#0E6B5A]" />
             </div>
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function SupplierRedemptions() {
         <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-r from-[#FEF9E7] to-[#FFF8F0] p-4 border border-[#FDE68A]/60 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563EB]/15">
-              <Wallet className="h-5 w-5 text-[#B8923F]" />
+              <Wallet className="h-5 w-5 text-[#0A5446]" />
             </div>
             <div className="flex-1">
               <div className="text-fs-xs font-bold text-[#6B7280] uppercase tracking-wider">פוטנציאל הכנסה</div>
@@ -179,7 +179,7 @@ export default function SupplierRedemptions() {
         {/* Search */}
         <div className="relative">
           <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="חיפוש לפי שם, קוד או הצעה" className="pr-9 rounded-2xl border-0 bg-white shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] focus-visible:ring-[#C9A227]/40" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="חיפוש לפי שם, קוד או הצעה" className="pr-9 rounded-2xl border-0 bg-white shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] focus-visible:ring-[#0E6B5A]/40" />
         </div>
 
         {/* Cards */}

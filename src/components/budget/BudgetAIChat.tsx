@@ -9,7 +9,7 @@ interface Msg { role: "user" | "assistant"; content: string }
 const QUICK: { q: string; icon: typeof Lightbulb; tint: string; color: string }[] = [
   { q: "איך אפשר לחסוך כאן?",          icon: TrendingDown,   tint: "#F0FDF4", color: "#16A34A" },
   { q: "מה כלול ומה לא?",               icon: ClipboardCheck, tint: "#EEF4FF", color: "#2563EB" },
-  { q: "האם המחיר סביר לרמת הגמר?",     icon: Lightbulb,      tint: "#FFFBEB", color: "#C9A227" },
+  { q: "האם המחיר סביר לרמת הגמר?",     icon: Lightbulb,      tint: "#FFFBEB", color: "#0E6B5A" },
   { q: "אילו שאלות חשוב לשאול קבלן?",   icon: HelpCircle,     tint: "#F5F3FF", color: "#7C3AED" },
 ];
 
@@ -56,7 +56,7 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
       style={{
         fontFamily: "'Epilogue', system-ui, sans-serif",
         background: "linear-gradient(180deg, #FFFDF5 0%, #FFFFFF 50%)",
-        boxShadow: "0 20px 50px -24px rgba(201,162,39,0.35), 0 4px 12px -6px rgba(31,41,55,0.06)",
+        boxShadow: "0 20px 50px -24px rgba(14,107,90,0.35), 0 4px 12px -6px rgba(31,41,55,0.06)",
       }}
     >
       {/* Premium header */}
@@ -64,13 +64,13 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
         className="px-5 pt-5 pb-4 relative overflow-hidden"
         style={{ background: "linear-gradient(135deg, #FFF8E1 0%, #FFFBEB 60%, #FFFFFF 100%)" }}
       >
-        <div className="absolute -top-8 -left-8 h-32 w-32 rounded-full opacity-30 blur-2xl" style={{ background: "#C9A227" }} />
+        <div className="absolute -top-8 -left-8 h-32 w-32 rounded-full opacity-30 blur-2xl" style={{ background: "#0E6B5A" }} />
         <div className="relative flex items-start gap-3">
           <div
             className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0"
             style={{
-              background: "linear-gradient(135deg, #C9A227 0%, #E2BD45 100%)",
-              boxShadow: "0 10px 24px -10px rgba(201,162,39,0.7), inset 0 1px 0 rgba(255,255,255,0.4)",
+              background: "linear-gradient(135deg, #0E6B5A 0%, #E2BD45 100%)",
+              boxShadow: "0 10px 24px -10px rgba(14,107,90,0.7), inset 0 1px 0 rgba(255,255,255,0.4)",
             }}
           >
             <Sparkles className="h-6 w-6 text-white" strokeWidth={2.4} />
@@ -80,7 +80,7 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
               <h3 className="font-extrabold text-[#1F2937] text-[17px] leading-tight" style={{ fontFamily: "'Urbanist'" }}>
                 יועץ התקציב החכם
               </h3>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full text-white" style={{ background: "#C9A227", letterSpacing: "0.04em" }}>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full text-white" style={{ background: "#0E6B5A", letterSpacing: "0.04em" }}>
                 AI
               </span>
             </div>
@@ -127,17 +127,17 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
                 key={i}
                 className={`text-[13.5px] leading-relaxed p-3.5 rounded-2xl whitespace-pre-wrap ${
                   m.role === "user"
-                    ? "text-white mr-6 shadow-[0_8px_20px_-8px_rgba(201,162,39,0.55)]"
+                    ? "text-white mr-6 shadow-[0_8px_20px_-8px_rgba(14,107,90,0.55)]"
                     : "bg-white border border-[#EFE9D6] text-[#1F2937] ml-6 shadow-sm"
                 }`}
                 style={
                   m.role === "user"
-                    ? { background: "linear-gradient(135deg, #C9A227 0%, #E2BD45 100%)" }
+                    ? { background: "linear-gradient(135deg, #0E6B5A 0%, #E2BD45 100%)" }
                     : undefined
                 }
               >
                 {m.role === "assistant" && (
-                  <div className="flex items-center gap-1.5 mb-1.5 text-[10px] font-extrabold text-[#C9A227]" style={{ fontFamily: "'Urbanist'", letterSpacing: "0.05em" }}>
+                  <div className="flex items-center gap-1.5 mb-1.5 text-[10px] font-extrabold text-[#0E6B5A]" style={{ fontFamily: "'Urbanist'", letterSpacing: "0.05em" }}>
                     <Sparkles className="h-3 w-3" /> יועץ AI
                   </div>
                 )}
@@ -159,7 +159,7 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
 
         <form
           onSubmit={(e) => { e.preventDefault(); send(input); }}
-          className="relative flex items-center gap-2 bg-white border border-[#EFE9D6] rounded-2xl pr-2 pl-1.5 py-1.5 focus-within:border-[#C9A227] focus-within:shadow-[0_0_0_3px_rgba(201,162,39,0.12)] transition"
+          className="relative flex items-center gap-2 bg-white border border-[#EFE9D6] rounded-2xl pr-2 pl-1.5 py-1.5 focus-within:border-[#0E6B5A] focus-within:shadow-[0_0_0_3px_rgba(14,107,90,0.12)] transition"
         >
           <input
             value={input}
@@ -173,8 +173,8 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
             disabled={loading || !input.trim()}
             className="h-10 w-10 rounded-xl flex items-center justify-center text-white shrink-0 disabled:opacity-40 active:scale-95 transition"
             style={{
-              background: "linear-gradient(135deg, #C9A227 0%, #E2BD45 100%)",
-              boxShadow: "0 6px 14px -6px rgba(201,162,39,0.6)",
+              background: "linear-gradient(135deg, #0E6B5A 0%, #E2BD45 100%)",
+              boxShadow: "0 6px 14px -6px rgba(14,107,90,0.6)",
             }}
             aria-label="שלח"
           >

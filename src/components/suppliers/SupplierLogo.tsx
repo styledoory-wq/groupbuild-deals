@@ -35,7 +35,7 @@ export function SupplierLogo({ name, logoUrl, size = "md", className }: Supplier
       {logoUrl ? (
         <img src={logoUrl} alt={name ?? "לוגו ספק"} className="h-full w-full object-cover" loading="lazy" />
       ) : (
-        <span className="text-[#B8923F]">{initials}</span>
+        <span className="text-[#0A5446]">{initials}</span>
       )}
     </div>
   );

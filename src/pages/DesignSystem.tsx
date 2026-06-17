@@ -123,7 +123,7 @@ export default function DesignSystemPage() {
         <Section title="Empty State" subtitle="איור · כותרת · הסבר · פעולה">
           <div className="bg-white rounded-[20px] mx-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
             <EmptyState
-              icon={<Sparkles className="h-7 w-7 text-[#C9A227]" />}
+              icon={<Sparkles className="h-7 w-7 text-[#0E6B5A]" />}
               title="עדיין אין כאן כלום"
               description="כשתפעלו במסך הזה, התוכן יופיע פה בצורה מסודרת."
               action={

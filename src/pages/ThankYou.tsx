@@ -30,8 +30,8 @@ export default function ThankYou() {
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF8E1] mb-4">
-            <Sparkles className="h-3 w-3 text-[#C9A227]" />
-            <span className="text-fs-xs font-bold text-[#C9A227]">נרשמת בהצלחה</span>
+            <Sparkles className="h-3 w-3 text-[#0E6B5A]" />
+            <span className="text-fs-xs font-bold text-[#0E6B5A]">נרשמת בהצלחה</span>
           </div>
 
           <h1 className="text-3xl font-extrabold mb-3 leading-tight">

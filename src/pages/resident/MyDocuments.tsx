@@ -213,12 +213,12 @@ export default function MyDocuments() {
         {/* Document list */}
         {loading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-[#C9A227]" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#0E6B5A]" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="bg-white rounded-[24px] border border-dashed border-[#ECEEF2] p-10 text-center">
             <div className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center mb-4 mx-auto shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]">
-              <FolderOpen className="h-7 w-7 text-[#C9A227]" />
+              <FolderOpen className="h-7 w-7 text-[#0E6B5A]" />
             </div>
             <p className="text-[14px] font-bold text-[#1F2937]">
               {selectedCategory ? "אין מסמכים בקטגוריה זו" : "עדיין לא העלית מסמכים"}

@@ -4,7 +4,7 @@ import { TrendingDown } from "lucide-react";
 import { BudgetResult, ILS } from "@/lib/budgetPricing";
 
 const COLORS = [
-  "#C9A227", "#16A34A", "#7C3AED", "#2563EB", "#EA580C", "#0FB5C9",
+  "#0E6B5A", "#16A34A", "#7C3AED", "#2563EB", "#EA580C", "#0FB5C9",
   "#DC2626", "#0891B2", "#65A30D", "#DB2777", "#9333EA", "#475569",
 ];
 

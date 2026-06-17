@@ -127,14 +127,14 @@ export default function NotificationSettings() {
       <div className="px-5 -mt-4 relative z-10 space-y-4 pb-24">
         <div className="rounded-[16px] p-3 bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
           <p className="text-fs-xs text-[#1F2937] leading-relaxed">
-            <Mail className="inline h-3.5 w-3.5 ml-1 text-[#C9A227]" />
+            <Mail className="inline h-3.5 w-3.5 ml-1 text-[#0E6B5A]" />
             מיילים נשלחים דרך Resend. התראות פוש פעילות באפליקציה הנייטיב כשהאישורים מוגדרים.
           </p>
         </div>
 
         <div className="rounded-[20px] bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] p-4 space-y-3">
           <h3 className="font-bold text-sm flex items-center gap-2 text-[#1F2937]">
-            <Bell className="h-4 w-4 text-[#C9A227]" />ערוצים ראשיים
+            <Bell className="h-4 w-4 text-[#0E6B5A]" />ערוצים ראשיים
           </h3>
           <Row
             label="קבלת מיילים"

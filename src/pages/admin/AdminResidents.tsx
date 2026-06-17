@@ -284,7 +284,7 @@ export default function AdminResidents() {
             <div className="border-t border-border pt-3">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-xs flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-[#C9A227]" /> פרויקט
+                  <Building2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> פרויקט
                 </Label>
                 <button
                   type="button"
@@ -363,7 +363,7 @@ export default function AdminResidents() {
               </div>
               <div>
                 <Label className="text-xs flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-[#C9A227]" /> פרויקט
+                  <Building2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> פרויקט
                 </Label>
                 <select
                   value={eProjectId}

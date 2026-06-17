@@ -50,12 +50,12 @@ export default function ProjectsList() {
               onClick={() => select(p.id)}
               className={cn(
                 "w-full text-right rounded-[20px] bg-white border p-4 transition-[transform,box-shadow] duration-200 active:scale-[0.99] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]",
-                active ? "border-[#C9A227] ring-2 ring-[#C9A227]/30" : "border-[#ECEEF2]"
+                active ? "border-[#0E6B5A] ring-2 ring-[#0E6B5A]/30" : "border-[#ECEEF2]"
               )}
             >
               <div className="flex items-start gap-3">
                 <div className="h-14 w-14 rounded-[16px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                  <Building2 className="h-7 w-7 text-[#C9A227]" />
+                  <Building2 className="h-7 w-7 text-[#0E6B5A]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">

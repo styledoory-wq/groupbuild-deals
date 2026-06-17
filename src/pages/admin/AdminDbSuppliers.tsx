@@ -654,7 +654,7 @@ export default function AdminDbSuppliers() {
                   "shrink-0 h-7 px-3 rounded-full text-fs-xs font-bold border transition-all " +
                   (active
                     ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "bg-card text-muted-foreground border-border hover:border-[#C9A227]/40")
+                    : "bg-card text-muted-foreground border-border hover:border-[#0E6B5A]/40")
                 }
               >
                 {lbl}
@@ -957,7 +957,7 @@ export default function AdminDbSuppliers() {
                       className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${
                         active
                           ? "bg-[#2563EB] text-white border-[#1F2937] font-bold"
-                          : "bg-card border-border text-foreground hover:border-[#C9A227]/50"
+                          : "bg-card border-border text-foreground hover:border-[#0E6B5A]/50"
                       }`}
                     >
                       {c.icon} {c.name}
@@ -1140,7 +1140,7 @@ export default function AdminDbSuppliers() {
                             : [...f.categoryIds, c.id],
                         }))}
                         className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${
-                          active ? "bg-[#2563EB] text-white border-[#1F2937] font-bold" : "bg-card border-border text-foreground hover:border-[#C9A227]/50"
+                          active ? "bg-[#2563EB] text-white border-[#1F2937] font-bold" : "bg-card border-border text-foreground hover:border-[#0E6B5A]/50"
                         }`}
                       >
                         {c.icon} {c.name}
@@ -1271,7 +1271,7 @@ export default function AdminDbSuppliers() {
                     key={r.id}
                     onClick={() => runMatch(r)}
                     className={`w-full text-right px-3 py-2 rounded-lg text-xs hover:bg-muted transition-smooth ${
-                      selectedResident?.id === r.id ? "bg-[#FFF8E1] border border-[#C9A227]/30" : ""
+                      selectedResident?.id === r.id ? "bg-[#FFF8E1] border border-[#0E6B5A]/30" : ""
                     }`}
                   >
                     <div className="font-bold">{r.full_name ?? r.email ?? "ללא שם"}</div>

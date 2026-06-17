@@ -47,7 +47,7 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
       )}
       style={{
         background:
-          "radial-gradient(ellipse 70% 50% at 50% 35%, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.04) 35%, transparent 70%), linear-gradient(180deg, #0A2147 0%, #081B38 55%, #050F25 100%)",
+          "radial-gradient(ellipse 70% 50% at 50% 35%, rgba(14,107,90,0.12) 0%, rgba(14,107,90,0.04) 35%, transparent 70%), linear-gradient(180deg, #0A2147 0%, #081B38 55%, #050F25 100%)",
         paddingTop: "env(safe-area-inset-top)",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
@@ -72,7 +72,7 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
         <div
           className="h-full w-1/2 rounded-full"
           style={{
-            background: "linear-gradient(90deg, transparent, #C9A227 50%, transparent)",
+            background: "linear-gradient(90deg, transparent, #0E6B5A 50%, transparent)",
             animation: "gb-splash-slide 1.2s ease-in-out infinite",
           }}
         />

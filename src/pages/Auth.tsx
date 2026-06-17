@@ -217,7 +217,7 @@ export default function Auth() {
   // Unified with Categories: light surface, white controls, soft shadows.
   const fieldWrap = "relative";
   const fieldInput =
-    "h-[56px] w-full rounded-[14px] bg-white pr-12 pl-4 text-[15px] text-[#1F2937] placeholder:text-[#9CA3AF] text-right border border-[#E0E4E8] shadow-[0_2px_8px_rgba(0,0,0,0.08)] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.22),0_4px_14px_-4px_rgba(10,31,61,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
+    "h-[56px] w-full rounded-[14px] bg-white pr-12 pl-4 text-[15px] text-[#1F2937] placeholder:text-[#9CA3AF] text-right border border-[#E0E4E8] shadow-[0_2px_8px_rgba(0,0,0,0.08)] focus:shadow-[0_0_0_3px_rgba(14,107,90,0.22),0_4px_14px_-4px_rgba(10,31,61,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
 
   return (
     <div
@@ -268,7 +268,7 @@ export default function Auth() {
           {mode === "signin" ? (
             <form onSubmit={handleSignIn} className="space-y-3.5 animate-fade-up">
               <div className={fieldWrap}>
-                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                 <Input
                   type="email"
                   value={email}
@@ -280,7 +280,7 @@ export default function Auth() {
                 />
               </div>
               <div className={fieldWrap}>
-                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -336,7 +336,7 @@ export default function Auth() {
                       <div
                         className={cn(
                            "h-10 w-10 rounded-[12px] flex items-center justify-center shrink-0 transition-colors",
-                          role === id ? "bg-white/15 text-white" : "bg-[#F4F6FA] text-[#C9A227]"
+                          role === id ? "bg-white/15 text-white" : "bg-[#F4F6FA] text-[#0E6B5A]"
                         )}
                       >
                         <Icon className="h-4.5 w-4.5" />
@@ -353,7 +353,7 @@ export default function Auth() {
 
 
               <div className={fieldWrap}>
-                <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
+                <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                 <Input
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -367,7 +367,7 @@ export default function Auth() {
               {role === "resident" && (
                 <>
                   <div className={fieldWrap}>
-                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
+                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                     <Input
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
@@ -378,7 +378,7 @@ export default function Auth() {
                     />
                   </div>
                   <div className={fieldWrap}>
-                    <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
+                    <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                     <select
                       value={projectId}
                       onChange={(e) => setProjectId(e.target.value)}
@@ -398,7 +398,7 @@ export default function Auth() {
 
               {role === "supplier" && (
                 <div className={fieldWrap}>
-                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
+                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                   <Input
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
@@ -411,7 +411,7 @@ export default function Auth() {
               )}
 
               <div className={fieldWrap}>
-                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                 <Input
                   type="email"
                   value={email}
@@ -424,7 +424,7 @@ export default function Auth() {
               </div>
 
               <div className={fieldWrap}>
-                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -451,14 +451,14 @@ export default function Auth() {
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-[#C9A227]"
+                  className="mt-0.5 h-4 w-4 accent-[#0E6B5A]"
                 />
                 <span>
                   קראתי ואני מאשר את{" "}
                   <Link
                     to={role === "supplier" ? "/terms/suppliers" : "/terms/residents"}
                     target="_blank"
-                    className="font-bold text-[#B8923F] underline-offset-2 hover:underline"
+                    className="font-bold text-[#0A5446] underline-offset-2 hover:underline"
                   >
                     תנאי השימוש
                   </Link>
@@ -501,7 +501,7 @@ export default function Auth() {
                 <button
                   type="button"
                   onClick={() => setMode("signup")}
-                  className="font-bold text-[#B8923F] hover:text-[#C9A227] transition-colors underline-offset-4 hover:underline"
+                  className="font-bold text-[#0A5446] hover:text-[#0E6B5A] transition-colors underline-offset-4 hover:underline"
                 >
                   הרשמה
                 </button>
@@ -512,7 +512,7 @@ export default function Auth() {
                 <button
                   type="button"
                   onClick={() => setMode("signin")}
-                  className="font-bold text-[#B8923F] hover:text-[#C9A227] transition-colors underline-offset-4 hover:underline"
+                  className="font-bold text-[#0A5446] hover:text-[#0E6B5A] transition-colors underline-offset-4 hover:underline"
                 >
                   התחברות
                 </button>

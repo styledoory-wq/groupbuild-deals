@@ -51,7 +51,7 @@ export default function Notifications() {
                 <div
                   className="h-10 w-10 rounded-[14px] flex items-center justify-center shrink-0"
                   style={{
-                    background: unread ? "#C9A227" : "#F4F6FA",
+                    background: unread ? "#0E6B5A" : "#F4F6FA",
                     color: unread ? "#FFFFFF" : "#6B7280",
                     boxShadow: unread ? "var(--shadow-soft)" : "none",
                   }}

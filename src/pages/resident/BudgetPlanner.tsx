@@ -30,8 +30,8 @@ const finishOptions: FinishLevel[] = ["basic", "standard", "premium", "luxury"];
 const regionOptions: Region[] = ["north", "haifa", "sharon", "center", "jerusalem", "south"];
 
 const FIELD_LABEL = "block text-[11.5px] font-extrabold text-[#6B7280] mb-1.5 tracking-wide";
-const FIELD_INPUT = "h-12 bg-white border border-[#ECEEF2] rounded-[18px] text-[14px] font-medium text-[#1F2937] text-right focus-visible:outline-none focus-visible:border-[#C9A227] focus-visible:ring-[3px] focus-visible:ring-[#C9A227]/15 transition";
-const FIELD_TRIGGER = "h-12 bg-white border border-[#ECEEF2] rounded-[18px] text-[14px] font-medium text-[#1F2937] focus:outline-none focus:border-[#C9A227] focus:ring-[3px] focus:ring-[#C9A227]/15";
+const FIELD_INPUT = "h-12 bg-white border border-[#ECEEF2] rounded-[18px] text-[14px] font-medium text-[#1F2937] text-right focus-visible:outline-none focus-visible:border-[#0E6B5A] focus-visible:ring-[3px] focus-visible:ring-[#0E6B5A]/15 transition";
+const FIELD_TRIGGER = "h-12 bg-white border border-[#ECEEF2] rounded-[18px] text-[14px] font-medium text-[#1F2937] focus:outline-none focus:border-[#0E6B5A] focus:ring-[3px] focus:ring-[#0E6B5A]/15";
 
 function FieldGrid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-3">{children}</div>;

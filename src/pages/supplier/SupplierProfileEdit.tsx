@@ -304,7 +304,7 @@ export default function SupplierProfileEdit() {
           {/* Supplier kind: services / products / both (two checkboxes) */}
           <div className="space-y-1.5">
             <Label className="text-xs font-bold flex items-center gap-1.5">
-              <Tag className="h-3.5 w-3.5 text-[#C9A227]" /> סוג הספק
+              <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> סוג הספק
             </Label>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -319,7 +319,7 @@ export default function SupplierProfileEdit() {
                   className={
                     "rounded-[16px] p-3 text-right transition-all relative shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] " +
                     (opt.checked
-                      ? "bg-[#EAF2FF] text-[#1F2937] ring-2 ring-[#C9A227]/30"
+                      ? "bg-[#EAF2FF] text-[#1F2937] ring-2 ring-[#0E6B5A]/30"
                       : "bg-white text-[#1F2937]")
                   }
                 >
@@ -343,7 +343,7 @@ export default function SupplierProfileEdit() {
           <Field label="אימייל" icon={Mail}>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-11 rounded-xl" />
             {email.trim().toLowerCase() !== originalEmail.toLowerCase() && (
-              <p className="text-fs-xs text-[#B8923F] mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
+              <p className="text-fs-xs text-[#0A5446] mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
             )}
           </Field>
           <Field label="תיאור קצר (יוצג בכרטיס)" icon={FileText}>
@@ -361,7 +361,7 @@ export default function SupplierProfileEdit() {
         {/* Branding & Media */}
         <section className="gb-card p-4 space-y-4">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <ImageIcon className="h-3.5 w-3.5 text-[#C9A227]" /> מיתוג ומדיה
+              <ImageIcon className="h-3.5 w-3.5 text-[#0E6B5A]" /> מיתוג ומדיה
           </h3>
 
           {/* Logo */}
@@ -383,7 +383,7 @@ export default function SupplierProfileEdit() {
           {/* Links */}
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
-              <LinkIcon className="h-3.5 w-3.5 text-[#C9A227]" /> קישורים
+              <LinkIcon className="h-3.5 w-3.5 text-[#0E6B5A]" /> קישורים
             </Label>
             <Input dir="ltr" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://example.com (אתר)" className="h-10 rounded-xl text-sm" maxLength={500} />
             <Input dir="ltr" value={whatsappUrl} onChange={(e) => setWhatsappUrl(e.target.value)} placeholder="https://wa.me/972500000000" className="h-10 rounded-xl text-sm" maxLength={500} />
@@ -394,7 +394,7 @@ export default function SupplierProfileEdit() {
           {/* Catalogs */}
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5 text-[#C9A227]" /> קטלוגים
+              <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" /> קטלוגים
             </Label>
             {supplierId ? (
               <SupplierCatalogsManager supplierId={supplierId} />
@@ -406,7 +406,7 @@ export default function SupplierProfileEdit() {
           {/* Gallery */}
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
-              <ImageIcon className="h-3.5 w-3.5 text-[#C9A227]" /> גלריית עבודות
+              <ImageIcon className="h-3.5 w-3.5 text-[#0E6B5A]" /> גלריית עבודות
             </Label>
             <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleGalleryUpload} />
             <Button type="button" variant="outline" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery} className="h-9 rounded-xl text-xs w-full">
@@ -434,7 +434,7 @@ export default function SupplierProfileEdit() {
 
         <section className="gb-card p-4 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Tag className="h-3.5 w-3.5 text-[#C9A227]" /> קטגוריות שירות
+            <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> קטגוריות שירות
           </h3>
           <div className="flex flex-wrap gap-2">
             {categories.map((c) => {
@@ -458,7 +458,7 @@ export default function SupplierProfileEdit() {
 
         <section className="gb-card p-4 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Globe className="h-3.5 w-3.5 text-[#C9A227]" /> אזורי שירות
+            <Globe className="h-3.5 w-3.5 text-[#0E6B5A]" /> אזורי שירות
           </h3>
           <div className="flex items-center justify-between py-1">
             <span className="text-sm font-semibold">נותן שירות בכל הארץ</span>
@@ -529,7 +529,7 @@ function Field({ label, icon: Icon, children }: { label: string; icon: React.Com
   return (
     <div>
       <Label className="text-xs font-bold flex items-center gap-1.5 mb-1.5">
-        <Icon className="h-3.5 w-3.5 text-[#C9A227]" /> {label}
+        <Icon className="h-3.5 w-3.5 text-[#0E6B5A]" /> {label}
       </Label>
       {children}
     </div>

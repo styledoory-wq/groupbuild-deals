@@ -72,7 +72,7 @@ export default function AdminStats() {
               </div>
             </div>
             <div className="h-11 w-11 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-              <TrendingUp className="h-[18px] w-[18px] text-[#C9A227]" strokeWidth={2.2} />
+              <TrendingUp className="h-[18px] w-[18px] text-[#0E6B5A]" strokeWidth={2.2} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-[#ECEEF2]">
@@ -126,7 +126,7 @@ function Mini({ icon: Icon, label, value }: { icon: LucideIcon; label: string; v
   return (
     <div className="bg-white rounded-[16px] p-4 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
       <div className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center mb-2.5">
-        <Icon className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
+        <Icon className="h-[16px] w-[16px] text-[#0E6B5A]" strokeWidth={2.2} />
       </div>
       <div className="text-[20px] font-extrabold text-[#1F2937] leading-none tracking-tight">{value.toLocaleString("he-IL")}</div>
       <div className="text-[12px] text-[#6B7280] mt-1.5 font-medium">{label}</div>

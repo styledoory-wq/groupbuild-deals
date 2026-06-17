@@ -383,7 +383,7 @@ export default function MyOffers() {
                     <Link to={`/resident/deals/${deal.id}`} className="flex-1 min-w-0">
                       <h3 className="font-bold text-[14px] text-[#1F2937] truncate flex items-center gap-1.5">
                         {deal.title}
-                        <ShieldCheck className="h-3.5 w-3.5 text-[#C9A227] shrink-0" />
+                        <ShieldCheck className="h-3.5 w-3.5 text-[#0E6B5A] shrink-0" />
                       </h3>
                       <p className="text-[11px] text-[#6B7280] mt-0.5 inline-flex items-center gap-1 font-medium">
                         <span>{count} מצטרפים</span>

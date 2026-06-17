@@ -66,7 +66,7 @@ export default function AdminLogin() {
       <div className="w-full max-w-screen-sm flex flex-col px-6 pt-16 pb-8">
         <button
           onClick={() => navigate("/")}
-          className="self-start text-xs text-[#6B7280] hover:text-[#C9A227] transition-smooth flex items-center gap-1 mb-8"
+          className="self-start text-xs text-[#6B7280] hover:text-[#0E6B5A] transition-smooth flex items-center gap-1 mb-8"
         >
           <ArrowRight className="h-3.5 w-3.5" />
           חזרה

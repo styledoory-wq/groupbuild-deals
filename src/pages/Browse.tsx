@@ -176,7 +176,7 @@ export default function Browse() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={tab === "deals" ? "חיפוש עסקה לפי שם..." : "חיפוש ספק..."}
-            className="w-full h-12 rounded-[18px] bg-white border border-[#ECEEF2] pr-11 pl-4 text-[14px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#C9A227] focus:ring-[3px] focus:ring-[#C9A227]/15"
+            className="w-full h-12 rounded-[18px] bg-white border border-[#ECEEF2] pr-11 pl-4 text-[14px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#0E6B5A] focus:ring-[3px] focus:ring-[#0E6B5A]/15"
           />
         </div>
 
@@ -221,7 +221,7 @@ export default function Browse() {
                     <img src={s.logo_url} alt={s.business_name} className="h-14 w-14 rounded-xl object-cover border border-[#ECEEF2]" />
                   ) : (
                     <div className="h-14 w-14 rounded-xl bg-[#F4F6FA] flex items-center justify-center">
-                      <ShieldCheck className="h-6 w-6 text-[#C9A227]" />
+                      <ShieldCheck className="h-6 w-6 text-[#0E6B5A]" />
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
@@ -233,7 +233,7 @@ export default function Browse() {
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-[#6B7280]">
                   <span className="inline-flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-[#C9A227] text-[#C9A227]" />
+                    <Star className="h-3 w-3 fill-[#0E6B5A] text-[#0E6B5A]" />
                     <span className="font-bold text-[#1F2937]">מאומת</span>
                   </span>
                   {s.service_areas?.[0] && <span className="truncate max-w-[60%]">{s.service_areas[0]}</span>}

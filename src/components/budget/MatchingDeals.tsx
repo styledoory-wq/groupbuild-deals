@@ -65,7 +65,7 @@ export function MatchingDeals({ result }: { result: BudgetResult }) {
     <div className="bg-white rounded-3xl p-5 border border-[#E5E7EB] shadow-sm space-y-3" style={{ fontFamily: "'Epilogue', system-ui, sans-serif" }}>
       <div className="flex items-center gap-2">
         <div className="h-8 w-8 rounded-xl bg-[#FFFBEB] flex items-center justify-center">
-          <Tag className="h-4 w-4 text-[#C9A227]" />
+          <Tag className="h-4 w-4 text-[#0E6B5A]" />
         </div>
         <h3 className="font-extrabold text-[#1F2937] text-[15px]" style={{ fontFamily: "'Urbanist'" }}>עסקאות שיכולות לחסוך לך כסף</h3>
       </div>

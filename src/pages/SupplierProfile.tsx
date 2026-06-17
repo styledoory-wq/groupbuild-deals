@@ -237,7 +237,7 @@ export default function SupplierProfile() {
                 as="h1"
                 className="text-[20px] font-extrabold truncate text-[#1F2937] tracking-tight"
               />
-              {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-[#C9A227] shrink-0" />}
+              {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-[#0E6B5A] shrink-0" />}
             </div>
             <div className="mb-1 flex items-center gap-1.5 flex-wrap">
               <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-[#6B7280] [&>b]:text-[#1F2937] [&>span]:text-[#6B7280]" />
@@ -282,7 +282,7 @@ export default function SupplierProfile() {
                   rel="noreferrer noopener"
                   className="h-11 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
                 >
-                  <l.Icon className="h-4 w-4 text-[#C9A227]" />
+                  <l.Icon className="h-4 w-4 text-[#0E6B5A]" />
                   {l.label}
                 </a>
               ))}
@@ -314,7 +314,7 @@ export default function SupplierProfile() {
         {supplierCategories.length > 0 && (
           <section className="gb-card p-4">
             <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Tag className="h-3.5 w-3.5 text-[#C9A227]" /> תחומים
+              <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> תחומים
             </h2>
             <div className="flex flex-wrap gap-1.5">
               {supplierCategories.map((c) => (
@@ -332,7 +332,7 @@ export default function SupplierProfile() {
         {/* Service area */}
         <section className="gb-card p-4">
           <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5 text-[#C9A227]" /> אזורי שירות
+            <MapPin className="h-3.5 w-3.5 text-[#0E6B5A]" /> אזורי שירות
           </h2>
           {supplier.serves_all_country ? (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-extrabold bg-[#F4F6FA] text-[#1F2937] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
@@ -357,7 +357,7 @@ export default function SupplierProfile() {
         {/* Active offers from this supplier */}
         <section className="gb-card p-4">
           <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <Tag className="h-3.5 w-3.5 text-[#C9A227]" /> ההצעות הפעילות
+            <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> ההצעות הפעילות
           </h2>
           {deals.length === 0 ? (
             <p className="text-sm text-muted-foreground">אין עדיין הצעות פעילות מהספק הזה.</p>
@@ -434,7 +434,7 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
   return (
     <section className="gb-card p-4 space-y-2">
       <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-        <FileText className="h-3.5 w-3.5 text-[#C9A227]" /> קטלוגים
+        <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" /> קטלוגים
       </h2>
       <div className="space-y-1.5">
         {rows.map((r) => {
@@ -448,7 +448,7 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
               className="flex items-center gap-3 p-2.5 rounded-[16px] bg-white shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] transition-transform active:scale-[0.98]"
             >
               <div className="h-10 w-10 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                <FileText className="h-4 w-4 text-[#C9A227]" />
+                <FileText className="h-4 w-4 text-[#0E6B5A]" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-bold truncate flex items-center gap-1.5">
@@ -460,7 +460,7 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
                 {r.description && (
                   <div className="text-fs-xs text-muted-foreground line-clamp-1">{r.description}</div>
                 )}
-                <div className="text-fs-xs text-[#B8923F] font-bold mt-0.5">
+                <div className="text-fs-xs text-[#0A5446] font-bold mt-0.5">
                   {isLink ? "צפייה בקטלוג ↗" : "צפייה בקטלוג"}
                 </div>
               </div>
@@ -476,7 +476,7 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
             className="flex items-center gap-3 p-2.5 rounded-[16px] bg-white shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] transition-transform active:scale-[0.98]"
           >
             <div className="h-10 w-10 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
-              <FileText className="h-4 w-4 text-[#C9A227]" />
+              <FileText className="h-4 w-4 text-[#0E6B5A]" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-bold truncate">צפייה בקטלוג</div>

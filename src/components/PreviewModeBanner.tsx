@@ -60,7 +60,7 @@ export function PreviewModeBanner() {
   return (
     <div
       dir="rtl"
-      className="fixed top-0 inset-x-0 z-[120] bg-[#FFF3B0] border-b border-[#C9A227] text-[#1F2937] shadow-[0_2px_8px_-2px_rgba(10,31,61,0.15)]"
+      className="fixed top-0 inset-x-0 z-[120] bg-[#FFF3B0] border-b border-[#0E6B5A] text-[#1F2937] shadow-[0_2px_8px_-2px_rgba(10,31,61,0.15)]"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <div className="mx-auto max-w-[var(--app-max-w)] flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold">

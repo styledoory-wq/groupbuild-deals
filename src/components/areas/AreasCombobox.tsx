@@ -90,7 +90,7 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
             disabled={loading}
           >
             <span className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4 text-[#C9A227]" />
+              <MapPin className="h-4 w-4 text-[#0E6B5A]" />
               {selectedChips.length > 0
                 ? `${selectedChips.length} אזורי שירות נבחרו`
                 : placeholder}
@@ -116,7 +116,7 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
                       value.servesAllCountry ? "opacity-100" : "opacity-0",
                     )}
                   />
-                  <Globe className="ml-2 h-4 w-4 text-[#C9A227]" />
+                  <Globe className="ml-2 h-4 w-4 text-[#0E6B5A]" />
                   כל הארץ
                 </CommandItem>
               </CommandGroup>

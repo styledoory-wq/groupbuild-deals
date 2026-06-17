@@ -14,7 +14,7 @@ const buttonVariants = cva(
     "rounded-[16px] text-[14px] font-bold tracking-tight",
     "min-h-touch ring-offset-background",
     "transition-[transform,box-shadow,filter,background-color,color] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A227]/40 focus-visible:ring-offset-1",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E6B5A]/40 focus-visible:ring-offset-1",
     "disabled:pointer-events-none disabled:opacity-50",
     "active:scale-[0.97]",
     "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -27,7 +27,7 @@ const buttonVariants = cva(
           "bg-[#2563EB] text-white shadow-[0_8px_20px_-10px_rgba(37,99,235,0.45)] hover:brightness-110",
         // Gold accent — premium / hero actions
         premium:
-          "bg-gradient-to-l from-[#C9A84C] via-[#E8C96B] to-[#C9A84C] text-[#1F2937] shadow-[0_8px_20px_-10px_rgba(201,168,76,0.55)] hover:brightness-105",
+          "bg-gradient-to-l from-[#1A8870] via-[#34A88E] to-[#1A8870] text-[#1F2937] shadow-[0_8px_20px_-10px_rgba(201,168,76,0.55)] hover:brightness-105",
         // Secondary — soft white surface, matches cards
         secondary:
           "bg-white text-[#1F2937] shadow-[0_2px_10px_-4px_rgba(31,41,55,0.10)] hover:bg-[#F4F6FA]",

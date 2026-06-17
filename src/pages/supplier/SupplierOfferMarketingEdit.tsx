@@ -111,7 +111,7 @@ export default function SupplierOfferMarketingEdit() {
         {/* Trust banner */}
         <div className="rounded-[16px] bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] p-3.5 flex items-start gap-2.5">
           <div className="h-8 w-8 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-            <Sparkles className="h-4 w-4 text-[#C9A227]" />
+            <Sparkles className="h-4 w-4 text-[#0E6B5A]" />
           </div>
           <div className="text-fs-sm leading-relaxed">
             <div className="font-bold text-[#1F2937] mb-0.5">עריכה בטוחה</div>
@@ -213,7 +213,7 @@ export default function SupplierOfferMarketingEdit() {
             <li>קטגוריה ונראות (ציבורי / פרויקט)</li>
           </ul>
           <p className="text-fs-xs text-[#6B7280] flex items-start gap-1.5 pt-1">
-            <ShieldAlert className="h-3.5 w-3.5 text-[#C9A227] shrink-0 mt-0.5" />
+            <ShieldAlert className="h-3.5 w-3.5 text-[#0E6B5A] shrink-0 mt-0.5" />
             לשינויים בשדות אלו יש לפנות למנהל המערכת. נועד למניעת שינויים לאחר שדיירים כבר הצטרפו.
           </p>
         </section>

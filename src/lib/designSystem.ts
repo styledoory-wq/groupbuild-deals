@@ -38,11 +38,11 @@ export const STAGE_THEMES: StageTheme[] = [
   { id: "finishes",     index: 5, title: "גמרים",              shortTitle: "גמר",
     accent: "#7C3AED", tint: "#F5F3FF", border: "#E2DBFB" },
   { id: "kitchen-bath", index: 6, title: "מטבחים ואמבטיות",  shortTitle: "מטבח",
-    accent: "#C9A227", tint: "#FFF7ED", border: "#F1E2C0" },
+    accent: "#0E6B5A", tint: "#EAF7F2", border: "#D6F0E8" },
   { id: "outdoor",      index: 7, title: "חצר ופיתוח",         shortTitle: "חצר",
     accent: "#6E8A2E", tint: "#F7FEE7", border: "#DFEFBE" },
   { id: "moving",       index: 8, title: "כניסה לבית",         shortTitle: "כניסה",
-    accent: "#C9A227", tint: "#FFF7ED", border: "#F1E2C0" },
+    accent: "#0E6B5A", tint: "#EAF7F2", border: "#D6F0E8" },
 ];
 
 export const getStage = (id: StageId): StageTheme =>

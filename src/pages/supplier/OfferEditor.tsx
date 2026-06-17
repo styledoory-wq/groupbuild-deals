@@ -808,7 +808,7 @@ export default function OfferEditor() {
           className={`gb-card p-4 transition-colors ${
             commitmentError && !commitmentAccepted
               ? "border border-destructive bg-destructive/5 animate-pulse"
-              : "border border-[#C9A227]/40 bg-[#FFF8E1]/40"
+              : "border border-[#0E6B5A]/40 bg-[#FFF8E1]/40"
           }`}
         >
           <label className="flex items-start gap-3 cursor-pointer">

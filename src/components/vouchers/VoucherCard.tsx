@@ -104,7 +104,7 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
           </div>
           <div className="text-left">
             <div className="text-fs-xs text-primary-foreground/65">מחיר הטבה</div>
-            <div className="text-2xl font-extrabold text-[#C9A227] leading-none">{formatIls(benefitPrice)}</div>
+            <div className="text-2xl font-extrabold text-[#0E6B5A] leading-none">{formatIls(benefitPrice)}</div>
           </div>
         </div>
         <div className="rounded-[16px] bg-white/10 px-3 py-2 flex items-center justify-between gap-2">

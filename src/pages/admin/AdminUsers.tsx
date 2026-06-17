@@ -294,7 +294,7 @@ export default function AdminUsers() {
 
               <div>
                 <Label className="text-xs flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-[#C9A227]" /> פרויקט משויך
+                  <Building2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> פרויקט משויך
                 </Label>
                 <select
                   value={editing.project_id ?? ""}

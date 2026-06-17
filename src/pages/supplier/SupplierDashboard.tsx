@@ -191,7 +191,7 @@ export default function SupplierDashboard() {
         </h1>
         {dbSupplier && !isPending && !isRejected && (
           <div className="mt-1.5">
-            <SupplierRatingBadge supplierId={dbSupplier.id} className="text-[12px] text-[#C9A227]" />
+            <SupplierRatingBadge supplierId={dbSupplier.id} className="text-[12px] text-[#0E6B5A]" />
           </div>
         )}
       </div>
@@ -205,7 +205,7 @@ export default function SupplierDashboard() {
         <div className="px-5 mt-5">
           <div className="bg-white rounded-[24px] p-6 border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] text-center">
             <div className="h-16 w-16 mx-auto rounded-2xl bg-white flex items-center justify-center mb-4 shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]">
-              <Clock className="h-6 w-6 text-[#C9A227]" strokeWidth={2} />
+              <Clock className="h-6 w-6 text-[#0E6B5A]" strokeWidth={2} />
             </div>
             <h2 className="font-extrabold text-[#1F2937] text-base mb-2">
               {isRejected ? "ההרשמה נדחתה" : "ההרשמה התקבלה וממתינה לאישור"}
@@ -253,7 +253,7 @@ export default function SupplierDashboard() {
 
         <section className="px-5 space-y-3 pb-8 w-full">
           <h2 className="text-[12px] font-bold text-[#6B7280] uppercase tracking-wider flex items-center gap-1.5 mb-1 px-1">
-            <Briefcase className="h-3 w-3 text-[#C9A227]" strokeWidth={2} /> ההצעות שלי
+            <Briefcase className="h-3 w-3 text-[#0E6B5A]" strokeWidth={2} /> ההצעות שלי
           </h2>
           {myDeals.length === 0 && (
             <div className="bg-white rounded-[20px] p-5 border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] text-center text-sm text-[#6B7280]">
@@ -271,12 +271,12 @@ export default function SupplierDashboard() {
                   </div>
                   <div className="text-left">
                     <div className="font-extrabold text-[#1F2937] text-sm">{formatILS(priceFor(d))}</div>
-                    <div className="text-[12px] text-[#C9A227] font-bold mt-0.5">{c.paid} שילמו</div>
+                    <div className="text-[12px] text-[#0E6B5A] font-bold mt-0.5">{c.paid} שילמו</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-[12px] pt-3 border-t border-[#ECEEF2]">
                   <span className="px-2.5 py-1 rounded-full bg-[#F8F8F6] text-[#1F2937] border border-[#ECEEF2] font-semibold">{c.interests} לידים</span>
-                  <span className="px-2.5 py-1 rounded-full bg-[#C9A227]/12 text-[#C9A227] border border-[#C9A227]/30 font-semibold">{c.paid} פיקדונות</span>
+                  <span className="px-2.5 py-1 rounded-full bg-[#0E6B5A]/12 text-[#0E6B5A] border border-[#0E6B5A]/30 font-semibold">{c.paid} פיקדונות</span>
                 </div>
               </div>
             );
@@ -294,7 +294,7 @@ function Stat({ icon: Icon, label, value, small }: { icon: LucideIcon; label: st
     <div className="bg-white rounded-[20px] p-4 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] w-full">
       <div className="flex items-center gap-2 mb-2">
         <span className="h-9 w-9 rounded-xl bg-[#2563EB]/12 flex items-center justify-center">
-          <Icon className="h-4 w-4 text-[#C9A227]" strokeWidth={2} />
+          <Icon className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2} />
         </span>
         <span className="text-[12px] text-[#6B7280] font-bold uppercase tracking-wider">{label}</span>
       </div>

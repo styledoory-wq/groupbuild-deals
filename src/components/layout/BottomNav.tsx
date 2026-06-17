@@ -63,7 +63,7 @@ function BottomNavImpl({ role }: { role: Role }) {
               onTouchStart={() => preloadRoute(to)}
               className={cn(
                 "flex-1 flex flex-col items-center justify-center gap-[3px] relative transition-colors duration-150",
-                active ? "text-[#C9A227]" : "text-[#6B7280] hover:text-[#1F2937]",
+                active ? "text-[#0E6B5A]" : "text-[#6B7280] hover:text-[#1F2937]",
               )}
               style={{ minHeight: "var(--tap)" }}
             >

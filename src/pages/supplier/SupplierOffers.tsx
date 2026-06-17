@@ -184,7 +184,7 @@ export default function SupplierOffers() {
             <div className="flex-1 rounded-[16px] bg-gradient-to-br from-[#1F2937] to-[#1A3A5C] p-4 text-white shadow-[0_8px_24px_-10px_rgba(10,31,61,0.4)]">
               <div className="flex items-center gap-2 mb-1">
                 <div className="h-7 w-7 rounded-full bg-white/15 flex items-center justify-center">
-                  <Sparkles className="h-3.5 w-3.5 text-[#C9A227]" />
+                  <Sparkles className="h-3.5 w-3.5 text-[#0E6B5A]" />
                 </div>
                 <span className="text-xs font-medium opacity-80">הצעות פעילות</span>
               </div>
