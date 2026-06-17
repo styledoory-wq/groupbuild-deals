@@ -352,12 +352,13 @@ export default function BudgetPlanner() {
                   boxShadow: `0 14px 28px -10px ${theme.ring}, inset 0 1px 0 rgba(255,255,255,0.25)`,
                 }}
               >
-                חשב תקציב
+                {mode === "wizard" ? "המשך לאשף השאלות" : "חשב תקציב"}
               </button>
                   </>
                 );
               })()}
             </div>
+            )}
           </>
           );
         })()}
