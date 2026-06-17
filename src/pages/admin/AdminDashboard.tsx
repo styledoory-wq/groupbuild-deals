@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, MapPin, Settings, UserCog, AlertTriangle, Eye, type LucideIcon } from "lucide-react";
+import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, MapPin, Settings, UserCog, AlertTriangle, Eye, Inbox, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -177,6 +177,7 @@ export default function AdminDashboard() {
           <QuickLink onClick={() => navigate("/admin/settings")} icon={Settings} label="הגדרות מערכת" desc="התראות ומייל אדמין" />
           <QuickLink onClick={() => navigate("/admin/stats")} icon={BarChart3} label="סטטיסטיקות" desc="ניתוח מערכת מלא" />
           <QuickLink onClick={() => navigate("/admin/complaints")} icon={AlertTriangle} label="תלונות דיירים" desc="דיווחי בעיות" />
+          <QuickLink onClick={() => navigate("/admin/leads")} icon={Inbox} label="ניהול לידים" desc="לידים, פניות ורשימת המתנה" />
         </div>
       </section>
 
