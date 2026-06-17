@@ -98,10 +98,13 @@ Deno.serve(async (req) => {
       return json({ error: "deposit_not_required", message: "לעסקה זו לא נדרש פיקדון" }, 409);
     }
 
-    const amount = Number(deal.deposit_amount);
-    if (!Number.isFinite(amount) || amount <= 0) {
+    const depositAmount = Number(deal.deposit_amount);
+    if (!Number.isFinite(depositAmount) || depositAmount <= 0) {
       return json({ error: "invalid_amount", message: "סכום הפיקדון אינו תקין" }, 409);
     }
+    // Platform joining fee (non-refundable) — keep in sync with src/lib/platformFees.ts
+    const JOINING_FEE = 15;
+    const amount = depositAmount + JOINING_FEE;
 
     // ---------- Already-paid / existing-pending ----------
     const { data: existingDeposit } = await admin
