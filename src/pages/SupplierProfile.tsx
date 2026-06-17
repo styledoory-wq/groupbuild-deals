@@ -145,6 +145,18 @@ export default function SupplierProfile() {
         })),
       );
 
+      const revRows = (revData ?? []) as ReviewItem[];
+      let withNames: ReviewItem[] = revRows;
+      const uids = Array.from(new Set(revRows.map((r) => r.user_id)));
+      if (uids.length) {
+        const { data: profs } = await supabase.from("profiles").select("id,full_name").in("id", uids);
+        const map = new Map<string, string>();
+        (profs ?? []).forEach((p) => map.set(p.id, p.full_name || "דייר"));
+        withNames = revRows.map((r) => ({ ...r, reviewer_name: map.get(r.user_id) || "דייר" }));
+      }
+      if (!cancelled) setReviews(withNames);
+
+
       } catch (error) {
         if (!cancelled) setLoadError(getFriendlyLoadError(error, "שגיאה בטעינת הספק"));
       } finally {
