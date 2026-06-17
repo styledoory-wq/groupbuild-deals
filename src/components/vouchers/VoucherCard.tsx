@@ -96,7 +96,7 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
         </span>
       </div>
 
-      <div className="rounded-[20px] bg-[#2563EB] text-white p-4 space-y-3 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
+      <div className="rounded-[20px] bg-[#0E6B5A] text-white p-4 space-y-3 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-fs-xs text-primary-foreground/65">מחיר רגיל</div>

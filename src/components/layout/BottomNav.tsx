@@ -71,7 +71,7 @@ function BottomNavImpl({ role }: { role: Role }) {
               <span
                 className={cn(
                   "absolute top-0 left-1/2 -translate-x-1/2 h-[3px] rounded-b-full transition-all duration-200",
-                  active ? "w-10 bg-[#2563EB]" : "w-0 bg-transparent",
+                  active ? "w-10 bg-[#0E6B5A]" : "w-0 bg-transparent",
                 )}
               />
               <Icon

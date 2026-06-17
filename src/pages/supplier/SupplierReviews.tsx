@@ -171,7 +171,7 @@ export default function SupplierReviews() {
                 <span className="w-4 text-muted-foreground">{d.star}</span>
                 <Star className="h-3 w-3 fill-[#0E6B5A] text-[#0E6B5A]" />
                 <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full bg-[#2563EB]" style={{ width: `${(d.count / denom) * 100}%` }} />
+                  <div className="h-full bg-[#0E6B5A]" style={{ width: `${(d.count / denom) * 100}%` }} />
                 </div>
                 <span className="w-6 text-left text-muted-foreground">{d.count}</span>
               </div>

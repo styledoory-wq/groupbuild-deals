@@ -248,7 +248,7 @@ export default function Auth() {
           <h1 className="mt-10 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight">
             {mode === "signin" ? "מתחברים לעסקאות טובות יותר" : "בואו נצא לדרך"}
           </h1>
-          <div className="mt-3 h-[2px] w-10 rounded-full bg-[#2563EB]" />
+          <div className="mt-3 h-[2px] w-10 rounded-full bg-[#0E6B5A]" />
           <p className="mt-3 text-[#6B7280] text-[13px] font-medium leading-relaxed max-w-[22rem]">
             {mode === "signin"
               ? "דיירים וספקים מתחברים לפלטפורמה אחת ויוצרים כוח קנייה שחוסך כסף לכולם"
@@ -329,7 +329,7 @@ export default function Auth() {
                       className={cn(
                         "p-3 rounded-[16px] text-right transition-all flex items-center gap-3 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97]",
                         role === id
-                          ? "bg-[#2563EB] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+                          ? "bg-[#0E6B5A] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
                           : "bg-white text-[#1F2937]"
                       )}
                     >

@@ -110,7 +110,7 @@ export default function AdminStats() {
                 <span className="text-[#6B7280] font-medium">{c.count} · {formatILS(c.revenue)}</span>
               </div>
               <div className="h-2 rounded-full bg-[#F4F6FA] overflow-hidden">
-                <div className="h-full bg-[#2563EB]" style={{ width: `${(c.count / maxCount) * 100}%` }} />
+                <div className="h-full bg-[#0E6B5A]" style={{ width: `${(c.count / maxCount) * 100}%` }} />
               </div>
             </div>
           ))}

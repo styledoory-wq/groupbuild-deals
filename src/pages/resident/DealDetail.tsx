@@ -928,7 +928,7 @@ export default function DealDetail() {
       >
         <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0]/95 to-transparent">
           {interested ? (
-            <div className="flex items-center gap-2.5 bg-[#2563EB] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
+            <div className="flex items-center gap-2.5 bg-[#0E6B5A] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
               <div className="w-10 h-10 bg-gradient-to-l from-[#1A8870] to-[#34A88E] rounded-full flex items-center justify-center shrink-0">
                 {hasCompletedJoin ? (
                   <CheckCircle2 className="w-5 h-5 text-[#1F2937]" strokeWidth={2.6} />
@@ -964,7 +964,7 @@ export default function DealDetail() {
               <Button
                 onClick={handleJoinClick}
                 disabled={submittingInterest}
-                className="flex-1 h-14 rounded-2xl bg-[#2563EB] hover:bg-[#2563EB]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#0E6B5A]/40"
+                className="flex-1 h-14 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#0E6B5A]/40"
               >
                 {submittingInterest ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -1134,7 +1134,7 @@ export default function DealDetail() {
             <Button
               onClick={submitJoin}
               disabled={!acceptedTerms || submittingInterest}
-              className="rounded-xl bg-[#2563EB] text-white font-bold"
+              className="rounded-xl bg-[#0E6B5A] text-white font-bold"
             >
               {submittingInterest ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1252,7 +1252,7 @@ function ShareButton({ deal, compact = false }: { deal: { id: string; title: str
             <a
               href={`sms:?&body=${encodeURIComponent(shareText)}`}
               onClick={() => setShareOpen(false)}
-              className="h-12 rounded-xl bg-[#2563EB] text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"
+              className="h-12 rounded-xl bg-[#0E6B5A] text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"
             >
               <Phone className="h-5 w-5" />
               שליחה ב-SMS

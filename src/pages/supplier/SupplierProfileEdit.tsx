@@ -325,7 +325,7 @@ export default function SupplierProfileEdit() {
                 >
                   <div className={"text-sm font-bold " + (opt.checked ? "text-primary" : "text-foreground")}>{opt.label}</div>
                   <div className="text-fs-xs text-muted-foreground mt-0.5 leading-tight">{opt.sub}</div>
-                  <span className={"absolute top-2 left-2 h-4 w-4 rounded-md flex items-center justify-center text-fs-xs shadow-[0_1px_3px_rgba(10,31,61,0.06)] " + (opt.checked ? "bg-[#2563EB] text-[#1F2937]" : "bg-[#F4F6FA]")}>{opt.checked ? "✓" : ""}</span>
+                  <span className={"absolute top-2 left-2 h-4 w-4 rounded-md flex items-center justify-center text-fs-xs shadow-[0_1px_3px_rgba(10,31,61,0.06)] " + (opt.checked ? "bg-[#0E6B5A] text-[#1F2937]" : "bg-[#F4F6FA]")}>{opt.checked ? "✓" : ""}</span>
                 </button>
               ))}
             </div>
@@ -445,7 +445,7 @@ export default function SupplierProfileEdit() {
                   key={c.id}
                   onClick={() => toggle(selectedCategories, setSelectedCategories, c.id)}
                   className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-transform active:scale-[0.97] shadow-[0_1px_3px_rgba(10,31,61,0.06)] ${
-                    on ? "bg-[#2563EB] text-white" : "bg-white text-[#1F2937]"
+                    on ? "bg-[#0E6B5A] text-white" : "bg-white text-[#1F2937]"
                   }`}
                 >
                   <span className="ml-1">{c.icon}</span>

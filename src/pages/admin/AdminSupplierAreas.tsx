@@ -199,7 +199,7 @@ export default function AdminSupplierAreas() {
           <Button
             onClick={save}
             disabled={saving}
-            className="w-full h-12 rounded-2xl bg-[#2563EB] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+            className="w-full h-12 rounded-2xl bg-[#0E6B5A] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
           >
             <Save className="h-4 w-4 ml-2" />
             {saving ? "שומר…" : "שמירה"}

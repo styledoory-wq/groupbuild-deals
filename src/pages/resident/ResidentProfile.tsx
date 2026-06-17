@@ -93,7 +93,7 @@ export default function ResidentProfile() {
                 <span className="text-[34px] font-extrabold text-[#1F2937] tracking-tight">{initials || "?"}</span>
               )}
             </div>
-            <label className="absolute bottom-0 left-0 h-9 w-9 rounded-full bg-[#2563EB] flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(14,107,90,0.5)] cursor-pointer active:scale-95 transition-transform">
+            <label className="absolute bottom-0 left-0 h-9 w-9 rounded-full bg-[#0E6B5A] flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(14,107,90,0.5)] cursor-pointer active:scale-95 transition-transform">
               <Camera className="h-4 w-4 text-white" strokeWidth={2.4} />
               <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploading} />
             </label>
@@ -130,7 +130,7 @@ export default function ResidentProfile() {
               className="w-full h-[60px] rounded-[20px] px-4 flex items-center justify-between bg-white border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] active:scale-[0.99] transition-transform"
             >
               <span className="flex items-center gap-3">
-                <span className="h-10 w-10 rounded-xl bg-[#2563EB]/12 flex items-center justify-center">
+                <span className="h-10 w-10 rounded-xl bg-[#0E6B5A]/12 flex items-center justify-center">
                   <Icon className="h-[18px] w-[18px] text-[#0E6B5A]" strokeWidth={2} />
                 </span>
                 <span className="text-[15px] font-bold text-[#1F2937] tracking-tight">{label}</span>
@@ -156,7 +156,7 @@ export default function ResidentProfile() {
 function InfoRow({ icon: Icon, label, value }: { icon: typeof Phone; label: string; value: string }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3.5">
-      <span className="h-9 w-9 rounded-xl bg-[#2563EB]/12 flex items-center justify-center shrink-0">
+      <span className="h-9 w-9 rounded-xl bg-[#0E6B5A]/12 flex items-center justify-center shrink-0">
         <Icon className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2.2} />
       </span>
       <div className="flex-1 min-w-0 text-right">

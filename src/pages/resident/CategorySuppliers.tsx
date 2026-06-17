@@ -345,7 +345,7 @@ export default function CategorySuppliers() {
             <button
               type="button"
               onClick={() => { setRegionId("all"); setCityId("all"); }}
-              className="mt-4 h-10 px-4 rounded-xl bg-[#2563EB] text-white text-xs font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+              className="mt-4 h-10 px-4 rounded-xl bg-[#0E6B5A] text-white text-xs font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
             >
               שנה אזור
             </button>

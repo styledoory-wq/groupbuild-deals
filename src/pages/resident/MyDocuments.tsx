@@ -38,7 +38,7 @@ const getErrorMessage = (error: unknown, fallback: string) =>
 
 const CARD = "bg-white rounded-[20px] border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]";
 const CHIP_BASE = "text-[12px] px-3 py-1.5 rounded-full border font-bold transition-colors";
-const CHIP_ACTIVE = "bg-[#2563EB] text-white border-[#2563EB]";
+const CHIP_ACTIVE = "bg-[#0E6B5A] text-white border-[#0E6B5A]";
 const CHIP_IDLE = "bg-white border-[#ECEEF2] text-[#6B7280]";
 
 export default function MyDocuments() {
@@ -180,7 +180,7 @@ export default function MyDocuments() {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="w-full h-12 rounded-[20px] bg-[#2563EB] text-white font-bold text-[14px] flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-60"
+            className="w-full h-12 rounded-[20px] bg-[#0E6B5A] text-white font-bold text-[14px] flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-60"
           >
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             {uploading ? "מעלה..." : "בחירת קובץ להעלאה"}
@@ -230,7 +230,7 @@ export default function MyDocuments() {
               const catInfo = getCategoryInfo(doc.category);
               return (
                 <div key={doc.id} className={`${CARD} p-3 flex items-center gap-3`}>
-                  <div className="h-10 w-10 rounded-xl bg-[#2563EB]/12 flex items-center justify-center text-lg shrink-0">
+                  <div className="h-10 w-10 rounded-xl bg-[#0E6B5A]/12 flex items-center justify-center text-lg shrink-0">
                     {catInfo.icon}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -243,7 +243,7 @@ export default function MyDocuments() {
                   <div className="flex gap-1 shrink-0">
                     <button
                       onClick={() => handleDownload(doc)}
-                      className="h-8 w-8 rounded-xl bg-[#2563EB]/12 flex items-center justify-center text-[#2563EB] active:scale-95 transition-transform"
+                      className="h-8 w-8 rounded-xl bg-[#0E6B5A]/12 flex items-center justify-center text-[#0E6B5A] active:scale-95 transition-transform"
                       aria-label="הורדה"
                     >
                       <Download className="h-4 w-4" />

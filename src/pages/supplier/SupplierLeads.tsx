@@ -347,7 +347,7 @@ export default function SupplierLeads() {
             <>
               {(phone || wa) && (
                 <div className="flex gap-2 mt-2">
-                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#2563EB] text-white">חיוג</a>}
+                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#0E6B5A] text-white">חיוג</a>}
                   {wa && (
                     <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] inline-flex items-center justify-center gap-1">
                       <MessageCircle className="h-3 w-3" /> וואטסאפ
@@ -440,7 +440,7 @@ export default function SupplierLeads() {
               </div>
               {(phone || wa) && (
                 <div className="flex gap-2">
-                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#2563EB] text-white">חיוג</a>}
+                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#0E6B5A] text-white">חיוג</a>}
                   {wa && (
                     <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] inline-flex items-center justify-center gap-1">
                       <MessageCircle className="h-3 w-3" /> וואטסאפ

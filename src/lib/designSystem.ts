@@ -28,7 +28,7 @@ export interface StageTheme {
 
 export const STAGE_THEMES: StageTheme[] = [
   { id: "planning",     index: 1, title: "תכנון ועיצוב",     shortTitle: "תכנון",
-    accent: "#2563EB", tint: "#EEF4FF", border: "#DBE6FF" },
+    accent: "#0E6B5A", tint: "#EEF4FF", border: "#DBE6FF" },
   { id: "structure",    index: 2, title: "שלד ובנייה",        shortTitle: "בנייה",
     accent: "#E8742C", tint: "#FFF5EB", border: "#FFE2C7" },
   { id: "systems",      index: 3, title: "מערכות הבית",       shortTitle: "מערכות",

@@ -217,7 +217,7 @@ const filteredDeals = useMemo(() => {
               onClick={() => navigate("/resident/profile/edit")}
               className="shrink-0 inline-flex items-center gap-2 h-8 px-3 rounded-full bg-white border border-[#ECEEF2] text-[12px] font-semibold text-[#1F2937] shadow-sm active:scale-95 transition-transform"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#0E6B5A]" />
               <MapPin className="h-3 w-3 text-[#6B7280]" strokeWidth={2.4} />
               <span>{city}</span>
             </button>
@@ -251,7 +251,7 @@ const filteredDeals = useMemo(() => {
                 {formatILS(estimatedSavings)}
               </div>
               <p className="text-[12px] text-[#6B7280] mt-1 mb-4">נחסכו בזכות רכישות קבוצתיות</p>
-              <div className="w-full bg-[#2563EB] text-white py-2.5 rounded-xl font-bold text-[13px] shadow-md border border-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
+              <div className="w-full bg-[#0E6B5A] text-white py-2.5 rounded-xl font-bold text-[13px] shadow-md border border-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
                 פירוט החסכון המלא
               </div>
             </div>
@@ -293,7 +293,7 @@ const filteredDeals = useMemo(() => {
                 onClick={() => setActiveFilter(f)}
                 className={`shrink-0 h-9 px-4 rounded-full text-[12px] font-bold transition-all border ${
                   active
-                    ? "bg-[#2563EB] text-white border-[#2563EB] shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]"
+                    ? "bg-[#0E6B5A] text-white border-[#0E6B5A] shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]"
                     : "bg-white text-[#1F2937] border-[#ECEEF2] shadow-[0_2px_8px_-3px_rgba(10,31,61,0.10)]"
                 }`}
               >
@@ -334,7 +334,7 @@ const filteredDeals = useMemo(() => {
                   onClick={() => navigate(`/resident/categories?stage=${stage.id}`)}
                   className={`relative p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all active:scale-95 ${
                     isCurrent
-                      ? "border-2 border-[#2563EB] shadow-sm"
+                      ? "border-2 border-[#0E6B5A] shadow-sm"
                       : isPast
                       ? "border border-[#ECEEF2] opacity-90"
                       : "border border-[#ECEEF2] opacity-70"
@@ -342,7 +342,7 @@ const filteredDeals = useMemo(() => {
                   style={{ background: tint, minHeight: 78 }}
                 >
                   {isCurrent && (
-                    <span className="absolute -top-1.5 right-1/2 translate-x-1/2 bg-[#2563EB] text-white text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider whitespace-nowrap">נוכחי</span>
+                    <span className="absolute -top-1.5 right-1/2 translate-x-1/2 bg-[#0E6B5A] text-white text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider whitespace-nowrap">נוכחי</span>
                   )}
                   <Icon className="h-4 w-4 mb-1 text-[#1F2937]" strokeWidth={2.2} />
                   <span className="text-[11px] font-bold text-[#1F2937] leading-tight">{stage.title}</span>

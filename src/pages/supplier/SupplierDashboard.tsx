@@ -293,7 +293,7 @@ function Stat({ icon: Icon, label, value, small }: { icon: LucideIcon; label: st
   return (
     <div className="bg-white rounded-[20px] p-4 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] w-full">
       <div className="flex items-center gap-2 mb-2">
-        <span className="h-9 w-9 rounded-xl bg-[#2563EB]/12 flex items-center justify-center">
+        <span className="h-9 w-9 rounded-xl bg-[#0E6B5A]/12 flex items-center justify-center">
           <Icon className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2} />
         </span>
         <span className="text-[12px] text-[#6B7280] font-bold uppercase tracking-wider">{label}</span>
