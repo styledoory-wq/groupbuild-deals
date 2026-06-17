@@ -19,45 +19,45 @@
     /* Min touch target per WCAG / Apple HIG */
     --tap: 44px;
 
-    /* GroupBuild brand surface */
-    --background: 214 20% 95%;         /* #E8ECF0 */
-    --foreground: 215 56% 12%;         /* #0D1B2E */
-    --card: 0 0% 100%;
-    --card-foreground: 215 56% 12%;
+    /* GroupBuild — Home + Construction + Savings palette */
+    --background: 60 11% 97%;          /* #F8F8F6 */
+    --foreground: 220 26% 17%;         /* #1F2937 */
+    --card: 0 0% 100%;                 /* #FFFFFF */
+    --card-foreground: 220 26% 17%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 56% 12%;
-    --primary: 215 56% 12%;
+    --popover-foreground: 220 26% 17%;
+    --primary: 220 26% 17%;            /* #1F2937 */
     --primary-foreground: 0 0% 100%;
-    --primary-soft: 215 49% 21%;
-    --secondary: 43 54% 54%;
-    --secondary-foreground: 215 56% 12%;
-    --gold: 43 54% 54%;
+    --primary-soft: 220 14% 32%;
+    --secondary: 45 68% 47%;           /* #C9A227 brand gold */
+    --secondary-foreground: 220 26% 17%;
+    --gold: 45 68% 47%;                /* #C9A227 */
     --gold-light: 45 73% 67%;
-    --gold-foreground: 215 56% 12%;
-    --muted: 214 22% 92%;
-    --muted-foreground: 213 16% 49%;
-    --accent: 43 54% 54%;
-    --accent-foreground: 215 56% 12%;
-    --success: 152 45% 40%;
+    --gold-foreground: 220 26% 17%;
+    --muted: 60 9% 94%;
+    --muted-foreground: 220 9% 46%;    /* #6B7280 */
+    --accent: 45 68% 47%;
+    --accent-foreground: 220 26% 17%;
+    --success: 142 71% 36%;            /* #16A34A */
     --success-foreground: 0 0% 100%;
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 22% 88%;
-    --input: 214 22% 92%;
-    --ring: 43 54% 54%;
+    --border: 220 13% 91%;             /* #E5E7EB */
+    --input: 220 13% 91%;
+    --ring: 45 68% 47%;
     --radius: 1rem;
-    --gradient-hero: linear-gradient(180deg, #FFFFFF 0%, #E8ECF0 100%);
-    --gradient-gold: linear-gradient(135deg, #0A1F3D 0%, #123456 100%);
+    --gradient-hero: linear-gradient(180deg, #FFFFFF 0%, #F8F8F6 100%);
+    --gradient-gold: linear-gradient(135deg, #C9A227 0%, #E0BC52 100%);
     --gradient-card: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
-    --gradient-navy-deep: linear-gradient(160deg, #0D1B2E 0%, #1A2F4E 100%);
-    --gradient-page: #E8ECF0;
-    --shadow-soft: 0 1px 2px rgba(15,30,60,0.04), 0 4px 12px -6px rgba(15,30,60,0.06);
-    --shadow-card: 0 1px 2px rgba(15,30,60,0.04), 0 12px 32px -16px rgba(15,30,60,0.10), 0 2px 6px -2px rgba(15,30,60,0.04);
-    --shadow-elevated: 0 20px 48px -24px rgba(15,30,60,0.16), 0 6px 18px -10px rgba(15,30,60,0.08);
-    --shadow-floating: 0 28px 60px -28px rgba(15,30,60,0.22), 0 10px 24px -14px rgba(15,30,60,0.10);
-    --shadow-gold: 0 8px 20px -10px rgba(10,31,61,0.45);
-    --glow-gold: 0 0 0 3px rgba(212,175,55,0.18);
-    --glow-navy: 0 0 28px rgba(10,31,61,0.18);
+    --gradient-navy-deep: linear-gradient(160deg, #1F2937 0%, #374151 100%);
+    --gradient-page: #F8F8F6;
+    --shadow-soft: 0 1px 2px rgba(31,41,55,0.04), 0 4px 12px -6px rgba(31,41,55,0.06);
+    --shadow-card: 0 1px 2px rgba(31,41,55,0.04), 0 12px 32px -16px rgba(31,41,55,0.10), 0 2px 6px -2px rgba(31,41,55,0.04);
+    --shadow-elevated: 0 20px 48px -24px rgba(31,41,55,0.16), 0 6px 18px -10px rgba(31,41,55,0.08);
+    --shadow-floating: 0 28px 60px -28px rgba(31,41,55,0.22), 0 10px 24px -14px rgba(31,41,55,0.10);
+    --shadow-gold: 0 8px 20px -10px rgba(201,162,39,0.45);
+    --glow-gold: 0 0 0 3px rgba(201,162,39,0.18);
+    --glow-navy: 0 0 28px rgba(31,41,55,0.18);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
