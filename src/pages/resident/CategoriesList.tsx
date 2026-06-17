@@ -309,9 +309,9 @@ function StageSection({
           קטגוריות יתווספו בקרוב
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {cats.map((cat) => (
-            <CategoryRow
+            <CategoryTile
               key={cat.id}
               id={cat.id}
               name={cat.name}
@@ -326,7 +326,7 @@ function StageSection({
   );
 }
 
-function CategoryRow({
+function CategoryTile({
   id, name, icon, count, colors,
 }: {
   id: string;
@@ -337,39 +337,47 @@ function CategoryRow({
 }) {
   const dim = count === 0;
 
-  const body = (
-    <>
+  const inner = (
+    <div className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-1">
+      {/* count badge */}
+      {!dim && count > 0 && (
+        <span className={`absolute top-1 left-1 text-[9px] font-bold ${colors.tagText} ${colors.tagBg} px-1 py-0 rounded-full leading-none`}>
+          {count}
+        </span>
+      )}
+      {dim && (
+        <span className="absolute top-1 left-1 text-[9px] font-bold text-gray-400 bg-gray-100 px-1 py-0 rounded-full leading-none">
+          בקרוב
+        </span>
+      )}
+      {/* icon */}
       <div
-        className={`w-10 h-10 ${colors.iconBg} rounded-xl flex items-center justify-center ${colors.iconText} text-[20px] shrink-0`}
+        className={`w-12 h-12 ${colors.iconBg} rounded-2xl flex items-center justify-center ${colors.iconText} text-[24px] shrink-0`}
       >
         <span aria-hidden>{icon}</span>
       </div>
-      <div className="flex-1 min-w-0 text-right">
-        <span
-          className="font-bold text-[13px] text-[#1A1A1A] block leading-tight truncate"
-          style={{ fontFamily: URBANIST }}
-        >
-          {name}
-        </span>
-        <span className={`text-[11px] font-semibold ${dim ? "text-gray-400" : colors.tagText}`}>
-          {dim ? "בקרוב" : `${count} ספקים`}
-        </span>
-      </div>
-    </>
+      {/* name */}
+      <span
+        className="text-[11px] font-bold text-[#1A1A1A] text-center leading-tight line-clamp-2 px-0.5"
+        style={{ fontFamily: URBANIST }}
+      >
+        {name}
+      </span>
+    </div>
   );
 
-  const baseClass = `bg-white p-2.5 rounded-xl border ${colors.cardBorder} shadow-sm flex items-center gap-2.5 transition-transform`;
+  const baseClass = `bg-white rounded-2xl border ${colors.cardBorder} shadow-sm transition-all`;
 
   if (dim) {
-    return <div className={`${baseClass} opacity-60`}>{body}</div>;
+    return <div className={`${baseClass} opacity-50`}>{inner}</div>;
   }
 
   return (
     <Link
       to={`/resident/categories/${id}`}
-      className={`${baseClass} active:scale-[0.97] hover:shadow-md`}
+      className={`${baseClass} active:scale-[0.94] hover:shadow-md`}
     >
-      {body}
+      {inner}
     </Link>
   );
 }
