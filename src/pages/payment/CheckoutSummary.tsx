@@ -26,6 +26,11 @@ import {
   describeTier,
   type OfferTier,
 } from "@/lib/offerPricing";
+import {
+  JOINING_FEE_ILS,
+  JOINING_FEE_LABEL,
+  JOINING_FEE_DESCRIPTION,
+} from "@/lib/platformFees";
 
 interface DealRow {
   id: string;
