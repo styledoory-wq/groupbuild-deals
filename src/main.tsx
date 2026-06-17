@@ -1,6 +1,9 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "@fontsource-variable/urbanist";
+import "@fontsource-variable/epilogue";
+
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import { initNative } from "@/lib/nativeInit";
 
