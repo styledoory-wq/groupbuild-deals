@@ -440,11 +440,11 @@ export default function CheckoutSummary() {
               />
               <span className="text-xs leading-relaxed">
                 אני מאשר/ת את{" "}
-                <a className="underline font-bold" href="/terms" target="_blank">
+                <a className="underline font-bold" href="/terms/residents" target="_blank" rel="noopener noreferrer">
                   תנאי השימוש
                 </a>{" "}
                 ו
-                <a className="underline font-bold" href="/privacy" target="_blank">
+                <a className="underline font-bold" href="/privacy" target="_blank" rel="noopener noreferrer">
                   מדיניות הפרטיות
                 </a>
                 , ומסכים/ה שגרופבילד תיצור קשר בנוגע להצעה.
