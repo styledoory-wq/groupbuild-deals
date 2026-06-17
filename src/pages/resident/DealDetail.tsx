@@ -745,14 +745,26 @@ export default function DealDetail() {
         </div>
       </div>
 
-      {/* ===== SECTION 1b — SUMMARY STAT CARDS ===== */}
-      <div className="px-4 mt-4 grid grid-cols-2 gap-3">
-        <StatCard icon={Percent}      accent="#E8742C" tint="#FFF1E4" label="הנחה"          value={discountPct ? `${discountPct}%` : "—"} />
-        {savingsAmount ? (
-          <StatCard icon={PiggyBank}    accent="#2EA85A" tint="#E8F7EC" label="חיסכון משוער"  value={ils(savingsAmount)} />
-        ) : null}
-        <StatCard icon={Users}        accent="#2F6BFF" tint="#EAF2FF" label="הצטרפו"         value={`${participantCount}`} sub={progressTarget > 0 ? `מתוך ${progressTarget}` : undefined} />
-        <StatCard icon={CalendarDays} accent="#7A4FCF" tint="#F2ECFB" label="ימים שנותרו"    value={daysRemaining !== null ? `${daysRemaining}` : "—"} sub={daysRemaining !== null ? "עד סגירה" : undefined} />
+      {/* ===== SECTION 1b — COMPACT KEY METRICS STRIP ===== */}
+      <div className="px-4 mt-4">
+        <div className="bg-white rounded-[20px] px-4 py-3 shadow-[0_4px_12px_-6px_rgba(10,31,61,0.12)] flex items-center justify-between divide-x divide-x-reverse divide-[#ECEEF2]">
+          <div className="flex-1 text-center px-2">
+            <div className="text-[18px] font-extrabold text-[#E8742C] leading-none">{discountPct ? `${discountPct}%` : "—"}</div>
+            <div className="text-[10px] font-bold text-[#6B7280] mt-1">הנחה</div>
+          </div>
+          {savingsAmount ? (
+            <div className="flex-1 text-center px-2">
+              <div className="text-[18px] font-extrabold text-[#2EA85A] leading-none">{ils(savingsAmount)}</div>
+              <div className="text-[10px] font-bold text-[#6B7280] mt-1">חיסכון</div>
+            </div>
+          ) : null}
+          {daysRemaining !== null && (
+            <div className="flex-1 text-center px-2">
+              <div className="text-[18px] font-extrabold text-[#1F2937] leading-none">{daysRemaining}</div>
+              <div className="text-[10px] font-bold text-[#6B7280] mt-1">ימים לסגירה</div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ===== SECTION 2 — PROGRESS ===== */}
