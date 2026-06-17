@@ -175,13 +175,12 @@ export default function CategoriesList() {
         </div>
 
         {/* Filter chips */}
-        <div className="flex overflow-x-auto gap-2 no-scrollbar pb-2 -mx-5 px-5 mb-6">
+        <div className="flex flex-nowrap overflow-x-auto gap-2 no-scrollbar pb-2 -mx-5 px-5 mb-6">
           <FilterChip
             label="הכל" active={activeStage === "all"}
             onClick={() => setActiveStage("all")}
             activeClass="bg-[#1A1A1A] text-white border-transparent"
             idleClass="bg-white border border-gray-200 text-gray-700"
-            Icon={LayoutGrid}
           />
           {STAGES.map((s) => (
             <FilterChip
@@ -190,10 +189,10 @@ export default function CategoriesList() {
               onClick={() => setActiveStage(s.id)}
               activeClass={`${s.colors.chipBg.replace("100","500")} text-white border-transparent shadow-sm`}
               idleClass={`${s.colors.chipBg} ${s.colors.chipText} border ${s.colors.chipBorder}`}
-              Icon={s.Icon}
             />
           ))}
         </div>
+
 
         {/* Search results */}
         {q && (
