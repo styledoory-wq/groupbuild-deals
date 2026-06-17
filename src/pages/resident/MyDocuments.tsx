@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { FileText, Upload, Trash2, Download, FolderOpen, Loader2 } from "lucide-react";
+import { Upload, Trash2, Download, FolderOpen, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -32,11 +31,15 @@ const ALLOWED_TYPES = [
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
-const getErrorMessage = (error: unknown, fallback: string) => {
-  return error instanceof Error && error.message ? error.message : fallback;
-};
+const getErrorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error && error.message ? error.message : fallback;
+
+const CARD = "bg-white rounded-[20px] border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]";
+const CHIP_BASE = "text-[12px] px-3 py-1.5 rounded-full border font-bold transition-colors";
+const CHIP_ACTIVE = "bg-[#2563EB] text-white border-[#2563EB]";
+const CHIP_IDLE = "bg-white border-[#ECEEF2] text-[#6B7280]";
 
 export default function MyDocuments() {
   const [docs, setDocs] = useState<DocRow[]>([]);
@@ -50,14 +53,12 @@ export default function MyDocuments() {
     const { data: session } = await supabase.auth.getSession();
     const uid = session.session?.user?.id;
     if (!uid) return;
-
     const { data, error } = await supabase
       .from("documents")
       .select("*")
       .eq("user_id", uid)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
-
     if (error) {
       console.error(error);
       toast.error("שגיאה בטעינת מסמכים");
@@ -74,7 +75,6 @@ export default function MyDocuments() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!ALLOWED_TYPES.includes(file.type)) {
       toast.error("סוג קובץ לא נתמך. ניתן להעלות PDF, תמונות או מסמכי Word.");
       return;
@@ -83,31 +83,25 @@ export default function MyDocuments() {
       toast.error("הקובץ גדול מדי (מקסימום 20MB)");
       return;
     }
-
     setUploading(true);
     try {
       const { data: session } = await supabase.auth.getSession();
       const uid = session.session?.user?.id;
       if (!uid) throw new Error("יש להתחבר");
-
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `${uid}/${Date.now()}_${safeName}`;
-
       const { error: uploadErr } = await supabase.storage
         .from("resident-documents")
         .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
       if (uploadErr) throw uploadErr;
-
-
       const { error: insertErr } = await supabase.from("documents").insert({
         user_id: uid,
         file_name: file.name,
-        file_url: path, // store the path, generate signed URLs on demand
+        file_url: path,
         category: uploadCategory,
         file_size: file.size,
       });
       if (insertErr) throw insertErr;
-
       toast.success("הקובץ הועלה בהצלחה");
       fetchDocs();
     } catch (err: unknown) {
@@ -123,7 +117,7 @@ export default function MyDocuments() {
     try {
       const { data, error } = await supabase.storage
         .from("resident-documents")
-        .createSignedUrl(doc.file_url, 60 * 5); // 5 min
+        .createSignedUrl(doc.file_url, 60 * 5);
       if (error) throw error;
       window.open(data.signedUrl, "_blank");
     } catch {
@@ -134,13 +128,11 @@ export default function MyDocuments() {
   const handleDelete = async (doc: DocRow) => {
     if (!confirm(`למחוק את "${doc.file_name}"?`)) return;
     try {
-      // Soft delete in DB
       const { error } = await supabase
         .from("documents")
         .update({ is_deleted: true, deleted_at: new Date().toISOString() })
         .eq("id", doc.id);
       if (error) throw error;
-
       toast.success("הקובץ נמחק");
       setDocs((prev) => prev.filter((d) => d.id !== doc.id));
     } catch {
@@ -155,10 +147,7 @@ export default function MyDocuments() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const filtered = selectedCategory
-    ? docs.filter((d) => d.category === selectedCategory)
-    : docs;
-
+  const filtered = selectedCategory ? docs.filter((d) => d.category === selectedCategory) : docs;
   const getCategoryInfo = (val: string) =>
     CATEGORIES.find((c) => c.value === val) || { label: val, icon: "📄" };
 
@@ -166,20 +155,16 @@ export default function MyDocuments() {
     <MobileShell>
       <PageHeader title="המסמכים שלי" subtitle="ניהול קבצים ומסמכים" />
 
-      <div className="px-4 -mt-4 relative z-10 space-y-4 pb-24" dir="rtl">
+      <div className="px-5 mt-2 space-y-4" dir="rtl">
         {/* Upload section */}
-        <div className="gb-card p-4 space-y-3">
-          <h3 className="font-bold text-sm text-foreground">העלאת קובץ חדש</h3>
+        <div className={`${CARD} p-4 space-y-3`}>
+          <h3 className="font-extrabold text-[14px] text-[#1F2937]">העלאת קובץ חדש</h3>
           <div className="flex gap-2 flex-wrap">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.value}
                 onClick={() => setUploadCategory(cat.value)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                  uploadCategory === cat.value
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card border-border text-muted-foreground"
-                }`}
+                className={`${CHIP_BASE} ${uploadCategory === cat.value ? CHIP_ACTIVE : CHIP_IDLE}`}
               >
                 {cat.icon} {cat.label}
               </button>
@@ -192,29 +177,21 @@ export default function MyDocuments() {
             onChange={handleUpload}
             className="hidden"
           />
-          <Button
+          <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="w-full h-11 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/90"
+            className="w-full h-12 rounded-[20px] bg-[#2563EB] text-white font-bold text-[14px] flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-60"
           >
-            {uploading ? (
-              <Loader2 className="h-4 w-4 animate-spin ml-2" />
-            ) : (
-              <Upload className="h-4 w-4 ml-2" />
-            )}
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             {uploading ? "מעלה..." : "בחירת קובץ להעלאה"}
-          </Button>
+          </button>
         </div>
 
         {/* Filter by category */}
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-              !selectedCategory
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-card border-border text-muted-foreground"
-            }`}
+            className={`${CHIP_BASE} ${!selectedCategory ? CHIP_ACTIVE : CHIP_IDLE}`}
           >
             הכל ({docs.length})
           </button>
@@ -225,11 +202,7 @@ export default function MyDocuments() {
               <button
                 key={cat.value}
                 onClick={() => setSelectedCategory(cat.value)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                  selectedCategory === cat.value
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card border-border text-muted-foreground"
-                }`}
+                className={`${CHIP_BASE} ${selectedCategory === cat.value ? CHIP_ACTIVE : CHIP_IDLE}`}
               >
                 {cat.icon} {cat.label} ({count})
               </button>
@@ -240,12 +213,14 @@ export default function MyDocuments() {
         {/* Document list */}
         {loading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#C9A227]" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="gb-card p-8 text-center">
-            <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-            <p className="text-sm text-muted-foreground">
+          <div className="bg-white rounded-[24px] border border-dashed border-[#ECEEF2] p-10 text-center">
+            <div className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center mb-4 mx-auto shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]">
+              <FolderOpen className="h-7 w-7 text-[#C9A227]" />
+            </div>
+            <p className="text-[14px] font-bold text-[#1F2937]">
               {selectedCategory ? "אין מסמכים בקטגוריה זו" : "עדיין לא העלית מסמכים"}
             </p>
           </div>
@@ -254,13 +229,13 @@ export default function MyDocuments() {
             {filtered.map((doc) => {
               const catInfo = getCategoryInfo(doc.category);
               return (
-                <div key={doc.id} className="gb-card p-3 flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-lg shrink-0">
+                <div key={doc.id} className={`${CARD} p-3 flex items-center gap-3`}>
+                  <div className="h-10 w-10 rounded-xl bg-[#2563EB]/12 flex items-center justify-center text-lg shrink-0">
                     {catInfo.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">{doc.file_name}</div>
-                    <div className="text-fs-xs text-muted-foreground">
+                    <div className="font-bold text-[13.5px] text-[#1F2937] truncate">{doc.file_name}</div>
+                    <div className="text-[12px] text-[#6B7280]">
                       {catInfo.label} · {formatSize(doc.file_size)} ·{" "}
                       {new Date(doc.created_at).toLocaleDateString("he-IL")}
                     </div>
@@ -268,13 +243,15 @@ export default function MyDocuments() {
                   <div className="flex gap-1 shrink-0">
                     <button
                       onClick={() => handleDownload(doc)}
-                      className="h-8 w-8 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary hover:bg-secondary/20 transition-colors"
+                      className="h-8 w-8 rounded-xl bg-[#2563EB]/12 flex items-center justify-center text-[#2563EB] active:scale-95 transition-transform"
+                      aria-label="הורדה"
                     >
                       <Download className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(doc)}
-                      className="h-8 w-8 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive hover:bg-destructive/20 transition-colors"
+                      className="h-8 w-8 rounded-xl bg-[#DC2626]/10 flex items-center justify-center text-[#DC2626] active:scale-95 transition-transform"
+                      aria-label="מחיקה"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

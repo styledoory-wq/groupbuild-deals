@@ -30,8 +30,8 @@ const finishOptions: FinishLevel[] = ["basic", "standard", "premium", "luxury"];
 const regionOptions: Region[] = ["north", "haifa", "sharon", "center", "jerusalem", "south"];
 
 const FIELD_LABEL = "block text-[11.5px] font-extrabold text-[#6B7280] mb-1.5 tracking-wide";
-const FIELD_INPUT = "h-12 bg-white border border-[#ECEEF2] rounded-xl text-[14px] font-bold text-[#1F2937] text-right shadow-[0_1px_2px_rgba(31,41,55,0.04)] focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-[#C9A227]/30 focus-visible:border-[#C9A227]";
-const FIELD_TRIGGER = "h-12 bg-white border border-[#ECEEF2] rounded-xl text-[14px] font-bold text-[#1F2937] shadow-[0_1px_2px_rgba(31,41,55,0.04)] focus:ring-2 focus:ring-[#C9A227]/30";
+const FIELD_INPUT = "h-12 bg-white border border-[#ECEEF2] rounded-[18px] text-[14px] font-medium text-[#1F2937] text-right focus-visible:outline-none focus-visible:border-[#C9A227] focus-visible:ring-[3px] focus-visible:ring-[#C9A227]/15 transition";
+const FIELD_TRIGGER = "h-12 bg-white border border-[#ECEEF2] rounded-[18px] text-[14px] font-medium text-[#1F2937] focus:outline-none focus:border-[#C9A227] focus:ring-[3px] focus:ring-[#C9A227]/15";
 
 function FieldGrid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-3">{children}</div>;
@@ -176,7 +176,7 @@ export default function BudgetPlanner() {
             </div>
 
             {/* Mode toggle */}
-            <div className="bg-white rounded-2xl p-1.5 border border-[#ECEEF2] flex gap-1 shadow-sm">
+            <div className="bg-white rounded-full p-1 border border-[#ECEEF2] flex gap-1 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)]">
               {([
                 { key: "quick", label: "מהיר", desc: "טופס קצר · דיוק ±28%", icon: Zap },
                 { key: "wizard", label: "אשף מדויק", desc: "5-7 שלבים · דיוק ±10%", icon: Sparkles },
@@ -213,7 +213,7 @@ export default function BudgetPlanner() {
                 onCancel={() => setWizardOpen(false)}
               />
             ) : (
-            <div className="bg-white rounded-3xl p-5 border border-[#ECEEF2] shadow-[0_4px_20px_-12px_rgba(31,41,55,0.12)] space-y-4">
+            <div className="bg-white rounded-[24px] p-5 border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
               {(() => {
                 const SwitchRow = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) => (
                   <button
