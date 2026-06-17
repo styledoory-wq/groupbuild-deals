@@ -175,6 +175,44 @@ export default function BudgetPlanner() {
               </button>
             </div>
 
+            {/* Mode toggle */}
+            <div className="bg-white rounded-2xl p-1.5 border border-[#E5E7EB] flex gap-1 shadow-sm">
+              {([
+                { key: "quick", label: "מהיר", desc: "טופס קצר · דיוק ±28%", icon: Zap },
+                { key: "wizard", label: "אשף מדויק", desc: "5-7 שלבים · דיוק ±10%", icon: Sparkles },
+              ] as const).map((m) => {
+                const active = mode === m.key;
+                const Icon = m.icon;
+                return (
+                  <button
+                    key={m.key}
+                    onClick={() => { setMode(m.key); setWizardOpen(false); }}
+                    className="flex-1 rounded-xl px-3 py-2.5 text-right transition flex items-start gap-2"
+                    style={{
+                      background: active ? theme.tint : "transparent",
+                      boxShadow: active ? `inset 0 0 0 1.5px ${theme.accent}` : "none",
+                    }}
+                  >
+                    <Icon className="h-4 w-4 mt-0.5 shrink-0" style={{ color: active ? theme.accent : "#9CA3AF" }} />
+                    <div>
+                      <div className="text-[12.5px] font-extrabold" style={{ color: active ? theme.accent : "#6B7280", fontFamily: "'Urbanist'" }}>{m.label}</div>
+                      <div className="text-[10.5px] text-[#9CA3AF] mt-0.5 leading-tight">{m.desc}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {wizardOpen ? (
+              <BudgetWizard
+                questions={getWizardQuestions(track)}
+                themeAccent={theme.accent}
+                themeRing={theme.ring}
+                themeTint={theme.tint}
+                onComplete={onWizardComplete}
+                onCancel={() => setWizardOpen(false)}
+              />
+            ) : (
             <div className="bg-white rounded-3xl p-5 border border-[#E5E7EB] shadow-[0_4px_20px_-12px_rgba(31,41,55,0.12)] space-y-4">
               {(() => {
                 const SwitchRow = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) => (
