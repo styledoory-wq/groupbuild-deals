@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
-  Search, X, Compass, HardHat, Plug, DoorOpen, PaintBucket, ChefHat, Trees,
+  Search, X, Compass, HardHat, Plug, DoorOpen, PaintBucket, ChefHat, Trees, Sun,
   ChevronLeft,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -34,12 +34,12 @@ type StageDef = {
 
 const STAGES: StageDef[] = [
   { id: "planning", index: 1, title: "תכנון ואדריכלות", shortTitle: "תכנון",
-    ids: ["architect", "interior-designer", "consultant"], Icon: Compass,
+    ids: ["architect", "interior-designer", "consultant", "turnkey-contractor", "construction-supervisor"], Icon: Compass,
     colors: { chipBg:"bg-blue-100", chipText:"text-blue-700", chipBorder:"border-blue-200",
       bar:"bg-blue-500", tagBg:"bg-blue-50", tagText:"text-blue-600",
       cardBorder:"border-blue-100", iconBg:"bg-blue-50", iconText:"text-blue-600", iconHover:"group-hover:bg-blue-100" } },
   { id: "structure", index: 2, title: "שלד ובנייה", shortTitle: "שלד",
-    ids: ["contractor", "skeleton"], Icon: HardHat,
+    ids: ["contractor", "skeleton", "gypsum"], Icon: HardHat,
     colors: { chipBg:"bg-orange-100", chipText:"text-orange-700", chipBorder:"border-orange-200",
       bar:"bg-orange-500", tagBg:"bg-orange-50", tagText:"text-orange-600",
       cardBorder:"border-orange-100", iconBg:"bg-orange-50", iconText:"text-orange-600", iconHover:"group-hover:bg-orange-100" } },
@@ -54,7 +54,7 @@ const STAGES: StageDef[] = [
       bar:"bg-green-500", tagBg:"bg-green-50", tagText:"text-green-600",
       cardBorder:"border-green-100", iconBg:"bg-green-50", iconText:"text-green-600", iconHover:"group-hover:bg-green-100" } },
   { id: "finishes", index: 5, title: "עבודות גמר", shortTitle: "גמר",
-    ids: ["painting", "flooring", "cladding", "carpentry", "gypsum", "closets", "lighting"], Icon: PaintBucket,
+    ids: ["painting", "flooring", "cladding", "carpentry", "closets", "lighting"], Icon: PaintBucket,
     colors: { chipBg:"bg-purple-100", chipText:"text-purple-700", chipBorder:"border-purple-200",
       bar:"bg-purple-500", tagBg:"bg-purple-50", tagText:"text-purple-600",
       cardBorder:"border-purple-100", iconBg:"bg-purple-50", iconText:"text-purple-600", iconHover:"group-hover:bg-purple-100" } },
@@ -68,6 +68,11 @@ const STAGES: StageDef[] = [
     colors: { chipBg:"bg-lime-100", chipText:"text-lime-700", chipBorder:"border-lime-200",
       bar:"bg-lime-500", tagBg:"bg-lime-50", tagText:"text-lime-600",
       cardBorder:"border-lime-100", iconBg:"bg-lime-50", iconText:"text-lime-600", iconHover:"group-hover:bg-lime-100" } },
+  { id: "solar", index: 8, title: "סולארי וחשמל ירוק", shortTitle: "סולארי",
+    ids: ["c_1778448823740"], Icon: Sun,
+    colors: { chipBg:"bg-yellow-100", chipText:"text-yellow-700", chipBorder:"border-yellow-200",
+      bar:"bg-yellow-500", tagBg:"bg-yellow-50", tagText:"text-yellow-600",
+      cardBorder:"border-yellow-100", iconBg:"bg-yellow-50", iconText:"text-yellow-600", iconHover:"group-hover:bg-yellow-100" } },
 ];
 
 interface SupplierLite {
