@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { Tag, Search as SearchIcon } from "lucide-react";
+import { Tag, Search as SearchIcon, Heart } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
@@ -8,10 +8,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
 import { DealCardSkeletonList } from "@/components/deals/DealCardSkeleton";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
+import { listFavoriteIds } from "@/lib/favorites";
 import type { OfferTier } from "@/lib/offerPricing";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
 type DealWithSupplier = RealDealCardData;
+type TabKey = "active" | "favorites" | "archive";
 
 const STAGE_CATEGORY_IDS: Record<string, string[]> = {
   planning: ["architect", "interior-designer", "consultant"],
