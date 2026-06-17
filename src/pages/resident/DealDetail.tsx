@@ -878,45 +878,120 @@ export default function DealDetail() {
         </div>
       )}
 
-      {/* ===== TIERS LADDER (transparency) ===== */}
-      {tiers.length > 0 && (
-        <div className="px-4 mt-5">
-          <h2 className="text-[15px] font-extrabold text-[#1F2937] mb-3 px-1">מדרגות מחיר</h2>
-          <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
-            <div className="space-y-2.5">
-              {tiers.map((t, idx) => {
-                const td = describeTier(offerType, t);
-                const isActive = !!activeTier && t.minParticipants === activeTier.minParticipants;
-                const isPast = activeTier ? t.minParticipants < activeTier.minParticipants : false;
-                return (
+      {/* ===== TIERS LADDER (horizontal stepper) ===== */}
+      {tiers.length > 0 && (() => {
+        const sortedTiers = [...tiers].sort((a, b) => a.minParticipants - b.minParticipants);
+        const activeIdx = activeTier
+          ? sortedTiers.findIndex((t) => t.minParticipants === activeTier.minParticipants)
+          : -1;
+        const stepCount = sortedTiers.length;
+        const ladderFill = stepCount > 1 && activeIdx >= 0
+          ? Math.round((activeIdx / (stepCount - 1)) * 100)
+          : activeIdx >= 0 ? 100 : 0;
+        const bestTier = sortedTiers[sortedTiers.length - 1];
+        const bestDisplay = bestTier ? describeTier(offerType, bestTier) : null;
+        const activeDisplay = activeTier ? describeTier(offerType, activeTier) : null;
+        const savingsPerPerson =
+          bestDisplay?.effectivePrice != null && activeDisplay?.effectivePrice != null
+            ? Math.max(0, activeDisplay.effectivePrice - bestDisplay.effectivePrice)
+            : null;
+        return (
+          <div className="px-4 mt-5">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h2 className="text-[15px] font-extrabold text-[#1F2937]">מדרגות מחיר לקבוצה</h2>
+              <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-md">
+                {participantCount} משתתפים כרגע
+              </span>
+            </div>
+            <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
+              {/* Horizontal stepper */}
+              <div className="relative pt-7 pb-2">
+                <div className="flex justify-between relative">
+                  {/* Track background */}
+                  <div className="absolute top-1.5 left-2 right-2 h-1 bg-[#ECEEF2] rounded-full" />
+                  {/* Progress fill (RTL: from right) */}
                   <div
-                    key={idx}
-                    className={cn(
-                      "flex items-center justify-between rounded-2xl px-3 py-2.5 transition-colors",
-                      isActive ? "bg-[#FFF8E1] border border-[#EBD79A]" : isPast ? "opacity-50" : "bg-[#F7F5F0]",
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={cn(
-                          "rounded-full",
-                          isActive ? "w-2.5 h-2.5 bg-[#1A8870] ring-4 ring-[#1A8870]/20" : "w-1.5 h-1.5 bg-[#6B7280]",
+                    className="absolute top-1.5 right-2 h-1 bg-[#0E6B5A] rounded-full transition-all duration-700"
+                    style={{ width: `calc(${ladderFill}% - ${ladderFill > 0 ? '4px' : '0px'})` }}
+                  />
+                  {sortedTiers.map((t, idx) => {
+                    const td = describeTier(offerType, t);
+                    const isActive = idx === activeIdx;
+                    const isPast = activeIdx >= 0 && idx < activeIdx;
+                    return (
+                      <div key={idx} className="relative flex flex-col items-center flex-1 min-w-0">
+                        <div
+                          className={cn(
+                            "rounded-full border-4 border-white z-10 transition-all",
+                            isActive
+                              ? "w-4 h-4 bg-[#0E6B5A] shadow-md ring-4 ring-[#0E6B5A]/20"
+                              : isPast
+                                ? "w-4 h-4 bg-[#0E6B5A] shadow-sm"
+                                : "w-4 h-4 bg-[#E5E7EB]",
+                          )}
+                        />
+                        <div className={cn("mt-2 text-center", !isActive && !isPast && "opacity-70")}>
+                          <div
+                            className={cn(
+                              "text-[10px] leading-tight",
+                              isActive ? "text-[#0E6B5A] font-extrabold" : "text-[#6B7280] font-medium",
+                            )}
+                          >
+                            {tierRange(t)} חברים
+                          </div>
+                          <div
+                            className={cn(
+                              "gb-num leading-tight mt-0.5",
+                              isActive ? "text-[13px] font-extrabold text-[#1F2937]" : "text-[11px] font-bold text-[#1F2937]",
+                            )}
+                          >
+                            {td.headline}
+                          </div>
+                        </div>
+                        {isActive && (
+                          <div className="absolute -top-1 left-1/2 -translate-x-1/2 -translate-y-full">
+                            <div className="bg-[#0E6B5A] text-white text-[9px] px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">
+                              המחיר שלך
+                            </div>
+                          </div>
                         )}
-                      />
-                      <span className={cn("text-[13px]", isActive ? "font-extrabold text-[#1F2937]" : "font-bold text-[#1F2937]")}>
-                        {tierRange(t)} דיירים{isActive ? " · פעיל" : ""}
-                      </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Unlock next tier promo */}
+              {nextTier && peopleNeeded > 0 && bestDisplay && (
+                <div className="mt-5 bg-[#F7F5F0] border border-[#ECEEF2] rounded-2xl p-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center border border-[#ECEEF2] shadow-sm shrink-0">
+                      <span className="text-[#0E6B5A] font-black text-sm">+{peopleNeeded}</span>
                     </div>
-                    <span className={cn("text-[13px] gb-num", isActive ? "font-black text-[#1F2937]" : "font-bold text-[#1A8870]")}>
-                      {td.headline}
-                    </span>
+                    <div className="min-w-0">
+                      <div className="text-[12px] font-extrabold text-[#1F2937] leading-tight">
+                        עוד {peopleNeeded} חברים למחיר הבא
+                      </div>
+                      {savingsPerPerson && savingsPerPerson > 0 ? (
+                        <div className="text-[10px] text-[#6B7280] leading-snug mt-0.5">
+                          חיסכון נוסף של {ils(savingsPerPerson)} לכל אחד מהקבוצה
+                        </div>
+                      ) : (
+                        <div className="text-[10px] text-[#6B7280] leading-snug mt-0.5">
+                          המחיר ירד אוטומטית עבור כל הקבוצה
+                        </div>
+                      )}
+                    </div>
                   </div>
-                );
-              })}
+                  <div className="text-[#0E6B5A] font-black text-[15px] gb-num shrink-0">
+                    {describeTier(offerType, nextTier).headline}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Spacer for sticky CTA */}
       <div aria-hidden className="h-40" />
