@@ -73,7 +73,7 @@ export default function AdminDashboard() {
         rightSlot={
           <button
             onClick={handleLogout}
-            className="h-10 px-3 rounded-full bg-white border border-[#ECEEF2] flex items-center gap-1.5 text-[#0A1F3D] shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform text-[12px] font-bold"
+            className="h-10 px-3 rounded-full bg-white border border-[#ECEEF2] flex items-center gap-1.5 text-[#1F2937] shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform text-[12px] font-bold"
             aria-label="יציאה"
           >
             <LogOut className="h-[14px] w-[14px]" strokeWidth={2} />
@@ -89,10 +89,10 @@ export default function AdminDashboard() {
             className="w-full bg-white rounded-[16px] px-4 py-3 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] text-[13px] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
           >
             <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-              <ShieldCheck className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
+              <ShieldCheck className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
             </span>
-            <span className="text-[#0A1F3D] flex-1 font-medium">
-              <b className="text-[#D4AF37]">{stats.pendingSuppliers}</b> ספקים ממתינים לאישור
+            <span className="text-[#1F2937] flex-1 font-medium">
+              <b className="text-[#C9A227]">{stats.pendingSuppliers}</b> ספקים ממתינים לאישור
             </span>
             <ChevronLeft className="h-4 w-4 text-[#9CA3AF]" strokeWidth={2} />
           </button>
@@ -105,22 +105,22 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div className="min-w-0">
               <div className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">פיקדונות ששולמו</div>
-              <div className="text-[26px] font-extrabold text-[#0A1F3D] mt-1 tracking-tight leading-none">
+              <div className="text-[26px] font-extrabold text-[#1F2937] mt-1 tracking-tight leading-none">
                 {formatILS(stats.paidDepositsAmount)}
               </div>
             </div>
             <div className="h-11 w-11 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-              <TrendingUp className="h-[18px] w-[18px] text-[#D4AF37]" strokeWidth={2.2} />
+              <TrendingUp className="h-[18px] w-[18px] text-[#C9A227]" strokeWidth={2.2} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-[#ECEEF2]">
             <div>
               <div className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">פיקדונות (סה״כ)</div>
-              <div className="font-extrabold text-[#0A1F3D] mt-1 text-[15px]">{stats.totalDeposits}</div>
+              <div className="font-extrabold text-[#1F2937] mt-1 text-[15px]">{stats.totalDeposits}</div>
             </div>
             <div>
               <div className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">דירות</div>
-              <div className="font-extrabold text-[#0A1F3D] mt-1 text-[15px]">{stats.apartments}</div>
+              <div className="font-extrabold text-[#1F2937] mt-1 text-[15px]">{stats.apartments}</div>
             </div>
           </div>
         </div>
@@ -141,10 +141,10 @@ export default function AdminDashboard() {
           className="bg-white rounded-[16px] p-3.5 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
         >
           <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-            <Eye className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
+            <Eye className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
           </span>
           <div className="flex-1 min-w-0">
-            <div className="font-extrabold text-[13px] text-[#0A1F3D] leading-tight">תצוגת דייר</div>
+            <div className="font-extrabold text-[13px] text-[#1F2937] leading-tight">תצוגת דייר</div>
             <div className="text-[11px] text-[#6B7280] mt-0.5 font-medium">צפייה בממשק הדייר</div>
           </div>
         </button>
@@ -153,17 +153,17 @@ export default function AdminDashboard() {
           className="bg-white rounded-[16px] p-3.5 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
         >
           <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-            <Eye className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
+            <Eye className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
           </span>
           <div className="flex-1 min-w-0">
-            <div className="font-extrabold text-[13px] text-[#0A1F3D] leading-tight">תצוגת ספק</div>
+            <div className="font-extrabold text-[13px] text-[#1F2937] leading-tight">תצוגת ספק</div>
             <div className="text-[11px] text-[#6B7280] mt-0.5 font-medium">צפייה בממשק הספק</div>
           </div>
         </button>
       </div>
 
       <section className="px-5 pb-10">
-        <h2 className="text-[12px] font-extrabold text-[#0A1F3D] tracking-tight mb-2.5 px-1">ניהול מהיר</h2>
+        <h2 className="text-[12px] font-extrabold text-[#1F2937] tracking-tight mb-2.5 px-1">ניהול מהיר</h2>
         <div className="space-y-2">
           <QuickLink onClick={() => navigate("/admin/projects")} icon={Building2} label="ניהול פרויקטים" desc="הוספה, עריכה ומחיקה" />
           <QuickLink onClick={() => navigate("/admin/suppliers")} icon={ShieldCheck} label="ניהול ספקים" desc="אזורי שירות, מדיה וקישורים" badge={stats.pendingSuppliers} />
@@ -189,9 +189,9 @@ function StatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: strin
   return (
     <div className="bg-white rounded-[16px] p-4 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
       <div className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center mb-2.5">
-        <Icon className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
+        <Icon className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
       </div>
-      <div className="text-[20px] font-extrabold text-[#0A1F3D] leading-none tracking-tight">
+      <div className="text-[20px] font-extrabold text-[#1F2937] leading-none tracking-tight">
         {value.toLocaleString("he-IL")}
       </div>
       <div className="text-[12px] text-[#6B7280] mt-1.5 font-medium">{label}</div>
@@ -206,10 +206,10 @@ function QuickLink({ onClick, icon: Icon, label, desc, badge }: { onClick: () =>
       className="w-full bg-white rounded-[16px] p-3.5 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] flex items-center gap-3 text-right active:scale-[0.99] transition-transform"
     >
       <span className="h-10 w-10 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-        <Icon className="h-[16px] w-[16px] text-[#D4AF37]" strokeWidth={2.2} />
+        <Icon className="h-[16px] w-[16px] text-[#C9A227]" strokeWidth={2.2} />
       </span>
       <div className="flex-1 min-w-0">
-        <div className="font-extrabold text-[13.5px] text-[#0A1F3D] leading-tight">{label}</div>
+        <div className="font-extrabold text-[13.5px] text-[#1F2937] leading-tight">{label}</div>
         <div className="text-[11.5px] text-[#6B7280] mt-0.5 font-medium leading-tight">{desc}</div>
       </div>
       {badge && badge > 0 ? (

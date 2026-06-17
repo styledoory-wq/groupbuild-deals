@@ -103,7 +103,7 @@ export function ReviewForm({ supplierId, dealId, dealCompleted, onSubmitted }: P
               className="p-1 transition-transform hover:scale-110"
               aria-label={`${i} כוכבים`}
             >
-              <Star className={cn("h-8 w-8 transition-colors", active ? "fill-[#D4AF37] text-[#D4AF37]" : "text-[#E5E7EB]")} />
+              <Star className={cn("h-8 w-8 transition-colors", active ? "fill-[#C9A227] text-[#C9A227]" : "text-[#E5E7EB]")} />
             </button>
           );
         })}

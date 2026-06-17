@@ -11,7 +11,7 @@ export default function ThankYou() {
         {/* Header */}
         <header className="px-5 h-14 flex items-center border-b border-white/5">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-[#0A1F3D] text-white flex items-center justify-center">
+            <div className="h-8 w-8 rounded-xl bg-[#1F2937] text-white flex items-center justify-center">
               <Building2 className="h-4 w-4 text-primary" />
             </div>
             <span className="font-extrabold text-base">
@@ -24,14 +24,14 @@ export default function ThankYou() {
         <main className="flex-1 px-6 pt-12 pb-10 flex flex-col items-center text-center">
           <div className="relative mb-8">
             <div className="absolute inset-0 rounded-full bg-[#FFF8E1] blur-3xl" />
-            <div className="relative h-24 w-24 rounded-full bg-[#0A1F3D] text-white flex items-center justify-center shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] animate-fade-up">
+            <div className="relative h-24 w-24 rounded-full bg-[#1F2937] text-white flex items-center justify-center shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] animate-fade-up">
               <CheckCircle2 className="h-12 w-12 text-primary" strokeWidth={2.5} />
             </div>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF8E1] mb-4">
-            <Sparkles className="h-3 w-3 text-[#D4AF37]" />
-            <span className="text-fs-xs font-bold text-[#D4AF37]">נרשמת בהצלחה</span>
+            <Sparkles className="h-3 w-3 text-[#C9A227]" />
+            <span className="text-fs-xs font-bold text-[#C9A227]">נרשמת בהצלחה</span>
           </div>
 
           <h1 className="text-3xl font-extrabold mb-3 leading-tight">
@@ -54,7 +54,7 @@ export default function ThankYou() {
               { n: "3", t: "תקבל גישה לעסקאות הקבוצתיות", d: "מחירים מיוחדים שמורידים את העלות לכולם." },
             ].map((s) => (
               <div key={s.n} className="flex gap-3 items-start text-right bg-white/5 border border-white/10 rounded-2xl p-4">
-                <div className="shrink-0 h-8 w-8 rounded-full bg-[#0A1F3D] text-white font-extrabold flex items-center justify-center text-sm">
+                <div className="shrink-0 h-8 w-8 rounded-full bg-[#1F2937] text-white font-extrabold flex items-center justify-center text-sm">
                   {s.n}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -67,7 +67,7 @@ export default function ThankYou() {
 
           <Button
             onClick={() => navigate("/")}
-            className="w-full h-12 rounded-2xl bg-[#0A1F3D] text-white hover:opacity-90 font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
+            className="w-full h-12 rounded-2xl bg-[#1F2937] text-white hover:opacity-90 font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
           >
             <Home className="h-4 w-4" />
             חזרה לעמוד הבית

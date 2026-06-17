@@ -99,7 +99,7 @@ export function ProfileAvatar({
       <button
         onClick={() => setOpen((v) => !v)}
         className="relative rounded-full overflow-hidden ring-2 ring-white shadow-[0_4px_14px_-4px_rgba(10,31,61,0.25)] active:scale-95 transition-transform"
-        style={{ width: size, height: size, background: "linear-gradient(135deg,#D4AF37,#B8923F)" }}
+        style={{ width: size, height: size, background: "linear-gradient(135deg,#C9A227,#B8923F)" }}
         aria-label="פרופיל"
       >
         {avatarUrl ? (
@@ -119,14 +119,14 @@ export function ProfileAvatar({
       {open && (
         <div className="absolute top-[calc(100%+8px)] left-0 w-60 bg-white rounded-2xl shadow-[0_20px_40px_-12px_rgba(10,31,61,0.18)] border border-[#ECEEF2] overflow-hidden z-50 origin-top-left animate-in fade-in zoom-in-95 duration-150">
           <div className="p-4 border-b border-[#ECEEF2] flex items-center gap-3">
-            <div className="h-11 w-11 rounded-full overflow-hidden flex items-center justify-center" style={{ background: "linear-gradient(135deg,#D4AF37,#B8923F)" }}>
+            <div className="h-11 w-11 rounded-full overflow-hidden flex items-center justify-center" style={{ background: "linear-gradient(135deg,#C9A227,#B8923F)" }}>
               {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : <span className="text-white font-bold text-sm">{initials}</span>}
             </div>
             <div className="min-w-0 flex-1 text-right">
-              <div className="font-bold text-[#0A1F3D] text-sm truncate">{user?.name || "משתמש"}</div>
+              <div className="font-bold text-[#1F2937] text-sm truncate">{user?.name || "משתמש"}</div>
               <button
                 onClick={() => fileRef.current?.click()}
-                className="text-[11px] text-[#D4AF37] font-semibold flex items-center gap-1 mr-auto"
+                className="text-[11px] text-[#C9A227] font-semibold flex items-center gap-1 mr-auto"
               >
                 <Camera className="h-3 w-3" /> שנה תמונה
               </button>
@@ -154,7 +154,7 @@ function MenuItem({ icon: Icon, label, onClick, danger }: { icon: typeof Bell; l
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 text-right text-sm font-medium hover:bg-[#E8ECF0] transition-colors ${danger ? "text-[#E74C3C]" : "text-[#0A1F3D]"}`}
+      className={`w-full flex items-center gap-3 px-4 py-3 text-right text-sm font-medium hover:bg-[#F8F8F6] transition-colors ${danger ? "text-[#E74C3C]" : "text-[#1F2937]"}`}
     >
       <Icon className="h-4 w-4" strokeWidth={2} />
       <span className="flex-1">{label}</span>

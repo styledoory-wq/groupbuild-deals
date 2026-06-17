@@ -647,9 +647,9 @@ export default function DealDetail() {
       return { label: "הסתיימה", dot: "#6B7280", fg: "#6B7280", bg: "#F4F6FA" };
     }
     if (deal.status === "closing-soon") {
-      return { label: "נסגרת בקרוב", dot: "#F59E0B", fg: "#0A1F3D", bg: "#FFF8E1" };
+      return { label: "נסגרת בקרוב", dot: "#F59E0B", fg: "#1F2937", bg: "#FFF8E1" };
     }
-    return { label: "פעילה", dot: "#10B981", fg: "#0A1F3D", bg: "#FFFFFF" };
+    return { label: "פעילה", dot: "#10B981", fg: "#1F2937", bg: "#FFFFFF" };
   })();
 
   const benefits: Array<{ icon: typeof Tag; title: string; subtitle: string; accent: string; tint: string }> = [
@@ -711,7 +711,7 @@ export default function DealDetail() {
           </span>
 
           {(hasCompletedJoin || hasPendingDeposit) && (
-            <div className="absolute top-4 left-4 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] text-[#0A1F3D] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
+            <div className="absolute top-4 left-4 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] text-[#1F2937] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
               {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
               <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
             </div>
@@ -730,12 +730,12 @@ export default function DealDetail() {
               field="title"
               value={deal.title}
               as="h1"
-              className="text-[24px] leading-[1.15] font-extrabold text-[#0A1F3D] tracking-tight"
+              className="text-[24px] leading-[1.15] font-extrabold text-[#1F2937] tracking-tight"
             />
             {supplier && (
               <div className="flex items-center gap-2 mt-2.5">
                 <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="sm" />
-                <span className="text-[13px] font-bold text-[#0A1F3D]">{supplier.business_name}</span>
+                <span className="text-[13px] font-bold text-[#1F2937]">{supplier.business_name}</span>
                 {supplier.approval_status === "approved" && (
                   <BadgeCheck className="h-4 w-4 text-[#2EA85A]" strokeWidth={2.4} />
                 )}
@@ -762,12 +762,12 @@ export default function DealDetail() {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B7280]">התקדמות הקבוצה</p>
-                <p className="text-[20px] font-extrabold text-[#0A1F3D] mt-1 tracking-tight">
+                <p className="text-[20px] font-extrabold text-[#1F2937] mt-1 tracking-tight">
                   {participantCount} מתוך {progressTarget} הצטרפו
                 </p>
               </div>
               <div className="text-left">
-                <div className="text-[28px] font-black text-[#0A1F3D] leading-none">{progressPct}%</div>
+                <div className="text-[28px] font-black text-[#1F2937] leading-none">{progressPct}%</div>
                 <div className="text-[10px] font-bold text-[#6B7280] mt-1">הושלם</div>
               </div>
             </div>
@@ -782,7 +782,7 @@ export default function DealDetail() {
               />
             </div>
             {nextTier && peopleNeeded > 0 && (
-              <p className="text-[12px] font-bold text-[#0A1F3D] mt-3 flex items-center gap-1.5">
+              <p className="text-[12px] font-bold text-[#1F2937] mt-3 flex items-center gap-1.5">
                 <TrendingUp className="h-3.5 w-3.5 text-[#C9A84C]" />
                 עוד {peopleNeeded} דיירים פותחים את המדרגה הבאה
               </p>
@@ -793,14 +793,14 @@ export default function DealDetail() {
 
       {/* ===== SECTION 3 — WHY JOIN ===== */}
       <div className="px-4 mt-5">
-        <h2 className="text-[15px] font-extrabold text-[#0A1F3D] mb-3 px-1">למה כדאי להצטרף</h2>
+        <h2 className="text-[15px] font-extrabold text-[#1F2937] mb-3 px-1">למה כדאי להצטרף</h2>
         <div className="grid grid-cols-2 gap-3">
           {benefits.map((b) => (
             <div key={b.title} className="bg-white rounded-[20px] p-4 shadow-[0_4px_12px_-6px_rgba(10,31,61,0.12)]">
               <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-2.5" style={{ background: b.tint }}>
                 <b.icon className="w-5 h-5" style={{ color: b.accent }} strokeWidth={2} />
               </div>
-              <p className="text-[13px] font-extrabold text-[#0A1F3D] leading-tight">{b.title}</p>
+              <p className="text-[13px] font-extrabold text-[#1F2937] leading-tight">{b.title}</p>
               <p className="text-[11px] text-[#6B7280] leading-snug mt-1">{b.subtitle}</p>
             </div>
           ))}
@@ -809,7 +809,7 @@ export default function DealDetail() {
 
       {/* ===== SECTION 4 — OFFER DETAILS GRID ===== */}
       <div className="px-4 mt-5">
-        <h2 className="text-[15px] font-extrabold text-[#0A1F3D] mb-3 px-1">פרטי ההצעה</h2>
+        <h2 className="text-[15px] font-extrabold text-[#1F2937] mb-3 px-1">פרטי ההצעה</h2>
         <div className="grid grid-cols-2 gap-3">
           {depositRequired && <DetailCell icon={Shield} label="פיקדון" value={ils(Number(deal.deposit_amount))} />}
           {savingsAmount && <DetailCell icon={Tag} label="חיסכון" value={ils(savingsAmount)} />}
@@ -824,7 +824,7 @@ export default function DealDetail() {
 
       {/* ===== SECTION 5 — HOW IT WORKS ===== */}
       <div className="px-4 mt-5">
-        <h2 className="text-[15px] font-extrabold text-[#0A1F3D] mb-3 px-1">איך זה עובד</h2>
+        <h2 className="text-[15px] font-extrabold text-[#1F2937] mb-3 px-1">איך זה עובד</h2>
         <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
           <ol className="relative">
             {timeline.map((step, idx) => {
@@ -832,11 +832,11 @@ export default function DealDetail() {
               return (
                 <li key={step.title} className="relative flex gap-3 pb-5 last:pb-0">
                   {!last && <span aria-hidden className="absolute right-[19px] top-10 bottom-0 w-px bg-[#ECEEF2]" />}
-                  <div className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: "#0A1F3D" }}>
+                  <div className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: "#1F2937" }}>
                     <step.icon className="w-[18px] h-[18px] text-white" strokeWidth={2.2} />
                   </div>
                   <div className="flex-1 pt-1">
-                    <p className="text-[13px] font-extrabold text-[#0A1F3D] leading-tight">
+                    <p className="text-[13px] font-extrabold text-[#1F2937] leading-tight">
                       <span className="text-[#C9A84C] font-black mr-1">{idx + 1}.</span>
                       {step.title}
                     </p>
@@ -857,7 +857,7 @@ export default function DealDetail() {
               <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="md" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <p className="text-[15px] font-extrabold text-[#0A1F3D] truncate">{supplier.business_name}</p>
+                  <p className="text-[15px] font-extrabold text-[#1F2937] truncate">{supplier.business_name}</p>
                   {supplier.approval_status === "approved" && (
                     <BadgeCheck className="h-4 w-4 text-[#2EA85A] shrink-0" strokeWidth={2.4} />
                   )}
@@ -869,7 +869,7 @@ export default function DealDetail() {
             </div>
             <Link
               to={`/suppliers/${supplier.id}`}
-              className="mt-4 flex items-center justify-center gap-1 h-11 rounded-2xl bg-[#F4F6FA] text-[#0A1F3D] text-[13px] font-bold active:scale-[0.98] transition-transform"
+              className="mt-4 flex items-center justify-center gap-1 h-11 rounded-2xl bg-[#F4F6FA] text-[#1F2937] text-[13px] font-bold active:scale-[0.98] transition-transform"
             >
               צפייה בפרופיל הספק
               <ChevronLeft className="h-4 w-4" />
@@ -881,7 +881,7 @@ export default function DealDetail() {
       {/* ===== TIERS LADDER (transparency) ===== */}
       {tiers.length > 0 && (
         <div className="px-4 mt-5">
-          <h2 className="text-[15px] font-extrabold text-[#0A1F3D] mb-3 px-1">מדרגות מחיר</h2>
+          <h2 className="text-[15px] font-extrabold text-[#1F2937] mb-3 px-1">מדרגות מחיר</h2>
           <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
             <div className="space-y-2.5">
               {tiers.map((t, idx) => {
@@ -893,7 +893,7 @@ export default function DealDetail() {
                     key={idx}
                     className={cn(
                       "flex items-center justify-between rounded-2xl px-3 py-2.5 transition-colors",
-                      isActive ? "bg-[#FFF8E1] border border-[#EBD79A]" : isPast ? "opacity-50" : "bg-[#E8ECF0]",
+                      isActive ? "bg-[#FFF8E1] border border-[#EBD79A]" : isPast ? "opacity-50" : "bg-[#F8F8F6]",
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -903,11 +903,11 @@ export default function DealDetail() {
                           isActive ? "w-2.5 h-2.5 bg-[#C9A84C] ring-4 ring-[#C9A84C]/20" : "w-1.5 h-1.5 bg-[#6B7280]",
                         )}
                       />
-                      <span className={cn("text-[13px]", isActive ? "font-extrabold text-[#0A1F3D]" : "font-bold text-[#0A1F3D]")}>
+                      <span className={cn("text-[13px]", isActive ? "font-extrabold text-[#1F2937]" : "font-bold text-[#1F2937]")}>
                         {tierRange(t)} דיירים{isActive ? " · פעיל" : ""}
                       </span>
                     </div>
-                    <span className={cn("text-[13px] gb-num", isActive ? "font-black text-[#0A1F3D]" : "font-bold text-[#C9A84C]")}>
+                    <span className={cn("text-[13px] gb-num", isActive ? "font-black text-[#1F2937]" : "font-bold text-[#C9A84C]")}>
                       {td.headline}
                     </span>
                   </div>
@@ -926,14 +926,14 @@ export default function DealDetail() {
         className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
       >
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#E8ECF0] via-[#E8ECF0]/95 to-transparent">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F8F8F6] via-[#F8F8F6]/95 to-transparent">
           {interested ? (
-            <div className="flex items-center gap-2.5 bg-[#0A1F3D] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
+            <div className="flex items-center gap-2.5 bg-[#1F2937] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
               <div className="w-10 h-10 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] rounded-full flex items-center justify-center shrink-0">
                 {hasCompletedJoin ? (
-                  <CheckCircle2 className="w-5 h-5 text-[#0A1F3D]" strokeWidth={2.6} />
+                  <CheckCircle2 className="w-5 h-5 text-[#1F2937]" strokeWidth={2.6} />
                 ) : (
-                  <Clock className="w-5 h-5 text-[#0A1F3D]" strokeWidth={2.6} />
+                  <Clock className="w-5 h-5 text-[#1F2937]" strokeWidth={2.6} />
                 )}
               </div>
               <div className="flex-1 text-right">
@@ -951,7 +951,7 @@ export default function DealDetail() {
                   type="button"
                   onClick={handleResumePayment}
                   disabled={resumingPayment}
-                  className="h-10 px-3 rounded-2xl bg-white text-[#0A1F3D] text-[11px] font-extrabold active:scale-[0.97] transition-transform disabled:opacity-60"
+                  className="h-10 px-3 rounded-2xl bg-white text-[#1F2937] text-[11px] font-extrabold active:scale-[0.97] transition-transform disabled:opacity-60"
                 >
                   {resumingPayment ? "..." : "לתשלום"}
                 </button>
@@ -964,7 +964,7 @@ export default function DealDetail() {
               <Button
                 onClick={handleJoinClick}
                 disabled={submittingInterest}
-                className="flex-1 h-14 rounded-2xl bg-[#0A1F3D] hover:bg-[#0A1F3D]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#D4AF37]/40"
+                className="flex-1 h-14 rounded-2xl bg-[#1F2937] hover:bg-[#1F2937]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#C9A227]/40"
               >
                 {submittingInterest ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -1134,7 +1134,7 @@ export default function DealDetail() {
             <Button
               onClick={submitJoin}
               disabled={!acceptedTerms || submittingInterest}
-              className="rounded-xl bg-[#0A1F3D] text-white font-bold"
+              className="rounded-xl bg-[#1F2937] text-white font-bold"
             >
               {submittingInterest ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1168,7 +1168,7 @@ function StatCard({
         </div>
         <p className="text-[11px] font-bold text-[#6B7280]">{label}</p>
       </div>
-      <p className="text-[20px] font-black text-[#0A1F3D] leading-none tracking-tight gb-num">{value}</p>
+      <p className="text-[20px] font-black text-[#1F2937] leading-none tracking-tight gb-num">{value}</p>
       {sub && <p className="text-[10px] font-bold text-[#6B7280] mt-1.5">{sub}</p>}
     </div>
   );
@@ -1180,11 +1180,11 @@ function DetailCell({
   return (
     <div className="bg-white rounded-[18px] p-3.5 shadow-[0_4px_12px_-6px_rgba(10,31,61,0.10)] flex items-center gap-3">
       <div className="w-9 h-9 rounded-xl bg-[#F4F6FA] flex items-center justify-center shrink-0">
-        <Icon className="w-4 h-4 text-[#0A1F3D]" strokeWidth={2} />
+        <Icon className="w-4 h-4 text-[#1F2937]" strokeWidth={2} />
       </div>
       <div className="min-w-0">
         <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">{label}</p>
-        <p className="text-[13px] font-extrabold text-[#0A1F3D] truncate">{value}</p>
+        <p className="text-[13px] font-extrabold text-[#1F2937] truncate">{value}</p>
       </div>
     </div>
   );
@@ -1225,7 +1225,7 @@ function ShareButton({ deal, compact = false }: { deal: { id: string; title: str
         onClick={handleShare}
         aria-label="שתפו את ההצעה"
         className={cn(
-          "rounded-2xl bg-white text-[#0A1F3D] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-transform shadow-[0_4px_12px_-6px_rgba(10,31,61,0.18)]",
+          "rounded-2xl bg-white text-[#1F2937] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-transform shadow-[0_4px_12px_-6px_rgba(10,31,61,0.18)]",
           compact ? "h-10 w-10" : "h-14 w-14",
         )}
       >
@@ -1252,7 +1252,7 @@ function ShareButton({ deal, compact = false }: { deal: { id: string; title: str
             <a
               href={`sms:?&body=${encodeURIComponent(shareText)}`}
               onClick={() => setShareOpen(false)}
-              className="h-12 rounded-xl bg-[#0A1F3D] text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"
+              className="h-12 rounded-xl bg-[#1F2937] text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"
             >
               <Phone className="h-5 w-5" />
               שליחה ב-SMS
@@ -1260,7 +1260,7 @@ function ShareButton({ deal, compact = false }: { deal: { id: string; title: str
             <button
               type="button"
               onClick={copyLink}
-              className="h-12 rounded-xl border-2 border-[#D4AF37] bg-white text-[#0A1F3D] font-bold flex items-center justify-center gap-2 hover:bg-[#FFFBEB] transition"
+              className="h-12 rounded-xl border-2 border-[#C9A227] bg-white text-[#1F2937] font-bold flex items-center justify-center gap-2 hover:bg-[#FFFBEB] transition"
             >
               <Share2 className="h-5 w-5" />
               העתק קישור

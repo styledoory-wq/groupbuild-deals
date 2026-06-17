@@ -111,10 +111,10 @@ export default function SupplierOfferMarketingEdit() {
         {/* Trust banner */}
         <div className="rounded-[16px] bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] p-3.5 flex items-start gap-2.5">
           <div className="h-8 w-8 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
-            <Sparkles className="h-4 w-4 text-[#D4AF37]" />
+            <Sparkles className="h-4 w-4 text-[#C9A227]" />
           </div>
           <div className="text-fs-sm leading-relaxed">
-            <div className="font-bold text-[#0A1F3D] mb-0.5">עריכה בטוחה</div>
+            <div className="font-bold text-[#1F2937] mb-0.5">עריכה בטוחה</div>
             <p className="text-[#6B7280]">
               ניתן לעדכן את הטקסט השיווקי, הכותרת והתיאור — נתוני פיקדון, מדרגות ותנאים נעולים לשמירה על ההוגנות לדיירים.
             </p>
@@ -185,7 +185,7 @@ export default function SupplierOfferMarketingEdit() {
               {highlights.map((h, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1.5 text-fs-sm font-bold px-2.5 py-1.5 rounded-full bg-[#F4F6FA] text-[#0A1F3D] border border-[#ECEEF2]"
+                  className="inline-flex items-center gap-1.5 text-fs-sm font-bold px-2.5 py-1.5 rounded-full bg-[#F4F6FA] text-[#1F2937] border border-[#ECEEF2]"
                 >
                   {h}
                   <button
@@ -213,18 +213,18 @@ export default function SupplierOfferMarketingEdit() {
             <li>קטגוריה ונראות (ציבורי / פרויקט)</li>
           </ul>
           <p className="text-fs-xs text-[#6B7280] flex items-start gap-1.5 pt-1">
-            <ShieldAlert className="h-3.5 w-3.5 text-[#D4AF37] shrink-0 mt-0.5" />
+            <ShieldAlert className="h-3.5 w-3.5 text-[#C9A227] shrink-0 mt-0.5" />
             לשינויים בשדות אלו יש לפנות למנהל המערכת. נועד למניעת שינויים לאחר שדיירים כבר הצטרפו.
           </p>
         </section>
       </div>
 
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#E8ECF0] via-[#E8ECF0]/95 to-transparent flex gap-2">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#F8F8F6] via-[#F8F8F6]/95 to-transparent flex gap-2">
           <Button variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-[16px]">
             ביטול
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="flex-1 h-12 rounded-[16px] bg-[#0A1F3D] hover:bg-[#0A1F3D]/90 text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
+          <Button onClick={handleSave} disabled={saving} className="flex-1 h-12 rounded-[16px] bg-[#1F2937] hover:bg-[#1F2937]/90 text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
             <Save className="h-4 w-4 ml-2" /> {saving ? "שומר..." : "שמירה"}
           </Button>
         </div>

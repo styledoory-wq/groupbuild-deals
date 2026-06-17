@@ -109,7 +109,7 @@ export default function AdminSupplierAreas() {
             onChange={(e) => setServesAll(e.target.checked)}
             className="h-5 w-5 accent-primary"
           />
-          <Globe className="h-5 w-5 text-[#D4AF37]" />
+          <Globe className="h-5 w-5 text-[#C9A227]" />
           <div className="flex-1">
             <div className="font-bold text-sm">משרת את כל הארץ</div>
             <div className="text-fs-xs text-muted-foreground">הספק יוצג לכל הדיירים בכל מקום</div>
@@ -120,7 +120,7 @@ export default function AdminSupplierAreas() {
           <>
             <div className="gb-card p-4">
               <div className="flex items-center gap-2 mb-3">
-                <MapPin className="h-4 w-4 text-[#D4AF37]" />
+                <MapPin className="h-4 w-4 text-[#C9A227]" />
                 <h3 className="font-bold text-sm">אזורים</h3>
                 <span className="text-fs-xs text-muted-foreground mr-auto">{selectedRegions.size} נבחרו</span>
               </div>
@@ -172,7 +172,7 @@ export default function AdminSupplierAreas() {
                                 className={
                                   "px-2.5 py-1 rounded-full text-fs-xs font-bold border transition " +
                                   (active
-                                    ? "bg-[#FFF8E1] text-[#0A1F3D] border-[#D4AF37]"
+                                    ? "bg-[#FFF8E1] text-[#1F2937] border-[#C9A227]"
                                     : "bg-card text-foreground border-border")
                                 }
                               >
@@ -199,7 +199,7 @@ export default function AdminSupplierAreas() {
           <Button
             onClick={save}
             disabled={saving}
-            className="w-full h-12 rounded-2xl bg-[#0A1F3D] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+            className="w-full h-12 rounded-2xl bg-[#1F2937] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
           >
             <Save className="h-4 w-4 ml-2" />
             {saving ? "שומר…" : "שמירה"}

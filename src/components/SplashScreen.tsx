@@ -72,7 +72,7 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
         <div
           className="h-full w-1/2 rounded-full"
           style={{
-            background: "linear-gradient(90deg, transparent, #D4AF37 50%, transparent)",
+            background: "linear-gradient(90deg, transparent, #C9A227 50%, transparent)",
             animation: "gb-splash-slide 1.2s ease-in-out infinite",
           }}
         />

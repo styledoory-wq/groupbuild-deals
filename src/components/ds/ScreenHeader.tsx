@@ -14,7 +14,7 @@ export function ScreenHeader({ title, subtitle, action }: ScreenHeaderProps) {
   return (
     <header className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
       <div className="min-w-0">
-        <h1 className="text-[24px] font-extrabold text-[#0A1F3D] tracking-tight leading-tight">
+        <h1 className="text-[24px] font-extrabold text-[#1F2937] tracking-tight leading-tight">
           {title}
         </h1>
         {subtitle && (

@@ -40,7 +40,7 @@ const statusBadge = (status: string) => {
     case "closed":
       return {
         label: "נסגרה",
-        class: "bg-[#EFF6FF] text-[#0A1F3D] border-[#BFDBFE]",
+        class: "bg-[#EFF6FF] text-[#1F2937] border-[#BFDBFE]",
         icon: <XCircle className="h-3 w-3" />,
       };
     case "pending":
@@ -171,7 +171,7 @@ export default function SupplierOffers() {
       {/* CTA Button */}
       <div className="px-5 -mt-4 relative z-10 mb-5">
         <Link to="/supplier/offers/new">
-          <Button className="w-full h-13 rounded-[16px] bg-gradient-to-r from-[#0A1F3D] to-[#1A3A5C] hover:from-[#0A1F3D]/90 hover:to-[#1A3A5C]/90 text-white font-bold shadow-[0_12px_28px_-10px_rgba(10,31,61,0.55)] transition-all duration-300 hover:shadow-[0_16px_36px_-10px_rgba(10,31,61,0.65)] hover:-translate-y-0.5 text-base">
+          <Button className="w-full h-13 rounded-[16px] bg-gradient-to-r from-[#1F2937] to-[#1A3A5C] hover:from-[#1F2937]/90 hover:to-[#1A3A5C]/90 text-white font-bold shadow-[0_12px_28px_-10px_rgba(10,31,61,0.55)] transition-all duration-300 hover:shadow-[0_16px_36px_-10px_rgba(10,31,61,0.65)] hover:-translate-y-0.5 text-base">
             <Plus className="h-5 w-5 ml-2" /> צרו הצעה חדשה
           </Button>
         </Link>
@@ -181,10 +181,10 @@ export default function SupplierOffers() {
       {!loading && !error && supplierId && deals.length > 0 && (
         <div className="px-5 mb-5">
           <div className="flex gap-3">
-            <div className="flex-1 rounded-[16px] bg-gradient-to-br from-[#0A1F3D] to-[#1A3A5C] p-4 text-white shadow-[0_8px_24px_-10px_rgba(10,31,61,0.4)]">
+            <div className="flex-1 rounded-[16px] bg-gradient-to-br from-[#1F2937] to-[#1A3A5C] p-4 text-white shadow-[0_8px_24px_-10px_rgba(10,31,61,0.4)]">
               <div className="flex items-center gap-2 mb-1">
                 <div className="h-7 w-7 rounded-full bg-white/15 flex items-center justify-center">
-                  <Sparkles className="h-3.5 w-3.5 text-[#D4AF37]" />
+                  <Sparkles className="h-3.5 w-3.5 text-[#C9A227]" />
                 </div>
                 <span className="text-xs font-medium opacity-80">הצעות פעילות</span>
               </div>
@@ -279,7 +279,7 @@ export default function SupplierOffers() {
                       ₪{d.original_price.toLocaleString("he-IL")}
                     </span>
                   )}
-                  <span className="text-2xl font-extrabold text-[#0A1F3D]">
+                  <span className="text-2xl font-extrabold text-[#1F2937]">
                     {display.headline}
                   </span>
                 </div>
@@ -288,7 +288,7 @@ export default function SupplierOffers() {
 
               {/* Row 4: Participants */}
               <div className="flex items-center gap-2 mb-4 flex-wrap">
-                <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#0A1F3D] bg-[#EFF6FF] px-3 py-1.5 rounded-full">
+                <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#1F2937] bg-[#EFF6FF] px-3 py-1.5 rounded-full">
                   <Users className="h-3.5 w-3.5" />
                   {participants} {participants === 1 ? "מצטרף" : "מצטרפים"}
                 </div>
@@ -305,13 +305,13 @@ export default function SupplierOffers() {
                 <div className="flex items-center gap-2">
                   <Link
                     to={`/supplier/offers/${d.id}/edit`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-[#0A1F3D] text-white hover:bg-[#0A1F3D]/90 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-[#1F2937] text-white hover:bg-[#1F2937]/90 transition-colors"
                   >
                     <Pencil className="h-3 w-3" /> עריכת הצעה
                   </Link>
                   <Link
                     to={`/supplier/offers/${d.id}/marketing`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-white border border-[#ECEEF2] text-[#0A1F3D] hover:bg-[#F4F6FA] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-white border border-[#ECEEF2] text-[#1F2937] hover:bg-[#F4F6FA] transition-colors"
                   >
                     <Pencil className="h-3 w-3" /> שיווק
                   </Link>

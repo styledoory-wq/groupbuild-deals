@@ -217,12 +217,12 @@ export default function Auth() {
   // Unified with Categories: light surface, white controls, soft shadows.
   const fieldWrap = "relative";
   const fieldInput =
-    "h-[56px] w-full rounded-[14px] bg-white pr-12 pl-4 text-[15px] text-[#0A1F3D] placeholder:text-[#9CA3AF] text-right border border-[#E0E4E8] shadow-[0_2px_8px_rgba(0,0,0,0.08)] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.22),0_4px_14px_-4px_rgba(10,31,61,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
+    "h-[56px] w-full rounded-[14px] bg-white pr-12 pl-4 text-[15px] text-[#1F2937] placeholder:text-[#9CA3AF] text-right border border-[#E0E4E8] shadow-[0_2px_8px_rgba(0,0,0,0.08)] focus:shadow-[0_0_0_3px_rgba(212,175,55,0.22),0_4px_14px_-4px_rgba(10,31,61,0.12)] focus:outline-none focus:ring-0 transition-all duration-200";
 
   return (
     <div
       dir="rtl"
-      className="auth-screen min-h-[100dvh] w-full flex justify-center text-[#0A1F3D] relative overflow-hidden"
+      className="auth-screen min-h-[100dvh] w-full flex justify-center text-[#1F2937] relative overflow-hidden"
       style={{ background: "linear-gradient(160deg, #EEF1F5 0%, #E4E8EE 100%)" }}
     >
       {/* Unified light app background */}
@@ -248,7 +248,7 @@ export default function Auth() {
           <h1 className="mt-10 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight">
             {mode === "signin" ? "מתחברים לעסקאות טובות יותר" : "בואו נצא לדרך"}
           </h1>
-          <div className="mt-3 h-[2px] w-10 rounded-full bg-[#D4AF37]" />
+          <div className="mt-3 h-[2px] w-10 rounded-full bg-[#C9A227]" />
           <p className="mt-3 text-[#6B7280] text-[13px] font-medium leading-relaxed max-w-[22rem]">
             {mode === "signin"
               ? "דיירים וספקים מתחברים לפלטפורמה אחת ויוצרים כוח קנייה שחוסך כסף לכולם"
@@ -268,7 +268,7 @@ export default function Auth() {
           {mode === "signin" ? (
             <form onSubmit={handleSignIn} className="space-y-3.5 animate-fade-up">
               <div className={fieldWrap}>
-                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
                 <Input
                   type="email"
                   value={email}
@@ -280,7 +280,7 @@ export default function Auth() {
                 />
               </div>
               <div className={fieldWrap}>
-                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -295,7 +295,7 @@ export default function Auth() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#0A1F3D] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#1F2937] transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
@@ -306,7 +306,7 @@ export default function Auth() {
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={loading}
-                  className="text-xs text-[#6B7280] hover:text-[#0A1F3D] transition-colors underline-offset-4 hover:underline"
+                  className="text-xs text-[#6B7280] hover:text-[#1F2937] transition-colors underline-offset-4 hover:underline"
                 >
                   שכחתי סיסמה ›
                 </button>
@@ -329,20 +329,20 @@ export default function Auth() {
                       className={cn(
                         "p-3 rounded-[16px] text-right transition-all flex items-center gap-3 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97]",
                         role === id
-                          ? "bg-[#0A1F3D] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
-                          : "bg-white text-[#0A1F3D]"
+                          ? "bg-[#1F2937] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+                          : "bg-white text-[#1F2937]"
                       )}
                     >
                       <div
                         className={cn(
                            "h-10 w-10 rounded-[12px] flex items-center justify-center shrink-0 transition-colors",
-                          role === id ? "bg-white/15 text-white" : "bg-[#F4F6FA] text-[#D4AF37]"
+                          role === id ? "bg-white/15 text-white" : "bg-[#F4F6FA] text-[#C9A227]"
                         )}
                       >
                         <Icon className="h-4.5 w-4.5" />
                       </div>
                       <div className="min-w-0">
-                        <div className={cn("text-sm font-bold leading-tight", role === id ? "text-white" : "text-[#0A1F3D]")}>{label}</div>
+                        <div className={cn("text-sm font-bold leading-tight", role === id ? "text-white" : "text-[#1F2937]")}>{label}</div>
                         <div className={cn("text-[11px] leading-tight mt-0.5", role === id ? "text-white/70" : "text-[#6B7280]")}>{desc}</div>
                       </div>
                     </button>
@@ -353,7 +353,7 @@ export default function Auth() {
 
 
               <div className={fieldWrap}>
-                <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
+                <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
                 <Input
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -367,7 +367,7 @@ export default function Auth() {
               {role === "resident" && (
                 <>
                   <div className={fieldWrap}>
-                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
+                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
                     <Input
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
@@ -378,16 +378,16 @@ export default function Auth() {
                     />
                   </div>
                   <div className={fieldWrap}>
-                    <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
+                    <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
                     <select
                       value={projectId}
                       onChange={(e) => setProjectId(e.target.value)}
                       className={cn(fieldInput, "appearance-none cursor-pointer")}
-                      style={{ color: projectId ? "#0A1F3D" : "#9CA3AF" }}
+                      style={{ color: projectId ? "#1F2937" : "#9CA3AF" }}
                     >
-                      <option value="" style={{ color: "#0A1F3D" }}>פרויקט (אופציונלי)</option>
+                      <option value="" style={{ color: "#1F2937" }}>פרויקט (אופציונלי)</option>
                       {projects.map((p) => (
-                        <option key={p.id} value={p.id} style={{ color: "#0A1F3D" }}>
+                        <option key={p.id} value={p.id} style={{ color: "#1F2937" }}>
                           {p.name} — {p.city}
                         </option>
                       ))}
@@ -398,7 +398,7 @@ export default function Auth() {
 
               {role === "supplier" && (
                 <div className={fieldWrap}>
-                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
+                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
                   <Input
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
@@ -411,7 +411,7 @@ export default function Auth() {
               )}
 
               <div className={fieldWrap}>
-                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
                 <Input
                   type="email"
                   value={email}
@@ -424,7 +424,7 @@ export default function Auth() {
               </div>
 
               <div className={fieldWrap}>
-                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#D4AF37] pointer-events-none" />
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#C9A227] pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -439,7 +439,7 @@ export default function Auth() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#0A1F3D] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#1F2937] transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
@@ -451,7 +451,7 @@ export default function Auth() {
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-[#D4AF37]"
+                  className="mt-0.5 h-4 w-4 accent-[#C9A227]"
                 />
                 <span>
                   קראתי ואני מאשר את{" "}
@@ -501,7 +501,7 @@ export default function Auth() {
                 <button
                   type="button"
                   onClick={() => setMode("signup")}
-                  className="font-bold text-[#B8923F] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
+                  className="font-bold text-[#B8923F] hover:text-[#C9A227] transition-colors underline-offset-4 hover:underline"
                 >
                   הרשמה
                 </button>
@@ -512,7 +512,7 @@ export default function Auth() {
                 <button
                   type="button"
                   onClick={() => setMode("signin")}
-                  className="font-bold text-[#B8923F] hover:text-[#D4AF37] transition-colors underline-offset-4 hover:underline"
+                  className="font-bold text-[#B8923F] hover:text-[#C9A227] transition-colors underline-offset-4 hover:underline"
                 >
                   התחברות
                 </button>
@@ -524,7 +524,7 @@ export default function Auth() {
           <div className="flex items-center justify-center">
             <Link
               to="/about"
-              className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#0A1F3D] transition-colors"
+              className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#1F2937] transition-colors"
             >
               <HelpCircle className="h-3.5 w-3.5" />
               איך זה עובד?

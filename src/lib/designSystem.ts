@@ -42,7 +42,7 @@ export const STAGE_THEMES: StageTheme[] = [
   { id: "outdoor",      index: 7, title: "חצר ופיתוח",         shortTitle: "חצר",
     accent: "#6E8A2E", tint: "#F1F5E4", border: "#D2DEB5" },
   { id: "moving",       index: 8, title: "כניסה לבית",         shortTitle: "כניסה",
-    accent: "#D4AF37", tint: "#FFF8E1", border: "#EBD79A" },
+    accent: "#C9A227", tint: "#FFF8E1", border: "#EBD79A" },
 ];
 
 export const getStage = (id: StageId): StageTheme =>
@@ -57,7 +57,7 @@ export const STATUS_PRESETS: Record<StatusKind, {
   fg: string;
   bg: string;
 }> = {
-  active:        { label: "פעיל",   dot: "#10B981", fg: "#0A1F3D", bg: "#FFFFFF" },
+  active:        { label: "פעיל",   dot: "#10B981", fg: "#1F2937", bg: "#FFFFFF" },
   "coming-soon": { label: "בקרוב",  dot: "#F59E0B", fg: "#9CA3AF", bg: "#FFFFFFE6" },
   finished:      { label: "הסתיים", dot: "#6B7280", fg: "#6B7280", bg: "#F4F6FA" },
   pending:       { label: "ממתין",  dot: "#3B82F6", fg: "#1E40AF", bg: "#EAF2FF" },

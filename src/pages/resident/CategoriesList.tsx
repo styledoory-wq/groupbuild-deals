@@ -130,7 +130,7 @@ export default function CategoriesList() {
     : stageGroups.filter((g) => g.stage.id === activeStage);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#E8ECF0" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F8F8F6" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -142,7 +142,7 @@ export default function CategoriesList() {
           className="sticky z-20 px-5 pt-2 pb-3"
           style={{
             top: "env(safe-area-inset-top)",
-            background: "linear-gradient(180deg,#E8ECF0 60%, rgba(247,248,250,0.0))",
+            background: "linear-gradient(180deg,#F8F8F6 60%, rgba(247,248,250,0.0))",
             backdropFilter: "saturate(180%) blur(8px)",
             WebkitBackdropFilter: "saturate(180%) blur(8px)",
           }}
@@ -153,7 +153,7 @@ export default function CategoriesList() {
               type="text" dir="rtl" value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="חיפוש קטגוריה, ספק או אזור"
-              className="w-full h-12 pr-11 pl-10 rounded-[16px] bg-white border border-[#ECEEF2] text-[14px] font-medium text-[#0A1F3D] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#D4AF37] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]"
+              className="w-full h-12 pr-11 pl-10 rounded-[16px] bg-white border border-[#ECEEF2] text-[14px] font-medium text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#C9A227] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-[#F4F6FA] flex items-center justify-center">
@@ -182,7 +182,7 @@ export default function CategoriesList() {
                   className="w-full bg-white rounded-[16px] p-3 border border-[#ECEEF2] flex items-center gap-3 text-right active:scale-[0.99] transition-transform">
                   <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[14px] text-[#0A1F3D] truncate">{s.business_name}</p>
+                    <p className="font-bold text-[14px] text-[#1F2937] truncate">{s.business_name}</p>
                     <p className="text-[12px] text-[#6B7280] truncate font-medium">{catNames || "ספק"}</p>
                   </div>
                   <ChevronLeft className="h-4 w-4 text-[#9CA3AF]" />
@@ -196,7 +196,7 @@ export default function CategoriesList() {
           <>
             {/* === COMPACT 2-ROW MAIN-CATEGORY GRID === */}
             <section className="px-5 mt-1">
-              <h2 className="text-[12px] font-extrabold text-[#0A1F3D] tracking-tight mb-2.5">
+              <h2 className="text-[12px] font-extrabold text-[#1F2937] tracking-tight mb-2.5">
                 כל התחומים
               </h2>
 
@@ -205,7 +205,7 @@ export default function CategoriesList() {
                   label="הכל" Icon={LayoutGrid}
                   active={activeStage === "all"}
                   onClick={() => setActiveStage("all")}
-                  accent="#0A1F3D" tint="#F4F6FA" border="#ECEEF2"
+                  accent="#1F2937" tint="#F4F6FA" border="#ECEEF2"
                 />
                 {STAGES.map((s) => (
                   <FilterTile
@@ -272,7 +272,7 @@ function FilterTile({
       </div>
       <span
         className="text-[11px] font-extrabold leading-tight text-center line-clamp-1"
-        style={{ color: active ? "#FFFFFF" : "#0A1F3D" }}
+        style={{ color: active ? "#FFFFFF" : "#1F2937" }}
       >
         {label}
       </span>
@@ -323,7 +323,7 @@ function StageSection({
       {/* Stage heading */}
       <div className="mb-3 px-3 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="text-[19px] font-extrabold text-[#0A1F3D] tracking-tight leading-tight">
+          <h3 className="text-[19px] font-extrabold text-[#1F2937] tracking-tight leading-tight">
             {stage.title}
           </h3>
           <p className="mt-1 text-[11.5px] font-bold" style={{ color: stage.accent }}>
@@ -437,7 +437,7 @@ function CategoryCard({
         )}
       </div>
 
-      <p className="mt-2.5 text-[13.5px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight line-clamp-2">
+      <p className="mt-2.5 text-[13.5px] font-extrabold text-[#1F2937] leading-tight tracking-tight line-clamp-2">
         {name}
       </p>
     </>

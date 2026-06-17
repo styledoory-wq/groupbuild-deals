@@ -138,7 +138,7 @@ export default function AdminProjects() {
       <div className="px-5 -mt-4 relative z-10 mb-4">
         <button
           onClick={openCreate}
-          className="w-full h-12 rounded-2xl bg-[#0A1F3D] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
+          className="w-full h-12 rounded-2xl bg-[#1F2937] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
         >
           <Plus className="h-5 w-5" /> הוספת פרויקט
         </button>
@@ -164,7 +164,7 @@ export default function AdminProjects() {
           <div key={p.id} className="gb-card p-4">
             <div className="flex items-start gap-3">
               <div className="h-12 w-12 rounded-2xl bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                <Building2 className="h-6 w-6 text-[#D4AF37]" />
+                <Building2 className="h-6 w-6 text-[#C9A227]" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold truncate">{p.name}</h3>
@@ -181,7 +181,7 @@ export default function AdminProjects() {
             <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-[#ECEEF2]">
               <button
                 onClick={() => openEdit(p)}
-                className="h-9 rounded-[12px] bg-[#F4F6FA] text-[#0A1F3D] text-[12px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
+                className="h-9 rounded-[12px] bg-[#F4F6FA] text-[#1F2937] text-[12px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
               >
                 <Pencil className="h-3.5 w-3.5" /> עריכה
               </button>
@@ -237,8 +237,8 @@ export default function AdminProjects() {
                     className={
                       "h-9 rounded-[12px] text-[12px] font-bold border transition " +
                       (form.status === st
-                        ? "bg-[#0A1F3D] text-white border-[#0A1F3D]"
-                        : "bg-white text-[#0A1F3D] border-[#ECEEF2]")
+                        ? "bg-[#1F2937] text-white border-[#1F2937]"
+                        : "bg-white text-[#1F2937] border-[#ECEEF2]")
                     }
                   >
                     {statusLabel[st]}
@@ -248,8 +248,8 @@ export default function AdminProjects() {
             </div>
           </div>
           <DialogFooter className="mt-4 gap-2 sm:gap-2">
-            <button onClick={() => setOpen(false)} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#F4F6FA] text-[#0A1F3D] text-sm font-bold flex-1 disabled:opacity-50">ביטול</button>
-            <button onClick={save} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#0A1F3D] text-white text-sm font-bold flex-1 disabled:opacity-50">
+            <button onClick={() => setOpen(false)} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#F4F6FA] text-[#1F2937] text-sm font-bold flex-1 disabled:opacity-50">ביטול</button>
+            <button onClick={save} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#1F2937] text-white text-sm font-bold flex-1 disabled:opacity-50">
               {saving ? "שומר…" : form.id ? "שמירה" : "הוספה"}
             </button>
           </DialogFooter>
@@ -332,7 +332,7 @@ function CityCombobox({ value, cities, onChange }: { value: string; cities: stri
 
 function Tag({ children, accent }: { children: React.ReactNode; accent?: boolean }) {
   return (
-    <span className={"text-[11px] font-bold px-2 py-1 rounded-full " + (accent ? "bg-[#FFF8E1] text-[#0A1F3D]" : "bg-[#F4F6FA] text-[#6B7280]")}>
+    <span className={"text-[11px] font-bold px-2 py-1 rounded-full " + (accent ? "bg-[#FFF8E1] text-[#1F2937]" : "bg-[#F4F6FA] text-[#6B7280]")}>
       {children}
     </span>
   );

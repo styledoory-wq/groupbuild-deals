@@ -235,17 +235,17 @@ export default function SupplierProfile() {
                 field="business_name"
                 value={supplier.business_name}
                 as="h1"
-                className="text-[20px] font-extrabold truncate text-[#0A1F3D] tracking-tight"
+                className="text-[20px] font-extrabold truncate text-[#1F2937] tracking-tight"
               />
-              {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-[#D4AF37] shrink-0" />}
+              {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-[#C9A227] shrink-0" />}
             </div>
             <div className="mb-1 flex items-center gap-1.5 flex-wrap">
-              <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-[#6B7280] [&>b]:text-[#0A1F3D] [&>span]:text-[#6B7280]" />
+              <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-[#6B7280] [&>b]:text-[#1F2937] [&>span]:text-[#6B7280]" />
               {(() => {
                 const isSvc = Boolean(supplier.offers_services) || supplier.supplier_kind === "service";
                 const isProd = Boolean(supplier.offers_products) || supplier.supplier_kind === "product";
                 if (isSvc && isProd) return (
-                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-white text-[#0A1F3D] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
+                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-white text-[#1F2937] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
                     שירות + מוצרים
                   </span>
                 );
@@ -280,9 +280,9 @@ export default function SupplierProfile() {
                   href={l.href}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="h-11 rounded-[16px] bg-white text-[#0A1F3D] text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
+                  className="h-11 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
                 >
-                  <l.Icon className="h-4 w-4 text-[#D4AF37]" />
+                  <l.Icon className="h-4 w-4 text-[#C9A227]" />
                   {l.label}
                 </a>
               ))}
@@ -314,13 +314,13 @@ export default function SupplierProfile() {
         {supplierCategories.length > 0 && (
           <section className="gb-card p-4">
             <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Tag className="h-3.5 w-3.5 text-[#D4AF37]" /> תחומים
+              <Tag className="h-3.5 w-3.5 text-[#C9A227]" /> תחומים
             </h2>
             <div className="flex flex-wrap gap-1.5">
               {supplierCategories.map((c) => (
                 <span
                   key={c.id}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-extrabold bg-white text-[#0A1F3D] shadow-[0_1px_3px_rgba(10,31,61,0.06)]"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-extrabold bg-white text-[#1F2937] shadow-[0_1px_3px_rgba(10,31,61,0.06)]"
                 >
                   <span>{c.icon}</span> {c.name}
                 </span>
@@ -332,10 +332,10 @@ export default function SupplierProfile() {
         {/* Service area */}
         <section className="gb-card p-4">
           <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5 text-[#D4AF37]" /> אזורי שירות
+            <MapPin className="h-3.5 w-3.5 text-[#C9A227]" /> אזורי שירות
           </h2>
           {supplier.serves_all_country ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-extrabold bg-[#F4F6FA] text-[#0A1F3D] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-extrabold bg-[#F4F6FA] text-[#1F2937] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
               נותן שירות בכל הארץ
             </span>
           ) : serviceAreas.length > 0 ? (
@@ -357,7 +357,7 @@ export default function SupplierProfile() {
         {/* Active offers from this supplier */}
         <section className="gb-card p-4">
           <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <Tag className="h-3.5 w-3.5 text-[#D4AF37]" /> ההצעות הפעילות
+            <Tag className="h-3.5 w-3.5 text-[#C9A227]" /> ההצעות הפעילות
           </h2>
           {deals.length === 0 ? (
             <p className="text-sm text-muted-foreground">אין עדיין הצעות פעילות מהספק הזה.</p>
@@ -391,7 +391,7 @@ export default function SupplierProfile() {
 
       {/* CTA */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#E8ECF0] via-[#E8ECF0] to-transparent">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#F8F8F6] via-[#F8F8F6] to-transparent">
           <Button
             onClick={handleInterest}
             disabled={submitting || interested}
@@ -406,7 +406,7 @@ export default function SupplierProfile() {
       {lightbox && (
         <div
           onClick={() => setLightbox(null)}
-          className="fixed inset-0 z-50 bg-[#0A1F3D]/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#1F2937]/80 flex items-center justify-center p-4"
         >
           <img src={lightbox} alt="" className="max-h-[90vh] max-w-full rounded-[20px]" />
         </div>
@@ -434,7 +434,7 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
   return (
     <section className="gb-card p-4 space-y-2">
       <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-        <FileText className="h-3.5 w-3.5 text-[#D4AF37]" /> קטלוגים
+        <FileText className="h-3.5 w-3.5 text-[#C9A227]" /> קטלוגים
       </h2>
       <div className="space-y-1.5">
         {rows.map((r) => {
@@ -448,7 +448,7 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
               className="flex items-center gap-3 p-2.5 rounded-[16px] bg-white shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] transition-transform active:scale-[0.98]"
             >
               <div className="h-10 w-10 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                <FileText className="h-4 w-4 text-[#D4AF37]" />
+                <FileText className="h-4 w-4 text-[#C9A227]" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-bold truncate flex items-center gap-1.5">
@@ -476,7 +476,7 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
             className="flex items-center gap-3 p-2.5 rounded-[16px] bg-white shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] transition-transform active:scale-[0.98]"
           >
             <div className="h-10 w-10 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
-              <FileText className="h-4 w-4 text-[#D4AF37]" />
+              <FileText className="h-4 w-4 text-[#C9A227]" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-bold truncate">צפייה בקטלוג</div>

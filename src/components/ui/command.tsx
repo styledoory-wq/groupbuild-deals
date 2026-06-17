@@ -13,7 +13,7 @@ const Command = React.forwardRef<
   <CommandPrimitive
     ref={ref}
     className={cn(
-      "flex h-full w-full flex-col overflow-hidden rounded-[20px] bg-white text-[#0A1F3D]",
+      "flex h-full w-full flex-col overflow-hidden rounded-[20px] bg-white text-[#1F2937]",
       className,
     )}
     {...props}
@@ -81,7 +81,7 @@ const CommandGroup = React.forwardRef<
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      "overflow-hidden p-1 text-[#0A1F3D] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-bold [&_[cmdk-group-heading]]:text-[#6B7280]",
+      "overflow-hidden p-1 text-[#1F2937] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-bold [&_[cmdk-group-heading]]:text-[#6B7280]",
       className,
     )}
     {...props}
@@ -105,7 +105,7 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-[12px] px-2 py-2 text-[14px] font-medium outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-[#F4F6FA] data-[selected=true]:text-[#0A1F3D] data-[disabled=true]:opacity-50",
+      "relative flex cursor-default select-none items-center rounded-[12px] px-2 py-2 text-[14px] font-medium outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-[#F4F6FA] data-[selected=true]:text-[#1F2937] data-[disabled=true]:opacity-50",
       className,
     )}
     {...props}

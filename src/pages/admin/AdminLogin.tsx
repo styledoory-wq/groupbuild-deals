@@ -62,11 +62,11 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E8ECF0] text-[#0A1F3D] flex justify-center">
+    <div className="min-h-screen bg-[#F8F8F6] text-[#1F2937] flex justify-center">
       <div className="w-full max-w-screen-sm flex flex-col px-6 pt-16 pb-8">
         <button
           onClick={() => navigate("/")}
-          className="self-start text-xs text-[#6B7280] hover:text-[#D4AF37] transition-smooth flex items-center gap-1 mb-8"
+          className="self-start text-xs text-[#6B7280] hover:text-[#C9A227] transition-smooth flex items-center gap-1 mb-8"
         >
           <ArrowRight className="h-3.5 w-3.5" />
           חזרה
@@ -75,7 +75,7 @@ export default function AdminLogin() {
         <div className="relative animate-fade-up">
           <div className="absolute -top-10 -left-10 h-48 w-48 rounded-full bg-[#FFF8E1] blur-3xl" />
           <div className="relative">
-            <div className="h-16 w-16 rounded-2xl bg-[#0A1F3D] text-white flex items-center justify-center shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] mb-6">
+            <div className="h-16 w-16 rounded-2xl bg-[#1F2937] text-white flex items-center justify-center shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] mb-6">
               <ShieldCheck className="h-8 w-8 text-primary" />
             </div>
             <h1 className="text-3xl font-extrabold mb-2">כניסת ניהול</h1>
@@ -120,14 +120,14 @@ export default function AdminLogin() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-2xl bg-[#0A1F3D] text-white font-bold text-base shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+              className="w-full h-12 rounded-2xl bg-[#1F2937] text-white font-bold text-base shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
             >
               {loading ? "מתחבר…" : "כניסה לפאנל הניהול"}
             </Button>
           </form>
         </div>
 
-        <p className="text-center text-fs-xs text-[#0A1F3D]/50 mt-6">
+        <p className="text-center text-fs-xs text-[#1F2937]/50 mt-6">
           הגישה מתועדת ומאובטחת
         </p>
       </div>
