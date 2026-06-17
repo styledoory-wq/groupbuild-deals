@@ -67,6 +67,8 @@ function RegionSelect({ value, onChange }: { value: Region; onChange: (v: Region
 export default function BudgetPlanner() {
   const [track, setTrack] = useState<Track | null>(null);
   const [result, setResult] = useState<BudgetResult | null>(null);
+  const [mode, setMode] = useState<"quick" | "wizard">("quick");
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   // Shared
   const [region, setRegion] = useState<Region>("center");
@@ -93,18 +95,34 @@ export default function BudgetPlanner() {
   const [svc, setSvc] = useState<ServiceKind>("interior_doors");
   const [qty, setQty] = useState(5);
 
-  const reset = () => { setTrack(null); setResult(null); };
+  const reset = () => { setTrack(null); setResult(null); setWizardOpen(false); setMode("quick"); };
+
+  const computeBase = (): BudgetResult | null => {
+    if (track === "new_build") return calcNewBuild({ builtSqm, floors, basement, safeRoom, region, finish });
+    if (track === "full_renovation") return calcFullReno({ sqm: renoSqm, type: renoType, ...renoFlags, region, finish });
+    if (track === "single_room") return calcSingleRoom({ room, sizeSqm: roomSize, finish, region, replacePlumbing, newFurniture });
+    if (track === "single_service") return calcSingleService({ service: svc, quantity: qty, finish, region });
+    return null;
+  };
 
   const calculate = () => {
-    if (track === "new_build") {
-      setResult(calcNewBuild({ builtSqm, floors, basement, safeRoom, region, finish }));
-    } else if (track === "full_renovation") {
-      setResult(calcFullReno({ sqm: renoSqm, type: renoType, ...renoFlags, region, finish }));
-    } else if (track === "single_room") {
-      setResult(calcSingleRoom({ room, sizeSqm: roomSize, finish, region, replacePlumbing, newFurniture }));
-    } else if (track === "single_service") {
-      setResult(calcSingleService({ service: svc, quantity: qty, finish, region }));
+    if (mode === "wizard") {
+      setWizardOpen(true);
+      return;
     }
+    const base = computeBase();
+    if (base) setResult(base);
+    requestAnimationFrame(() => {
+      document.getElementById("budget-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+  const onWizardComplete = (answers: WizardAnswers) => {
+    const base = computeBase();
+    if (!base || !track) return;
+    const refined = applyWizardAnswers(base, getWizardQuestions(track), answers);
+    setResult(refined);
+    setWizardOpen(false);
     requestAnimationFrame(() => {
       document.getElementById("budget-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
