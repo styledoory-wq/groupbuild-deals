@@ -229,19 +229,19 @@
     background: var(--gradient-hero);
     color: #1F2937;
     @apply relative overflow-hidden;
-    box-shadow: 0 8px 20px -10px rgba(31,41,55,0.18), 0 2px 4px -2px rgba(31,41,55,0.05);
+    box-shadow: var(--shadow-card);
   }
 
   .gb-glass {
     background: #ffffff;
-    box-shadow: 0 8px 20px -10px rgba(31,41,55,0.18), 0 2px 4px -2px rgba(31,41,55,0.05);
+    box-shadow: var(--shadow-card);
     @apply rounded-[16px];
   }
 
   .gb-glass-light {
     background: #ffffff;
     @apply rounded-[16px];
-    box-shadow: 0 8px 20px -10px rgba(31,41,55,0.18), 0 2px 4px -2px rgba(31,41,55,0.05);
+    box-shadow: var(--shadow-card);
   }
 
   .gb-card-premium {
@@ -285,19 +285,19 @@
     background: #ffffff;
     color: #1F2937;
     @apply rounded-[16px] relative overflow-hidden;
-    box-shadow: 0 8px 20px -10px rgba(31,41,55,0.18), 0 2px 4px -2px rgba(31,41,55,0.05);
+    box-shadow: var(--shadow-card);
     transition: var(--transition-smooth);
   }
   .gb-tile-dark:hover {
     transform: translateY(-1px);
-    box-shadow: 0 14px 28px -10px rgba(31,41,55,0.22);
+    box-shadow: var(--shadow-elevated);
   }
 
   .gb-stat-pill {
     @apply rounded-[16px] px-3 py-4 flex flex-col items-center justify-center gap-1;
     background: #ffffff;
     
-    box-shadow: 0 4px 12px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+    box-shadow: var(--shadow-card);
   }
 
   .gb-particle { @apply absolute rounded-full pointer-events-none; background: #0E6B5A; box-shadow: 0 1px 3px rgba(31,41,55,0.06); }
@@ -315,7 +315,7 @@
 
   .gb-gold-underline { @apply block h-[2px] w-10 rounded-full mt-2; background: #1A8870; }
   .gb-deal-card { border-right: 0; }
-  .gb-deal-card:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(31,41,55,0.22); }
+  .gb-deal-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-elevated); }
 
   .gb-progress { background: #E8EAED; border-radius: 999px; height: 6px; overflow: hidden; }
   .gb-progress > .gb-progress-fill {
