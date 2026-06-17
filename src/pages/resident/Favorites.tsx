@@ -68,11 +68,11 @@ export default function Favorites() {
   return (
     <MobileShell>
       <PageHeader title="המועדפים שלי" subtitle="עסקאות ששמרת לעיון מאוחר יותר" />
-      <div className="px-5 lg:px-0 pb-24">
+      <div className="px-5 lg:px-0 mt-2 pb-24">
         {loading ? (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="aspect-[3/4] rounded-xl gb-skeleton" />
+              <div key={i} className="aspect-[3/4] rounded-[20px] bg-white animate-pulse border border-[#ECEEF2]" />
             ))}
           </div>
         ) : deals.length === 0 ? (

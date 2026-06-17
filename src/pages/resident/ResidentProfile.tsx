@@ -127,11 +127,11 @@ export default function ResidentProfile() {
             <button
               key={label}
               onClick={onClick}
-              className="w-full h-[60px] rounded-[20px] px-4 flex items-center justify-between bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.05)] active:scale-[0.99] transition-transform"
+              className="w-full h-[60px] rounded-[20px] px-4 flex items-center justify-between bg-white border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] active:scale-[0.99] transition-transform"
             >
               <span className="flex items-center gap-3">
-                <span className="h-10 w-10 rounded-xl bg-[#F8F8F6] flex items-center justify-center">
-                  <Icon className="h-[18px] w-[18px] text-[#1F2937]" strokeWidth={2} />
+                <span className="h-10 w-10 rounded-xl bg-[#2563EB]/12 flex items-center justify-center">
+                  <Icon className="h-[18px] w-[18px] text-[#C9A227]" strokeWidth={2} />
                 </span>
                 <span className="text-[15px] font-bold text-[#1F2937] tracking-tight">{label}</span>
               </span>
