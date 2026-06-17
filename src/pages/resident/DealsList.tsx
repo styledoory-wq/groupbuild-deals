@@ -156,7 +156,7 @@ export default function DealsList() {
             <button
               onClick={() => setTab("active")}
               className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all ${
-                tab === "active" ? "bg-[#C9A227] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
+                tab === "active" ? "bg-[#2563EB] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
               }`}
             >
               פעילות
@@ -164,7 +164,7 @@ export default function DealsList() {
             <button
               onClick={() => setTab("archive")}
               className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all ${
-                tab === "archive" ? "bg-[#C9A227] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
+                tab === "archive" ? "bg-[#2563EB] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
               }`}
             >
               ארכיון

@@ -63,7 +63,7 @@ export function DesktopSidebar({ role }: { role: Role }) {
               className={cn(
                 "flex items-center gap-3 h-12 px-4 rounded-[14px] text-[15px] font-bold transition-colors",
                 active
-                  ? "bg-[#C9A227] text-white shadow-[0_6px_16px_-8px_rgba(10,31,61,0.45)]"
+                  ? "bg-[#2563EB] text-white shadow-[0_6px_16px_-8px_rgba(10,31,61,0.45)]"
                   : "text-[#1F2937] hover:bg-[#F4F6FA]",
               )}
             >

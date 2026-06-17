@@ -119,7 +119,7 @@ export default function SearchPage() {
                       <p className="text-[12px] text-[#6B7280] truncate mt-0.5">{s.short_description}</p>
                     )}
                   </div>
-                  <span className="h-9 w-9 rounded-xl bg-[#C9A227]/12 flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-xl bg-[#2563EB]/12 flex items-center justify-center">
                     <Store className="h-4 w-4 text-[#C9A227]" strokeWidth={2.2} />
                   </span>
                 </Link>

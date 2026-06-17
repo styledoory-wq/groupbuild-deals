@@ -224,7 +224,7 @@ export default function SupplierOfferMarketingEdit() {
           <Button variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-[16px]">
             ביטול
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="flex-1 h-12 rounded-[16px] bg-[#C9A227] hover:bg-[#C9A227]/90 text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
+          <Button onClick={handleSave} disabled={saving} className="flex-1 h-12 rounded-[16px] bg-[#2563EB] hover:bg-[#2563EB]/90 text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
             <Save className="h-4 w-4 ml-2" /> {saving ? "שומר..." : "שמירה"}
           </Button>
         </div>

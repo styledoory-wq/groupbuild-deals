@@ -225,7 +225,7 @@ export default function BudgetPlanner() {
                     <Switch
                       checked={checked}
                       onCheckedChange={onChange}
-                      className="data-[state=checked]:bg-[#C9A227] data-[state=unchecked]:bg-[#E5E7EB]"
+                      className="data-[state=checked]:bg-[#2563EB] data-[state=unchecked]:bg-[#E5E7EB]"
                     />
                   </button>
                 );

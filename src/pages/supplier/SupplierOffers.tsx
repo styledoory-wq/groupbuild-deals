@@ -305,7 +305,7 @@ export default function SupplierOffers() {
                 <div className="flex items-center gap-2">
                   <Link
                     to={`/supplier/offers/${d.id}/edit`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-[#C9A227] text-white hover:bg-[#C9A227]/90 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-[#2563EB] text-white hover:bg-[#2563EB]/90 transition-colors"
                   >
                     <Pencil className="h-3 w-3" /> עריכת הצעה
                   </Link>

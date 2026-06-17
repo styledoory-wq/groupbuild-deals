@@ -217,7 +217,7 @@ const filteredDeals = useMemo(() => {
               onClick={() => navigate("/resident/profile/edit")}
               className="shrink-0 inline-flex items-center gap-2 h-8 px-3 rounded-full bg-white border border-[#E5E7EB] text-[12px] font-semibold text-[#1F2937] shadow-sm active:scale-95 transition-transform"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#C9A227]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
               <MapPin className="h-3 w-3 text-[#6B7280]" strokeWidth={2.4} />
               <span>{city}</span>
             </button>
@@ -251,7 +251,7 @@ const filteredDeals = useMemo(() => {
                 {formatILS(estimatedSavings)}
               </div>
               <p className="text-[12px] text-[#6B7280] mt-1 mb-4">נחסכו בזכות רכישות קבוצתיות</p>
-              <div className="w-full bg-[#C9A227] text-white py-2.5 rounded-xl font-bold text-[13px] shadow-md border border-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
+              <div className="w-full bg-[#2563EB] text-white py-2.5 rounded-xl font-bold text-[13px] shadow-md border border-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
                 פירוט החסכון המלא
               </div>
             </div>
@@ -293,7 +293,7 @@ const filteredDeals = useMemo(() => {
                 onClick={() => setActiveFilter(f)}
                 className={`shrink-0 h-9 px-4 rounded-full text-[12px] font-bold transition-all border ${
                   active
-                    ? "bg-[#C9A227] text-white border-[#C9A227] shadow-md shadow-[#C9A227]/25"
+                    ? "bg-[#2563EB] text-white border-[#C9A227] shadow-md shadow-[#C9A227]/25"
                     : "bg-white text-[#1F2937] border-[#E5E7EB] shadow-sm"
                 }`}
               >

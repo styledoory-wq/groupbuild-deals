@@ -61,7 +61,7 @@ export default function Notifications() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-0.5 gap-2">
                     <h3 className="font-bold text-[14px] text-[#1F2937] tracking-tight truncate">{n.title}</h3>
-                    {unread && <span className="h-2 w-2 rounded-full bg-[#C9A227] shrink-0" />}
+                    {unread && <span className="h-2 w-2 rounded-full bg-[#2563EB] shrink-0" />}
                   </div>
                   <p className="text-[12.5px] text-[#6B7280] leading-relaxed">{n.body}</p>
                   <p className="text-[11px] text-[#9CA3AF] mt-2 font-medium">
