@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus, LogOut, Pencil, Clock, AlertCircle, ArrowLeft, MapPin, Users, TrendingDown,
-  TrendingUp, Ticket, Building2, Sparkles, ChevronLeft, Check, Zap, Eye,
+  TrendingUp, Building2, Sparkles, ChevronLeft, Zap, Radar,
 } from "lucide-react";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { MobileShell } from "@/components/layout/MobileShell";
