@@ -230,9 +230,9 @@ export default function CategoriesList() {
           </div>
         )}
 
-        {/* Stage sections — compact grid, all visible, no horizontal scroll */}
+        {/* Stage sections — compact list cards, all visible */}
         {!q && (
-          <div className="space-y-7">
+          <div className="space-y-4">
             {visibleStages.map(({ stage, cats, totalSuppliers }) => (
               <StageSection
                 key={stage.id}
