@@ -184,7 +184,7 @@ Deno.serve(async (req) => {
       ISOCoinId: 1,
       MaxPayments: 1,
       Language: "he",
-      ProductName: "פיקדון השתתפות בעסקה קבוצתית",
+      ProductName: "פיקדון + דמי הצטרפות — עסקה קבוצתית",
       SuccessRedirectUrl: successUrl,
       FailedRedirectUrl: cancelUrl,
       ReturnValue: depositId,
