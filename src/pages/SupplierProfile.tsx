@@ -464,16 +464,49 @@ export default function SupplierProfile() {
         )}
       </div>
 
-      {/* CTA */}
+      {/* Dual CTA */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
         <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-transparent">
-          <Button
-            onClick={handleInterest}
-            disabled={submitting || interested}
-            className="w-full h-12"
-          >
-            {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ ההתעניינות שלך נרשמה" : "אני מעוניין בהצעה"}
-          </Button>
+          <div className="flex gap-2">
+            {whatsappHref ? (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer noopener"
+                onClick={() => {
+                  if (supplier) {
+                    void supabase.from("supplier_inquiries").insert({
+                      supplier_id: supplier.id,
+                      message: `לחיצה על וואטסאפ מפרופיל הספק`,
+                      source: "whatsapp_click",
+                      status: "new",
+                    });
+                  }
+                }}
+                className="flex-1 h-12 rounded-[16px] bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 shadow-[0_4px_14px_-4px_rgba(37,211,102,0.5)] active:scale-[0.98] transition-transform"
+              >
+                <WhatsappIcon className="h-5 w-5" />
+                בקשת הצעה
+              </a>
+            ) : (
+              <Button
+                onClick={handleInterest}
+                disabled={submitting || interested}
+                variant="outline"
+                className="flex-1 h-12"
+              >
+                {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ נרשם" : "השאר פרטים"}
+              </Button>
+            )}
+            <Button
+              onClick={() => dealsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              disabled={deals.length === 0}
+              className="flex-1 h-12"
+            >
+              <Tag className="h-4 w-4 ml-1.5" />
+              {deals.length > 0 ? `ראה עסקאות (${deals.length})` : "אין עסקאות פעילות"}
+            </Button>
+          </div>
         </div>
       </div>
 
