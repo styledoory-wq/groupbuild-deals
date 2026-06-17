@@ -261,6 +261,9 @@ const App = () => (
                   <Route path="/admin/complaints" element={adminRoute(<AdminComplaints />)} />
                   <Route path="/admin/leads" element={adminRoute(<AdminLeads />)} />
                   <Route path="/admin/supplier-trust" element={adminRoute(<AdminSupplierTrust />)} />
+                  <Route path="/admin/committee-requests" element={adminRoute(<AdminCommitteeRequests />)} />
+                  <Route path="/committee" element={<CommitteeDashboard />} />
+                  <Route path="/committee/request" element={<CommitteeRequest />} />
                   <Route path="/payment/checkout" element={<PaymentCheckout />} />
                   <Route path="/checkout/:dealId" element={<CheckoutSummary />} />
                   <Route path="/payment/success" element={<PaymentSuccess />} />
