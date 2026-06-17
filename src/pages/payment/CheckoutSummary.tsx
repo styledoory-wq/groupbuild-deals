@@ -507,7 +507,7 @@ export default function CheckoutSummary() {
             {submitting ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : depositAmount > 0 ? (
-              <>המשך לתשלום מאובטח · {ils(depositAmount)}</>
+              <>המשך לתשלום מאובטח · {ils(totalNow)}</>
             ) : (
               <>אישור הצטרפות</>
             )}
