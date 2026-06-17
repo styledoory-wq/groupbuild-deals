@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Briefcase, TrendingUp, Users, DollarSign, Plus, LogOut, Pencil, Clock, AlertCircle, type LucideIcon } from "lucide-react";
+import {
+  Plus, LogOut, Pencil, Clock, AlertCircle, ArrowLeft, MapPin, Users, TrendingDown,
+  TrendingUp, Ticket, Building2, Sparkles, ChevronLeft, Check, Zap, Eye,
+} from "lucide-react";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -31,6 +34,20 @@ type DbDeal = {
   offer_type: string | null;
 };
 
+// Visual demo data for blocks that don't have a backing table yet.
+// TODO: wire to real projects/competitor tables when available.
+const DEMO_PROJECTS = [
+  { id: "p1", name: "מגדלי הצמרת", city: "תל אביב", units: 84, distance: "1.2 ק״מ", category: "מזגנים" },
+  { id: "p2", name: "פרויקט סביוני הכרמל", city: "חיפה", units: 56, distance: "3.4 ק״מ", category: "שיפוצים" },
+  { id: "p3", name: "נווה גנים B", city: "רעננה", units: 120, distance: "5.8 ק״מ", category: "אינסטלציה" },
+];
+
+const DEMO_COMPETITORS = [
+  { id: "c1", name: "קול-אייר בע״מ", category: "התקנת מזגן 2.5 כ״ס", price: 2390, joiners: 47, delta: -120 },
+  { id: "c2", name: "ChillPro", category: "התקנת מזגן 2.5 כ״ס", price: 2450, joiners: 31, delta: 0 },
+  { id: "c3", name: "ארקטיק שירותים", category: "ניקוי + שירות שנתי", price: 690, joiners: 22, delta: -40 },
+];
+
 export default function SupplierDashboard() {
   const navigate = useNavigate();
   const { user, logout } = useApp();
@@ -39,6 +56,7 @@ export default function SupplierDashboard() {
   const [dbSupplier, setDbSupplier] = useState<DbSupplier | null>(null);
   const [myDeals, setMyDeals] = useState<DbDeal[]>([]);
   const [counts, setCounts] = useState<Record<string, { interests: number; paid: number }>>({});
+  const [voucherCode, setVoucherCode] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -49,17 +67,12 @@ export default function SupplierDashboard() {
         const { data: sessionData } = await supabase.auth.getSession();
         const session = sessionData.session;
         if (!session) {
-          if (!cancelled) {
-            setLoading(false);
-            navigate("/auth", { replace: true });
-          }
+          if (!cancelled) { setLoading(false); navigate("/auth", { replace: true }); }
           return;
         }
-
         const email = session.user.email ?? "";
         let supplierRow = await resolveSupplierForUser<DbSupplier>(
-          session.user.id,
-          email,
+          session.user.id, email,
           "id, business_name, approval_status, is_active, user_id, email",
         );
         if (!supplierRow) {
@@ -81,7 +94,6 @@ export default function SupplierDashboard() {
           if (insertErr) throw insertErr;
           supplierRow = created as DbSupplier;
         }
-
         if (cancelled) return;
         setDbSupplier(supplierRow);
 
@@ -134,14 +146,19 @@ export default function SupplierDashboard() {
     return Number(d.base_price ?? d.original_price ?? 0);
   };
 
+  const totals = useMemo(() => {
+    const totalLeads = Object.values(counts).reduce((s, c) => s + c.interests, 0);
+    const totalPaid = Object.values(counts).reduce((s, c) => s + c.paid, 0);
+    const revenue = myDeals.reduce((s, d) => s + (counts[d.id]?.paid ?? 0) * priceFor(d), 0);
+    const conversion = totalLeads ? Math.round((totalPaid / totalLeads) * 100) : 0;
+    return { totalLeads, totalPaid, revenue, conversion };
+  }, [counts, myDeals]);
+
   if (loading) {
     return (
       <MobileShell>
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-center">
-            <div className="h-10 w-10 mx-auto rounded-full border-2 border-[#1F2937] border-t-transparent animate-spin mb-3" />
-            <div className="text-sm text-[#6B7280]">טוען את החשבון…</div>
-          </div>
+          <div className="h-9 w-9 rounded-full border-2 border-[#0E6B5A] border-t-transparent animate-spin" />
         </div>
       </MobileShell>
     );
@@ -152,14 +169,12 @@ export default function SupplierDashboard() {
       <MobileShell>
         <div className="min-h-[60vh] flex items-center justify-center px-6">
           <div className="text-center max-w-sm">
-            <div className="h-12 w-12 mx-auto rounded-full bg-destructive/10 flex items-center justify-center mb-3">
+            <div className="h-12 w-12 mx-auto rounded-2xl bg-destructive/10 flex items-center justify-center mb-3">
               <AlertCircle className="h-6 w-6 text-destructive" />
             </div>
-            <h2 className="font-bold text-base mb-2">שגיאה בטעינה</h2>
-            <p className="text-sm text-[#6B7280] mb-5">{error}</p>
-            <Button onClick={handleLogout} variant="outline" className="w-full rounded-2xl">
-              חזרה למסך התחברות
-            </Button>
+            <h2 className="font-extrabold text-base mb-2 text-[#0F1B14]">שגיאה בטעינה</h2>
+            <p className="text-[13px] text-[#5C6770] mb-5">{error}</p>
+            <Button onClick={handleLogout} variant="outline" className="w-full rounded-2xl">חזרה למסך התחברות</Button>
           </div>
         </div>
       </MobileShell>
@@ -170,29 +185,28 @@ export default function SupplierDashboard() {
   const isRejected = dbSupplier?.approval_status === "rejected";
   const businessName = dbSupplier?.business_name || user?.name || "החשבון שלי";
 
-  const HeroBar = () => (
-    <header className="px-5 pt-4 pb-3">
+  const TopBar = () => (
+    <header className="px-5 pt-4 pb-2">
       <div className="flex items-center justify-between mb-3">
-        <span className="h-8 px-3 rounded-full bg-white flex items-center text-[#1F2937] text-[11px] font-bold uppercase tracking-[0.14em] shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)]">
-          אזור ספק
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-[#10B981] animate-pulse" />
+          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#0E6B5A]">פעיל · אזור ספק</span>
+        </div>
         <button
           onClick={handleLogout}
-          className="h-9 px-3 rounded-full bg-white flex items-center gap-1.5 text-[#DC2626] text-[13px] font-bold shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)] active:scale-95 transition-transform"
+          className="h-8 w-8 rounded-full bg-white border border-[#E8EAE5] flex items-center justify-center text-[#5C6770] active:scale-95 transition"
           aria-label="יציאה"
         >
-          <LogOut className="h-4 w-4" strokeWidth={2} />
-          <span>התנתקות</span>
+          <LogOut className="h-4 w-4" strokeWidth={2.2} />
         </button>
       </div>
       <div className="text-right">
-        <h1 className="text-[24px] font-extrabold text-[#1F2937] leading-tight tracking-tight break-words">
+        <div className="text-[12px] text-[#5C6770] font-semibold mb-0.5">שלום,</div>
+        <h1 className="text-[26px] font-black text-[#0F1B14] leading-[1.05] tracking-[-0.02em] break-words">
           {businessName}
         </h1>
         {dbSupplier && !isPending && !isRejected && (
-          <div className="mt-1.5">
-            <SupplierRatingBadge supplierId={dbSupplier.id} className="text-[12px] text-[#0E6B5A]" />
-          </div>
+          <div className="mt-1.5"><SupplierRatingBadge supplierId={dbSupplier.id} className="text-[12px] text-[#0E6B5A]" /></div>
         )}
       </div>
     </header>
@@ -201,87 +215,217 @@ export default function SupplierDashboard() {
   if (!dbSupplier || isPending || isRejected) {
     return (
       <MobileShell>
-        <HeroBar />
-        <div className="px-5 mt-5">
-          <div className="bg-white rounded-[24px] p-6 border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] text-center">
-            <div className="h-16 w-16 mx-auto rounded-2xl bg-white flex items-center justify-center mb-4 shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]">
-              <Clock className="h-6 w-6 text-[#0E6B5A]" strokeWidth={2} />
+        <div className="min-h-screen bg-[#F7F5F0]">
+          <TopBar />
+          <div className="px-5 mt-5">
+            <div className="bg-white rounded-[24px] p-6 border border-[#E8EAE5] text-center">
+              <div className="h-14 w-14 mx-auto rounded-2xl bg-[#0E6B5A]/10 flex items-center justify-center mb-4">
+                <Clock className="h-6 w-6 text-[#0E6B5A]" strokeWidth={2.2} />
+              </div>
+              <h2 className="font-extrabold text-[#0F1B14] text-[17px] mb-2 tracking-tight">
+                {isRejected ? "ההרשמה נדחתה" : "ממתין לאישור מנהל"}
+              </h2>
+              <p className="text-[13px] text-[#5C6770] leading-relaxed mb-5">
+                {isRejected
+                  ? "לצערנו ההרשמה לא אושרה. ניתן לפנות לתמיכה."
+                  : "נעדכן אותך לאחר האישור ותוכל להתחיל לפרסם הצעות ולקבל לידים."}
+              </p>
+              <Button onClick={() => navigate("/supplier/profile/edit")} className="w-full h-11 rounded-2xl bg-[#0E6B5A] hover:bg-[#0a5648] text-white">
+                <Pencil className="h-4 w-4 ml-2" /> השלמת פרטי הספק
+              </Button>
             </div>
-            <h2 className="font-extrabold text-[#1F2937] text-base mb-2">
-              {isRejected ? "ההרשמה נדחתה" : "ההרשמה התקבלה וממתינה לאישור"}
-            </h2>
-            <p className="text-sm text-[#6B7280] leading-relaxed mb-5">
-              {isRejected
-                ? "לצערנו ההרשמה לא אושרה כרגע. ניתן לפנות לתמיכה לפרטים נוספים."
-                : "החשבון שלך ממתין לאישור מנהל. נעדכן אותך לאחר האישור ותוכל להתחיל לפרסם הצעות."}
-            </p>
-            <Button onClick={() => navigate("/supplier/profile/edit")} className="w-full h-11 rounded-2xl">
-              <Pencil className="h-4 w-4 ml-2" /> השלמת פרטי הספק
-            </Button>
           </div>
+          <BottomNav role="supplier" />
         </div>
-        <BottomNav role="supplier" />
       </MobileShell>
     );
   }
 
-  const totalLeads = Object.values(counts).reduce((s, c) => s + c.interests, 0);
-  const totalPaid = Object.values(counts).reduce((s, c) => s + c.paid, 0);
-  const revenue = myDeals.reduce((s, d) => s + (counts[d.id]?.paid ?? 0) * priceFor(d), 0);
-  const conversion = totalLeads ? Math.round((totalPaid / totalLeads) * 100) : 0;
+  const handleRedeem = () => {
+    const code = voucherCode.trim();
+    if (!code) { toast.error("הזן קוד שובר"); return; }
+    navigate(`/supplier/scan?code=${encodeURIComponent(code)}`);
+  };
 
   return (
     <MobileShell>
-      <div className="w-full overflow-x-hidden">
-        <HeroBar />
+      <div className="min-h-screen bg-[#F7F5F0] w-full overflow-x-hidden">
+        <TopBar />
 
-        <div className="px-5 mt-4 grid grid-cols-2 gap-3 w-full">
-          <Stat icon={Users} label="לידים" value={totalLeads.toString()} />
-          <Stat icon={TrendingUp} label="המרה" value={`${conversion}%`} />
-          <Stat icon={Briefcase} label="עסקאות פעילות" value={myDeals.length.toString()} />
-          <Stat icon={DollarSign} label="הכנסה" value={formatILS(revenue)} small />
+        {/* KPI strip */}
+        <div className="px-5 mt-3 grid grid-cols-4 gap-2">
+          <Kpi label="הכנסה" value={formatILS(totals.revenue)} accent />
+          <Kpi label="לידים" value={totals.totalLeads.toString()} />
+          <Kpi label="המרה" value={`${totals.conversion}%`} />
+          <Kpi label="פעילות" value={myDeals.length.toString()} />
         </div>
 
-        <div className="px-5 mt-5 mb-6 space-y-2.5 w-full">
-          <Button onClick={() => navigate("/supplier/offers/new")} className="w-full h-12 rounded-2xl font-semibold">
-            <Plus className="h-4 w-4 ml-2" strokeWidth={2} /> צרו הצעה חדשה
-          </Button>
-          <Button onClick={() => navigate("/supplier/profile/edit")} variant="outline" className="w-full h-11 rounded-2xl">
-            <Pencil className="h-4 w-4 ml-2" /> עריכת פרופיל ואזורי שירות
-          </Button>
+        {/* Voucher redeem — hero block */}
+        <section className="px-5 mt-4">
+          <div className="relative rounded-[24px] p-5 bg-gradient-to-br from-[#0E6B5A] to-[#0a5648] text-white overflow-hidden">
+            <div className="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-white/5" />
+            <div className="absolute -left-2 -top-10 h-20 w-20 rounded-full bg-white/5" />
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="h-9 w-9 rounded-xl bg-white/15 flex items-center justify-center">
+                  <Ticket className="h-4 w-4" strokeWidth={2.4} />
+                </span>
+                <div className="text-right flex-1">
+                  <div className="text-[11px] uppercase tracking-[0.18em] font-bold opacity-80">מימוש שובר</div>
+                  <div className="text-[15px] font-extrabold tracking-tight">סרוק או הזן קוד לקוח</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 bg-white rounded-2xl p-1.5">
+                <input
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                  placeholder="הזן קוד · למשל GB-4F2A"
+                  className="flex-1 bg-transparent text-[#0F1B14] placeholder:text-[#9CA39A] text-[14px] font-bold tracking-wider px-3 py-2 outline-none text-right"
+                  dir="rtl"
+                />
+                <button
+                  onClick={handleRedeem}
+                  className="h-10 px-4 rounded-xl bg-[#0F1B14] text-white text-[13px] font-extrabold flex items-center gap-1.5 active:scale-95 transition"
+                >
+                  <Check className="h-4 w-4" strokeWidth={2.6} /> מימוש
+                </button>
+              </div>
+              <button
+                onClick={() => navigate("/supplier/scan")}
+                className="mt-3 text-[12px] font-bold text-white/90 flex items-center gap-1"
+              >
+                סרוק QR מהמצלמה <ChevronLeft className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* New projects in area */}
+        <SectionHeader
+          icon={<Building2 className="h-3.5 w-3.5" />}
+          title="פרויקטים חדשים באזורך"
+          subtitle="חבר בניינים שמחפשים ספק כמוך"
+          action={<button onClick={() => navigate("/supplier/offers/new")} className="text-[12px] font-bold text-[#0E6B5A]">צור הצעה <ChevronLeft className="h-3 w-3 inline" /></button>}
+        />
+        <div className="px-5 mt-2 -mr-1 pr-1 overflow-x-auto no-scrollbar">
+          <div className="flex gap-2.5 pb-1 snap-x snap-mandatory">
+            {DEMO_PROJECTS.map((p) => (
+              <div key={p.id} className="snap-start min-w-[230px] bg-white rounded-2xl border border-[#E8EAE5] p-3.5">
+                <div className="flex items-center gap-1.5 text-[11px] text-[#5C6770] mb-2">
+                  <MapPin className="h-3 w-3 text-[#0E6B5A]" />
+                  <span className="font-semibold">{p.city}</span>
+                  <span className="text-[#C9CDC4]">·</span>
+                  <span>{p.distance}</span>
+                </div>
+                <div className="font-extrabold text-[14px] text-[#0F1B14] tracking-tight leading-tight mb-1">{p.name}</div>
+                <div className="text-[12px] text-[#5C6770] mb-3">{p.units} דירות · {p.category}</div>
+                <button
+                  onClick={() => navigate("/supplier/offers/new")}
+                  className="w-full h-9 rounded-xl bg-[#0F1B14] text-white text-[12px] font-extrabold flex items-center justify-center gap-1 active:scale-95 transition"
+                >
+                  <Plus className="h-3.5 w-3.5" strokeWidth={2.8} /> הצעה ייעודית
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <section className="px-5 space-y-3 pb-8 w-full">
-          <h2 className="text-[12px] font-bold text-[#6B7280] uppercase tracking-wider flex items-center gap-1.5 mb-1 px-1">
-            <Briefcase className="h-3 w-3 text-[#0E6B5A]" strokeWidth={2} /> ההצעות שלי
-          </h2>
+        {/* Competitor intel */}
+        <SectionHeader
+          icon={<Eye className="h-3.5 w-3.5" />}
+          title="מודיעין מתחרים"
+          subtitle="מחירים והצטרפויות באזורך · עדכון חי"
+        />
+        <div className="px-5 mt-2 space-y-2">
+          {DEMO_COMPETITORS.map((c) => (
+            <div key={c.id} className="bg-white rounded-2xl border border-[#E8EAE5] p-3.5 flex items-center gap-3">
+              <div className="flex-1 min-w-0 text-right">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="font-extrabold text-[13px] text-[#0F1B14] tracking-tight truncate">{c.name}</span>
+                  {c.delta < 0 && (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[#FEF2F0] text-[#C73E1D] text-[10px] font-bold">
+                      <TrendingDown className="h-2.5 w-2.5" strokeWidth={3} /> {Math.abs(c.delta)}₪
+                    </span>
+                  )}
+                </div>
+                <div className="text-[11.5px] text-[#5C6770] truncate">{c.category}</div>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-[14px] font-black text-[#0F1B14] tracking-tight">{formatILS(c.price)}</span>
+                  <span className="inline-flex items-center gap-1 text-[11px] text-[#5C6770] font-bold">
+                    <Users className="h-3 w-3" /> {c.joiners}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate("/supplier/offers/new")}
+                className="h-9 px-3 rounded-xl bg-[#0E6B5A]/8 text-[#0E6B5A] text-[11.5px] font-extrabold flex items-center gap-1 active:scale-95 transition border border-[#0E6B5A]/15"
+              >
+                <Zap className="h-3.5 w-3.5" strokeWidth={2.6} /> הורד 5%
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* My offers */}
+        <SectionHeader
+          icon={<Sparkles className="h-3.5 w-3.5" />}
+          title="ההצעות שלי"
+          action={
+            <button onClick={() => navigate("/supplier/offers/new")} className="h-8 px-3 rounded-full bg-[#0F1B14] text-white text-[11.5px] font-extrabold flex items-center gap-1 active:scale-95 transition">
+              <Plus className="h-3.5 w-3.5" strokeWidth={2.8} /> חדשה
+            </button>
+          }
+        />
+        <div className="px-5 mt-2 space-y-2 pb-8">
           {myDeals.length === 0 && (
-            <div className="bg-white rounded-[20px] p-5 border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] text-center text-sm text-[#6B7280]">
-              עדיין לא יצרת הצעות. לחץ "צרו הצעה חדשה" כדי להתחיל.
+            <div className="bg-white rounded-2xl border border-dashed border-[#C9CDC4] p-6 text-center">
+              <div className="text-[13px] text-[#5C6770] mb-3">עדיין לא יצרת הצעות</div>
+              <Button onClick={() => navigate("/supplier/offers/new")} className="h-10 rounded-xl bg-[#0E6B5A] hover:bg-[#0a5648] text-white text-[13px] font-extrabold">
+                <Plus className="h-4 w-4 ml-1.5" /> צור הצעה ראשונה
+              </Button>
             </div>
           )}
           {myDeals.map((d) => {
             const c = counts[d.id] ?? { interests: 0, paid: 0 };
+            const goal = 20; // visual goal — until min_buyers wired
+            const progress = Math.min(100, Math.round((c.paid / goal) * 100));
+            const active = d.status === "active" || d.status === "approved";
             return (
-              <div key={d.id} className="bg-white rounded-[20px] p-4 border border-[#ECEEF2] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] w-full">
-                <div className="flex items-start justify-between mb-3">
+              <button
+                key={d.id}
+                onClick={() => navigate(`/supplier/offers/${d.id}/marketing`)}
+                className="w-full bg-white rounded-2xl border border-[#E8EAE5] p-3.5 text-right active:scale-[0.99] transition"
+              >
+                <div className="flex items-start justify-between gap-3 mb-2.5">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-[14px] text-[#1F2937] truncate">{d.title}</h3>
-                    <div className="text-[12px] text-[#6B7280] mt-0.5">{d.status}</div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-[#10B981]" : "bg-[#C9CDC4]"}`} />
+                      <span className="text-[10.5px] uppercase tracking-wider font-bold text-[#5C6770]">{active ? "פעיל" : d.status}</span>
+                    </div>
+                    <h3 className="font-extrabold text-[14px] text-[#0F1B14] tracking-tight truncate leading-tight">{d.title}</h3>
                   </div>
-                  <div className="text-left">
-                    <div className="font-extrabold text-[#1F2937] text-sm">{formatILS(priceFor(d))}</div>
-                    <div className="text-[12px] text-[#0E6B5A] font-bold mt-0.5">{c.paid} שילמו</div>
+                  <div className="text-left shrink-0">
+                    <div className="font-black text-[#0F1B14] text-[15px] tracking-tight">{formatILS(priceFor(d))}</div>
+                    <div className="text-[11px] text-[#0E6B5A] font-extrabold mt-0.5">{c.paid} שילמו</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-[12px] pt-3 border-t border-[#ECEEF2]">
-                  <span className="px-2.5 py-1 rounded-full bg-[#F7F5F0] text-[#1F2937] border border-[#ECEEF2] font-semibold">{c.interests} לידים</span>
-                  <span className="px-2.5 py-1 rounded-full bg-[#0E6B5A]/12 text-[#0E6B5A] border border-[#0E6B5A]/30 font-semibold">{c.paid} פיקדונות</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex-1 h-1.5 rounded-full bg-[#EFEDE6] overflow-hidden">
+                    <div className="h-full bg-[#0E6B5A] rounded-full transition-all" style={{ width: `${progress}%` }} />
+                  </div>
+                  <span className="text-[10.5px] font-extrabold text-[#5C6770]">{c.paid}/{goal}</span>
                 </div>
-              </div>
+                <div className="flex items-center justify-between text-[11px] text-[#5C6770]">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center gap-1 font-bold"><Users className="h-3 w-3" /> {c.interests}</span>
+                    <span className="inline-flex items-center gap-1 font-bold"><TrendingUp className="h-3 w-3" /> {c.interests ? Math.round((c.paid / c.interests) * 100) : 0}%</span>
+                  </div>
+                  <ArrowLeft className="h-3.5 w-3.5 text-[#9CA39A]" />
+                </div>
+              </button>
             );
           })}
-        </section>
+        </div>
       </div>
 
       <BottomNav role="supplier" />
@@ -289,16 +433,26 @@ export default function SupplierDashboard() {
   );
 }
 
-function Stat({ icon: Icon, label, value, small }: { icon: LucideIcon; label: string; value: string; small?: boolean }) {
+function Kpi({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="bg-white rounded-[20px] p-4 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] w-full">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="h-9 w-9 rounded-xl bg-[#0E6B5A]/12 flex items-center justify-center">
-          <Icon className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2} />
-        </span>
-        <span className="text-[12px] text-[#6B7280] font-bold uppercase tracking-wider">{label}</span>
+    <div className={`rounded-xl px-2 py-2.5 border ${accent ? "bg-[#0F1B14] border-[#0F1B14] text-white" : "bg-white border-[#E8EAE5] text-[#0F1B14]"}`}>
+      <div className={`text-[9.5px] uppercase tracking-wider font-bold mb-0.5 ${accent ? "text-white/60" : "text-[#5C6770]"}`}>{label}</div>
+      <div className="text-[13px] font-black tracking-tight leading-none truncate">{value}</div>
+    </div>
+  );
+}
+
+function SectionHeader({ icon, title, subtitle, action }: { icon: React.ReactNode; title: string; subtitle?: string; action?: React.ReactNode }) {
+  return (
+    <div className="px-5 mt-6 flex items-end justify-between gap-3">
+      <div className="text-right">
+        <div className="flex items-center gap-1.5 text-[#0E6B5A] mb-0.5">
+          {icon}
+          <h2 className="text-[15px] font-black text-[#0F1B14] tracking-tight">{title}</h2>
+        </div>
+        {subtitle && <div className="text-[11.5px] text-[#5C6770]">{subtitle}</div>}
       </div>
-      <div className={(small ? "text-fs-base" : "text-fs-xl") + " font-extrabold text-[#1F2937] tracking-tight leading-none"}>{value}</div>
+      {action}
     </div>
   );
 }
