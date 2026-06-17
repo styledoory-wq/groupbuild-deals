@@ -241,11 +241,6 @@ export default function SupplierDashboard() {
     );
   }
 
-  const handleRedeem = () => {
-    const code = voucherCode.trim();
-    if (!code) { toast.error("הזן קוד שובר"); return; }
-    navigate(`/supplier/scan?code=${encodeURIComponent(code)}`);
-  };
 
   return (
     <MobileShell>
