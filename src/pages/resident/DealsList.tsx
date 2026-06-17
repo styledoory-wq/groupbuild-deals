@@ -41,8 +41,9 @@ export default function DealsList() {
   const [counts, setCounts] = useState<Record<string, number>>(() => cached?.counts ?? {});
   const [loading, setLoading] = useState(() => !cached);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<"active" | "archive">("active");
+  const [tab, setTab] = useState<TabKey>("active");
   const [q, setQ] = useState("");
+  const [favIds, setFavIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
