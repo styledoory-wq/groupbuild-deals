@@ -230,9 +230,9 @@ export default function CategoriesList() {
           </div>
         )}
 
-        {/* Stage sections — compact grid, all visible, no horizontal scroll */}
+        {/* Stage sections — compact list cards, all visible */}
         {!q && (
-          <div className="space-y-7">
+          <div className="space-y-4">
             {visibleStages.map(({ stage, cats, totalSuppliers }) => (
               <StageSection
                 key={stage.id}
@@ -284,34 +284,32 @@ function StageSection({
   const c = stage.colors;
 
   return (
-    <section>
+    <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Section header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className={`w-1.5 h-5 ${c.bar} rounded-full shrink-0`} />
-          <h2
-            className="text-[16px] font-bold text-[#1A1A1A] truncate"
-            style={{ fontFamily: URBANIST }}
-          >
-            {stage.title}
-          </h2>
-          <span className={`text-[10px] font-bold ${c.tagText} ${c.tagBg} px-1.5 py-0.5 rounded-md whitespace-nowrap`}>
-            שלב {stage.index}
-          </span>
-        </div>
-        <span className="text-[11px] font-semibold text-gray-500 whitespace-nowrap">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
+        <div className={`w-1.5 h-5 ${c.bar} rounded-full shrink-0`} />
+        <h2
+          className="text-[15px] font-bold text-[#1A1A1A]"
+          style={{ fontFamily: URBANIST }}
+        >
+          {stage.title}
+        </h2>
+        <span className={`text-[10px] font-bold ${c.tagText} ${c.tagBg} px-1.5 py-0.5 rounded-md`}>
+          שלב {stage.index}
+        </span>
+        <span className="text-[11px] font-medium text-gray-400 mr-auto">
           {totalSuppliers} ספקים
         </span>
       </div>
 
       {cats.length === 0 ? (
-        <div className="bg-white/70 rounded-xl p-3 text-center text-[12px] text-gray-500 font-medium border border-gray-100">
+        <div className="px-4 py-3 text-center text-[12px] text-gray-500 font-medium">
           קטגוריות יתווספו בקרוב
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-2">
+        <div className="divide-y divide-gray-50">
           {cats.map((cat) => (
-            <CategoryTile
+            <CategoryRow
               key={cat.id}
               id={cat.id}
               name={cat.name}
@@ -326,7 +324,7 @@ function StageSection({
   );
 }
 
-function CategoryTile({
+function CategoryRow({
   id, name, icon, count, colors,
 }: {
   id: string;
@@ -337,47 +335,40 @@ function CategoryTile({
 }) {
   const dim = count === 0;
 
-  const inner = (
-    <div className="relative flex flex-col items-center justify-center gap-1 py-2 px-0.5">
-      {/* count badge */}
-      {!dim && count > 0 && (
-        <span className={`absolute top-0 left-0 text-[9px] font-bold ${colors.tagText} ${colors.tagBg} px-1 py-0.5 rounded-full leading-none`}>
-          {count}
-        </span>
-      )}
-      {dim && (
-        <span className="absolute top-0 left-0 text-[9px] font-bold text-gray-400 bg-gray-100 px-1 py-0.5 rounded-full leading-none">
-          בקרוב
-        </span>
-      )}
-      {/* icon */}
+  const body = (
+    <div className="flex items-center gap-3 px-4 py-3">
       <div
-        className={`w-11 h-11 ${colors.iconBg} rounded-2xl flex items-center justify-center ${colors.iconText} text-[22px] shrink-0`}
+        className={`w-9 h-9 ${colors.iconBg} rounded-xl flex items-center justify-center ${colors.iconText} text-[18px] shrink-0`}
       >
         <span aria-hidden>{icon}</span>
       </div>
-      {/* name */}
       <span
-        className="text-[10px] font-bold text-[#1A1A1A] text-center leading-tight line-clamp-2 px-0.5"
+        className="flex-1 text-[13px] font-bold text-[#1A1A1A] truncate"
         style={{ fontFamily: URBANIST }}
       >
         {name}
       </span>
+      {dim ? (
+        <span className="text-[11px] font-semibold text-gray-400 shrink-0">בקרוב</span>
+      ) : (
+        <span className={`text-[11px] font-bold ${colors.tagText} ${colors.tagBg} px-2 py-0.5 rounded-full shrink-0`}>
+          {count} ספקים
+        </span>
+      )}
+      <ChevronLeft className="h-4 w-4 text-gray-300 shrink-0" />
     </div>
   );
 
-  const baseClass = `bg-white rounded-2xl border ${colors.cardBorder} shadow-sm transition-all`;
-
   if (dim) {
-    return <div className={`${baseClass} opacity-50`}>{inner}</div>;
+    return <div className="opacity-50">{body}</div>;
   }
 
   return (
     <Link
       to={`/resident/categories/${id}`}
-      className={`${baseClass} active:scale-[0.94] hover:shadow-md`}
+      className="block active:bg-gray-50 transition-colors"
     >
-      {inner}
+      {body}
     </Link>
   );
 }
