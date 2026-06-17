@@ -159,6 +159,8 @@ export default function CheckoutSummary() {
   }, [originalPrice, headlinePrice]);
 
   const depositAmount = deal?.deposit_required ? deal.deposit_amount ?? 0 : 0;
+  const joiningFee = depositAmount > 0 ? JOINING_FEE_ILS : 0;
+  const totalNow = depositAmount + joiningFee;
 
   const canSubmit =
     !!deal && acceptedTerms && fullName.trim().length >= 2 && phone.trim().length >= 9 && !submitting;
