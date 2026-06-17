@@ -22,29 +22,30 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Primary — blue progress/action color
+        // Primary — brand emerald, the single CTA color across the app
         default:
-          "bg-[#2563EB] text-white shadow-[0_8px_20px_-10px_rgba(37,99,235,0.45)] hover:brightness-110",
-        // Gold accent — premium / hero actions
+          "bg-[#0E6B5A] text-white shadow-[0_8px_20px_-10px_rgba(14,107,90,0.45)] hover:bg-[#0A5446] hover:shadow-[0_10px_24px_-10px_rgba(14,107,90,0.55)]",
+        // Premium — brand gradient for hero / marketing actions
         premium:
-          "bg-gradient-to-l from-[#1A8870] via-[#34A88E] to-[#1A8870] text-[#1F2937] shadow-[0_8px_20px_-10px_rgba(201,168,76,0.55)] hover:brightness-105",
+          "bg-gradient-to-l from-[#0A5446] via-[#0E6B5A] to-[#1A8870] text-white shadow-[0_10px_24px_-10px_rgba(14,107,90,0.55)] hover:brightness-105",
         // Secondary — soft white surface, matches cards
         secondary:
-          "bg-white text-[#1F2937] shadow-[0_2px_10px_-4px_rgba(31,41,55,0.10)] hover:bg-[#F4F6FA]",
+          "bg-white text-[#0B1220] shadow-[0_2px_10px_-4px_rgba(11,18,32,0.10)] hover:bg-[#F4F6FA]",
         outline:
-          "bg-white text-[#1F2937] shadow-[0_2px_8px_-4px_rgba(31,41,55,0.08)] hover:bg-[#F4F6FA]",
+          "bg-white text-[#0B1220] ring-1 ring-inset ring-[#E5E7EB] shadow-none hover:bg-[#F7F5F0] hover:ring-[#0E6B5A]/30",
         ghost:
-          "bg-transparent text-[#1F2937] hover:bg-[#F4F6FA]",
+          "bg-transparent text-[#0B1220] hover:bg-[#F1F1ED]",
         destructive:
-          "bg-[#DC2626] text-white shadow-[0_8px_20px_-10px_rgba(220,38,38,0.55)] hover:brightness-110",
+          "bg-[#DC2626] text-white shadow-[0_8px_20px_-10px_rgba(220,38,38,0.45)] hover:bg-[#B91C1C]",
         link:
-          "text-[#2563EB] underline-offset-4 hover:underline min-h-0 shadow-none",
+          "text-[#0E6B5A] underline-offset-4 hover:underline min-h-0 shadow-none",
         navy:
-          "bg-[#2563EB] text-white shadow-[0_8px_20px_-10px_rgba(37,99,235,0.45)] hover:brightness-110",
+          "bg-[#0B1220] text-white shadow-[0_8px_20px_-10px_rgba(11,18,32,0.45)] hover:bg-black",
         glass:
           "bg-white/10 backdrop-blur-md border border-white/15 text-white hover:bg-white/15",
 
       },
+
       size: {
         default: "h-12 px-5",
         sm: "h-10 px-3.5 text-[13px]",
