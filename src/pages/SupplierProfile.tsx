@@ -95,7 +95,7 @@ export default function SupplierProfile() {
     (async () => {
       try {
         setLoadError(null);
-        const [{ data: s }, { data: g }, { data: sregs }, { data: scits }, { data: dealsData }] = await Promise.all([
+        const [{ data: s }, { data: g }, { data: sregs }, { data: scits }, { data: dealsData }, { data: revData }] = await Promise.all([
           withTimeout(supabase.from("suppliers").select("*").eq("id", supplierId).maybeSingle(), "טעינת ספק"),
           withTimeout(supabase.from("supplier_gallery").select("id,image_url,caption").eq("supplier_id", supplierId).order("display_order"), "טעינת גלריה"),
           withTimeout(supabase.from("supplier_regions").select("region_id, regions(name_he)").eq("supplier_id", supplierId), "טעינת אזורי שירות"),
@@ -106,6 +106,12 @@ export default function SupplierProfile() {
             .eq("supplier_id", supplierId)
             .eq("status", "active")
             .order("created_at", { ascending: false }), "טעינת הצעות"),
+          withTimeout(supabase
+            .from("reviews")
+            .select("id,rating,comment,created_at,user_id")
+            .eq("supplier_id", supplierId)
+            .order("created_at", { ascending: false })
+            .limit(20), "טעינת ביקורות"),
         ]);
         if (cancelled) return;
       const sup = (s as DbSupplier | null) ?? null;
