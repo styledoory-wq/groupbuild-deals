@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Hammer, DoorOpen, Wrench, RefreshCw } from "lucide-react";
+import { Home, Hammer, DoorOpen, Wrench, RefreshCw, Zap, Sparkles } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BudgetResultView } from "@/components/budget/BudgetResultView";
 import { BudgetAIChat } from "@/components/budget/BudgetAIChat";
 import { MatchingDeals } from "@/components/budget/MatchingDeals";
+import { BudgetWizard } from "@/components/budget/BudgetWizard";
+import { applyWizardAnswers, getWizardQuestions, WizardAnswers } from "@/lib/budgetWizard";
 import {
   Track, FinishLevel, Region, RenovationType, RoomKind, ServiceKind,
   REGION_LABELS, FINISH_LABELS, RENO_LABELS, ROOM_LABELS, SERVICES,
@@ -65,6 +67,8 @@ function RegionSelect({ value, onChange }: { value: Region; onChange: (v: Region
 export default function BudgetPlanner() {
   const [track, setTrack] = useState<Track | null>(null);
   const [result, setResult] = useState<BudgetResult | null>(null);
+  const [mode, setMode] = useState<"quick" | "wizard">("quick");
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   // Shared
   const [region, setRegion] = useState<Region>("center");
@@ -91,18 +95,34 @@ export default function BudgetPlanner() {
   const [svc, setSvc] = useState<ServiceKind>("interior_doors");
   const [qty, setQty] = useState(5);
 
-  const reset = () => { setTrack(null); setResult(null); };
+  const reset = () => { setTrack(null); setResult(null); setWizardOpen(false); setMode("quick"); };
+
+  const computeBase = (): BudgetResult | null => {
+    if (track === "new_build") return calcNewBuild({ builtSqm, floors, basement, safeRoom, region, finish });
+    if (track === "full_renovation") return calcFullReno({ sqm: renoSqm, type: renoType, ...renoFlags, region, finish });
+    if (track === "single_room") return calcSingleRoom({ room, sizeSqm: roomSize, finish, region, replacePlumbing, newFurniture });
+    if (track === "single_service") return calcSingleService({ service: svc, quantity: qty, finish, region });
+    return null;
+  };
 
   const calculate = () => {
-    if (track === "new_build") {
-      setResult(calcNewBuild({ builtSqm, floors, basement, safeRoom, region, finish }));
-    } else if (track === "full_renovation") {
-      setResult(calcFullReno({ sqm: renoSqm, type: renoType, ...renoFlags, region, finish }));
-    } else if (track === "single_room") {
-      setResult(calcSingleRoom({ room, sizeSqm: roomSize, finish, region, replacePlumbing, newFurniture }));
-    } else if (track === "single_service") {
-      setResult(calcSingleService({ service: svc, quantity: qty, finish, region }));
+    if (mode === "wizard") {
+      setWizardOpen(true);
+      return;
     }
+    const base = computeBase();
+    if (base) setResult(base);
+    requestAnimationFrame(() => {
+      document.getElementById("budget-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+  const onWizardComplete = (answers: WizardAnswers) => {
+    const base = computeBase();
+    if (!base || !track) return;
+    const refined = applyWizardAnswers(base, getWizardQuestions(track), answers);
+    setResult(refined);
+    setWizardOpen(false);
     requestAnimationFrame(() => {
       document.getElementById("budget-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -155,6 +175,44 @@ export default function BudgetPlanner() {
               </button>
             </div>
 
+            {/* Mode toggle */}
+            <div className="bg-white rounded-2xl p-1.5 border border-[#E5E7EB] flex gap-1 shadow-sm">
+              {([
+                { key: "quick", label: "מהיר", desc: "טופס קצר · דיוק ±28%", icon: Zap },
+                { key: "wizard", label: "אשף מדויק", desc: "5-7 שלבים · דיוק ±10%", icon: Sparkles },
+              ] as const).map((m) => {
+                const active = mode === m.key;
+                const Icon = m.icon;
+                return (
+                  <button
+                    key={m.key}
+                    onClick={() => { setMode(m.key); setWizardOpen(false); }}
+                    className="flex-1 rounded-xl px-3 py-2.5 text-right transition flex items-start gap-2"
+                    style={{
+                      background: active ? theme.tint : "transparent",
+                      boxShadow: active ? `inset 0 0 0 1.5px ${theme.accent}` : "none",
+                    }}
+                  >
+                    <Icon className="h-4 w-4 mt-0.5 shrink-0" style={{ color: active ? theme.accent : "#9CA3AF" }} />
+                    <div>
+                      <div className="text-[12.5px] font-extrabold" style={{ color: active ? theme.accent : "#6B7280", fontFamily: "'Urbanist'" }}>{m.label}</div>
+                      <div className="text-[10.5px] text-[#9CA3AF] mt-0.5 leading-tight">{m.desc}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {wizardOpen ? (
+              <BudgetWizard
+                questions={getWizardQuestions(track)}
+                themeAccent={theme.accent}
+                themeRing={theme.ring}
+                themeTint={theme.tint}
+                onComplete={onWizardComplete}
+                onCancel={() => setWizardOpen(false)}
+              />
+            ) : (
             <div className="bg-white rounded-3xl p-5 border border-[#E5E7EB] shadow-[0_4px_20px_-12px_rgba(31,41,55,0.12)] space-y-4">
               {(() => {
                 const SwitchRow = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) => (
@@ -294,12 +352,13 @@ export default function BudgetPlanner() {
                   boxShadow: `0 14px 28px -10px ${theme.ring}, inset 0 1px 0 rgba(255,255,255,0.25)`,
                 }}
               >
-                חשב תקציב
+                {mode === "wizard" ? "המשך לאשף השאלות" : "חשב תקציב"}
               </button>
                   </>
                 );
               })()}
             </div>
+            )}
           </>
           );
         })()}
