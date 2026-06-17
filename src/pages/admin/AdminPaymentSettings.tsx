@@ -106,7 +106,7 @@ export default function AdminPaymentSettings() {
                     className={cn(
                       "p-4 rounded-2xl border-2 transition-smooth text-center",
                       provider === p
-                        ? "border-[#0A1F3D] bg-[#F4F6FA]"
+                        ? "border-[#1F2937] bg-[#F4F6FA]"
                         : "border-border bg-card"
                     )}
                   >

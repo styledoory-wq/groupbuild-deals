@@ -139,7 +139,7 @@ export default function SupplierDashboard() {
       <MobileShell>
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center">
-            <div className="h-10 w-10 mx-auto rounded-full border-2 border-[#0A1F3D] border-t-transparent animate-spin mb-3" />
+            <div className="h-10 w-10 mx-auto rounded-full border-2 border-[#1F2937] border-t-transparent animate-spin mb-3" />
             <div className="text-sm text-[#475569]">טוען את החשבון…</div>
           </div>
         </div>
@@ -173,7 +173,7 @@ export default function SupplierDashboard() {
   const HeroBar = () => (
     <header className="px-5 pt-4 pb-3">
       <div className="flex items-center justify-between mb-3">
-        <span className="h-8 px-3 rounded-full bg-white flex items-center text-[#0A1F3D] text-[11px] font-bold uppercase tracking-[0.14em] shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)]">
+        <span className="h-8 px-3 rounded-full bg-white flex items-center text-[#1F2937] text-[11px] font-bold uppercase tracking-[0.14em] shadow-[0_2px_8px_-2px_rgba(10,31,61,0.06)]">
           אזור ספק
         </span>
         <button
@@ -186,7 +186,7 @@ export default function SupplierDashboard() {
         </button>
       </div>
       <div className="text-right">
-        <h1 className="text-[24px] font-extrabold text-[#0A1F3D] leading-tight tracking-tight break-words">
+        <h1 className="text-[24px] font-extrabold text-[#1F2937] leading-tight tracking-tight break-words">
           {businessName}
         </h1>
         {dbSupplier && !isPending && !isRejected && (
@@ -207,7 +207,7 @@ export default function SupplierDashboard() {
             <div className="h-14 w-14 mx-auto rounded-2xl bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center mb-4">
               <Clock className="h-6 w-6 text-[#B8923F]" strokeWidth={2} />
             </div>
-            <h2 className="font-extrabold text-[#0A1F3D] text-base mb-2">
+            <h2 className="font-extrabold text-[#1F2937] text-base mb-2">
               {isRejected ? "ההרשמה נדחתה" : "ההרשמה התקבלה וממתינה לאישור"}
             </h2>
             <p className="text-sm text-[#475569] leading-relaxed mb-5">
@@ -266,16 +266,16 @@ export default function SupplierDashboard() {
               <div key={d.id} className="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] w-full">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-fs-sm text-[#0A1F3D] truncate">{d.title}</h3>
+                    <h3 className="font-bold text-fs-sm text-[#1F2937] truncate">{d.title}</h3>
                     <div className="text-fs-xs text-[#475569] mt-0.5">{d.status}</div>
                   </div>
                   <div className="text-left">
-                    <div className="font-extrabold text-[#0A1F3D] text-sm">{formatILS(priceFor(d))}</div>
+                    <div className="font-extrabold text-[#1F2937] text-sm">{formatILS(priceFor(d))}</div>
                     <div className="text-fs-xs text-[#B8923F] font-bold mt-0.5">{c.paid} שילמו</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-fs-xs pt-3 border-t border-[#E2E8F0]">
-                  <span className="px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#0A1F3D] border border-[#E2E8F0] font-semibold">{c.interests} לידים</span>
+                  <span className="px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#1F2937] border border-[#E2E8F0] font-semibold">{c.interests} לידים</span>
                   <span className="px-2.5 py-1 rounded-full bg-[#C9A961]/12 text-[#B8923F] border border-[#C9A961]/30 font-semibold">{c.paid} פיקדונות</span>
                 </div>
               </div>
@@ -298,7 +298,7 @@ function Stat({ icon: Icon, label, value, small }: { icon: LucideIcon; label: st
         </span>
         <span className="text-fs-xs text-[#475569] font-semibold uppercase tracking-[0.12em]">{label}</span>
       </div>
-      <div className={(small ? "text-fs-base" : "text-fs-xl") + " font-extrabold text-[#0A1F3D] tracking-tight leading-none"}>{value}</div>
+      <div className={(small ? "text-fs-base" : "text-fs-xl") + " font-extrabold text-[#1F2937] tracking-tight leading-none"}>{value}</div>
     </div>
   );
 }

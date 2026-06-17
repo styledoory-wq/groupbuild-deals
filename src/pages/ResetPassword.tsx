@@ -44,7 +44,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E8ECF0] text-[#0A1F3D] flex justify-center">
+    <div className="min-h-screen bg-[#F8F8F6] text-[#1F2937] flex justify-center">
       <div className="w-full max-w-screen-sm flex flex-col safe-top">
         <div className="px-6 pt-12 pb-8">
           <h1 className="text-3xl font-extrabold mb-2">איפוס סיסמה</h1>
@@ -57,7 +57,7 @@ export default function ResetPassword() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold flex items-center gap-1.5">
-                  <Lock className="h-3.5 w-3.5 text-[#D4AF37]" /> סיסמה חדשה
+                  <Lock className="h-3.5 w-3.5 text-[#C9A227]" /> סיסמה חדשה
                 </Label>
                 <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                   required minLength={6} dir="ltr" placeholder="לפחות 6 תווים"
@@ -65,7 +65,7 @@ export default function ResetPassword() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold flex items-center gap-1.5">
-                  <Lock className="h-3.5 w-3.5 text-[#D4AF37]" /> אישור סיסמה
+                  <Lock className="h-3.5 w-3.5 text-[#C9A227]" /> אישור סיסמה
                 </Label>
                 <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
                   required minLength={6} dir="ltr"

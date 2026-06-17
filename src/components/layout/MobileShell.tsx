@@ -43,19 +43,19 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
             <input
               type="search"
               placeholder="חיפוש..."
-              className="w-full h-9 rounded-full bg-[#F4F6F9] border border-transparent pr-9 pl-4 text-[13px] text-[#0A1F3D] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#D4AF37] focus:bg-white transition"
+              className="w-full h-9 rounded-full bg-[#F4F6F9] border border-transparent pr-9 pl-4 text-[13px] text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#C9A227] focus:bg-white transition"
             />
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Link
             to="/resident/notifications"
-            className="h-9 w-9 rounded-full hover:bg-[#F4F6F9] flex items-center justify-center text-[#0A1F3D]"
+            className="h-9 w-9 rounded-full hover:bg-[#F4F6F9] flex items-center justify-center text-[#1F2937]"
             aria-label="התראות"
           >
             <Bell className="h-4.5 w-4.5" />
           </Link>
-          <div className="h-9 w-9 rounded-full bg-[#0A1F3D] text-white flex items-center justify-center text-[12px] font-bold">
+          <div className="h-9 w-9 rounded-full bg-[#1F2937] text-white flex items-center justify-center text-[12px] font-bold">
             {(user?.name ?? "?").slice(0, 1)}
           </div>
         </div>

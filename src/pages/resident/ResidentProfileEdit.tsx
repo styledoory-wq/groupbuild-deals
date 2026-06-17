@@ -232,7 +232,7 @@ export default function ResidentProfileEdit() {
                   className={`text-right rounded-[14px] p-3 border transition-all active:scale-[0.98] ${
                     active
                       ? "border-transparent text-white shadow-[0_6px_16px_-8px_rgba(10,31,61,0.35)]"
-                      : "bg-white border-[#ECEEF2] text-[#0A1F3D]"
+                      : "bg-white border-[#ECEEF2] text-[#1F2937]"
                   }`}
                   style={active ? { background: s.accent } : undefined}
                 >

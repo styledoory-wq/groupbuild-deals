@@ -106,7 +106,7 @@ function RealDealCardImpl({
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              <TagIcon className="h-10 w-10 text-[#D4AF37]/40" strokeWidth={1.5} />
+              <TagIcon className="h-10 w-10 text-[#C9A227]/40" strokeWidth={1.5} />
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
@@ -119,7 +119,7 @@ function RealDealCardImpl({
               </span>
             )}
             {discountBadge && (
-              <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-[#D4AF37] text-[#0A1F3D]">
+              <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-[#C9A227] text-[#1F2937]">
                 {discountBadge} הנחה
               </span>
             )}
@@ -150,18 +150,18 @@ function RealDealCardImpl({
               {deal.supplier_logo_url ? (
                 <img src={deal.supplier_logo_url} alt="" className="h-5 w-5 rounded-full object-cover border border-[#ECEEF2]" />
               ) : (
-                <ShieldCheck className="h-3 w-3 text-[#D4AF37]" strokeWidth={2.5} />
+                <ShieldCheck className="h-3 w-3 text-[#C9A227]" strokeWidth={2.5} />
               )}
               <span className="truncate font-medium">{deal.supplier_name}</span>
             </div>
           )}
-          <h3 className="font-semibold text-[13px] text-[#0A1F3D] leading-snug line-clamp-2 min-h-[2.4em]">
+          <h3 className="font-semibold text-[13px] text-[#1F2937] leading-snug line-clamp-2 min-h-[2.4em]">
             {deal.title}
           </h3>
 
           <div className="mt-auto pt-1.5 flex items-end justify-between gap-2 border-t border-[#F4F6F9]">
             <div className="min-w-0">
-              <div className="text-[14px] font-extrabold text-[#0A1F3D] leading-tight truncate">{display.headline}</div>
+              <div className="text-[14px] font-extrabold text-[#1F2937] leading-tight truncate">{display.headline}</div>
               {bestSavings && bestSavings > 0 ? (
                 <div className="text-[10px] font-bold text-emerald-600 inline-flex items-center gap-0.5 mt-0.5">
                   <TrendingDown className="h-2.5 w-2.5" /> חוסכים {ils(bestSavings)}

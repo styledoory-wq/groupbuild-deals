@@ -98,7 +98,7 @@ export default function PrivacyPolicy() {
         {/* Navy header */}
         <header
           className="relative px-5 pt-6 pb-8 text-white"
-          style={{ background: "linear-gradient(160deg, #0D1B2E 0%, #1A2F4E 100%)" }}
+          style={{ background: "linear-gradient(160deg, #1F2937 0%, #1A2F4E 100%)" }}
         >
           <button
             onClick={() => navigate("/resident/profile")}
@@ -124,7 +124,7 @@ export default function PrivacyPolicy() {
               key={i}
               className="gb-card-enter bg-white rounded-2xl p-5 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)]"
             >
-              <h2 className="text-fs-base font-extrabold text-[#0D1B2E] leading-snug">
+              <h2 className="text-fs-base font-extrabold text-[#1F2937] leading-snug">
                 {s.title}
               </h2>
               <div className="mt-1 h-[2px] w-8 rounded-full bg-[#C9A84C]" />

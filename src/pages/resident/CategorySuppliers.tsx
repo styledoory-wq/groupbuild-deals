@@ -215,7 +215,7 @@ export default function CategorySuppliers() {
   return (
     <MobileShell>
       {/* Luxury hero */}
-      <header className="bg-white text-[#0A1F3D] px-6 pt-9 pb-16 rounded-b-[28px] relative overflow-hidden">
+      <header className="bg-white text-[#1F2937] px-6 pt-9 pb-16 rounded-b-[28px] relative overflow-hidden">
         <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-gold/5 blur-3xl pointer-events-none" />
 
@@ -230,7 +230,7 @@ export default function CategorySuppliers() {
         <div className="relative animate-fade-up">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F4F6FA] border border-[#ECEEF2] mb-4">
             <Sparkles className="h-3.5 w-3.5 text-gold" />
-            <span className="text-fs-xs font-medium text-[#0A1F3D]/85">
+            <span className="text-fs-xs font-medium text-[#1F2937]/85">
               {filteredSuppliers.length} ספקים זמינים · {areaLabel}
             </span>
           </div>
@@ -245,7 +245,7 @@ export default function CategorySuppliers() {
               <h1 className="text-fs-xl leading-[1.15] font-extrabold">
                 <span className="gb-gold-text">{activeCategory?.name ?? "ספקים"}</span>
               </h1>
-              <p className="text-[#0A1F3D]/65 text-fs-xs mt-0.5">ספקים מובילים בתחום</p>
+              <p className="text-[#1F2937]/65 text-fs-xs mt-0.5">ספקים מובילים בתחום</p>
             </div>
           </div>
           <div className="gb-divider-gold" />
@@ -345,7 +345,7 @@ export default function CategorySuppliers() {
             <button
               type="button"
               onClick={() => { setRegionId("all"); setCityId("all"); }}
-              className="mt-4 h-10 px-4 rounded-xl bg-[#0A1F3D] text-white text-xs font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+              className="mt-4 h-10 px-4 rounded-xl bg-[#1F2937] text-white text-xs font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
             >
               שנה אזור
             </button>

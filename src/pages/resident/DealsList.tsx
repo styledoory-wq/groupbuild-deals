@@ -140,7 +140,7 @@ export default function DealsList() {
   }, [deals, tab, q]);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#E8ECF0" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F8F8F6" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -156,7 +156,7 @@ export default function DealsList() {
             <button
               onClick={() => setTab("active")}
               className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all ${
-                tab === "active" ? "bg-[#0A1F3D] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
+                tab === "active" ? "bg-[#1F2937] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
               }`}
             >
               פעילות
@@ -164,7 +164,7 @@ export default function DealsList() {
             <button
               onClick={() => setTab("archive")}
               className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all ${
-                tab === "archive" ? "bg-[#0A1F3D] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
+                tab === "archive" ? "bg-[#1F2937] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
               }`}
             >
               ארכיון
@@ -180,7 +180,7 @@ export default function DealsList() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="חפש הצעה לפי שם..."
-              className="w-full h-12 rounded-[18px] bg-white border border-[#ECEEF2] pr-11 pl-4 text-[14px] font-medium text-[#0A1F3D] placeholder:text-[#6B7280] focus:outline-none focus:border-[#D4AF37] focus:ring-[3px] focus:ring-[#D4AF37]/15 transition"
+              className="w-full h-12 rounded-[18px] bg-white border border-[#ECEEF2] pr-11 pl-4 text-[14px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#C9A227] focus:ring-[3px] focus:ring-[#C9A227]/15 transition"
               dir="rtl"
             />
           </div>
@@ -192,7 +192,7 @@ export default function DealsList() {
 
             {!loading && error && (
               <div className="rounded-[20px] border border-[#ECEEF2] bg-white p-6 text-center col-span-2 md:col-span-3">
-                <p className="text-[14px] font-bold text-[#0A1F3D]">שגיאה בטעינה</p>
+                <p className="text-[14px] font-bold text-[#1F2937]">שגיאה בטעינה</p>
                 <p className="text-[12px] text-[#6B7280] mt-1">{error}</p>
               </div>
             )}
@@ -200,7 +200,7 @@ export default function DealsList() {
             {!loading && !error && filtered.length === 0 && (
               <div className="rounded-[24px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center col-span-2 md:col-span-3">
                 <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
-                <p className="text-[14px] font-bold text-[#0A1F3D]">
+                <p className="text-[14px] font-bold text-[#1F2937]">
                   {tab === "active" ? "אין עדיין הצעות פעילות" : "אין הצעות בארכיון"}
                 </p>
                 <p className="text-[12px] text-[#6B7280] mt-1">

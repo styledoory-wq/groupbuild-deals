@@ -44,7 +44,7 @@ function BottomNavImpl({ role }: { role: Role }) {
         className="lg:hidden fixed bottom-0 left-1/2 -translate-x-1/2 z-[90] w-full max-w-[480px] bg-white border-t border-x border-[#ECEEF2] rounded-t-2xl transition-transform duration-200 [.keyboard-open_&]:translate-y-full [.keyboard-open_&]:pointer-events-none"
         style={{
           paddingBottom: "env(safe-area-inset-bottom)",
-          boxShadow: "0 -4px 16px -8px rgba(10,31,61,0.08)",
+          boxShadow: "0 -4px 16px -8px rgba(31,41,55,0.08)",
         }}
       >
       <div
@@ -63,7 +63,7 @@ function BottomNavImpl({ role }: { role: Role }) {
               onTouchStart={() => preloadRoute(to)}
               className={cn(
                 "flex-1 flex flex-col items-center justify-center gap-[3px] relative transition-colors duration-150",
-                active ? "text-[#D4AF37]" : "text-[#6B7280] hover:text-[#0A1F3D]",
+                active ? "text-[#C9A227]" : "text-[#6B7280] hover:text-[#1F2937]",
               )}
               style={{ minHeight: "var(--tap)" }}
             >
@@ -71,7 +71,7 @@ function BottomNavImpl({ role }: { role: Role }) {
               <span
                 className={cn(
                   "absolute top-0 left-1/2 -translate-x-1/2 h-[3px] rounded-b-full transition-all duration-200",
-                  active ? "w-10 bg-[#D4AF37]" : "w-0 bg-transparent",
+                  active ? "w-10 bg-[#C9A227]" : "w-0 bg-transparent",
                 )}
               />
               <Icon

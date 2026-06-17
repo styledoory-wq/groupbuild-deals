@@ -90,13 +90,13 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
         <span className={`text-fs-xs font-extrabold px-2.5 py-1 rounded-full whitespace-nowrap shadow-[0_1px_3px_rgba(10,31,61,0.06)] ${
           isRedeemed ? "bg-[#E8F7EC] text-[#2EA85A]"
           : isExpired ? "bg-[#F4F6FA] text-[#6B7280]"
-          : "bg-white text-[#0A1F3D]"
+          : "bg-white text-[#1F2937]"
         }`}>
           {STATUS_LABEL[voucher.status] ?? voucher.status}
         </span>
       </div>
 
-      <div className="rounded-[20px] bg-[#0A1F3D] text-white p-4 space-y-3 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
+      <div className="rounded-[20px] bg-[#1F2937] text-white p-4 space-y-3 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]">
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-fs-xs text-primary-foreground/65">מחיר רגיל</div>
@@ -104,7 +104,7 @@ export function VoucherCard({ voucher }: { voucher: Voucher }) {
           </div>
           <div className="text-left">
             <div className="text-fs-xs text-primary-foreground/65">מחיר הטבה</div>
-            <div className="text-2xl font-extrabold text-[#D4AF37] leading-none">{formatIls(benefitPrice)}</div>
+            <div className="text-2xl font-extrabold text-[#C9A227] leading-none">{formatIls(benefitPrice)}</div>
           </div>
         </div>
         <div className="rounded-[16px] bg-white/10 px-3 py-2 flex items-center justify-between gap-2">

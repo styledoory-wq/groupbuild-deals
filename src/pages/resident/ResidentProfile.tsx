@@ -78,7 +78,7 @@ export default function ResidentProfile() {
   ];
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#E8ECF0" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F8F8F6" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -90,15 +90,15 @@ export default function ResidentProfile() {
               {avatarUrl ? (
                 <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
               ) : (
-                <span className="text-[34px] font-extrabold text-[#0A1F3D] tracking-tight">{initials || "?"}</span>
+                <span className="text-[34px] font-extrabold text-[#1F2937] tracking-tight">{initials || "?"}</span>
               )}
             </div>
-            <label className="absolute bottom-0 left-0 h-9 w-9 rounded-full bg-[#D4AF37] flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(212,175,55,0.5)] cursor-pointer active:scale-95 transition-transform">
+            <label className="absolute bottom-0 left-0 h-9 w-9 rounded-full bg-[#C9A227] flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(212,175,55,0.5)] cursor-pointer active:scale-95 transition-transform">
               <Camera className="h-4 w-4 text-white" strokeWidth={2.4} />
               <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploading} />
             </label>
           </div>
-          <h1 className="mt-4 text-[24px] font-extrabold text-[#0A1F3D] tracking-tight">{user?.name}</h1>
+          <h1 className="mt-4 text-[24px] font-extrabold text-[#1F2937] tracking-tight">{user?.name}</h1>
           <p className="text-[13px] text-[#6B7280] mt-1 font-medium">
             דייר{project ? ` · ${project.name}` : ""}
           </p>
@@ -107,7 +107,7 @@ export default function ResidentProfile() {
         {/* Info card */}
         {(user?.phone || user?.email || user?.apartment) && (
           <div className="px-5">
-            <div className="bg-white rounded-[24px] border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] divide-y divide-[#E8ECF0]">
+            <div className="bg-white rounded-[24px] border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] divide-y divide-[#F8F8F6]">
               {user?.phone && (
                 <InfoRow icon={Phone} label="טלפון" value={user.phone} />
               )}
@@ -130,10 +130,10 @@ export default function ResidentProfile() {
               className="w-full h-[60px] rounded-[20px] px-4 flex items-center justify-between bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.05)] active:scale-[0.99] transition-transform"
             >
               <span className="flex items-center gap-3">
-                <span className="h-10 w-10 rounded-xl bg-[#E8ECF0] flex items-center justify-center">
-                  <Icon className="h-[18px] w-[18px] text-[#0A1F3D]" strokeWidth={2} />
+                <span className="h-10 w-10 rounded-xl bg-[#F8F8F6] flex items-center justify-center">
+                  <Icon className="h-[18px] w-[18px] text-[#1F2937]" strokeWidth={2} />
                 </span>
-                <span className="text-[15px] font-bold text-[#0A1F3D] tracking-tight">{label}</span>
+                <span className="text-[15px] font-bold text-[#1F2937] tracking-tight">{label}</span>
               </span>
               <ChevronLeft className="h-5 w-5 text-[#9CA3AF]" strokeWidth={2.2} />
             </button>
@@ -156,12 +156,12 @@ export default function ResidentProfile() {
 function InfoRow({ icon: Icon, label, value }: { icon: typeof Phone; label: string; value: string }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3.5">
-      <span className="h-9 w-9 rounded-xl bg-[#D4AF37]/12 flex items-center justify-center shrink-0">
-        <Icon className="h-4 w-4 text-[#D4AF37]" strokeWidth={2.2} />
+      <span className="h-9 w-9 rounded-xl bg-[#C9A227]/12 flex items-center justify-center shrink-0">
+        <Icon className="h-4 w-4 text-[#C9A227]" strokeWidth={2.2} />
       </span>
       <div className="flex-1 min-w-0 text-right">
         <div className="text-[11px] text-[#6B7280] font-semibold">{label}</div>
-        <div className="text-[14px] font-bold text-[#0A1F3D] truncate">{value}</div>
+        <div className="text-[14px] font-bold text-[#1F2937] truncate">{value}</div>
       </div>
     </div>
   );

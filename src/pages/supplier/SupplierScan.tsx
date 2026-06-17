@@ -186,7 +186,7 @@ export default function SupplierScan() {
 
         {result.kind === "idle" && mode === "manual" && (
           <div className="gb-card p-5 space-y-3">
-            <label className="text-sm font-bold text-[#0A1F3D]">קוד שובר</label>
+            <label className="text-sm font-bold text-[#1F2937]">קוד שובר</label>
             <Input
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value.toUpperCase())}

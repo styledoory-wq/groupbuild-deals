@@ -124,7 +124,7 @@ export default function AdminSupplierMedia() {
         {/* Logo */}
         <section className="gb-card p-4 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <ImageIcon className="h-3.5 w-3.5 text-[#D4AF37]" /> לוגו
+            <ImageIcon className="h-3.5 w-3.5 text-[#C9A227]" /> לוגו
           </h3>
           <div className="flex items-center gap-4">
             <SupplierLogo name={businessName} logoUrl={logoUrl} size="lg" />
@@ -151,7 +151,7 @@ export default function AdminSupplierMedia() {
         {/* Links */}
         <section className="gb-card p-4 space-y-2">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <LinkIcon className="h-3.5 w-3.5 text-[#D4AF37]" /> קישורים
+            <LinkIcon className="h-3.5 w-3.5 text-[#C9A227]" /> קישורים
           </h3>
           <Input dir="ltr" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="אתר" className="h-10 rounded-xl text-sm" maxLength={500} />
           <Input dir="ltr" value={whatsappUrl} onChange={(e) => setWhatsappUrl(e.target.value)} placeholder="https://wa.me/..." className="h-10 rounded-xl text-sm" maxLength={500} />
@@ -162,7 +162,7 @@ export default function AdminSupplierMedia() {
         {/* Catalogs */}
         <section className="gb-card p-4 space-y-2">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <FileText className="h-3.5 w-3.5 text-[#D4AF37]" /> קטלוגים
+            <FileText className="h-3.5 w-3.5 text-[#C9A227]" /> קטלוגים
           </h3>
           {supplierId && <SupplierCatalogsManager supplierId={supplierId} />}
         </section>
@@ -170,7 +170,7 @@ export default function AdminSupplierMedia() {
         {/* Gallery */}
         <section className="gb-card p-4 space-y-2">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <ImageIcon className="h-3.5 w-3.5 text-[#D4AF37]" /> גלריה
+            <ImageIcon className="h-3.5 w-3.5 text-[#C9A227]" /> גלריה
           </h3>
           <input ref={galleryRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleGallery} />
           <Button type="button" variant="outline" onClick={() => galleryRef.current?.click()} disabled={uploadingGallery} className="h-9 rounded-xl text-xs w-full">

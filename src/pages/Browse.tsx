@@ -128,7 +128,7 @@ export default function Browse() {
   const returnUrl = encodeURIComponent("/browse");
 
   return (
-    <div dir="rtl" className="min-h-screen w-full bg-[#E8ECF0]">
+    <div dir="rtl" className="min-h-screen w-full bg-[#F8F8F6]">
       {/* Top bar */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-[#ECEEF2]">
         <div className="mx-auto w-full max-w-[1200px] flex items-center justify-between gap-3 px-4 lg:px-8 h-14">
@@ -145,7 +145,7 @@ export default function Browse() {
 
       <div className="mx-auto w-full max-w-[1200px] px-4 lg:px-8 py-6 space-y-5">
         <div>
-          <h1 className="text-[24px] lg:text-[30px] font-extrabold text-[#0A1F3D] tracking-tight">צפייה חופשית בעסקאות</h1>
+          <h1 className="text-[24px] lg:text-[30px] font-extrabold text-[#1F2937] tracking-tight">צפייה חופשית בעסקאות</h1>
           <p className="text-[13px] lg:text-[14px] text-[#6B7280] mt-1">עיינו בהצעות ובספקים — ההצטרפות והשמירה דורשות הרשמה קצרה.</p>
         </div>
 
@@ -154,7 +154,7 @@ export default function Browse() {
           <button
             onClick={() => setTab("deals")}
             className={`px-5 h-10 rounded-full text-[13px] font-bold transition-all ${
-              tab === "deals" ? "bg-[#0A1F3D] text-white" : "text-[#6B7280]"
+              tab === "deals" ? "bg-[#1F2937] text-white" : "text-[#6B7280]"
             }`}
           >
             <Tag className="inline h-4 w-4 ml-1" /> עסקאות ({deals.length})
@@ -162,7 +162,7 @@ export default function Browse() {
           <button
             onClick={() => setTab("suppliers")}
             className={`px-5 h-10 rounded-full text-[13px] font-bold transition-all ${
-              tab === "suppliers" ? "bg-[#0A1F3D] text-white" : "text-[#6B7280]"
+              tab === "suppliers" ? "bg-[#1F2937] text-white" : "text-[#6B7280]"
             }`}
           >
             <Store className="inline h-4 w-4 ml-1" /> ספקים ({suppliers.length})
@@ -176,7 +176,7 @@ export default function Browse() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={tab === "deals" ? "חיפוש עסקה לפי שם..." : "חיפוש ספק..."}
-            className="w-full h-12 rounded-[18px] bg-white border border-[#ECEEF2] pr-11 pl-4 text-[14px] font-medium text-[#0A1F3D] placeholder:text-[#6B7280] focus:outline-none focus:border-[#D4AF37] focus:ring-[3px] focus:ring-[#D4AF37]/15"
+            className="w-full h-12 rounded-[18px] bg-white border border-[#ECEEF2] pr-11 pl-4 text-[14px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#C9A227] focus:ring-[3px] focus:ring-[#C9A227]/15"
           />
         </div>
 
@@ -186,7 +186,7 @@ export default function Browse() {
             {!loading && filteredDeals.length === 0 && (
               <div className="col-span-full rounded-2xl border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center">
                 <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
-                <p className="text-[14px] font-bold text-[#0A1F3D]">אין עסקאות תואמות</p>
+                <p className="text-[14px] font-bold text-[#1F2937]">אין עסקאות תואמות</p>
               </div>
             )}
             {!loading && filteredDeals.map((d) => (
@@ -207,7 +207,7 @@ export default function Browse() {
             {!loading && filteredSuppliers.length === 0 && (
               <div className="col-span-full rounded-2xl border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center">
                 <Store className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
-                <p className="text-[14px] font-bold text-[#0A1F3D]">אין ספקים תואמים</p>
+                <p className="text-[14px] font-bold text-[#1F2937]">אין ספקים תואמים</p>
               </div>
             )}
             {!loading && filteredSuppliers.map((s) => (
@@ -221,11 +221,11 @@ export default function Browse() {
                     <img src={s.logo_url} alt={s.business_name} className="h-14 w-14 rounded-xl object-cover border border-[#ECEEF2]" />
                   ) : (
                     <div className="h-14 w-14 rounded-xl bg-[#F4F6FA] flex items-center justify-center">
-                      <ShieldCheck className="h-6 w-6 text-[#D4AF37]" />
+                      <ShieldCheck className="h-6 w-6 text-[#C9A227]" />
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-[14px] text-[#0A1F3D] truncate">{s.business_name}</h3>
+                    <h3 className="font-bold text-[14px] text-[#1F2937] truncate">{s.business_name}</h3>
                     {s.category_name && (
                       <p className="text-[11px] text-[#6B7280] truncate">{s.category_name}</p>
                     )}
@@ -233,8 +233,8 @@ export default function Browse() {
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-[#6B7280]">
                   <span className="inline-flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-[#D4AF37] text-[#D4AF37]" />
-                    <span className="font-bold text-[#0A1F3D]">מאומת</span>
+                    <Star className="h-3 w-3 fill-[#C9A227] text-[#C9A227]" />
+                    <span className="font-bold text-[#1F2937]">מאומת</span>
                   </span>
                   {s.service_areas?.[0] && <span className="truncate max-w-[60%]">{s.service_areas[0]}</span>}
                 </div>
@@ -245,7 +245,7 @@ export default function Browse() {
 
         {/* Floating CTA */}
         <div className="sticky bottom-4 z-30 pt-6">
-          <div className="mx-auto max-w-md bg-[#0A1F3D] text-white rounded-2xl p-4 shadow-[0_12px_32px_-12px_rgba(10,31,61,0.6)] flex items-center justify-between gap-3">
+          <div className="mx-auto max-w-md bg-[#1F2937] text-white rounded-2xl p-4 shadow-[0_12px_32px_-12px_rgba(10,31,61,0.6)] flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="font-bold text-[14px]">רוצים להצטרף להצעה?</div>
               <div className="text-[12px] text-white/70">הרשמה מהירה — תחזרו לעמוד הזה אוטומטית.</div>

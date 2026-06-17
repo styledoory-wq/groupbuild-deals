@@ -19,7 +19,7 @@ export default function DesignSystemPage() {
   const [q, setQ] = useState("");
 
   return (
-    <div dir="rtl" className="min-h-screen w-full" style={{ background: "#E8ECF0" }}>
+    <div dir="rtl" className="min-h-screen w-full" style={{ background: "#F8F8F6" }}>
       <div className="mx-auto w-full max-w-[var(--app-max-w)] pb-24">
         <ScreenHeader
           title="מערכת העיצוב"
@@ -43,7 +43,7 @@ export default function DesignSystemPage() {
                   <div className="text-[11px] font-bold" style={{ color: s.accent }}>
                     שלב {s.index}
                   </div>
-                  <div className="text-[13px] font-extrabold text-[#0A1F3D]">
+                  <div className="text-[13px] font-extrabold text-[#1F2937]">
                     {s.title}
                   </div>
                   <div className="mt-1 text-[10px] font-mono text-[#6B7280]">
@@ -59,20 +59,20 @@ export default function DesignSystemPage() {
         <Section title="כרטיסים" subtitle="פינה 20px · צל רך · ללא border · scale(1.02) בלחיצה">
           <div className="px-5 grid grid-cols-2 gap-3">
             <AppCard to="/design-system">
-              <p className="text-[13px] font-extrabold text-[#0A1F3D]">כרטיס רגיל</p>
+              <p className="text-[13px] font-extrabold text-[#1F2937]">כרטיס רגיל</p>
               <p className="mt-1 text-[11px] font-medium text-[#6B7280]">לחיץ עם press</p>
             </AppCard>
             <AppCard variant="tinted" tint={STAGE_THEMES[2].tint} to="/design-system">
-              <p className="text-[13px] font-extrabold text-[#0A1F3D]">כרטיס מתוייג</p>
+              <p className="text-[13px] font-extrabold text-[#1F2937]">כרטיס מתוייג</p>
               <p className="mt-1 text-[11px] font-medium text-[#6B7280]">רקע בגוון שלב</p>
             </AppCard>
             <AppCard variant="dim">
-              <p className="text-[13px] font-extrabold text-[#0A1F3D]">כרטיס דהוי</p>
+              <p className="text-[13px] font-extrabold text-[#1F2937]">כרטיס דהוי</p>
               <p className="mt-1 text-[11px] font-medium text-[#6B7280]">תוכן עתידי</p>
             </AppCard>
             <AppCard>
               <div className="flex items-center justify-between">
-                <p className="text-[13px] font-extrabold text-[#0A1F3D]">עם תג</p>
+                <p className="text-[13px] font-extrabold text-[#1F2937]">עם תג</p>
                 <StatusChip status="active" />
               </div>
             </AppCard>
@@ -123,7 +123,7 @@ export default function DesignSystemPage() {
         <Section title="Empty State" subtitle="איור · כותרת · הסבר · פעולה">
           <div className="bg-white rounded-[20px] mx-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
             <EmptyState
-              icon={<Sparkles className="h-7 w-7 text-[#D4AF37]" />}
+              icon={<Sparkles className="h-7 w-7 text-[#C9A227]" />}
               title="עדיין אין כאן כלום"
               description="כשתפעלו במסך הזה, התוכן יופיע פה בצורה מסודרת."
               action={
@@ -161,7 +161,7 @@ function Section({
   return (
     <section className="mt-6">
       <div className="px-5 mb-3">
-        <h2 className="text-[15px] font-extrabold text-[#0A1F3D] tracking-tight">
+        <h2 className="text-[15px] font-extrabold text-[#1F2937] tracking-tight">
           {title}
         </h2>
         {subtitle && (
@@ -176,7 +176,7 @@ function Section({
 function Demo({ label, cls }: { label: string; cls: string }) {
   return (
     <div
-      className={`h-16 rounded-[16px] bg-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] flex items-center justify-center text-[12px] font-bold text-[#0A1F3D] ${cls}`}
+      className={`h-16 rounded-[16px] bg-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] flex items-center justify-center text-[12px] font-bold text-[#1F2937] ${cls}`}
     >
       {label}
     </div>

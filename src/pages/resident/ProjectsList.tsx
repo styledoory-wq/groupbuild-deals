@@ -50,16 +50,16 @@ export default function ProjectsList() {
               onClick={() => select(p.id)}
               className={cn(
                 "w-full text-right rounded-[20px] bg-white border p-4 transition-[transform,box-shadow] duration-200 active:scale-[0.99] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]",
-                active ? "border-[#D4AF37] ring-2 ring-[#D4AF37]/30" : "border-[#ECEEF2]"
+                active ? "border-[#C9A227] ring-2 ring-[#C9A227]/30" : "border-[#ECEEF2]"
               )}
             >
               <div className="flex items-start gap-3">
                 <div className="h-14 w-14 rounded-[16px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                  <Building2 className="h-7 w-7 text-[#D4AF37]" />
+                  <Building2 className="h-7 w-7 text-[#C9A227]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-bold text-[#0A1F3D] truncate">{p.name}</h3>
+                    <h3 className="font-bold text-[#1F2937] truncate">{p.name}</h3>
                     {active && <Check className="h-5 w-5 text-[#10B981] shrink-0" />}
                   </div>
                   <div className="flex items-center gap-1 text-xs text-[#6B7280] mb-2">
@@ -73,7 +73,7 @@ export default function ProjectsList() {
                     <span className="px-2 py-0.5 rounded-full bg-[#F4F6FA] text-[#6B7280]">
                       {p.apartmentCount} דירות
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#0A1F3D] font-medium">
+                    <span className="px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#1F2937] font-medium">
                       {statusLabel[p.status]}
                     </span>
                   </div>
