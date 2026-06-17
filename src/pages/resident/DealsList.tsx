@@ -163,9 +163,9 @@ export default function DealsList() {
         <div className="px-5 mt-3">
           <div className="bg-white border border-[#ECEEF2] rounded-full p-1 flex items-center shadow-[0_1px_3px_rgba(17,24,39,0.04)]">
             {([
-              { key: "active", label: "פעילות" },
+              { key: "active", label: "פעילות", icon: false },
               { key: "favorites", label: "מועדפים", icon: true },
-              { key: "archive", label: "ארכיון" },
+              { key: "archive", label: "ארכיון", icon: false },
             ] as const).map((t) => {
               const isActive = tab === t.key;
               return (
