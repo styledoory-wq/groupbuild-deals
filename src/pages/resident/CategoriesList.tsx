@@ -10,8 +10,9 @@ import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
-const URBANIST = "'Urbanist Variable', 'Urbanist', system-ui, sans-serif";
-const EPILOGUE = "'Epilogue Variable', 'Epilogue', system-ui, sans-serif";
+const URBANIST = "'Urbanist', system-ui, sans-serif";
+const EPILOGUE = "'Epilogue', system-ui, sans-serif";
+
 
 /* ---------- Stages with per-stage color tokens ---------- */
 type StageColors = {
