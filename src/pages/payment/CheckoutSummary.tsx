@@ -365,6 +365,15 @@ export default function CheckoutSummary() {
                   <span className="text-sm text-muted-foreground">פיקדון להבטחת מקום</span>
                   <span className="text-sm font-bold">{ils(depositAmount)}</span>
                 </div>
+                <div className="flex items-start justify-between py-2 border-b border-black/5">
+                  <div className="min-w-0 pr-2">
+                    <div className="text-sm text-muted-foreground">{JOINING_FEE_LABEL}</div>
+                    <div className="text-[11px] text-muted-foreground/80 mt-0.5 leading-tight">
+                      {JOINING_FEE_DESCRIPTION}
+                    </div>
+                  </div>
+                  <span className="text-sm font-bold whitespace-nowrap">{ils(joiningFee)}</span>
+                </div>
                 <div className="flex items-center justify-between py-2">
                   <span className="text-sm text-muted-foreground">יתרה לתשלום לספק*</span>
                   <span className="text-sm font-bold">
@@ -374,12 +383,12 @@ export default function CheckoutSummary() {
                 <div className="mt-3 pt-3 border-t-2 border-black/10 flex items-center justify-between">
                   <span className="text-base font-extrabold">סה״כ עכשיו</span>
                   <span className="text-xl font-black" style={{ color: BRAND }}>
-                    {ils(depositAmount)}
+                    {ils(totalNow)}
                   </span>
                 </div>
                 <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
                   *היתרה משולמת ישירות לספק במועד אספקת השירות. הפיקדון יוחזר אם
-                  ההצעה לא מגיעה למינימום משתתפים.
+                  ההצעה לא מגיעה למינימום משתתפים. דמי ההצטרפות אינם מוחזרים.
                 </p>
               </>
             ) : (
