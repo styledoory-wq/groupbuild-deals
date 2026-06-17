@@ -34,12 +34,18 @@ type DbDeal = {
   offer_type: string | null;
 };
 
-// Visual demo data for blocks that don't have a backing table yet.
-// TODO: wire to real projects/competitor tables when available.
-const DEMO_PROJECTS = [
-  { id: "p1", name: "מגדלי הצמרת", city: "תל אביב", units: 84, distance: "1.2 ק״מ", category: "מזגנים" },
-  { id: "p2", name: "פרויקט סביוני הכרמל", city: "חיפה", units: 56, distance: "3.4 ק״מ", category: "שיפוצים" },
-  { id: "p3", name: "נווה גנים B", city: "רעננה", units: 120, distance: "5.8 ק״מ", category: "אינסטלציה" },
+type AreaProject = {
+  id: string;
+  name: string;
+  city: string;
+  units: number;
+  stage: string | null;
+};
+
+const DEMO_COMPETITORS = [
+  { id: "c1", name: "התקנת מזגן 2.5 כ״ס · רמת גן", category: "מיזוג אוויר · ספק אחר", price: 2390, joiners: 47, delta: -120 },
+  { id: "c2", name: "שירות שנתי + ניקוי 4 מזגנים", category: "תחזוקה · ספק אחר", price: 690, joiners: 31, delta: 0 },
+  { id: "c3", name: "החלפת דוד שמש 150 ליטר", category: "אינסטלציה · ספק אחר", price: 2890, joiners: 22, delta: -40 },
 ];
 
 const DEMO_COMPETITORS = [
