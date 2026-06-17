@@ -225,9 +225,9 @@ export default function CategoriesList() {
           </div>
         )}
 
-        {/* Stage sections — each in its own row with horizontal scroll */}
+        {/* Stage sections — compact grid, all visible, no horizontal scroll */}
         {!q && (
-          <div className="space-y-8">
+          <div className="space-y-7">
             {visibleStages.map(({ stage, cats, totalSuppliers }) => (
               <StageSection
                 key={stage.id}
@@ -276,27 +276,6 @@ function StageSection({
   totalSuppliers: number;
   counts: Record<string, number>;
 }) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const [canScroll, setCanScroll] = useState(false);
-
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 8);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, [cats.length]);
-
-  // Subtle nudge on first mount to hint scroll affordance
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el || !canScroll) return;
-    const t1 = setTimeout(() => el.scrollBy({ left: -30, behavior: "smooth" }), 600);
-    const t2 = setTimeout(() => el.scrollBy({ left: 30, behavior: "smooth" }), 1100);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [canScroll]);
-
   const c = stage.colors;
 
   return (
@@ -304,62 +283,45 @@ function StageSection({
       {/* Section header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <div className={`w-2 h-6 ${c.bar} rounded-full shrink-0`} />
+          <div className={`w-1.5 h-5 ${c.bar} rounded-full shrink-0`} />
           <h2
-            className="text-[19px] font-bold text-[#1A1A1A] truncate"
+            className="text-[16px] font-bold text-[#1A1A1A] truncate"
             style={{ fontFamily: URBANIST }}
           >
             {stage.title}
           </h2>
+          <span className={`text-[10px] font-bold ${c.tagText} ${c.tagBg} px-1.5 py-0.5 rounded-md whitespace-nowrap`}>
+            שלב {stage.index}
+          </span>
         </div>
-        <span className={`text-[11px] font-bold ${c.tagText} ${c.tagBg} px-2 py-1 rounded-md whitespace-nowrap`}>
-          שלב {stage.index} · {totalSuppliers}
+        <span className="text-[11px] font-semibold text-gray-500 whitespace-nowrap">
+          {totalSuppliers} ספקים
         </span>
       </div>
 
       {cats.length === 0 ? (
-        <div className="bg-white/70 rounded-2xl p-4 text-center text-[12px] text-gray-500 font-medium border border-gray-100">
+        <div className="bg-white/70 rounded-xl p-3 text-center text-[12px] text-gray-500 font-medium border border-gray-100">
           קטגוריות יתווספו בקרוב
         </div>
       ) : (
-        <div className="relative -mx-5">
-          <div
-            ref={scrollerRef}
-            className="flex gap-3 overflow-x-auto no-scrollbar snap-x scroll-smooth px-5 pb-1"
-            style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
-          >
-            {cats.map((cat) => (
-              <CategoryCard
-                key={cat.id}
-                id={cat.id}
-                name={cat.name}
-                icon={cat.icon}
-                count={counts[cat.id] ?? 0}
-                colors={c}
-              />
-            ))}
-            <div className="shrink-0 w-1" aria-hidden />
-          </div>
-
-          {/* Scroll affordance — peek + fade */}
-          {canScroll && (
-            <>
-              <div
-                className="pointer-events-none absolute top-0 bottom-1 left-0 w-10"
-                style={{ background: "linear-gradient(90deg, #FBF8F3, rgba(251,248,243,0))" }}
-              />
-              <div className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-white shadow-md flex items-center justify-center animate-pulse">
-                <ChevronLeft className={`h-4 w-4 ${c.tagText}`} strokeWidth={2.5} />
-              </div>
-            </>
-          )}
+        <div className="grid grid-cols-2 gap-2">
+          {cats.map((cat) => (
+            <CategoryRow
+              key={cat.id}
+              id={cat.id}
+              name={cat.name}
+              icon={cat.icon}
+              count={counts[cat.id] ?? 0}
+              colors={c}
+            />
+          ))}
         </div>
       )}
     </section>
   );
 }
 
-function CategoryCard({
+function CategoryRow({
   id, name, icon, count, colors,
 }: {
   id: string;
@@ -373,38 +335,37 @@ function CategoryCard({
   const body = (
     <>
       <div
-        className={`w-14 h-14 ${colors.iconBg} ${!dim ? colors.iconHover : ""} rounded-2xl flex items-center justify-center mb-3 ${colors.iconText} text-[26px] transition-colors`}
+        className={`w-10 h-10 ${colors.iconBg} rounded-xl flex items-center justify-center ${colors.iconText} text-[20px] shrink-0`}
       >
         <span aria-hidden>{icon}</span>
       </div>
-      <span
-        className="font-bold text-[13px] text-[#1A1A1A] block leading-tight line-clamp-2 min-h-[2.2em]"
-        style={{ fontFamily: URBANIST }}
-      >
-        {name}
-      </span>
-      <span className={`text-[11px] font-semibold mt-1 ${dim ? "text-gray-400" : colors.tagText}`}>
-        {dim ? "בקרוב" : `${count} ספקים`}
-      </span>
+      <div className="flex-1 min-w-0 text-right">
+        <span
+          className="font-bold text-[13px] text-[#1A1A1A] block leading-tight truncate"
+          style={{ fontFamily: URBANIST }}
+        >
+          {name}
+        </span>
+        <span className={`text-[11px] font-semibold ${dim ? "text-gray-400" : colors.tagText}`}>
+          {dim ? "בקרוב" : `${count} ספקים`}
+        </span>
+      </div>
     </>
   );
 
-  const baseClass = `snap-start shrink-0 w-[140px] bg-white p-4 rounded-2xl border ${colors.cardBorder} shadow-sm flex flex-col items-center text-center group transition-transform`;
+  const baseClass = `bg-white p-2.5 rounded-xl border ${colors.cardBorder} shadow-sm flex items-center gap-2.5 transition-transform`;
 
   if (dim) {
-    return (
-      <div className={`${baseClass} opacity-60 cursor-default`}>
-        {body}
-      </div>
-    );
+    return <div className={`${baseClass} opacity-60`}>{body}</div>;
   }
 
   return (
     <Link
       to={`/resident/categories/${id}`}
-      className={`${baseClass} active:scale-95 hover:shadow-md`}
+      className={`${baseClass} active:scale-[0.97] hover:shadow-md`}
     >
       {body}
     </Link>
   );
 }
+
