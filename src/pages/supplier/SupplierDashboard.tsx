@@ -57,6 +57,8 @@ export default function SupplierDashboard() {
   const [dbSupplier, setDbSupplier] = useState<DbSupplier | null>(null);
   const [myDeals, setMyDeals] = useState<DbDeal[]>([]);
   const [counts, setCounts] = useState<Record<string, { interests: number; paid: number }>>({});
+  const [areaProjects, setAreaProjects] = useState<AreaProject[]>([]);
+  const [areaSet, setAreaSet] = useState(false);
   
 
   useEffect(() => {
