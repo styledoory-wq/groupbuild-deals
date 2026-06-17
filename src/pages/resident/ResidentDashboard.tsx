@@ -228,7 +228,7 @@ const filteredDeals = useMemo(() => {
         <div className="mt-4">
           <button
             onClick={() => navigate("/resident/search")}
-            className="w-full h-13 py-3.5 rounded-2xl bg-white border border-[#ECEEF2] flex items-center gap-3 px-4 text-right shadow-sm active:scale-[0.99] transition-transform"
+            className="w-full h-14 rounded-[20px] bg-white border border-[#ECEEF2] flex items-center gap-3 px-4 text-right shadow-[0_4px_16px_-6px_rgba(10,31,61,0.08)] active:scale-[0.99] transition-transform"
           >
             <SearchIcon className="h-[18px] w-[18px] text-[#6B7280] shrink-0" strokeWidth={2} />
             <span className="text-[13px] font-medium text-[#6B7280] flex-1 truncate">חפש ספקים, הצעות וקטגוריות</span>
@@ -240,7 +240,7 @@ const filteredDeals = useMemo(() => {
           {/* Savings Hero - full width */}
           <button
             onClick={() => navigate("/resident/my-offers")}
-            className="col-span-2 bg-white border border-[#ECEEF2] p-5 rounded-[24px] shadow-sm relative overflow-hidden text-right active:scale-[0.99] transition-transform"
+            className="col-span-2 bg-white border border-[#ECEEF2] p-5 rounded-[24px] shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] relative overflow-hidden text-right active:scale-[0.99] transition-transform"
           >
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-2">
@@ -261,7 +261,7 @@ const filteredDeals = useMemo(() => {
           {/* Budget Card - left */}
           <button
             onClick={() => navigate("/resident/budget-planner")}
-            className="bg-white border border-[#ECEEF2] p-4 rounded-[24px] shadow-sm flex flex-col justify-between text-right active:scale-[0.98] transition-transform min-h-[160px]"
+            className="bg-white border border-[#ECEEF2] p-4 rounded-[24px] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] flex flex-col justify-between text-right active:scale-[0.98] transition-transform min-h-[160px]"
           >
             <div>
               <div className="w-9 h-9 bg-[#F5F3FF] rounded-xl flex items-center justify-center mb-2">
@@ -293,8 +293,8 @@ const filteredDeals = useMemo(() => {
                 onClick={() => setActiveFilter(f)}
                 className={`shrink-0 h-9 px-4 rounded-full text-[12px] font-bold transition-all border ${
                   active
-                    ? "bg-[#2563EB] text-white border-[#C9A227] shadow-md shadow-[#C9A227]/25"
-                    : "bg-white text-[#1F2937] border-[#ECEEF2] shadow-sm"
+                    ? "bg-[#2563EB] text-white border-[#2563EB] shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]"
+                    : "bg-white text-[#1F2937] border-[#ECEEF2] shadow-[0_2px_8px_-3px_rgba(10,31,61,0.10)]"
                 }`}
               >
                 {f}
@@ -362,7 +362,7 @@ function BentoStat({ icon: Icon, label, value, tint, color, onClick }: { icon: t
   return (
     <button
       onClick={onClick}
-      className="bg-white border border-[#ECEEF2] p-2.5 rounded-2xl flex items-center gap-2.5 shadow-sm active:scale-[0.97] transition-transform text-right flex-1"
+      className="bg-white border border-[#ECEEF2] p-2.5 rounded-2xl flex items-center gap-2.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] active:scale-[0.97] transition-transform text-right flex-1"
     >
       <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: tint }}>
         <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} style={{ color }} />
