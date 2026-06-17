@@ -129,7 +129,7 @@ export default function AdminCommitteeRequests() {
           </div>
         ))}
       </div>
-      <BottomNav />
+      <BottomNav role="admin" />
     </MobileShell>
   );
 }
