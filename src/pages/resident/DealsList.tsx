@@ -156,28 +156,33 @@ export default function DealsList() {
       >
         <PageHeader size="large"
           title={cat ? `${cat.icon} ${cat.name}` : stageTitle ? stageTitle : "כל ההצעות"}
-          subtitle={loading ? "טוען..." : `${filtered.length} הצעות ${tab === "active" ? "פעילות" : "בארכיון"}`}
+          subtitle={loading ? "טוען..." : `${filtered.length} הצעות ${tab === "active" ? "פעילות" : tab === "favorites" ? "במועדפים" : "בארכיון"}`}
         />
 
-        {/* Tabs — segmented control */}
+        {/* Tabs — segmented control (gold accent) */}
         <div className="px-5 mt-3">
-          <div className="bg-white border border-[#ECEEF2] rounded-full p-1 flex items-center shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)]">
-            <button
-              onClick={() => setTab("active")}
-              className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all ${
-                tab === "active" ? "bg-[#2563EB] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
-              }`}
-            >
-              פעילות
-            </button>
-            <button
-              onClick={() => setTab("archive")}
-              className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all ${
-                tab === "archive" ? "bg-[#2563EB] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
-              }`}
-            >
-              ארכיון
-            </button>
+          <div className="bg-white border border-[#ECEEF2] rounded-full p-1 flex items-center shadow-[0_1px_3px_rgba(17,24,39,0.04)]">
+            {([
+              { key: "active", label: "פעילות" },
+              { key: "favorites", label: "מועדפים", icon: true },
+              { key: "archive", label: "ארכיון" },
+            ] as const).map((t) => {
+              const isActive = tab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all inline-flex items-center justify-center gap-1.5 ${
+                    isActive
+                      ? "bg-[#C9A227] text-white shadow-[0_4px_12px_-4px_rgba(201,162,39,0.45)]"
+                      : "text-[#6B7280] hover:text-[#1F2937]"
+                  }`}
+                >
+                  {t.icon && <Heart className={`h-3.5 w-3.5 ${isActive ? "fill-white" : ""}`} strokeWidth={2.2} />}
+                  {t.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -207,13 +212,19 @@ export default function DealsList() {
             )}
 
             {!loading && !error && filtered.length === 0 && (
-              <div className="rounded-[24px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center col-span-2 md:col-span-3">
-                <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
+              <div className="rounded-[20px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center col-span-2 md:col-span-3">
+                {tab === "favorites" ? (
+                  <Heart className="h-8 w-8 mx-auto mb-3 text-[#C9A227]" strokeWidth={2} />
+                ) : (
+                  <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
+                )}
                 <p className="text-[14px] font-bold text-[#1F2937]">
-                  {tab === "active" ? "אין עדיין הצעות פעילות" : "אין הצעות בארכיון"}
+                  {tab === "active" ? "אין עדיין הצעות פעילות" : tab === "favorites" ? "עדיין אין הצעות במועדפים" : "אין הצעות בארכיון"}
                 </p>
                 <p className="text-[12px] text-[#6B7280] mt-1">
-                  {cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."}
+                  {tab === "favorites"
+                    ? "לחצו על הלב בכל הצעה כדי לשמור אותה כאן."
+                    : cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."}
                 </p>
               </div>
             )}
