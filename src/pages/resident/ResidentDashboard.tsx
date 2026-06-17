@@ -377,7 +377,7 @@ function SectionHeader({ title, subtitle, action }: { title: string; subtitle?: 
   );
 }
 
-function QuickAction({ icon: Icon, label, onClick }: { icon: typeof SearchIcon; label: string; onClick: () => void }) {
+function QuickAction({ icon: Icon, label, onClick }: { icon: typeof Calculator; label: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
