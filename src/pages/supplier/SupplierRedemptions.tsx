@@ -150,7 +150,7 @@ export default function SupplierRedemptions() {
               <div className="text-3xl font-extrabold">{stats.total}</div>
               <div className="text-fs-sm text-white/70 mt-0.5">לקוחות פעילים</div>
             </div>
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#C9A227]/20 border border-[#C9A227]/30">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#2563EB]/20 border border-[#C9A227]/30">
               <Users className="h-7 w-7 text-[#C9A227]" />
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function SupplierRedemptions() {
         {/* Income Potential */}
         <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-r from-[#FEF9E7] to-[#FFF8F0] p-4 border border-[#FDE68A]/60 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#C9A227]/15">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563EB]/15">
               <Wallet className="h-5 w-5 text-[#B8923F]" />
             </div>
             <div className="flex-1">

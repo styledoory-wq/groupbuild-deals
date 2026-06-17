@@ -739,7 +739,7 @@ export default function AdminDbSuppliers() {
                 </button>
                 <button
                   onClick={() => navigate(`/supplier/offers/new?supplierId=${r.id}`)}
-                  className="h-9 rounded-xl bg-[#C9A227] text-white text-fs-sm font-bold flex items-center justify-center gap-1 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+                  className="h-9 rounded-xl bg-[#2563EB] text-white text-fs-sm font-bold flex items-center justify-center gap-1 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
                 >
                   <Plus className="h-3.5 w-3.5" /> צור הצעה
                 </button>
@@ -810,7 +810,7 @@ export default function AdminDbSuppliers() {
       {/* Floating Action Button — add new supplier */}
       <button
         onClick={() => { setForm(emptyForm); setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] }); setOpen(true); }}
-        className="fixed z-40 left-5 bottom-24 h-14 w-14 rounded-full bg-[#C9A227] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center active:scale-95 transition-transform"
+        className="fixed z-40 left-5 bottom-24 h-14 w-14 rounded-full bg-[#2563EB] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center active:scale-95 transition-transform"
         aria-label="הוסף ספק חדש"
       >
         <Plus className="h-6 w-6" strokeWidth={2.6} />
@@ -956,7 +956,7 @@ export default function AdminDbSuppliers() {
                       }))}
                       className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${
                         active
-                          ? "bg-[#C9A227] text-white border-[#1F2937] font-bold"
+                          ? "bg-[#2563EB] text-white border-[#1F2937] font-bold"
                           : "bg-card border-border text-foreground hover:border-[#C9A227]/50"
                       }`}
                     >
@@ -998,7 +998,7 @@ export default function AdminDbSuppliers() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>ביטול</Button>
-            <Button onClick={handleCreate} disabled={saving} className="bg-[#C9A227] text-white font-bold">
+            <Button onClick={handleCreate} disabled={saving} className="bg-[#2563EB] text-white font-bold">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "צור ספק"}
             </Button>
           </DialogFooter>
@@ -1140,7 +1140,7 @@ export default function AdminDbSuppliers() {
                             : [...f.categoryIds, c.id],
                         }))}
                         className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${
-                          active ? "bg-[#C9A227] text-white border-[#1F2937] font-bold" : "bg-card border-border text-foreground hover:border-[#C9A227]/50"
+                          active ? "bg-[#2563EB] text-white border-[#1F2937] font-bold" : "bg-card border-border text-foreground hover:border-[#C9A227]/50"
                         }`}
                       >
                         {c.icon} {c.name}
@@ -1233,7 +1233,7 @@ export default function AdminDbSuppliers() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditOpen(false)}>ביטול</Button>
-            <Button onClick={handleEditSave} disabled={editSaving || editLoading} className="bg-[#C9A227] text-white font-bold">
+            <Button onClick={handleEditSave} disabled={editSaving || editLoading} className="bg-[#2563EB] text-white font-bold">
               {editSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "שמור שינויים"}
             </Button>
           </DialogFooter>

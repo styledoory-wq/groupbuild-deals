@@ -147,9 +147,9 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
             {loading && (
               <div className="ml-6 flex items-center gap-2 bg-white border border-[#EFE9D6] rounded-2xl p-3 w-fit">
                 <div className="flex gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#C9A227] animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#C9A227] animate-bounce" style={{ animationDelay: "120ms" }} />
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#C9A227] animate-bounce" style={{ animationDelay: "240ms" }} />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB] animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB] animate-bounce" style={{ animationDelay: "120ms" }} />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB] animate-bounce" style={{ animationDelay: "240ms" }} />
                 </div>
                 <span className="text-[11px] text-[#6B7280] font-medium">היועץ מנתח...</span>
               </div>

@@ -55,7 +55,7 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
           >
             <Bell className="h-4.5 w-4.5" />
           </Link>
-          <div className="h-9 w-9 rounded-full bg-[#C9A227] text-white flex items-center justify-center text-[12px] font-bold">
+          <div className="h-9 w-9 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-[12px] font-bold">
             {(user?.name ?? "?").slice(0, 1)}
           </div>
         </div>

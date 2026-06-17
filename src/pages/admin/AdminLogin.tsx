@@ -75,7 +75,7 @@ export default function AdminLogin() {
         <div className="relative animate-fade-up">
           <div className="absolute -top-10 -left-10 h-48 w-48 rounded-full bg-[#FFF8E1] blur-3xl" />
           <div className="relative">
-            <div className="h-16 w-16 rounded-2xl bg-[#C9A227] text-white flex items-center justify-center shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] mb-6">
+            <div className="h-16 w-16 rounded-2xl bg-[#2563EB] text-white flex items-center justify-center shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] mb-6">
               <ShieldCheck className="h-8 w-8 text-primary" />
             </div>
             <h1 className="text-3xl font-extrabold mb-2">כניסת ניהול</h1>
@@ -120,7 +120,7 @@ export default function AdminLogin() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-2xl bg-[#C9A227] text-white font-bold text-base shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+              className="w-full h-12 rounded-2xl bg-[#2563EB] text-white font-bold text-base shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
             >
               {loading ? "מתחבר…" : "כניסה לפאנל הניהול"}
             </Button>

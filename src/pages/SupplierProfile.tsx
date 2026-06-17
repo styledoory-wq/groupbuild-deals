@@ -406,7 +406,7 @@ export default function SupplierProfile() {
       {lightbox && (
         <div
           onClick={() => setLightbox(null)}
-          className="fixed inset-0 z-50 bg-[#C9A227]/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#2563EB]/80 flex items-center justify-center p-4"
         >
           <img src={lightbox} alt="" className="max-h-[90vh] max-w-full rounded-[20px]" />
         </div>

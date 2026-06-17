@@ -184,7 +184,7 @@ export default function NotificationSettings() {
         <Button
           onClick={save}
           disabled={saving}
-          className="w-full h-12 rounded-[16px] bg-[#C9A227] hover:bg-[#C9A227]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
+          className="w-full h-12 rounded-[16px] bg-[#2563EB] hover:bg-[#2563EB]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
         >
           <Save className="h-4 w-4" />
           {saving ? "שומר…" : "שמירת הגדרות"}
