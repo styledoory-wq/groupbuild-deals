@@ -72,6 +72,9 @@ const AdminSupplierAreas = lazy(() => import("./pages/admin/AdminSupplierAreas")
 const AdminSupplierMedia = lazy(() => import("./pages/admin/AdminSupplierMedia"));
 const AdminDbSuppliers = lazy(() => import("./pages/admin/AdminDbSuppliers"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
+const AdminCommitteeRequests = lazy(() => import("./pages/admin/AdminCommitteeRequests"));
+const CommitteeDashboard = lazy(() => import("./pages/committee/CommitteeDashboard"));
+const CommitteeRequest = lazy(() => import("./pages/committee/CommitteeRequest"));
 const PaymentCheckout = lazy(() => import("./pages/payment/PaymentCheckout"));
 const CheckoutSummary = lazy(() => import("./pages/payment/CheckoutSummary"));
 const PaymentSuccess = lazy(() => import("./pages/payment/PaymentSuccess"));
@@ -258,6 +261,9 @@ const App = () => (
                   <Route path="/admin/complaints" element={adminRoute(<AdminComplaints />)} />
                   <Route path="/admin/leads" element={adminRoute(<AdminLeads />)} />
                   <Route path="/admin/supplier-trust" element={adminRoute(<AdminSupplierTrust />)} />
+                  <Route path="/admin/committee-requests" element={adminRoute(<AdminCommitteeRequests />)} />
+                  <Route path="/committee" element={<CommitteeDashboard />} />
+                  <Route path="/committee/request" element={<CommitteeRequest />} />
                   <Route path="/payment/checkout" element={<PaymentCheckout />} />
                   <Route path="/checkout/:dealId" element={<CheckoutSummary />} />
                   <Route path="/payment/success" element={<PaymentSuccess />} />
