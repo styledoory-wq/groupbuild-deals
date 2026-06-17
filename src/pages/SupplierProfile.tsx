@@ -473,15 +473,18 @@ export default function SupplierProfile() {
                 href={whatsappHref}
                 target="_blank"
                 rel="noreferrer noopener"
-                onClick={() => {
-                  if (supplier) {
-                    void supabase.from("supplier_inquiries").insert({
-                      supplier_id: supplier.id,
-                      message: `לחיצה על וואטסאפ מפרופיל הספק`,
-                      source: "whatsapp_click",
-                      status: "new",
-                    });
-                  }
+                onClick={async () => {
+                  if (!supplier) return;
+                  const { data: sd } = await supabase.auth.getSession();
+                  const uid = sd.session?.user.id;
+                  if (!uid) return;
+                  void supabase.from("supplier_inquiries").insert({
+                    supplier_id: supplier.id,
+                    user_id: uid,
+                    message: `לחיצה על וואטסאפ מפרופיל הספק`,
+                    source: "whatsapp_click",
+                    status: "new",
+                  });
                 }}
                 className="flex-1 h-12 rounded-[16px] bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 shadow-[0_4px_14px_-4px_rgba(37,211,102,0.5)] active:scale-[0.98] transition-transform"
               >
