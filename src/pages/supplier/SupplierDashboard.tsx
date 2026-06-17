@@ -121,6 +121,38 @@ export default function SupplierDashboard() {
             cMap[d.id] = { interests: interests ?? 0, paid: paid ?? 0 };
           }));
           if (!cancelled) setCounts(cMap);
+
+          // Load supplier work-area cities, then projects in those cities only
+          const { data: scRows } = await supabase
+            .from("supplier_cities")
+            .select("city_id")
+            .eq("supplier_id", supplierRow.id);
+          const cityIds = (scRows ?? []).map((r: { city_id: string }) => r.city_id);
+          if (!cancelled) setAreaSet(cityIds.length > 0);
+          if (cityIds.length > 0) {
+            const { data: cityRows } = await supabase
+              .from("cities")
+              .select("name_he")
+              .in("id", cityIds);
+            const cityNames = (cityRows ?? []).map((c: { name_he: string }) => c.name_he);
+            if (cityNames.length > 0) {
+              const { data: projRows } = await supabase
+                .from("projects")
+                .select("id,name,city,apartment_count,building_count,current_stage")
+                .in("city", cityNames)
+                .eq("is_active", true)
+                .eq("is_deleted", false)
+                .order("created_at", { ascending: false })
+                .limit(12);
+              if (!cancelled) {
+                setAreaProjects((projRows ?? []).map((p: { id: string; name: string; city: string; apartment_count: number | null; building_count: number | null; current_stage: string | null }) => ({
+                  id: p.id, name: p.name, city: p.city,
+                  units: (p.apartment_count ?? 0) || (p.building_count ?? 0),
+                  stage: p.current_stage,
+                })));
+              }
+            }
+          }
         }
       } catch (e) {
         console.error("[SupplierDashboard] load error", e);
