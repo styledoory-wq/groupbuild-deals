@@ -48,11 +48,6 @@ const DEMO_COMPETITORS = [
   { id: "c3", name: "החלפת דוד שמש 150 ליטר", category: "אינסטלציה · ספק אחר", price: 2890, joiners: 22, delta: -40 },
 ];
 
-const DEMO_COMPETITORS = [
-  { id: "c1", name: "התקנת מזגן 2.5 כ״ס · רמת גן", category: "מיזוג אוויר · ספק אחר", price: 2390, joiners: 47, delta: -120 },
-  { id: "c2", name: "שירות שנתי + ניקוי 4 מזגנים", category: "תחזוקה · ספק אחר", price: 690, joiners: 31, delta: 0 },
-  { id: "c3", name: "החלפת דוד שמש 150 ליטר", category: "אינסטלציה · ספק אחר", price: 2890, joiners: 22, delta: -40 },
-];
 
 export default function SupplierDashboard() {
   const navigate = useNavigate();
