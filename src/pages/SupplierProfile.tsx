@@ -57,6 +57,15 @@ const WhatsappIcon = (props: { className?: string }) => (
   </svg>
 );
 
+type ReviewItem = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  user_id: string;
+  reviewer_name?: string;
+};
+
 export default function SupplierProfile() {
   const { supplierId } = useParams();
   const navigate = useNavigate();
@@ -69,7 +78,10 @@ export default function SupplierProfile() {
   const [submitting, setSubmitting] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [deals, setDeals] = useState<RealDealCardData[]>([]);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const dealsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!supplierId) return;
