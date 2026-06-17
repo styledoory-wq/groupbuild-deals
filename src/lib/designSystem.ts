@@ -28,21 +28,21 @@ export interface StageTheme {
 
 export const STAGE_THEMES: StageTheme[] = [
   { id: "planning",     index: 1, title: "תכנון ועיצוב",     shortTitle: "תכנון",
-    accent: "#2F6BFF", tint: "#EAF2FF", border: "#BFD7FF" },
+    accent: "#2563EB", tint: "#EEF4FF", border: "#DBE6FF" },
   { id: "structure",    index: 2, title: "שלד ובנייה",        shortTitle: "בנייה",
-    accent: "#E8742C", tint: "#FFF1E4", border: "#FFD4B0" },
+    accent: "#E8742C", tint: "#FFF5EB", border: "#FFE2C7" },
   { id: "systems",      index: 3, title: "מערכות הבית",       shortTitle: "מערכות",
-    accent: "#0FB5C9", tint: "#E7F8FB", border: "#B5E8EF" },
+    accent: "#0891B2", tint: "#ECFEFF", border: "#CFF5F9" },
   { id: "openings",     index: 4, title: "פתחים ובטחון",      shortTitle: "פתחים",
-    accent: "#2EA85A", tint: "#E8F7EC", border: "#BFE9C6" },
+    accent: "#16A34A", tint: "#F0FDF4", border: "#CFEFD8" },
   { id: "finishes",     index: 5, title: "גמרים",              shortTitle: "גמר",
-    accent: "#7A4FCF", tint: "#F2ECFB", border: "#D8C9F0" },
+    accent: "#7C3AED", tint: "#F5F3FF", border: "#E2DBFB" },
   { id: "kitchen-bath", index: 6, title: "מטבחים ואמבטיות",  shortTitle: "מטבח",
-    accent: "#B07E2E", tint: "#F8F1E4", border: "#E9D9BD" },
+    accent: "#C9A227", tint: "#FFF7ED", border: "#F1E2C0" },
   { id: "outdoor",      index: 7, title: "חצר ופיתוח",         shortTitle: "חצר",
-    accent: "#6E8A2E", tint: "#F1F5E4", border: "#D2DEB5" },
+    accent: "#6E8A2E", tint: "#F7FEE7", border: "#DFEFBE" },
   { id: "moving",       index: 8, title: "כניסה לבית",         shortTitle: "כניסה",
-    accent: "#C9A227", tint: "#FFF8E1", border: "#EBD79A" },
+    accent: "#C9A227", tint: "#FFF7ED", border: "#F1E2C0" },
 ];
 
 export const getStage = (id: StageId): StageTheme =>
