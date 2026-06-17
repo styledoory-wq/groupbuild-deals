@@ -20,7 +20,10 @@ type StageColors = {
   bar: string; tagBg: string; tagText: string;
   cardBorder: string; iconBg: string; iconText: string;
   iconHover: string;
+  badgeSolid: string; // e.g. "bg-blue-600"
+  ring: string;       // e.g. "ring-blue-500"
 };
+
 
 type StageDef = {
   id: string;
