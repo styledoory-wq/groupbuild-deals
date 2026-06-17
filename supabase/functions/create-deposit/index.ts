@@ -135,9 +135,9 @@ Deno.serve(async (req) => {
           user_id: userId,
           deal_id: body.deal_id,
           amount,
-          gross_deposit_amount: amount,
-          net_deposit_amount: amount,
-          supplier_deduction_amount: amount,
+          gross_deposit_amount: depositAmount,
+          net_deposit_amount: depositAmount,
+          supplier_deduction_amount: depositAmount,
           supplier_deduction_basis: "gross",
           payment_fee_absorber: "groupbuild",
           payment_processing_fee_status: "unknown",
@@ -148,6 +148,9 @@ Deno.serve(async (req) => {
             source: "create_deposit_function",
             deal_title: deal.title ?? null,
             interest_id: body.interest_id ?? null,
+            joining_fee: JOINING_FEE,
+            deposit_only_amount: depositAmount,
+            total_charged_amount: amount,
           },
         })
         .select("id")
