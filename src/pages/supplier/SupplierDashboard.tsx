@@ -221,28 +221,24 @@ export default function SupplierDashboard() {
   const businessName = dbSupplier?.business_name || user?.name || "החשבון שלי";
 
   const TopBar = () => (
-    <header className="px-5 pt-4 pb-2">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-[#10B981] animate-pulse" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#0E6B5A]">פעיל · אזור ספק</span>
+    <header className="px-5 pt-5 pb-1">
+      <div className="flex items-start justify-between">
+        <div className="text-right flex-1 min-w-0">
+          <div className="text-[13px] text-[#8E8E93] font-medium mb-0.5">שלום,</div>
+          <h1 className="text-[28px] font-bold text-[#1C1C1E] leading-[1.1] tracking-[-0.03em] break-words">
+            {businessName}
+          </h1>
+          {dbSupplier && !isPending && !isRejected && (
+            <div className="mt-1.5"><SupplierRatingBadge supplierId={dbSupplier.id} className="text-[12px] text-[#0E6B5A]" /></div>
+          )}
         </div>
         <button
           onClick={handleLogout}
-          className="h-8 w-8 rounded-full bg-white border border-[#E8EAE5] flex items-center justify-center text-[#5C6770] active:scale-95 transition"
+          className="shrink-0 h-10 w-10 rounded-full bg-white border border-[#E5E5EA] flex items-center justify-center text-[#8E8E93] active:scale-95 transition shadow-sm"
           aria-label="יציאה"
         >
-          <LogOut className="h-4 w-4" strokeWidth={2.2} />
+          <LogOut className="h-4 w-4" strokeWidth={2} />
         </button>
-      </div>
-      <div className="text-right">
-        <div className="text-[12px] text-[#5C6770] font-semibold mb-0.5">שלום,</div>
-        <h1 className="text-[26px] font-black text-[#0F1B14] leading-[1.05] tracking-[-0.02em] break-words">
-          {businessName}
-        </h1>
-        {dbSupplier && !isPending && !isRejected && (
-          <div className="mt-1.5"><SupplierRatingBadge supplierId={dbSupplier.id} className="text-[12px] text-[#0E6B5A]" /></div>
-        )}
       </div>
     </header>
   );
@@ -250,22 +246,22 @@ export default function SupplierDashboard() {
   if (!dbSupplier || isPending || isRejected) {
     return (
       <MobileShell>
-        <div className="min-h-screen bg-[#F7F5F0]">
+        <div className="min-h-screen bg-[#F2F2F7]">
           <TopBar />
-          <div className="px-5 mt-5">
-            <div className="bg-white rounded-[24px] p-6 border border-[#E8EAE5] text-center">
+          <div className="px-5 mt-6">
+            <div className="bg-white rounded-3xl p-7 border border-[#E5E5EA] shadow-sm text-center">
               <div className="h-14 w-14 mx-auto rounded-2xl bg-[#0E6B5A]/10 flex items-center justify-center mb-4">
-                <Clock className="h-6 w-6 text-[#0E6B5A]" strokeWidth={2.2} />
+                <Clock className="h-6 w-6 text-[#0E6B5A]" strokeWidth={2} />
               </div>
-              <h2 className="font-extrabold text-[#0F1B14] text-[17px] mb-2 tracking-tight">
+              <h2 className="font-semibold text-[#1C1C1E] text-[18px] mb-2 tracking-tight">
                 {isRejected ? "ההרשמה נדחתה" : "ממתין לאישור מנהל"}
               </h2>
-              <p className="text-[13px] text-[#5C6770] leading-relaxed mb-5">
+              <p className="text-[14px] text-[#8E8E93] leading-relaxed mb-5">
                 {isRejected
                   ? "לצערנו ההרשמה לא אושרה. ניתן לפנות לתמיכה."
                   : "נעדכן אותך לאחר האישור ותוכל להתחיל לפרסם הצעות ולקבל לידים."}
               </p>
-              <Button onClick={() => navigate("/supplier/profile/edit")} className="w-full h-11 rounded-2xl bg-[#0E6B5A] hover:bg-[#0a5648] text-white">
+              <Button onClick={() => navigate("/supplier/profile/edit")} className="w-full h-12 rounded-2xl bg-[#1C1C1E] hover:bg-black text-white font-semibold">
                 <Pencil className="h-4 w-4 ml-2" /> השלמת פרטי הספק
               </Button>
             </div>
