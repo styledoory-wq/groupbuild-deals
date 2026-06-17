@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { Tag, Search as SearchIcon } from "lucide-react";
+import { Tag, Search as SearchIcon, Heart } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
@@ -8,10 +8,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
 import { DealCardSkeletonList } from "@/components/deals/DealCardSkeleton";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
+import { listFavoriteIds } from "@/lib/favorites";
 import type { OfferTier } from "@/lib/offerPricing";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
 type DealWithSupplier = RealDealCardData;
+type TabKey = "active" | "favorites" | "archive";
 
 const STAGE_CATEGORY_IDS: Record<string, string[]> = {
   planning: ["architect", "interior-designer", "consultant"],
@@ -39,8 +41,9 @@ export default function DealsList() {
   const [counts, setCounts] = useState<Record<string, number>>(() => cached?.counts ?? {});
   const [loading, setLoading] = useState(() => !cached);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<"active" | "archive">("active");
+  const [tab, setTab] = useState<TabKey>("active");
   const [q, setQ] = useState("");
+  const [favIds, setFavIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -120,16 +123,22 @@ export default function DealsList() {
     return () => { cancelled = true; };
   }, [categoryId, stageId, cacheKey]);
 
+  useEffect(() => {
+    let cancelled = false;
+    listFavoriteIds().then((s) => { if (!cancelled) setFavIds(s); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   const cat = categories.find((c) => c.id === categoryId);
   const stageTitle = stageId ? STAGE_TITLES[stageId] : "";
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
     return deals.filter((d) => {
-      const statusMatch =
-        tab === "active"
-          ? d.status === "active" && !d.auto_closed_at
-          : d.status === "closed" || !!d.auto_closed_at;
+      let statusMatch = false;
+      if (tab === "active") statusMatch = d.status === "active" && !d.auto_closed_at;
+      else if (tab === "archive") statusMatch = d.status === "closed" || !!d.auto_closed_at;
+      else if (tab === "favorites") statusMatch = favIds.has(d.id);
       if (!statusMatch) return false;
       if (!term) return true;
       return (
@@ -137,7 +146,7 @@ export default function DealsList() {
         (d.supplier_name ?? "").toLowerCase().includes(term)
       );
     });
-  }, [deals, tab, q]);
+  }, [deals, tab, q, favIds]);
 
   return (
     <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F8F8F6" }}>
@@ -147,28 +156,33 @@ export default function DealsList() {
       >
         <PageHeader size="large"
           title={cat ? `${cat.icon} ${cat.name}` : stageTitle ? stageTitle : "כל ההצעות"}
-          subtitle={loading ? "טוען..." : `${filtered.length} הצעות ${tab === "active" ? "פעילות" : "בארכיון"}`}
+          subtitle={loading ? "טוען..." : `${filtered.length} הצעות ${tab === "active" ? "פעילות" : tab === "favorites" ? "במועדפים" : "בארכיון"}`}
         />
 
-        {/* Tabs — segmented control */}
+        {/* Tabs — segmented control (gold accent) */}
         <div className="px-5 mt-3">
-          <div className="bg-white border border-[#ECEEF2] rounded-full p-1 flex items-center shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)]">
-            <button
-              onClick={() => setTab("active")}
-              className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all ${
-                tab === "active" ? "bg-[#2563EB] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
-              }`}
-            >
-              פעילות
-            </button>
-            <button
-              onClick={() => setTab("archive")}
-              className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all ${
-                tab === "archive" ? "bg-[#2563EB] text-white shadow-[0_4px_12px_-4px_rgba(10,31,61,0.4)]" : "text-[#6B7280]"
-              }`}
-            >
-              ארכיון
-            </button>
+          <div className="bg-white border border-[#ECEEF2] rounded-full p-1 flex items-center shadow-[0_1px_3px_rgba(17,24,39,0.04)]">
+            {([
+              { key: "active", label: "פעילות", icon: false },
+              { key: "favorites", label: "מועדפים", icon: true },
+              { key: "archive", label: "ארכיון", icon: false },
+            ] as const).map((t) => {
+              const isActive = tab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all inline-flex items-center justify-center gap-1.5 ${
+                    isActive
+                      ? "bg-[#C9A227] text-white shadow-[0_4px_12px_-4px_rgba(201,162,39,0.45)]"
+                      : "text-[#6B7280] hover:text-[#1F2937]"
+                  }`}
+                >
+                  {t.icon && <Heart className={`h-3.5 w-3.5 ${isActive ? "fill-white" : ""}`} strokeWidth={2.2} />}
+                  {t.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -198,13 +212,19 @@ export default function DealsList() {
             )}
 
             {!loading && !error && filtered.length === 0 && (
-              <div className="rounded-[24px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center col-span-2 md:col-span-3">
-                <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
+              <div className="rounded-[20px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center col-span-2 md:col-span-3">
+                {tab === "favorites" ? (
+                  <Heart className="h-8 w-8 mx-auto mb-3 text-[#C9A227]" strokeWidth={2} />
+                ) : (
+                  <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
+                )}
                 <p className="text-[14px] font-bold text-[#1F2937]">
-                  {tab === "active" ? "אין עדיין הצעות פעילות" : "אין הצעות בארכיון"}
+                  {tab === "active" ? "אין עדיין הצעות פעילות" : tab === "favorites" ? "עדיין אין הצעות במועדפים" : "אין הצעות בארכיון"}
                 </p>
                 <p className="text-[12px] text-[#6B7280] mt-1">
-                  {cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."}
+                  {tab === "favorites"
+                    ? "לחצו על הלב בכל הצעה כדי לשמור אותה כאן."
+                    : cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."}
                 </p>
               </div>
             )}

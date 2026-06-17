@@ -94,7 +94,7 @@ function RealDealCardImpl({
 
   return (
     <Link to={to ?? `/resident/deals/${deal.id}`} className="block group">
-      <article className="bg-white rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(10,31,61,0.06)] hover:shadow-[0_8px_24px_-10px_rgba(10,31,61,0.18)] hover:scale-[1.02] transition-all duration-200 flex flex-col h-full">
+      <article className="bg-white rounded-[20px] overflow-hidden border border-[#ECEEF2] shadow-[0_1px_3px_rgba(17,24,39,0.04)] hover:shadow-[0_8px_24px_-12px_rgba(17,24,39,0.15)] hover:-translate-y-[1px] transition-all duration-200 flex flex-col h-full">
         {/* Square image top half */}
         <div className="relative aspect-square w-full overflow-hidden bg-[#F4F6FA]">
           {cover ? (
@@ -119,7 +119,7 @@ function RealDealCardImpl({
               </span>
             )}
             {discountBadge && (
-              <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-[#2563EB] text-[#1F2937]">
+              <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-[#C9A227] text-white shadow-[0_2px_6px_-2px_rgba(201,162,39,0.5)]">
                 {discountBadge} הנחה
               </span>
             )}
