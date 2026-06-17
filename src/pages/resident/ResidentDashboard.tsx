@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Search as SearchIcon, MapPin, Sparkles, Store, Users, Flame,
+  MapPin, Sparkles, Users, Flame,
   PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, Calculator,
-  TrendingUp, Check, ChevronLeft,
+  TrendingUp, Check, ChevronLeft, Heart, Ticket,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupportButton } from "@/components/SupportButton";
@@ -223,21 +223,26 @@ export default function ResidentDashboard() {
           </div>
         </header>
 
-        {/* === HERO: Savings (Apple dark tile) === */}
+        {/* === HERO: Savings (brand green tile) === */}
         <section className="px-5 mt-6">
           <button
             onClick={() => navigate("/resident/my-offers")}
-            className="w-full text-right rounded-3xl p-6 bg-[#1C1C1E] border border-[#1C1C1E] shadow-sm active:scale-[0.99] transition"
+            className="w-full text-right rounded-3xl p-6 border border-[#0E6B5A] shadow-[0_10px_30px_-12px_rgba(14,107,90,0.45)] active:scale-[0.99] transition relative overflow-hidden"
+            style={{ background: "linear-gradient(135deg,#0E6B5A 0%,#0A5547 60%,#063C33 100%)" }}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="inline-flex items-center gap-1.5 bg-white/10 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
-                <Flame className="h-3 w-3" strokeWidth={2.4} /> חיסכון מצטבר
-              </span>
-              <ChevronLeft className="h-4 w-4 text-white/40" strokeWidth={2} />
-            </div>
-            <div className="text-white/60 text-[12px] font-medium mb-1">סך הכל חסכת</div>
-            <div className="text-white text-[34px] font-bold leading-none tabular-nums tracking-[-0.03em]">
-              {formatILS(estimatedSavings)}
+            <div className="absolute -top-10 -left-10 w-44 h-44 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-12 -right-6 w-48 h-48 rounded-full bg-[#34A88E]/25 blur-3xl pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <span className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full border border-white/20">
+                  <Flame className="h-3 w-3" strokeWidth={2.4} /> חיסכון מצטבר
+                </span>
+                <ChevronLeft className="h-4 w-4 text-white/50" strokeWidth={2} />
+              </div>
+              <div className="text-white/70 text-[12px] font-medium mb-1">סך הכל חסכת</div>
+              <div className="text-white text-[36px] font-bold leading-none tabular-nums tracking-[-0.03em]">
+                {formatILS(estimatedSavings)}
+              </div>
             </div>
           </button>
         </section>
@@ -311,9 +316,10 @@ export default function ResidentDashboard() {
         {/* === Quick actions === */}
         <SectionHeader title="פעולות מהירות" />
         <section className="px-5 mt-3 grid grid-cols-3 gap-3">
-          <QuickAction icon={SearchIcon} label="חפש" onClick={() => navigate("/resident/search")} />
-          <QuickAction icon={Calculator} label="תקציב" onClick={() => navigate("/resident/budget-planner")} />
-          <QuickAction icon={Store} label="ספקים" onClick={() => navigate("/resident/search")} />
+          <QuickAction icon={Calculator} label="תכנון תקציב" onClick={() => navigate("/resident/budget-planner")} />
+          <QuickAction icon={Heart} label="המועדפים שלי" onClick={() => navigate("/resident/favorites")} />
+          <QuickAction icon={Ticket} label="השוברים שלי" onClick={() => navigate("/resident/my-vouchers")} />
+
         </section>
 
         {/* === FEED === */}
@@ -371,7 +377,7 @@ function SectionHeader({ title, subtitle, action }: { title: string; subtitle?: 
   );
 }
 
-function QuickAction({ icon: Icon, label, onClick }: { icon: typeof SearchIcon; label: string; onClick: () => void }) {
+function QuickAction({ icon: Icon, label, onClick }: { icon: typeof Calculator; label: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
