@@ -242,9 +242,9 @@ export default function CategoriesList() {
           </div>
         )}
 
-        {/* Stage sections — compact list cards, all visible */}
+        {/* Stage sections — sticky headers + elevated row cards */}
         {!q && (
-          <div className="space-y-4">
+          <div className="space-y-7">
             {visibleStages.map(({ stage, cats, totalSuppliers }) => (
               <StageSection
                 key={stage.id}
@@ -257,6 +257,36 @@ export default function CategoriesList() {
           </div>
         )}
       </div>
+
+      {/* Floating summary pill */}
+      {!q && suppliers.length > 0 && (
+        <div
+          className="fixed left-1/2 -translate-x-1/2 z-30 w-[88%] max-w-[var(--app-max-w)] bg-slate-900 text-white rounded-2xl px-4 py-3 shadow-2xl shadow-black/30 border border-white/10 flex items-center justify-between"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 12px)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-[15px] font-extrabold tabular-nums" style={{ fontFamily: URBANIST }}>
+              {STAGES.length}
+            </div>
+            <div className="leading-tight">
+              <div className="text-[12px] font-bold" style={{ fontFamily: URBANIST }}>
+                {suppliers.length} ספקים ב-{STAGES.length} שלבים
+              </div>
+              <div className="text-[10.5px] text-slate-400 font-medium">
+                מתכנון ועד מסירת מפתח
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/resident/search")}
+            className="bg-white text-slate-900 px-3 py-1.5 rounded-xl text-[11.5px] font-extrabold active:scale-95 transition-transform"
+            style={{ fontFamily: URBANIST }}
+          >
+            חיפוש מהיר
+          </button>
+        </div>
+      )}
+
 
       <BottomNav role="resident" />
     </div>
