@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ShieldCheck, Loader2, ArrowRight, Tag } from "lucide-react";
+import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ShieldCheck, Loader2, ArrowRight, Tag, MessageSquare } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
