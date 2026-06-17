@@ -294,32 +294,41 @@ function StageSection({
   counts: Record<string, number>;
 }) {
   const c = stage.colors;
+  const idx = String(stage.index).padStart(2, "0");
 
   return (
-    <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      {/* Section header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
-        <div className={`w-1.5 h-5 ${c.bar} rounded-full shrink-0`} />
-        <h2
-          className="text-[15px] font-bold text-[#1A1A1A]"
-          style={{ fontFamily: URBANIST }}
-        >
-          {stage.title}
-        </h2>
-        <span className={`text-[10px] font-bold ${c.tagText} ${c.tagBg} px-1.5 py-0.5 rounded-md`}>
-          שלב {stage.index}
-        </span>
-        <span className="text-[11px] font-medium text-gray-400 mr-auto">
-          {totalSuppliers} ספקים
-        </span>
+    <section>
+      {/* Sticky stage header */}
+      <div
+        className="sticky z-10 -mx-5 px-5 py-2.5 bg-[#FBF8F3]/85 backdrop-blur-md border-b border-gray-200/60"
+        style={{ top: "calc(env(safe-area-inset-top))" }}
+      >
+        <div className="flex items-center gap-2.5">
+          <span
+            className={`flex items-center justify-center w-7 h-7 rounded-lg ${c.badgeSolid} text-white text-[11px] font-extrabold shadow-sm`}
+            style={{ fontFamily: URBANIST }}
+          >
+            {idx}
+          </span>
+          <h2
+            className="text-[15px] font-extrabold text-slate-800 tracking-tight"
+            style={{ fontFamily: URBANIST }}
+          >
+            {stage.title}
+          </h2>
+          <span className="mr-auto text-[10.5px] font-bold text-gray-400 tabular-nums">
+            {totalSuppliers} ספקים
+          </span>
+        </div>
       </div>
 
+      {/* Rows */}
       {cats.length === 0 ? (
-        <div className="px-4 py-3 text-center text-[12px] text-gray-500 font-medium">
+        <div className="mt-3 bg-white/70 rounded-2xl border border-dashed border-gray-200 px-4 py-4 text-center text-[12px] text-gray-500 font-medium">
           קטגוריות יתווספו בקרוב
         </div>
       ) : (
-        <div className="divide-y divide-gray-50">
+        <div className="mt-3 space-y-2">
           {cats.map((cat) => (
             <CategoryRow
               key={cat.id}
@@ -348,40 +357,48 @@ function CategoryRow({
   const dim = count === 0;
 
   const body = (
-    <div className="flex items-center gap-3 px-4 py-3">
-      <div
-        className={`w-9 h-9 ${colors.iconBg} rounded-xl flex items-center justify-center ${colors.iconText} text-[18px] shrink-0`}
-      >
-        <span aria-hidden>{icon}</span>
+    <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm shadow-black/[0.03]">
+      <div className="flex items-center gap-3 min-w-0">
+        <div
+          className={`w-11 h-11 flex items-center justify-center rounded-xl ${colors.iconBg} ${colors.iconText} text-[20px] shrink-0 ring-1 ring-inset ring-black/[0.04]`}
+        >
+          <span aria-hidden>{icon}</span>
+        </div>
+        <div className="min-w-0">
+          <div
+            className="text-[14px] font-bold text-slate-900 truncate leading-tight"
+            style={{ fontFamily: URBANIST }}
+          >
+            {name}
+          </div>
+          <div className="text-[11px] text-gray-400 font-medium mt-0.5">
+            {dim ? "יתווספו ספקים בקרוב" : `${count} ספקים זמינים`}
+          </div>
+        </div>
       </div>
-      <span
-        className="flex-1 text-[13px] font-bold text-[#1A1A1A] truncate"
-        style={{ fontFamily: URBANIST }}
-      >
-        {name}
-      </span>
-      {dim ? (
-        <span className="text-[11px] font-semibold text-gray-400 shrink-0">בקרוב</span>
-      ) : (
-        <span className={`text-[11px] font-bold ${colors.tagText} ${colors.tagBg} px-2 py-0.5 rounded-full shrink-0`}>
-          {count} ספקים
-        </span>
-      )}
-      <ChevronLeft className="h-4 w-4 text-gray-300 shrink-0" />
+      <div className="flex items-center gap-1.5 shrink-0">
+        {!dim && (
+          <span className={`px-2 py-0.5 rounded-full ${colors.tagBg} ${colors.tagText} text-[10.5px] font-bold tabular-nums`}>
+            {count}
+          </span>
+        )}
+        <ChevronLeft className="h-4 w-4 text-gray-300" />
+      </div>
     </div>
   );
 
   if (dim) {
-    return <div className="opacity-50">{body}</div>;
+    return <div className="opacity-55">{body}</div>;
   }
 
   return (
     <Link
       to={`/resident/categories/${id}`}
-      className="block active:bg-gray-50 transition-colors"
+      className="block active:scale-[0.985] transition-transform"
     >
       {body}
     </Link>
   );
 }
+
 
