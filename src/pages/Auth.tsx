@@ -329,7 +329,7 @@ export default function Auth() {
                       className={cn(
                         "p-3 rounded-[16px] text-right transition-all flex items-center gap-3 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97]",
                         role === id
-                          ? "bg-[#1F2937] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
+                          ? "bg-[#C9A227] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
                           : "bg-white text-[#1F2937]"
                       )}
                     >

@@ -24,7 +24,7 @@ const buttonVariants = cva(
       variant: {
         // Primary — deep navy CTA, app-wide default
         default:
-          "bg-[#1F2937] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] hover:brightness-110",
+          "bg-[#C9A227] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] hover:brightness-110",
         // Gold accent — premium / hero actions
         premium:
           "bg-gradient-to-l from-[#C9A84C] via-[#E8C96B] to-[#C9A84C] text-[#1F2937] shadow-[0_8px_20px_-10px_rgba(201,168,76,0.55)] hover:brightness-105",
@@ -40,7 +40,7 @@ const buttonVariants = cva(
         link:
           "text-[#1F2937] underline-offset-4 hover:underline min-h-0 shadow-none",
         navy:
-          "bg-[#1F2937] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] hover:brightness-110",
+          "bg-[#C9A227] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] hover:brightness-110",
         glass:
           "bg-white/10 backdrop-blur-md border border-white/15 text-white hover:bg-white/15",
       },

@@ -154,7 +154,7 @@ export default function Browse() {
           <button
             onClick={() => setTab("deals")}
             className={`px-5 h-10 rounded-full text-[13px] font-bold transition-all ${
-              tab === "deals" ? "bg-[#1F2937] text-white" : "text-[#6B7280]"
+              tab === "deals" ? "bg-[#C9A227] text-white" : "text-[#6B7280]"
             }`}
           >
             <Tag className="inline h-4 w-4 ml-1" /> עסקאות ({deals.length})
@@ -162,7 +162,7 @@ export default function Browse() {
           <button
             onClick={() => setTab("suppliers")}
             className={`px-5 h-10 rounded-full text-[13px] font-bold transition-all ${
-              tab === "suppliers" ? "bg-[#1F2937] text-white" : "text-[#6B7280]"
+              tab === "suppliers" ? "bg-[#C9A227] text-white" : "text-[#6B7280]"
             }`}
           >
             <Store className="inline h-4 w-4 ml-1" /> ספקים ({suppliers.length})
@@ -245,7 +245,7 @@ export default function Browse() {
 
         {/* Floating CTA */}
         <div className="sticky bottom-4 z-30 pt-6">
-          <div className="mx-auto max-w-md bg-[#1F2937] text-white rounded-2xl p-4 shadow-[0_12px_32px_-12px_rgba(10,31,61,0.6)] flex items-center justify-between gap-3">
+          <div className="mx-auto max-w-md bg-[#C9A227] text-white rounded-2xl p-4 shadow-[0_12px_32px_-12px_rgba(10,31,61,0.6)] flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="font-bold text-[14px]">רוצים להצטרף להצעה?</div>
               <div className="text-[12px] text-white/70">הרשמה מהירה — תחזרו לעמוד הזה אוטומטית.</div>

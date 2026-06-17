@@ -254,7 +254,7 @@ export default function MyOffers() {
                 onClick={() => setShowHidden(false)}
                 className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all ${
                   !showHidden
-                    ? "bg-[#1F2937] text-white"
+                    ? "bg-[#C9A227] text-white"
                     : "text-[#6B7280]"
                 }`}
               >
@@ -264,7 +264,7 @@ export default function MyOffers() {
                 onClick={() => setShowHidden(true)}
                 className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all ${
                   showHidden
-                    ? "bg-[#1F2937] text-white"
+                    ? "bg-[#C9A227] text-white"
                     : "text-[#6B7280]"
                 }`}
               >
@@ -310,7 +310,7 @@ export default function MyOffers() {
               !showHidden ? (
                 <Link
                   to="/resident/deals"
-                  className="inline-flex items-center gap-1.5 h-11 px-5 rounded-2xl bg-[#1F2937] text-white text-[14px] font-bold active:scale-95 transition-transform"
+                  className="inline-flex items-center gap-1.5 h-11 px-5 rounded-2xl bg-[#C9A227] text-white text-[14px] font-bold active:scale-95 transition-transform"
                   style={{ boxShadow: "var(--shadow-soft)" }}
                 >
                   <Sparkles className="h-4 w-4" strokeWidth={2.4} />

@@ -445,7 +445,7 @@ export default function SupplierProfileEdit() {
                   key={c.id}
                   onClick={() => toggle(selectedCategories, setSelectedCategories, c.id)}
                   className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-transform active:scale-[0.97] shadow-[0_1px_3px_rgba(10,31,61,0.06)] ${
-                    on ? "bg-[#1F2937] text-white" : "bg-white text-[#1F2937]"
+                    on ? "bg-[#C9A227] text-white" : "bg-white text-[#1F2937]"
                   }`}
                 >
                   <span className="ml-1">{c.icon}</span>
