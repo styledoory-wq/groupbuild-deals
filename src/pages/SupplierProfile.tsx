@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ShieldCheck, Loader2, ArrowRight, Tag } from "lucide-react";
+import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ShieldCheck, Loader2, ArrowRight, Tag, MessageSquare } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,15 @@ const WhatsappIcon = (props: { className?: string }) => (
   </svg>
 );
 
+type ReviewItem = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  user_id: string;
+  reviewer_name?: string;
+};
+
 export default function SupplierProfile() {
   const { supplierId } = useParams();
   const navigate = useNavigate();
@@ -69,7 +78,10 @@ export default function SupplierProfile() {
   const [submitting, setSubmitting] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [deals, setDeals] = useState<RealDealCardData[]>([]);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const dealsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!supplierId) return;
@@ -83,7 +95,7 @@ export default function SupplierProfile() {
     (async () => {
       try {
         setLoadError(null);
-        const [{ data: s }, { data: g }, { data: sregs }, { data: scits }, { data: dealsData }] = await Promise.all([
+        const [{ data: s }, { data: g }, { data: sregs }, { data: scits }, { data: dealsData }, { data: revData }] = await Promise.all([
           withTimeout(supabase.from("suppliers").select("*").eq("id", supplierId).maybeSingle(), "טעינת ספק"),
           withTimeout(supabase.from("supplier_gallery").select("id,image_url,caption").eq("supplier_id", supplierId).order("display_order"), "טעינת גלריה"),
           withTimeout(supabase.from("supplier_regions").select("region_id, regions(name_he)").eq("supplier_id", supplierId), "טעינת אזורי שירות"),
@@ -94,6 +106,12 @@ export default function SupplierProfile() {
             .eq("supplier_id", supplierId)
             .eq("status", "active")
             .order("created_at", { ascending: false }), "טעינת הצעות"),
+          withTimeout(supabase
+            .from("reviews")
+            .select("id,rating,comment,created_at,user_id")
+            .eq("supplier_id", supplierId)
+            .order("created_at", { ascending: false })
+            .limit(20), "טעינת ביקורות"),
         ]);
         if (cancelled) return;
       const sup = (s as DbSupplier | null) ?? null;
@@ -126,6 +144,18 @@ export default function SupplierProfile() {
           ends_at: (r.ends_at as string | null) ?? null,
         })),
       );
+
+      const revRows = (revData ?? []) as ReviewItem[];
+      let withNames: ReviewItem[] = revRows;
+      const uids = Array.from(new Set(revRows.map((r) => r.user_id)));
+      if (uids.length) {
+        const { data: profs } = await supabase.from("profiles").select("id,full_name").in("id", uids);
+        const map = new Map<string, string>();
+        (profs ?? []).forEach((p) => map.set(p.id, p.full_name || "דייר"));
+        withNames = revRows.map((r) => ({ ...r, reviewer_name: map.get(r.user_id) || "דייר" }));
+      }
+      if (!cancelled) setReviews(withNames);
+
 
       } catch (error) {
         if (!cancelled) setLoadError(getFriendlyLoadError(error, "שגיאה בטעינת הספק"));
@@ -355,7 +385,7 @@ export default function SupplierProfile() {
         </section>
 
         {/* Active offers from this supplier */}
-        <section className="gb-card p-4">
+        <section ref={dealsRef} className="gb-card p-4 scroll-mt-20">
           <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
             <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> ההצעות הפעילות
           </h2>
@@ -369,6 +399,51 @@ export default function SupplierProfile() {
             </div>
           )}
         </section>
+
+        {/* Reviews */}
+        <section className="gb-card p-4">
+          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <Star className="h-3.5 w-3.5 text-[#0E6B5A]" /> ביקורות אחרונות
+          </h2>
+          {reviews.length === 0 ? (
+            <p className="text-sm text-muted-foreground">אין עדיין ביקורות לספק זה.</p>
+          ) : (
+            <>
+              <div className="space-y-3">
+                {(showAllReviews ? reviews : reviews.slice(0, 3)).map((r) => (
+                  <div key={r.id} className="rounded-[16px] bg-white p-3 shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-sm font-bold text-[#1F2937]">{r.reviewer_name || "דייר"}</span>
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3.5 w-3.5 ${i < r.rating ? "fill-[#F5B600] text-[#F5B600]" : "text-[#E5E7EB]"}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {r.comment && (
+                      <p className="text-sm text-[#4B5563] leading-relaxed whitespace-pre-line">{r.comment}</p>
+                    )}
+                    <div className="text-fs-xs text-muted-foreground mt-1.5">
+                      {new Date(r.created_at).toLocaleDateString("he-IL")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {reviews.length > 3 && (
+                <button
+                  onClick={() => setShowAllReviews((v) => !v)}
+                  className="mt-3 w-full h-10 rounded-[14px] text-sm font-bold text-[#0E6B5A] bg-white shadow-[0_1px_3px_rgba(10,31,61,0.06)] active:scale-[0.98] transition-transform"
+                >
+                  {showAllReviews ? "הצג פחות" : `הצג עוד (${reviews.length - 3})`}
+                </button>
+              )}
+            </>
+          )}
+        </section>
+
 
         {/* Gallery */}
         {gallery.length > 0 && (
@@ -389,16 +464,52 @@ export default function SupplierProfile() {
         )}
       </div>
 
-      {/* CTA */}
+      {/* Dual CTA */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
         <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-transparent">
-          <Button
-            onClick={handleInterest}
-            disabled={submitting || interested}
-            className="w-full h-12"
-          >
-            {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ ההתעניינות שלך נרשמה" : "אני מעוניין בהצעה"}
-          </Button>
+          <div className="flex gap-2">
+            {whatsappHref ? (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer noopener"
+                onClick={async () => {
+                  if (!supplier) return;
+                  const { data: sd } = await supabase.auth.getSession();
+                  const uid = sd.session?.user.id;
+                  if (!uid) return;
+                  void supabase.from("supplier_inquiries").insert({
+                    supplier_id: supplier.id,
+                    user_id: uid,
+                    message: `לחיצה על וואטסאפ מפרופיל הספק`,
+                    source: "whatsapp_click",
+                    status: "new",
+                  });
+                }}
+                className="flex-1 h-12 rounded-[16px] bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 shadow-[0_4px_14px_-4px_rgba(37,211,102,0.5)] active:scale-[0.98] transition-transform"
+              >
+                <WhatsappIcon className="h-5 w-5" />
+                בקשת הצעה
+              </a>
+            ) : (
+              <Button
+                onClick={handleInterest}
+                disabled={submitting || interested}
+                variant="outline"
+                className="flex-1 h-12"
+              >
+                {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ נרשם" : "השאר פרטים"}
+              </Button>
+            )}
+            <Button
+              onClick={() => dealsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              disabled={deals.length === 0}
+              className="flex-1 h-12"
+            >
+              <Tag className="h-4 w-4 ml-1.5" />
+              {deals.length > 0 ? `ראה עסקאות (${deals.length})` : "אין עסקאות פעילות"}
+            </Button>
+          </div>
         </div>
       </div>
 
