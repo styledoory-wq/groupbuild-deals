@@ -309,7 +309,7 @@ function StageSection({
           קטגוריות יתווספו בקרוב
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-4 gap-2">
           {cats.map((cat) => (
             <CategoryTile
               key={cat.id}
@@ -338,27 +338,27 @@ function CategoryTile({
   const dim = count === 0;
 
   const inner = (
-    <div className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-1">
+    <div className="relative flex flex-col items-center justify-center gap-1 py-2 px-0.5">
       {/* count badge */}
       {!dim && count > 0 && (
-        <span className={`absolute top-1 left-1 text-[9px] font-bold ${colors.tagText} ${colors.tagBg} px-1 py-0 rounded-full leading-none`}>
+        <span className={`absolute top-0 left-0 text-[9px] font-bold ${colors.tagText} ${colors.tagBg} px-1 py-0.5 rounded-full leading-none`}>
           {count}
         </span>
       )}
       {dim && (
-        <span className="absolute top-1 left-1 text-[9px] font-bold text-gray-400 bg-gray-100 px-1 py-0 rounded-full leading-none">
+        <span className="absolute top-0 left-0 text-[9px] font-bold text-gray-400 bg-gray-100 px-1 py-0.5 rounded-full leading-none">
           בקרוב
         </span>
       )}
       {/* icon */}
       <div
-        className={`w-12 h-12 ${colors.iconBg} rounded-2xl flex items-center justify-center ${colors.iconText} text-[24px] shrink-0`}
+        className={`w-11 h-11 ${colors.iconBg} rounded-2xl flex items-center justify-center ${colors.iconText} text-[22px] shrink-0`}
       >
         <span aria-hidden>{icon}</span>
       </div>
       {/* name */}
       <span
-        className="text-[11px] font-bold text-[#1A1A1A] text-center leading-tight line-clamp-2 px-0.5"
+        className="text-[10px] font-bold text-[#1A1A1A] text-center leading-tight line-clamp-2 px-0.5"
         style={{ fontFamily: URBANIST }}
       >
         {name}
