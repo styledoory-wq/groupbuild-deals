@@ -119,7 +119,7 @@ function RealDealCardImpl({
               </span>
             )}
             {discountBadge && (
-              <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-[#2563EB] text-[#1F2937]">
+              <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-[#C9A227] text-white shadow-[0_2px_6px_-2px_rgba(201,162,39,0.5)]">
                 {discountBadge} הנחה
               </span>
             )}
