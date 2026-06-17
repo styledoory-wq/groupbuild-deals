@@ -251,7 +251,7 @@ const filteredDeals = useMemo(() => {
                 {formatILS(estimatedSavings)}
               </div>
               <p className="text-[12px] text-[#6B7280] mt-1 mb-4">נחסכו בזכות רכישות קבוצתיות</p>
-              <div className="w-full bg-[#1F2937] text-white py-2.5 rounded-xl font-bold text-[13px] shadow-md border border-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
+              <div className="w-full bg-[#C9A227] text-white py-2.5 rounded-xl font-bold text-[13px] shadow-md border border-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>
                 פירוט החסכון המלא
               </div>
             </div>

@@ -138,7 +138,7 @@ export default function AdminSettings() {
         <Button
           onClick={save}
           disabled={saving}
-          className="w-full h-12 rounded-2xl bg-[#1F2937] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
+          className="w-full h-12 rounded-2xl bg-[#C9A227] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
         >
           <Save className="h-4 w-4" />
           {saving ? "שומר…" : "שמירת הגדרות"}

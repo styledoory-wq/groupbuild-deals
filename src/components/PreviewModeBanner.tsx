@@ -90,7 +90,7 @@ export function PreviewModeBanner() {
 
         <button
           onClick={exit}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#1F2937] text-white text-[11px] font-extrabold active:scale-95 transition-transform"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C9A227] text-white text-[11px] font-extrabold active:scale-95 transition-transform"
         >
           <X className="h-3 w-3" strokeWidth={2.4} />
           יציאה

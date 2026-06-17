@@ -63,7 +63,7 @@ export function TermsAcceptanceGate({ children }: { children: React.ReactNode })
     <>
       {children}
       {needsAccept && (
-        <div className="fixed inset-0 z-[100] bg-[#1F2937]/45 backdrop-blur-[6px] flex items-end md:items-center justify-center p-0 md:p-4" dir="rtl">
+        <div className="fixed inset-0 z-[100] bg-[#C9A227]/45 backdrop-blur-[6px] flex items-end md:items-center justify-center p-0 md:p-4" dir="rtl">
           <div className="w-full md:max-w-2xl bg-white rounded-t-[20px] md:rounded-[20px] shadow-[0_20px_44px_-18px_rgba(10,31,61,0.24)] max-h-[92vh] flex flex-col">
             <div className="px-6 pt-6 pb-3 shadow-[0_1px_0_rgba(10,31,61,0.06)]">
               <h2 className="text-lg font-extrabold text-primary">עודכנו תנאי השימוש במערכת</h2>

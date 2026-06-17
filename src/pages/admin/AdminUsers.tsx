@@ -165,7 +165,7 @@ export default function AdminUsers() {
               <div className="flex items-center gap-3">
                 <div className={
                   "h-11 w-11 rounded-full flex items-center justify-center " +
-                  (u.is_active ? "bg-[#1F2937] text-white" : "bg-muted text-muted-foreground")
+                  (u.is_active ? "bg-[#C9A227] text-white" : "bg-muted text-muted-foreground")
                 }>
                   <Icon className="h-5 w-5" />
                 </div>
