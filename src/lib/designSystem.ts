@@ -42,7 +42,8 @@ export const STAGE_THEMES: StageTheme[] = [
   { id: "outdoor",      index: 7, title: "חצר ופיתוח",         shortTitle: "חצר",
     accent: "#6E8A2E", tint: "#F7FEE7", border: "#DFEFBE" },
   { id: "moving",       index: 8, title: "כניסה לבית",         shortTitle: "כניסה",
-    accent: "#0E6B5A", tint: "#EAF7F2", border: "#D6F0E8" },
+    accent: "#475569", tint: "#F1F5F9", border: "#E2E8F0" },
+
 ];
 
 export const getStage = (id: StageId): StageTheme =>
