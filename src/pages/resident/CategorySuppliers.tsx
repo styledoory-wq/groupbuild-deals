@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronLeft, MapPin, Sparkles, Star, UserPlus, Wrench, Package } from "lucide-react";
+import { ArrowRight, ChevronDown, MapPin, ShieldCheck, Sparkles, Star, UserPlus, Wrench, Package, SlidersHorizontal } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -42,7 +42,8 @@ export default function CategorySuppliers() {
   const [regionId, setRegionId] = useState<string>("all");
   const [cityId, setCityId] = useState<string>("all");
   const [kindFilter, setKindFilter] = useState<"all" | "service" | "product">("all");
-  // search removed per UX request
+  const [showAreaPicker, setShowAreaPicker] = useState(false);
+
   const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
   const [supplierCityIds, setSupplierCityIds] = useState<Record<string, string[]>>({});
   const [supplierCouncilIds, setSupplierCouncilIds] = useState<Record<string, string[]>>({});
@@ -53,7 +54,6 @@ export default function CategorySuppliers() {
     setActiveCategoryId(categoryId ?? "all");
   }, [categoryId]);
 
-  // Initialize filter from resident profile
   useEffect(() => {
     (async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -80,14 +80,11 @@ export default function CategorySuppliers() {
     (async () => {
       setLoading(true);
       setLoadError(null);
-
-      // Hard safety timeout — never get stuck on the spinner
       const safety = window.setTimeout(() => {
         if (!cancelled) setLoading(false);
       }, 8000);
 
       try {
-        // Primary query — must succeed for the screen to be useful
         const suppliersResult = await supabase
           .from("suppliers")
           .select(
@@ -106,9 +103,8 @@ export default function CategorySuppliers() {
           service_areas: s.service_areas ?? [],
         }));
         setSuppliers(list);
-        setLoading(false); // Show suppliers immediately
+        setLoading(false);
 
-        // Secondary queries — non-blocking, used for richer area filtering
         const [regionsResult, citiesResult, councilsResult] = await Promise.all([
           supabase.from("supplier_regions").select("supplier_id,region_id"),
           supabase.from("supplier_cities").select("supplier_id,city_id"),
@@ -157,8 +153,6 @@ export default function CategorySuppliers() {
     return s.serves_all_country || s.service_areas.includes(NATIONAL_AREA) || (regionCount === 0 && cityCount === 0 && councilCount === 0 && s.service_areas.length === 0);
   };
 
-  // Strict hierarchy match: city → council → exact region → nationwide.
-  // No fuzzy "north matches any north" heuristic — Haifa ≠ Upper Galilee.
   const matchesArea = (s: DbSupplier) => {
     if (regionId === "all" && cityId === "all") return true;
     if (isNationalSupplier(s)) return true;
@@ -186,7 +180,6 @@ export default function CategorySuppliers() {
     return false;
   };
 
-
   const filteredSuppliers = useMemo(() => {
     const byCategory = activeCategoryId === "all"
       ? suppliers
@@ -212,71 +205,81 @@ export default function CategorySuppliers() {
         ? regions.find((r) => r.id === regionId)?.name_he
         : "כל הארץ";
 
+  const nationalCount = useMemo(
+    () => filteredSuppliers.filter(isNationalSupplier).length,
+    [filteredSuppliers, supplierRegionIds, supplierCityIds, supplierCouncilIds],
+  );
+
+  const kinds: { v: "all" | "service" | "product"; label: string; Icon: typeof Sparkles }[] = [
+    { v: "all", label: "הכול", Icon: Sparkles },
+    { v: "service", label: "בעלי מקצוע", Icon: Wrench },
+    { v: "product", label: "ספקי מוצרים", Icon: Package },
+  ];
+
   return (
     <MobileShell>
-      {/* Luxury hero */}
-      <header className="bg-white text-[#1F2937] px-6 pt-9 pb-16 rounded-b-[28px] relative overflow-hidden">
-        <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-gold/5 blur-3xl pointer-events-none" />
+      <div className="bg-slate-50 min-h-screen pb-24" dir="rtl">
+        <div className="px-4 pt-3 max-w-2xl mx-auto">
+          {/* Sticky Header */}
+          <header className="sticky top-0 z-20 bg-slate-50/90 backdrop-blur-md pb-3 pt-2 -mx-4 px-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-emerald-700 transition mb-2"
+            >
+              <ArrowRight className="h-3.5 w-3.5" />
+              חזרה לתחומים
+            </button>
 
-        <button
-          onClick={() => navigate(-1)}
-          className="relative inline-flex items-center gap-1 text-fs-xs text-[#6B7280] hover:text-gold transition-smooth mb-5"
-        >
-          <ArrowRight className="h-3.5 w-3.5" />
-          חזרה לתחומים
-        </button>
-
-        <div className="relative animate-fade-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F4F6FA] border border-[#ECEEF2] mb-4">
-            <Sparkles className="h-3.5 w-3.5 text-gold" />
-            <span className="text-fs-xs font-medium text-[#1F2937]/85">
-              {filteredSuppliers.length} ספקים זמינים · {areaLabel}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3 mb-3">
-            {activeCategory?.icon && (
-              <div className="h-12 w-12 rounded-2xl bg-[#F4F6FA] border border-gold/20 flex items-center justify-center text-2xl shadow-soft">
-                {activeCategory.icon}
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex items-center gap-3 min-w-0">
+                {activeCategory?.icon && (
+                  <div className="h-11 w-11 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-xl shrink-0 shadow-sm">
+                    {activeCategory.icon}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <h1 className="text-[20px] leading-tight font-bold text-slate-900 truncate">
+                    {activeCategory?.name ?? "ספקים"}
+                  </h1>
+                  <p className="text-[12px] text-slate-500 mt-0.5 truncate">
+                    {filteredSuppliers.length} ספקים זמינים · {areaLabel}
+                  </p>
+                </div>
               </div>
-            )}
-            <div>
-              <h1 className="text-fs-xl leading-[1.15] font-extrabold">
-                <span className="gb-gold-text">{activeCategory?.name ?? "ספקים"}</span>
-              </h1>
-              <p className="text-[#1F2937]/65 text-fs-xs mt-0.5">ספקים מובילים בתחום</p>
             </div>
-          </div>
-          <div className="gb-divider-gold" />
-        </div>
-      </header>
 
-      <div className="px-5 -mt-10 relative z-10 space-y-3 pb-6">
-        {/* Marketplace controls */}
-        <div className="gb-card p-4 animate-fade-up space-y-3">
-          {/* Kind filter */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-fs-xs uppercase tracking-wider font-bold text-muted-foreground">סוג ספק</span>
+            {/* Summary chips */}
+            <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar -mx-1 px-1">
+              <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-emerald-100 whitespace-nowrap">
+                <Star className="h-3 w-3 fill-current" />
+                ספקים מאומתים
+              </div>
+              {nationalCount > 0 && (
+                <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-amber-100 whitespace-nowrap">
+                  <Sparkles className="h-3 w-3" />
+                  {nationalCount} פועלים ארצית
+                </div>
+              )}
+              <div className="flex items-center gap-1.5 bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 whitespace-nowrap">
+                <ShieldCheck className="h-3 w-3" />
+                ביקורות אמיתיות
+              </div>
             </div>
-            <div className="grid grid-cols-3 gap-1.5">
-              {[
-                { v: "all", label: "הכול", Icon: Sparkles },
-                { v: "service", label: "בעלי מקצוע", Icon: Wrench },
-                { v: "product", label: "ספקי מוצרים", Icon: Package },
-              ].map(({ v, label, Icon }) => {
+
+            {/* Filter chips */}
+            <nav className="flex gap-1.5 overflow-x-auto no-scrollbar pb-2 border-b border-slate-200/70">
+              {kinds.map(({ v, label, Icon }) => {
                 const active = kindFilter === v;
                 return (
                   <button
                     key={v}
                     type="button"
-                    onClick={() => setKindFilter(v as typeof kindFilter)}
+                    onClick={() => setKindFilter(v)}
                     className={
-                      "h-10 rounded-xl text-fs-xs font-bold inline-flex items-center justify-center gap-1.5 border transition-all " +
+                      "whitespace-nowrap px-3.5 py-1.5 rounded-full text-[12px] font-bold inline-flex items-center gap-1.5 transition-all border " +
                       (active
-                        ? "bg-gradient-to-br from-gold/20 to-gold/5 text-primary border-gold shadow-[0_0_0_2px_hsl(var(--gold)/0.15)]"
-                        : "bg-card text-muted-foreground border-border hover:border-gold/40")
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300")
                     }
                   >
                     <Icon className="h-3 w-3" />
@@ -284,125 +287,164 @@ export default function CategorySuppliers() {
                   </button>
                 );
               })}
-            </div>
-          </div>
+              <div className="w-px h-6 bg-slate-200 mx-1 self-center" />
+              <button
+                type="button"
+                onClick={() => setShowAreaPicker((v) => !v)}
+                className={
+                  "whitespace-nowrap px-3.5 py-1.5 rounded-full text-[12px] font-bold inline-flex items-center gap-1.5 transition-all border " +
+                  (regionId !== "all" || cityId !== "all"
+                    ? "bg-slate-900 text-white border-slate-900"
+                    : "bg-white text-slate-600 border-slate-200")
+                }
+              >
+                <MapPin className="h-3 w-3" />
+                {areaLabel}
+                <ChevronDown className={`h-3 w-3 transition-transform ${showAreaPicker ? "rotate-180" : ""}`} />
+              </button>
+            </nav>
 
-          <div className="flex items-center gap-1.5 pt-1">
-            <MapPin className="h-3.5 w-3.5 text-gold" />
-            <span className="text-fs-xs uppercase tracking-wider font-bold text-muted-foreground">
-              סינון לפי אזור
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <select
-              value={regionId}
-              onChange={(e) => {
-                setRegionId(e.target.value);
-                setCityId("all");
-              }}
-              className="h-11 rounded-xl bg-card border border-border px-3 text-sm text-foreground focus:border-gold focus:outline-none transition-smooth"
-            >
-              <option value="all">כל האזורים</option>
-              {regions.map((r) => (
-                <option key={r.id} value={r.id}>{r.name_he}</option>
-              ))}
-            </select>
-            <select
-              value={cityId}
-              onChange={(e) => setCityId(e.target.value)}
-              className="h-11 rounded-xl bg-card border border-border px-3 text-sm text-foreground focus:border-gold focus:outline-none transition-smooth disabled:opacity-50"
-              disabled={regionId === "all" && filteredCities.length === 0}
-            >
-              <option value="all">כל הערים</option>
-              {filteredCities.map((c) => (
-                <option key={c.id} value={c.id}>{c.name_he}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* List */}
-        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3">
-        {loading ? (
-          <div className="gb-card p-10 text-center">
-            <div className="h-8 w-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin mx-auto mb-3" />
-            <p className="text-muted-foreground text-sm">טוען ספקים...</p>
-          </div>
-        ) : loadError ? (
-          <div className="gb-card p-8 text-center">
-            <p className="text-sm font-bold text-foreground">שגיאה בטעינה</p>
-            <p className="text-fs-xs text-muted-foreground mt-1.5">נסו לרענן את המסך בעוד רגע.</p>
-          </div>
-        ) : filteredSuppliers.length === 0 ? (
-          <div className="gb-card p-8 text-center">
-            <div className="h-14 w-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-3">
-              <UserPlus className="h-6 w-6 text-gold" />
-            </div>
-            <p className="text-sm font-bold text-foreground">לא נמצאו ספקים</p>
-            <p className="text-fs-xs text-muted-foreground mt-1.5 leading-relaxed max-w-[240px] mx-auto">
-              שנה אזור או הזמן ספקים להצטרף כדי לפתוח עוד אפשרויות לדיירים.
-            </p>
-            <button
-              type="button"
-              onClick={() => { setRegionId("all"); setCityId("all"); }}
-              className="mt-4 h-10 px-4 rounded-xl bg-[#0E6B5A] text-white text-xs font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
-            >
-              שנה אזור
-            </button>
-          </div>
-        ) : (
-          filteredSuppliers.map((s, idx) => (
-            <Link
-              key={s.id}
-              to={`/suppliers/${s.id}`}
-              className="gb-card p-4 flex items-center gap-3 hover:shadow-elevated hover:-translate-y-0.5 transition-smooth group relative overflow-hidden animate-fade-up"
-              style={{ animationDelay: `${idx * 40}ms` }}
-            >
-              <div className="absolute -top-10 -left-10 h-20 w-20 rounded-full bg-gold/8 blur-2xl group-hover:bg-gold/15 transition-smooth pointer-events-none" />
-              <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="lg" />
-              <div className="flex-1 min-w-0 relative">
-                <h3 className="font-bold text-foreground text-fs-base truncate">{s.business_name}</h3>
-                {s.short_description && (
-                  <p className="text-fs-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
-                    {s.short_description}
-                  </p>
-                )}
-                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                  <SupplierRatingBadge supplierId={s.id} showEmpty={false} />
-                  {(() => {
-                    const isSvc = Boolean(s.offers_services) || s.supplier_kind === "service";
-                    const isProd = Boolean(s.offers_products) || s.supplier_kind === "product";
-                    if (isSvc && isProd) return (
-                      <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-500/15 to-emerald-500/15 text-primary border border-gold/30 inline-flex items-center gap-1">
-                        <Sparkles className="h-2.5 w-2.5 text-gold" /> שירות + מוצרים
-                      </span>
-                    );
-                    if (isSvc) return (
-                      <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/30 inline-flex items-center gap-1">
-                        <Wrench className="h-2.5 w-2.5" /> בעל מקצוע
-                      </span>
-                    );
-                    if (isProd) return (
-                      <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 inline-flex items-center gap-1">
-                        <Package className="h-2.5 w-2.5" /> ספק מוצרים
-                      </span>
-                    );
-                    return null;
-                  })()}
-                  {s.serves_all_country && (
-                    <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-gold/15 text-primary border border-gold/20">
-                      ארצי
-                    </span>
-                  )}
-                  <span className="text-fs-xs font-medium px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground flex items-center gap-1">
-                    <Star className="h-2.5 w-2.5 text-gold" /> מאומת
-                  </span>
-                </div>
+            {showAreaPicker && (
+              <div className="mt-3 bg-white border border-slate-200 rounded-2xl p-3 shadow-sm grid grid-cols-2 gap-2 animate-fade-in">
+                <select
+                  value={regionId}
+                  onChange={(e) => {
+                    setRegionId(e.target.value);
+                    setCityId("all");
+                  }}
+                  className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-[13px] text-slate-700 focus:border-emerald-500 focus:outline-none"
+                >
+                  <option value="all">כל האזורים</option>
+                  {regions.map((r) => (
+                    <option key={r.id} value={r.id}>{r.name_he}</option>
+                  ))}
+                </select>
+                <select
+                  value={cityId}
+                  onChange={(e) => setCityId(e.target.value)}
+                  className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-[13px] text-slate-700 focus:border-emerald-500 focus:outline-none disabled:opacity-50"
+                  disabled={regionId === "all" && filteredCities.length === 0}
+                >
+                  <option value="all">כל הערים</option>
+                  {filteredCities.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name_he}</option>
+                  ))}
+                </select>
               </div>
-              <ChevronLeft className="h-5 w-5 text-gold shrink-0 group-hover:-translate-x-0.5 transition-smooth" strokeWidth={2} />
-            </Link>
-          ))
-        )}
+            )}
+          </header>
+
+          {/* Suppliers list */}
+          <main className="mt-4 space-y-3">
+            {loading ? (
+              <div className="bg-white rounded-2xl border border-slate-100 p-10 text-center shadow-sm">
+                <div className="h-8 w-8 rounded-full border-2 border-emerald-200 border-t-emerald-600 animate-spin mx-auto mb-3" />
+                <p className="text-slate-500 text-sm">טוען ספקים...</p>
+              </div>
+            ) : loadError ? (
+              <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-sm">
+                <p className="text-sm font-bold text-slate-900">שגיאה בטעינה</p>
+                <p className="text-xs text-slate-500 mt-1.5">נסו לרענן את המסך בעוד רגע.</p>
+              </div>
+            ) : filteredSuppliers.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-sm">
+                <div className="h-14 w-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-3">
+                  <UserPlus className="h-6 w-6 text-emerald-600" />
+                </div>
+                <p className="text-sm font-bold text-slate-900">לא נמצאו ספקים</p>
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed max-w-[260px] mx-auto">
+                  שנה אזור או הזמן ספקים להצטרף כדי לפתוח עוד אפשרויות לדיירים.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setRegionId("all"); setCityId("all"); }}
+                  className="mt-4 h-10 px-4 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-sm hover:bg-emerald-700"
+                >
+                  שנה אזור
+                </button>
+              </div>
+            ) : (
+              filteredSuppliers.map((s, idx) => {
+                const isSvc = Boolean(s.offers_services) || s.supplier_kind === "service";
+                const isProd = Boolean(s.offers_products) || s.supplier_kind === "product";
+                const isNational = isNationalSupplier(s);
+                const isFeatured = idx === 0;
+
+                return (
+                  <article
+                    key={s.id}
+                    className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden animate-fade-up"
+                    style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}
+                  >
+                    <Link to={`/suppliers/${s.id}`} className="block p-4">
+                      <div className="flex gap-3">
+                        <div className="shrink-0">
+                          <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="lg" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start gap-2">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                                <h3 className="text-[15px] font-bold text-slate-900 truncate">{s.business_name}</h3>
+                                {isFeatured && (
+                                  <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded">מומלץ</span>
+                                )}
+                              </div>
+                              {s.short_description && (
+                                <p className="text-[12.5px] text-slate-600 leading-relaxed line-clamp-2">
+                                  {s.short_description}
+                                </p>
+                              )}
+                            </div>
+                            <div className="text-left shrink-0">
+                              <SupplierRatingBadge supplierId={s.id} showEmpty={false} />
+                            </div>
+                          </div>
+
+                          <div className="mt-2.5 flex items-center gap-3 flex-wrap text-[11px] text-slate-500">
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                              {isNational ? "כל הארץ" : (s.service_areas?.slice(0, 2).join(" · ") || "אזור ייעודי")}
+                            </span>
+                            {isSvc && isProd ? (
+                              <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
+                                <Sparkles className="h-3 w-3 text-emerald-600" />
+                                שירות + מוצרים
+                              </span>
+                            ) : isSvc ? (
+                              <span className="inline-flex items-center gap-1 font-semibold text-blue-700">
+                                <Wrench className="h-3 w-3" /> בעל מקצוע
+                              </span>
+                            ) : isProd ? (
+                              <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                                <Package className="h-3 w-3" /> ספק מוצרים
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+
+                    <div className="bg-slate-50/60 border-t border-slate-100 px-4 py-2.5 flex justify-between items-center">
+                      <div className="flex items-center gap-1.5">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-600">זמין לעבודות</span>
+                      </div>
+                      <Link
+                        to={`/suppliers/${s.id}`}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-[12px] font-bold transition-colors shadow-sm"
+                      >
+                        הצעת מחיר
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })
+            )}
+          </main>
         </div>
       </div>
 
