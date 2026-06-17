@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search as SearchIcon, MapPin, Sparkles, Store, Users, Flame,
-  PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, PiggyBank, Calculator,
-  TrendingUp, Check,
+  PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, Calculator,
+  TrendingUp, Check, ChevronLeft,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupportButton } from "@/components/SupportButton";
@@ -174,12 +174,10 @@ export default function ResidentDashboard() {
   const currentIdx = useMemo(() => Math.max(0, STAGES.findIndex((s) => s.id === currentStage)), [currentStage]);
   const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
 
-  // Interleave deals + activity items (FB-style mixed feed)
   const feedItems = useMemo<FeedItem[]>(() => {
     const out: FeedItem[] = [];
     areaDeals.forEach((d, i) => {
       out.push({ kind: "deal", deal: d });
-      // Every 2 deals, insert an activity card if there are joiners
       if (i % 2 === 1 && d.joiners && d.joiners > 0) {
         out.push({ kind: "activity", dealId: d.id, dealTitle: d.title, joiners: d.joiners });
       }
@@ -187,176 +185,150 @@ export default function ResidentDashboard() {
     return out;
   }, [areaDeals]);
 
-  const STAGE_TINTS: Record<string, string> = {
-    planning: "#EEF4FF", structure: "#FFF5EB", systems: "#ECFEFF", openings: "#F0FDF4",
-    finishes: "#F5F3FF", "kitchen-bath": "#EAF7F2", outdoor: "#F7FEE7", moving: "#FEF2F2",
-  };
-
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0", fontFamily: "'Epilogue', system-ui, sans-serif" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full bg-[#F2F2F7]">
       <div
-        className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)] px-5"
+        className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
         {/* Top bar */}
-        <header className="pt-4 pb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <header className="px-5 pt-5 pb-1 flex items-start justify-between">
+          <div className="text-right flex-1 min-w-0">
+            <div className="text-[13px] text-[#8E8E93] font-medium mb-0.5">שלום,</div>
+            <h1 className="text-[28px] font-bold text-[#1C1C1E] leading-[1.1] tracking-[-0.03em] break-words">
+              {fullName || "דייר"}
+            </h1>
+            {city && (
+              <button
+                onClick={() => navigate("/resident/profile/edit")}
+                className="mt-1.5 inline-flex items-center gap-1 text-[12px] text-[#0E6B5A] font-medium active:opacity-70"
+              >
+                <MapPin className="h-3 w-3" strokeWidth={2.4} /> {city}
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => navigate("/resident/notifications")}
-              className="h-10 w-10 rounded-full bg-white border border-[#ECEEF2] flex items-center justify-center shadow-sm active:scale-95 transition-transform"
+              className="h-10 w-10 rounded-full bg-white border border-[#E5E5EA] flex items-center justify-center shadow-sm active:scale-95 transition"
               aria-label="התראות"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
               </svg>
             </button>
             <SupportButton />
             <DocumentsButton />
+            <ProfileAvatar fallbackName={fullName} />
           </div>
-          <ProfileAvatar fallbackName={fullName} />
         </header>
 
-        {/* Greeting + city pill */}
-        <section className="mt-1 flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-[26px] leading-[1.15] font-extrabold tracking-tight text-[#1F2937]" style={{ fontFamily: "'Urbanist', system-ui, sans-serif" }}>
-              שלום, {fullName || "דייר"}
-            </h1>
-            <p className="text-[13px] text-[#6B7280] mt-1">הקהילה שלך קונה יחד וחוסכת</p>
-          </div>
-          {city && (
-            <button
-              onClick={() => navigate("/resident/profile/edit")}
-              className="shrink-0 inline-flex items-center gap-2 h-8 px-3 rounded-full bg-white border border-[#ECEEF2] text-[12px] font-semibold text-[#1F2937] shadow-sm active:scale-95 transition-transform"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#0E6B5A]" />
-              <MapPin className="h-3 w-3 text-[#6B7280]" strokeWidth={2.4} />
-              <span>{city}</span>
-            </button>
-          )}
-        </section>
-
-        {/* === STORIES: project stages (Instagram-style) === */}
-        <section className="mt-4 -mx-5 px-5">
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-            {STAGES.map((stage, idx) => {
-              const isCurrent = stage.id === currentStage;
-              const isPast = idx < currentIdx;
-              const tint = STAGE_TINTS[stage.id] ?? "#F4F6FA";
-              const Icon = stage.icon;
-              return (
-                <button
-                  key={stage.id}
-                  onClick={() => navigate(`/resident/categories?stage=${stage.id}`)}
-                  className="shrink-0 flex flex-col items-center gap-1.5 w-[68px] active:scale-95 transition-transform"
-                  aria-label={stage.title}
-                >
-                  <div
-                    className={`relative h-[64px] w-[64px] rounded-full flex items-center justify-center ${
-                      isCurrent
-                        ? "p-[2.5px] bg-gradient-to-tr from-[#0E6B5A] to-[#34A88E]"
-                        : isPast
-                        ? "p-[2px] bg-[#0E6B5A]/30"
-                        : "p-[2px] bg-[#E5E7EB]"
-                    }`}
-                  >
-                    <div
-                      className="h-full w-full rounded-full flex items-center justify-center"
-                      style={{ background: tint }}
-                    >
-                      {isPast ? (
-                        <Check className="h-5 w-5 text-[#0E6B5A]" strokeWidth={3} />
-                      ) : (
-                        <Icon className="h-5 w-5 text-[#1F2937]" strokeWidth={2.2} />
-                      )}
-                    </div>
-                    {isCurrent && (
-                      <span className="absolute -bottom-0.5 right-1/2 translate-x-1/2 bg-[#0E6B5A] text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold leading-none whitespace-nowrap shadow-md">
-                        עכשיו
-                      </span>
-                    )}
-                  </div>
-                  <span className={`text-[10.5px] font-bold leading-tight text-center px-0.5 line-clamp-2 ${isCurrent ? "text-[#0E6B5A]" : "text-[#1F2937]"}`}>
-                    {stage.title}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          {/* Progress bar under stories */}
-          <div className="mt-1 flex items-center gap-2">
-            <div className="flex-1 h-1.5 rounded-full bg-[#E5E7EB] overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${completionPct}%`, background: "linear-gradient(90deg,#0E6B5A,#34A88E)" }}
-              />
-            </div>
-            <span className="text-[10px] font-bold text-[#6B7280] tabular-nums">{completionPct}%</span>
-          </div>
-        </section>
-
-        {/* === HERO: Savings === */}
-        <section className="mt-4">
+        {/* === HERO: Savings (Apple dark tile) === */}
+        <section className="px-5 mt-6">
           <button
             onClick={() => navigate("/resident/my-offers")}
-            className="w-full text-right relative overflow-hidden rounded-[28px] p-6 shadow-[0_10px_40px_-12px_rgba(14,107,90,0.35)] active:scale-[0.99] transition-transform"
-            style={{ background: "linear-gradient(135deg,#0E6B5A 0%,#0A5547 60%,#063C33 100%)" }}
+            className="w-full text-right rounded-3xl p-6 bg-[#1C1C1E] border border-[#1C1C1E] shadow-sm active:scale-[0.99] transition"
           >
-            {/* decorative blobs */}
-            <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-16 -right-8 w-56 h-56 rounded-full bg-[#34A88E]/20 blur-3xl pointer-events-none" />
-
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-3">
-                <span className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm border border-white/25 text-white text-[11px] font-bold px-3 py-1 rounded-full">
-                  <Flame className="h-3 w-3" strokeWidth={2.6} />
-                  חיסכון מצטבר
-                </span>
-                <PiggyBank className="h-6 w-6 text-white/40" strokeWidth={2} />
-              </div>
-
-              <div className="text-white/70 text-[12px] font-medium mb-1">סך הכל חסכת</div>
-              <div className="text-white text-[40px] font-extrabold leading-none tabular-nums tracking-tight animate-fade-in" style={{ fontFamily: "'Urbanist'" }}>
-                {formatILS(estimatedSavings)}
-              </div>
-
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                <HeroStat value={joinedCount} label="הצעות שלי" />
-                <HeroStat value={areaDeals.length} label="פעילות עכשיו" />
-                <HeroStat value={areaSuppliersCount} label="ספקים באזור" />
-              </div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="inline-flex items-center gap-1.5 bg-white/10 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                <Flame className="h-3 w-3" strokeWidth={2.4} /> חיסכון מצטבר
+              </span>
+              <ChevronLeft className="h-4 w-4 text-white/40" strokeWidth={2} />
+            </div>
+            <div className="text-white/60 text-[12px] font-medium mb-1">סך הכל חסכת</div>
+            <div className="text-white text-[34px] font-bold leading-none tabular-nums tracking-[-0.03em]">
+              {formatILS(estimatedSavings)}
             </div>
           </button>
         </section>
 
-        {/* === Quick actions === */}
-        <section className="mt-3 grid grid-cols-3 gap-2.5">
-          <QuickAction icon={SearchIcon} label="חפש" tint="#EEF4FF" color="#2563EB" onClick={() => navigate("/resident/search")} />
-          <QuickAction icon={Calculator} label="תקציב" tint="#F5F3FF" color="#7C3AED" onClick={() => navigate("/resident/budget-planner")} />
-          <QuickAction icon={Store} label="ספקים" tint="#FFF5EB" color="#EA580C" onClick={() => navigate("/resident/search")} />
+        {/* KPI tiles */}
+        <section className="px-5 mt-3 grid grid-cols-3 gap-3">
+          <Kpi label="הצעות שלי" value={joinedCount.toString()} />
+          <Kpi label="פעילות" value={areaDeals.length.toString()} accent />
+          <Kpi label="ספקים" value={areaSuppliersCount.toString()} />
         </section>
 
-        {/* === FEED: deals + community activity === */}
-        <section className="mt-6">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="text-[18px] font-extrabold text-[#1F2937] tracking-tight" style={{ fontFamily: "'Urbanist'" }}>
-                בשבילך עכשיו
-              </h2>
-              <p className="text-[12px] text-[#6B7280] mt-0.5">הצעות חמות ופעילות הקהילה שלך</p>
-            </div>
+        {/* === Project stages — Apple-style segmented strip === */}
+        <SectionHeader
+          title="שלבי הפרויקט"
+          subtitle={`${completionPct}% הושלם`}
+          action={
             <button
-              onClick={() => navigate("/resident/deals")}
-              className="text-[12px] font-bold text-[#0E6B5A] hover:underline"
+              onClick={() => navigate(`/resident/categories?stage=${currentStage}`)}
+              className="text-[14px] font-medium text-[#0E6B5A]"
             >
-              הכל ←
+              לקטגוריות
             </button>
+          }
+        />
+        <div className="px-5 mt-3">
+          <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-4">
+            <div className="flex items-center gap-1.5 mb-3">
+              {STAGES.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`flex-1 h-1 rounded-full ${idx <= currentIdx ? "bg-[#0E6B5A]" : "bg-[#F2F2F7]"}`}
+                />
+              ))}
+            </div>
+            <div className="-mx-1 px-1 overflow-x-auto no-scrollbar">
+              <div className="flex gap-2">
+                {STAGES.map((stage, idx) => {
+                  const isCurrent = stage.id === currentStage;
+                  const isPast = idx < currentIdx;
+                  const Icon = stage.icon;
+                  return (
+                    <button
+                      key={stage.id}
+                      onClick={() => navigate(`/resident/categories?stage=${stage.id}`)}
+                      className={`shrink-0 flex flex-col items-center gap-1.5 w-[68px] py-2 rounded-2xl active:scale-95 transition ${
+                        isCurrent ? "bg-[#0E6B5A]/8" : ""
+                      }`}
+                    >
+                      <div
+                        className={`h-11 w-11 rounded-2xl flex items-center justify-center ${
+                          isCurrent
+                            ? "bg-[#0E6B5A] text-white"
+                            : isPast
+                            ? "bg-[#0E6B5A]/10 text-[#0E6B5A]"
+                            : "bg-[#F2F2F7] text-[#1C1C1E]"
+                        }`}
+                      >
+                        {isPast ? <Check className="h-5 w-5" strokeWidth={2.6} /> : <Icon className="h-5 w-5" strokeWidth={2.2} />}
+                      </div>
+                      <span className={`text-[10.5px] font-medium leading-tight text-center line-clamp-2 ${isCurrent ? "text-[#0E6B5A]" : "text-[#1C1C1E]"}`}>
+                        {stage.title}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
+        </div>
 
+        {/* === Quick actions === */}
+        <SectionHeader title="פעולות מהירות" />
+        <section className="px-5 mt-3 grid grid-cols-3 gap-3">
+          <QuickAction icon={SearchIcon} label="חפש" onClick={() => navigate("/resident/search")} />
+          <QuickAction icon={Calculator} label="תקציב" onClick={() => navigate("/resident/budget-planner")} />
+          <QuickAction icon={Store} label="ספקים" onClick={() => navigate("/resident/search")} />
+        </section>
+
+        {/* === FEED === */}
+        <SectionHeader
+          title="בשבילך עכשיו"
+          subtitle="הצעות חמות באזורך"
+          action={<button onClick={() => navigate("/resident/deals")} className="text-[14px] font-medium text-[#0E6B5A]">הצג הכל</button>}
+        />
+        <div className="px-5 mt-3">
           {feedItems.length === 0 ? (
-            <div className="bg-white border border-[#ECEEF2] rounded-2xl p-8 text-center">
-              <Sparkles className="h-8 w-8 text-[#6B7280] mx-auto mb-2" />
-              <p className="text-[13px] text-[#6B7280] font-medium">עדיין אין הצעות פעילות באזור שלך</p>
+            <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-7 text-center">
+              <div className="h-12 w-12 mx-auto rounded-2xl bg-[#F2F2F7] flex items-center justify-center mb-3">
+                <Sparkles className="h-5 w-5 text-[#8E8E93]" />
+              </div>
+              <p className="text-[13px] text-[#8E8E93] font-medium">עדיין אין הצעות פעילות באזור שלך</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -369,7 +341,7 @@ export default function ResidentDashboard() {
               )}
             </div>
           )}
-        </section>
+        </div>
       </div>
       <BottomNav role="resident" />
     </div>
@@ -378,25 +350,37 @@ export default function ResidentDashboard() {
 
 /* ============ Sub-components ============ */
 
-function HeroStat({ value, label }: { value: number; label: string }) {
+function Kpi({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-3 py-2.5 border border-white/15">
-      <div className="text-white text-[18px] font-extrabold leading-none tabular-nums" style={{ fontFamily: "'Urbanist'" }}>{value}</div>
-      <div className="text-white/70 text-[10px] font-medium mt-1 leading-tight">{label}</div>
+    <div className="rounded-2xl p-4 border bg-white border-[#E5E5EA] shadow-sm">
+      <div className="text-[11px] font-medium text-[#8E8E93] mb-1">{label}</div>
+      <div className={`text-[20px] font-bold tracking-tight leading-none tabular-nums truncate ${accent ? "text-[#0E6B5A]" : "text-[#1C1C1E]"}`}>{value}</div>
     </div>
   );
 }
 
-function QuickAction({ icon: Icon, label, tint, color, onClick }: { icon: typeof SearchIcon; label: string; tint: string; color: string; onClick: () => void }) {
+function SectionHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
+  return (
+    <div className="px-5 mt-8 flex items-end justify-between gap-3">
+      <div className="text-right">
+        <h2 className="text-[22px] font-bold text-[#1C1C1E] tracking-[-0.02em] leading-tight">{title}</h2>
+        {subtitle && <div className="text-[13px] text-[#8E8E93] mt-0.5">{subtitle}</div>}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+function QuickAction({ icon: Icon, label, onClick }: { icon: typeof SearchIcon; label: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="bg-white border border-[#ECEEF2] rounded-2xl p-3 flex flex-col items-center gap-1.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.06)] active:scale-[0.96] transition-transform"
+      className="bg-white border border-[#E5E5EA] rounded-3xl p-4 flex flex-col items-center gap-2 shadow-sm active:scale-95 transition"
     >
-      <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: tint }}>
-        <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} style={{ color }} />
+      <div className="h-10 w-10 rounded-2xl bg-[#F2F2F7] flex items-center justify-center">
+        <Icon className="h-[18px] w-[18px] text-[#1C1C1E]" strokeWidth={2} />
       </div>
-      <span className="text-[12px] font-bold text-[#1F2937]" style={{ fontFamily: "'Urbanist'" }}>{label}</span>
+      <span className="text-[12px] font-semibold text-[#1C1C1E] tracking-tight">{label}</span>
     </button>
   );
 }
@@ -406,44 +390,40 @@ function DealFeedCard({ deal, onClick }: { deal: MiniDeal; onClick: () => void }
   return (
     <button
       onClick={onClick}
-      className="w-full text-right bg-white border border-[#ECEEF2] rounded-[22px] overflow-hidden shadow-[0_4px_16px_-8px_rgba(10,31,61,0.12)] hover:shadow-[0_8px_28px_-10px_rgba(10,31,61,0.20)] hover:-translate-y-0.5 transition-all active:scale-[0.99] animate-fade-in"
+      className="w-full text-right bg-white border border-[#E5E5EA] rounded-3xl overflow-hidden shadow-sm active:scale-[0.99] transition"
     >
-      {/* Image */}
-      <div className="relative h-44 bg-[#F4F6FA] overflow-hidden">
+      <div className="relative h-44 bg-[#F2F2F7] overflow-hidden">
         {deal.cover_image_url ? (
           <img src={deal.cover_image_url} alt={deal.title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Sparkles className="h-10 w-10 text-[#D1D5DB]" />
+            <Sparkles className="h-10 w-10 text-[#D1D1D6]" />
           </div>
         )}
         {discount > 0 && (
-          <div className="absolute top-3 right-3 bg-[#0E6B5A] text-white text-[12px] font-extrabold px-2.5 py-1 rounded-full shadow-md tabular-nums" style={{ fontFamily: "'Urbanist'" }}>
-            {discount}%- 
+          <div className="absolute top-3 right-3 bg-[#1C1C1E] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full tabular-nums">
+            {discount}%-
           </div>
         )}
         {deal.joiners && deal.joiners > 0 ? (
-          <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur text-[#1F2937] text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md inline-flex items-center gap-1">
-            <Users className="h-3 w-3 text-[#0E6B5A]" strokeWidth={2.6} />
+          <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur text-[#1C1C1E] text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm inline-flex items-center gap-1">
+            <Users className="h-3 w-3 text-[#0E6B5A]" strokeWidth={2.4} />
             {deal.joiners} הצטרפו
           </div>
         ) : null}
       </div>
-
-      {/* Body */}
       <div className="p-4">
         {deal.supplier_name && (
-          <div className="text-[11px] text-[#6B7280] font-semibold mb-1">{deal.supplier_name}</div>
+          <div className="text-[11px] text-[#8E8E93] font-medium mb-1 truncate">{deal.supplier_name}</div>
         )}
-        <div className="text-[15px] font-extrabold text-[#1F2937] leading-tight line-clamp-2" style={{ fontFamily: "'Urbanist'" }}>
+        <div className="text-[15px] font-semibold text-[#1C1C1E] tracking-tight leading-tight line-clamp-2">
           {deal.title}
         </div>
         <div className="mt-3 flex items-center justify-between">
-          <span className="inline-flex items-center gap-1 text-[11px] text-[#0E6B5A] font-bold">
-            <TrendingUp className="h-3 w-3" strokeWidth={2.6} />
-            פעיל עכשיו
+          <span className="inline-flex items-center gap-1 text-[11px] text-[#0E6B5A] font-semibold">
+            <TrendingUp className="h-3 w-3" strokeWidth={2.4} /> פעיל עכשיו
           </span>
-          <span className="text-[12px] font-bold text-[#0E6B5A]">לפרטים ←</span>
+          <span className="text-[12px] font-semibold text-[#0E6B5A]">לפרטים ←</span>
         </div>
       </div>
     </button>
@@ -454,37 +434,33 @@ function ActivityFeedCard({ title, joiners, onClick }: { title: string; joiners:
   return (
     <button
       onClick={onClick}
-      className="w-full text-right bg-[#F0FAF7] border border-[#0E6B5A]/15 rounded-[20px] p-4 flex items-center gap-3 hover:bg-[#E6F4EF] transition-colors active:scale-[0.99] animate-fade-in"
+      className="w-full text-right bg-white border border-[#E5E5EA] rounded-3xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.99] transition"
     >
-      {/* Avatar stack */}
       <div className="relative shrink-0 flex">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="h-9 w-9 rounded-full border-2 border-[#F0FAF7] flex items-center justify-center text-white text-[11px] font-bold"
+            className="h-9 w-9 rounded-full border-2 border-white flex items-center justify-center text-white text-[11px] font-semibold"
             style={{
               background: ["#0E6B5A", "#34A88E", "#1F4D45"][i],
               marginRight: i === 0 ? 0 : -12,
               zIndex: 3 - i,
-              fontFamily: "'Urbanist'",
             }}
           >
             {["א", "ר", "מ"][i]}
           </div>
         ))}
       </div>
-
       <div className="min-w-0 flex-1">
-        <div className="text-[12px] text-[#0E6B5A] font-bold mb-0.5 inline-flex items-center gap-1">
-          <Users className="h-3 w-3" strokeWidth={2.6} />
+        <div className="text-[12px] text-[#0E6B5A] font-semibold mb-0.5 inline-flex items-center gap-1">
+          <Users className="h-3 w-3" strokeWidth={2.4} />
           {joiners} שכנים הצטרפו
         </div>
-        <div className="text-[13px] font-bold text-[#1F2937] leading-tight line-clamp-1" style={{ fontFamily: "'Urbanist'" }}>
+        <div className="text-[13px] font-semibold text-[#1C1C1E] tracking-tight leading-tight line-clamp-1">
           {title}
         </div>
       </div>
-
-      <div className="shrink-0 text-[11px] font-bold text-[#0E6B5A] bg-white border border-[#0E6B5A]/20 px-3 py-1.5 rounded-full">
+      <div className="shrink-0 text-[11px] font-semibold text-white bg-[#1C1C1E] px-3 py-1.5 rounded-full">
         הצטרף
       </div>
     </button>
