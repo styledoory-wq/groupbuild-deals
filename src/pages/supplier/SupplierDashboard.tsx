@@ -294,31 +294,49 @@ export default function SupplierDashboard() {
         <SectionHeader
           icon={<Building2 className="h-3.5 w-3.5" />}
           title="פרויקטים חדשים באזור שלך"
-          subtitle="בניינים פעילים במפת השירות שהגדרת · רק האזור שלך"
-          action={<button onClick={() => navigate("/supplier/offers/new")} className="text-[12px] font-bold text-[#0E6B5A]">צור הצעה <ChevronLeft className="h-3 w-3 inline" /></button>}
+          subtitle={areaSet ? "בניינים פעילים בערים שהגדרת באזור השירות" : "הגדר אזור שירות כדי לראות פרויקטים רלוונטיים"}
+          action={<button onClick={() => navigate("/supplier/profile/edit")} className="text-[12px] font-bold text-[#0E6B5A]">ערוך אזור <ChevronLeft className="h-3 w-3 inline" /></button>}
         />
-        <div className="px-5 mt-2 -mr-1 pr-1 overflow-x-auto no-scrollbar">
-          <div className="flex gap-2.5 pb-1 snap-x snap-mandatory">
-            {DEMO_PROJECTS.map((p) => (
-              <div key={p.id} className="snap-start min-w-[230px] bg-white rounded-2xl border border-[#E8EAE5] p-3.5">
-                <div className="flex items-center gap-1.5 text-[11px] text-[#5C6770] mb-2">
-                  <MapPin className="h-3 w-3 text-[#0E6B5A]" />
-                  <span className="font-semibold">{p.city}</span>
-                  <span className="text-[#C9CDC4]">·</span>
-                  <span>{p.distance}</span>
-                </div>
-                <div className="font-extrabold text-[14px] text-[#0F1B14] tracking-tight leading-tight mb-1">{p.name}</div>
-                <div className="text-[12px] text-[#5C6770] mb-3">{p.units} דירות · {p.category}</div>
-                <button
-                  onClick={() => navigate("/supplier/offers/new")}
-                  className="w-full h-9 rounded-xl bg-[#0F1B14] text-white text-[12px] font-extrabold flex items-center justify-center gap-1 active:scale-95 transition"
-                >
-                  <Plus className="h-3.5 w-3.5" strokeWidth={2.8} /> הצעה ייעודית
-                </button>
-              </div>
-            ))}
+        {!areaSet ? (
+          <div className="px-5 mt-2">
+            <div className="bg-white rounded-2xl border border-dashed border-[#C9CDC4] p-5 text-center">
+              <MapPin className="h-5 w-5 mx-auto text-[#0E6B5A] mb-2" />
+              <div className="text-[13px] font-extrabold text-[#0F1B14] mb-1">לא הוגדר אזור עבודה</div>
+              <div className="text-[12px] text-[#5C6770] mb-3">בחר את הערים שבהן אתה נותן שירות כדי שנציג רק פרויקטים רלוונטיים אליך.</div>
+              <Button onClick={() => navigate("/supplier/profile/edit")} className="h-10 rounded-xl bg-[#0E6B5A] hover:bg-[#0a5648] text-white text-[12.5px] font-extrabold">
+                הגדר אזור שירות
+              </Button>
+            </div>
           </div>
-        </div>
+        ) : areaProjects.length === 0 ? (
+          <div className="px-5 mt-2">
+            <div className="bg-white rounded-2xl border border-[#E8EAE5] p-5 text-center text-[12.5px] text-[#5C6770]">
+              אין כרגע פרויקטים פעילים באזור שלך. נעדכן אותך ברגע שיתפרסמו.
+            </div>
+          </div>
+        ) : (
+          <div className="px-5 mt-2 -mr-1 pr-1 overflow-x-auto no-scrollbar">
+            <div className="flex gap-2.5 pb-1 snap-x snap-mandatory">
+              {areaProjects.map((p) => (
+                <div key={p.id} className="snap-start min-w-[230px] bg-white rounded-2xl border border-[#E8EAE5] p-3.5">
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#5C6770] mb-2">
+                    <MapPin className="h-3 w-3 text-[#0E6B5A]" />
+                    <span className="font-semibold">{p.city}</span>
+                    {p.stage && (<><span className="text-[#C9CDC4]">·</span><span>{p.stage}</span></>)}
+                  </div>
+                  <div className="font-extrabold text-[14px] text-[#0F1B14] tracking-tight leading-tight mb-1">{p.name}</div>
+                  <div className="text-[12px] text-[#5C6770] mb-3">{p.units ? `${p.units} יחידות` : "פרויקט חדש"}</div>
+                  <button
+                    onClick={() => navigate("/supplier/offers/new")}
+                    className="w-full h-9 rounded-xl bg-[#0F1B14] text-white text-[12px] font-extrabold flex items-center justify-center gap-1 active:scale-95 transition"
+                  >
+                    <Plus className="h-3.5 w-3.5" strokeWidth={2.8} /> הצעה ייעודית
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Market — published offers in your area */}
         <SectionHeader
