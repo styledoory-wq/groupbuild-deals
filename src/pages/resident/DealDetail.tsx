@@ -711,7 +711,7 @@ export default function DealDetail() {
           </span>
 
           {(hasCompletedJoin || hasPendingDeposit) && (
-            <div className="absolute top-4 left-4 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] text-[#1F2937] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
+            <div className="absolute top-4 left-4 bg-gradient-to-l from-[#1A8870] to-[#34A88E] text-[#1F2937] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
               {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
               <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
             </div>
@@ -776,14 +776,14 @@ export default function DealDetail() {
                 className="h-full rounded-full transition-all duration-700"
                 style={{
                   width: `${progressPct}%`,
-                  background: "linear-gradient(90deg, #C9A84C 0%, #E8C96B 50%, #C9A84C 100%)",
+                  background: "linear-gradient(90deg, #1A8870 0%, #34A88E 50%, #1A8870 100%)",
                   boxShadow: "0 0 12px rgba(201,168,76,0.45)",
                 }}
               />
             </div>
             {nextTier && peopleNeeded > 0 && (
               <p className="text-[12px] font-bold text-[#1F2937] mt-3 flex items-center gap-1.5">
-                <TrendingUp className="h-3.5 w-3.5 text-[#C9A84C]" />
+                <TrendingUp className="h-3.5 w-3.5 text-[#1A8870]" />
                 עוד {peopleNeeded} דיירים פותחים את המדרגה הבאה
               </p>
             )}
@@ -837,7 +837,7 @@ export default function DealDetail() {
                   </div>
                   <div className="flex-1 pt-1">
                     <p className="text-[13px] font-extrabold text-[#1F2937] leading-tight">
-                      <span className="text-[#C9A84C] font-black mr-1">{idx + 1}.</span>
+                      <span className="text-[#1A8870] font-black mr-1">{idx + 1}.</span>
                       {step.title}
                     </p>
                     <p className="text-[11px] text-[#6B7280] leading-snug mt-1">{step.subtitle}</p>
@@ -893,21 +893,21 @@ export default function DealDetail() {
                     key={idx}
                     className={cn(
                       "flex items-center justify-between rounded-2xl px-3 py-2.5 transition-colors",
-                      isActive ? "bg-[#FFF8E1] border border-[#EBD79A]" : isPast ? "opacity-50" : "bg-[#F8F8F6]",
+                      isActive ? "bg-[#FFF8E1] border border-[#EBD79A]" : isPast ? "opacity-50" : "bg-[#F7F5F0]",
                     )}
                   >
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
                           "rounded-full",
-                          isActive ? "w-2.5 h-2.5 bg-[#C9A84C] ring-4 ring-[#C9A84C]/20" : "w-1.5 h-1.5 bg-[#6B7280]",
+                          isActive ? "w-2.5 h-2.5 bg-[#1A8870] ring-4 ring-[#1A8870]/20" : "w-1.5 h-1.5 bg-[#6B7280]",
                         )}
                       />
                       <span className={cn("text-[13px]", isActive ? "font-extrabold text-[#1F2937]" : "font-bold text-[#1F2937]")}>
                         {tierRange(t)} דיירים{isActive ? " · פעיל" : ""}
                       </span>
                     </div>
-                    <span className={cn("text-[13px] gb-num", isActive ? "font-black text-[#1F2937]" : "font-bold text-[#C9A84C]")}>
+                    <span className={cn("text-[13px] gb-num", isActive ? "font-black text-[#1F2937]" : "font-bold text-[#1A8870]")}>
                       {td.headline}
                     </span>
                   </div>
@@ -926,10 +926,10 @@ export default function DealDetail() {
         className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
       >
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F8F8F6] via-[#F8F8F6]/95 to-transparent">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0]/95 to-transparent">
           {interested ? (
-            <div className="flex items-center gap-2.5 bg-[#2563EB] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
-              <div className="w-10 h-10 bg-gradient-to-l from-[#C9A84C] to-[#E8C96B] rounded-full flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-2.5 bg-[#0E6B5A] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
+              <div className="w-10 h-10 bg-gradient-to-l from-[#1A8870] to-[#34A88E] rounded-full flex items-center justify-center shrink-0">
                 {hasCompletedJoin ? (
                   <CheckCircle2 className="w-5 h-5 text-[#1F2937]" strokeWidth={2.6} />
                 ) : (
@@ -964,7 +964,7 @@ export default function DealDetail() {
               <Button
                 onClick={handleJoinClick}
                 disabled={submittingInterest}
-                className="flex-1 h-14 rounded-2xl bg-[#2563EB] hover:bg-[#2563EB]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#C9A227]/40"
+                className="flex-1 h-14 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#0E6B5A]/40"
               >
                 {submittingInterest ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -1134,7 +1134,7 @@ export default function DealDetail() {
             <Button
               onClick={submitJoin}
               disabled={!acceptedTerms || submittingInterest}
-              className="rounded-xl bg-[#2563EB] text-white font-bold"
+              className="rounded-xl bg-[#0E6B5A] text-white font-bold"
             >
               {submittingInterest ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1252,7 +1252,7 @@ function ShareButton({ deal, compact = false }: { deal: { id: string; title: str
             <a
               href={`sms:?&body=${encodeURIComponent(shareText)}`}
               onClick={() => setShareOpen(false)}
-              className="h-12 rounded-xl bg-[#2563EB] text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"
+              className="h-12 rounded-xl bg-[#0E6B5A] text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"
             >
               <Phone className="h-5 w-5" />
               שליחה ב-SMS
@@ -1260,7 +1260,7 @@ function ShareButton({ deal, compact = false }: { deal: { id: string; title: str
             <button
               type="button"
               onClick={copyLink}
-              className="h-12 rounded-xl border-2 border-[#C9A227] bg-white text-[#1F2937] font-bold flex items-center justify-center gap-2 hover:bg-[#FFFBEB] transition"
+              className="h-12 rounded-xl border-2 border-[#0E6B5A] bg-white text-[#1F2937] font-bold flex items-center justify-center gap-2 hover:bg-[#FFFBEB] transition"
             >
               <Share2 className="h-5 w-5" />
               העתק קישור

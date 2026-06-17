@@ -808,7 +808,7 @@ export default function OfferEditor() {
           className={`gb-card p-4 transition-colors ${
             commitmentError && !commitmentAccepted
               ? "border border-destructive bg-destructive/5 animate-pulse"
-              : "border border-[#C9A227]/40 bg-[#FFF8E1]/40"
+              : "border border-[#0E6B5A]/40 bg-[#FFF8E1]/40"
           }`}
         >
           <label className="flex items-start gap-3 cursor-pointer">
@@ -830,7 +830,7 @@ export default function OfferEditor() {
           </label>
         </div>
 
-        <Button onClick={save} disabled={saving} className="w-full h-12 rounded-[16px] bg-[#2563EB] hover:bg-[#2563EB]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] disabled:opacity-50">
+        <Button onClick={save} disabled={saving} className="w-full h-12 rounded-[16px] bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] disabled:opacity-50">
           {saving ? <Loader2 className="h-4 w-4 ml-2 animate-spin" /> : <Save className="h-4 w-4 ml-2" />}
           {saving ? "שומר..." : isEditing ? "עדכון ההצעה" : "שמירת ההצעה"}
         </Button>

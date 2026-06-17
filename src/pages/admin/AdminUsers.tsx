@@ -165,7 +165,7 @@ export default function AdminUsers() {
               <div className="flex items-center gap-3">
                 <div className={
                   "h-11 w-11 rounded-full flex items-center justify-center " +
-                  (u.is_active ? "bg-[#2563EB] text-white" : "bg-muted text-muted-foreground")
+                  (u.is_active ? "bg-[#0E6B5A] text-white" : "bg-muted text-muted-foreground")
                 }>
                   <Icon className="h-5 w-5" />
                 </div>
@@ -294,7 +294,7 @@ export default function AdminUsers() {
 
               <div>
                 <Label className="text-xs flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-[#C9A227]" /> פרויקט משויך
+                  <Building2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> פרויקט משויך
                 </Label>
                 <select
                   value={editing.project_id ?? ""}

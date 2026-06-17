@@ -28,7 +28,7 @@ export interface StageTheme {
 
 export const STAGE_THEMES: StageTheme[] = [
   { id: "planning",     index: 1, title: "תכנון ועיצוב",     shortTitle: "תכנון",
-    accent: "#2563EB", tint: "#EEF4FF", border: "#DBE6FF" },
+    accent: "#0E6B5A", tint: "#EEF4FF", border: "#DBE6FF" },
   { id: "structure",    index: 2, title: "שלד ובנייה",        shortTitle: "בנייה",
     accent: "#E8742C", tint: "#FFF5EB", border: "#FFE2C7" },
   { id: "systems",      index: 3, title: "מערכות הבית",       shortTitle: "מערכות",
@@ -38,11 +38,12 @@ export const STAGE_THEMES: StageTheme[] = [
   { id: "finishes",     index: 5, title: "גמרים",              shortTitle: "גמר",
     accent: "#7C3AED", tint: "#F5F3FF", border: "#E2DBFB" },
   { id: "kitchen-bath", index: 6, title: "מטבחים ואמבטיות",  shortTitle: "מטבח",
-    accent: "#C9A227", tint: "#FFF7ED", border: "#F1E2C0" },
+    accent: "#0E6B5A", tint: "#EAF7F2", border: "#D6F0E8" },
   { id: "outdoor",      index: 7, title: "חצר ופיתוח",         shortTitle: "חצר",
     accent: "#6E8A2E", tint: "#F7FEE7", border: "#DFEFBE" },
   { id: "moving",       index: 8, title: "כניסה לבית",         shortTitle: "כניסה",
-    accent: "#C9A227", tint: "#FFF7ED", border: "#F1E2C0" },
+    accent: "#475569", tint: "#F1F5F9", border: "#E2E8F0" },
+
 ];
 
 export const getStage = (id: StageId): StageTheme =>

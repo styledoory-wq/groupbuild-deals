@@ -254,7 +254,7 @@ export default function MyOffers() {
                 onClick={() => setShowHidden(false)}
                 className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all ${
                   !showHidden
-                    ? "bg-[#2563EB] text-white"
+                    ? "bg-[#0E6B5A] text-white"
                     : "text-[#6B7280]"
                 }`}
               >
@@ -264,7 +264,7 @@ export default function MyOffers() {
                 onClick={() => setShowHidden(true)}
                 className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all ${
                   showHidden
-                    ? "bg-[#2563EB] text-white"
+                    ? "bg-[#0E6B5A] text-white"
                     : "text-[#6B7280]"
                 }`}
               >
@@ -310,7 +310,7 @@ export default function MyOffers() {
               !showHidden ? (
                 <Link
                   to="/resident/deals"
-                  className="inline-flex items-center gap-1.5 h-11 px-5 rounded-2xl bg-[#2563EB] text-white text-[14px] font-bold active:scale-95 transition-transform"
+                  className="inline-flex items-center gap-1.5 h-11 px-5 rounded-2xl bg-[#0E6B5A] text-white text-[14px] font-bold active:scale-95 transition-transform"
                   style={{ boxShadow: "var(--shadow-soft)" }}
                 >
                   <Sparkles className="h-4 w-4" strokeWidth={2.4} />
@@ -330,7 +330,7 @@ export default function MyOffers() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => toggleHide({ interest, deposit }, !hidden)}
-                        className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#F8F8F6] text-[#1F2937]"
+                        className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#F7F5F0] text-[#1F2937]"
                       >
                         {hidden ? "החזרה" : "הסתרה"}
                       </button>
@@ -383,7 +383,7 @@ export default function MyOffers() {
                     <Link to={`/resident/deals/${deal.id}`} className="flex-1 min-w-0">
                       <h3 className="font-bold text-[14px] text-[#1F2937] truncate flex items-center gap-1.5">
                         {deal.title}
-                        <ShieldCheck className="h-3.5 w-3.5 text-[#C9A227] shrink-0" />
+                        <ShieldCheck className="h-3.5 w-3.5 text-[#0E6B5A] shrink-0" />
                       </h3>
                       <p className="text-[11px] text-[#6B7280] mt-0.5 inline-flex items-center gap-1 font-medium">
                         <span>{count} מצטרפים</span>
@@ -418,7 +418,7 @@ export default function MyOffers() {
                   </div>
 
                   <Link to={`/resident/deals/${deal.id}`} className="block">
-                    <div className="pt-3 border-t border-[#F8F8F6] flex items-end justify-between gap-2">
+                    <div className="pt-3 border-t border-[#F7F5F0] flex items-end justify-between gap-2">
                       <div>
                         <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 uppercase tracking-wide">המחיר הנוכחי שלך</div>
                         <div className="text-[20px] font-extrabold text-[#1F2937] leading-none tracking-tight">{display.headline}</div>
@@ -445,7 +445,7 @@ export default function MyOffers() {
                           </span>
                         )}
                         {interest.deposit_required && interest.deposit_amount > 0 && (
-                          <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#F8F8F6] text-[#1F2937]">
+                          <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#F7F5F0] text-[#1F2937]">
                             {ils(Number(interest.deposit_amount))}
                           </span>
                         )}

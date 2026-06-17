@@ -149,7 +149,7 @@ export default function DealsList() {
   }, [deals, tab, q, favIds]);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F8F8F6" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -174,7 +174,7 @@ export default function DealsList() {
                   onClick={() => setTab(t.key)}
                   className={`flex-1 h-10 rounded-full text-[13px] font-bold transition-all inline-flex items-center justify-center gap-1.5 ${
                     isActive
-                      ? "bg-[#C9A227] text-white shadow-[0_4px_12px_-4px_rgba(201,162,39,0.45)]"
+                      ? "bg-[#0E6B5A] text-white shadow-[0_4px_12px_-4px_rgba(14,107,90,0.45)]"
                       : "text-[#6B7280] hover:text-[#1F2937]"
                   }`}
                 >
@@ -194,7 +194,7 @@ export default function DealsList() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="חפש הצעה לפי שם..."
-              className="w-full h-12 rounded-[18px] bg-white border border-[#ECEEF2] pr-11 pl-4 text-[14px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#C9A227] focus:ring-[3px] focus:ring-[#C9A227]/15 transition"
+              className="w-full h-12 rounded-[18px] bg-white border border-[#ECEEF2] pr-11 pl-4 text-[14px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#0E6B5A] focus:ring-[3px] focus:ring-[#0E6B5A]/15 transition"
               dir="rtl"
             />
           </div>
@@ -214,7 +214,7 @@ export default function DealsList() {
             {!loading && !error && filtered.length === 0 && (
               <div className="rounded-[20px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center col-span-2 md:col-span-3">
                 {tab === "favorites" ? (
-                  <Heart className="h-8 w-8 mx-auto mb-3 text-[#C9A227]" strokeWidth={2} />
+                  <Heart className="h-8 w-8 mx-auto mb-3 text-[#0E6B5A]" strokeWidth={2} />
                 ) : (
                   <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
                 )}

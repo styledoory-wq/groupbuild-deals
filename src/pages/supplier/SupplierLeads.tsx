@@ -314,7 +314,7 @@ export default function SupplierLeads() {
           </button>
         )}
         <div
-          className="gb-card p-4 border-r-4 border-[#C9A227]/60 transition-transform relative z-10"
+          className="gb-card p-4 border-r-4 border-[#0E6B5A]/60 transition-transform relative z-10"
           style={isSwiped ? { transform: "translateX(80px)" } : undefined}
           onTouchStart={trashed ? undefined : onTouchStart}
           onTouchEnd={trashed ? undefined : makeSwipeEnd(q.id)}
@@ -324,7 +324,7 @@ export default function SupplierLeads() {
               <h4 className="font-bold text-sm text-foreground truncate">{name}</h4>
               <p className="text-fs-xs text-muted-foreground truncate">{q.message ?? "פנייה כללית"}</p>
             </div>
-            <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#C9A227]/30 shrink-0">
+            <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30 shrink-0">
               פנייה חדשה
             </span>
           </div>
@@ -347,7 +347,7 @@ export default function SupplierLeads() {
             <>
               {(phone || wa) && (
                 <div className="flex gap-2 mt-2">
-                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#2563EB] text-white">חיוג</a>}
+                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#0E6B5A] text-white">חיוג</a>}
                   {wa && (
                     <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] inline-flex items-center justify-center gap-1">
                       <MessageCircle className="h-3 w-3" /> וואטסאפ
@@ -390,7 +390,7 @@ export default function SupplierLeads() {
               <p className="text-fs-xs text-muted-foreground truncate">{dealTitle(i.deal_id)}</p>
             </div>
             {committed && (
-              <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#C9A227]/30 shrink-0">
+              <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30 shrink-0">
                 <BadgeCheck className="h-3 w-3" />
                 {i.deposit_status === "paid" ? "פיקדון שולם" : `התחייב ${ils(Number(i.deposit_amount))}`}
               </span>
@@ -407,7 +407,7 @@ export default function SupplierLeads() {
                 "inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold " +
                 (i.lead_status === "approved" ? "bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"
                   : i.lead_status === "rejected" ? "bg-muted text-muted-foreground border border-border"
-                  : "bg-[#FFF8E1] text-[#1F2937] border border-[#C9A227]/30")
+                  : "bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30")
               }>
                 {i.lead_status === "approved" ? "מאושר" : i.lead_status === "rejected" ? "לא רלוונטי" : i.lead_status}
               </span>
@@ -440,7 +440,7 @@ export default function SupplierLeads() {
               </div>
               {(phone || wa) && (
                 <div className="flex gap-2">
-                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#2563EB] text-white">חיוג</a>}
+                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#0E6B5A] text-white">חיוג</a>}
                   {wa && (
                     <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] inline-flex items-center justify-center gap-1">
                       <MessageCircle className="h-3 w-3" /> וואטסאפ
@@ -451,7 +451,7 @@ export default function SupplierLeads() {
               {isAdmin && i.deposit_required && i.deposit_status !== "paid" && (
                 <button onClick={() => markDepositPaid(i.user_id, i.deal_id)}
                   disabled={busyKey === i.user_id + i.deal_id}
-                  className="mt-2 w-full text-fs-xs font-bold py-2 rounded-lg bg-[#FFF8E1] text-[#1F2937] border border-[#C9A227]/40 inline-flex items-center justify-center gap-1 disabled:opacity-50">
+                  className="mt-2 w-full text-fs-xs font-bold py-2 rounded-lg bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/40 inline-flex items-center justify-center gap-1 disabled:opacity-50">
                   <CheckCircle2 className="h-3 w-3" /> סמן פיקדון כשולם (אדמין)
                 </button>
               )}
@@ -469,7 +469,7 @@ export default function SupplierLeads() {
       <div className="px-5 -mt-4 relative z-10 pb-24">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-[#C9A227]" />
+            <Loader2 className="h-6 w-6 animate-spin text-[#0E6B5A]" />
           </div>
         ) : error ? (
           <div className="gb-card p-6 text-center">
@@ -479,7 +479,7 @@ export default function SupplierLeads() {
           <>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Users className="h-4 w-4 text-[#C9A227]" />
+                <Users className="h-4 w-4 text-[#0E6B5A]" />
                 {showTrash ? `סל מחזור · ${totalTrashed} פריטים` : `סה"כ ${totalActive} פניות${deals.length ? ` · ${deals.length} הצעות` : ""}`}
               </div>
               <button onClick={() => { setShowTrash((v) => !v); setSwipeId(null); }}

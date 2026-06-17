@@ -63,7 +63,7 @@ function BottomNavImpl({ role }: { role: Role }) {
               onTouchStart={() => preloadRoute(to)}
               className={cn(
                 "flex-1 flex flex-col items-center justify-center gap-[3px] relative transition-colors duration-150",
-                active ? "text-[#C9A227]" : "text-[#6B7280] hover:text-[#1F2937]",
+                active ? "text-[#0E6B5A]" : "text-[#6B7280] hover:text-[#1F2937]",
               )}
               style={{ minHeight: "var(--tap)" }}
             >
@@ -71,7 +71,7 @@ function BottomNavImpl({ role }: { role: Role }) {
               <span
                 className={cn(
                   "absolute top-0 left-1/2 -translate-x-1/2 h-[3px] rounded-b-full transition-all duration-200",
-                  active ? "w-10 bg-[#2563EB]" : "w-0 bg-transparent",
+                  active ? "w-10 bg-[#0E6B5A]" : "w-0 bg-transparent",
                 )}
               />
               <Icon

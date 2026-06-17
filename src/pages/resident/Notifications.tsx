@@ -18,7 +18,7 @@ export default function Notifications() {
   }, []);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F8F8F6" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -51,7 +51,7 @@ export default function Notifications() {
                 <div
                   className="h-10 w-10 rounded-[14px] flex items-center justify-center shrink-0"
                   style={{
-                    background: unread ? "#C9A227" : "#F4F6FA",
+                    background: unread ? "#0E6B5A" : "#F4F6FA",
                     color: unread ? "#FFFFFF" : "#6B7280",
                     boxShadow: unread ? "var(--shadow-soft)" : "none",
                   }}
@@ -61,7 +61,7 @@ export default function Notifications() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-0.5 gap-2">
                     <h3 className="font-bold text-[14px] text-[#1F2937] tracking-tight truncate">{n.title}</h3>
-                    {unread && <span className="h-2 w-2 rounded-full bg-[#2563EB] shrink-0" />}
+                    {unread && <span className="h-2 w-2 rounded-full bg-[#0E6B5A] shrink-0" />}
                   </div>
                   <p className="text-[12.5px] text-[#6B7280] leading-relaxed">{n.body}</p>
                   <p className="text-[11px] text-[#9CA3AF] mt-2 font-medium">

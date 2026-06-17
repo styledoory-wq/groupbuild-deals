@@ -18,7 +18,7 @@ export function SearchInput({
   const stickyStyle: React.CSSProperties = sticky
     ? {
         top: "env(safe-area-inset-top)",
-        background: "linear-gradient(180deg,#F8F8F6 60%, rgba(247,248,250,0))",
+        background: "linear-gradient(180deg,#F7F5F0 60%, rgba(247,248,250,0))",
         backdropFilter: "saturate(180%) blur(8px)",
         WebkitBackdropFilter: "saturate(180%) blur(8px)",
       }
@@ -37,7 +37,7 @@ export function SearchInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full h-12 pr-11 pl-10 rounded-[16px] bg-white text-[14px] font-medium text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#C9A227]/40 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]"
+          className="w-full h-12 pr-11 pl-10 rounded-[16px] bg-white text-[14px] font-medium text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#0E6B5A]/40 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]"
         />
         {value && (
           <button

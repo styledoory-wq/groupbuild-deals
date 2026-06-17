@@ -17,7 +17,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           "shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]",
           "border-0 ring-0 outline-none",
           "transition-[box-shadow,transform] duration-200 ease-out",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A227]/40 focus-visible:shadow-[0_4px_14px_-4px_rgba(10,31,61,0.12)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E6B5A]/40 focus-visible:shadow-[0_4px_14px_-4px_rgba(10,31,61,0.12)]",
           "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
           "disabled:cursor-not-allowed disabled:opacity-50",
           className,

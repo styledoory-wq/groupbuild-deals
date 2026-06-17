@@ -214,7 +214,7 @@ export default function AdminResidents() {
       <div className="px-5 -mt-4 relative z-10 mb-4">
         <button
           onClick={() => setOpen(true)}
-          className="w-full h-12 rounded-2xl bg-[#2563EB] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
+          className="w-full h-12 rounded-2xl bg-[#0E6B5A] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
         >
           <UserPlus className="h-5 w-5" /> הוספת דייר חדש
         </button>
@@ -230,7 +230,7 @@ export default function AdminResidents() {
           const initial = (r.full_name || r.email || "?").charAt(0);
           return (
             <div key={r.id} className="gb-card p-3 flex items-center gap-3">
-              <div className="h-11 w-11 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-primary font-bold">
+              <div className="h-11 w-11 rounded-full bg-[#0E6B5A] text-white flex items-center justify-center text-primary font-bold">
                 {initial}
               </div>
               <div className="flex-1 min-w-0">
@@ -284,7 +284,7 @@ export default function AdminResidents() {
             <div className="border-t border-border pt-3">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-xs flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-[#C9A227]" /> פרויקט
+                  <Building2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> פרויקט
                 </Label>
                 <button
                   type="button"
@@ -363,7 +363,7 @@ export default function AdminResidents() {
               </div>
               <div>
                 <Label className="text-xs flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-[#C9A227]" /> פרויקט
+                  <Building2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> פרויקט
                 </Label>
                 <select
                   value={eProjectId}

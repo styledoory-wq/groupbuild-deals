@@ -102,7 +102,7 @@ export default function AdminSupplierTrust() {
                 <div className="grid grid-cols-4 gap-2 text-center text-fs-xs py-2 border-t border-b border-border">
                   <div>
                     <div className="font-bold text-foreground inline-flex items-center gap-0.5 justify-center">
-                      <Star className="h-3 w-3 text-[#C9A227]" /> {Number(r.trust_score).toFixed(1)}
+                      <Star className="h-3 w-3 text-[#0E6B5A]" /> {Number(r.trust_score).toFixed(1)}
                     </div>
                     <div className="text-muted-foreground">אמון</div>
                   </div>

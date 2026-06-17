@@ -94,7 +94,7 @@ export default function SharedDeal() {
   })();
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#F8F8F6]">
+    <div dir="rtl" className="min-h-screen bg-[#F7F5F0]">
       <div className="mx-auto max-w-xl px-5 pt-8 pb-24">
         <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" />
@@ -129,7 +129,7 @@ export default function SharedDeal() {
             </h1>
             {supplier?.business_name && (
               <p className="text-sm text-muted-foreground mt-2 inline-flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-[#C9A227]" />
+                <ShieldCheck className="h-4 w-4 text-[#0E6B5A]" />
                 {supplier.business_name}
               </p>
             )}
@@ -145,7 +145,7 @@ export default function SharedDeal() {
               <div className="mt-5 gb-card p-5">
                 <div className="flex items-start gap-3">
                   <div className="h-11 w-11 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center">
-                    <TagIcon className="h-5 w-5 text-[#C9A227]" />
+                    <TagIcon className="h-5 w-5 text-[#0E6B5A]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xl font-extrabold text-primary leading-tight">{display.headline}</div>

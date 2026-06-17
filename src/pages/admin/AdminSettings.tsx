@@ -85,7 +85,7 @@ export default function AdminSettings() {
       <div className="px-5 -mt-4 relative z-10 space-y-4 pb-24">
         <div className="gb-card p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-[#C9A227]" />
+            <Mail className="h-4 w-4 text-[#0E6B5A]" />
             <h3 className="font-bold text-sm">אימייל לקבלת התראות</h3>
           </div>
           <div>
@@ -105,7 +105,7 @@ export default function AdminSettings() {
 
         <div className="gb-card p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Bell className="h-4 w-4 text-[#C9A227]" />
+            <Bell className="h-4 w-4 text-[#0E6B5A]" />
             <h3 className="font-bold text-sm">סוגי התראות</h3>
           </div>
 
@@ -138,7 +138,7 @@ export default function AdminSettings() {
         <Button
           onClick={save}
           disabled={saving}
-          className="w-full h-12 rounded-2xl bg-[#2563EB] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
+          className="w-full h-12 rounded-2xl bg-[#0E6B5A] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
         >
           <Save className="h-4 w-4" />
           {saving ? "שומר…" : "שמירת הגדרות"}
@@ -146,7 +146,7 @@ export default function AdminSettings() {
 
         <div className="gb-card p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-[#C9A227]" />
+            <Mail className="h-4 w-4 text-[#0E6B5A]" />
             <h3 className="font-bold text-sm">בדיקת שליחת מיילים</h3>
           </div>
           <div>

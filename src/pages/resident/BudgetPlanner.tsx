@@ -20,7 +20,7 @@ import {
 } from "@/lib/budgetPricing";
 
 const TRACKS: { key: Track; label: string; desc: string; icon: typeof Home; tint: string; accent: string; ring: string }[] = [
-  { key: "new_build",       label: "בנייה חדשה",       desc: "וילה / בית פרטי מהיסוד",          icon: Home,   tint: "#EEF4FF", accent: "#2563EB", ring: "rgba(37,99,235,0.18)" },
+  { key: "new_build",       label: "בנייה חדשה",       desc: "וילה / בית פרטי מהיסוד",          icon: Home,   tint: "#EEF4FF", accent: "#0E6B5A", ring: "rgba(14,107,90,0.18)" },
   { key: "full_renovation", label: "שיפוץ בית מלא",     desc: "שיפוץ דירה / בית קיים",            icon: Hammer, tint: "#FFF5EB", accent: "#E8742C", ring: "rgba(232,116,44,0.18)" },
   { key: "single_room",     label: "שיפוץ חדר בודד",    desc: "מטבח / אמבטיה / סלון ועוד",        icon: DoorOpen, tint: "#F0FDF4", accent: "#16A34A", ring: "rgba(22,163,74,0.18)" },
   { key: "single_service",  label: "שירות בודד",        desc: "דלתות / ריצוף / מיזוג ועוד",       icon: Wrench, tint: "#F5F3FF", accent: "#7C3AED", ring: "rgba(124,58,237,0.18)" },
@@ -30,8 +30,8 @@ const finishOptions: FinishLevel[] = ["basic", "standard", "premium", "luxury"];
 const regionOptions: Region[] = ["north", "haifa", "sharon", "center", "jerusalem", "south"];
 
 const FIELD_LABEL = "block text-[11.5px] font-extrabold text-[#6B7280] mb-1.5 tracking-wide";
-const FIELD_INPUT = "h-12 bg-white border border-[#ECEEF2] rounded-[18px] text-[14px] font-medium text-[#1F2937] text-right focus-visible:outline-none focus-visible:border-[#C9A227] focus-visible:ring-[3px] focus-visible:ring-[#C9A227]/15 transition";
-const FIELD_TRIGGER = "h-12 bg-white border border-[#ECEEF2] rounded-[18px] text-[14px] font-medium text-[#1F2937] focus:outline-none focus:border-[#C9A227] focus:ring-[3px] focus:ring-[#C9A227]/15";
+const FIELD_INPUT = "h-12 bg-white border border-[#ECEEF2] rounded-[18px] text-[14px] font-medium text-[#1F2937] text-right focus-visible:outline-none focus-visible:border-[#0E6B5A] focus-visible:ring-[3px] focus-visible:ring-[#0E6B5A]/15 transition";
+const FIELD_TRIGGER = "h-12 bg-white border border-[#ECEEF2] rounded-[18px] text-[14px] font-medium text-[#1F2937] focus:outline-none focus:border-[#0E6B5A] focus:ring-[3px] focus:ring-[#0E6B5A]/15";
 
 function FieldGrid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-3">{children}</div>;
@@ -132,7 +132,7 @@ export default function BudgetPlanner() {
 
   return (
     <MobileShell>
-      <div style={{ background: "#F8F8F6", fontFamily: "'Epilogue', system-ui, sans-serif" }}>
+      <div style={{ background: "#F7F5F0", fontFamily: "'Epilogue', system-ui, sans-serif" }}>
       <PageHeader title="מחשבון תקציב מקצועי" subtitle="הערכת עלות מדויקת ב-4 מסלולים — עם יועץ AI ועסקאות מתאימות" />
       <div className="px-5 pb-28 space-y-5">
 
@@ -219,13 +219,13 @@ export default function BudgetPlanner() {
                   <button
                     type="button"
                     onClick={() => onChange(!checked)}
-                    className="w-full flex items-center justify-between bg-[#F8F8F6] border border-[#ECEEF2] rounded-xl p-3.5 hover:border-[#D1D5DB] transition text-right"
+                    className="w-full flex items-center justify-between bg-[#F7F5F0] border border-[#ECEEF2] rounded-xl p-3.5 hover:border-[#D1D5DB] transition text-right"
                   >
                     <span className="text-[13.5px] font-bold text-[#1F2937]">{label}</span>
                     <Switch
                       checked={checked}
                       onCheckedChange={onChange}
-                      className="data-[state=checked]:bg-[#2563EB] data-[state=unchecked]:bg-[#E5E7EB]"
+                      className="data-[state=checked]:bg-[#0E6B5A] data-[state=unchecked]:bg-[#E5E7EB]"
                     />
                   </button>
                 );

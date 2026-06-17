@@ -184,7 +184,7 @@ export default function SupplierOffers() {
             <div className="flex-1 rounded-[16px] bg-gradient-to-br from-[#1F2937] to-[#1A3A5C] p-4 text-white shadow-[0_8px_24px_-10px_rgba(10,31,61,0.4)]">
               <div className="flex items-center gap-2 mb-1">
                 <div className="h-7 w-7 rounded-full bg-white/15 flex items-center justify-center">
-                  <Sparkles className="h-3.5 w-3.5 text-[#C9A227]" />
+                  <Sparkles className="h-3.5 w-3.5 text-[#0E6B5A]" />
                 </div>
                 <span className="text-xs font-medium opacity-80">הצעות פעילות</span>
               </div>
@@ -305,7 +305,7 @@ export default function SupplierOffers() {
                 <div className="flex items-center gap-2">
                   <Link
                     to={`/supplier/offers/${d.id}/edit`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-[#2563EB] text-white hover:bg-[#2563EB]/90 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-[10px] bg-[#0E6B5A] text-white hover:bg-[#0E6B5A]/90 transition-colors"
                   >
                     <Pencil className="h-3 w-3" /> עריכת הצעה
                   </Link>

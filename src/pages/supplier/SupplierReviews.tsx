@@ -159,7 +159,7 @@ export default function SupplierReviews() {
             {[1, 2, 3, 4, 5].map((i) => (
               <Star
                 key={i}
-                className={"h-5 w-5 " + (i <= Math.round(avg) ? "fill-[#C9A227] text-[#C9A227]" : "text-[#E5E7EB]")}
+                className={"h-5 w-5 " + (i <= Math.round(avg) ? "fill-[#0E6B5A] text-[#0E6B5A]" : "text-[#E5E7EB]")}
               />
             ))}
           </div>
@@ -169,9 +169,9 @@ export default function SupplierReviews() {
             {dist.map((d) => (
               <div key={d.star} className="flex items-center gap-2 text-fs-xs">
                 <span className="w-4 text-muted-foreground">{d.star}</span>
-                <Star className="h-3 w-3 fill-[#C9A227] text-[#C9A227]" />
+                <Star className="h-3 w-3 fill-[#0E6B5A] text-[#0E6B5A]" />
                 <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full bg-[#2563EB]" style={{ width: `${(d.count / denom) * 100}%` }} />
+                  <div className="h-full bg-[#0E6B5A]" style={{ width: `${(d.count / denom) * 100}%` }} />
                 </div>
                 <span className="w-6 text-left text-muted-foreground">{d.count}</span>
               </div>
@@ -200,7 +200,7 @@ export default function SupplierReviews() {
                 <h3 className="font-bold text-sm">{reviewerNames[r.user_id] || "דייר"}</h3>
                 <div className="flex items-center gap-0.5">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className={"h-3 w-3 " + (i <= r.rating ? "fill-[#C9A227] text-[#C9A227]" : "text-[#E5E7EB]")} />
+                    <Star key={i} className={"h-3 w-3 " + (i <= r.rating ? "fill-[#0E6B5A] text-[#0E6B5A]" : "text-[#E5E7EB]")} />
                   ))}
                 </div>
               </div>

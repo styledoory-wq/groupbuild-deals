@@ -4,7 +4,7 @@ import { TrendingDown } from "lucide-react";
 import { BudgetResult, ILS } from "@/lib/budgetPricing";
 
 const COLORS = [
-  "#C9A227", "#16A34A", "#7C3AED", "#2563EB", "#EA580C", "#0FB5C9",
+  "#0E6B5A", "#16A34A", "#7C3AED", "#0E6B5A", "#EA580C", "#0FB5C9",
   "#DC2626", "#0891B2", "#65A30D", "#DB2777", "#9333EA", "#475569",
 ];
 
@@ -58,7 +58,7 @@ export function BudgetResultView({ result }: { result: BudgetResult }) {
                 </span>
                 <span className="text-[#6B7280] font-medium">{ILS(c.min)} – {ILS(c.max)}</span>
               </div>
-              <div className="h-2 rounded-full bg-[#F8F8F6] overflow-hidden">
+              <div className="h-2 rounded-full bg-[#F7F5F0] overflow-hidden">
                 <div className="h-full" style={{ width: `${pct}%`, background: COLORS[i % COLORS.length] }} />
               </div>
             </div>

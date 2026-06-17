@@ -82,19 +82,19 @@ export function EditableField({
           className,
           "cursor-text relative inline-block group",
           "outline outline-2 outline-dashed outline-offset-2 rounded-[6px]",
-          isDirty ? "outline-[#E8742C] bg-[#FFF1E4]" : "outline-[#C9A227]/60 hover:outline-[#C9A227]",
+          isDirty ? "outline-[#E8742C] bg-[#FFF1E4]" : "outline-[#0E6B5A]/60 hover:outline-[#0E6B5A]",
         )}
         title="לחץ לעריכה"
       >
         {render ? render(current) : current ?? placeholder ?? "—"}
-        <Pencil className="inline-block ms-1 h-3 w-3 align-baseline text-[#C9A227] opacity-70 group-hover:opacity-100" strokeWidth={2.4} />
+        <Pencil className="inline-block ms-1 h-3 w-3 align-baseline text-[#0E6B5A] opacity-70 group-hover:opacity-100" strokeWidth={2.4} />
       </TagAny>
     );
   }
 
   // Editing UI
   const commonCls =
-    "w-full bg-white border-2 border-[#C9A227] rounded-[8px] px-2 py-1 text-inherit font-inherit outline-none";
+    "w-full bg-white border-2 border-[#0E6B5A] rounded-[8px] px-2 py-1 text-inherit font-inherit outline-none";
 
   if (type === "textarea") {
     return (

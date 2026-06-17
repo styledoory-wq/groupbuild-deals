@@ -29,7 +29,7 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
   return (
     <div
       className="min-h-screen min-h-[100dvh] relative"
-      style={{ overscrollBehavior: "none", backgroundColor: "#F8F8F6" }}
+      style={{ overscrollBehavior: "none", backgroundColor: "#F7F5F0" }}
     >
       {/* Desktop top header — sits to the LEFT of the right sidebar (248px) */}
       <header
@@ -43,7 +43,7 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
             <input
               type="search"
               placeholder="חיפוש..."
-              className="w-full h-9 rounded-full bg-[#F4F6F9] border border-transparent pr-9 pl-4 text-[13px] text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#C9A227] focus:bg-white transition"
+              className="w-full h-9 rounded-full bg-[#F4F6F9] border border-transparent pr-9 pl-4 text-[13px] text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#0E6B5A] focus:bg-white transition"
             />
           </div>
         </div>
@@ -55,7 +55,7 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
           >
             <Bell className="h-4.5 w-4.5" />
           </Link>
-          <div className="h-9 w-9 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-[12px] font-bold">
+          <div className="h-9 w-9 rounded-full bg-[#0E6B5A] text-white flex items-center justify-center text-[12px] font-bold">
             {(user?.name ?? "?").slice(0, 1)}
           </div>
         </div>

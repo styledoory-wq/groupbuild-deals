@@ -83,7 +83,7 @@ export default function Favorites() {
             action={
               <Link
                 to="/resident/deals"
-                className="inline-flex items-center gap-1.5 h-11 px-5 rounded-2xl bg-[#2563EB] text-white text-[14px] font-bold"
+                className="inline-flex items-center gap-1.5 h-11 px-5 rounded-2xl bg-[#0E6B5A] text-white text-[14px] font-bold"
               >
                 <Sparkles className="h-4 w-4" /> לעסקאות חיות
               </Link>

@@ -12,7 +12,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div dir="rtl" className="min-h-[100dvh] w-full" style={{ backgroundColor: "#F8F8F6" }}>
+    <div dir="rtl" className="min-h-[100dvh] w-full" style={{ backgroundColor: "#F7F5F0" }}>
       <div
         className="relative z-10 w-full max-w-[var(--app-max-w,640px)] mx-auto flex flex-col"
         style={{
@@ -35,7 +35,7 @@ export default function Landing() {
 
         {/* Hero */}
         <section className="px-5 pt-6 pb-6 text-center">
-          <span className="inline-flex items-center gap-1.5 px-3 h-7 rounded-full bg-[#FFF8E1] text-[#B8923F] text-[11px] font-bold tracking-tight">
+          <span className="inline-flex items-center gap-1.5 px-3 h-7 rounded-full bg-[#FFF8E1] text-[#0A5446] text-[11px] font-bold tracking-tight">
             איך GroupBuild עובד
           </span>
           <h1 className="mt-4 text-[clamp(1.5rem,5vw,1.9rem)] font-extrabold leading-tight tracking-tight text-[#1F2937]">
@@ -82,7 +82,7 @@ export default function Landing() {
           <article className="bg-white rounded-[20px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-12 w-12 rounded-[14px] flex items-center justify-center shrink-0 bg-[#FFF8E1]">
-                <Building2 className="h-5 w-5 text-[#B8923F]" />
+                <Building2 className="h-5 w-5 text-[#0A5446]" />
               </div>
               <div>
                 <h2 className="text-[17px] font-extrabold text-[#1F2937] tracking-tight">ספקים</h2>
@@ -98,7 +98,7 @@ export default function Landing() {
                 "סוגרים יותר עסקאות איכותיות",
               ].map((t, i) => (
                 <li key={i} className="flex items-center gap-3 p-3 rounded-[14px] bg-[#F4F6FA]">
-                  <span className="h-7 w-7 rounded-full bg-white text-[#B8923F] text-[13px] font-extrabold flex items-center justify-center shadow-[0_2px_6px_-2px_rgba(10,31,61,0.18)]">
+                  <span className="h-7 w-7 rounded-full bg-white text-[#0A5446] text-[13px] font-extrabold flex items-center justify-center shadow-[0_2px_6px_-2px_rgba(10,31,61,0.18)]">
                     {i + 1}
                   </span>
                   <span className="text-[13.5px] font-semibold text-[#1F2937]">{t}</span>
@@ -125,7 +125,7 @@ export default function Landing() {
                 className="bg-white rounded-[18px] p-3.5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]"
               >
                 <div className="h-9 w-9 rounded-[12px] bg-[#FFF8E1] flex items-center justify-center mb-2">
-                  <c.icon className="h-4 w-4 text-[#B8923F]" />
+                  <c.icon className="h-4 w-4 text-[#0A5446]" />
                 </div>
                 <h3 className="text-[13.5px] font-extrabold text-[#1F2937] tracking-tight">{c.title}</h3>
                 <p className="text-[12px] text-[#6B7280] font-medium leading-snug mt-0.5">{c.desc}</p>

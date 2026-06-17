@@ -106,7 +106,7 @@ function RealDealCardImpl({
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              <TagIcon className="h-10 w-10 text-[#C9A227]/40" strokeWidth={1.5} />
+              <TagIcon className="h-10 w-10 text-[#0E6B5A]/40" strokeWidth={1.5} />
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
@@ -119,7 +119,7 @@ function RealDealCardImpl({
               </span>
             )}
             {discountBadge && (
-              <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-[#C9A227] text-white shadow-[0_2px_6px_-2px_rgba(201,162,39,0.5)]">
+              <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-[#0E6B5A] text-white shadow-[0_2px_6px_-2px_rgba(14,107,90,0.5)]">
                 {discountBadge} הנחה
               </span>
             )}
@@ -150,7 +150,7 @@ function RealDealCardImpl({
               {deal.supplier_logo_url ? (
                 <img src={deal.supplier_logo_url} alt="" className="h-5 w-5 rounded-full object-cover border border-[#ECEEF2]" />
               ) : (
-                <ShieldCheck className="h-3 w-3 text-[#C9A227]" strokeWidth={2.5} />
+                <ShieldCheck className="h-3 w-3 text-[#0E6B5A]" strokeWidth={2.5} />
               )}
               <span className="truncate font-medium">{deal.supplier_name}</span>
             </div>

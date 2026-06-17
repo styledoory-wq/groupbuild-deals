@@ -44,7 +44,7 @@ export default function SearchPage() {
   }, [term]);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F8F8F6" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -60,13 +60,13 @@ export default function SearchPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="חפש ספקים, בעלי מקצוע..."
-              className="w-full h-14 rounded-[20px] bg-white border border-[#ECEEF2] pr-12 pl-12 text-[15px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#C9A227] focus:ring-[3px] focus:ring-[#C9A227]/15 shadow-[0_4px_16px_-6px_rgba(10,31,61,0.08)] transition"
+              className="w-full h-14 rounded-[20px] bg-white border border-[#ECEEF2] pr-12 pl-12 text-[15px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#0E6B5A] focus:ring-[3px] focus:ring-[#0E6B5A]/15 shadow-[0_4px_16px_-6px_rgba(10,31,61,0.08)] transition"
               dir="rtl"
             />
             {q && (
               <button
                 onClick={() => setQ("")}
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-[#F8F8F6] flex items-center justify-center active:scale-90 transition-transform"
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-[#F7F5F0] flex items-center justify-center active:scale-90 transition-transform"
                 aria-label="נקה"
               >
                 <X className="h-4 w-4 text-[#6B7280]" strokeWidth={2.4} />
@@ -99,7 +99,7 @@ export default function SearchPage() {
           ) : suppliers.length === 0 ? (
             <div className="flex flex-col items-center text-center py-16">
               <div className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center mb-4 shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]">
-                <SearchIcon className="h-7 w-7 text-[#C9A227]" />
+                <SearchIcon className="h-7 w-7 text-[#0E6B5A]" />
               </div>
               <p className="text-[15px] font-bold text-[#1F2937]">לא נמצאו ספקים</p>
               <p className="text-[13px] text-[#6B7280] mt-1">נסה לחפש בעזרת מילה אחרת</p>
@@ -119,8 +119,8 @@ export default function SearchPage() {
                       <p className="text-[12px] text-[#6B7280] truncate mt-0.5">{s.short_description}</p>
                     )}
                   </div>
-                  <span className="h-9 w-9 rounded-xl bg-[#2563EB]/12 flex items-center justify-center">
-                    <Store className="h-4 w-4 text-[#C9A227]" strokeWidth={2.2} />
+                  <span className="h-9 w-9 rounded-xl bg-[#0E6B5A]/12 flex items-center justify-center">
+                    <Store className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2.2} />
                   </span>
                 </Link>
               ))}
