@@ -34,19 +34,20 @@ type DbDeal = {
   offer_type: string | null;
 };
 
-// Visual demo data for blocks that don't have a backing table yet.
-// TODO: wire to real projects/competitor tables when available.
-const DEMO_PROJECTS = [
-  { id: "p1", name: "מגדלי הצמרת", city: "תל אביב", units: 84, distance: "1.2 ק״מ", category: "מזגנים" },
-  { id: "p2", name: "פרויקט סביוני הכרמל", city: "חיפה", units: 56, distance: "3.4 ק״מ", category: "שיפוצים" },
-  { id: "p3", name: "נווה גנים B", city: "רעננה", units: 120, distance: "5.8 ק״מ", category: "אינסטלציה" },
-];
+type AreaProject = {
+  id: string;
+  name: string;
+  city: string;
+  units: number;
+  stage: string | null;
+};
 
 const DEMO_COMPETITORS = [
   { id: "c1", name: "התקנת מזגן 2.5 כ״ס · רמת גן", category: "מיזוג אוויר · ספק אחר", price: 2390, joiners: 47, delta: -120 },
   { id: "c2", name: "שירות שנתי + ניקוי 4 מזגנים", category: "תחזוקה · ספק אחר", price: 690, joiners: 31, delta: 0 },
   { id: "c3", name: "החלפת דוד שמש 150 ליטר", category: "אינסטלציה · ספק אחר", price: 2890, joiners: 22, delta: -40 },
 ];
+
 
 export default function SupplierDashboard() {
   const navigate = useNavigate();
@@ -56,6 +57,8 @@ export default function SupplierDashboard() {
   const [dbSupplier, setDbSupplier] = useState<DbSupplier | null>(null);
   const [myDeals, setMyDeals] = useState<DbDeal[]>([]);
   const [counts, setCounts] = useState<Record<string, { interests: number; paid: number }>>({});
+  const [areaProjects, setAreaProjects] = useState<AreaProject[]>([]);
+  const [areaSet, setAreaSet] = useState(false);
   
 
   useEffect(() => {
@@ -118,6 +121,38 @@ export default function SupplierDashboard() {
             cMap[d.id] = { interests: interests ?? 0, paid: paid ?? 0 };
           }));
           if (!cancelled) setCounts(cMap);
+
+          // Load supplier work-area cities, then projects in those cities only
+          const { data: scRows } = await supabase
+            .from("supplier_cities")
+            .select("city_id")
+            .eq("supplier_id", supplierRow.id);
+          const cityIds = (scRows ?? []).map((r: { city_id: string }) => r.city_id);
+          if (!cancelled) setAreaSet(cityIds.length > 0);
+          if (cityIds.length > 0) {
+            const { data: cityRows } = await supabase
+              .from("cities")
+              .select("name_he")
+              .in("id", cityIds);
+            const cityNames = (cityRows ?? []).map((c: { name_he: string }) => c.name_he);
+            if (cityNames.length > 0) {
+              const { data: projRows } = await supabase
+                .from("projects")
+                .select("id,name,city,apartment_count,building_count,current_stage")
+                .in("city", cityNames)
+                .eq("is_active", true)
+                .eq("is_deleted", false)
+                .order("created_at", { ascending: false })
+                .limit(12);
+              if (!cancelled) {
+                setAreaProjects((projRows ?? []).map((p: { id: string; name: string; city: string; apartment_count: number | null; building_count: number | null; current_stage: string | null }) => ({
+                  id: p.id, name: p.name, city: p.city,
+                  units: (p.apartment_count ?? 0) || (p.building_count ?? 0),
+                  stage: p.current_stage,
+                })));
+              }
+            }
+          }
         }
       } catch (e) {
         console.error("[SupplierDashboard] load error", e);
@@ -259,31 +294,49 @@ export default function SupplierDashboard() {
         <SectionHeader
           icon={<Building2 className="h-3.5 w-3.5" />}
           title="פרויקטים חדשים באזור שלך"
-          subtitle="בניינים פעילים במפת השירות שהגדרת · רק האזור שלך"
-          action={<button onClick={() => navigate("/supplier/offers/new")} className="text-[12px] font-bold text-[#0E6B5A]">צור הצעה <ChevronLeft className="h-3 w-3 inline" /></button>}
+          subtitle={areaSet ? "בניינים פעילים בערים שהגדרת באזור השירות" : "הגדר אזור שירות כדי לראות פרויקטים רלוונטיים"}
+          action={<button onClick={() => navigate("/supplier/profile/edit")} className="text-[12px] font-bold text-[#0E6B5A]">ערוך אזור <ChevronLeft className="h-3 w-3 inline" /></button>}
         />
-        <div className="px-5 mt-2 -mr-1 pr-1 overflow-x-auto no-scrollbar">
-          <div className="flex gap-2.5 pb-1 snap-x snap-mandatory">
-            {DEMO_PROJECTS.map((p) => (
-              <div key={p.id} className="snap-start min-w-[230px] bg-white rounded-2xl border border-[#E8EAE5] p-3.5">
-                <div className="flex items-center gap-1.5 text-[11px] text-[#5C6770] mb-2">
-                  <MapPin className="h-3 w-3 text-[#0E6B5A]" />
-                  <span className="font-semibold">{p.city}</span>
-                  <span className="text-[#C9CDC4]">·</span>
-                  <span>{p.distance}</span>
-                </div>
-                <div className="font-extrabold text-[14px] text-[#0F1B14] tracking-tight leading-tight mb-1">{p.name}</div>
-                <div className="text-[12px] text-[#5C6770] mb-3">{p.units} דירות · {p.category}</div>
-                <button
-                  onClick={() => navigate("/supplier/offers/new")}
-                  className="w-full h-9 rounded-xl bg-[#0F1B14] text-white text-[12px] font-extrabold flex items-center justify-center gap-1 active:scale-95 transition"
-                >
-                  <Plus className="h-3.5 w-3.5" strokeWidth={2.8} /> הצעה ייעודית
-                </button>
-              </div>
-            ))}
+        {!areaSet ? (
+          <div className="px-5 mt-2">
+            <div className="bg-white rounded-2xl border border-dashed border-[#C9CDC4] p-5 text-center">
+              <MapPin className="h-5 w-5 mx-auto text-[#0E6B5A] mb-2" />
+              <div className="text-[13px] font-extrabold text-[#0F1B14] mb-1">לא הוגדר אזור עבודה</div>
+              <div className="text-[12px] text-[#5C6770] mb-3">בחר את הערים שבהן אתה נותן שירות כדי שנציג רק פרויקטים רלוונטיים אליך.</div>
+              <Button onClick={() => navigate("/supplier/profile/edit")} className="h-10 rounded-xl bg-[#0E6B5A] hover:bg-[#0a5648] text-white text-[12.5px] font-extrabold">
+                הגדר אזור שירות
+              </Button>
+            </div>
           </div>
-        </div>
+        ) : areaProjects.length === 0 ? (
+          <div className="px-5 mt-2">
+            <div className="bg-white rounded-2xl border border-[#E8EAE5] p-5 text-center text-[12.5px] text-[#5C6770]">
+              אין כרגע פרויקטים פעילים באזור שלך. נעדכן אותך ברגע שיתפרסמו.
+            </div>
+          </div>
+        ) : (
+          <div className="px-5 mt-2 -mr-1 pr-1 overflow-x-auto no-scrollbar">
+            <div className="flex gap-2.5 pb-1 snap-x snap-mandatory">
+              {areaProjects.map((p) => (
+                <div key={p.id} className="snap-start min-w-[230px] bg-white rounded-2xl border border-[#E8EAE5] p-3.5">
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#5C6770] mb-2">
+                    <MapPin className="h-3 w-3 text-[#0E6B5A]" />
+                    <span className="font-semibold">{p.city}</span>
+                    {p.stage && (<><span className="text-[#C9CDC4]">·</span><span>{p.stage}</span></>)}
+                  </div>
+                  <div className="font-extrabold text-[14px] text-[#0F1B14] tracking-tight leading-tight mb-1">{p.name}</div>
+                  <div className="text-[12px] text-[#5C6770] mb-3">{p.units ? `${p.units} יחידות` : "פרויקט חדש"}</div>
+                  <button
+                    onClick={() => navigate("/supplier/offers/new")}
+                    className="w-full h-9 rounded-xl bg-[#0F1B14] text-white text-[12px] font-extrabold flex items-center justify-center gap-1 active:scale-95 transition"
+                  >
+                    <Plus className="h-3.5 w-3.5" strokeWidth={2.8} /> הצעה ייעודית
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Market — published offers in your area */}
         <SectionHeader
