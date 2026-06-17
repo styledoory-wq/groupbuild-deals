@@ -122,6 +122,56 @@ export type Database = {
           },
         ]
       }
+      committee_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_notes: string | null
+          id: string
+          notes: string | null
+          project_id: string
+          requested_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          id?: string
+          notes?: string | null
+          project_id: string
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          id?: string
+          notes?: string | null
+          project_id?: string
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "committee_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       complaints: {
         Row: {
           admin_notes: string | null
@@ -1567,6 +1617,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_decide_committee_request: {
+        Args: { _approve: boolean; _id: string; _notes?: string }
+        Returns: undefined
+      }
       admin_get_supplier_billing: {
         Args: { _supplier_id: string }
         Returns: {
@@ -1598,6 +1652,7 @@ export type Database = {
         Args: { _deal_id: string }
         Returns: undefined
       }
+      get_committee_dashboard: { Args: { _project_id?: string }; Returns: Json }
       get_deal_interest_count: { Args: { _deal_id: string }; Returns: number }
       get_deal_paid_count: { Args: { _deal_id: string }; Returns: number }
       get_deal_reviews_public: {
@@ -1648,6 +1703,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_committee_for_project: {
+        Args: { _project_id: string; _user_id?: string }
+        Returns: boolean
+      }
       is_supplier_for_deal: {
         Args: { _deal_id: string; _user_id?: string }
         Returns: boolean
@@ -1683,6 +1742,10 @@ export type Database = {
       refresh_supplier_service_areas: {
         Args: { _supplier_id: string }
         Returns: undefined
+      }
+      request_committee_role: {
+        Args: { _notes?: string; _project_id: string }
+        Returns: string
       }
       set_deposit_hidden: {
         Args: { _deposit_id: string; _hidden: boolean }
