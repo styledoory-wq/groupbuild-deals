@@ -766,57 +766,8 @@ export default function DealDetail() {
         </div>
       </div>
 
-      {/* ===== SECTION 2 — PROGRESS ===== */}
-      {progressTarget > 0 && (
-        <div className="px-4 mt-5">
-          <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B7280]">התקדמות הקבוצה</p>
-                <p className="text-[20px] font-extrabold text-[#1F2937] mt-1 tracking-tight">
-                  {participantCount} מתוך {progressTarget} הצטרפו
-                </p>
-              </div>
-              <div className="text-left">
-                <div className="text-[28px] font-black text-[#1F2937] leading-none">{progressPct}%</div>
-                <div className="text-[10px] font-bold text-[#6B7280] mt-1">הושלם</div>
-              </div>
-            </div>
-            <div className="h-3 bg-[#F4F6FA] rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{
-                  width: `${progressPct}%`,
-                  background: "linear-gradient(90deg, #1A8870 0%, #34A88E 50%, #1A8870 100%)",
-                  boxShadow: "0 0 12px rgba(201,168,76,0.45)",
-                }}
-              />
-            </div>
-            {nextTier && peopleNeeded > 0 && (
-              <p className="text-[12px] font-bold text-[#1F2937] mt-3 flex items-center gap-1.5">
-                <TrendingUp className="h-3.5 w-3.5 text-[#1A8870]" />
-                עוד {peopleNeeded} דיירים פותחים את המדרגה הבאה
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Progress + benefits removed — info shown in tiers ladder & how-it-works */}
 
-      {/* ===== SECTION 3 — WHY JOIN ===== */}
-      <div className="px-4 mt-5">
-        <h2 className="text-[15px] font-extrabold text-[#1F2937] mb-3 px-1">למה כדאי להצטרף</h2>
-        <div className="grid grid-cols-2 gap-3">
-          {benefits.map((b) => (
-            <div key={b.title} className="bg-white rounded-[20px] p-4 shadow-[0_4px_12px_-6px_rgba(10,31,61,0.12)]">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-2.5" style={{ background: b.tint }}>
-                <b.icon className="w-5 h-5" style={{ color: b.accent }} strokeWidth={2} />
-              </div>
-              <p className="text-[13px] font-extrabold text-[#1F2937] leading-tight">{b.title}</p>
-              <p className="text-[11px] text-[#6B7280] leading-snug mt-1">{b.subtitle}</p>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* SECTION 4 removed — info already shown in hero, metrics strip & supplier card */}
 
