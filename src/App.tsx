@@ -73,6 +73,7 @@ const AdminSupplierMedia = lazy(() => import("./pages/admin/AdminSupplierMedia")
 const AdminDbSuppliers = lazy(() => import("./pages/admin/AdminDbSuppliers"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
 const PaymentCheckout = lazy(() => import("./pages/payment/PaymentCheckout"));
+const CheckoutSummary = lazy(() => import("./pages/payment/CheckoutSummary"));
 const PaymentSuccess = lazy(() => import("./pages/payment/PaymentSuccess"));
 const PaymentCancel = lazy(() => import("./pages/payment/PaymentCancel"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
@@ -258,6 +259,7 @@ const App = () => (
                   <Route path="/admin/leads" element={adminRoute(<AdminLeads />)} />
                   <Route path="/admin/supplier-trust" element={adminRoute(<AdminSupplierTrust />)} />
                   <Route path="/payment/checkout" element={<PaymentCheckout />} />
+                  <Route path="/checkout/:dealId" element={<CheckoutSummary />} />
                   <Route path="/payment/success" element={<PaymentSuccess />} />
                   <Route path="/payment/cancel" element={<PaymentCancel />} />
 <Route path="/design-system" element={adminRoute(<DesignSystem />)} />

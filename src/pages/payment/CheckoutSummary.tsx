@@ -131,7 +131,9 @@ export default function CheckoutSummary() {
     [tiers, participants],
   );
 
-  const tierLabel = activeTier ? describeTier(activeTier, deal?.offer_type ?? "tiers") : null;
+  const tierLabel = activeTier
+    ? describeTier((deal?.offer_type as "percentage" | "price_comparison" | "tiers") ?? "tiers", activeTier).headline
+    : null;
 
   const headlinePrice = useMemo(() => {
     if (activeTier?.discounted_price) return activeTier.discounted_price;
@@ -167,19 +169,27 @@ export default function CheckoutSummary() {
       }
       const uid = session.session.user.id;
 
-      // Create / upsert interest
-      await supabase.from("deal_interests").upsert(
-        {
-          deal_id: deal.id,
-          user_id: uid,
-          full_name: fullName,
-          phone,
-          status: depositAmount > 0 ? "pending_deposit" : "interested",
-          accepted_terms: true,
-          accepted_terms_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id,deal_id" },
-      );
+      // Create interest row (or update existing)
+      const { data: existing } = await supabase
+        .from("deal_interests")
+        .select("id")
+        .eq("user_id", uid)
+        .eq("deal_id", deal.id)
+        .eq("is_deleted", false)
+        .maybeSingle();
+      const interestPayload = {
+        deal_id: deal.id,
+        user_id: uid,
+        full_name: fullName,
+        phone,
+        status: depositAmount > 0 ? "pending_deposit" : "interested",
+        terms_accepted_at: new Date().toISOString(),
+      };
+      if (existing?.id) {
+        await supabase.from("deal_interests").update(interestPayload).eq("id", existing.id);
+      } else {
+        await supabase.from("deal_interests").insert(interestPayload);
+      }
 
       if (depositAmount <= 0) {
         toast.success("הצטרפת בהצלחה להצעה 🎉");
@@ -279,10 +289,11 @@ export default function CheckoutSummary() {
                 />
               ) : (
                 <SupplierLogo
-                  url={supplier?.logo_url ?? null}
+                  logoUrl={supplier?.logo_url ?? null}
                   name={supplier?.business_name ?? ""}
                   className="h-16 w-16 rounded-2xl shrink-0"
                 />
+
               )}
               <div className="min-w-0 flex-1">
                 <h2 className="text-base font-extrabold leading-tight line-clamp-2">
