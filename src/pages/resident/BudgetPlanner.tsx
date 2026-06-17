@@ -30,8 +30,8 @@ const finishOptions: FinishLevel[] = ["basic", "standard", "premium", "luxury"];
 const regionOptions: Region[] = ["north", "haifa", "sharon", "center", "jerusalem", "south"];
 
 const FIELD_LABEL = "block text-[11.5px] font-extrabold text-[#6B7280] mb-1.5 tracking-wide";
-const FIELD_INPUT = "h-12 bg-white border border-[#E5E7EB] rounded-xl text-[14px] font-bold text-[#1F2937] text-right shadow-[0_1px_2px_rgba(31,41,55,0.04)] focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-[#C9A227]/30 focus-visible:border-[#C9A227]";
-const FIELD_TRIGGER = "h-12 bg-white border border-[#E5E7EB] rounded-xl text-[14px] font-bold text-[#1F2937] shadow-[0_1px_2px_rgba(31,41,55,0.04)] focus:ring-2 focus:ring-[#C9A227]/30";
+const FIELD_INPUT = "h-12 bg-white border border-[#ECEEF2] rounded-xl text-[14px] font-bold text-[#1F2937] text-right shadow-[0_1px_2px_rgba(31,41,55,0.04)] focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-[#C9A227]/30 focus-visible:border-[#C9A227]";
+const FIELD_TRIGGER = "h-12 bg-white border border-[#ECEEF2] rounded-xl text-[14px] font-bold text-[#1F2937] shadow-[0_1px_2px_rgba(31,41,55,0.04)] focus:ring-2 focus:ring-[#C9A227]/30";
 
 function FieldGrid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-3">{children}</div>;
@@ -170,13 +170,13 @@ export default function BudgetPlanner() {
                 <span className="h-2 w-2 rounded-full" style={{ background: theme.accent }} />
                 {theme.label}
               </div>
-              <button onClick={reset} className="text-[12px] text-[#6B7280] flex items-center gap-1 hover:text-[#1F2937] bg-white border border-[#E5E7EB] rounded-full px-3 py-1.5 shadow-sm">
+              <button onClick={reset} className="text-[12px] text-[#6B7280] flex items-center gap-1 hover:text-[#1F2937] bg-white border border-[#ECEEF2] rounded-full px-3 py-1.5 shadow-sm">
                 <RefreshCw className="h-3.5 w-3.5" /> החלף מסלול
               </button>
             </div>
 
             {/* Mode toggle */}
-            <div className="bg-white rounded-2xl p-1.5 border border-[#E5E7EB] flex gap-1 shadow-sm">
+            <div className="bg-white rounded-2xl p-1.5 border border-[#ECEEF2] flex gap-1 shadow-sm">
               {([
                 { key: "quick", label: "מהיר", desc: "טופס קצר · דיוק ±28%", icon: Zap },
                 { key: "wizard", label: "אשף מדויק", desc: "5-7 שלבים · דיוק ±10%", icon: Sparkles },
@@ -213,13 +213,13 @@ export default function BudgetPlanner() {
                 onCancel={() => setWizardOpen(false)}
               />
             ) : (
-            <div className="bg-white rounded-3xl p-5 border border-[#E5E7EB] shadow-[0_4px_20px_-12px_rgba(31,41,55,0.12)] space-y-4">
+            <div className="bg-white rounded-3xl p-5 border border-[#ECEEF2] shadow-[0_4px_20px_-12px_rgba(31,41,55,0.12)] space-y-4">
               {(() => {
                 const SwitchRow = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) => (
                   <button
                     type="button"
                     onClick={() => onChange(!checked)}
-                    className="w-full flex items-center justify-between bg-[#F8F8F6] border border-[#E5E7EB] rounded-xl p-3.5 hover:border-[#D1D5DB] transition text-right"
+                    className="w-full flex items-center justify-between bg-[#F8F8F6] border border-[#ECEEF2] rounded-xl p-3.5 hover:border-[#D1D5DB] transition text-right"
                   >
                     <span className="text-[13.5px] font-bold text-[#1F2937]">{label}</span>
                     <Switch

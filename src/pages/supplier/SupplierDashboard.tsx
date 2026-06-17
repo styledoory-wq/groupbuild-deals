@@ -140,7 +140,7 @@ export default function SupplierDashboard() {
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center">
             <div className="h-10 w-10 mx-auto rounded-full border-2 border-[#1F2937] border-t-transparent animate-spin mb-3" />
-            <div className="text-sm text-[#475569]">טוען את החשבון…</div>
+            <div className="text-sm text-[#6B7280]">טוען את החשבון…</div>
           </div>
         </div>
       </MobileShell>
@@ -156,7 +156,7 @@ export default function SupplierDashboard() {
               <AlertCircle className="h-6 w-6 text-destructive" />
             </div>
             <h2 className="font-bold text-base mb-2">שגיאה בטעינה</h2>
-            <p className="text-sm text-[#475569] mb-5">{error}</p>
+            <p className="text-sm text-[#6B7280] mb-5">{error}</p>
             <Button onClick={handleLogout} variant="outline" className="w-full rounded-2xl">
               חזרה למסך התחברות
             </Button>
@@ -191,7 +191,7 @@ export default function SupplierDashboard() {
         </h1>
         {dbSupplier && !isPending && !isRejected && (
           <div className="mt-1.5">
-            <SupplierRatingBadge supplierId={dbSupplier.id} className="text-[12px] text-[#B8923F]" />
+            <SupplierRatingBadge supplierId={dbSupplier.id} className="text-[12px] text-[#C9A227]" />
           </div>
         )}
       </div>
@@ -203,14 +203,14 @@ export default function SupplierDashboard() {
       <MobileShell>
         <HeroBar />
         <div className="px-5 mt-5">
-          <div className="bg-white rounded-2xl p-6 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] text-center">
-            <div className="h-14 w-14 mx-auto rounded-2xl bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center mb-4">
-              <Clock className="h-6 w-6 text-[#B8923F]" strokeWidth={2} />
+          <div className="bg-white rounded-2xl p-6 border border-[#ECEEF2] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.10)] text-center">
+            <div className="h-14 w-14 mx-auto rounded-2xl bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A227]/40 flex items-center justify-center mb-4">
+              <Clock className="h-6 w-6 text-[#C9A227]" strokeWidth={2} />
             </div>
             <h2 className="font-extrabold text-[#1F2937] text-base mb-2">
               {isRejected ? "ההרשמה נדחתה" : "ההרשמה התקבלה וממתינה לאישור"}
             </h2>
-            <p className="text-sm text-[#475569] leading-relaxed mb-5">
+            <p className="text-sm text-[#6B7280] leading-relaxed mb-5">
               {isRejected
                 ? "לצערנו ההרשמה לא אושרה כרגע. ניתן לפנות לתמיכה לפרטים נוספים."
                 : "החשבון שלך ממתין לאישור מנהל. נעדכן אותך לאחר האישור ותוכל להתחיל לפרסם הצעות."}
@@ -252,31 +252,31 @@ export default function SupplierDashboard() {
         </div>
 
         <section className="px-5 space-y-3 pb-8 w-full">
-          <h2 className="text-fs-xs uppercase tracking-[0.14em] text-[#475569] font-semibold flex items-center gap-1.5 mb-1 px-1">
-            <Briefcase className="h-3 w-3 text-[#B8923F]" strokeWidth={2} /> ההצעות שלי
+          <h2 className="text-fs-xs uppercase tracking-[0.14em] text-[#6B7280] font-semibold flex items-center gap-1.5 mb-1 px-1">
+            <Briefcase className="h-3 w-3 text-[#C9A227]" strokeWidth={2} /> ההצעות שלי
           </h2>
           {myDeals.length === 0 && (
-            <div className="bg-white rounded-2xl p-5 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center text-sm text-[#475569]">
+            <div className="bg-white rounded-2xl p-5 border border-[#ECEEF2] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] text-center text-sm text-[#6B7280]">
               עדיין לא יצרת הצעות. לחץ "צרו הצעה חדשה" כדי להתחיל.
             </div>
           )}
           {myDeals.map((d) => {
             const c = counts[d.id] ?? { interests: 0, paid: 0 };
             return (
-              <div key={d.id} className="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] w-full">
+              <div key={d.id} className="bg-white rounded-2xl p-4 border border-[#ECEEF2] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] w-full">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-fs-sm text-[#1F2937] truncate">{d.title}</h3>
-                    <div className="text-fs-xs text-[#475569] mt-0.5">{d.status}</div>
+                    <div className="text-fs-xs text-[#6B7280] mt-0.5">{d.status}</div>
                   </div>
                   <div className="text-left">
                     <div className="font-extrabold text-[#1F2937] text-sm">{formatILS(priceFor(d))}</div>
-                    <div className="text-fs-xs text-[#B8923F] font-bold mt-0.5">{c.paid} שילמו</div>
+                    <div className="text-fs-xs text-[#C9A227] font-bold mt-0.5">{c.paid} שילמו</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-fs-xs pt-3 border-t border-[#E2E8F0]">
-                  <span className="px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#1F2937] border border-[#E2E8F0] font-semibold">{c.interests} לידים</span>
-                  <span className="px-2.5 py-1 rounded-full bg-[#C9A961]/12 text-[#B8923F] border border-[#C9A961]/30 font-semibold">{c.paid} פיקדונות</span>
+                <div className="flex items-center gap-2 text-fs-xs pt-3 border-t border-[#ECEEF2]">
+                  <span className="px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#1F2937] border border-[#ECEEF2] font-semibold">{c.interests} לידים</span>
+                  <span className="px-2.5 py-1 rounded-full bg-[#C9A227]/12 text-[#C9A227] border border-[#C9A227]/30 font-semibold">{c.paid} פיקדונות</span>
                 </div>
               </div>
             );
@@ -291,12 +291,12 @@ export default function SupplierDashboard() {
 
 function Stat({ icon: Icon, label, value, small }: { icon: LucideIcon; label: string; value: string; small?: boolean }) {
   return (
-    <div className="bg-white rounded-2xl p-4 border border-[#E2E8F0] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] w-full">
+    <div className="bg-white rounded-2xl p-4 border border-[#ECEEF2] shadow-[0_4px_14px_-8px_rgba(15,30,60,0.08)] w-full">
       <div className="flex items-center gap-2 mb-2">
-        <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A961]/40 flex items-center justify-center">
-          <Icon className="h-3.5 w-3.5 text-[#B8923F]" strokeWidth={2} />
+        <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#F3E9CC] to-[#FAF4E2] border border-[#C9A227]/40 flex items-center justify-center">
+          <Icon className="h-3.5 w-3.5 text-[#C9A227]" strokeWidth={2} />
         </span>
-        <span className="text-fs-xs text-[#475569] font-semibold uppercase tracking-[0.12em]">{label}</span>
+        <span className="text-fs-xs text-[#6B7280] font-semibold uppercase tracking-[0.12em]">{label}</span>
       </div>
       <div className={(small ? "text-fs-base" : "text-fs-xl") + " font-extrabold text-[#1F2937] tracking-tight leading-none"}>{value}</div>
     </div>
