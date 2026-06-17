@@ -123,16 +123,22 @@ export default function DealsList() {
     return () => { cancelled = true; };
   }, [categoryId, stageId, cacheKey]);
 
+  useEffect(() => {
+    let cancelled = false;
+    listFavoriteIds().then((s) => { if (!cancelled) setFavIds(s); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   const cat = categories.find((c) => c.id === categoryId);
   const stageTitle = stageId ? STAGE_TITLES[stageId] : "";
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
     return deals.filter((d) => {
-      const statusMatch =
-        tab === "active"
-          ? d.status === "active" && !d.auto_closed_at
-          : d.status === "closed" || !!d.auto_closed_at;
+      let statusMatch = false;
+      if (tab === "active") statusMatch = d.status === "active" && !d.auto_closed_at;
+      else if (tab === "archive") statusMatch = d.status === "closed" || !!d.auto_closed_at;
+      else if (tab === "favorites") statusMatch = favIds.has(d.id);
       if (!statusMatch) return false;
       if (!term) return true;
       return (
@@ -140,7 +146,7 @@ export default function DealsList() {
         (d.supplier_name ?? "").toLowerCase().includes(term)
       );
     });
-  }, [deals, tab, q]);
+  }, [deals, tab, q, favIds]);
 
   return (
     <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F8F8F6" }}>
