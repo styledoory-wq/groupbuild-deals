@@ -819,20 +819,7 @@ export default function DealDetail() {
         </div>
       </div>
 
-      {/* ===== SECTION 4 — OFFER DETAILS GRID ===== */}
-      <div className="px-4 mt-5">
-        <h2 className="text-[15px] font-extrabold text-[#1F2937] mb-3 px-1">פרטי ההצעה</h2>
-        <div className="grid grid-cols-2 gap-3">
-          {depositRequired && <DetailCell icon={Shield} label="פיקדון" value={ils(Number(deal.deposit_amount))} />}
-          {savingsAmount && <DetailCell icon={Tag} label="חיסכון" value={ils(savingsAmount)} />}
-          {daysRemaining !== null && <DetailCell icon={Clock} label="משך" value={`${daysRemaining} ימים`} />}
-          {supplier?.service_areas?.length ? (
-            <DetailCell icon={MapPin} label="אזור" value={supplier.service_areas.slice(0, 2).join(", ")} />
-          ) : null}
-          {category?.name && <DetailCell icon={Layers} label="קטגוריה" value={category.name} />}
-          {supplier?.business_name && <DetailCell icon={Store} label="ספק" value={supplier.business_name} />}
-        </div>
-      </div>
+      {/* SECTION 4 removed — info already shown in hero, metrics strip & supplier card */}
 
       {/* ===== SECTION 5 — HOW IT WORKS ===== */}
       <div className="px-4 mt-5">
