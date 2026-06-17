@@ -1,10 +1,15 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-// @ts-expect-error - fontsource has no types
-import "@fontsource-variable/urbanist";
-// @ts-expect-error - fontsource has no types
-import "@fontsource-variable/epilogue";
+import "@fontsource/urbanist/400.css";
+import "@fontsource/urbanist/600.css";
+import "@fontsource/urbanist/700.css";
+import "@fontsource/urbanist/800.css";
+import "@fontsource/epilogue/400.css";
+import "@fontsource/epilogue/500.css";
+import "@fontsource/epilogue/600.css";
+import "@fontsource/epilogue/700.css";
+
 
 
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";

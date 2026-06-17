@@ -10,8 +10,9 @@ import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 
-const URBANIST = "'Urbanist Variable', 'Urbanist', system-ui, sans-serif";
-const EPILOGUE = "'Epilogue Variable', 'Epilogue', system-ui, sans-serif";
+const URBANIST = "'Urbanist', system-ui, sans-serif";
+const EPILOGUE = "'Epilogue', system-ui, sans-serif";
+
 
 /* ---------- Stages with per-stage color tokens ---------- */
 type StageColors = {
@@ -174,13 +175,12 @@ export default function CategoriesList() {
         </div>
 
         {/* Filter chips */}
-        <div className="flex overflow-x-auto gap-2 no-scrollbar pb-2 -mx-5 px-5 mb-6">
+        <div className="flex flex-nowrap overflow-x-auto gap-2 no-scrollbar pb-2 -mx-5 px-5 mb-6">
           <FilterChip
             label="הכל" active={activeStage === "all"}
             onClick={() => setActiveStage("all")}
             activeClass="bg-[#1A1A1A] text-white border-transparent"
             idleClass="bg-white border border-gray-200 text-gray-700"
-            Icon={LayoutGrid}
           />
           {STAGES.map((s) => (
             <FilterChip
@@ -189,10 +189,10 @@ export default function CategoriesList() {
               onClick={() => setActiveStage(s.id)}
               activeClass={`${s.colors.chipBg.replace("100","500")} text-white border-transparent shadow-sm`}
               idleClass={`${s.colors.chipBg} ${s.colors.chipText} border ${s.colors.chipBorder}`}
-              Icon={s.Icon}
             />
           ))}
         </div>
+
 
         {/* Search results */}
         {q && (
@@ -249,25 +249,24 @@ export default function CategoriesList() {
 /* ---------- Sub-components ---------- */
 
 function FilterChip({
-  label, active, onClick, activeClass, idleClass, Icon,
+  label, active, onClick, activeClass, idleClass,
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
   activeClass: string;
   idleClass: string;
-  Icon: typeof Compass;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`whitespace-nowrap inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all active:scale-95 ${active ? activeClass : idleClass}`}
+      className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95 ${active ? activeClass : idleClass}`}
     >
-      <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
       {label}
     </button>
   );
 }
+
 
 function StageSection({
   stage, cats, totalSuppliers, counts,
