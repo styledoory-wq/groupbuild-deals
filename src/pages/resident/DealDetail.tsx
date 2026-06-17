@@ -320,11 +320,10 @@ export default function DealDetail() {
     if (!deal) return;
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
-      window.location.href = `/auth?redirect=/resident/deals/${deal.id}`;
+      window.location.href = `/auth?redirect=/checkout/${deal.id}`;
       return;
     }
-    setAcceptedTerms(false);
-    setShowJoinModal(true);
+    navigate(`/checkout/${deal.id}`);
   };
 
   const submitJoin = async () => {
