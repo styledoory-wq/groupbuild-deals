@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus, LogOut, Pencil, Clock, AlertCircle, ArrowLeft, MapPin, Users, TrendingDown,
-  TrendingUp, Ticket, Building2, Sparkles, ChevronLeft, Check, Zap, Eye,
+  TrendingUp, Building2, Sparkles, ChevronLeft, Zap, Radar,
 } from "lucide-react";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -43,9 +43,9 @@ const DEMO_PROJECTS = [
 ];
 
 const DEMO_COMPETITORS = [
-  { id: "c1", name: "קול-אייר בע״מ", category: "התקנת מזגן 2.5 כ״ס", price: 2390, joiners: 47, delta: -120 },
-  { id: "c2", name: "ChillPro", category: "התקנת מזגן 2.5 כ״ס", price: 2450, joiners: 31, delta: 0 },
-  { id: "c3", name: "ארקטיק שירותים", category: "ניקוי + שירות שנתי", price: 690, joiners: 22, delta: -40 },
+  { id: "c1", name: "התקנת מזגן 2.5 כ״ס · רמת גן", category: "מיזוג אוויר · ספק אחר", price: 2390, joiners: 47, delta: -120 },
+  { id: "c2", name: "שירות שנתי + ניקוי 4 מזגנים", category: "תחזוקה · ספק אחר", price: 690, joiners: 31, delta: 0 },
+  { id: "c3", name: "החלפת דוד שמש 150 ליטר", category: "אינסטלציה · ספק אחר", price: 2890, joiners: 22, delta: -40 },
 ];
 
 export default function SupplierDashboard() {
@@ -56,7 +56,7 @@ export default function SupplierDashboard() {
   const [dbSupplier, setDbSupplier] = useState<DbSupplier | null>(null);
   const [myDeals, setMyDeals] = useState<DbDeal[]>([]);
   const [counts, setCounts] = useState<Record<string, { interests: number; paid: number }>>({});
-  const [voucherCode, setVoucherCode] = useState("");
+  
 
   useEffect(() => {
     let cancelled = false;
@@ -241,11 +241,6 @@ export default function SupplierDashboard() {
     );
   }
 
-  const handleRedeem = () => {
-    const code = voucherCode.trim();
-    if (!code) { toast.error("הזן קוד שובר"); return; }
-    navigate(`/supplier/scan?code=${encodeURIComponent(code)}`);
-  };
 
   return (
     <MobileShell>
@@ -260,51 +255,11 @@ export default function SupplierDashboard() {
           <Kpi label="פעילות" value={myDeals.length.toString()} />
         </div>
 
-        {/* Voucher redeem — hero block */}
-        <section className="px-5 mt-4">
-          <div className="relative rounded-[24px] p-5 bg-gradient-to-br from-[#0E6B5A] to-[#0a5648] text-white overflow-hidden">
-            <div className="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-white/5" />
-            <div className="absolute -left-2 -top-10 h-20 w-20 rounded-full bg-white/5" />
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="h-9 w-9 rounded-xl bg-white/15 flex items-center justify-center">
-                  <Ticket className="h-4 w-4" strokeWidth={2.4} />
-                </span>
-                <div className="text-right flex-1">
-                  <div className="text-[11px] uppercase tracking-[0.18em] font-bold opacity-80">מימוש שובר</div>
-                  <div className="text-[15px] font-extrabold tracking-tight">סרוק או הזן קוד לקוח</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 bg-white rounded-2xl p-1.5">
-                <input
-                  value={voucherCode}
-                  onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
-                  placeholder="הזן קוד · למשל GB-4F2A"
-                  className="flex-1 bg-transparent text-[#0F1B14] placeholder:text-[#9CA39A] text-[14px] font-bold tracking-wider px-3 py-2 outline-none text-right"
-                  dir="rtl"
-                />
-                <button
-                  onClick={handleRedeem}
-                  className="h-10 px-4 rounded-xl bg-[#0F1B14] text-white text-[13px] font-extrabold flex items-center gap-1.5 active:scale-95 transition"
-                >
-                  <Check className="h-4 w-4" strokeWidth={2.6} /> מימוש
-                </button>
-              </div>
-              <button
-                onClick={() => navigate("/supplier/scan")}
-                className="mt-3 text-[12px] font-bold text-white/90 flex items-center gap-1"
-              >
-                סרוק QR מהמצלמה <ChevronLeft className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
-        </section>
-
         {/* New projects in area */}
         <SectionHeader
           icon={<Building2 className="h-3.5 w-3.5" />}
-          title="פרויקטים חדשים באזורך"
-          subtitle="חבר בניינים שמחפשים ספק כמוך"
+          title="פרויקטים חדשים באזור שלך"
+          subtitle="בניינים פעילים במפת השירות שהגדרת · רק האזור שלך"
           action={<button onClick={() => navigate("/supplier/offers/new")} className="text-[12px] font-bold text-[#0E6B5A]">צור הצעה <ChevronLeft className="h-3 w-3 inline" /></button>}
         />
         <div className="px-5 mt-2 -mr-1 pr-1 overflow-x-auto no-scrollbar">
@@ -330,11 +285,11 @@ export default function SupplierDashboard() {
           </div>
         </div>
 
-        {/* Competitor intel */}
+        {/* Market — published offers in your area */}
         <SectionHeader
-          icon={<Eye className="h-3.5 w-3.5" />}
-          title="מודיעין מתחרים"
-          subtitle="מחירים והצטרפויות באזורך · עדכון חי"
+          icon={<Radar className="h-3.5 w-3.5" />}
+          title="הצעות פעילות בשוק"
+          subtitle="הצעות שמתפרסמות באזור שלך · השווה ועדכן את שלך"
         />
         <div className="px-5 mt-2 space-y-2">
           {DEMO_COMPETITORS.map((c) => (
