@@ -385,7 +385,7 @@ export default function SupplierProfile() {
         </section>
 
         {/* Active offers from this supplier */}
-        <section className="gb-card p-4">
+        <section ref={dealsRef} className="gb-card p-4 scroll-mt-20">
           <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
             <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> ההצעות הפעילות
           </h2>
@@ -399,6 +399,51 @@ export default function SupplierProfile() {
             </div>
           )}
         </section>
+
+        {/* Reviews */}
+        <section className="gb-card p-4">
+          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <Star className="h-3.5 w-3.5 text-[#0E6B5A]" /> ביקורות אחרונות
+          </h2>
+          {reviews.length === 0 ? (
+            <p className="text-sm text-muted-foreground">אין עדיין ביקורות לספק זה.</p>
+          ) : (
+            <>
+              <div className="space-y-3">
+                {(showAllReviews ? reviews : reviews.slice(0, 3)).map((r) => (
+                  <div key={r.id} className="rounded-[16px] bg-white p-3 shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-sm font-bold text-[#1F2937]">{r.reviewer_name || "דייר"}</span>
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3.5 w-3.5 ${i < r.rating ? "fill-[#F5B600] text-[#F5B600]" : "text-[#E5E7EB]"}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {r.comment && (
+                      <p className="text-sm text-[#4B5563] leading-relaxed whitespace-pre-line">{r.comment}</p>
+                    )}
+                    <div className="text-fs-xs text-muted-foreground mt-1.5">
+                      {new Date(r.created_at).toLocaleDateString("he-IL")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {reviews.length > 3 && (
+                <button
+                  onClick={() => setShowAllReviews((v) => !v)}
+                  className="mt-3 w-full h-10 rounded-[14px] text-sm font-bold text-[#0E6B5A] bg-white shadow-[0_1px_3px_rgba(10,31,61,0.06)] active:scale-[0.98] transition-transform"
+                >
+                  {showAllReviews ? "הצג פחות" : `הצג עוד (${reviews.length - 3})`}
+                </button>
+              )}
+            </>
+          )}
+        </section>
+
 
         {/* Gallery */}
         {gallery.length > 0 && (
