@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Search as SearchIcon, MapPin, Sparkles, Store, Users, Flame,
+  MapPin, Sparkles, Users, Flame,
   PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, Calculator,
   TrendingUp, Check, ChevronLeft, Heart, Ticket,
 } from "lucide-react";
