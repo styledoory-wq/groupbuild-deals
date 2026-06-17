@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Search as SearchIcon, MapPin, Sparkles, Store, Users, Flame,
   PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, Calculator,
-  TrendingUp, Check, ChevronLeft,
+  TrendingUp, Check, ChevronLeft, Heart, Ticket,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupportButton } from "@/components/SupportButton";
