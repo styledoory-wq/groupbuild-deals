@@ -249,25 +249,24 @@ export default function CategoriesList() {
 /* ---------- Sub-components ---------- */
 
 function FilterChip({
-  label, active, onClick, activeClass, idleClass, Icon,
+  label, active, onClick, activeClass, idleClass,
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
   activeClass: string;
   idleClass: string;
-  Icon: typeof Compass;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`whitespace-nowrap inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all active:scale-95 ${active ? activeClass : idleClass}`}
+      className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95 ${active ? activeClass : idleClass}`}
     >
-      <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
       {label}
     </button>
   );
 }
+
 
 function StageSection({
   stage, cats, totalSuppliers, counts,
