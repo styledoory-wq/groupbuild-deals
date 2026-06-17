@@ -26,6 +26,11 @@ import {
   describeTier,
   type OfferTier,
 } from "@/lib/offerPricing";
+import {
+  JOINING_FEE_ILS,
+  JOINING_FEE_LABEL,
+  JOINING_FEE_DESCRIPTION,
+} from "@/lib/platformFees";
 
 interface DealRow {
   id: string;
@@ -154,6 +159,8 @@ export default function CheckoutSummary() {
   }, [originalPrice, headlinePrice]);
 
   const depositAmount = deal?.deposit_required ? deal.deposit_amount ?? 0 : 0;
+  const joiningFee = depositAmount > 0 ? JOINING_FEE_ILS : 0;
+  const totalNow = depositAmount + joiningFee;
 
   const canSubmit =
     !!deal && acceptedTerms && fullName.trim().length >= 2 && phone.trim().length >= 9 && !submitting;
@@ -358,6 +365,15 @@ export default function CheckoutSummary() {
                   <span className="text-sm text-muted-foreground">פיקדון להבטחת מקום</span>
                   <span className="text-sm font-bold">{ils(depositAmount)}</span>
                 </div>
+                <div className="flex items-start justify-between py-2 border-b border-black/5">
+                  <div className="min-w-0 pr-2">
+                    <div className="text-sm text-muted-foreground">{JOINING_FEE_LABEL}</div>
+                    <div className="text-[11px] text-muted-foreground/80 mt-0.5 leading-tight">
+                      {JOINING_FEE_DESCRIPTION}
+                    </div>
+                  </div>
+                  <span className="text-sm font-bold whitespace-nowrap">{ils(joiningFee)}</span>
+                </div>
                 <div className="flex items-center justify-between py-2">
                   <span className="text-sm text-muted-foreground">יתרה לתשלום לספק*</span>
                   <span className="text-sm font-bold">
@@ -367,12 +383,12 @@ export default function CheckoutSummary() {
                 <div className="mt-3 pt-3 border-t-2 border-black/10 flex items-center justify-between">
                   <span className="text-base font-extrabold">סה״כ עכשיו</span>
                   <span className="text-xl font-black" style={{ color: BRAND }}>
-                    {ils(depositAmount)}
+                    {ils(totalNow)}
                   </span>
                 </div>
                 <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
                   *היתרה משולמת ישירות לספק במועד אספקת השירות. הפיקדון יוחזר אם
-                  ההצעה לא מגיעה למינימום משתתפים.
+                  ההצעה לא מגיעה למינימום משתתפים. דמי ההצטרפות אינם מוחזרים.
                 </p>
               </>
             ) : (
@@ -424,8 +440,9 @@ export default function CheckoutSummary() {
               </div>
               <ul className="text-xs text-foreground/80 space-y-1.5 leading-relaxed">
                 <li>• אם ההצעה לא מגיעה למינימום המשתתפים — הפיקדון מוחזר אוטומטית</li>
-                <li>• ביטול עד 24 שעות מההצטרפות — החזר מלא</li>
+                <li>• ביטול עד 24 שעות מההצטרפות — החזר מלא של הפיקדון</li>
                 <li>• הפיקדון נכלל במחיר הסופי של השירות</li>
+                <li>• דמי ההצטרפות ({ils(JOINING_FEE_ILS)}) אינם מוחזרים בכל מקרה</li>
               </ul>
             </section>
           )}
@@ -447,7 +464,7 @@ export default function CheckoutSummary() {
                 <Link className="underline font-bold" to="/privacy">
                   מדיניות הפרטיות
                 </Link>
-                , ומבין/ה שמדובר בהתחייבות להצטרפות לעסקה קבוצתית: הפיקדון ייגבה מיידית, יוחזר במלואו אם העסקה לא תצא לפועל או בביטול תוך 24 שעות, וייכלל במחיר הסופי של השירות בעת מימוש העסקה.
+                , ומבין/ה שמדובר בהתחייבות להצטרפות לעסקה קבוצתית: הפיקדון ייגבה מיידית ויוחזר במלואו אם העסקה לא תצא לפועל או בביטול תוך 24 שעות, וייכלל במחיר הסופי של השירות בעת מימוש העסקה. דמי ההצטרפות לפלטפורמה ({ils(JOINING_FEE_ILS)}) אינם מוחזרים בכל מקרה.
               </span>
             </label>
           </section>
@@ -490,7 +507,7 @@ export default function CheckoutSummary() {
             {submitting ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : depositAmount > 0 ? (
-              <>המשך לתשלום מאובטח · {ils(depositAmount)}</>
+              <>המשך לתשלום מאובטח · {ils(totalNow)}</>
             ) : (
               <>אישור הצטרפות</>
             )}

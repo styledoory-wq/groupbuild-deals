@@ -98,10 +98,13 @@ Deno.serve(async (req) => {
       return json({ error: "deposit_not_required", message: "לעסקה זו לא נדרש פיקדון" }, 409);
     }
 
-    const amount = Number(deal.deposit_amount);
-    if (!Number.isFinite(amount) || amount <= 0) {
+    const depositAmount = Number(deal.deposit_amount);
+    if (!Number.isFinite(depositAmount) || depositAmount <= 0) {
       return json({ error: "invalid_amount", message: "סכום הפיקדון אינו תקין" }, 409);
     }
+    // Platform joining fee (non-refundable) — keep in sync with src/lib/platformFees.ts
+    const JOINING_FEE = 15;
+    const amount = depositAmount + JOINING_FEE;
 
     // ---------- Already-paid / existing-pending ----------
     const { data: existingDeposit } = await admin
@@ -132,9 +135,9 @@ Deno.serve(async (req) => {
           user_id: userId,
           deal_id: body.deal_id,
           amount,
-          gross_deposit_amount: amount,
-          net_deposit_amount: amount,
-          supplier_deduction_amount: amount,
+          gross_deposit_amount: depositAmount,
+          net_deposit_amount: depositAmount,
+          supplier_deduction_amount: depositAmount,
           supplier_deduction_basis: "gross",
           payment_fee_absorber: "groupbuild",
           payment_processing_fee_status: "unknown",
@@ -145,6 +148,9 @@ Deno.serve(async (req) => {
             source: "create_deposit_function",
             deal_title: deal.title ?? null,
             interest_id: body.interest_id ?? null,
+            joining_fee: JOINING_FEE,
+            deposit_only_amount: depositAmount,
+            total_charged_amount: amount,
           },
         })
         .select("id")
@@ -178,7 +184,7 @@ Deno.serve(async (req) => {
       ISOCoinId: 1,
       MaxPayments: 1,
       Language: "he",
-      ProductName: "פיקדון השתתפות בעסקה קבוצתית",
+      ProductName: "פיקדון + דמי הצטרפות — עסקה קבוצתית",
       SuccessRedirectUrl: successUrl,
       FailedRedirectUrl: cancelUrl,
       ReturnValue: depositId,
