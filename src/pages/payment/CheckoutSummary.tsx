@@ -440,8 +440,9 @@ export default function CheckoutSummary() {
               </div>
               <ul className="text-xs text-foreground/80 space-y-1.5 leading-relaxed">
                 <li>• אם ההצעה לא מגיעה למינימום המשתתפים — הפיקדון מוחזר אוטומטית</li>
-                <li>• ביטול עד 24 שעות מההצטרפות — החזר מלא</li>
+                <li>• ביטול עד 24 שעות מההצטרפות — החזר מלא של הפיקדון</li>
                 <li>• הפיקדון נכלל במחיר הסופי של השירות</li>
+                <li>• דמי ההצטרפות ({ils(JOINING_FEE_ILS)}) אינם מוחזרים בכל מקרה</li>
               </ul>
             </section>
           )}
