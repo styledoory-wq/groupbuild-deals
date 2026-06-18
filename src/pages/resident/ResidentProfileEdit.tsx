@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { Save, ArrowRight, Mail, Phone, User as UserIcon, MapPin, Building2, Bell, Hammer } from "lucide-react";
+import { Save, ArrowRight, Mail, Phone, User as UserIcon, MapPin, Building2, Bell, Hammer, Compass } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { STAGE_THEMES, type StageId } from "@/lib/designSystem";
+import { JOURNEYS, VALID_JOURNEY_IDS, type JourneyId } from "@/lib/journeys";
 import { toast } from "sonner";
 
 const profileSchema = z.object({
@@ -40,9 +41,16 @@ export default function ResidentProfileEdit() {
   const [address, setAddress] = useState("");
   const [projectId, setProjectId] = useState("");
   const [currentStage, setCurrentStage] = useState<StageId>("planning");
+  const [journey, setJourney] = useState<JourneyId>("new_build");
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifPush, setNotifPush] = useState(true);
   const [notifSms, setNotifSms] = useState(false);
+
+  const journeyMeta = useMemo(() => JOURNEYS.find((j) => j.id === journey) ?? JOURNEYS[0], [journey]);
+  const stageOptions = useMemo(
+    () => STAGE_THEMES.filter((s) => journeyMeta.stages.includes(s.id)),
+    [journeyMeta]
+  );
 
   useEffect(() => {
     (async () => {
@@ -66,6 +74,8 @@ export default function ResidentProfileEdit() {
         const validIds = STAGE_THEMES.map((s) => s.id) as string[];
         const cs = (data as { current_stage?: string | null }).current_stage ?? "planning";
         setCurrentStage((validIds.includes(cs) ? cs : "planning") as StageId);
+        const jr = (data as { journey?: string | null }).journey ?? "new_build";
+        setJourney((VALID_JOURNEY_IDS.includes(jr as JourneyId) ? jr : "new_build") as JourneyId);
         const np = (data.notification_prefs as { email?: boolean; push?: boolean; sms?: boolean } | null) ?? {};
         setNotifEmail(np.email ?? true);
         setNotifPush(np.push ?? true);
@@ -105,6 +115,7 @@ export default function ResidentProfileEdit() {
           address: address.trim() || null,
           project_id: projectId || null,
           current_stage: currentStage,
+          journey,
           notification_prefs: { email: notifEmail, push: notifPush, sms: notifSms },
         })
         .eq("id", uid);
