@@ -557,7 +557,7 @@ export default function SupplierLeads() {
                   {trashedInterests.map((i) => renderInterest(i, true))}
                 </div>
               )
-            ) : totalActive === 0 ? (
+            ) : totalActive === 0 && quoteRequests.length === 0 ? (
               <div className="gb-card p-8 flex flex-col items-center text-center">
                 <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mb-3">
                   <Inbox className="h-7 w-7 text-muted-foreground" />
@@ -569,6 +569,62 @@ export default function SupplierLeads() {
               </div>
             ) : (
               <div className="space-y-3">
+                {quoteRequests.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-xs font-bold text-muted-foreground mt-2 inline-flex items-center gap-1.5">
+                      <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" />
+                      בקשות הצעת מחיר מוועדי בתים ({quoteRequests.length})
+                    </h3>
+                    {quoteRequests.map((q) => {
+                      const p = requesterProfiles[q.user_id];
+                      const addressed = !!q.supplier_id;
+                      return (
+                        <div key={q.id} className="gb-card p-4 border-r-4 border-[#0E6B5A]">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <h4 className="font-bold text-[15px] text-[#1C1C1E] leading-tight">{q.title}</h4>
+                            {addressed && (
+                              <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] whitespace-nowrap">
+                                פנייה ישירה
+                              </span>
+                            )}
+                          </div>
+                          {q.description && (
+                            <p className="text-xs text-muted-foreground mb-3 leading-relaxed">{q.description}</p>
+                          )}
+                          <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-[#1C1C1E] mb-3">
+                            {q.residents_count != null && (
+                              <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#0E6B5A]" />{q.residents_count} דיירים</span>
+                            )}
+                            {q.category_id && (
+                              <span className="inline-flex items-center gap-1"><Tag className="h-3.5 w-3.5 text-[#0E6B5A]" />{q.category_id}</span>
+                            )}
+                            {q.target_price_per_unit != null && (
+                              <span className="inline-flex items-center gap-1"><Coins className="h-3.5 w-3.5 text-[#0E6B5A]" />יעד {ils(q.target_price_per_unit)}</span>
+                            )}
+                            {q.deadline && (
+                              <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5 text-[#0E6B5A]" />עד {new Date(q.deadline).toLocaleDateString("he-IL")}</span>
+                            )}
+                          </div>
+                          {p && (
+                            <div className="pt-3 border-t border-border flex flex-wrap gap-2">
+                              {p.full_name && <span className="text-xs font-bold">{p.full_name}</span>}
+                              {p.phone && (
+                                <a href={`tel:${p.phone}`} className="inline-flex items-center gap-1 text-xs text-[#0E6B5A] font-bold">
+                                  <Phone className="h-3.5 w-3.5" />{p.phone}
+                                </a>
+                              )}
+                              {p.email && (
+                                <a href={`mailto:${p.email}`} className="inline-flex items-center gap-1 text-xs text-[#0E6B5A] font-bold">
+                                  <Mail className="h-3.5 w-3.5" />שלח הצעה
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 {inquiries.length > 0 && (
                   <div className="space-y-2">
                     <h3 className="text-xs font-bold text-muted-foreground mt-2">פניות כלליות (ללא הצעה)</h3>
