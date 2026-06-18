@@ -213,7 +213,7 @@ export default function DealsList() {
             {!loading && !error && filtered.length === 0 && (
               <div className="col-span-2 md:col-span-3">
                 <EmptyState
-                  icon={tab === "favorites" ? Heart : Tag}
+                  icon={tab === "favorites" ? <Heart className="h-7 w-7 text-[#0E6B5A]" strokeWidth={2} /> : <Tag className="h-7 w-7 text-[#9CA3AF]" />}
                   title={tab === "active" ? "אין עדיין הצעות פעילות" : tab === "favorites" ? "עדיין אין הצעות במועדפים" : "אין הצעות בארכיון"}
                   description={
                     tab === "favorites"
