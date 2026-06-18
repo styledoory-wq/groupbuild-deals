@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Tag, Search as SearchIcon, Heart } from "lucide-react";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, ErrorState, EmptyState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
