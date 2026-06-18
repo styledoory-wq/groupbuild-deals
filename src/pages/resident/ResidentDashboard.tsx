@@ -13,6 +13,7 @@ import { useApp, formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import { type StageId } from "@/lib/designSystem";
+import { getJourney, type JourneyId, VALID_JOURNEY_IDS } from "@/lib/journeys";
 import { QuoteRequestSheet } from "@/components/committee/QuoteRequestSheet";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
@@ -51,6 +52,7 @@ export default function ResidentDashboard() {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectName, setProjectName] = useState("");
   const [currentStage, setCurrentStage] = useState<StageId>("planning");
+  const [journey, setJourney] = useState<JourneyId>("new_build");
   const [areaDeals, setAreaDeals] = useState<MiniDeal[]>([]);
   const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
   const [joinedCount, setJoinedCount] = useState(0);
@@ -69,8 +71,13 @@ export default function ResidentDashboard() {
         const uid = user.id;
         const { data: prof } = await supabase
           .from("profiles")
-          .select("full_name,city,project_id,city_id,region_id,current_stage")
+          .select("full_name,city,project_id,city_id,region_id,current_stage,journey")
           .eq("id", uid).maybeSingle();
+
+        const jrRaw = (prof as { journey?: string | null } | null)?.journey ?? "new_build";
+        const jr = (VALID_JOURNEY_IDS.includes(jrRaw as JourneyId) ? jrRaw : "new_build") as JourneyId;
+        // Committee role users go to dedicated dashboard
+        if (jr === "committee") { navigate("/committee", { replace: true }); return; }
 
         const fname = prof?.full_name ?? user.name ?? "דייר";
         const cityName = prof?.city ?? "";
@@ -89,14 +96,19 @@ export default function ResidentDashboard() {
         const councilId: string | null = (cityRow?.council_id as string | null) ?? null;
         if (cityRow?.region_id) regionId = (cityRow.region_id as string | null) ?? regionId;
 
+        const journeyMeta = getJourney(jr);
+        const journeyStageIds = journeyMeta.stages as string[];
         const validIds = STAGES.map((s) => s.id) as string[];
         const profStage = (prof?.current_stage as string | undefined) ?? "";
         const projStage = (projectResult.data?.current_stage as string | undefined) ?? "";
-        const chosen = (validIds.includes(profStage) ? profStage : validIds.includes(projStage) ? projStage : "planning") as StageId;
+        // Pick a stage that's valid for this journey. Single-purchase has no stages -> no filter.
+        const allowed = journeyStageIds.length ? journeyStageIds : validIds;
+        const chosen = (allowed.includes(profStage) ? profStage : allowed.includes(projStage) ? projStage : (allowed[0] ?? "planning")) as StageId;
         const stage: StageId = chosen;
+        const stageFilter: string | null = journeyStageIds.length ? stage : null;
 
         const [matchesResult, citySupResult, councilSupResult, regionSupResult, nationwideResult, paidDepositsResult, freeInterestsResult] = await Promise.all([
-          supabase.rpc("get_matching_deals_for_user", { _stage_filter: stage, _limit: 8 }),
+          supabase.rpc("get_matching_deals_for_user", stageFilter ? { _stage_filter: stageFilter, _limit: 8 } : { _limit: 8 }),
           prof?.city_id ? supabase.from("supplier_cities").select("supplier_id").eq("city_id", prof.city_id) : Promise.resolve({ data: [] }),
           councilId ? supabase.from("supplier_councils").select("supplier_id").eq("council_id", councilId) : Promise.resolve({ data: [] }),
           regionId ? supabase.from("supplier_regions").select("supplier_id").eq("region_id", regionId) : Promise.resolve({ data: [] }),
@@ -176,6 +188,7 @@ export default function ResidentDashboard() {
         if (cancelled) return;
         setFullName(fname); setCity(cityName); setProjectId(pid);
         setCurrentStage(stage);
+        setJourney(jr);
         setAreaDeals(nextDeals); setAreaSuppliersCount(supCountRes.count ?? 0); setJoinedCount(joined);
         setEstimatedSavings(savings);
       } catch (e) {
@@ -218,8 +231,13 @@ export default function ResidentDashboard() {
     return () => { cancelled = true; };
   }, [quoteOpen]);
 
-  const currentIdx = useMemo(() => Math.max(0, STAGES.findIndex((s) => s.id === currentStage)), [currentStage]);
-  const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
+  const journeyMeta = useMemo(() => getJourney(journey), [journey]);
+  const journeyStages = useMemo(
+    () => STAGES.filter((s) => journeyMeta.stages.includes(s.id)),
+    [journeyMeta]
+  );
+  const currentIdx = useMemo(() => Math.max(0, journeyStages.findIndex((s) => s.id === currentStage)), [currentStage, journeyStages]);
+  const completionPct = journeyStages.length ? Math.round(((currentIdx + 1) / journeyStages.length) * 100) : 0;
 
   const feedItems = useMemo<FeedItem[]>(() => {
     const out: FeedItem[] = [];
@@ -352,64 +370,84 @@ export default function ResidentDashboard() {
 
 
 
-        {/* === Project stages — Apple-style segmented strip === */}
-        <SectionHeader
-          title="שלבי הפרויקט"
-          subtitle={`${completionPct}% הושלם`}
-          action={
-            <button
-              onClick={() => navigate(`/resident/categories?stage=${currentStage}`)}
-              className="text-[14px] font-medium text-[#0E6B5A]"
-            >
-              לקטגוריות
-            </button>
-          }
-        />
-        <div className="px-5 mt-3">
-          <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-4">
-            <div className="flex items-center gap-1.5 mb-3">
-              {STAGES.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`flex-1 h-1 rounded-full ${idx <= currentIdx ? "bg-[#0E6B5A]" : "bg-[#F2F2F7]"}`}
-                />
-              ))}
-            </div>
-            <div className="-mx-1 px-1 overflow-x-auto no-scrollbar">
-              <div className="flex gap-2">
-                {STAGES.map((stage, idx) => {
-                  const isCurrent = stage.id === currentStage;
-                  const isPast = idx < currentIdx;
-                  const Icon = stage.icon;
-                  return (
-                    <button
-                      key={stage.id}
-                      onClick={() => navigate(`/resident/categories?stage=${stage.id}`)}
-                      className={`shrink-0 flex flex-col items-center gap-1.5 w-[68px] py-2 rounded-2xl active:scale-95 transition ${
-                        isCurrent ? "bg-[#0E6B5A]/8" : ""
-                      }`}
-                    >
-                      <div
-                        className={`h-11 w-11 rounded-2xl flex items-center justify-center ${
-                          isCurrent
-                            ? "bg-[#0E6B5A] text-white"
-                            : isPast
-                            ? "bg-[#0E6B5A]/10 text-[#0E6B5A]"
-                            : "bg-[#F2F2F7] text-[#1C1C1E]"
-                        }`}
-                      >
-                        {isPast ? <Check className="h-5 w-5" strokeWidth={2.6} /> : <Icon className="h-5 w-5" strokeWidth={2.2} />}
-                      </div>
-                      <span className={`text-[10.5px] font-medium leading-tight text-center line-clamp-2 ${isCurrent ? "text-[#0E6B5A]" : "text-[#1C1C1E]"}`}>
-                        {stage.title}
-                      </span>
-                    </button>
-                  );
-                })}
+        {/* === Project stages — only when the journey has stages === */}
+        {journeyStages.length > 0 && (
+          <>
+            <SectionHeader
+              title={journey === "renovation" ? "שלבי השיפוץ" : "שלבי הפרויקט"}
+              subtitle={`${completionPct}% הושלם`}
+              action={
+                <button
+                  onClick={() => navigate(`/resident/categories?stage=${currentStage}`)}
+                  className="text-[14px] font-medium text-[#0E6B5A]"
+                >
+                  לקטגוריות
+                </button>
+              }
+            />
+            <div className="px-5 mt-3">
+              <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-4">
+                <div className="flex items-center gap-1.5 mb-3">
+                  {journeyStages.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex-1 h-1 rounded-full ${idx <= currentIdx ? "bg-[#0E6B5A]" : "bg-[#F2F2F7]"}`}
+                    />
+                  ))}
+                </div>
+                <div className="-mx-1 px-1 overflow-x-auto no-scrollbar">
+                  <div className="flex gap-2">
+                    {journeyStages.map((stage, idx) => {
+                      const isCurrent = stage.id === currentStage;
+                      const isPast = idx < currentIdx;
+                      const Icon = stage.icon;
+                      return (
+                        <button
+                          key={stage.id}
+                          onClick={() => navigate(`/resident/categories?stage=${stage.id}`)}
+                          className={`shrink-0 flex flex-col items-center gap-1.5 w-[68px] py-2 rounded-2xl active:scale-95 transition ${
+                            isCurrent ? "bg-[#0E6B5A]/8" : ""
+                          }`}
+                        >
+                          <div
+                            className={`h-11 w-11 rounded-2xl flex items-center justify-center ${
+                              isCurrent
+                                ? "bg-[#0E6B5A] text-white"
+                                : isPast
+                                ? "bg-[#0E6B5A]/10 text-[#0E6B5A]"
+                                : "bg-[#F2F2F7] text-[#1C1C1E]"
+                            }`}
+                          >
+                            {isPast ? <Check className="h-5 w-5" strokeWidth={2.6} /> : <Icon className="h-5 w-5" strokeWidth={2.2} />}
+                          </div>
+                          <span className={`text-[10.5px] font-medium leading-tight text-center line-clamp-2 ${isCurrent ? "text-[#0E6B5A]" : "text-[#1C1C1E]"}`}>
+                            {stage.title}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
+          </>
+        )}
+
+        {/* === Single-purchase callout === */}
+        {journey === "single_purchase" && (
+          <div className="px-5 mt-6">
+            <button
+              onClick={() => navigate("/resident/categories")}
+              className="w-full text-right bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-5 active:scale-[0.99] transition"
+            >
+              <div className="text-[12px] text-[#0E6B5A] font-semibold mb-1">חיפוש לפי קטגוריה</div>
+              <div className="text-[17px] font-bold text-[#1C1C1E] tracking-tight leading-tight">
+                מה אתה צריך עכשיו?
+              </div>
+              <div className="text-[12px] text-[#8E8E93] mt-1">דפדוף בכל הקטגוריות והעסקאות הזמינות</div>
+            </button>
           </div>
-        </div>
+        )}
 
         {/* === Quick actions === */}
         <SectionHeader title="פעולות מהירות" />

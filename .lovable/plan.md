@@ -1,58 +1,58 @@
-## מטרה
-ליצור שפה ויזואלית אחידה בין כל הדפים, לתקן את חוויית הניווט, ולכסות את כל מצבי ה-Loading / Empty / Error בעזרת רכיבים משותפים.
 
-## מצב נוכחי (מה שמצאתי בקוד)
-- קיים `PageHeader` ישן (`src/components/layout/PageHeader.tsx`) שכמעט לא בשימוש.
-- קיימים רכיבי DS (`ScreenHeader`, `EmptyState`, `StatusChip`, `AppCard`) אך רק 4 דפים משתמשים בהם.
-- ~40 דפים בנו לעצמם header inline (`sticky top-0 ... ArrowRight`) — קוד משוכפל וקצת שונה בכל מקום.
-- ~15+ דפים מציגים סתם טקסט "טוען…" ללא skeleton/ספינר.
-- אין רכיב `ErrorState` כלל — שגיאות מטופלות עם `toast` או טקסט נוקשה.
+# מסלולי משתמש מותאמים (User Journeys)
 
-## תוכנית
-שלוש פעימות קטנות, כל אחת אפשר לבדוק לבד.
+היום הדשבורד של הדייר מציג תמיד את 8 השלבים של בנייה חדשה (`STAGE_THEMES`). זה לא מתאים למי שמשפץ או קונה משהו נקודתי, ולוועד בית בוודאי לא.
 
-### פעימה 1 — רכיבים משותפים חדשים
-חדשים תחת `src/components/ds/`:
-1. **`BackHeader`** — header דביק עליון אחיד (חץ חזרה + כותרת + תת-כותרת + slot ימני אופציונלי). מחליף את ה-header ה-inline שמופיע ב-~40 דפים.
-2. **`LoadingState`** — ספינר מרכזי עם טקסט אופציונלי, וגם וריאנט `SkeletonList` לרשימות.
-3. **`ErrorState`** — אייקון אדום + כותרת + תיאור + כפתור "נסה שוב".
-4. הרחבת `EmptyState` הקיים עם variant `compact` עבור קופסאות פנימיות.
+## ארבעת המסלולים
 
-### פעימה 2 — מיגרציה ראשונית (Proof) ✅
-החלת הרכיבים החדשים על 6 דפים מרכזיים:
-- ✅ `CommitteeDashboard`, `CommitteeRequest`
-- ✅ `DealsList` (BackHeader + ErrorState + EmptyState)
-- ✅ `DealDetail` (BackHeader + LoadingState + ErrorState במצבי טעינה/שגיאה)
-- ✅ `SupplierDashboard` (LoadingState + ErrorState)
-- `ResidentDashboard` — נשמר עם header מותאם (hero ייעודי, לא inline)
+| מסלול | מה הוא רואה |
+|---|---|
+| **בנייה חדשה** (`new_build`) | כל 8 השלבים — כמו היום |
+| **שיפוץ כללי** (`renovation`) | תת־סט: הריסה/בינוי קל · מערכות · פתחים · גמרים · מטבח/אמבטיה · ריהוט |
+| **רכישה נקודתית** (`single_purchase`) | בלי שלבים בכלל — חיפוש חופשי + קטגוריות + עסקאות מומלצות |
+| **ועד בית** (`committee`) | דשבורד ועד הקיים, ללא שלבים |
 
-המטרה: לוודא שהרכיבים מכסים את כל המקרים האמיתיים לפני מיגרציה רחבה.
+> *שלבי השיפוץ הם הצעה — קל לכוונן אחרי שנראה את זה חי.*
 
-### פעימה 3 — מיגרציה רחבה ✅ חלקית
-- ✅ דפי הדייר הנותרים: `Favorites`, `MyOffers`, `Search`, `BudgetPlanner`, `MyDocuments`, `MyDeposits`, `MyVouchers`, `ProjectsList`, `ResidentProfileEdit`
-- ✅ דפי הספק: `SupplierLeads`, `SupplierOffers`, `SupplierProfileEdit`, `SupplierRedemptions`, `SupplierReviews`, `SupplierScan`, `OfferEditor`, `SupplierOfferMarketingEdit`, `SupplierProfile`, `NotificationSettings`
-- ⏳ דפי האדמין (18 דפים — נשאר לסיום)
-- ⏳ הסרת `PageHeader` הישן כשלא בשימוש
+## איפה זה נבחר
+- **באונבורדינג** — צעד אחד אחרי הרשמה: כרטיסיות עם 4 המסלולים (ברירת מחדל: בנייה חדשה למי שכבר רשום ללא מסלול).
+- **בעריכת פרופיל** (`ResidentProfileEdit`) — שדה ניתן לשינוי בכל רגע.
 
-## פרטים טכניים
-```text
-src/components/ds/
-├── BackHeader.tsx      (חדש)
-├── LoadingState.tsx    (חדש, +SkeletonList)
-├── ErrorState.tsx      (חדש)
-├── EmptyState.tsx      (הרחבה: variant)
-└── index.ts            (export החדשים)
-```
+## איך זה משפיע על ה־UI
 
-`BackHeader` API:
-```tsx
-<BackHeader title="ועד בית" subtitle={projectName} right={<BellButton/>} />
-```
+### `ResidentDashboard`
+- אם `journey = single_purchase` — הסטריפ של השלבים מוסתר לגמרי; במקומו מוצג בלוק "חפש קטגוריה" + עסקאות מומלצות.
+- אם `journey = renovation` — הסטריפ מסונן לתת־הסט הרלוונטי.
+- אם `journey = new_build` — ללא שינוי מהיום.
+- אם `journey = committee` — redirect ל-`/committee`.
 
-ללא שינויי backend, ללא שינויי לוגיקה — רק presentation.
+### סינון עסקאות
+- ה־RPC `get_matching_deals_for_user` כבר תומך ב-`_stage_filter`. כשהמסלול הוא `single_purchase` — לא נשלח פילטר. כששיפוץ — נשלח רק שלבים מהתת־סט.
 
-## איך נתקדם
-אבצע את **פעימה 1 + פעימה 2** מיד (רכיבים + 6 דפים מרכזיים).
-אחרי שתסתכל ותאשר את הסגנון, ארוץ עם פעימה 3 על שאר הדפים.
+## שינויים טכניים
 
-מאשר?
+**DB (migration אחד):**
+- `app_journey` enum: `new_build | renovation | single_purchase | committee`
+- `profiles.journey app_journey` (default: `new_build` למשתמשים קיימים)
+
+**קוד:**
+- `src/lib/designSystem.ts` — קבועי `JOURNEY_STAGES: Record<Journey, StageId[]>`.
+- `src/lib/journeys.ts` (חדש) — מטא־דאטה למסלולים (label, icon, description, default stages).
+- `src/pages/resident/ResidentProfileEdit.tsx` — שדה בחירת מסלול.
+- `src/pages/resident/ResidentDashboard.tsx` — לקרוא `journey` ולסנן/להחביא את הסטריפ.
+- `src/pages/Auth.tsx` או צעד אונבורדינג נפרד — בחירת מסלול אחרי הרשמה (אם אין `journey`).
+
+## מה לא משתנה (בשלב הזה)
+- אין שינוי במסלול של ועד בית (`CommitteeDashboard`) — הוא ממילא לא מציג שלבים.
+- אין שינוי בצד הספק.
+- אין שינוי בעסקאות / קטגוריות עצמן.
+
+---
+
+**אישור?** אם כן — אני בונה את ה־migration + הקוד ברצף אחד. אם תרצה לדייק את שלבי השיפוץ לפני כן, שלח את הרשימה שלך.
+
+## ✅ הושלם 18/06/2026 — User Journeys
+- Migration: profiles.journey (new_build/renovation/single_purchase/committee)
+- src/lib/journeys.ts
+- ProfileEdit: בורר מסלול + סינון שלבים לפי המסלול
+- Dashboard: hides/filters stages strip לפי המסלול; redirect לוועד

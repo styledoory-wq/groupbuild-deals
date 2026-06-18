@@ -906,6 +906,7 @@ export type Database = {
           is_active: boolean
           is_deleted: boolean
           is_demo: boolean
+          journey: string
           notification_prefs: Json
           phone: string | null
           project_id: string | null
@@ -934,6 +935,7 @@ export type Database = {
           is_active?: boolean
           is_deleted?: boolean
           is_demo?: boolean
+          journey?: string
           notification_prefs?: Json
           phone?: string | null
           project_id?: string | null
@@ -962,6 +964,7 @@ export type Database = {
           is_active?: boolean
           is_deleted?: boolean
           is_demo?: boolean
+          journey?: string
           notification_prefs?: Json
           phone?: string | null
           project_id?: string | null

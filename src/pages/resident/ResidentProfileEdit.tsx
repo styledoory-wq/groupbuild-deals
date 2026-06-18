@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { Save, ArrowRight, Mail, Phone, User as UserIcon, MapPin, Building2, Bell, Hammer } from "lucide-react";
+import { Save, ArrowRight, Mail, Phone, User as UserIcon, MapPin, Building2, Bell, Hammer, Compass } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { STAGE_THEMES, type StageId } from "@/lib/designSystem";
+import { JOURNEYS, VALID_JOURNEY_IDS, type JourneyId } from "@/lib/journeys";
 import { toast } from "sonner";
 
 const profileSchema = z.object({
@@ -40,9 +41,16 @@ export default function ResidentProfileEdit() {
   const [address, setAddress] = useState("");
   const [projectId, setProjectId] = useState("");
   const [currentStage, setCurrentStage] = useState<StageId>("planning");
+  const [journey, setJourney] = useState<JourneyId>("new_build");
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifPush, setNotifPush] = useState(true);
   const [notifSms, setNotifSms] = useState(false);
+
+  const journeyMeta = useMemo(() => JOURNEYS.find((j) => j.id === journey) ?? JOURNEYS[0], [journey]);
+  const stageOptions = useMemo(
+    () => STAGE_THEMES.filter((s) => journeyMeta.stages.includes(s.id)),
+    [journeyMeta]
+  );
 
   useEffect(() => {
     (async () => {
@@ -66,6 +74,8 @@ export default function ResidentProfileEdit() {
         const validIds = STAGE_THEMES.map((s) => s.id) as string[];
         const cs = (data as { current_stage?: string | null }).current_stage ?? "planning";
         setCurrentStage((validIds.includes(cs) ? cs : "planning") as StageId);
+        const jr = (data as { journey?: string | null }).journey ?? "new_build";
+        setJourney((VALID_JOURNEY_IDS.includes(jr as JourneyId) ? jr : "new_build") as JourneyId);
         const np = (data.notification_prefs as { email?: boolean; push?: boolean; sms?: boolean } | null) ?? {};
         setNotifEmail(np.email ?? true);
         setNotifPush(np.push ?? true);
@@ -105,6 +115,7 @@ export default function ResidentProfileEdit() {
           address: address.trim() || null,
           project_id: projectId || null,
           current_stage: currentStage,
+          journey,
           notification_prefs: { email: notifEmail, push: notifPush, sms: notifSms },
         })
         .eq("id", uid);
@@ -215,14 +226,52 @@ export default function ResidentProfileEdit() {
           </Field>
         </section>
 
-        {/* Build stage */}
+        {/* Journey selector */}
         <section className="gb-card p-4 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Hammer className="h-3.5 w-3.5 text-gold" /> שלב נוכחי בבנייה
+            <Compass className="h-3.5 w-3.5 text-gold" /> מה מתאים לך?
+          </h3>
+          <p className="text-[12px] text-muted-foreground -mt-1">בחר את המסלול המתאים — נציג לך רק את התוכן הרלוונטי.</p>
+          <div className="grid grid-cols-2 gap-2">
+            {JOURNEYS.map((j) => {
+              const active = j.id === journey;
+              const Icon = j.icon;
+              return (
+                <button
+                  type="button"
+                  key={j.id}
+                  onClick={() => {
+                    setJourney(j.id);
+                    if (j.stages.length && !j.stages.includes(currentStage)) {
+                      setCurrentStage(j.stages[0]);
+                    }
+                  }}
+                  className={`text-right rounded-[14px] p-3 border transition-all active:scale-[0.98] ${
+                    active
+                      ? "border-[#0E6B5A] bg-[#E8F1EE] text-[#0E6B5A] shadow-sm"
+                      : "bg-white border-[#ECEEF2] text-[#1F2937]"
+                  }`}
+                >
+                  <Icon className={`h-4 w-4 mb-1.5 ${active ? "text-[#0E6B5A]" : "text-[#6B7280]"}`} />
+                  <div className="text-[13px] font-extrabold leading-tight">{j.title}</div>
+                  <div className={`text-[10.5px] mt-1 leading-tight ${active ? "text-[#0E6B5A]/80" : "text-[#6B7280]"}`}>
+                    {j.description}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Build stage — only when journey has stages */}
+        {stageOptions.length > 0 && (
+        <section className="gb-card p-4 space-y-3">
+          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Hammer className="h-3.5 w-3.5 text-gold" /> שלב נוכחי {journey === "renovation" ? "בשיפוץ" : "בבנייה"}
           </h3>
           <p className="text-[12px] text-muted-foreground -mt-1">השלב שתבחרו ישמש להמלצות, הצעות רלוונטיות וחישובי התקדמות.</p>
           <div className="grid grid-cols-2 gap-2">
-            {STAGE_THEMES.map((s) => {
+            {stageOptions.map((s) => {
               const active = s.id === currentStage;
               return (
                 <button
@@ -243,6 +292,7 @@ export default function ResidentProfileEdit() {
             })}
           </div>
         </section>
+        )}
 
 
 
