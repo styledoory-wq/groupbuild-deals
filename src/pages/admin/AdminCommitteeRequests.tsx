@@ -147,6 +147,18 @@ export default function AdminCommitteeRequests() {
                 ><XCircle className="w-4 h-4" />דחייה</button>
               </div>
             )}
+            {r.status === "approved" && (
+              <div className="mt-3">
+                <button
+                  onClick={() => revoke(r)}
+                  disabled={busy === r.id}
+                  className="w-full h-10 rounded-xl border border-[#DCD8CD] text-[#C73E3E] text-sm font-medium hover:bg-[#FBE9E9] disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  {busy === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldOff className="w-4 h-4" />}
+                  ביטול הרשאת ועד בית
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
