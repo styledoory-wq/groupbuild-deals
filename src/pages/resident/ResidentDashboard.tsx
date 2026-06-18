@@ -231,8 +231,13 @@ export default function ResidentDashboard() {
     return () => { cancelled = true; };
   }, [quoteOpen]);
 
-  const currentIdx = useMemo(() => Math.max(0, STAGES.findIndex((s) => s.id === currentStage)), [currentStage]);
-  const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
+  const journeyMeta = useMemo(() => getJourney(journey), [journey]);
+  const journeyStages = useMemo(
+    () => STAGES.filter((s) => journeyMeta.stages.includes(s.id)),
+    [journeyMeta]
+  );
+  const currentIdx = useMemo(() => Math.max(0, journeyStages.findIndex((s) => s.id === currentStage)), [currentStage, journeyStages]);
+  const completionPct = journeyStages.length ? Math.round(((currentIdx + 1) / journeyStages.length) * 100) : 0;
 
   const feedItems = useMemo<FeedItem[]>(() => {
     const out: FeedItem[] = [];
