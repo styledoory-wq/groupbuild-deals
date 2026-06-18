@@ -9,7 +9,7 @@ import { BackHeader } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { getCurrentSupplier } from "@/lib/supplierAuth";
+
 import { toast } from "sonner";
 
 type Result =
