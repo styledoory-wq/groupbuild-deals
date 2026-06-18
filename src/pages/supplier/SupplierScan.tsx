@@ -5,7 +5,7 @@ import { Capacitor } from "@capacitor/core";
 import { BarcodeScanner, BarcodeFormat } from "@capacitor-mlkit/barcode-scanning";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -159,7 +159,7 @@ export default function SupplierScan() {
 
   return (
     <MobileShell>
-      <PageHeader title="סריקת שובר" subtitle="סרוק QR או הזן קוד ידני" />
+      <BackHeader title="סריקת שובר" subtitle="סרוק QR או הזן קוד ידני" />
       <div className="px-5 pb-28 space-y-5">
         <div className="flex gap-2">
           <Button

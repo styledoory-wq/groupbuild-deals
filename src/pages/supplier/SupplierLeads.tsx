@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2, Check, X, Trash2, RotateCcw, Archive, FileText, Calendar, Tag, Coins } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { ScreenHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -522,17 +522,13 @@ export default function SupplierLeads() {
 
   return (
     <MobileShell>
-      <PageHeader title="לידים ופניות" subtitle="כל הדיירים שהצטרפו להצעות שלך" back={false} />
+      <ScreenHeader title="לידים ופניות" subtitle="כל הדיירים שהצטרפו להצעות שלך" />
 
       <div className="px-5 -mt-4 relative z-10 pb-24">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-[#0E6B5A]" />
-          </div>
+          <LoadingState />
         ) : error ? (
-          <div className="gb-card p-6 text-center">
-            <p className="text-sm text-destructive font-bold">{error}</p>
-          </div>
+          <ErrorState title="שגיאה בטעינה" description={error} />
         ) : (
           <>
             <div className="flex items-center justify-between mb-3">
@@ -549,7 +545,11 @@ export default function SupplierLeads() {
 
             {showTrash ? (
               totalTrashed === 0 ? (
-                <div className="gb-card p-8 text-center text-sm text-muted-foreground">סל המחזור ריק.</div>
+                <EmptyState
+                  icon={<Archive className="h-7 w-7 text-[#9CA3AF]" />}
+                  title="סל המחזור ריק"
+                  description="פריטים שנמחקו יופיעו כאן למשך 30 ימים לפני מחיקה לצמיתות."
+                />
               ) : (
                 <div className="space-y-3">
                   <p className="text-fs-xs text-muted-foreground">פריטים בסל המחזור נמחקים לצמיתות לאחר {TRASH_DAYS} ימים.</p>
@@ -558,15 +558,11 @@ export default function SupplierLeads() {
                 </div>
               )
             ) : totalActive === 0 && quoteRequests.length === 0 ? (
-              <div className="gb-card p-8 flex flex-col items-center text-center">
-                <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mb-3">
-                  <Inbox className="h-7 w-7 text-muted-foreground" />
-                </div>
-                <h3 className="font-bold text-base mb-1">אין לידים עדיין</h3>
-                <p className="text-xs text-muted-foreground max-w-xs">
-                  כשדיירים יביעו עניין בהצעות או בשירותים שלך — הם יופיעו כאן.
-                </p>
-              </div>
+              <EmptyState
+                icon={<Inbox className="h-7 w-7 text-[#9CA3AF]" />}
+                title="אין לידים עדיין"
+                description="כשדיירים יביעו עניין בהצעות או בשירותים שלך — הם יופיעו כאן."
+              />
             ) : (
               <div className="space-y-3">
                 {quoteRequests.length > 0 && (

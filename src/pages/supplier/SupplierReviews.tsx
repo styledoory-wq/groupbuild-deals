@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Star, MessageSquare, AlertCircle } from "lucide-react";
+import { Star, MessageSquare } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { ScreenHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -103,10 +103,8 @@ export default function SupplierReviews() {
   if (loading) {
     return (
       <MobileShell>
-        <PageHeader title="ביקורות ומוניטין" subtitle="המוניטין שלך בעיני הדיירים" back={false} />
-        <div className="px-5 mt-6 flex items-center justify-center min-h-[40vh]">
-          <div className="h-9 w-9 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-        </div>
+        <ScreenHeader title="ביקורות ומוניטין" subtitle="המוניטין שלך בעיני הדיירים" />
+        <LoadingState />
         <BottomNav role="supplier" />
       </MobileShell>
     );
@@ -115,16 +113,8 @@ export default function SupplierReviews() {
   if (error) {
     return (
       <MobileShell>
-        <PageHeader title="ביקורות ומוניטין" subtitle="המוניטין שלך בעיני הדיירים" back={false} />
-        <div className="px-5 mt-6">
-          <div className="gb-card p-6 text-center">
-            <div className="h-12 w-12 mx-auto rounded-full bg-destructive/10 flex items-center justify-center mb-3">
-              <AlertCircle className="h-6 w-6 text-destructive" />
-            </div>
-            <h2 className="font-bold text-base mb-1">לא ניתן לטעון ביקורות</h2>
-            <p className="text-xs text-muted-foreground">{error}</p>
-          </div>
-        </div>
+        <ScreenHeader title="ביקורות ומוניטין" subtitle="המוניטין שלך בעיני הדיירים" />
+        <ErrorState title="לא ניתן לטעון ביקורות" description={error} />
         <BottomNav role="supplier" />
       </MobileShell>
     );
@@ -133,16 +123,12 @@ export default function SupplierReviews() {
   if (!supplierId) {
     return (
       <MobileShell>
-        <PageHeader title="ביקורות ומוניטין" subtitle="המוניטין שלך בעיני הדיירים" back={false} />
-        <div className="px-5 mt-6">
-          <div className="gb-card p-8 text-center">
-            <div className="h-14 w-14 mx-auto rounded-full bg-muted flex items-center justify-center mb-3">
-              <MessageSquare className="h-7 w-7 text-muted-foreground" />
-            </div>
-            <h3 className="font-bold text-base mb-1">חסר פרופיל ספק</h3>
-            <p className="text-xs text-muted-foreground">השלם את פרטי הספק כדי לקבל ביקורות מדיירים.</p>
-          </div>
-        </div>
+        <ScreenHeader title="ביקורות ומוניטין" subtitle="המוניטין שלך בעיני הדיירים" />
+        <EmptyState
+          icon={<MessageSquare className="h-7 w-7 text-[#9CA3AF]" />}
+          title="חסר פרופיל ספק"
+          description="השלם את פרטי הספק כדי לקבל ביקורות מדיירים."
+        />
         <BottomNav role="supplier" />
       </MobileShell>
     );
@@ -150,7 +136,7 @@ export default function SupplierReviews() {
 
   return (
     <MobileShell>
-      <PageHeader title="ביקורות ומוניטין" subtitle="המוניטין שלך בעיני הדיירים" back={false} />
+      <ScreenHeader title="ביקורות ומוניטין" subtitle="המוניטין שלך בעיני הדיירים" />
 
       <div className="px-5 -mt-4 relative z-10 mb-4">
         <div className="gb-card p-5 bg-gradient-card text-center">
@@ -184,15 +170,11 @@ export default function SupplierReviews() {
         <h2 className="text-sm font-bold">ביקורות אחרונות</h2>
 
         {reviews.length === 0 ? (
-          <div className="gb-card p-8 text-center">
-            <div className="h-14 w-14 mx-auto rounded-full bg-muted flex items-center justify-center mb-3">
-              <MessageSquare className="h-7 w-7 text-muted-foreground" />
-            </div>
-            <h3 className="font-bold text-base mb-1">עדיין אין ביקורות לספק זה</h3>
-            <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-              ביקורות יופיעו כאן לאחר שדיירים שהשתתפו בעסקה ידרגו את השירות.
-            </p>
-          </div>
+          <EmptyState
+            icon={<MessageSquare className="h-7 w-7 text-[#9CA3AF]" />}
+            title="עדיין אין ביקורות לספק זה"
+            description="ביקורות יופיעו כאן לאחר שדיירים שהשתתפו בעסקה ידרגו את השירות."
+          />
         ) : (
           reviews.map((r) => (
             <div key={r.id} className="gb-card p-4">
