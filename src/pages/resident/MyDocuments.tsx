@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Upload, Trash2, Download, FolderOpen } from "lucide-react";
+import { Upload, Trash2, Download, FolderOpen, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState, EmptyState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
