@@ -46,8 +46,8 @@ export function BrandLogo({
           style={{
             color: wordColor,
             fontFamily: "'Rubik', 'Heebo', system-ui, sans-serif",
-            fontSize: "0.62em",
-            letterSpacing: "-0.02em",
+            fontSize: "0.78em",
+            letterSpacing: "-0.025em",
           }}
         >
           GroupBuild
