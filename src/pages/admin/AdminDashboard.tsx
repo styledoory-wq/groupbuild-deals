@@ -13,6 +13,7 @@ type Stats = {
   projects: number;
   suppliers: number;
   pendingSuppliers: number;
+  pendingCommittee: number;
   activeDeals: number;
   totalDeposits: number;
   paidDepositsAmount: number;
