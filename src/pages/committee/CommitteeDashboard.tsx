@@ -183,7 +183,7 @@ export default function CommitteeDashboard() {
 
         {/* Primary CTA */}
         <button
-          onClick={() => navigate("/committee/quote-request")}
+          onClick={() => setQuoteOpen(true)}
           className="w-full flex items-center justify-between gap-3 bg-[#0E6B5A] text-white rounded-2xl px-5 py-4 hover:bg-[#0c5a4c] active:scale-[0.99] transition"
         >
           <div className="text-right">
@@ -195,7 +195,7 @@ export default function CommitteeDashboard() {
 
         {/* Quick management tiles */}
         <section className="grid grid-cols-2 gap-3">
-          <ActionTile icon={FileEdit} title="בקש הצעת מחיר" desc="עם מחיר יעד וכמות דיירים" onClick={() => navigate("/committee/quote-request")} />
+          <ActionTile icon={FileEdit} title="בקש הצעת מחיר" desc="עם מחיר יעד וכמות דיירים" onClick={() => setQuoteOpen(true)} />
           <ActionTile icon={Search} title="עסקאות פעילות" desc="חפש והצטרף" onClick={() => navigate("/deals")} />
           <ActionTile icon={Share2} title="הזמן דיירים" desc="הודעות מוכנות לוואטסאפ" onClick={() => setInviteOpen(true)} />
           <ActionTile icon={Megaphone} title="שלח עדכון" desc="ליצירת קשר עם דיירי הקהילה" onClick={() => toast.info("בקרוב — שליחת הודעה לדיירים")} />
