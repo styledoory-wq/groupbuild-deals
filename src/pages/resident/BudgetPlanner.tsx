@@ -327,7 +327,7 @@ export default function BudgetPlanner() {
                   <FieldGrid>
                     <div className="col-span-2">
                       <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>בחר שירות</Label>
-                      <Select value={svc} onValueChange={(v) => setSvc(v as ServiceKind)}>
+                      <Select value={svc} onValueChange={(v) => onChangeService(v as ServiceKind)}>
                         <SelectTrigger className={FIELD_TRIGGER}><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {SERVICES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
@@ -339,7 +339,7 @@ export default function BudgetPlanner() {
                       <Input
                         type="number"
                         min={1}
-                        step={svcDef.unit === "sqm" ? "1" : "1"}
+                        step="1"
                         value={qty}
                         onChange={(e) => setQty(+e.target.value)}
                         className={FIELD_INPUT}
@@ -348,6 +348,32 @@ export default function BudgetPlanner() {
                     <FinishSelect value={finish} onChange={setFinish} />
                     <div className="col-span-2"><RegionSelect value={region} onChange={setRegion} /></div>
                   </FieldGrid>
+
+                  {(SERVICE_SPECS[svc] ?? []).length > 0 && (
+                    <div className="space-y-3 pt-1">
+                      <div className="text-[12px] font-extrabold text-[#0E6B5A]" style={{ fontFamily: "'Urbanist'" }}>
+                        ✨ פרטים שיביאו את ההערכה הכי קרובה למציאות
+                      </div>
+                      {(SERVICE_SPECS[svc] ?? []).map((spec) => (
+                        <div key={spec.id}>
+                          <Label className={FIELD_LABEL} style={{ fontFamily: "'Urbanist'" }}>{spec.title}</Label>
+                          <Select
+                            value={svcSpecs[spec.id] ?? ""}
+                            onValueChange={(v) => setSvcSpecs({ ...svcSpecs, [spec.id]: v })}
+                          >
+                            <SelectTrigger className={FIELD_TRIGGER}>
+                              <SelectValue placeholder="בחר אפשרות" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {spec.options.map((o) => (
+                                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </>
               )}
 
