@@ -273,6 +273,57 @@ export default function ResidentDashboard() {
           <Kpi label="ספקים" value={areaSuppliersCount.toString()} />
         </section>
 
+        {/* === Committee management — only for approved committee reps === */}
+        {isCommittee && (
+          <section className="px-5 mt-5">
+            <div
+              className="rounded-3xl p-5 border border-[#0E6B5A]/20 shadow-sm relative overflow-hidden"
+              style={{ background: "linear-gradient(135deg,#FFFFFF 0%,#E8F1EE 100%)" }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-9 w-9 rounded-2xl bg-[#0E6B5A] flex items-center justify-center">
+                    <Building2 className="h-4 w-4 text-white" strokeWidth={2.4} />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[15px] font-bold text-[#1C1C1E] tracking-tight leading-tight">ועד הבית שלי</div>
+                    <div className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">נציג מאושר</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate("/committee")}
+                  className="text-[12px] font-semibold text-[#0E6B5A] inline-flex items-center gap-0.5"
+                >
+                  ניהול <ChevronLeft className="h-3 w-3" strokeWidth={2.4} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <MiniStat label="עסקאות" value={(committeeStats?.active_deals ?? 0).toString()} />
+                <MiniStat label="הצטרפו" value={(committeeStats?.joiners ?? 0).toString()} />
+                <MiniStat label="חיסכון" value={formatILS(committeeStats?.savings ?? 0)} small />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => navigate("/deals")}
+                  className="bg-[#0E6B5A] text-white rounded-2xl py-3 px-3 text-[12px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-95 transition"
+                >
+                  <Plus className="h-3.5 w-3.5" strokeWidth={2.6} /> יזום עסקה
+                </button>
+                <button
+                  onClick={() => navigate("/committee")}
+                  className="bg-white border border-[#0E6B5A]/20 text-[#0E6B5A] rounded-2xl py-3 px-3 text-[12px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-95 transition"
+                >
+                  <ClipboardList className="h-3.5 w-3.5" strokeWidth={2.6} /> משימות וניהול
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
+
+
         {/* === Project stages — Apple-style segmented strip === */}
         <SectionHeader
           title="שלבי הפרויקט"
