@@ -52,6 +52,20 @@ type InquiryRow = {
   is_deleted?: boolean;
   deleted_at?: string | null;
 };
+type QuoteRequestRow = {
+  id: string;
+  user_id: string;
+  project_id: string;
+  title: string;
+  description: string | null;
+  category_id: string | null;
+  supplier_id: string | null;
+  residents_count: number | null;
+  target_price_per_unit: number | null;
+  deadline: string | null;
+  status: string;
+  created_at: string;
+};
 
 const TRASH_DAYS = 30;
 const daysLeftToPurge = (deletedAt?: string | null) => {
