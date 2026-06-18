@@ -122,6 +122,54 @@ export type Database = {
           },
         ]
       }
+      committee_quote_requests: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          deadline: string | null
+          description: string | null
+          id: string
+          project_id: string
+          residents_count: number
+          status: string
+          supplier_id: string | null
+          target_price_per_unit: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          project_id: string
+          residents_count: number
+          status?: string
+          supplier_id?: string | null
+          target_price_per_unit?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          project_id?: string
+          residents_count?: number
+          status?: string
+          supplier_id?: string | null
+          target_price_per_unit?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       committee_requests: {
         Row: {
           created_at: string
