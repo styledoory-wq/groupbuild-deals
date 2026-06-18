@@ -76,8 +76,6 @@ export default function ResidentDashboard() {
 
         const jrRaw = (prof as { journey?: string | null } | null)?.journey ?? "new_build";
         const jr = (VALID_JOURNEY_IDS.includes(jrRaw as JourneyId) ? jrRaw : "new_build") as JourneyId;
-        // Committee role users go to dedicated dashboard
-        if (jr === "committee") { navigate("/committee", { replace: true }); return; }
 
         const fname = prof?.full_name ?? user.name ?? "דייר";
         const cityName = prof?.city ?? "";
