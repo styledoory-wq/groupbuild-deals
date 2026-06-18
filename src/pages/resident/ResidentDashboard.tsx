@@ -370,64 +370,84 @@ export default function ResidentDashboard() {
 
 
 
-        {/* === Project stages — Apple-style segmented strip === */}
-        <SectionHeader
-          title="שלבי הפרויקט"
-          subtitle={`${completionPct}% הושלם`}
-          action={
-            <button
-              onClick={() => navigate(`/resident/categories?stage=${currentStage}`)}
-              className="text-[14px] font-medium text-[#0E6B5A]"
-            >
-              לקטגוריות
-            </button>
-          }
-        />
-        <div className="px-5 mt-3">
-          <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-4">
-            <div className="flex items-center gap-1.5 mb-3">
-              {STAGES.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`flex-1 h-1 rounded-full ${idx <= currentIdx ? "bg-[#0E6B5A]" : "bg-[#F2F2F7]"}`}
-                />
-              ))}
-            </div>
-            <div className="-mx-1 px-1 overflow-x-auto no-scrollbar">
-              <div className="flex gap-2">
-                {STAGES.map((stage, idx) => {
-                  const isCurrent = stage.id === currentStage;
-                  const isPast = idx < currentIdx;
-                  const Icon = stage.icon;
-                  return (
-                    <button
-                      key={stage.id}
-                      onClick={() => navigate(`/resident/categories?stage=${stage.id}`)}
-                      className={`shrink-0 flex flex-col items-center gap-1.5 w-[68px] py-2 rounded-2xl active:scale-95 transition ${
-                        isCurrent ? "bg-[#0E6B5A]/8" : ""
-                      }`}
-                    >
-                      <div
-                        className={`h-11 w-11 rounded-2xl flex items-center justify-center ${
-                          isCurrent
-                            ? "bg-[#0E6B5A] text-white"
-                            : isPast
-                            ? "bg-[#0E6B5A]/10 text-[#0E6B5A]"
-                            : "bg-[#F2F2F7] text-[#1C1C1E]"
-                        }`}
-                      >
-                        {isPast ? <Check className="h-5 w-5" strokeWidth={2.6} /> : <Icon className="h-5 w-5" strokeWidth={2.2} />}
-                      </div>
-                      <span className={`text-[10.5px] font-medium leading-tight text-center line-clamp-2 ${isCurrent ? "text-[#0E6B5A]" : "text-[#1C1C1E]"}`}>
-                        {stage.title}
-                      </span>
-                    </button>
-                  );
-                })}
+        {/* === Project stages — only when the journey has stages === */}
+        {journeyStages.length > 0 && (
+          <>
+            <SectionHeader
+              title={journey === "renovation" ? "שלבי השיפוץ" : "שלבי הפרויקט"}
+              subtitle={`${completionPct}% הושלם`}
+              action={
+                <button
+                  onClick={() => navigate(`/resident/categories?stage=${currentStage}`)}
+                  className="text-[14px] font-medium text-[#0E6B5A]"
+                >
+                  לקטגוריות
+                </button>
+              }
+            />
+            <div className="px-5 mt-3">
+              <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-4">
+                <div className="flex items-center gap-1.5 mb-3">
+                  {journeyStages.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex-1 h-1 rounded-full ${idx <= currentIdx ? "bg-[#0E6B5A]" : "bg-[#F2F2F7]"}`}
+                    />
+                  ))}
+                </div>
+                <div className="-mx-1 px-1 overflow-x-auto no-scrollbar">
+                  <div className="flex gap-2">
+                    {journeyStages.map((stage, idx) => {
+                      const isCurrent = stage.id === currentStage;
+                      const isPast = idx < currentIdx;
+                      const Icon = stage.icon;
+                      return (
+                        <button
+                          key={stage.id}
+                          onClick={() => navigate(`/resident/categories?stage=${stage.id}`)}
+                          className={`shrink-0 flex flex-col items-center gap-1.5 w-[68px] py-2 rounded-2xl active:scale-95 transition ${
+                            isCurrent ? "bg-[#0E6B5A]/8" : ""
+                          }`}
+                        >
+                          <div
+                            className={`h-11 w-11 rounded-2xl flex items-center justify-center ${
+                              isCurrent
+                                ? "bg-[#0E6B5A] text-white"
+                                : isPast
+                                ? "bg-[#0E6B5A]/10 text-[#0E6B5A]"
+                                : "bg-[#F2F2F7] text-[#1C1C1E]"
+                            }`}
+                          >
+                            {isPast ? <Check className="h-5 w-5" strokeWidth={2.6} /> : <Icon className="h-5 w-5" strokeWidth={2.2} />}
+                          </div>
+                          <span className={`text-[10.5px] font-medium leading-tight text-center line-clamp-2 ${isCurrent ? "text-[#0E6B5A]" : "text-[#1C1C1E]"}`}>
+                            {stage.title}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
+          </>
+        )}
+
+        {/* === Single-purchase callout === */}
+        {journey === "single_purchase" && (
+          <div className="px-5 mt-6">
+            <button
+              onClick={() => navigate("/resident/categories")}
+              className="w-full text-right bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-5 active:scale-[0.99] transition"
+            >
+              <div className="text-[12px] text-[#0E6B5A] font-semibold mb-1">חיפוש לפי קטגוריה</div>
+              <div className="text-[17px] font-bold text-[#1C1C1E] tracking-tight leading-tight">
+                מה אתה צריך עכשיו?
+              </div>
+              <div className="text-[12px] text-[#8E8E93] mt-1">דפדוף בכל הקטגוריות והעסקאות הזמינות</div>
+            </button>
           </div>
-        </div>
+        )}
 
         {/* === Quick actions === */}
         <SectionHeader title="פעולות מהירות" />
