@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   MapPin, Sparkles, Users, Flame,
   PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, Calculator,
-  TrendingUp, Check, ChevronLeft, Heart, Ticket,
+  TrendingUp, Check, ChevronLeft, Heart, Ticket, Building2,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupportButton } from "@/components/SupportButton";
@@ -319,7 +319,7 @@ export default function ResidentDashboard() {
           <QuickAction icon={Calculator} label="תכנון תקציב" onClick={() => navigate("/resident/budget-planner")} />
           <QuickAction icon={Heart} label="המועדפים שלי" onClick={() => navigate("/resident/favorites")} />
           <QuickAction icon={Ticket} label="השוברים שלי" onClick={() => navigate("/resident/my-vouchers")} />
-
+          <QuickAction icon={Building2} label="בקשת ועד בית" onClick={() => navigate("/committee/request")} />
         </section>
 
         {/* === FEED === */}

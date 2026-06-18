@@ -70,6 +70,7 @@ export default function ResidentProfile() {
 
   const actions = [
     { label: "עריכת פרופיל", icon: Pencil, onClick: () => navigate("/resident/profile/edit") },
+    { label: "בקשת הרשאת ועד בית", icon: Building2, onClick: () => navigate("/committee/request") },
     { label: "הפיקדונות שלי", icon: Wallet, onClick: () => navigate("/resident/deposits") },
     { label: "ההטבה שלי", icon: Ticket, onClick: () => navigate("/resident/my-vouchers") },
     { label: "המסמכים שלי", icon: FileText, onClick: () => navigate("/resident/documents") },
