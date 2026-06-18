@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import groupBuildMarkExact from "@/assets/groupbuild-mark-exact.png.asset.json";
 
 interface Props {
   variant?: "dark" | "light";
@@ -63,46 +64,12 @@ export function BrandLogo({
  */
 export function BrandMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 100 120"
-      className={cn("select-none", className)}
+    <img
+      src={groupBuildMarkExact.url}
+      alt=""
       aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Top-left: leaning rounded bar (deep green) — parallelogram with rounded caps */}
-      <line
-        x1="16"
-        y1="60"
-        x2="32"
-        y2="14"
-        stroke={COLORS.deep}
-        strokeWidth="28"
-        strokeLinecap="round"
-      />
-
-      {/* Top-right: house pentagon (mint) */}
-      <path
-        d="
-          M 70 4
-          Q 73 1 76 4
-          L 94 22
-          Q 96 24 96 28
-          L 96 58
-          Q 96 64 90 64
-          L 56 64
-          Q 50 64 50 58
-          L 50 28
-          Q 50 24 52 22
-          Z
-        "
-        fill={COLORS.mint}
-      />
-
-      {/* Bottom-left: vivid green rounded square */}
-      <rect x="10" y="76" width="36" height="36" rx="8" fill={COLORS.vivid} />
-
-      {/* Bottom-right: soft mint rounded square */}
-      <rect x="54" y="76" width="36" height="36" rx="8" fill={COLORS.soft} />
-    </svg>
+      className={cn("select-none object-contain", className)}
+      draggable={false}
+    />
   );
 }
