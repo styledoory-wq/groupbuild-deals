@@ -132,16 +132,16 @@ export default function ResidentDashboard() {
             ? supabase.from("suppliers").select("id", { count: "exact", head: true })
                 .in("id", Array.from(supplierIds)).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"])
             : Promise.resolve({ count: 0 }),
-          dealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url,discount_percentage,deposit_required,deposit_amount,created_at,price_before_discount,price_after_discount").in("id", dealIds).eq("is_deleted", false) : Promise.resolve({ data: [] }),
+          dealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url,discount_percentage,deposit_required,deposit_amount,created_at,original_price,discounted_price").in("id", dealIds).eq("is_deleted", false) : Promise.resolve({ data: [] }),
           joinedIds.length
-            ? supabase.from("deals").select("price_after_discount,price_before_discount").in("id", joinedIds)
+            ? supabase.from("deals").select("original_price,discounted_price").in("id", joinedIds)
             : Promise.resolve({ data: [] }),
         ]);
 
-        const savings = ((joinedDealsRes.data ?? []) as { price_after_discount: number | null; price_before_discount: number | null }[])
+        const savings = ((joinedDealsRes.data ?? []) as { discounted_price: number | null; original_price: number | null }[])
           .reduce((sum, d) => {
-            const before = Number(d.price_before_discount ?? 0);
-            const after = Number(d.price_after_discount ?? 0);
+            const before = Number(d.original_price ?? 0);
+            const after = Number(d.discounted_price ?? 0);
             const diff = before > after ? before - after : 0;
             return sum + diff;
           }, 0);
