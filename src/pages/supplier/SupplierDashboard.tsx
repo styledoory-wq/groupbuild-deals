@@ -7,6 +7,7 @@ import {
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { LoadingState, ErrorState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
