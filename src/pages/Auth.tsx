@@ -237,12 +237,8 @@ export default function Auth() {
           className="absolute -bottom-40 -left-24 h-[460px] w-[460px] rounded-full blur-3xl opacity-[0.22]"
           style={{ background: "radial-gradient(circle, #0E6B5A 0%, transparent 65%)" }}
         />
-        <img
-          src={logoIcon}
-          alt=""
-          aria-hidden
+        <BrandMark
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(78vw,560px)] opacity-[0.05] select-none"
-          draggable={false}
         />
       </div>
 
