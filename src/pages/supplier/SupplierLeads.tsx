@@ -82,6 +82,8 @@ export default function SupplierLeads() {
   const [trashedInterests, setTrashedInterests] = useState<InterestRow[]>([]);
   const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
   const [trashedInquiries, setTrashedInquiries] = useState<InquiryRow[]>([]);
+  const [quoteRequests, setQuoteRequests] = useState<QuoteRequestRow[]>([]);
+  const [requesterProfiles, setRequesterProfiles] = useState<Record<string, ProfileLite>>({});
   const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
