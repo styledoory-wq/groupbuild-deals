@@ -9,7 +9,7 @@ import { BackHeader } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { getCurrentSupplier } from "@/lib/supplierAuth";
+
 import { toast } from "sonner";
 
 type Result =
@@ -116,28 +116,36 @@ export default function SupplierScan() {
 
   async function lookup(code: string) {
     setResult({ kind: "looking-up", code });
-    const { session, supplier } = await getCurrentSupplier<{ id: string }>("id");
-    if (!session) { setResult({ kind: "error", message: "יש להתחבר כספק" }); return; }
-    if (!supplier) { setResult({ kind: "error", message: "לא נמצא פרופיל ספק מחובר" }); return; }
-    const { data, error } = await supabase
-      .from("vouchers")
-      .select("id, code, reference_number, status, deal_id, supplier_id, profiles:user_id(full_name, project_id)")
-      .ilike("code", code)
-      .maybeSingle();
-    if (error || !data) { setResult({ kind: "error", message: "שובר לא נמצא" }); return; }
-    if ((data as { supplier_id?: string }).supplier_id !== supplier.id) {
-      setResult({ kind: "error", message: "השובר אינו שייך לעסק זה" });
+    const { data, error } = await supabase.rpc("lookup_voucher_for_supplier", { _code: code });
+    if (error) { setResult({ kind: "error", message: "שגיאה בבדיקת השובר" }); return; }
+    const res = data as { ok: boolean; error?: string; voucher?: {
+      id: string; code: string; reference_number: string; status: string; deal_id: string;
+      deal_title: string | null; discounted_price: number | null; original_price: number | null;
+      full_name: string | null; project_id: string | null;
+    } };
+    if (!res?.ok) {
+      const map: Record<string, string> = {
+        auth_required: "יש להתחבר כספק",
+        not_supplier: "לא נמצא פרופיל ספק מחובר",
+        not_found: "שובר לא נמצא במערכת",
+        wrong_supplier: "השובר שייך לעסק אחר",
+        already_redeemed: "השובר כבר מומש בעבר",
+        cancelled: "השובר בוטל",
+        expired: "פג תוקף השובר",
+      };
+      setResult({ kind: "error", message: map[res?.error ?? ""] ?? "שובר לא תקין" });
       return;
     }
-    if (data.status === "redeemed") { setResult({ kind: "error", message: "השובר כבר מומש" }); return; }
-    if (data.status === "expired") { setResult({ kind: "error", message: "השובר פג תוקף" }); return; }
-    const raw = data as unknown as RawVoucherInfo;
-    const { data: deal } = await supabase
-      .from("deals")
-      .select("title, discounted_price, original_price")
-      .eq("id", raw.deal_id)
-      .maybeSingle();
-    setResult({ kind: "eligible", voucher: { ...raw, deals: deal ?? null } });
+    const v = res.voucher!;
+    setResult({
+      kind: "eligible",
+      voucher: {
+        id: v.id, code: v.code, reference_number: v.reference_number, status: v.status,
+        deal_id: v.deal_id,
+        deals: { title: v.deal_title, discounted_price: v.discounted_price, original_price: v.original_price },
+        profiles: { full_name: v.full_name, project_id: v.project_id },
+      },
+    });
   }
 
   async function confirmRedeem() {

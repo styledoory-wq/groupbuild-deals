@@ -1767,6 +1767,7 @@ export type Database = {
         Returns: boolean
       }
       issue_vouchers_for_deal: { Args: { _deal_id: string }; Returns: number }
+      lookup_voucher_for_supplier: { Args: { _code: string }; Returns: Json }
       notify_admins: {
         Args: {
           _body: string

@@ -25,11 +25,7 @@ type Voucher = {
 
 const STATUS_LABEL: Record<string, string> = {
   eligible: "זכאי להטבה",
-  appointment: "נקבעה פגישה",
-  measured: "נלקחו מידות",
-  ordered: "בהזמנה",
-  installed: "הותקן",
-  completed: "הושלם",
+  in_progress: "בתהליך מימוש",
   redeemed: "מומש",
   expired: "פג תוקף",
   cancelled: "בוטל",
