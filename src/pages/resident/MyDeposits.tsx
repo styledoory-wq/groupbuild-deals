@@ -168,7 +168,7 @@ export default function MyDeposits() {
 
   return (
     <MobileShell>
-      <PageHeader title="הפיקדונות שלי" subtitle="ריכוז כל הפיקדונות שלך" />
+      <BackHeader title="הפיקדונות שלי" subtitle="ריכוז כל הפיקדונות שלך" />
 
       <section className="px-5 mt-4 mb-5">
         <div className="flex items-center justify-between mb-3">
@@ -184,9 +184,13 @@ export default function MyDeposits() {
         </div>
         <div className="space-y-2">
           {depositsLoading ? (
-            <><div className="gb-skeleton h-20 rounded-2xl" /><div className="gb-skeleton h-20 rounded-2xl" /></>
+            <SkeletonList count={2} itemClassName="h-20" />
           ) : activeDeposits.length === 0 ? (
-            <div className="gb-card p-6 text-center text-sm text-muted-foreground">אין פיקדונות פעילים.</div>
+            <EmptyState
+              icon={<History className="h-7 w-7 text-[#9CA3AF]" />}
+              title="אין פיקדונות פעילים"
+              description="הפיקדונות שלך יופיעו כאן לאחר שתצטרף לעסקה."
+            />
           ) : activeDeposits.map(renderItem)}
         </div>
       </section>
