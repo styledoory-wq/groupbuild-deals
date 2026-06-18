@@ -44,7 +44,7 @@ export default function SearchPage() {
   }, [term]);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#FCFBF8" }}>
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -66,7 +66,7 @@ export default function SearchPage() {
             {q && (
               <button
                 onClick={() => setQ("")}
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-[#F7F5F0] flex items-center justify-center active:scale-90 transition-transform"
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-[#FCFBF8] flex items-center justify-center active:scale-90 transition-transform"
                 aria-label="נקה"
               >
                 <X className="h-4 w-4 text-[#6B7280]" strokeWidth={2.4} />

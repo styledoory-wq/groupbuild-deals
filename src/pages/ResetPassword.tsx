@@ -44,7 +44,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F0] text-[#1F2937] flex justify-center">
+    <div className="min-h-screen bg-[#FCFBF8] text-[#1F2937] flex justify-center">
       <div className="w-full max-w-screen-sm flex flex-col safe-top">
         <div className="px-6 pt-12 pb-8">
           <h1 className="text-3xl font-extrabold mb-2">איפוס סיסמה</h1>

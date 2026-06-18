@@ -258,14 +258,14 @@ export default function CheckoutSummary() {
 
   return (
     <MobileShell>
-      <div dir="rtl" className="min-h-[100dvh] bg-[#F7F5F0] pb-32">
+      <div dir="rtl" className="min-h-[100dvh] bg-[#FCFBF8] pb-32">
         {/* Top bar */}
         <header className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-black/5">
           <div className="h-14 flex items-center justify-between px-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="h-10 w-10 rounded-full bg-[#F7F5F0] flex items-center justify-center active:scale-95 transition"
+              className="h-10 w-10 rounded-full bg-[#FCFBF8] flex items-center justify-center active:scale-95 transition"
               aria-label="חזרה"
             >
               <ArrowRight className="h-5 w-5" />
@@ -311,7 +311,7 @@ export default function CheckoutSummary() {
                     {supplier.business_name}
                   </p>
                 )}
-                <div className="mt-2 inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-[#F7F5F0] rounded-full px-2 py-0.5">
+                <div className="mt-2 inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-[#FCFBF8] rounded-full px-2 py-0.5">
                   <Users className="h-3 w-3" />
                   {participants} כבר הצטרפו
                 </div>

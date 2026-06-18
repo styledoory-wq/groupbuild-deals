@@ -32,7 +32,7 @@ const buttonVariants = cva(
         secondary:
           "bg-white text-[#0B1220] shadow-[0_2px_10px_-4px_rgba(11,18,32,0.10)] hover:bg-[#F4F6FA]",
         outline:
-          "bg-white text-[#0B1220] ring-1 ring-inset ring-[#E5E7EB] shadow-none hover:bg-[#F7F5F0] hover:ring-[#0E6B5A]/30",
+          "bg-white text-[#0B1220] ring-1 ring-inset ring-[#E5E7EB] shadow-none hover:bg-[#FCFBF8] hover:ring-[#0E6B5A]/30",
         ghost:
           "bg-transparent text-[#0B1220] hover:bg-[#F1F1ED]",
         destructive:
