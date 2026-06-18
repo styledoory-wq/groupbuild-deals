@@ -52,6 +52,8 @@ export default function ResidentDashboard() {
   const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
   const [joinedCount, setJoinedCount] = useState(0);
   const [estimatedSavings, setEstimatedSavings] = useState(0);
+  const [isCommittee, setIsCommittee] = useState(false);
+  const [committeeStats, setCommitteeStats] = useState<{ active_deals: number; joiners: number; savings: number } | null>(null);
 
   useEffect(() => {
     if (!authReady || !user?.id) return;
