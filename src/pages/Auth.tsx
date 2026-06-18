@@ -2,6 +2,7 @@ import { useState, useLayoutEffect, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Briefcase, Mail, ArrowLeft, User as UserIcon, MapPin, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import logoIcon from "@/assets/logo-icon.png";
 import { SupportButton } from "@/components/SupportButton";
 
 import { useApp } from "@/store/AppStore";
@@ -236,7 +237,7 @@ export default function Auth() {
           style={{ background: "radial-gradient(circle, #0E6B5A 0%, transparent 65%)" }}
         />
         <img
-          src={new URL("@/assets/logo-icon.png", import.meta.url).href}
+          src={logoIcon}
           alt=""
           aria-hidden
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(78vw,560px)] opacity-[0.05] select-none"
