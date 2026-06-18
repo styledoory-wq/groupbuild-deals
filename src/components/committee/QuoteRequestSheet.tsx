@@ -69,11 +69,12 @@ export function QuoteRequestSheet({ projectName, projectId, categories, supplier
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40" onClick={onClose} dir="rtl">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 overscroll-contain" onClick={onClose} dir="rtl">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
+        className="w-full sm:max-w-lg max-h-[90dvh] sm:max-h-[92vh] overflow-y-auto overscroll-contain bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
       >
+
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDEAE3] sticky top-0 bg-white">
           <div>
             <h2 className="text-base font-semibold text-[#1F1F1F]">בקשת הצעת מחיר קבוצתית</h2>
