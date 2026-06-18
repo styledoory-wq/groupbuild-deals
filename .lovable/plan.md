@@ -50,3 +50,9 @@
 ---
 
 **אישור?** אם כן — אני בונה את ה־migration + הקוד ברצף אחד. אם תרצה לדייק את שלבי השיפוץ לפני כן, שלח את הרשימה שלך.
+
+## ✅ הושלם 18/06/2026 — User Journeys
+- Migration: profiles.journey (new_build/renovation/single_purchase/committee)
+- src/lib/journeys.ts
+- ProfileEdit: בורר מסלול + סינון שלבים לפי המסלול
+- Dashboard: hides/filters stages strip לפי המסלול; redirect לוועד
