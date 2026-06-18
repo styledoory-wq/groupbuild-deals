@@ -139,9 +139,13 @@ export function QuoteRequestSheet({ projectName, projectId, categories, supplier
               className="w-full h-11 px-3 rounded-xl border border-[#EDEAE3] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#0E6B5A]"
             >
               <option value="">— פתוח לכל הספקים המתאימים —</option>
-              {suppliers.map((s) => <option key={s.id} value={s.id}>{s.business_name}</option>)}
+              {filteredSuppliers.map((s) => <option key={s.id} value={s.id}>{s.business_name}</option>)}
             </select>
-            <p className="text-[11px] text-[#6B6B6B] mt-1.5">אם תבחר ספק, הוא יקבל התראה ישירה.</p>
+            <p className="text-[11px] text-[#6B6B6B] mt-1.5">
+              {categoryId
+                ? `מציג ${filteredSuppliers.length} ספקים בתחום זה. אם תבחר ספק, הוא יקבל התראה ישירה.`
+                : "בחר קטגוריה כדי לסנן ספקים. אם תבחר ספק, הוא יקבל התראה ישירה."}
+            </p>
           </Field>
 
           <Field label="מועד אחרון להגשת הצעות" icon={Calendar}>
