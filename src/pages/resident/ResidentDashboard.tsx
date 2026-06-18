@@ -13,6 +13,7 @@ import { useApp, formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import { type StageId } from "@/lib/designSystem";
+import { QuoteRequestSheet } from "@/components/committee/QuoteRequestSheet";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
   { id: "planning",     title: "תכנון ועיצוב",       description: "אדריכלות ועיצוב פנים",            icon: PencilRuler, dbStage: "planning" },
