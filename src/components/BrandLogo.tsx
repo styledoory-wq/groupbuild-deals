@@ -69,17 +69,17 @@ export function BrandMark({ className }: { className?: string }) {
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Top-left: tall leaning shape with angled top (deep green) */}
+      {/* Top-left: tall leaning shape with angled top (deep green) — like a leaf/roof slice */}
       <path
         d="
-          M 14 8
-          Q 14 4 18 3
-          L 32 0.5
-          Q 38 -0.2 38 6
+          M 18 14
+          Q 18 9 22 7
+          L 32 2
+          Q 38 -0.5 38 6
           L 38 64
           Q 38 70 32 70
-          L 20 70
-          Q 14 70 14 64
+          L 24 70
+          Q 18 70 18 64
           Z
         "
         fill={COLORS.deep}
