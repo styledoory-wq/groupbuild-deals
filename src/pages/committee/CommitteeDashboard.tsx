@@ -159,12 +159,12 @@ export default function CommitteeDashboard() {
 
         {/* Primary CTA */}
         <button
-          onClick={() => navigate("/deals")}
+          onClick={() => navigate("/committee/quote-request")}
           className="w-full flex items-center justify-between gap-3 bg-[#0E6B5A] text-white rounded-2xl px-5 py-4 hover:bg-[#0c5a4c] active:scale-[0.99] transition"
         >
           <div className="text-right">
             <div className="text-sm font-semibold">יזום עסקה קבוצתית בקהילה</div>
-            <div className="text-xs text-white/80 mt-0.5">עיין בעסקאות פתוחות והזמן דיירים להצטרף</div>
+            <div className="text-xs text-white/80 mt-0.5">בקש הצעת מחיר מספקים לפי כמות דיירים ומחיר יעד</div>
           </div>
           <Plus className="w-5 h-5" />
         </button>
