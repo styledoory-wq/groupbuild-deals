@@ -1,10 +1,7 @@
 import { cn } from "@/lib/utils";
-import brandMark from "@/assets/brand-mark.png";
 
 interface Props {
-  /** "dark" = dark wordmark for light surfaces; "light" = white wordmark for dark surfaces. */
   variant?: "dark" | "light";
-  /** Show only the icon mark without the wordmark. */
   markOnly?: boolean;
   className?: string;
   size?: "sm" | "md" | "lg" | "xl";
@@ -17,9 +14,16 @@ const sizeMap = {
   xl: "h-24",
 };
 
+/** Official GroupBuild brand colors */
+const COLORS = {
+  deep: "#0F3D34",   // dark green — tall leaning shape
+  vivid: "#2E9D74",  // vivid green — small square
+  mint: "#9CC4B0",   // mint — house pentagon
+  soft: "#C7D8CD",   // soft mint — light square
+};
+
 /**
- * GroupBuild brand logo — official mark + Rubik wordmark per brand guidelines.
- * Brand colors: Deep #0F3D34 · Mint #7FB69E · Soft #C7D8CD.
+ * GroupBuild brand logo — vector mark + Rubik wordmark per official brand guidelines.
  */
 export function BrandLogo({
   variant = "dark",
@@ -27,7 +31,7 @@ export function BrandLogo({
   className,
   size = "md",
 }: Props) {
-  const wordColor = variant === "light" ? "#FFFFFF" : "#0F3D34";
+  const wordColor = variant === "light" ? "#FFFFFF" : COLORS.deep;
 
   return (
     <span
@@ -42,8 +46,8 @@ export function BrandLogo({
           style={{
             color: wordColor,
             fontFamily: "'Rubik', 'Heebo', system-ui, sans-serif",
-            fontSize: "0.72em",
-            letterSpacing: "-0.015em",
+            fontSize: "0.62em",
+            letterSpacing: "-0.02em",
           }}
         >
           GroupBuild
@@ -53,15 +57,57 @@ export function BrandLogo({
   );
 }
 
-/** Official GroupBuild mark — four rounded shapes from the brand guidelines. */
+/**
+ * Official GroupBuild mark — four geometric shapes forming two stylized houses.
+ * Crisp vector reproduction of the brand-guideline mark.
+ */
 export function BrandMark({ className }: { className?: string }) {
   return (
-    <img
-      src={brandMark}
-      alt=""
-      aria-hidden="true"
+    <svg
+      viewBox="0 0 100 120"
       className={cn("select-none", className)}
-      draggable={false}
-    />
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Top-left: tall leaning shape with angled top (deep green) */}
+      <path
+        d="
+          M 14 8
+          Q 14 4 18 3
+          L 32 0.5
+          Q 38 -0.2 38 6
+          L 38 64
+          Q 38 70 32 70
+          L 20 70
+          Q 14 70 14 64
+          Z
+        "
+        fill={COLORS.deep}
+      />
+
+      {/* Top-right: house pentagon (mint) */}
+      <path
+        d="
+          M 70 4
+          Q 73 1 76 4
+          L 94 22
+          Q 96 24 96 28
+          L 96 64
+          Q 96 70 90 70
+          L 56 70
+          Q 50 70 50 64
+          L 50 28
+          Q 50 24 52 22
+          Z
+        "
+        fill={COLORS.mint}
+      />
+
+      {/* Bottom-left: vivid green rounded square */}
+      <rect x="14" y="78" width="32" height="32" rx="8" fill={COLORS.vivid} />
+
+      {/* Bottom-right: soft mint rounded square */}
+      <rect x="56" y="78" width="40" height="32" rx="8" fill={COLORS.soft} />
+    </svg>
   );
 }
