@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Briefcase, Loader2, AlertCircle, ShieldCheck, Pencil, Wallet, Sparkles, Clock, CheckCircle2, XCircle, PauseCircle, Users, TrendingUp, Coins } from "lucide-react";
+import { Plus, Briefcase, ShieldCheck, Pencil, Wallet, Sparkles, Clock, CheckCircle2, XCircle, PauseCircle, Users, TrendingUp, Coins } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { ScreenHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,7 +166,7 @@ export default function SupplierOffers() {
 
   return (
     <MobileShell>
-      <PageHeader title="ההצעות שלי" subtitle="ניהול כל ההצעות הפעילות שלך" back={false} />
+      <ScreenHeader title="ההצעות שלי" subtitle="ניהול כל ההצעות הפעילות שלך" />
 
       {/* CTA Button */}
       <div className="px-5 -mt-4 relative z-10 mb-5">
@@ -208,34 +208,33 @@ export default function SupplierOffers() {
       )}
 
       <div className="px-5 space-y-4 pb-8">
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-7 w-7 animate-spin text-primary" />
-          </div>
-        )}
+        {loading && <LoadingState />}
 
         {!loading && error && (
-          <div className="gb-card p-6 text-center">
-            <div className="h-12 w-12 mx-auto rounded-full bg-destructive/10 flex items-center justify-center mb-3">
-              <AlertCircle className="h-6 w-6 text-destructive" />
-            </div>
-            <p className="text-xs text-muted-foreground">{error}</p>
-          </div>
+          <ErrorState title="שגיאה בטעינה" description={error} onRetry={refresh} />
         )}
 
         {!loading && !error && !supplierId && (
-          <div className="gb-card p-8 text-center">
-            <Briefcase className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-            <h3 className="font-bold text-base mb-1">חסר פרופיל ספק</h3>
-            <p className="text-sm text-muted-foreground">השלם את פרטי הספק לפני יצירת הצעות.</p>
-          </div>
+          <EmptyState
+            icon={<Briefcase className="h-7 w-7 text-[#9CA3AF]" />}
+            title="חסר פרופיל ספק"
+            description="השלם את פרטי הספק לפני יצירת הצעות."
+          />
         )}
 
         {!loading && !error && supplierId && deals.length === 0 && (
-          <div className="gb-card p-8 text-center">
-            <Briefcase className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">אין הצעות עדיין</p>
-          </div>
+          <EmptyState
+            icon={<Briefcase className="h-7 w-7 text-[#9CA3AF]" />}
+            title="אין הצעות עדיין"
+            description="צור את ההצעה הראשונה שלך ותתחיל לקבל לידים."
+            action={
+              <Link to="/supplier/offers/new">
+                <Button className="h-11 px-5 rounded-2xl bg-[#0E6B5A] text-white font-bold">
+                  <Plus className="h-4 w-4 ml-2" /> צרו הצעה חדשה
+                </Button>
+              </Link>
+            }
+          />
         )}
 
         {!loading && !error && deals.map((d) => {

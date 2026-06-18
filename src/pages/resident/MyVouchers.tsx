@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, LoadingState, EmptyState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { VoucherCard } from "@/components/vouchers/VoucherCard";
@@ -196,27 +196,16 @@ export default function MyVouchers() {
 
   return (
     <MobileShell>
-      <PageHeader title="ההטבה שלי" subtitle="ההצעות שהצטרפת אליהן והשוברים שלך" />
+      <BackHeader title="ההטבה שלי" subtitle="ההצעות שהצטרפת אליהן והשוברים שלך" />
       <div className="px-5 pb-28 space-y-5">
         {loading ? (
-          <div className="h-72 gb-skeleton rounded-3xl" />
+          <LoadingState label="טוען הטבות…" />
         ) : vouchers.length === 0 && pending.length === 0 ? (
-          <div className="gb-card p-10 text-center">
-            <div
-              className="h-16 w-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-              style={{
-                background: "linear-gradient(145deg, rgba(212,180,106,0.18) 0%, rgba(201,169,97,0.10) 100%)",
-                border: "1px solid rgba(201,169,97,0.30)",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 16px -8px rgba(201,169,97,0.30)",
-              }}
-            >
-              <Ticket className="h-7 w-7 text-[#C9A961]" strokeWidth={1.75} />
-            </div>
-            <h3 className="font-extrabold text-fs-lg text-[#1F2937]">אין עדיין הטבות זמינות</h3>
-            <p className="text-fs-sm text-[#475569] mt-2 leading-relaxed max-w-[280px] mx-auto">
-              ברגע שעסקה שהצטרפת אליה תיסגר, יופיע כאן שובר ההטבה האישי שלך עם קוד מימוש ו-QR.
-            </p>
-          </div>
+          <EmptyState
+            icon={<Ticket className="h-7 w-7 text-[#C9A961]" />}
+            title="אין עדיין הטבות זמינות"
+            description="ברגע שעסקה שהצטרפת אליה תיסגר, יופיע כאן שובר ההטבה האישי שלך עם קוד מימוש ו-QR."
+          />
         ) : (
           <>
             {/* Pending — joined but group hasn't closed yet */}

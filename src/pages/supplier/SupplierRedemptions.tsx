@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, TrendingUp, Users, CheckCircle2, Clock, XCircle, Award, Wallet } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { ScreenHeader, SkeletonList, EmptyState } from "@/components/ds";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
@@ -137,7 +137,7 @@ export default function SupplierRedemptions() {
 
   return (
     <MobileShell>
-      <PageHeader title="מימושים" subtitle="לקוחות זכאים והתקדמות המימוש" />
+      <ScreenHeader title="מימושים" subtitle="לקוחות זכאים והתקדמות המימוש" />
 
       <div className="px-5 pb-28 space-y-5">
         {/* Hero Banner — Navy/Gold */}
@@ -184,11 +184,13 @@ export default function SupplierRedemptions() {
 
         {/* Cards */}
         {loading ? (
-          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-24 gb-skeleton rounded-[20px]" />)}</div>
+          <SkeletonList count={3} itemClassName="h-24" />
         ) : filtered.length === 0 ? (
-          <div className="gb-card p-10 text-center text-muted-foreground">
-            אין עדיין מימושים להצגה
-          </div>
+          <EmptyState
+            icon={<Award className="h-7 w-7 text-[#9CA3AF]" />}
+            title="אין עדיין מימושים להצגה"
+            description="המימושים של הלקוחות יופיעו כאן כשיתחילו להשתמש בשוברים."
+          />
         ) : (
           <div className="space-y-3">
             {filtered.map((r, idx) => {

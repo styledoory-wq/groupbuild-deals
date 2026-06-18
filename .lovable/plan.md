@@ -28,11 +28,11 @@
 
 המטרה: לוודא שהרכיבים מכסים את כל המקרים האמיתיים לפני מיגרציה רחבה.
 
-### פעימה 3 — מיגרציה רחבה
-- כל דפי הדייר הנותרים (`Favorites`, `MyOffers`, `Notifications`, `Search`, `BudgetPlanner`, וכו').
-- כל דפי הספק.
-- כל דפי האדמין (15 דפים — שם הכי הרבה "טוען…" inline).
-- הסרת `PageHeader` הישן אם לא בשימוש.
+### פעימה 3 — מיגרציה רחבה ✅ חלקית
+- ✅ דפי הדייר הנותרים: `Favorites`, `MyOffers`, `Search`, `BudgetPlanner`, `MyDocuments`, `MyDeposits`, `MyVouchers`, `ProjectsList`, `ResidentProfileEdit`
+- ✅ דפי הספק: `SupplierLeads`, `SupplierOffers`, `SupplierProfileEdit`, `SupplierRedemptions`, `SupplierReviews`, `SupplierScan`, `OfferEditor`, `SupplierOfferMarketingEdit`, `SupplierProfile`, `NotificationSettings`
+- ⏳ דפי האדמין (18 דפים — נשאר לסיום)
+- ⏳ הסרת `PageHeader` הישן כשלא בשימוש
 
 ## פרטים טכניים
 ```text

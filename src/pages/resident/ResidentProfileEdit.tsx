@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Save, ArrowRight, Mail, Phone, User as UserIcon, MapPin, Building2, Bell, Hammer } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -143,14 +143,14 @@ export default function ResidentProfileEdit() {
   if (loading) {
     return (
       <MobileShell>
-        <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground text-sm">טוען…</div>
+        <LoadingState />
       </MobileShell>
     );
   }
 
   return (
     <MobileShell>
-      <PageHeader title="עריכת פרופיל" subtitle="עדכנו את הפרטים שלכם" />
+      <BackHeader title="עריכת פרופיל" subtitle="עדכנו את הפרטים שלכם" />
 
       <form onSubmit={handleSave} className="px-5 space-y-5 pb-8">
         {/* Personal */}

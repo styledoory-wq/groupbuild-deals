@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search as SearchIcon, Store, X } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, SkeletonList, EmptyState } from "@/components/ds";
 import { supabase } from "@/integrations/supabase/client";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 
@@ -49,7 +49,7 @@ export default function SearchPage() {
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
-        <PageHeader size="large" title="חיפוש" subtitle="מצא ספקים, בעלי מקצוע וקטגוריות" />
+        <BackHeader title="חיפוש" subtitle="מצא ספקים, בעלי מקצוע וקטגוריות" />
 
         {/* Search field */}
         <div className="px-5 mt-2">
@@ -93,17 +93,13 @@ export default function SearchPage() {
               </div>
             </>
           ) : loading ? (
-            <div className="space-y-3">
-              {[0,1,2].map((i) => <div key={i} className="h-20 rounded-[20px] bg-white animate-pulse" />)}
-            </div>
+            <SkeletonList count={3} itemClassName="h-20" />
           ) : suppliers.length === 0 ? (
-            <div className="flex flex-col items-center text-center py-16">
-              <div className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center mb-4 shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]">
-                <SearchIcon className="h-7 w-7 text-[#0E6B5A]" />
-              </div>
-              <p className="text-[15px] font-bold text-[#1F2937]">לא נמצאו ספקים</p>
-              <p className="text-[13px] text-[#6B7280] mt-1">נסה לחפש בעזרת מילה אחרת</p>
-            </div>
+            <EmptyState
+              icon={<SearchIcon className="h-7 w-7 text-[#0E6B5A]" />}
+              title="לא נמצאו ספקים"
+              description="נסה לחפש בעזרת מילה אחרת"
+            />
           ) : (
             <div className="space-y-2.5">
               {suppliers.map((s) => (

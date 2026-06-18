@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Search, MapPin, Building2, Check } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Input } from "@/components/ui/input";
 import { useApp } from "@/store/AppStore";
@@ -28,7 +28,7 @@ export default function ProjectsList() {
 
   return (
     <MobileShell>
-      <PageHeader title="בחרו את הפרויקט שלכם" subtitle="חברו את הדירה שלכם לעסקאות הקבוצתיות" />
+      <BackHeader title="בחרו את הפרויקט שלכם" subtitle="חברו את הדירה שלכם לעסקאות הקבוצתיות" />
       <div className="px-5 -mt-4 relative z-10 mb-4">
         <div className="relative">
           <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />

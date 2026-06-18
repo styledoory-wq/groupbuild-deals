@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Home, Hammer, DoorOpen, Wrench, RefreshCw, Zap, Sparkles } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader } from "@/components/ds";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -133,7 +133,7 @@ export default function BudgetPlanner() {
   return (
     <MobileShell>
       <div style={{ background: "#F7F5F0", fontFamily: "'Epilogue', system-ui, sans-serif" }}>
-      <PageHeader title="מחשבון תקציב מקצועי" subtitle="הערכת עלות מדויקת ב-4 מסלולים — עם יועץ AI ועסקאות מתאימות" />
+      <BackHeader title="מחשבון תקציב מקצועי" subtitle="הערכת עלות מדויקת ב-4 מסלולים — עם יועץ AI ועסקאות מתאימות" />
       <div className="px-5 pb-28 space-y-5">
 
         {!track && (

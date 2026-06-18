@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Bell, Loader2, Save, Mail, Smartphone } from "lucide-react";
+import { Bell, Save, Mail, Smartphone } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
@@ -110,9 +110,7 @@ export default function NotificationSettings() {
   if (loading) {
     return (
       <MobileShell>
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
+        <LoadingState />
       </MobileShell>
     );
   }
@@ -122,7 +120,7 @@ export default function NotificationSettings() {
 
   return (
     <MobileShell>
-      <PageHeader title="הגדרות התראות" subtitle="ניהול מייל והתראות פוש" />
+      <BackHeader title="הגדרות התראות" subtitle="ניהול מייל והתראות פוש" />
 
       <div className="px-5 -mt-4 relative z-10 space-y-4 pb-24">
         <div className="rounded-[16px] p-3 bg-white border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">

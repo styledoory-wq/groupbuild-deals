@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Save, ArrowRight, Briefcase, Phone, Mail, MapPin, Tag, User as UserIcon, FileText, Globe, Image as ImageIcon, Trash2, Plus, Link as LinkIcon, Instagram, Facebook } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -285,14 +285,14 @@ export default function SupplierProfileEdit() {
   if (loading) {
     return (
       <MobileShell>
-        <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground text-sm">טוען…</div>
+        <LoadingState />
       </MobileShell>
     );
   }
 
   return (
     <MobileShell>
-      <PageHeader title="עריכת פרופיל ספק" subtitle="עדכנו את פרטי העסק" />
+      <BackHeader title="עריכת פרופיל ספק" subtitle="עדכנו את פרטי העסק" />
 
       <form onSubmit={handleSave} className="px-5 space-y-5 pb-8">
         <section className="gb-card p-4 space-y-3">

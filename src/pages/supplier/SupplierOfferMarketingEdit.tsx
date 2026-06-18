@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Save, Loader2, Plus, X, ShieldAlert, Sparkles, Lock } from "lucide-react";
+import { Save, Plus, X, ShieldAlert, Sparkles, Lock } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -95,17 +95,15 @@ export default function SupplierOfferMarketingEdit() {
   if (loading) {
     return (
       <MobileShell>
-        <PageHeader title="עריכת הצעה" subtitle="טוען..." back />
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
+        <BackHeader title="עריכת הצעה" subtitle="טוען..." />
+        <LoadingState />
       </MobileShell>
     );
   }
 
   return (
     <MobileShell>
-      <PageHeader title="עריכה שיווקית" subtitle="ניתן לעדכן רק שדות שיווקיים" back />
+      <BackHeader title="עריכה שיווקית" subtitle="ניתן לעדכן רק שדות שיווקיים" />
 
       <div className="px-5 -mt-4 relative z-10 space-y-4 pb-32">
         {/* Trust banner */}
