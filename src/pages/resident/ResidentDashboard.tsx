@@ -188,6 +188,7 @@ export default function ResidentDashboard() {
         if (cancelled) return;
         setFullName(fname); setCity(cityName); setProjectId(pid);
         setCurrentStage(stage);
+        setJourney(jr);
         setAreaDeals(nextDeals); setAreaSuppliersCount(supCountRes.count ?? 0); setJoinedCount(joined);
         setEstimatedSavings(savings);
       } catch (e) {
