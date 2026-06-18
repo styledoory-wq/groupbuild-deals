@@ -34,6 +34,7 @@ export default function CommitteeDashboard() {
   const [buildingDeals, setBuildingDeals] = useState<BuildingDeal[]>([]);
   const [isCommittee, setIsCommittee] = useState<boolean | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   useEffect(() => {
     if (!authReady) return;
