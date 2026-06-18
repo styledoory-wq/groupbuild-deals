@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Users, TrendingUp, ClipboardList, Plus, Bell, Share2, Megaphone, Search, FileText, ChevronLeft } from "lucide-react";
+import { Building2, Users, TrendingUp, ClipboardList, Plus, Bell, Share2, Megaphone, Search, FileText, ChevronLeft, FileEdit } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp, formatILS } from "@/store/AppStore";
