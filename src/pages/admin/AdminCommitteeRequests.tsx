@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, XCircle, Loader2, Inbox, Building2 } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, Inbox, Building2, ShieldOff } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -71,6 +71,26 @@ export default function AdminCommitteeRequests() {
     }
   };
 
+  const revoke = async (r: Row) => {
+    const reason = window.prompt(
+      `לבטל את הרשאת ועד הבית של ${profiles[r.user_id]?.full_name ?? "המשתמש"}?\nהמשתמש יחזור להיות דייר רגיל.\nסיבה (אופציונלי):`
+    );
+    if (reason === null) return; // cancel
+    setBusy(r.id);
+    try {
+      const { error } = await supabase.rpc("admin_revoke_committee_role" as never, {
+        _user_id: r.user_id, _project_id: r.project_id, _reason: reason || null,
+      } as never);
+      if (error) throw error;
+      toast.success("הרשאת ועד הבית בוטלה");
+      await load();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "שגיאה");
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const filtered = rows.filter(r => tab === "all" ? true : r.status === "pending");
 
   return (
@@ -125,6 +145,18 @@ export default function AdminCommitteeRequests() {
                   disabled={busy === r.id}
                   className="flex-1 h-10 rounded-xl border border-[#DCD8CD] text-[#C73E3E] text-sm font-medium hover:bg-[#FBE9E9] disabled:opacity-50 flex items-center justify-center gap-1.5"
                 ><XCircle className="w-4 h-4" />דחייה</button>
+              </div>
+            )}
+            {r.status === "approved" && (
+              <div className="mt-3">
+                <button
+                  onClick={() => revoke(r)}
+                  disabled={busy === r.id}
+                  className="w-full h-10 rounded-xl border border-[#DCD8CD] text-[#C73E3E] text-sm font-medium hover:bg-[#FBE9E9] disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  {busy === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldOff className="w-4 h-4" />}
+                  ביטול הרשאת ועד בית
+                </button>
               </div>
             )}
           </div>
