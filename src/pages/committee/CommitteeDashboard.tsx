@@ -412,150 +412,138 @@ ${url}`,
   );
 }
 
-function Field({ label, icon: Icon, required, children }: { label: string; icon?: typeof Users; required?: boolean; children: React.ReactNode }) {
+function StatCard({ icon, label, value, small }: { icon: React.ReactNode; label: string; value: number | string; small?: boolean }) {
   return (
-    <label className="block">
-      <div className="text-xs font-semibold text-[#1F1F1F] mb-1.5 inline-flex items-center gap-1.5">
-        {Icon && <Icon className="w-3.5 h-3.5 text-[#0E6B5A]" />}
-        {label}{required && <span className="text-[#DC2626]">*</span>}
-      </div>
-      {children}
-    </label>
+    <div className="bg-white rounded-2xl border border-[#EDEAE3] p-3">
+      <div className="w-7 h-7 rounded-full bg-[#E8F1EE] flex items-center justify-center mb-2">{icon}</div>
+      <div className={`font-semibold text-[#1F1F1F] ${small ? "text-sm" : "text-lg"}`}>{value}</div>
+      <div className="text-[11px] text-[#6B6B6B] leading-tight mt-0.5">{label}</div>
+    </div>
   );
 }
 
-function QuoteRequestSheet({ projectName, projectId, categories, suppliers, onClose }: { projectName: string; projectId: string | null; categories: Category[]; suppliers: Supplier[]; onClose: () => void }) {
-  const { user } = useApp();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState<string>("");
-  const [supplierId, setSupplierId] = useState<string>("");
-  const [residentsCount, setResidentsCount] = useState<string>("");
-  const [targetPrice, setTargetPrice] = useState<string>("");
-  const [deadline, setDeadline] = useState<string>("");
-  const [submitting, setSubmitting] = useState(false);
+function ActionTile({ icon: Icon, title, desc, onClick }: { icon: typeof Search; title: string; desc: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="bg-white rounded-2xl border border-[#EDEAE3] p-4 text-right hover:bg-[#FBFAF6] active:scale-[0.99] transition"
+    >
+      <div className="w-9 h-9 rounded-xl bg-[#E8F1EE] flex items-center justify-center mb-2">
+        <Icon className="w-4 h-4 text-[#0E6B5A]" />
+      </div>
+      <div className="text-sm font-semibold text-[#1F1F1F] tracking-tight">{title}</div>
+      <div className="text-[11px] text-[#6B6B6B] mt-0.5 leading-tight">{desc}</div>
+    </button>
+  );
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.id || !projectId) return;
-    if (!title.trim()) return toast.error("יש להזין כותרת");
-    const rc = parseInt(residentsCount, 10);
-    if (!rc || rc < 1) return toast.error("יש להזין מספר דיירים תקין");
+function InviteSheet({ projectName, onClose, onNativeShare }: { projectName: string; onClose: () => void; onNativeShare: () => void }) {
+  const url = typeof window !== "undefined" ? window.location.origin : "https://groupbuild.co.il";
+  const building = projectName ? projectName : "הקהילה שלנו";
 
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.from("committee_quote_requests").insert({
-        user_id: user.id,
-        project_id: projectId,
-        title: title.trim(),
-        description: description.trim() || null,
-        category_id: categoryId || null,
-        supplier_id: supplierId || null,
-        residents_count: rc,
-        target_price_per_unit: targetPrice ? parseFloat(targetPrice) : null,
-        deadline: deadline ? new Date(deadline).toISOString() : null,
-      });
-      if (error) throw error;
-      toast.success("הבקשה נשלחה! ניצור איתך קשר עם הצעות מתאימות.");
-      onClose();
-    } catch (err) {
-      console.error(err);
-      toast.error("שגיאה בשליחת הבקשה");
-    } finally {
-      setSubmitting(false);
-    }
+  const templates = useMemo(() => [
+    {
+      id: "general",
+      label: "הזמנה כללית",
+      text:
+`שלום שכנים 👋
+פתחנו ב-${building} קבוצת רכישה משותפת ב-GroupBuild — מתאחדים יחד וחוסכים מאות ש״ח על מוצרים ושירותים לבית החדש (מזגנים, ריהוט, מטבחים, מוצרי חשמל ועוד).
+
+🔗 הצטרפו כאן: ${url}
+
+ככל שנהיה יותר — נקבל מחירים טובים יותר 💪`,
+    },
+    {
+      id: "deal",
+      label: "יש עסקה חמה",
+      text:
+`היי שכנים 🔥
+יש עסקה קבוצתית חדשה ב-GroupBuild שמתאימה ל-${building} — המחיר יורד ככל שיותר דיירים מצטרפים.
+
+📲 כנסו, בדקו והצטרפו: ${url}
+
+שווה לבדוק לפני שזה נסגר 🙏`,
+    },
+    {
+      id: "reminder",
+      label: "תזכורת קצרה",
+      text:
+`תזכורת קטנה 🙂
+מי שעוד לא נרשם ל-GroupBuild של ${building} — מוזמן להירשם בקישור:
+${url}
+
+ככה תקבלו עדכון על כל עסקה קבוצתית שאני פותח בקהילה שלנו.`,
+    },
+    {
+      id: "personal",
+      label: "פנייה אישית",
+      text:
+`היי, מה נשמע? 🙂
+אני מארגן ב-${building} רכישות קבוצתיות דרך פלטפורמת GroupBuild — חוסכים יחד הרבה כסף על מוצרים לדירה החדשה.
+אשמח שתצטרף/י:
+${url}`,
+    },
+  ], [building, url]);
+
+  const send = (text: string) => {
+    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(wa, "_blank", "noopener,noreferrer");
+  };
+  const copy = async (text: string) => {
+    try { await navigator.clipboard.writeText(text); toast.success("ההודעה הועתקה"); }
+    catch { toast.error("ההעתקה נכשלה"); }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40" onClick={onClose} dir="rtl">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
+        className="w-full sm:max-w-lg max-h-[88vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDEAE3] sticky top-0 bg-white">
           <div>
-            <h2 className="text-base font-semibold text-[#1F1F1F]">בקשת הצעת מחיר קבוצתית</h2>
-            <p className="text-[11px] text-[#6B6B6B] mt-0.5">{projectName || "הקהילה שלנו"}</p>
+            <h2 className="text-base font-semibold text-[#1F1F1F]">הזמנת דיירים בוואטסאפ</h2>
+            <p className="text-[11px] text-[#6B6B6B] mt-0.5">בחר הודעה מוכנה — שלח או העתק</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-full hover:bg-[#F0EEE7]" aria-label="סגור">
             <X className="w-4 h-4 text-[#1F1F1F]" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          <Field label="כותרת הבקשה" required>
-            <input
-              type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-              placeholder="לדוגמה: צביעת חדרי מדרגות"
-              className="w-full h-11 px-3 rounded-xl border border-[#EDEAE3] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#0E6B5A]"
-              maxLength={120}
-            />
-          </Field>
-
-          <Field label="פירוט (אופציונלי)">
-            <textarea
-              value={description} onChange={(e) => setDescription(e.target.value)}
-              placeholder="היקף העבודה, חומרים, תנאים מיוחדים..."
-              className="w-full min-h-[96px] p-3 rounded-xl border border-[#EDEAE3] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#0E6B5A] resize-none"
-              maxLength={1000}
-            />
-          </Field>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="מספר דיירים מחויבים" icon={Users} required>
-              <input
-                type="number" inputMode="numeric" min={1} value={residentsCount}
-                onChange={(e) => setResidentsCount(e.target.value)}
-                placeholder="לדוגמה: 12"
-                className="w-full h-11 px-3 rounded-xl border border-[#EDEAE3] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#0E6B5A] tabular-nums"
-              />
-            </Field>
-            <Field label="מחיר יעד ליחידה (₪)" icon={Coins}>
-              <input
-                type="number" inputMode="decimal" min={0} step={0.01} value={targetPrice}
-                onChange={(e) => setTargetPrice(e.target.value)}
-                placeholder="אופציונלי"
-                className="w-full h-11 px-3 rounded-xl border border-[#EDEAE3] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#0E6B5A] tabular-nums"
-              />
-            </Field>
-          </div>
-
-          <Field label="קטגוריה" icon={Tag}>
-            <select
-              value={categoryId} onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full h-11 px-3 rounded-xl border border-[#EDEAE3] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#0E6B5A]"
-            >
-              <option value="">— כל הקטגוריות —</option>
-              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </Field>
-
-          <Field label="ספק יעד (אופציונלי)" icon={Building2}>
-            <select
-              value={supplierId} onChange={(e) => setSupplierId(e.target.value)}
-              className="w-full h-11 px-3 rounded-xl border border-[#EDEAE3] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#0E6B5A]"
-            >
-              <option value="">— פתוח לכל הספקים המתאימים —</option>
-              {suppliers.map((s) => <option key={s.id} value={s.id}>{s.business_name}</option>)}
-            </select>
-            <p className="text-[11px] text-[#6B6B6B] mt-1.5">אם תבחר ספק, הוא יקבל התראה ישירה.</p>
-          </Field>
-
-          <Field label="מועד אחרון להגשת הצעות" icon={Calendar}>
-            <input
-              type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
-              className="w-full h-11 px-3 rounded-xl border border-[#EDEAE3] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#0E6B5A]"
-            />
-          </Field>
+        <div className="p-4 space-y-3">
+          {templates.map((t) => (
+            <div key={t.id} className="bg-[#FBFAF6] border border-[#EDEAE3] rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-[#0E6B5A]">{t.label}</span>
+              </div>
+              <pre className="whitespace-pre-wrap text-[13px] leading-relaxed text-[#1F1F1F] font-sans">{t.text}</pre>
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={() => send(t.text)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-10 rounded-xl bg-[#25D366] text-white text-sm font-semibold hover:brightness-105"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  שלח בוואטסאפ
+                </button>
+                <button
+                  onClick={() => copy(t.text)}
+                  className="inline-flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl border border-[#EDEAE3] text-sm text-[#1F1F1F] hover:bg-[#F7F6F2]"
+                >
+                  <Copy className="w-4 h-4" />
+                  העתק
+                </button>
+              </div>
+            </div>
+          ))}
 
           <button
-            type="submit" disabled={submitting}
-            className="w-full h-12 rounded-xl bg-[#0E6B5A] text-white text-sm font-semibold inline-flex items-center justify-center gap-2 hover:bg-[#0c5a4c] active:scale-[0.99] transition disabled:opacity-60"
+            onClick={onNativeShare}
+            className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-[#EDEAE3] text-sm text-[#1F1F1F] hover:bg-[#F7F6F2]"
           >
-            <Send className="w-4 h-4" /> {submitting ? "שולח..." : "שלח בקשה"}
+            <Share2 className="w-4 h-4" />
+            שיתוף כללי (אפליקציות נוספות)
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );
