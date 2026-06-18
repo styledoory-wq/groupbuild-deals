@@ -27,7 +27,7 @@ interface Task {
 }
 
 interface Category { id: string; name: string }
-interface Supplier { id: string; business_name: string }
+interface Supplier { id: string; business_name: string; categories?: string[] | null }
 
 export default function CommitteeDashboard() {
   const navigate = useNavigate();
