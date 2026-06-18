@@ -279,6 +279,15 @@ export default function SupplierLeads() {
           if (!cancelled) { setInterests(activeList); setTrashedInterests(trashedList); }
         }
 
+        // Committee quote requests addressed to this supplier OR matching their categories (RLS-protected)
+        const { data: qrData } = await supabase
+          .from("committee_quote_requests")
+          .select("id,user_id,project_id,title,description,category_id,supplier_id,residents_count,target_price_per_unit,deadline,status,created_at")
+          .eq("status", "open")
+          .order("created_at", { ascending: false });
+        const qrs = (qrData ?? []) as QuoteRequestRow[];
+        if (!cancelled) setQuoteRequests(qrs);
+
         const userIds = Array.from(new Set([
           ...activeList.map((i) => i.user_id), ...trashedList.map((i) => i.user_id),
           ...allInq.map((i) => i.user_id),
@@ -289,6 +298,15 @@ export default function SupplierLeads() {
           const map: Record<string, ProfileLite> = {};
           (profs ?? []).forEach((p) => { map[(p as ProfileLite).id] = p as ProfileLite; });
           if (!cancelled) setProfiles(map);
+        }
+
+        const qrUserIds = Array.from(new Set(qrs.map((q) => q.user_id)));
+        if (qrUserIds.length) {
+          const { data: rprofs } = await supabase
+            .from("profiles").select("id,full_name,phone,email").in("id", qrUserIds);
+          const rmap: Record<string, ProfileLite> = {};
+          (rprofs ?? []).forEach((p) => { rmap[(p as ProfileLite).id] = p as ProfileLite; });
+          if (!cancelled) setRequesterProfiles(rmap);
         }
       } catch (e) {
         console.error("[SupplierLeads] load error", e);
