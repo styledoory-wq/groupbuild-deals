@@ -519,12 +519,29 @@ export interface SingleServiceInputs {
   quantity: number;
   finish: FinishLevel;
   region: Region;
+  specs?: ServiceSpecAnswers;
 }
 
 export function calcSingleService(i: SingleServiceInputs): BudgetResult {
   const svc = SERVICES.find((s) => s.key === i.service);
   if (!svc) throw new Error("שירות לא נמצא");
-  const avg = svc.avgPerUnit[i.finish] * i.quantity * REGION_FACTOR[i.region];
+  let avg = svc.avgPerUnit[i.finish] * i.quantity * REGION_FACTOR[i.region];
+
+  // Apply service-specific specs
+  const specs = SERVICE_SPECS[i.service] ?? [];
+  const noteParts: string[] = [];
+  let addTotal = 0;
+  for (const spec of specs) {
+    const ans = i.specs?.[spec.id];
+    if (!ans) continue;
+    const opt = spec.options.find((o) => o.value === ans);
+    if (!opt) continue;
+    if (opt.mult) avg *= opt.mult;
+    if (opt.addILS) addTotal += opt.addILS;
+    noteParts.push(opt.label);
+  }
+  avg += addTotal;
+
   const categories: CategoryLine[] = [
     { name: svc.label, slug: svc.slug, ...range(avg * 0.88), note: `${i.quantity} ${svc.unitLabel}` },
     { name: "הובלה והתקנה", slug: svc.slug, ...range(avg * 0.08) },
@@ -535,7 +552,7 @@ export function calcSingleService(i: SingleServiceInputs): BudgetResult {
     total: range(avg),
     categories,
     matchedSlugs: [svc.slug],
-    inputsSummary: `${svc.label} — ${i.quantity} ${svc.unitLabel}, רמת ${FINISH_LABELS[i.finish]}, ${REGION_LABELS[i.region]}`,
+    inputsSummary: `${svc.label} — ${i.quantity} ${svc.unitLabel}, רמת ${FINISH_LABELS[i.finish]}, ${REGION_LABELS[i.region]}${noteParts.length ? ` · ${noteParts.join(", ")}` : ""}`,
   };
 }
 
