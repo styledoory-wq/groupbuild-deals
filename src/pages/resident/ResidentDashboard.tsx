@@ -173,6 +173,23 @@ export default function ResidentDashboard() {
     return () => { cancelled = true; };
   }, [authReady, user?.id, user?.name]);
 
+  // Detect committee role + load building stats
+  useEffect(() => {
+    if (!authReady || !user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data: roles } = await supabase
+        .from("user_roles").select("role").eq("user_id", user.id);
+      const isC = (roles ?? []).some((r) => (r as { role: string }).role === "committee");
+      if (cancelled) return;
+      setIsCommittee(isC);
+      if (!isC) return;
+      const { data: s } = await supabase.rpc("get_committee_dashboard" as never, {} as never);
+      if (!cancelled && s) setCommitteeStats(s as unknown as { active_deals: number; joiners: number; savings: number });
+    })();
+    return () => { cancelled = true; };
+  }, [authReady, user?.id]);
+
   const currentIdx = useMemo(() => Math.max(0, STAGES.findIndex((s) => s.id === currentStage)), [currentStage]);
   const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
 
