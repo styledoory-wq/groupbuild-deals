@@ -223,15 +223,24 @@ export default function Auth() {
     <div
       dir="rtl"
       className="auth-screen min-h-[100dvh] w-full flex justify-center text-[#1F2937] relative overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #EEF1F5 0%, #E4E8EE 100%)" }}
+      style={{ background: "linear-gradient(170deg, #F7F5F0 0%, #EFEAE0 100%)" }}
     >
-      {/* Unified light app background */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
+      {/* Brand-tinted background — emerald glows + faint logo watermark */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
-          className="absolute inset-0"
-          style={{
-            background: "linear-gradient(160deg, #EEF1F5 0%, #E4E8EE 100%)",
-          }}
+          className="absolute -top-32 -right-24 h-[420px] w-[420px] rounded-full blur-3xl opacity-[0.28]"
+          style={{ background: "radial-gradient(circle, #34A88E 0%, transparent 65%)" }}
+        />
+        <div
+          className="absolute -bottom-40 -left-24 h-[460px] w-[460px] rounded-full blur-3xl opacity-[0.22]"
+          style={{ background: "radial-gradient(circle, #0E6B5A 0%, transparent 65%)" }}
+        />
+        <img
+          src={new URL("@/assets/logo-icon.png", import.meta.url).href}
+          alt=""
+          aria-hidden
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(78vw,560px)] opacity-[0.05] select-none"
+          draggable={false}
         />
       </div>
 
@@ -242,14 +251,19 @@ export default function Auth() {
           paddingBottom: "max(env(safe-area-inset-bottom), 20px)",
         }}
       >
-        {/* Brand header — minimal, product-focused */}
+        {/* Brand header — logo inside emerald rounded badge */}
         <div className="pt-6 pb-2 animate-fade-up flex flex-col items-center text-center">
-          <BrandLogo variant="dark" size="xl" className="opacity-100" />
-          <h1 className="mt-10 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight">
+          <div
+            className="rounded-[28px] px-7 py-5 shadow-[0_18px_40px_-18px_rgba(14,107,90,0.55)] ring-1 ring-white/10"
+            style={{ background: "linear-gradient(135deg, #0E6B5A 0%, #34A88E 100%)" }}
+          >
+            <BrandLogo variant="light" size="lg" className="opacity-100" />
+          </div>
+          <h1 className="mt-8 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight text-[#0B1220]">
             {mode === "signin" ? "מתחברים לעסקאות טובות יותר" : "בואו נצא לדרך"}
           </h1>
           <div className="mt-3 h-[2px] w-10 rounded-full bg-[#0E6B5A]" />
-          <p className="mt-3 text-[#6B7280] text-[13px] font-medium leading-relaxed max-w-[22rem]">
+          <p className="mt-3 text-[#5B6472] text-[13px] font-medium leading-relaxed max-w-[22rem]">
             {mode === "signin"
               ? "דיירים וספקים מתחברים לפלטפורמה אחת ויוצרים כוח קנייה שחוסך כסף לכולם"
               : "פתחו חשבון בדקות ספורות והצטרפו לכוח הקנייה של הפרויקט שלכם"}
