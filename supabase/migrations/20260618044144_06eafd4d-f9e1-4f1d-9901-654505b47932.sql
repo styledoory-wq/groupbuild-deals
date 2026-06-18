@@ -1,0 +1,1 @@
+ALTER TABLE public.committee_quote_requests ALTER COLUMN category_id TYPE text USING category_id::text;
