@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ShieldCheck, Loader2, ArrowRight, Tag, MessageSquare } from "lucide-react";
+import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ShieldCheck, ArrowRight, Tag, MessageSquare } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, LoadingState, ErrorState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { supabase } from "@/integrations/supabase/client";
@@ -223,9 +223,7 @@ export default function SupplierProfile() {
   if (loading) {
     return (
       <MobileShell>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <LoadingState />
       </MobileShell>
     );
   }
@@ -233,9 +231,9 @@ export default function SupplierProfile() {
   if (loadError || !supplier) {
     return (
       <MobileShell>
-        <PageHeader title={loadError ? "שגיאה בטעינת ספק" : "ספק לא נמצא"} back />
+        <BackHeader title={loadError ? "שגיאה בטעינת ספק" : "ספק לא נמצא"} />
         <div className="px-5 mt-6">
-          {loadError && <div className="gb-card p-4 mb-4 text-sm text-destructive text-center">{loadError}</div>}
+          {loadError && <ErrorState title="שגיאה בטעינה" description={loadError} />}
           <Button onClick={() => navigate(-1)} variant="outline" className="w-full">
             <ArrowRight className="h-4 w-4 ml-2" /> חזרה
           </Button>
@@ -254,8 +252,7 @@ export default function SupplierProfile() {
     <MobileShell>
       {/* Hero */}
       <div className="px-5 pt-4 pb-4 relative">
-        <PageHeader title="" subtitle="" back />
-        <div className="gb-card p-4 flex items-end gap-4">
+        <BackHeader title={supplier.business_name} subtitle="פרופיל ספק" />
           <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" className="shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]" />
           <div className="flex-1 min-w-0 pb-1">
             <div className="flex items-center gap-1.5 mb-1">

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { verifyAdminFromSession } from "@/lib/auth";
-import { Save, AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
+import { Save, Plus, Trash2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
