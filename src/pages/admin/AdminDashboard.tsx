@@ -102,6 +102,23 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {stats.pendingCommittee > 0 && (
+        <div className="px-5 mt-1 mb-3">
+          <button
+            onClick={() => navigate("/admin/committee-requests")}
+            className="w-full bg-white rounded-[16px] px-4 py-3 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] text-[13px] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
+          >
+            <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
+              <UserCheck className="h-[16px] w-[16px] text-[#0E6B5A]" strokeWidth={2.2} />
+            </span>
+            <span className="text-[#1F2937] flex-1 font-medium">
+              <b className="text-[#0E6B5A]">{stats.pendingCommittee}</b> בקשות הרשאת ועד בית ממתינות
+            </span>
+            <ChevronLeft className="h-4 w-4 text-[#9CA3AF]" strokeWidth={2} />
+          </button>
+        </div>
+      )}
+
       {/* Hero revenue card — light, premium, matches Categories */}
       <div className="px-5 mt-2 mb-4">
         <div className="rounded-[20px] bg-white p-5 border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
