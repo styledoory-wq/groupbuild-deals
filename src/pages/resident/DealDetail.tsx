@@ -563,10 +563,8 @@ export default function DealDetail() {
   if (loading) {
     return (
       <MobileShell>
-        <PageHeader title="טוען עסקה..." back />
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
+        <BackHeader title="טוען עסקה..." />
+        <LoadingState label="טוען פרטי עסקה..." />
         <BottomNav role="resident" />
       </MobileShell>
     );
@@ -575,18 +573,19 @@ export default function DealDetail() {
   if (error || !deal) {
     return (
       <MobileShell>
-        <PageHeader title="עסקה לא נמצאה" back />
-        <div className="px-5 mt-6">
-          <div className="gb-card p-6 text-center">
-            <p className="text-sm font-bold text-foreground">{error ?? "העסקה לא נמצאה"}</p>
+        <BackHeader title="עסקה לא נמצאה" />
+        <ErrorState
+          title="עסקה לא נמצאה"
+          description={error ?? "העסקה לא נמצאה"}
+          action={
             <Link to="/resident/deals">
-              <Button variant="outline" className="mt-4">
+              <Button variant="outline">
                 <ArrowRight className="h-4 w-4 ml-2" />
                 חזרה לעסקאות
               </Button>
             </Link>
-          </div>
-        </div>
+          }
+        />
         <BottomNav role="resident" />
       </MobileShell>
     );
