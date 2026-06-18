@@ -264,3 +264,115 @@ function ActionTile({ icon: Icon, title, desc, onClick }: { icon: typeof Search;
     </button>
   );
 }
+
+function InviteSheet({ projectName, onClose, onNativeShare }: { projectName: string; onClose: () => void; onNativeShare: () => void }) {
+  const url = typeof window !== "undefined" ? window.location.origin : "https://groupbuild.co.il";
+  const building = projectName ? `בניין ${projectName}` : "הבניין שלנו";
+
+  const templates = useMemo(() => [
+    {
+      id: "general",
+      label: "הזמנה כללית",
+      text:
+`שלום שכנים 👋
+פתחנו ב-${building} קבוצת רכישה משותפת ב-GroupBuild — מתאחדים יחד וחוסכים מאות ש״ח על מוצרים ושירותים לבית החדש (מזגנים, ריהוט, מטבחים, מוצרי חשמל ועוד).
+
+🔗 הצטרפו כאן: ${url}
+
+ככל שנהיה יותר — נקבל מחירים טובים יותר 💪`,
+    },
+    {
+      id: "deal",
+      label: "יש עסקה חמה",
+      text:
+`היי שכנים 🔥
+יש עסקה קבוצתית חדשה ב-GroupBuild שמתאימה ל-${building} — המחיר יורד ככל שיותר דיירים מצטרפים.
+
+📲 כנסו, בדקו והצטרפו: ${url}
+
+שווה לבדוק לפני שזה נסגר 🙏`,
+    },
+    {
+      id: "reminder",
+      label: "תזכורת קצרה",
+      text:
+`תזכורת קטנה 🙂
+מי שעוד לא נרשם ל-GroupBuild של ${building} — מוזמן להירשם בקישור:
+${url}
+
+ככה תקבלו עדכון על כל עסקה קבוצתית שאני פותח לבניין שלנו.`,
+    },
+    {
+      id: "personal",
+      label: "פנייה אישית",
+      text:
+`היי, מה נשמע? 🙂
+אני מארגן ב-${building} רכישות קבוצתיות דרך פלטפורמת GroupBuild — חוסכים יחד הרבה כסף על מוצרים לדירה החדשה.
+אשמח שתצטרף/י:
+${url}`,
+    },
+  ], [building, url]);
+
+  const send = (text: string) => {
+    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(wa, "_blank", "noopener,noreferrer");
+  };
+  const copy = async (text: string) => {
+    try { await navigator.clipboard.writeText(text); toast.success("ההודעה הועתקה"); }
+    catch { toast.error("ההעתקה נכשלה"); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40" onClick={onClose} dir="rtl">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full sm:max-w-lg max-h-[88vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDEAE3] sticky top-0 bg-white">
+          <div>
+            <h2 className="text-base font-semibold text-[#1F1F1F]">הזמנת דיירים בוואטסאפ</h2>
+            <p className="text-[11px] text-[#6B6B6B] mt-0.5">בחר הודעה מוכנה — שלח או העתק</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-[#F0EEE7]" aria-label="סגור">
+            <X className="w-4 h-4 text-[#1F1F1F]" />
+          </button>
+        </div>
+
+        <div className="p-4 space-y-3">
+          {templates.map((t) => (
+            <div key={t.id} className="bg-[#FBFAF6] border border-[#EDEAE3] rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-[#0E6B5A]">{t.label}</span>
+              </div>
+              <pre className="whitespace-pre-wrap text-[13px] leading-relaxed text-[#1F1F1F] font-sans">{t.text}</pre>
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={() => send(t.text)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-10 rounded-xl bg-[#25D366] text-white text-sm font-semibold hover:brightness-105"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  שלח בוואטסאפ
+                </button>
+                <button
+                  onClick={() => copy(t.text)}
+                  className="inline-flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl border border-[#EDEAE3] text-sm text-[#1F1F1F] hover:bg-[#F7F6F2]"
+                >
+                  <Copy className="w-4 h-4" />
+                  העתק
+                </button>
+              </div>
+            </div>
+          ))}
+
+          <button
+            onClick={onNativeShare}
+            className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-[#EDEAE3] text-sm text-[#1F1F1F] hover:bg-[#F7F6F2]"
+          >
+            <Share2 className="w-4 h-4" />
+            שיתוף כללי (אפליקציות נוספות)
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
