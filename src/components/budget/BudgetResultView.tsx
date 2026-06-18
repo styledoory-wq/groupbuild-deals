@@ -58,7 +58,7 @@ export function BudgetResultView({ result }: { result: BudgetResult }) {
                 </span>
                 <span className="text-[#6B7280] font-medium">{ILS(c.min)} – {ILS(c.max)}</span>
               </div>
-              <div className="h-2 rounded-full bg-[#F7F5F0] overflow-hidden">
+              <div className="h-2 rounded-full bg-[#FCFBF8] overflow-hidden">
                 <div className="h-full" style={{ width: `${pct}%`, background: COLORS[i % COLORS.length] }} />
               </div>
             </div>

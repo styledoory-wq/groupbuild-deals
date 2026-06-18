@@ -154,7 +154,7 @@ function MenuItem({ icon: Icon, label, onClick, danger }: { icon: typeof Bell; l
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 text-right text-sm font-medium hover:bg-[#F7F5F0] transition-colors ${danger ? "text-[#E74C3C]" : "text-[#1F2937]"}`}
+      className={`w-full flex items-center gap-3 px-4 py-3 text-right text-sm font-medium hover:bg-[#FCFBF8] transition-colors ${danger ? "text-[#E74C3C]" : "text-[#1F2937]"}`}
     >
       <Icon className="h-4 w-4" strokeWidth={2} />
       <span className="flex-1">{label}</span>
