@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { BrandLogo } from "@/components/BrandLogo";
+import originalLogo from "@/assets/groupbuild-original-logo-transparent-tight.png.asset.json";
 
 const SPLASH_SHOWN_KEY = "gb:splash-shown";
 
@@ -52,16 +52,22 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      {/* Logo — full brand mark + text */}
+      {/* Logo — exact original full logo */}
       <div
         className="transition-all duration-700 ease-out flex items-center justify-center"
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0) scale(1)" : "translateY(8px) scale(0.94)",
-          width: "220px",
+          width: "260px",
+          maxWidth: "72vw",
         }}
       >
-        <BrandLogo size="xl" variant="dark" className="h-auto w-full" />
+        <img
+          src={originalLogo.url}
+          alt="GroupBuild"
+          className="block h-auto w-full select-none object-contain"
+          draggable={false}
+        />
       </div>
 
       {/* Gold accent loader */}
