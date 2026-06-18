@@ -256,9 +256,9 @@ export default function Auth() {
         {/* Brand header — clean logo, no badge */}
         <div className="pt-6 pb-2 animate-fade-up flex flex-col items-center text-center">
           <img
-            src={groupBuildLogo.url}
+            src={groupBuildLogoTransparent.url}
             alt="GroupBuild"
-            className="h-32 w-auto select-none object-contain"
+            className="h-36 w-auto select-none object-contain"
             draggable={false}
           />
           <h1 className="mt-8 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight text-[#0B1220]">
