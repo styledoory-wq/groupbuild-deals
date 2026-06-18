@@ -173,7 +173,7 @@ export default function CommitteeDashboard() {
         <section className="grid grid-cols-2 gap-3">
           <ActionTile icon={FileEdit} title="בקש הצעת מחיר" desc="עם מחיר יעד וכמות דיירים" onClick={() => navigate("/committee/quote-request")} />
           <ActionTile icon={Search} title="עסקאות פעילות" desc="חפש והצטרף" onClick={() => navigate("/deals")} />
-          <ActionTile icon={Share2} title="הזמן דיירים" desc="שתף קישור הצטרפות" onClick={handleShare} />
+          <ActionTile icon={Share2} title="הזמן דיירים" desc="הודעות מוכנות לוואטסאפ" onClick={() => setInviteOpen(true)} />
           <ActionTile icon={Megaphone} title="שלח עדכון" desc="ליצירת קשר עם דיירי הבניין" onClick={() => toast.info("בקרוב — שליחת הודעה לדיירים")} />
           <ActionTile icon={FileText} title="מסמכי הבניין" desc="פרוטוקולים והצעות מחיר" onClick={() => navigate("/resident/documents")} />
         </section>
