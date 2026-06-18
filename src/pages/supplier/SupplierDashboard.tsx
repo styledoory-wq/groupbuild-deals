@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus, LogOut, Pencil, Clock, AlertCircle, MapPin, Users,
+  Plus, LogOut, Pencil, Clock, MapPin, Users,
   TrendingUp, Zap, Radar,
 } from "lucide-react";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
