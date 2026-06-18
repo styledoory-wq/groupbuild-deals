@@ -252,14 +252,14 @@ export default function Auth() {
           paddingBottom: "max(env(safe-area-inset-bottom), 20px)",
         }}
       >
-        {/* Brand header — logo inside emerald rounded badge */}
+        {/* Brand header — clean logo, no badge */}
         <div className="pt-6 pb-2 animate-fade-up flex flex-col items-center text-center">
-          <div
-            className="rounded-[28px] px-7 py-5 shadow-[0_18px_40px_-18px_rgba(14,107,90,0.55)] ring-1 ring-white/10"
-            style={{ background: "linear-gradient(135deg, #0E6B5A 0%, #34A88E 100%)" }}
-          >
-            <BrandLogo variant="light" size="lg" className="opacity-100" />
-          </div>
+          <img
+            src={logoIcon}
+            alt="GroupBuild"
+            className="h-20 w-auto select-none"
+            draggable={false}
+          />
           <h1 className="mt-8 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight text-[#0B1220]">
             {mode === "signin" ? "מתחברים לעסקאות טובות יותר" : "בואו נצא לדרך"}
           </h1>
@@ -270,6 +270,7 @@ export default function Auth() {
               : "פתחו חשבון בדקות ספורות והצטרפו לכוח הקנייה של הפרויקט שלכם"}
           </p>
         </div>
+
 
 
         {authError && (
