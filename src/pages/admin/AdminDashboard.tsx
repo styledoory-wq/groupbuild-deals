@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { projects, categories, logout } = useApp();
   const [stats, setStats] = useState<Stats>({
-    projects: 0, suppliers: 0, pendingSuppliers: 0, activeDeals: 0,
+    projects: 0, suppliers: 0, pendingSuppliers: 0, pendingCommittee: 0, activeDeals: 0,
     totalDeposits: 0, paidDepositsAmount: 0, apartments: 0,
   });
 
