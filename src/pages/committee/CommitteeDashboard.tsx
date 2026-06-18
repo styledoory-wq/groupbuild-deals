@@ -88,9 +88,9 @@ export default function CommitteeDashboard() {
       }
 
       const t: Task[] = [];
-      if ((s?.active_deals ?? 0) === 0) t.push({ id: "no-deals", title: "אין עסקאות פעילות בבניין — שווה ליזום אחת", link: "/deals" });
+      if ((s?.active_deals ?? 0) === 0) t.push({ id: "no-deals", title: "אין עסקאות פעילות בקהילה — שווה ליזום אחת", link: "/deals" });
       if ((s?.joiners ?? 0) > 0 && (s?.active_deals ?? 0) > 0) t.push({ id: "follow", title: `${s?.joiners} דיירים הצטרפו — מומלץ לשלוח עדכון`, link: "/deals" });
-      t.push({ id: "share", title: "שתף את הפלטפורמה עם דיירים נוספים בבניין" });
+      t.push({ id: "share", title: "שתף את הפלטפורמה עם דיירים נוספים בקהילה" });
       if (!cancelled) setTasks(t);
     })();
     return () => { cancelled = true; };
@@ -99,7 +99,7 @@ export default function CommitteeDashboard() {
   const handleShare = async () => {
     const url = window.location.origin;
     const text = projectName
-      ? `הצטרפו אליי ל-GroupBuild — קונים יחד לבניין ${projectName} וחוסכים מאות שקלים. ${url}`
+      ? `הצטרפו אליי ל-GroupBuild — קונים יחד ל${projectName} וחוסכים מאות שקלים. ${url}`
       : `הצטרפו אליי ל-GroupBuild — קונים יחד וחוסכים. ${url}`;
     try {
       if (navigator.share) {
@@ -151,7 +151,7 @@ export default function CommitteeDashboard() {
       <main className="max-w-2xl mx-auto px-4 py-5 space-y-5">
         {/* Hero stats */}
         <section className="grid grid-cols-2 gap-3">
-          <StatCard icon={<Building2 className="w-4 h-4 text-[#0E6B5A]" />} label="עסקאות פעילות בבניין" value={stats?.active_deals ?? 0} />
+          <StatCard icon={<Building2 className="w-4 h-4 text-[#0E6B5A]" />} label="עסקאות פעילות בקהילה" value={stats?.active_deals ?? 0} />
           <StatCard icon={<Users className="w-4 h-4 text-[#0E6B5A]" />} label="דיירים שהצטרפו" value={stats?.joiners ?? 0} />
           <StatCard icon={<TrendingUp className="w-4 h-4 text-[#0E6B5A]" />} label="חיסכון מצטבר" value={formatILS(stats?.savings ?? 0)} small />
           <StatCard icon={<Users className="w-4 h-4 text-[#0E6B5A]" />} label="דיירים רשומים" value={residentsCount} />
@@ -163,7 +163,7 @@ export default function CommitteeDashboard() {
           className="w-full flex items-center justify-between gap-3 bg-[#0E6B5A] text-white rounded-2xl px-5 py-4 hover:bg-[#0c5a4c] active:scale-[0.99] transition"
         >
           <div className="text-right">
-            <div className="text-sm font-semibold">יזום עסקה קבוצתית לבניין</div>
+            <div className="text-sm font-semibold">יזום עסקה קבוצתית בקהילה</div>
             <div className="text-xs text-white/80 mt-0.5">עיין בעסקאות פתוחות והזמן דיירים להצטרף</div>
           </div>
           <Plus className="w-5 h-5" />
@@ -174,18 +174,18 @@ export default function CommitteeDashboard() {
           <ActionTile icon={FileEdit} title="בקש הצעת מחיר" desc="עם מחיר יעד וכמות דיירים" onClick={() => navigate("/committee/quote-request")} />
           <ActionTile icon={Search} title="עסקאות פעילות" desc="חפש והצטרף" onClick={() => navigate("/deals")} />
           <ActionTile icon={Share2} title="הזמן דיירים" desc="הודעות מוכנות לוואטסאפ" onClick={() => setInviteOpen(true)} />
-          <ActionTile icon={Megaphone} title="שלח עדכון" desc="ליצירת קשר עם דיירי הבניין" onClick={() => toast.info("בקרוב — שליחת הודעה לדיירים")} />
-          <ActionTile icon={FileText} title="מסמכי הבניין" desc="פרוטוקולים והצעות מחיר" onClick={() => navigate("/resident/documents")} />
+          <ActionTile icon={Megaphone} title="שלח עדכון" desc="ליצירת קשר עם דיירי הקהילה" onClick={() => toast.info("בקרוב — שליחת הודעה לדיירים")} />
+          <ActionTile icon={FileText} title="מסמכי הקהילה" desc="פרוטוקולים והצעות מחיר" onClick={() => navigate("/resident/documents")} />
         </section>
 
         {/* Building deals list */}
         <section className="bg-white rounded-2xl border border-[#EDEAE3] p-5">
           <div className="flex items-center gap-2 mb-3">
             <Building2 className="w-4 h-4 text-[#0E6B5A]" />
-            <h2 className="text-sm font-semibold text-[#1F1F1F]">עסקאות עם דיירים מהבניין</h2>
+            <h2 className="text-sm font-semibold text-[#1F1F1F]">עסקאות עם דיירים מהקהילה</h2>
           </div>
           {buildingDeals.length === 0 ? (
-            <p className="text-xs text-[#6B6B6B]">עדיין אין עסקאות עם דיירים מהבניין שלך.</p>
+            <p className="text-xs text-[#6B6B6B]">עדיין אין עסקאות עם דיירים מהקהילה שלך.</p>
           ) : (
             <ul className="divide-y divide-[#F0EEE7]">
               {buildingDeals.map((d) => (
@@ -196,7 +196,7 @@ export default function CommitteeDashboard() {
                   >
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-medium text-[#1F1F1F] truncate">{d.title}</div>
-                      <div className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">{d.joiners} דיירים מהבניין הצטרפו</div>
+                      <div className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">{d.joiners} דיירים מהקהילה הצטרפו</div>
                     </div>
                     <ChevronLeft className="w-4 h-4 text-[#9CA3AF] shrink-0" />
                   </button>
@@ -300,7 +300,7 @@ function InviteSheet({ projectName, onClose, onNativeShare }: { projectName: str
 מי שעוד לא נרשם ל-GroupBuild של ${building} — מוזמן להירשם בקישור:
 ${url}
 
-ככה תקבלו עדכון על כל עסקה קבוצתית שאני פותח לבניין שלנו.`,
+ככה תקבלו עדכון על כל עסקה קבוצתית שאני פותח בקהילה שלנו.`,
     },
     {
       id: "personal",
