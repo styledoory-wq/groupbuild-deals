@@ -131,8 +131,8 @@ export const SERVICES: ServiceDef[] = [
     avgPerUnit: { basic: 1200, standard: 1900, premium: 2800, luxury: 4500 } },
   { key: "entrance_door", label: "דלת כניסה", unit: "unit", unitLabel: "דלת", slug: "doors",
     avgPerUnit: { basic: 4500, standard: 7500, premium: 12000, luxury: 22000 } },
-  { key: "kitchen_svc", label: "מטבח", unit: "lump", unitLabel: "מטבח", slug: "kitchen",
-    avgPerUnit: { basic: 30000, standard: 55000, premium: 90000, luxury: 160000 } },
+  { key: "kitchen_svc", label: "מטבח", unit: "lump", unitLabel: 'מ"א ארונות', slug: "kitchen",
+    avgPerUnit: { basic: 4500, standard: 7500, premium: 12000, luxury: 22000 } },
   { key: "parquet", label: "פרקט", unit: "sqm", unitLabel: 'מ"ר', slug: "flooring",
     avgPerUnit: { basic: 180, standard: 280, premium: 420, luxury: 700 } },
   { key: "flooring_svc", label: "ריצוף", unit: "sqm", unitLabel: 'מ"ר', slug: "flooring",
@@ -145,8 +145,9 @@ export const SERVICES: ServiceDef[] = [
     avgPerUnit: { basic: 1400, standard: 2200, premium: 3200, luxury: 4800 } },
   { key: "ac_svc", label: "מיזוג", unit: "unit", unitLabel: "יחידה", slug: "ac",
     avgPerUnit: { basic: 3500, standard: 5500, premium: 8500, luxury: 14000 } },
-  { key: "solar", label: "מערכת סולארית", unit: "lump", unitLabel: "מערכת", slug: "solar",
-    avgPerUnit: { basic: 18000, standard: 28000, premium: 42000, luxury: 65000 } },
+  // Solar: priced per kWp installed (Israel 2026 typical: 3000-6500 ₪/kWp)
+  { key: "solar", label: "מערכת סולארית", unit: "unit", unitLabel: "kWp", slug: "solar",
+    avgPerUnit: { basic: 3000, standard: 3800, premium: 4800, luxury: 6500 } },
   { key: "fences", label: "גדרות", unit: "sqm", unitLabel: 'מ"ר', slug: "fences",
     avgPerUnit: { basic: 250, standard: 400, premium: 650, luxury: 1100 } },
   { key: "gates", label: "שערים", unit: "unit", unitLabel: "שער", slug: "gates",
@@ -162,6 +163,150 @@ export const SERVICES: ServiceDef[] = [
   { key: "plumbing_svc", label: "אינסטלציה", unit: "sqm", unitLabel: 'מ"ר דירה', slug: "plumbing",
     avgPerUnit: { basic: 150, standard: 230, premium: 350, luxury: 550 } },
 ];
+
+export const SERVICE_DEFAULT_QTY: Record<ServiceKind, number> = {
+  interior_doors: 6, entrance_door: 1, kitchen_svc: 6, parquet: 60, flooring_svc: 80,
+  paint: 100, drywall: 30, aluminum_svc: 12, ac_svc: 3, solar: 8, fences: 30,
+  gates: 1, pergola: 20, cameras: 4, furniture: 1, electricity_svc: 90, plumbing_svc: 90,
+};
+
+// Service-specific follow-up questions (multiply / add to the base estimate)
+export type ServiceSpecOption = { value: string; label: string; mult?: number; addILS?: number };
+export type ServiceSpec = { id: string; title: string; options: ServiceSpecOption[] };
+
+export const SERVICE_SPECS: Partial<Record<ServiceKind, ServiceSpec[]>> = {
+  solar: [
+    { id: "connection", title: "סוג חיבור המערכת", options: [
+      { value: "ongrid", label: "מחוברת לרשת (on-grid)", mult: 1 },
+      { value: "hybrid", label: "היברידית (גיבוי חלקי)", mult: 1.25 },
+      { value: "offgrid", label: "מנותקת מהרשת (off-grid)", mult: 1.55 },
+    ]},
+    { id: "battery", title: "סוללת אגירה", options: [
+      { value: "none", label: "ללא סוללה", addILS: 0 },
+      { value: "small", label: "סוללה 5 kWh", addILS: 18000 },
+      { value: "medium", label: "סוללה 10 kWh", addILS: 32000 },
+      { value: "large", label: "סוללה 15 kWh+", addILS: 50000 },
+    ]},
+    { id: "roof", title: "סוג הגג / התקנה", options: [
+      { value: "standing_seam", label: "איסכורית / פנלים (פשוט)", mult: 1 },
+      { value: "tile", label: "גג רעפים", mult: 1.07 },
+      { value: "flat", label: "גג שטוח (קונסטרוקציה)", mult: 1.12 },
+      { value: "ground", label: "התקנה קרקעית / חניה סולארית", mult: 1.2 },
+    ]},
+    { id: "panels", title: "סוג פאנלים", options: [
+      { value: "standard", label: "סטנדרט (Tier-1)", mult: 1 },
+      { value: "premium", label: "פרימיום (Jinko Tiger / LG)", mult: 1.15 },
+      { value: "bifacial", label: "דו-צדדיים / יוקרה", mult: 1.3 },
+    ]},
+  ],
+  ac_svc: [
+    { id: "system", title: "סוג המערכת", options: [
+      { value: "split", label: "מזגנים עיליים", mult: 1 },
+      { value: "mini", label: "מיני מרכזי", mult: 1.4 },
+      { value: "vrf", label: "VRF / מרכזי יוקרה", mult: 1.85 },
+    ]},
+    { id: "install", title: "מורכבות ההתקנה", options: [
+      { value: "simple", label: "התקנה רגילה", mult: 1 },
+      { value: "long", label: "צנרת ארוכה", mult: 1.15 },
+      { value: "concealed", label: "צנרת מוסתרת בגבס", mult: 1.25 },
+    ]},
+  ],
+  kitchen_svc: [
+    { id: "doors", title: "חזיתות הארונות", options: [
+      { value: "mdf", label: "MDF צבוע", mult: 0.85 },
+      { value: "veneer", label: "פורניר עץ", mult: 1.05 },
+      { value: "acrylic", label: "אקריליק / לכה", mult: 1.2 },
+      { value: "fenix", label: "פניקס / יוקרה", mult: 1.4 },
+    ]},
+    { id: "top", title: "סוג השיש", options: [
+      { value: "caesar", label: "אבן קיסר", mult: 1 },
+      { value: "dekton", label: "דקטון / נאוליט", mult: 1.25 },
+      { value: "natural", label: "אבן טבעית", mult: 1.4 },
+    ]},
+    { id: "appliances", title: "מכשירי חשמל", options: [
+      { value: "none", label: "ללא (קיים)", addILS: 0 },
+      { value: "basic", label: "בסיסי", addILS: 12000 },
+      { value: "mid", label: "בינוני (כולל מדיח)", addILS: 22000 },
+      { value: "premium", label: "פרימיום מובנים", addILS: 45000 },
+    ]},
+  ],
+  parquet: [
+    { id: "kind", title: "סוג הפרקט", options: [
+      { value: "laminate", label: "למינציה", mult: 0.7 },
+      { value: "engineered", label: "פרקט הנדסי", mult: 1 },
+      { value: "solid", label: "עץ מלא", mult: 1.4 },
+    ]},
+    { id: "remove_old", title: "פירוק רצפה קיימת?", options: [
+      { value: "no", label: "לא", mult: 1 },
+      { value: "yes", label: "כן — כולל פירוק ופינוי", addILS: 4000 },
+    ]},
+  ],
+  flooring_svc: [
+    { id: "type", title: "סוג האריח", options: [
+      { value: "ceramic", label: "קרמיקה רגילה", mult: 0.85 },
+      { value: "porcelain", label: "פורצלן", mult: 1 },
+      { value: "large", label: "פורצלן גדול (60×120+)", mult: 1.25 },
+      { value: "marble", label: "שיש / אבן טבעית", mult: 1.6 },
+    ]},
+    { id: "remove_old", title: "פירוק רצפה קיימת?", options: [
+      { value: "no", label: "לא", mult: 1 },
+      { value: "yes", label: "כן — כולל פירוק", addILS: 5000 },
+    ]},
+  ],
+  paint: [
+    { id: "prep", title: "מצב הקירות", options: [
+      { value: "good", label: "טוב — שכבת צבע בלבד", mult: 1 },
+      { value: "fix", label: "שפכטל ותיקונים", mult: 1.35 },
+      { value: "full", label: "שיוף מלא + פריימר", mult: 1.6 },
+    ]},
+    { id: "kind", title: "סוג הצבע", options: [
+      { value: "standard", label: "סופרקריל סטנדרט", mult: 1 },
+      { value: "premium", label: "צבע יוקרה / שטיפה", mult: 1.25 },
+      { value: "deco", label: "דקורטיבי / טאדלאקט", mult: 1.8 },
+    ]},
+  ],
+  aluminum_svc: [
+    { id: "kind", title: "סוג האלומיניום", options: [
+      { value: "regular", label: "סטנדרט", mult: 0.9 },
+      { value: "thermal", label: "תרמי / אקוסטי", mult: 1.15 },
+      { value: "belgian", label: "בלגי / יוקרה", mult: 1.55 },
+    ]},
+    { id: "shutters", title: "תריסים", options: [
+      { value: "none", label: "ללא תריסים", mult: 1 },
+      { value: "manual", label: "תריס ידני", addILS: 800 },
+      { value: "electric", label: "תריס חשמלי", addILS: 1600 },
+    ]},
+  ],
+  cameras: [
+    { id: "resolution", title: "איכות מצלמה", options: [
+      { value: "hd", label: "HD (2MP)", mult: 0.8 },
+      { value: "4k", label: "4K (8MP)", mult: 1 },
+      { value: "ai", label: "AI / זיהוי פנים", mult: 1.6 },
+    ]},
+    { id: "nvr", title: "מערכת הקלטה (NVR)", options: [
+      { value: "none", label: "ללא", addILS: 0 },
+      { value: "basic", label: "NVR בסיסי 4-8 ערוצים", addILS: 1800 },
+      { value: "pro", label: "NVR מקצועי + דיסק 4TB", addILS: 4500 },
+    ]},
+  ],
+  pergola: [
+    { id: "material", title: "חומר הפרגולה", options: [
+      { value: "wood", label: "עץ", mult: 1 },
+      { value: "aluminum", label: "אלומיניום", mult: 1.3 },
+      { value: "bioclimatic", label: "ביו-קלימטית מתכווננת", mult: 2.2 },
+    ]},
+  ],
+  fences: [
+    { id: "material", title: "חומר הגדר", options: [
+      { value: "mesh", label: "רשת רביץ", mult: 0.7 },
+      { value: "metal", label: "מתכת / ברזל מעוצב", mult: 1 },
+      { value: "block", label: "בלוקים + טיח", mult: 1.3 },
+      { value: "stone", label: "אבן / חיפוי יוקרה", mult: 1.8 },
+    ]},
+  ],
+};
+
+export type ServiceSpecAnswers = Record<string, string>;
 
 // =============================
 // Calculation engines
