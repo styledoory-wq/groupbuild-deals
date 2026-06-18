@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { LoadingState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";

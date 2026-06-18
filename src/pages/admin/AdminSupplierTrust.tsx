@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Loader2, Search, ShieldCheck, AlertTriangle, BadgeCheck, BadgeX, Ban, Star } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { LoadingState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
