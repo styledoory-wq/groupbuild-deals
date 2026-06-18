@@ -59,7 +59,7 @@ export default function ResidentDashboard() {
   const [committeeStats, setCommitteeStats] = useState<{ active_deals: number; joiners: number; savings: number } | null>(null);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const [suppliers, setSuppliers] = useState<{ id: string; business_name: string }[]>([]);
+  const [suppliers, setSuppliers] = useState<{ id: string; business_name: string; categories?: string[] | null }[]>([]);
 
   useEffect(() => {
     if (!authReady || !user?.id) return;
