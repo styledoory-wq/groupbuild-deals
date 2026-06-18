@@ -18,17 +18,21 @@ type Row = {
 
 type RawVoucherRow = Omit<Row, "deals" | "profiles">;
 
-const STATUSES = ["eligible","appointment","measured","ordered","installed","completed","redeemed"] as const;
+const STATUSES = ["eligible","in_progress","redeemed","cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
-  eligible: "זכאי", appointment: "נקבעה פגישה", measured: "נלקחו מידות",
-  ordered: "בהזמנה", installed: "הותקן", completed: "הושלם", redeemed: "מומש",
-  expired: "פג תוקף", cancelled: "בוטל",
+  eligible: "זכאי",
+  in_progress: "בתהליך",
+  redeemed: "מומש",
+  cancelled: "בוטל",
+  expired: "פג תוקף",
 };
 
 function statusBadgeStyle(status: string) {
   switch (status) {
     case "eligible":
       return { bg: "bg-[#EEF2FF]", text: "text-[#1E3A8A]", border: "border-[#BFDBFE]", iconColor: "#1E3A8A" };
+    case "in_progress":
+      return { bg: "bg-[#FFFBEB]", text: "text-[#92400E]", border: "border-[#FDE68A]", iconColor: "#92400E" };
     case "redeemed":
       return { bg: "bg-[#ECFDF5]", text: "text-[#065F46]", border: "border-[#A7F3D0]", iconColor: "#065F46" };
     case "cancelled":
@@ -36,17 +40,18 @@ function statusBadgeStyle(status: string) {
     case "expired":
       return { bg: "bg-[#F3F4F6]", text: "text-[#4B5563]", border: "border-[#D1D5DB]", iconColor: "#4B5563" };
     default:
-      return { bg: "bg-[#FFFBEB]", text: "text-[#92400E]", border: "border-[#FDE68A]", iconColor: "#92400E" };
+      return { bg: "bg-[#F3F4F6]", text: "text-[#4B5563]", border: "border-[#D1D5DB]", iconColor: "#4B5563" };
   }
 }
 
 function cardAccent(status: string) {
   switch (status) {
     case "eligible": return "border-r-[3px] border-r-[#3B82F6]";
+    case "in_progress": return "border-r-[3px] border-r-[#F59E0B]";
     case "redeemed": return "border-r-[3px] border-r-[#10B981]";
     case "cancelled": return "border-r-[3px] border-r-[#EF4444]";
     case "expired": return "border-r-[3px] border-r-[#9CA3AF]";
-    default: return "border-r-[3px] border-r-[#F59E0B]";
+    default: return "border-r-[3px] border-r-[#9CA3AF]";
   }
 }
 
@@ -54,6 +59,7 @@ function StatusIcon({ status }: { status: string }) {
   if (status === "redeemed") return <CheckCircle2 className="h-3 w-3" />;
   if (status === "cancelled") return <XCircle className="h-3 w-3" />;
   if (status === "expired") return <Clock className="h-3 w-3" />;
+  if (status === "in_progress") return <Clock className="h-3 w-3" />;
   return <Award className="h-3 w-3" />;
 }
 
