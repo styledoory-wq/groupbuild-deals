@@ -18,11 +18,13 @@
 3. **`ErrorState`** — אייקון אדום + כותרת + תיאור + כפתור "נסה שוב".
 4. הרחבת `EmptyState` הקיים עם variant `compact` עבור קופסאות פנימיות.
 
-### פעימה 2 — מיגרציה ראשונית (Proof)
+### פעימה 2 — מיגרציה ראשונית (Proof) ✅
 החלת הרכיבים החדשים על 6 דפים מרכזיים:
-- `ResidentDashboard`, `DealsList`, `DealDetail`
-- `CommitteeDashboard`, `CommitteeRequest` (בנינו הרגע)
-- `SupplierDashboard`
+- ✅ `CommitteeDashboard`, `CommitteeRequest`
+- ✅ `DealsList` (BackHeader + ErrorState + EmptyState)
+- ✅ `DealDetail` (BackHeader + LoadingState + ErrorState במצבי טעינה/שגיאה)
+- ✅ `SupplierDashboard` (LoadingState + ErrorState)
+- `ResidentDashboard` — נשמר עם header מותאם (hero ייעודי, לא inline)
 
 המטרה: לוודא שהרכיבים מכסים את כל המקרים האמיתיים לפני מיגרציה רחבה.
 

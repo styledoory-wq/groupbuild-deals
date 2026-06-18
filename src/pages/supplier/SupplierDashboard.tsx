@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus, LogOut, Pencil, Clock, AlertCircle, MapPin, Users,
+  Plus, LogOut, Pencil, Clock, MapPin, Users,
   TrendingUp, Zap, Radar,
 } from "lucide-react";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { LoadingState, ErrorState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
@@ -193,7 +194,7 @@ export default function SupplierDashboard() {
     return (
       <MobileShell>
         <div className="min-h-[60vh] flex items-center justify-center bg-[#F2F2F7]">
-          <div className="h-9 w-9 rounded-full border-2 border-[#0E6B5A] border-t-transparent animate-spin" />
+          <LoadingState label="טוען את המסך שלך..." />
         </div>
       </MobileShell>
     );
@@ -202,15 +203,13 @@ export default function SupplierDashboard() {
   if (error) {
     return (
       <MobileShell>
-        <div className="min-h-[60vh] flex items-center justify-center px-6 bg-[#F2F2F7]">
-          <div className="text-center max-w-sm">
-            <div className="h-12 w-12 mx-auto rounded-2xl bg-destructive/10 flex items-center justify-center mb-3">
-              <AlertCircle className="h-6 w-6 text-destructive" />
-            </div>
-            <h2 className="font-semibold text-base mb-2 text-[#1C1C1E] tracking-tight">שגיאה בטעינה</h2>
-            <p className="text-[13px] text-[#8E8E93] mb-5">{error}</p>
-            <Button onClick={handleLogout} variant="outline" className="w-full rounded-2xl">חזרה למסך התחברות</Button>
-          </div>
+        <div className="min-h-[60vh] flex items-center justify-center bg-[#F2F2F7]">
+          <ErrorState
+            title="שגיאה בטעינה"
+            description={error}
+            onRetry={handleLogout}
+            retryLabel="חזרה למסך התחברות"
+          />
         </div>
       </MobileShell>
     );

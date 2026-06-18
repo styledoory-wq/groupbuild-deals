@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Tag, Search as SearchIcon, Heart } from "lucide-react";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, ErrorState, EmptyState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,7 +154,7 @@ export default function DealsList() {
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
-        <PageHeader size="large"
+        <BackHeader
           title={cat ? `${cat.icon} ${cat.name}` : stageTitle ? stageTitle : "כל ההצעות"}
           subtitle={loading ? "טוען..." : `${filtered.length} הצעות ${tab === "active" ? "פעילות" : tab === "favorites" ? "במועדפים" : "בארכיון"}`}
         />
@@ -205,27 +205,22 @@ export default function DealsList() {
             {loading && <DealCardSkeletonList count={4} />}
 
             {!loading && error && (
-              <div className="rounded-[20px] border border-[#ECEEF2] bg-white p-6 text-center col-span-2 md:col-span-3">
-                <p className="text-[14px] font-bold text-[#1F2937]">שגיאה בטעינה</p>
-                <p className="text-[12px] text-[#6B7280] mt-1">{error}</p>
+              <div className="col-span-2 md:col-span-3">
+                <ErrorState title="שגיאה בטעינה" description={error} />
               </div>
             )}
 
             {!loading && !error && filtered.length === 0 && (
-              <div className="rounded-[20px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center col-span-2 md:col-span-3">
-                {tab === "favorites" ? (
-                  <Heart className="h-8 w-8 mx-auto mb-3 text-[#0E6B5A]" strokeWidth={2} />
-                ) : (
-                  <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
-                )}
-                <p className="text-[14px] font-bold text-[#1F2937]">
-                  {tab === "active" ? "אין עדיין הצעות פעילות" : tab === "favorites" ? "עדיין אין הצעות במועדפים" : "אין הצעות בארכיון"}
-                </p>
-                <p className="text-[12px] text-[#6B7280] mt-1">
-                  {tab === "favorites"
-                    ? "לחצו על הלב בכל הצעה כדי לשמור אותה כאן."
-                    : cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."}
-                </p>
+              <div className="col-span-2 md:col-span-3">
+                <EmptyState
+                  icon={tab === "favorites" ? <Heart className="h-7 w-7 text-[#0E6B5A]" strokeWidth={2} /> : <Tag className="h-7 w-7 text-[#9CA3AF]" />}
+                  title={tab === "active" ? "אין עדיין הצעות פעילות" : tab === "favorites" ? "עדיין אין הצעות במועדפים" : "אין הצעות בארכיון"}
+                  description={
+                    tab === "favorites"
+                      ? "לחצו על הלב בכל הצעה כדי לשמור אותה כאן."
+                      : cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."
+                  }
+                />
               </div>
             )}
 
