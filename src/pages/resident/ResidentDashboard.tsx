@@ -13,6 +13,7 @@ import { useApp, formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import { type StageId } from "@/lib/designSystem";
+import { getJourney, type JourneyId, VALID_JOURNEY_IDS } from "@/lib/journeys";
 import { QuoteRequestSheet } from "@/components/committee/QuoteRequestSheet";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
@@ -51,6 +52,7 @@ export default function ResidentDashboard() {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectName, setProjectName] = useState("");
   const [currentStage, setCurrentStage] = useState<StageId>("planning");
+  const [journey, setJourney] = useState<JourneyId>("new_build");
   const [areaDeals, setAreaDeals] = useState<MiniDeal[]>([]);
   const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
   const [joinedCount, setJoinedCount] = useState(0);
@@ -69,8 +71,13 @@ export default function ResidentDashboard() {
         const uid = user.id;
         const { data: prof } = await supabase
           .from("profiles")
-          .select("full_name,city,project_id,city_id,region_id,current_stage")
+          .select("full_name,city,project_id,city_id,region_id,current_stage,journey")
           .eq("id", uid).maybeSingle();
+
+        const jrRaw = (prof as { journey?: string | null } | null)?.journey ?? "new_build";
+        const jr = (VALID_JOURNEY_IDS.includes(jrRaw as JourneyId) ? jrRaw : "new_build") as JourneyId;
+        // Committee role users go to dedicated dashboard
+        if (jr === "committee") { navigate("/committee", { replace: true }); return; }
 
         const fname = prof?.full_name ?? user.name ?? "דייר";
         const cityName = prof?.city ?? "";
