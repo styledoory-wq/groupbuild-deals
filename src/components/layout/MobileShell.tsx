@@ -29,7 +29,7 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
   return (
     <div
       className="min-h-screen min-h-[100dvh] relative"
-      style={{ overscrollBehavior: "none", backgroundColor: "#FCFBF8" }}
+      style={{ overscrollBehavior: "none", backgroundColor: "#F7F5F0" }}
     >
       {/* Desktop top header — sits to the LEFT of the right sidebar (248px) */}
       <header

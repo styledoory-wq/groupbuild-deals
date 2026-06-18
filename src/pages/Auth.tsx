@@ -224,7 +224,7 @@ export default function Auth() {
     <div
       dir="rtl"
       className="auth-screen min-h-[100dvh] w-full flex justify-center text-[#1F2937] relative overflow-hidden"
-      style={{ background: "linear-gradient(170deg, #FCFBF8 0%, #EFEAE0 100%)" }}
+      style={{ background: "linear-gradient(170deg, #F7F5F0 0%, #EFEAE0 100%)" }}
     >
       {/* Brand-tinted background — emerald glows + faint logo watermark */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">

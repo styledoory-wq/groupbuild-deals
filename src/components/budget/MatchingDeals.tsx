@@ -78,7 +78,7 @@ export function MatchingDeals({ result }: { result: BudgetResult }) {
             <Link
               key={d.id}
               to={`/resident/deals/${d.id}`}
-              className="flex items-center gap-3 p-3 rounded-2xl bg-[#FCFBF8] border border-[#E5E7EB] hover:bg-white transition"
+              className="flex items-center gap-3 p-3 rounded-2xl bg-[#F7F5F0] border border-[#E5E7EB] hover:bg-white transition"
             >
               {d.image_url && (
                 <img src={d.image_url} alt={d.title} className="h-12 w-12 rounded-xl object-cover" />

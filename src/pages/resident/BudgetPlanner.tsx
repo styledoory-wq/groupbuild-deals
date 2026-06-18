@@ -140,7 +140,7 @@ export default function BudgetPlanner() {
 
   return (
     <MobileShell>
-      <div style={{ background: "#FCFBF8", fontFamily: "'Epilogue', system-ui, sans-serif" }}>
+      <div style={{ background: "#F7F5F0", fontFamily: "'Epilogue', system-ui, sans-serif" }}>
       <BackHeader title="מחשבון תקציב מקצועי" subtitle="הערכת עלות מדויקת ב-4 מסלולים — עם יועץ AI ועסקאות מתאימות" />
       <div className="px-5 pb-28 space-y-5">
 
@@ -227,7 +227,7 @@ export default function BudgetPlanner() {
                   <button
                     type="button"
                     onClick={() => onChange(!checked)}
-                    className="w-full flex items-center justify-between bg-[#FCFBF8] border border-[#ECEEF2] rounded-xl p-3.5 hover:border-[#D1D5DB] transition text-right"
+                    className="w-full flex items-center justify-between bg-[#F7F5F0] border border-[#ECEEF2] rounded-xl p-3.5 hover:border-[#D1D5DB] transition text-right"
                   >
                     <span className="text-[13.5px] font-bold text-[#1F2937]">{label}</span>
                     <Switch

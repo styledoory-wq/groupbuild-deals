@@ -128,7 +128,7 @@ export default function Browse() {
   const returnUrl = encodeURIComponent("/browse");
 
   return (
-    <div dir="rtl" className="min-h-screen w-full bg-[#FCFBF8]">
+    <div dir="rtl" className="min-h-screen w-full bg-[#F7F5F0]">
       {/* Top bar */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-[#ECEEF2]">
         <div className="mx-auto w-full max-w-[1200px] flex items-center justify-between gap-3 px-4 lg:px-8 h-14">

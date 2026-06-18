@@ -314,7 +314,7 @@ export default function MyOffers() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => toggleHide({ interest, deposit }, !hidden)}
-                        className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#FCFBF8] text-[#1F2937]"
+                        className="h-8 px-3 rounded-xl text-[11px] font-bold bg-[#F7F5F0] text-[#1F2937]"
                       >
                         {hidden ? "החזרה" : "הסתרה"}
                       </button>
@@ -402,7 +402,7 @@ export default function MyOffers() {
                   </div>
 
                   <Link to={`/resident/deals/${deal.id}`} className="block">
-                    <div className="pt-3 border-t border-[#FCFBF8] flex items-end justify-between gap-2">
+                    <div className="pt-3 border-t border-[#F7F5F0] flex items-end justify-between gap-2">
                       <div>
                         <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 uppercase tracking-wide">המחיר הנוכחי שלך</div>
                         <div className="text-[20px] font-extrabold text-[#1F2937] leading-none tracking-tight">{display.headline}</div>
@@ -429,7 +429,7 @@ export default function MyOffers() {
                           </span>
                         )}
                         {interest.deposit_required && interest.deposit_amount > 0 && (
-                          <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FCFBF8] text-[#1F2937]">
+                          <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#F7F5F0] text-[#1F2937]">
                             {ils(Number(interest.deposit_amount))}
                           </span>
                         )}

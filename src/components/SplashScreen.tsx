@@ -47,7 +47,7 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
       )}
       style={{
         background:
-          "radial-gradient(ellipse 80% 60% at 50% 35%, rgba(52,168,142,0.18) 0%, rgba(14,107,90,0.06) 40%, transparent 75%), linear-gradient(180deg, #FFFFFF 0%, #FCFBF8 55%, #EFEAE0 100%)",
+          "radial-gradient(ellipse 80% 60% at 50% 35%, rgba(52,168,142,0.18) 0%, rgba(14,107,90,0.06) 40%, transparent 75%), linear-gradient(180deg, #FFFFFF 0%, #F7F5F0 55%, #EFEAE0 100%)",
         paddingTop: "env(safe-area-inset-top)",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}

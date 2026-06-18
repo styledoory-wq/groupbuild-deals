@@ -909,7 +909,7 @@ export default function DealDetail() {
 
               {/* Unlock next tier promo */}
               {nextTier && peopleNeeded > 0 && bestDisplay && (
-                <div className="mt-5 bg-[#FCFBF8] border border-[#ECEEF2] rounded-2xl p-3 flex items-center justify-between gap-3">
+                <div className="mt-5 bg-[#F7F5F0] border border-[#ECEEF2] rounded-2xl p-3 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center border border-[#ECEEF2] shadow-sm shrink-0">
                       <span className="text-[#0E6B5A] font-black text-sm">+{peopleNeeded}</span>
@@ -947,7 +947,7 @@ export default function DealDetail() {
         className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
       >
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#FCFBF8] via-[#FCFBF8]/95 to-transparent">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0]/95 to-transparent">
           {interested ? (
             <div className="flex items-center gap-2.5 bg-[#0E6B5A] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
               <div className="w-10 h-10 bg-gradient-to-l from-[#1A8870] to-[#34A88E] rounded-full flex items-center justify-center shrink-0">
