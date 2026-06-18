@@ -434,6 +434,15 @@ function Kpi({ label, value, accent }: { label: string; value: string; accent?: 
   );
 }
 
+function MiniStat({ label, value, small }: { label: string; value: string; small?: boolean }) {
+  return (
+    <div className="bg-white/70 backdrop-blur rounded-xl p-2.5 text-center border border-white">
+      <div className={`font-bold text-[#1C1C1E] tabular-nums leading-none truncate ${small ? "text-[12px]" : "text-[16px]"}`}>{value}</div>
+      <div className="text-[10px] text-[#6B6B6B] mt-1 font-medium">{label}</div>
+    </div>
+  );
+}
+
 function SectionHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
   return (
     <div className="px-5 mt-8 flex items-end justify-between gap-3">
