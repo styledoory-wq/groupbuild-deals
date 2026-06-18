@@ -37,6 +37,17 @@ export default function ResidentProfile() {
     return () => { cancelled = true; };
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      const isC = (data ?? []).some((r) => (r as { role: string }).role === "committee");
+      if (!cancelled) setIsCommittee(isC);
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
   const handleLogout = async () => {
     await logout();
     toast.success("התנתקת בהצלחה");
