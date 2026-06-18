@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Briefcase, Mail, ArrowLeft, User as UserIcon, MapPin, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import logoIcon from "@/assets/logo-icon.png";
+import groupBuildLogo from "@/assets/groupbuild-logo.png.asset.json";
 import { SupportButton } from "@/components/SupportButton";
 
 import { useApp } from "@/store/AppStore";
