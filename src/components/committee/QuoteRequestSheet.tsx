@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 
 interface Category { id: string; name: string }
-interface Supplier { id: string; business_name: string }
+interface Supplier { id: string; business_name: string; categories?: string[] | null }
 
 interface QuoteRequestSheetProps {
   projectName: string;
@@ -25,6 +25,17 @@ export function QuoteRequestSheet({ projectName, projectId, categories, supplier
   const [targetPrice, setTargetPrice] = useState<string>("");
   const [deadline, setDeadline] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Filter suppliers by selected category (categories array contains category ids/slugs)
+  const filteredSuppliers = categoryId
+    ? suppliers.filter((s) => Array.isArray(s.categories) && s.categories.includes(categoryId))
+    : suppliers;
+
+  // If selected supplier is no longer in filtered list, clear it
+  if (supplierId && !filteredSuppliers.some((s) => s.id === supplierId)) {
+    setTimeout(() => setSupplierId(""), 0);
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
