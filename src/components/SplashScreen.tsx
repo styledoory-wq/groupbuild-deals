@@ -47,7 +47,7 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
       )}
       style={{
         background:
-          "radial-gradient(ellipse 70% 50% at 50% 35%, rgba(14,107,90,0.12) 0%, rgba(14,107,90,0.04) 35%, transparent 70%), linear-gradient(180deg, #0A2147 0%, #081B38 55%, #050F25 100%)",
+          "radial-gradient(ellipse 80% 60% at 50% 35%, rgba(52,168,142,0.18) 0%, rgba(14,107,90,0.06) 40%, transparent 75%), linear-gradient(180deg, #FFFFFF 0%, #F7F5F0 55%, #EFEAE0 100%)",
         paddingTop: "env(safe-area-inset-top)",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
@@ -61,12 +61,12 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
           width: "180px",
         }}
       >
-        <BrandLogo size="xl" variant="light" className="h-auto w-full" />
+        <BrandLogo size="xl" variant="dark" className="h-auto w-full" />
       </div>
 
       {/* Gold accent loader */}
       <div
-        className="mt-8 h-[3px] w-24 rounded-full overflow-hidden bg-white/10 transition-opacity duration-700"
+        className="mt-8 h-[3px] w-24 rounded-full overflow-hidden bg-black/5 transition-opacity duration-700"
         style={{ opacity: visible ? 1 : 0 }}
       >
         <div
