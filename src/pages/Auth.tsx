@@ -237,7 +237,7 @@ export default function Auth() {
           style={{ background: "radial-gradient(circle, #0E6B5A 0%, transparent 65%)" }}
         />
         <BrandMark
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(78vw,560px)] opacity-[0.05] select-none"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(78vw,560px)] opacity-[0.07] brightness-150 saturate-[0.5] select-none"
         />
       </div>
 
