@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   MapPin, Sparkles, Users, Flame,
   PencilRuler, Hammer, Plug, ShieldCheck, Palette, ChefHat, Trees, KeyRound, Calculator,
-  TrendingUp, Check, ChevronLeft, Heart, Ticket,
+  TrendingUp, Check, ChevronLeft, Heart, Ticket, Building2, Plus, ClipboardList,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupportButton } from "@/components/SupportButton";
@@ -52,6 +52,8 @@ export default function ResidentDashboard() {
   const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
   const [joinedCount, setJoinedCount] = useState(0);
   const [estimatedSavings, setEstimatedSavings] = useState(0);
+  const [isCommittee, setIsCommittee] = useState(false);
+  const [committeeStats, setCommitteeStats] = useState<{ active_deals: number; joiners: number; savings: number } | null>(null);
 
   useEffect(() => {
     if (!authReady || !user?.id) return;
@@ -171,6 +173,23 @@ export default function ResidentDashboard() {
     return () => { cancelled = true; };
   }, [authReady, user?.id, user?.name]);
 
+  // Detect committee role + load building stats
+  useEffect(() => {
+    if (!authReady || !user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data: roles } = await supabase
+        .from("user_roles").select("role").eq("user_id", user.id);
+      const isC = (roles ?? []).some((r) => (r as { role: string }).role === "committee");
+      if (cancelled) return;
+      setIsCommittee(isC);
+      if (!isC) return;
+      const { data: s } = await supabase.rpc("get_committee_dashboard" as never, {} as never);
+      if (!cancelled && s) setCommitteeStats(s as unknown as { active_deals: number; joiners: number; savings: number });
+    })();
+    return () => { cancelled = true; };
+  }, [authReady, user?.id]);
+
   const currentIdx = useMemo(() => Math.max(0, STAGES.findIndex((s) => s.id === currentStage)), [currentStage]);
   const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
 
@@ -253,6 +272,57 @@ export default function ResidentDashboard() {
           <Kpi label="פעילות" value={areaDeals.length.toString()} accent />
           <Kpi label="ספקים" value={areaSuppliersCount.toString()} />
         </section>
+
+        {/* === Committee management — only for approved committee reps === */}
+        {isCommittee && (
+          <section className="px-5 mt-5">
+            <div
+              className="rounded-3xl p-5 border border-[#0E6B5A]/20 shadow-sm relative overflow-hidden"
+              style={{ background: "linear-gradient(135deg,#FFFFFF 0%,#E8F1EE 100%)" }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-9 w-9 rounded-2xl bg-[#0E6B5A] flex items-center justify-center">
+                    <Building2 className="h-4 w-4 text-white" strokeWidth={2.4} />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[15px] font-bold text-[#1C1C1E] tracking-tight leading-tight">ועד הבית שלי</div>
+                    <div className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">נציג מאושר</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate("/committee")}
+                  className="text-[12px] font-semibold text-[#0E6B5A] inline-flex items-center gap-0.5"
+                >
+                  ניהול <ChevronLeft className="h-3 w-3" strokeWidth={2.4} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <MiniStat label="עסקאות" value={(committeeStats?.active_deals ?? 0).toString()} />
+                <MiniStat label="הצטרפו" value={(committeeStats?.joiners ?? 0).toString()} />
+                <MiniStat label="חיסכון" value={formatILS(committeeStats?.savings ?? 0)} small />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => navigate("/deals")}
+                  className="bg-[#0E6B5A] text-white rounded-2xl py-3 px-3 text-[12px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-95 transition"
+                >
+                  <Plus className="h-3.5 w-3.5" strokeWidth={2.6} /> יזום עסקה
+                </button>
+                <button
+                  onClick={() => navigate("/committee")}
+                  className="bg-white border border-[#0E6B5A]/20 text-[#0E6B5A] rounded-2xl py-3 px-3 text-[12px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-95 transition"
+                >
+                  <ClipboardList className="h-3.5 w-3.5" strokeWidth={2.6} /> משימות וניהול
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
+
 
         {/* === Project stages — Apple-style segmented strip === */}
         <SectionHeader
@@ -360,6 +430,15 @@ function Kpi({ label, value, accent }: { label: string; value: string; accent?: 
     <div className="rounded-2xl p-4 border bg-white border-[#E5E5EA] shadow-sm">
       <div className="text-[11px] font-medium text-[#8E8E93] mb-1">{label}</div>
       <div className={`text-[20px] font-bold tracking-tight leading-none tabular-nums truncate ${accent ? "text-[#0E6B5A]" : "text-[#1C1C1E]"}`}>{value}</div>
+    </div>
+  );
+}
+
+function MiniStat({ label, value, small }: { label: string; value: string; small?: boolean }) {
+  return (
+    <div className="bg-white/70 backdrop-blur rounded-xl p-2.5 text-center border border-white">
+      <div className={`font-bold text-[#1C1C1E] tabular-nums leading-none truncate ${small ? "text-[12px]" : "text-[16px]"}`}>{value}</div>
+      <div className="text-[10px] text-[#6B6B6B] mt-1 font-medium">{label}</div>
     </div>
   );
 }

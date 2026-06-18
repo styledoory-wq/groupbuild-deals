@@ -16,6 +16,7 @@ export default function ResidentProfile() {
   const project = projects.find((p) => p.id === user?.projectId);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [isCommittee, setIsCommittee] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -32,6 +33,17 @@ export default function ResidentProfile() {
         sessionStorage.setItem(cacheKey, signed.signedUrl);
         setAvatarUrl(signed.signedUrl);
       }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      const isC = (data ?? []).some((r) => (r as { role: string }).role === "committee");
+      if (!cancelled) setIsCommittee(isC);
     })();
     return () => { cancelled = true; };
   }, [user?.id]);
@@ -70,7 +82,9 @@ export default function ResidentProfile() {
 
   const actions = [
     { label: "עריכת פרופיל", icon: Pencil, onClick: () => navigate("/resident/profile/edit") },
-    { label: "בקשת הרשאת ועד בית", icon: Building2, onClick: () => navigate("/committee/request") },
+    isCommittee
+      ? { label: "ניהול ועד הבית", icon: Building2, onClick: () => navigate("/committee") }
+      : { label: "בקשת הרשאת ועד בית", icon: Building2, onClick: () => navigate("/committee/request") },
     { label: "הפיקדונות שלי", icon: Wallet, onClick: () => navigate("/resident/deposits") },
     { label: "ההטבה שלי", icon: Ticket, onClick: () => navigate("/resident/my-vouchers") },
     { label: "המסמכים שלי", icon: FileText, onClick: () => navigate("/resident/documents") },
