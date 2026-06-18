@@ -574,18 +574,15 @@ export default function DealDetail() {
     return (
       <MobileShell>
         <BackHeader title="עסקה לא נמצאה" />
-        <ErrorState
-          title="עסקה לא נמצאה"
-          description={error ?? "העסקה לא נמצאה"}
-          action={
-            <Link to="/resident/deals">
-              <Button variant="outline">
-                <ArrowRight className="h-4 w-4 ml-2" />
-                חזרה לעסקאות
-              </Button>
-            </Link>
-          }
-        />
+        <ErrorState title="עסקה לא נמצאה" description={error ?? "העסקה לא נמצאה"} />
+        <div className="px-5 mt-2 flex justify-center">
+          <Link to="/resident/deals">
+            <Button variant="outline">
+              <ArrowRight className="h-4 w-4 ml-2" />
+              חזרה לעסקאות
+            </Button>
+          </Link>
+        </div>
         <BottomNav role="resident" />
       </MobileShell>
     );
