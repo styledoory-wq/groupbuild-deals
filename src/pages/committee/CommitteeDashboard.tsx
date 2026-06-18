@@ -260,6 +260,16 @@ export default function CommitteeDashboard() {
           onNativeShare={handleShare}
         />
       )}
+
+      {quoteOpen && (
+        <QuoteRequestSheet
+          projectName={projectName}
+          projectId={stats?.project_id ?? null}
+          categories={categories}
+          suppliers={suppliers}
+          onClose={() => setQuoteOpen(false)}
+        />
+      )}
     </div>
   );
 }
