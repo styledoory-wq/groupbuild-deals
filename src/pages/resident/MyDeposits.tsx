@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { History, Eye, Trash2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BackHeader, SkeletonList, EmptyState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
