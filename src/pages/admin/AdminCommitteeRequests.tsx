@@ -71,6 +71,26 @@ export default function AdminCommitteeRequests() {
     }
   };
 
+  const revoke = async (r: Row) => {
+    const reason = window.prompt(
+      `לבטל את הרשאת ועד הבית של ${profiles[r.user_id]?.full_name ?? "המשתמש"}?\nהמשתמש יחזור להיות דייר רגיל.\nסיבה (אופציונלי):`
+    );
+    if (reason === null) return; // cancel
+    setBusy(r.id);
+    try {
+      const { error } = await supabase.rpc("admin_revoke_committee_role" as never, {
+        _user_id: r.user_id, _project_id: r.project_id, _reason: reason || null,
+      } as never);
+      if (error) throw error;
+      toast.success("הרשאת ועד הבית בוטלה");
+      await load();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "שגיאה");
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const filtered = rows.filter(r => tab === "all" ? true : r.status === "pending");
 
   return (
