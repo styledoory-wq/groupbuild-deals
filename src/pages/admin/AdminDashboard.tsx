@@ -197,6 +197,7 @@ export default function AdminDashboard() {
           <QuickLink onClick={() => navigate("/admin/settings")} icon={Settings} label="הגדרות מערכת" desc="התראות ומייל אדמין" />
           <QuickLink onClick={() => navigate("/admin/stats")} icon={BarChart3} label="סטטיסטיקות" desc="ניתוח מערכת מלא" />
           <QuickLink onClick={() => navigate("/admin/complaints")} icon={AlertTriangle} label="תלונות דיירים" desc="דיווחי בעיות" />
+          <QuickLink onClick={() => navigate("/admin/committee-requests")} icon={UserCheck} label="בקשות הרשאת ועד בית" desc="אישור דיירים לתפקיד נציג ועד" badge={stats.pendingCommittee} />
           <QuickLink onClick={() => navigate("/admin/leads")} icon={Inbox} label="ניהול לידים" desc="לידים, פניות ורשימת המתנה" />
         </div>
       </section>
