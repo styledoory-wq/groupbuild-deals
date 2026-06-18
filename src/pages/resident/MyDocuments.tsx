@@ -153,7 +153,7 @@ export default function MyDocuments() {
 
   return (
     <MobileShell>
-      <PageHeader title="המסמכים שלי" subtitle="ניהול קבצים ומסמכים" />
+      <BackHeader title="המסמכים שלי" subtitle="ניהול קבצים ומסמכים" />
 
       <div className="px-5 mt-2 space-y-4" dir="rtl">
         {/* Upload section */}
@@ -212,18 +212,13 @@ export default function MyDocuments() {
 
         {/* Document list */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-[#0E6B5A]" />
-          </div>
+          <LoadingState />
         ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-[24px] border border-dashed border-[#ECEEF2] p-10 text-center">
-            <div className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center mb-4 mx-auto shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]">
-              <FolderOpen className="h-7 w-7 text-[#0E6B5A]" />
-            </div>
-            <p className="text-[14px] font-bold text-[#1F2937]">
-              {selectedCategory ? "אין מסמכים בקטגוריה זו" : "עדיין לא העלית מסמכים"}
-            </p>
-          </div>
+          <EmptyState
+            icon={<FolderOpen className="h-7 w-7 text-[#0E6B5A]" />}
+            title={selectedCategory ? "אין מסמכים בקטגוריה זו" : "עדיין לא העלית מסמכים"}
+            description={selectedCategory ? "נסה לבחור קטגוריה אחרת או להעלות מסמך חדש." : "העלה את המסמכים הראשונים שלך כדי לנהל הכול במקום אחד."}
+          />
         ) : (
           <div className="space-y-2">
             {filtered.map((doc) => {
