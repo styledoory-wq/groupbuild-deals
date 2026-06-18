@@ -253,6 +253,7 @@ export default function SupplierProfile() {
       {/* Hero */}
       <div className="px-5 pt-4 pb-4 relative">
         <BackHeader title={supplier.business_name} subtitle="פרופיל ספק" />
+        <div className="gb-card p-4 flex items-end gap-4">
           <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" className="shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]" />
           <div className="flex-1 min-w-0 pb-1">
             <div className="flex items-center gap-1.5 mb-1">
