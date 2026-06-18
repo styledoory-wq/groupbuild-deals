@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 
 interface Category { id: string; name: string }
-interface Supplier { id: string; business_name: string }
+interface Supplier { id: string; business_name: string; categories?: string[] | null }
 
 interface QuoteRequestSheetProps {
   projectName: string;
@@ -25,6 +25,17 @@ export function QuoteRequestSheet({ projectName, projectId, categories, supplier
   const [targetPrice, setTargetPrice] = useState<string>("");
   const [deadline, setDeadline] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Filter suppliers by selected category (categories array contains category ids/slugs)
+  const filteredSuppliers = categoryId
+    ? suppliers.filter((s) => Array.isArray(s.categories) && s.categories.includes(categoryId))
+    : suppliers;
+
+  // If selected supplier is no longer in filtered list, clear it
+  if (supplierId && !filteredSuppliers.some((s) => s.id === supplierId)) {
+    setTimeout(() => setSupplierId(""), 0);
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,11 +69,12 @@ export function QuoteRequestSheet({ projectName, projectId, categories, supplier
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40" onClick={onClose} dir="rtl">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 overscroll-contain" onClick={onClose} dir="rtl">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
+        className="w-full sm:max-w-lg max-h-[90dvh] sm:max-h-[92vh] overflow-y-auto overscroll-contain bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
       >
+
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDEAE3] sticky top-0 bg-white">
           <div>
             <h2 className="text-base font-semibold text-[#1F1F1F]">בקשת הצעת מחיר קבוצתית</h2>
@@ -127,9 +139,13 @@ export function QuoteRequestSheet({ projectName, projectId, categories, supplier
               className="w-full h-11 px-3 rounded-xl border border-[#EDEAE3] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#0E6B5A]"
             >
               <option value="">— פתוח לכל הספקים המתאימים —</option>
-              {suppliers.map((s) => <option key={s.id} value={s.id}>{s.business_name}</option>)}
+              {filteredSuppliers.map((s) => <option key={s.id} value={s.id}>{s.business_name}</option>)}
             </select>
-            <p className="text-[11px] text-[#6B6B6B] mt-1.5">אם תבחר ספק, הוא יקבל התראה ישירה.</p>
+            <p className="text-[11px] text-[#6B6B6B] mt-1.5">
+              {categoryId
+                ? `מציג ${filteredSuppliers.length} ספקים בתחום זה. אם תבחר ספק, הוא יקבל התראה ישירה.`
+                : "בחר קטגוריה כדי לסנן ספקים. אם תבחר ספק, הוא יקבל התראה ישירה."}
+            </p>
           </Field>
 
           <Field label="מועד אחרון להגשת הצעות" icon={Calendar}>

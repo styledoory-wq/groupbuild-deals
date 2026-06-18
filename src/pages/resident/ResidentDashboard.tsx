@@ -59,7 +59,7 @@ export default function ResidentDashboard() {
   const [committeeStats, setCommitteeStats] = useState<{ active_deals: number; joiners: number; savings: number } | null>(null);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const [suppliers, setSuppliers] = useState<{ id: string; business_name: string }[]>([]);
+  const [suppliers, setSuppliers] = useState<{ id: string; business_name: string; categories?: string[] | null }[]>([]);
 
   useEffect(() => {
     if (!authReady || !user?.id) return;
@@ -209,7 +209,7 @@ export default function ResidentDashboard() {
     (async () => {
       const [{ data: cats }, { data: sups }] = await Promise.all([
         supabase.from("categories").select("id,name").eq("is_active", true).order("name"),
-        supabase.from("suppliers").select("id,business_name").eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]).order("business_name"),
+        supabase.from("suppliers").select("id,business_name,categories").eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]).order("business_name"),
       ]);
       if (cancelled) return;
       setCategories((cats ?? []) as { id: string; name: string }[]);

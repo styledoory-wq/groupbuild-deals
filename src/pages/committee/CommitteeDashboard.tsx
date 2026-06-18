@@ -27,7 +27,7 @@ interface Task {
 }
 
 interface Category { id: string; name: string }
-interface Supplier { id: string; business_name: string }
+interface Supplier { id: string; business_name: string; categories?: string[] | null }
 
 export default function CommitteeDashboard() {
   const navigate = useNavigate();
@@ -112,7 +112,7 @@ export default function CommitteeDashboard() {
     (async () => {
       const [{ data: cats }, { data: sups }] = await Promise.all([
         supabase.from("categories").select("id,name").eq("is_active", true).order("name"),
-        supabase.from("suppliers").select("id,business_name").eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]).order("business_name"),
+        supabase.from("suppliers").select("id,business_name,categories").eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]).order("business_name"),
       ]);
       if (cancelled) return;
       setCategories((cats ?? []) as Category[]);
