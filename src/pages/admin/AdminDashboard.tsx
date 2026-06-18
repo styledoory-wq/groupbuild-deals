@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, MapPin, Settings, UserCog, AlertTriangle, Eye, Inbox, type LucideIcon } from "lucide-react";
+import { Building2, Users, ShieldCheck, Tag, Wallet, TrendingUp, LogOut, BarChart3, LayoutGrid, ChevronLeft, CreditCard, MapPin, Settings, UserCog, AlertTriangle, Eye, Inbox, UserCheck, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -13,6 +13,7 @@ type Stats = {
   projects: number;
   suppliers: number;
   pendingSuppliers: number;
+  pendingCommittee: number;
   activeDeals: number;
   totalDeposits: number;
   paidDepositsAmount: number;
@@ -23,20 +24,21 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { projects, categories, logout } = useApp();
   const [stats, setStats] = useState<Stats>({
-    projects: 0, suppliers: 0, pendingSuppliers: 0, activeDeals: 0,
+    projects: 0, suppliers: 0, pendingSuppliers: 0, pendingCommittee: 0, activeDeals: 0,
     totalDeposits: 0, paidDepositsAmount: 0, apartments: 0,
   });
 
   useEffect(() => {
     (async () => {
       try {
-        const [projRes, supRes, pendingRes, dealsRes, depCountRes, depPaidRes] = await Promise.all([
+        const [projRes, supRes, pendingRes, dealsRes, depCountRes, depPaidRes, commRes] = await Promise.all([
           supabase.from("projects").select("apartment_count", { count: "exact" }).eq("is_deleted", false).eq("is_active", true),
           supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false).eq("approval_status", "pending"),
           supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["active", "closing-soon"]),
           supabase.from("deposits").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["pending", "paid"]),
           supabase.from("deposits").select("gross_deposit_amount,net_deposit_amount").eq("status", "paid").eq("is_deleted", false),
+          supabase.from("committee_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
         ]);
 
         const apartments = (projRes.data ?? []).reduce((s: number, p: { apartment_count: number | null }) => s + (p.apartment_count ?? 0), 0);
@@ -46,6 +48,7 @@ export default function AdminDashboard() {
           projects: projRes.count ?? (projRes.data?.length ?? 0),
           suppliers: supRes.count ?? 0,
           pendingSuppliers: pendingRes.count ?? 0,
+          pendingCommittee: commRes.count ?? 0,
           activeDeals: dealsRes.count ?? 0,
           totalDeposits: depCountRes.count ?? 0,
           paidDepositsAmount: paidAmount,
@@ -93,6 +96,23 @@ export default function AdminDashboard() {
             </span>
             <span className="text-[#1F2937] flex-1 font-medium">
               <b className="text-[#0E6B5A]">{stats.pendingSuppliers}</b> ספקים ממתינים לאישור
+            </span>
+            <ChevronLeft className="h-4 w-4 text-[#9CA3AF]" strokeWidth={2} />
+          </button>
+        </div>
+      )}
+
+      {stats.pendingCommittee > 0 && (
+        <div className="px-5 mt-1 mb-3">
+          <button
+            onClick={() => navigate("/admin/committee-requests")}
+            className="w-full bg-white rounded-[16px] px-4 py-3 border border-[#ECEEF2] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] text-[13px] flex items-center gap-2.5 text-right active:scale-[0.99] transition-transform"
+          >
+            <span className="h-9 w-9 rounded-[10px] bg-[#FFF8E1] flex items-center justify-center shrink-0">
+              <UserCheck className="h-[16px] w-[16px] text-[#0E6B5A]" strokeWidth={2.2} />
+            </span>
+            <span className="text-[#1F2937] flex-1 font-medium">
+              <b className="text-[#0E6B5A]">{stats.pendingCommittee}</b> בקשות הרשאת ועד בית ממתינות
             </span>
             <ChevronLeft className="h-4 w-4 text-[#9CA3AF]" strokeWidth={2} />
           </button>
@@ -177,6 +197,7 @@ export default function AdminDashboard() {
           <QuickLink onClick={() => navigate("/admin/settings")} icon={Settings} label="הגדרות מערכת" desc="התראות ומייל אדמין" />
           <QuickLink onClick={() => navigate("/admin/stats")} icon={BarChart3} label="סטטיסטיקות" desc="ניתוח מערכת מלא" />
           <QuickLink onClick={() => navigate("/admin/complaints")} icon={AlertTriangle} label="תלונות דיירים" desc="דיווחי בעיות" />
+          <QuickLink onClick={() => navigate("/admin/committee-requests")} icon={UserCheck} label="בקשות הרשאת ועד בית" desc="אישור דיירים לתפקיד נציג ועד" badge={stats.pendingCommittee} />
           <QuickLink onClick={() => navigate("/admin/leads")} icon={Inbox} label="ניהול לידים" desc="לידים, פניות ורשימת המתנה" />
         </div>
       </section>
