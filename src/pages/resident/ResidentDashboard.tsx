@@ -48,6 +48,8 @@ export default function ResidentDashboard() {
 
   const [fullName, setFullName] = useState("");
   const [city, setCity] = useState("");
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [projectName, setProjectName] = useState("");
   const [currentStage, setCurrentStage] = useState<StageId>("planning");
   const [areaDeals, setAreaDeals] = useState<MiniDeal[]>([]);
   const [areaSuppliersCount, setAreaSuppliersCount] = useState(0);
@@ -55,6 +57,9 @@ export default function ResidentDashboard() {
   const [estimatedSavings, setEstimatedSavings] = useState(0);
   const [isCommittee, setIsCommittee] = useState(false);
   const [committeeStats, setCommitteeStats] = useState<{ active_deals: number; joiners: number; savings: number } | null>(null);
+  const [quoteOpen, setQuoteOpen] = useState(false);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [suppliers, setSuppliers] = useState<{ id: string; business_name: string }[]>([]);
 
   useEffect(() => {
     if (!authReady || !user?.id) return;
