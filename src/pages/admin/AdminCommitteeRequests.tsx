@@ -3,6 +3,7 @@ import { CheckCircle2, XCircle, Loader2, Inbox, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { LoadingState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -87,7 +88,7 @@ export default function AdminCommitteeRequests() {
 
       <div className="px-4 pb-24 space-y-3">
         {loading ? (
-          <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-[#6B6B6B]" /></div>
+          <LoadingState fullHeight={false} />
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center py-12 text-[#6B6B6B]">
             <Inbox className="w-8 h-8 mb-2" />

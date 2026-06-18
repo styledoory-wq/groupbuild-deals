@@ -3,6 +3,7 @@ import { Trash2, Loader2, Inbox, Phone, MapPin, Building2, Mail, MessageCircle }
 import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { LoadingState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -119,7 +120,7 @@ export default function AdminLeads() {
 
       <div className="px-5 pb-10 space-y-2.5">
         {loading ? (
-          <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-[#0E6B5A]" /></div>
+          <LoadingState fullHeight={false} />
         ) : tab === "interests" ? (
           interests.length === 0 ? <Empty /> : interests.map((r) => (
             <LeadCard key={r.id} busy={busy === r.id} onDelete={() => setConfirm({ kind: "interests", id: r.id })}

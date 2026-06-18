@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { LoadingState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
@@ -185,9 +186,7 @@ export default function AdminDeposits() {
         </div>
 
         {loading ? (
-          <div className="px-5 py-12 text-center text-sm text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" /> טוען…
-          </div>
+          <LoadingState fullHeight={false} />
         ) : (
           <div className="space-y-2">
             {filtered.length === 0 && (

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CreditCard, Wallet, Percent, Save } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { LoadingState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,7 +91,7 @@ export default function AdminPaymentSettings() {
       <PageHeader title="הגדרות תשלום" subtitle="ספק סליקה וברירות מחדל" back />
       <div className="px-5 -mt-4 relative z-10 space-y-4">
         {loading ? (
-          <div className="text-center text-sm text-muted-foreground py-10">טוען…</div>
+          <LoadingState fullHeight={false} />
         ) : (
           <>
             <section className="gb-card p-5">

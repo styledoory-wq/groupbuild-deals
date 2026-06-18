@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Save, ArrowRight, Image as ImageIcon, FileText, Link as LinkIcon, Plus, Trash2, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -107,13 +108,7 @@ export default function AdminSupplierMedia() {
   };
 
   if (loading) {
-    return (
-      <MobileShell>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      </MobileShell>
-    );
+    return <MobileShell><LoadingState /></MobileShell>;
   }
 
   return (

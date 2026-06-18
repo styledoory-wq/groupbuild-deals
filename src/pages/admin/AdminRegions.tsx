@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2, MapPin } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { LoadingState } from "@/components/ds";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,7 +80,7 @@ export default function AdminRegions() {
   };
 
   if (loading) {
-    return <MobileShell><div className="p-8 text-center text-muted-foreground">טוען…</div></MobileShell>;
+    return <MobileShell><LoadingState /></MobileShell>;
   }
 
   return (

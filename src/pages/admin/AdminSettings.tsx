@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { LoadingState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -75,7 +76,7 @@ export default function AdminSettings() {
     }
   };
 
-  if (loading) return <MobileShell><div className="p-8 text-center">טוען…</div></MobileShell>;
+  if (loading) return <MobileShell><LoadingState /></MobileShell>;
   if (!settings) return <MobileShell><div className="p-8 text-center">לא נמצאו הגדרות</div></MobileShell>;
 
   return (
