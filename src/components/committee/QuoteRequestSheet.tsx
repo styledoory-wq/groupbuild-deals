@@ -69,10 +69,11 @@ export function QuoteRequestSheet({ projectName, projectId, categories, supplier
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 overscroll-contain" onClick={onClose} dir="rtl">
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40 overscroll-contain" onClick={onClose} dir="rtl">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-lg max-h-[90dvh] sm:max-h-[92vh] overflow-y-auto overscroll-contain bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
+        className="w-full sm:max-w-lg max-h-[calc(100dvh-12px)] sm:max-h-[92vh] overflow-y-auto overscroll-contain touch-pan-y bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
 
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDEAE3] sticky top-0 bg-white">
@@ -85,7 +86,7 @@ export function QuoteRequestSheet({ projectName, projectId, categories, supplier
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 pb-[calc(24px+env(safe-area-inset-bottom))] space-y-4">
           <Field label="כותרת הבקשה" required>
             <input
               type="text" value={title} onChange={(e) => setTitle(e.target.value)}
