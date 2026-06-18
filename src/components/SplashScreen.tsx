@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import originalLogo from "@/assets/groupbuild-original-logo-transparent-tight.png.asset.json";
+import originalLogo from "@/assets/groupbuild-logo-cropped.png";
 
 const SPLASH_SHOWN_KEY = "gb:splash-shown";
 
@@ -63,7 +63,7 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
         }}
       >
         <img
-          src={originalLogo.url}
+          src={originalLogo}
           alt="GroupBuild"
           className="block h-auto w-full select-none object-contain"
           draggable={false}
