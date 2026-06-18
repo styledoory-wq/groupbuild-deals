@@ -168,8 +168,14 @@ export default function ResidentDashboard() {
           }));
         }
 
+        const pid = (prof?.project_id as string | null) ?? null;
+        if (pid) {
+          const { data: proj } = await supabase.from("projects").select("name").eq("id", pid).maybeSingle();
+          if (!cancelled) setProjectName((proj as { name?: string } | null)?.name ?? "");
+        }
         if (cancelled) return;
-        setFullName(fname); setCity(cityName); setCurrentStage(stage);
+        setFullName(fname); setCity(cityName); setProjectId(pid);
+        setCurrentStage(stage);
         setAreaDeals(nextDeals); setAreaSuppliersCount(supCountRes.count ?? 0); setJoinedCount(joined);
         setEstimatedSavings(savings);
       } catch (e) {
@@ -195,6 +201,22 @@ export default function ResidentDashboard() {
     })();
     return () => { cancelled = true; };
   }, [authReady, user?.id]);
+
+  // Load categories & suppliers when quote sheet opens
+  useEffect(() => {
+    if (!quoteOpen) return;
+    let cancelled = false;
+    (async () => {
+      const [{ data: cats }, { data: sups }] = await Promise.all([
+        supabase.from("categories").select("id,name").eq("is_active", true).order("name"),
+        supabase.from("suppliers").select("id,business_name").eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]).order("business_name"),
+      ]);
+      if (cancelled) return;
+      setCategories((cats ?? []) as { id: string; name: string }[]);
+      setSuppliers((sups ?? []) as { id: string; business_name: string }[]);
+    })();
+    return () => { cancelled = true; };
+  }, [quoteOpen]);
 
   const currentIdx = useMemo(() => Math.max(0, STAGES.findIndex((s) => s.id === currentStage)), [currentStage]);
   const completionPct = Math.round(((currentIdx + 1) / STAGES.length) * 100);
@@ -312,7 +334,7 @@ export default function ResidentDashboard() {
 
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => navigate("/deals")}
+                  onClick={() => setQuoteOpen(true)}
                   className="bg-[#0E6B5A] text-white rounded-2xl py-3 px-3 text-[12px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-95 transition"
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={2.6} /> יזום עסקה
