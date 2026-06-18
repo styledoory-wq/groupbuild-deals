@@ -1691,6 +1691,10 @@ export type Database = {
           monthly_subscription: number
         }[]
       }
+      admin_revoke_committee_role: {
+        Args: { _project_id?: string; _reason?: string; _user_id: string }
+        Returns: undefined
+      }
       approve_lead_and_deposit: {
         Args: { _interest_id: string; _lead_status: string }
         Returns: undefined
