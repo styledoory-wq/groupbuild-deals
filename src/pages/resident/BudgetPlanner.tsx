@@ -94,15 +94,22 @@ export default function BudgetPlanner() {
 
   // Track 4
   const [svc, setSvc] = useState<ServiceKind>("interior_doors");
-  const [qty, setQty] = useState(5);
+  const [qty, setQty] = useState(SERVICE_DEFAULT_QTY.interior_doors);
+  const [svcSpecs, setSvcSpecs] = useState<ServiceSpecAnswers>({});
 
   const reset = () => { setTrack(null); setResult(null); setWizardOpen(false); setMode("quick"); };
+
+  const onChangeService = (next: ServiceKind) => {
+    setSvc(next);
+    setQty(SERVICE_DEFAULT_QTY[next] ?? 1);
+    setSvcSpecs({});
+  };
 
   const computeBase = (): BudgetResult | null => {
     if (track === "new_build") return calcNewBuild({ builtSqm, floors, basement, safeRoom, region, finish });
     if (track === "full_renovation") return calcFullReno({ sqm: renoSqm, type: renoType, ...renoFlags, region, finish });
     if (track === "single_room") return calcSingleRoom({ room, sizeSqm: roomSize, finish, region, replacePlumbing, newFurniture });
-    if (track === "single_service") return calcSingleService({ service: svc, quantity: qty, finish, region });
+    if (track === "single_service") return calcSingleService({ service: svc, quantity: qty, finish, region, specs: svcSpecs });
     return null;
   };
 
