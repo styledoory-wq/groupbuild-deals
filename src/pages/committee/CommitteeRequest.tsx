@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Building2, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Building2, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { toast } from "sonner";
+import { BackHeader, LoadingState } from "@/components/ds";
 
 interface ProjectOpt { id: string; name: string; city: string }
 interface RequestRow {
@@ -66,18 +67,11 @@ export default function CommitteeRequest() {
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-[#F7F6F2] flex items-center justify-center text-[#6B6B6B]">טוען…</div>;
+  if (loading) return <div className="min-h-screen bg-[#F7F6F2]"><LoadingState /></div>;
 
   return (
     <div className="min-h-screen bg-[#F7F6F2]" dir="rtl">
-      <header className="sticky top-0 z-10 bg-white border-b border-[#EDEAE3]">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 -mr-2 rounded-full hover:bg-[#F0EEE7]">
-            <ArrowRight className="w-5 h-5 text-[#1F1F1F]" />
-          </button>
-          <h1 className="text-base font-semibold text-[#1F1F1F]">הרשאת ועד בית</h1>
-        </div>
-      </header>
+      <BackHeader title="הרשאת ועד בית" />
 
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         <section className="bg-white rounded-2xl border border-[#EDEAE3] p-5">

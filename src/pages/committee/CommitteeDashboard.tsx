@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Building2, Users, TrendingUp, ClipboardList, Plus, Bell } from "lucide-react";
+import { Building2, Users, TrendingUp, ClipboardList, Plus, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp, formatILS } from "@/store/AppStore";
+import { BackHeader, LoadingState, EmptyState } from "@/components/ds";
 
 interface Stats {
   project_id: string | null;
@@ -59,37 +60,41 @@ export default function CommitteeDashboard() {
   }, [authReady, user, navigate]);
 
   if (isCommittee === null) {
-    return <div className="min-h-screen bg-[#F7F6F2] flex items-center justify-center text-[#6B6B6B]">טוען…</div>;
+    return <div className="min-h-screen bg-[#F7F6F2]"><LoadingState /></div>;
   }
   if (!isCommittee) {
     return (
-      <div className="min-h-screen bg-[#F7F6F2] flex flex-col items-center justify-center px-6 text-center" dir="rtl">
-        <div className="w-14 h-14 rounded-full bg-[#E8F1EE] flex items-center justify-center mb-4">
-          <Building2 className="w-7 h-7 text-[#0E6B5A]" />
-        </div>
-        <h1 className="text-lg font-semibold text-[#1F1F1F] mb-2">דרוש אישור ועד בית</h1>
-        <p className="text-sm text-[#6B6B6B] mb-6 max-w-sm">העמוד הזה זמין רק לנציגי ועד בית מאושרים. ניתן לבקש הרשאה והבקשה תיבדק על ידי הצוות.</p>
-        <button onClick={() => navigate("/committee/request")} className="h-12 px-6 rounded-xl bg-[#0E6B5A] text-white text-sm font-medium hover:bg-[#0c5a4c]">בקש הרשאה</button>
+      <div className="min-h-screen bg-[#F7F6F2] flex items-center justify-center" dir="rtl">
+        <EmptyState
+          icon={<Building2 className="w-7 h-7 text-[#0E6B5A]" />}
+          title="דרוש אישור ועד בית"
+          description="העמוד הזה זמין רק לנציגי ועד בית מאושרים. ניתן לבקש הרשאה והבקשה תיבדק על ידי הצוות."
+          action={
+            <button
+              onClick={() => navigate("/committee/request")}
+              className="h-12 px-6 rounded-xl bg-[#0E6B5A] text-white text-sm font-medium hover:bg-[#0c5a4c]"
+            >בקש הרשאה</button>
+          }
+        />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-[#F7F6F2]" dir="rtl">
-      <header className="sticky top-0 z-10 bg-white border-b border-[#EDEAE3]">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 -mr-2 rounded-full hover:bg-[#F0EEE7]">
-            <ArrowRight className="w-5 h-5 text-[#1F1F1F]" />
-          </button>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-base font-semibold text-[#1F1F1F] truncate">ועד בית</h1>
-            {projectName && <p className="text-xs text-[#6B6B6B] truncate">{projectName}</p>}
-          </div>
-          <button onClick={() => navigate("/resident/notifications")} className="p-2 rounded-full hover:bg-[#F0EEE7]">
+      <BackHeader
+        title="ועד בית"
+        subtitle={projectName || undefined}
+        right={
+          <button
+            onClick={() => navigate("/resident/notifications")}
+            className="p-2 rounded-full hover:bg-[#F0EEE7]"
+            aria-label="התראות"
+          >
             <Bell className="w-5 h-5 text-[#1F1F1F]" />
           </button>
-        </div>
-      </header>
+        }
+      />
 
       <main className="max-w-2xl mx-auto px-4 py-5 space-y-5">
         {/* Stats */}
