@@ -8,6 +8,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         window?.backgroundColor = UIColor(red: 247/255.0, green: 245/255.0, blue: 240/255.0, alpha: 1.0)
+        window?.overrideUserInterfaceStyle = .light
         // Disable bounce effect on all scroll views
         if let webView = window?.rootViewController?.view.subviews.first(where: { $0 is WKWebView }) as? WKWebView {
             webView.scrollView.bounces = false
