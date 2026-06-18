@@ -72,14 +72,14 @@ export function BrandMark({ className }: { className?: string }) {
       {/* Top-left: tall leaning shape with angled top (deep green) — like a leaf/roof slice */}
       <path
         d="
-          M 18 14
-          Q 18 9 22 7
-          L 32 2
-          Q 38 -0.5 38 6
-          L 38 64
-          Q 38 70 32 70
-          L 24 70
-          Q 18 70 18 64
+          M 20 12
+          Q 20 7 24 5
+          L 32 0
+          Q 36 -1 36 6
+          L 36 58
+          Q 36 64 30 64
+          L 24 64
+          Q 20 64 20 58
           Z
         "
         fill={COLORS.deep}
