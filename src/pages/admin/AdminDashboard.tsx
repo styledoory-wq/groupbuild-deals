@@ -31,13 +31,14 @@ export default function AdminDashboard() {
   useEffect(() => {
     (async () => {
       try {
-        const [projRes, supRes, pendingRes, dealsRes, depCountRes, depPaidRes] = await Promise.all([
+        const [projRes, supRes, pendingRes, dealsRes, depCountRes, depPaidRes, commRes] = await Promise.all([
           supabase.from("projects").select("apartment_count", { count: "exact" }).eq("is_deleted", false).eq("is_active", true),
           supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false).eq("approval_status", "pending"),
           supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["active", "closing-soon"]),
           supabase.from("deposits").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["pending", "paid"]),
           supabase.from("deposits").select("gross_deposit_amount,net_deposit_amount").eq("status", "paid").eq("is_deleted", false),
+          supabase.from("committee_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
         ]);
 
         const apartments = (projRes.data ?? []).reduce((s: number, p: { apartment_count: number | null }) => s + (p.apartment_count ?? 0), 0);
@@ -47,6 +48,7 @@ export default function AdminDashboard() {
           projects: projRes.count ?? (projRes.data?.length ?? 0),
           suppliers: supRes.count ?? 0,
           pendingSuppliers: pendingRes.count ?? 0,
+          pendingCommittee: commRes.count ?? 0,
           activeDeals: dealsRes.count ?? 0,
           totalDeposits: depCountRes.count ?? 0,
           paidDepositsAmount: paidAmount,
