@@ -108,13 +108,7 @@ export default function AdminSupplierMedia() {
   };
 
   if (loading) {
-    return (
-      <MobileShell>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      </MobileShell>
-    );
+    return <MobileShell><LoadingState /></MobileShell>;
   }
 
   return (

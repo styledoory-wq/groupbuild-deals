@@ -129,9 +129,7 @@ export default function AdminCategories() {
       </div>
 
       {loading ? (
-        <div className="px-5 py-8 text-center text-sm text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" /> טוען…
-        </div>
+        <LoadingState fullHeight={false} />
       ) : (
         <div className="px-5 space-y-2">
           {list.map((c, idx) => (

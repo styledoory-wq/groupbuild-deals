@@ -95,7 +95,7 @@ export default function AdminSupplierAreas() {
     }
   };
 
-  if (loading) return <MobileShell><div className="p-8 text-center">טוען…</div></MobileShell>;
+  if (loading) return <MobileShell><LoadingState /></MobileShell>;
   if (!supplier) return <MobileShell><div className="p-8 text-center">ספק לא נמצא</div></MobileShell>;
 
   return (

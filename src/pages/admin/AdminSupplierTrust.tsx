@@ -69,9 +69,7 @@ export default function AdminSupplierTrust() {
         </div>
       </div>
       {loading ? (
-        <div className="px-5 py-12 text-center text-sm text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" /> טוען…
-        </div>
+        <LoadingState fullHeight={false} />
       ) : (
         <div className="px-5 space-y-3 pb-24">
           {filtered.map((r) => {

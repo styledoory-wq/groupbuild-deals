@@ -152,7 +152,7 @@ export default function AdminUsers() {
       </div>
 
       <div className="px-5 space-y-2 pb-24">
-        {loading && <div className="text-center text-muted-foreground text-sm py-8">טוען…</div>}
+        {loading && <LoadingState fullHeight={false} />}
         {!loading && filtered.length === 0 && (
           <div className="gb-card p-6 text-center text-sm text-muted-foreground">
             לא נמצאו משתמשים

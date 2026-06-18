@@ -91,7 +91,7 @@ export default function AdminPaymentSettings() {
       <PageHeader title="הגדרות תשלום" subtitle="ספק סליקה וברירות מחדל" back />
       <div className="px-5 -mt-4 relative z-10 space-y-4">
         {loading ? (
-          <div className="text-center text-sm text-muted-foreground py-10">טוען…</div>
+          <LoadingState fullHeight={false} />
         ) : (
           <>
             <section className="gb-card p-5">

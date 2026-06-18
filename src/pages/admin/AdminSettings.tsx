@@ -76,7 +76,7 @@ export default function AdminSettings() {
     }
   };
 
-  if (loading) return <MobileShell><div className="p-8 text-center">טוען…</div></MobileShell>;
+  if (loading) return <MobileShell><LoadingState /></MobileShell>;
   if (!settings) return <MobileShell><div className="p-8 text-center">לא נמצאו הגדרות</div></MobileShell>;
 
   return (

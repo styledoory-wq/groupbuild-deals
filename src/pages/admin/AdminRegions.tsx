@@ -80,7 +80,7 @@ export default function AdminRegions() {
   };
 
   if (loading) {
-    return <MobileShell><div className="p-8 text-center text-muted-foreground">טוען…</div></MobileShell>;
+    return <MobileShell><LoadingState /></MobileShell>;
   }
 
   return (

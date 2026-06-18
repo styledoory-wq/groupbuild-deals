@@ -222,7 +222,7 @@ export default function AdminResidents() {
       </div>
 
       <div className="px-5 space-y-2">
-        {loading && <div className="text-center text-muted-foreground text-sm py-8">טוען…</div>}
+        {loading && <LoadingState fullHeight={false} />}
         {!loading && residents.length === 0 && (
           <div className="gb-card p-6 text-center text-sm text-muted-foreground">אין דיירים עדיין</div>
         )}
