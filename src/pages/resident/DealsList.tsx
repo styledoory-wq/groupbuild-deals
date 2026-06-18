@@ -205,27 +205,22 @@ export default function DealsList() {
             {loading && <DealCardSkeletonList count={4} />}
 
             {!loading && error && (
-              <div className="rounded-[20px] border border-[#ECEEF2] bg-white p-6 text-center col-span-2 md:col-span-3">
-                <p className="text-[14px] font-bold text-[#1F2937]">שגיאה בטעינה</p>
-                <p className="text-[12px] text-[#6B7280] mt-1">{error}</p>
+              <div className="col-span-2 md:col-span-3">
+                <ErrorState title="שגיאה בטעינה" description={error} />
               </div>
             )}
 
             {!loading && !error && filtered.length === 0 && (
-              <div className="rounded-[20px] border border-dashed border-[#ECEEF2] bg-white/60 p-10 text-center col-span-2 md:col-span-3">
-                {tab === "favorites" ? (
-                  <Heart className="h-8 w-8 mx-auto mb-3 text-[#0E6B5A]" strokeWidth={2} />
-                ) : (
-                  <Tag className="h-8 w-8 mx-auto mb-3 text-[#9CA3AF]" />
-                )}
-                <p className="text-[14px] font-bold text-[#1F2937]">
-                  {tab === "active" ? "אין עדיין הצעות פעילות" : tab === "favorites" ? "עדיין אין הצעות במועדפים" : "אין הצעות בארכיון"}
-                </p>
-                <p className="text-[12px] text-[#6B7280] mt-1">
-                  {tab === "favorites"
-                    ? "לחצו על הלב בכל הצעה כדי לשמור אותה כאן."
-                    : cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."}
-                </p>
+              <div className="col-span-2 md:col-span-3">
+                <EmptyState
+                  icon={tab === "favorites" ? Heart : Tag}
+                  title={tab === "active" ? "אין עדיין הצעות פעילות" : tab === "favorites" ? "עדיין אין הצעות במועדפים" : "אין הצעות בארכיון"}
+                  description={
+                    tab === "favorites"
+                      ? "לחצו על הלב בכל הצעה כדי לשמור אותה כאן."
+                      : cat ? `בקטגוריה ${cat.name} עוד אין הצעות זמינות.` : "חזרו בקרוב לבדוק הצעות חדשות."
+                  }
+                />
               </div>
             )}
 
