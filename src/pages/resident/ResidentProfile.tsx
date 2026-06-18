@@ -16,6 +16,7 @@ export default function ResidentProfile() {
   const project = projects.find((p) => p.id === user?.projectId);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [isCommittee, setIsCommittee] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
