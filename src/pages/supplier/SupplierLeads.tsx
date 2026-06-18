@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2, Check, X, Trash2, RotateCcw, Archive } from "lucide-react";
+import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2, Check, X, Trash2, RotateCcw, Archive, FileText, Calendar, Tag, Coins } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -52,6 +52,20 @@ type InquiryRow = {
   is_deleted?: boolean;
   deleted_at?: string | null;
 };
+type QuoteRequestRow = {
+  id: string;
+  user_id: string;
+  project_id: string;
+  title: string;
+  description: string | null;
+  category_id: string | null;
+  supplier_id: string | null;
+  residents_count: number | null;
+  target_price_per_unit: number | null;
+  deadline: string | null;
+  status: string;
+  created_at: string;
+};
 
 const TRASH_DAYS = 30;
 const daysLeftToPurge = (deletedAt?: string | null) => {
@@ -68,6 +82,8 @@ export default function SupplierLeads() {
   const [trashedInterests, setTrashedInterests] = useState<InterestRow[]>([]);
   const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
   const [trashedInquiries, setTrashedInquiries] = useState<InquiryRow[]>([]);
+  const [quoteRequests, setQuoteRequests] = useState<QuoteRequestRow[]>([]);
+  const [requesterProfiles, setRequesterProfiles] = useState<Record<string, ProfileLite>>({});
   const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -263,6 +279,15 @@ export default function SupplierLeads() {
           if (!cancelled) { setInterests(activeList); setTrashedInterests(trashedList); }
         }
 
+        // Committee quote requests addressed to this supplier OR matching their categories (RLS-protected)
+        const { data: qrData } = await supabase
+          .from("committee_quote_requests")
+          .select("id,user_id,project_id,title,description,category_id,supplier_id,residents_count,target_price_per_unit,deadline,status,created_at")
+          .eq("status", "open")
+          .order("created_at", { ascending: false });
+        const qrs = (qrData ?? []) as QuoteRequestRow[];
+        if (!cancelled) setQuoteRequests(qrs);
+
         const userIds = Array.from(new Set([
           ...activeList.map((i) => i.user_id), ...trashedList.map((i) => i.user_id),
           ...allInq.map((i) => i.user_id),
@@ -273,6 +298,15 @@ export default function SupplierLeads() {
           const map: Record<string, ProfileLite> = {};
           (profs ?? []).forEach((p) => { map[(p as ProfileLite).id] = p as ProfileLite; });
           if (!cancelled) setProfiles(map);
+        }
+
+        const qrUserIds = Array.from(new Set(qrs.map((q) => q.user_id)));
+        if (qrUserIds.length) {
+          const { data: rprofs } = await supabase
+            .from("profiles").select("id,full_name,phone,email").in("id", qrUserIds);
+          const rmap: Record<string, ProfileLite> = {};
+          (rprofs ?? []).forEach((p) => { rmap[(p as ProfileLite).id] = p as ProfileLite; });
+          if (!cancelled) setRequesterProfiles(rmap);
         }
       } catch (e) {
         console.error("[SupplierLeads] load error", e);
@@ -523,7 +557,7 @@ export default function SupplierLeads() {
                   {trashedInterests.map((i) => renderInterest(i, true))}
                 </div>
               )
-            ) : totalActive === 0 ? (
+            ) : totalActive === 0 && quoteRequests.length === 0 ? (
               <div className="gb-card p-8 flex flex-col items-center text-center">
                 <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mb-3">
                   <Inbox className="h-7 w-7 text-muted-foreground" />
@@ -535,6 +569,62 @@ export default function SupplierLeads() {
               </div>
             ) : (
               <div className="space-y-3">
+                {quoteRequests.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-xs font-bold text-muted-foreground mt-2 inline-flex items-center gap-1.5">
+                      <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" />
+                      בקשות הצעת מחיר מוועדי בתים ({quoteRequests.length})
+                    </h3>
+                    {quoteRequests.map((q) => {
+                      const p = requesterProfiles[q.user_id];
+                      const addressed = !!q.supplier_id;
+                      return (
+                        <div key={q.id} className="gb-card p-4 border-r-4 border-[#0E6B5A]">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <h4 className="font-bold text-[15px] text-[#1C1C1E] leading-tight">{q.title}</h4>
+                            {addressed && (
+                              <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] whitespace-nowrap">
+                                פנייה ישירה
+                              </span>
+                            )}
+                          </div>
+                          {q.description && (
+                            <p className="text-xs text-muted-foreground mb-3 leading-relaxed">{q.description}</p>
+                          )}
+                          <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-[#1C1C1E] mb-3">
+                            {q.residents_count != null && (
+                              <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#0E6B5A]" />{q.residents_count} דיירים</span>
+                            )}
+                            {q.category_id && (
+                              <span className="inline-flex items-center gap-1"><Tag className="h-3.5 w-3.5 text-[#0E6B5A]" />{q.category_id}</span>
+                            )}
+                            {q.target_price_per_unit != null && (
+                              <span className="inline-flex items-center gap-1"><Coins className="h-3.5 w-3.5 text-[#0E6B5A]" />יעד {ils(q.target_price_per_unit)}</span>
+                            )}
+                            {q.deadline && (
+                              <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5 text-[#0E6B5A]" />עד {new Date(q.deadline).toLocaleDateString("he-IL")}</span>
+                            )}
+                          </div>
+                          {p && (
+                            <div className="pt-3 border-t border-border flex flex-wrap gap-2">
+                              {p.full_name && <span className="text-xs font-bold">{p.full_name}</span>}
+                              {p.phone && (
+                                <a href={`tel:${p.phone}`} className="inline-flex items-center gap-1 text-xs text-[#0E6B5A] font-bold">
+                                  <Phone className="h-3.5 w-3.5" />{p.phone}
+                                </a>
+                              )}
+                              {p.email && (
+                                <a href={`mailto:${p.email}`} className="inline-flex items-center gap-1 text-xs text-[#0E6B5A] font-bold">
+                                  <Mail className="h-3.5 w-3.5" />שלח הצעה
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 {inquiries.length > 0 && (
                   <div className="space-y-2">
                     <h3 className="text-xs font-bold text-muted-foreground mt-2">פניות כלליות (ללא הצעה)</h3>
