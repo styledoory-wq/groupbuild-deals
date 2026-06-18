@@ -96,14 +96,19 @@ export default function ResidentDashboard() {
         const councilId: string | null = (cityRow?.council_id as string | null) ?? null;
         if (cityRow?.region_id) regionId = (cityRow.region_id as string | null) ?? regionId;
 
+        const journeyMeta = getJourney(jr);
+        const journeyStageIds = journeyMeta.stages as string[];
         const validIds = STAGES.map((s) => s.id) as string[];
         const profStage = (prof?.current_stage as string | undefined) ?? "";
         const projStage = (projectResult.data?.current_stage as string | undefined) ?? "";
-        const chosen = (validIds.includes(profStage) ? profStage : validIds.includes(projStage) ? projStage : "planning") as StageId;
+        // Pick a stage that's valid for this journey. Single-purchase has no stages -> no filter.
+        const allowed = journeyStageIds.length ? journeyStageIds : validIds;
+        const chosen = (allowed.includes(profStage) ? profStage : allowed.includes(projStage) ? projStage : (allowed[0] ?? "planning")) as StageId;
         const stage: StageId = chosen;
+        const stageFilter: string | null = journeyStageIds.length ? stage : null;
 
         const [matchesResult, citySupResult, councilSupResult, regionSupResult, nationwideResult, paidDepositsResult, freeInterestsResult] = await Promise.all([
-          supabase.rpc("get_matching_deals_for_user", { _stage_filter: stage, _limit: 8 }),
+          supabase.rpc("get_matching_deals_for_user", stageFilter ? { _stage_filter: stageFilter, _limit: 8 } : { _limit: 8 }),
           prof?.city_id ? supabase.from("supplier_cities").select("supplier_id").eq("city_id", prof.city_id) : Promise.resolve({ data: [] }),
           councilId ? supabase.from("supplier_councils").select("supplier_id").eq("council_id", councilId) : Promise.resolve({ data: [] }),
           regionId ? supabase.from("supplier_regions").select("supplier_id").eq("region_id", regionId) : Promise.resolve({ data: [] }),
