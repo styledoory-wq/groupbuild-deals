@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Users, TrendingUp, ClipboardList, Plus, Bell, Share2, Megaphone, Search, FileText, ChevronLeft } from "lucide-react";
+import { Building2, Users, TrendingUp, ClipboardList, Plus, Bell, Share2, Megaphone, Search, FileText, ChevronLeft, FileEdit } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp, formatILS } from "@/store/AppStore";
@@ -170,6 +170,7 @@ export default function CommitteeDashboard() {
 
         {/* Quick management tiles */}
         <section className="grid grid-cols-2 gap-3">
+          <ActionTile icon={FileEdit} title="בקש הצעת מחיר" desc="עם מחיר יעד וכמות דיירים" onClick={() => navigate("/committee/quote-request")} />
           <ActionTile icon={Search} title="עסקאות פעילות" desc="חפש והצטרף" onClick={() => navigate("/deals")} />
           <ActionTile icon={Share2} title="הזמן דיירים" desc="שתף קישור הצטרפות" onClick={handleShare} />
           <ActionTile icon={Megaphone} title="שלח עדכון" desc="ליצירת קשר עם דיירי הבניין" onClick={() => toast.info("בקרוב — שליחת הודעה לדיירים")} />
