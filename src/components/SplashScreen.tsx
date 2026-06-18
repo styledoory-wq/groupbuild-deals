@@ -52,16 +52,17 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      {/* Logo */}
+      {/* Logo mark — exact brand mark */}
       <div
-        className="transition-all duration-700 ease-out"
+        className="transition-all duration-700 ease-out flex items-center justify-center"
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0) scale(1)" : "translateY(8px) scale(0.94)",
-          width: "180px",
+          width: "140px",
+          height: "140px",
         }}
       >
-        <BrandLogo size="xl" variant="dark" className="h-auto w-full" />
+        <BrandLogo size="xl" variant="dark" markOnly className="h-full w-auto" />
       </div>
 
       {/* Gold accent loader */}
