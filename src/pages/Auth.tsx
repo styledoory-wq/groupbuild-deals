@@ -2,7 +2,7 @@ import { useState, useLayoutEffect, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Briefcase, Mail, ArrowLeft, User as UserIcon, MapPin, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { BrandLogo, BrandMark } from "@/components/BrandLogo";
-import groupBuildLogoTransparent from "@/assets/groupbuild-logo-transparent.png.asset.json";
+import groupBuildLogoCropped from "@/assets/groupbuild-logo-cropped.png.asset.json";
 import { SupportButton } from "@/components/SupportButton";
 
 import { useApp } from "@/store/AppStore";
