@@ -38,6 +38,11 @@ export default function CommitteeDashboard() {
   const [isCommittee, setIsCommittee] = useState<boolean | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
+
+  // Quote sheet data
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   useEffect(() => {
     if (!authReady) return;
