@@ -460,10 +460,8 @@ export default function OfferEditor() {
   if (bootLoading) {
     return (
       <MobileShell>
-        <PageHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} subtitle="טוען…" back />
-        <div className="px-5 mt-10 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
+        <BackHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} subtitle="טוען…" />
+        <LoadingState />
         <BottomNav role="supplier" />
       </MobileShell>
     );
@@ -472,19 +470,8 @@ export default function OfferEditor() {
   if (bootError) {
     return (
       <MobileShell>
-        <PageHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} back />
-        <div className="px-5 mt-6">
-          <div className="gb-card p-6 text-center">
-            <div className="h-12 w-12 mx-auto rounded-full bg-destructive/10 flex items-center justify-center mb-3">
-              <AlertCircle className="h-6 w-6 text-destructive" />
-            </div>
-            <h2 className="font-bold text-base mb-1">שגיאה</h2>
-            <p className="text-xs text-muted-foreground mb-4">{bootError}</p>
-            <Button onClick={() => navigate("/supplier", { replace: true })} className="w-full h-11 rounded-xl">
-              חזרה לדשבורד
-            </Button>
-          </div>
-        </div>
+        <BackHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} />
+        <ErrorState title="שגיאה" description={bootError} onRetry={() => window.location.reload()} />
         <BottomNav role="supplier" />
       </MobileShell>
     );
@@ -493,18 +480,16 @@ export default function OfferEditor() {
   if (!supplier) {
     return (
       <MobileShell>
-        <PageHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} back />
-        <div className="px-5 mt-6">
-          <div className="gb-card p-6 text-center">
-            <h2 className="font-bold text-base mb-2">חסר פרופיל ספק</h2>
-            <p className="text-xs text-muted-foreground mb-4">
-              לא נמצא פרופיל ספק עבור החשבון שלך. השלם את הפרטים כדי להתחיל לפרסם הצעות.
-            </p>
-            <Button onClick={() => navigate("/supplier/profile/edit")} className="w-full h-11 rounded-xl">
+        <BackHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} />
+        <EmptyState
+          title="חסר פרופיל ספק"
+          description="לא נמצא פרופיל ספק עבור החשבון שלך. השלם את הפרטים כדי להתחיל לפרסם הצעות."
+          action={
+            <Button onClick={() => navigate("/supplier/profile/edit")} className="h-11 px-5 rounded-xl bg-[#0E6B5A] text-white font-bold">
               השלמת פרטי ספק
             </Button>
-          </div>
-        </div>
+          }
+        />
         <BottomNav role="supplier" />
       </MobileShell>
     );
@@ -513,15 +498,16 @@ export default function OfferEditor() {
   if (!categories.length) {
     return (
       <MobileShell>
-        <PageHeader title="הצעה חדשה" subtitle="לא ניתן ליצור הצעה כרגע" back />
-        <div className="px-5 mt-6 space-y-3">
-          <div className="gb-card p-4 text-sm text-muted-foreground text-center">
-            חסרות קטגוריות במערכת. פנה למנהל המערכת.
-          </div>
-          <Button onClick={() => navigate("/supplier", { replace: true })} className="w-full h-12 rounded-2xl">
-            חזרה לדשבורד הספק
-          </Button>
-        </div>
+        <BackHeader title="הצעה חדשה" subtitle="לא ניתן ליצור הצעה כרגע" />
+        <EmptyState
+          title="חסרות קטגוריות"
+          description="חסרות קטגוריות במערכת. פנה למנהל המערכת."
+          action={
+            <Button onClick={() => navigate("/supplier", { replace: true })} className="h-12 rounded-2xl w-full">
+              חזרה לדשבורד הספק
+            </Button>
+          }
+        />
         <BottomNav role="supplier" />
       </MobileShell>
     );
@@ -529,7 +515,7 @@ export default function OfferEditor() {
 
   return (
     <MobileShell>
-      <PageHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} subtitle="הגדירו מדרגות הנחה לפי כמות מצטרפים" back />
+      <BackHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} subtitle="הגדירו מדרגות הנחה לפי כמות מצטרפים" />
 
       <div className="px-5 -mt-4 relative z-10 space-y-4">
         <div className="gb-card p-4 space-y-3">
