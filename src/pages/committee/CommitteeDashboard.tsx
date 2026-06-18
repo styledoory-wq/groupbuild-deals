@@ -267,7 +267,7 @@ function ActionTile({ icon: Icon, title, desc, onClick }: { icon: typeof Search;
 
 function InviteSheet({ projectName, onClose, onNativeShare }: { projectName: string; onClose: () => void; onNativeShare: () => void }) {
   const url = typeof window !== "undefined" ? window.location.origin : "https://groupbuild.co.il";
-  const building = projectName ? `בניין ${projectName}` : "הבניין שלנו";
+  const building = projectName ? projectName : "הקהילה שלנו";
 
   const templates = useMemo(() => [
     {
