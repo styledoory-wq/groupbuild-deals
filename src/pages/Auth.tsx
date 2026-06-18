@@ -2,7 +2,7 @@ import { useState, useLayoutEffect, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Briefcase, Mail, ArrowLeft, User as UserIcon, MapPin, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { BrandLogo, BrandMark } from "@/components/BrandLogo";
-import groupBuildLogoTransparent from "@/assets/groupbuild-logo-transparent.png.asset.json";
+import groupBuildLogoCropped from "@/assets/groupbuild-logo-cropped.png.asset.json";
 import { SupportButton } from "@/components/SupportButton";
 
 import { useApp } from "@/store/AppStore";
@@ -251,9 +251,9 @@ export default function Auth() {
         {/* Brand header — clean logo, no badge */}
         <div className="pt-6 pb-2 animate-fade-up flex flex-col items-center text-center">
           <img
-            src={groupBuildLogoTransparent.url}
+            src={groupBuildLogoCropped.url}
             alt="GroupBuild"
-            className="h-36 w-auto select-none object-contain"
+            className="h-28 w-auto select-none object-contain"
             draggable={false}
           />
           <h1 className="mt-8 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight text-[#0B1220]">
