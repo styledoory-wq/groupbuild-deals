@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, Sparkles } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { EmptyState } from "@/components/ds/EmptyState";
+import { BackHeader, EmptyState } from "@/components/ds";
 import { supabase } from "@/integrations/supabase/client";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
 import type { OfferTier } from "@/lib/offerPricing";
@@ -67,7 +66,7 @@ export default function Favorites() {
 
   return (
     <MobileShell>
-      <PageHeader title="המועדפים שלי" subtitle="עסקאות ששמרת לעיון מאוחר יותר" />
+      <BackHeader title="המועדפים שלי" subtitle="עסקאות ששמרת לעיון מאוחר יותר" />
       <div className="px-5 lg:px-0 mt-2 pb-24">
         {loading ? (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">

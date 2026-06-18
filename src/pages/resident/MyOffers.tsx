@@ -24,8 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { ScreenHeader } from "@/components/ds/ScreenHeader";
-import { EmptyState } from "@/components/ds/EmptyState";
+import { ScreenHeader, EmptyState, SkeletonList, ErrorState } from "@/components/ds";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -279,24 +278,9 @@ export default function MyOffers() {
         )}
 
         {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="p-4 space-y-3 animate-pulse" style={cardStyle}>
-                <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 rounded-2xl bg-[#F4F6FA]" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-3/4 bg-[#F4F6FA] rounded" />
-                    <div className="h-3 w-1/2 bg-[#F4F6FA] rounded" />
-                  </div>
-                </div>
-                <div className="h-6 w-1/3 bg-[#F4F6FA] rounded" />
-              </div>
-            ))}
-          </div>
+          <SkeletonList count={3} itemClassName="h-28" />
         ) : error ? (
-          <div className="p-6 text-center" style={cardStyle}>
-            <p className="text-sm text-[#DC2626] font-bold">{error}</p>
-          </div>
+          <ErrorState title="שגיאה בטעינה" description={error} onRetry={load} />
         ) : visibleItems.length === 0 ? (
           <EmptyState
             icon={<Inbox className="h-7 w-7 text-[#9CA3AF]" strokeWidth={2} />}
