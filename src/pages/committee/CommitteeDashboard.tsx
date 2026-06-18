@@ -228,6 +228,14 @@ export default function CommitteeDashboard() {
           )}
         </section>
       </main>
+
+      {inviteOpen && (
+        <InviteSheet
+          projectName={projectName}
+          onClose={() => setInviteOpen(false)}
+          onNativeShare={handleShare}
+        />
+      )}
     </div>
   );
 }
