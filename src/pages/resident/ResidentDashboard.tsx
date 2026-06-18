@@ -447,6 +447,16 @@ export default function ResidentDashboard() {
         </div>
       </div>
       <BottomNav role="resident" />
+
+      {isCommittee && quoteOpen && (
+        <QuoteRequestSheet
+          projectName={projectName}
+          projectId={projectId}
+          categories={categories}
+          suppliers={suppliers}
+          onClose={() => setQuoteOpen(false)}
+        />
+      )}
     </div>
   );
 }
