@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Users, TrendingUp, ClipboardList, Plus, Bell, Share2, Megaphone, Search, FileText, ChevronLeft, FileEdit, X, Copy, MessageCircle } from "lucide-react";
+import { Building2, Users, TrendingUp, ClipboardList, Plus, Bell, Share2, Megaphone, Search, FileText, ChevronLeft, FileEdit, X, Copy, MessageCircle, Send, Tag, Calendar, Coins } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp, formatILS } from "@/store/AppStore";
@@ -24,6 +24,9 @@ interface Task {
   title: string;
   link?: string;
 }
+
+interface Category { id: string; name: string }
+interface Supplier { id: string; business_name: string }
 
 export default function CommitteeDashboard() {
   const navigate = useNavigate();
