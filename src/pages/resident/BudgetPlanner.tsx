@@ -16,6 +16,7 @@ import { applyWizardAnswers, getWizardQuestions, WizardAnswers } from "@/lib/bud
 import {
   Track, FinishLevel, Region, RenovationType, RoomKind, ServiceKind,
   REGION_LABELS, FINISH_LABELS, RENO_LABELS, ROOM_LABELS, SERVICES,
+  SERVICE_SPECS, SERVICE_DEFAULT_QTY, ServiceSpecAnswers,
   BudgetResult, calcNewBuild, calcFullReno, calcSingleRoom, calcSingleService,
 } from "@/lib/budgetPricing";
 
