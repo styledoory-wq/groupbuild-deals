@@ -104,6 +104,22 @@ export default function CommitteeDashboard() {
     return () => { cancelled = true; };
   }, [authReady, user, navigate]);
 
+  // Load categories & suppliers when quote sheet opens
+  useEffect(() => {
+    if (!quoteOpen) return;
+    let cancelled = false;
+    (async () => {
+      const [{ data: cats }, { data: sups }] = await Promise.all([
+        supabase.from("categories").select("id,name").eq("is_active", true).order("name"),
+        supabase.from("suppliers").select("id,business_name").eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]).order("business_name"),
+      ]);
+      if (cancelled) return;
+      setCategories((cats ?? []) as Category[]);
+      setSuppliers((sups ?? []) as Supplier[]);
+    })();
+    return () => { cancelled = true; };
+  }, [quoteOpen]);
+
   const handleShare = async () => {
     const url = window.location.origin;
     const text = projectName
