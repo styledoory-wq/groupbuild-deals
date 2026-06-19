@@ -81,6 +81,20 @@ Deno.serve(async (req) => {
       return json({ error: `הפרופיל לא עודכן: ${upErr.message}` }, 500);
     }
 
+    // Send welcome email (best-effort)
+    try {
+      await admin.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "user-welcome",
+          recipientEmail: email.trim(),
+          idempotencyKey: `welcome-${created.user.id}`,
+          templateData: { name: full_name.trim(), appUrl: "https://groupbuild.co.il" },
+        },
+      });
+    } catch (e) {
+      console.error("[admin-create-resident] welcome email failed", e);
+    }
+
     return json({ success: true, user_id: created.user.id });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "שגיאה לא ידועה";
