@@ -699,10 +699,28 @@ export default function OfferEditor() {
 
         {/* Tiers builder */}
         <div className="gb-card p-4 space-y-3">
+          {offerType === "price_comparison" && (
+            <div className="rounded-[16px] border border-[#ECEEF2] bg-white p-3 space-y-1">
+              <div className="text-fs-xs font-bold text-muted-foreground">מחיר יחידה לפני הנחה (₪)</div>
+              <Input
+                type="number"
+                min={1}
+                value={unitPrice}
+                onChange={(e) => setUnitPrice(e.target.value)}
+                className="h-11 rounded-xl"
+                placeholder="לדוגמה: 5000"
+              />
+              <p className="text-fs-xs text-muted-foreground leading-relaxed">
+                המחיר המקורי של היחידה. המדרגות שלמטה קובעות את המחיר אחרי ההנחה לפי כמות המצטרפים.
+              </p>
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-sm">מדרגות לפי כמות מצטרפים</h3>
             <span className="text-fs-xs text-muted-foreground">{tiers.length} מדרגות</span>
           </div>
+
 
           <div className="space-y-3">
             {tiers.map((t, i) => (
