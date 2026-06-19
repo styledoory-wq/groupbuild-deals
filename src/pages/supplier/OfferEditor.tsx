@@ -402,6 +402,8 @@ export default function OfferEditor() {
       offer_type: offerType,
       deposit_required: depositRequired,
       deposit_amount: depositRequired ? cleanDepositAmount : 0,
+      supplier_payment_link: depositRequired ? (supplierPaymentLink.trim() || null) : null,
+      supplier_payment_instructions: depositRequired ? (supplierPaymentInstructions.trim() || null) : null,
       tiers: cleanTiers as unknown as Json,
       highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as Json,
       status: "active",
