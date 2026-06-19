@@ -89,6 +89,8 @@ export default function OfferEditor() {
   const [categoryId, setCategoryId] = useState<string>("");
   const [depositRequired, setDepositRequired] = useState<boolean>(false);
   const [depositAmount, setDepositAmount] = useState<string>("1000");
+  const [supplierPaymentLink, setSupplierPaymentLink] = useState<string>("");
+  const [supplierPaymentInstructions, setSupplierPaymentInstructions] = useState<string>("");
   const [depositLimits, setDepositLimits] = useState<DepositLimits>({ min: null, max: null });
   const [saving, setSaving] = useState(false);
 
