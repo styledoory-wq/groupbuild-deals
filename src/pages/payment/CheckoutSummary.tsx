@@ -210,6 +210,10 @@ export default function CheckoutSummary() {
         .eq("is_deleted", false)
         .maybeSingle();
 
+      const lockedMin = joinMode === "conditional" && activeTier
+        ? activeTier.minParticipants
+        : null;
+
       const interestPayload = {
         deal_id: deal.id,
         user_id: uid,
@@ -223,6 +227,8 @@ export default function CheckoutSummary() {
         direct_deposit_amount: depositAmount > 0 ? depositAmount : null,
         terms_accepted_at: new Date().toISOString(),
         lead_status: "new",
+        join_condition: joinMode,
+        min_tier_locked: lockedMin,
       };
 
       let savedId = existing?.id ?? null;
