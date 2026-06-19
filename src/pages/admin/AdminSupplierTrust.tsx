@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, Search, ShieldCheck, AlertTriangle, BadgeCheck, BadgeX, Ban, Star } from "lucide-react";
+import { Search, ShieldCheck, AlertTriangle, BadgeCheck, BadgeX, Ban, Star, Save, Coins } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { LoadingState } from "@/components/ds";
@@ -20,6 +20,19 @@ type Row = {
   is_suspended: boolean;
   is_active: boolean;
   approval_status: string;
+  monthly_subscription: number | null;
+  commission_percent: number | null;
+  lead_fee: number | null;
+  success_fee: number | null;
+  success_fee_type: string | null;
+};
+
+type FeeDraft = {
+  monthly_subscription: string;
+  commission_percent: string;
+  lead_fee: string;
+  success_fee: string;
+  success_fee_type: "percent" | "fixed";
 };
 
 export default function AdminSupplierTrust() {
@@ -27,12 +40,14 @@ export default function AdminSupplierTrust() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [feeDrafts, setFeeDrafts] = useState<Record<string, FeeDraft>>({});
+  const [openFees, setOpenFees] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,verified_supplier,trust_score,complaints_count,successful_redemptions,is_suspended,is_active,approval_status")
+      .select("id,business_name,verified_supplier,trust_score,complaints_count,successful_redemptions,is_suspended,is_active,approval_status,monthly_subscription,commission_percent,lead_fee,success_fee,success_fee_type")
       .eq("is_deleted", false)
       .order("trust_score", { ascending: false });
     if (error) toast.error("טעינה נכשלה");
@@ -52,6 +67,54 @@ export default function AdminSupplierTrust() {
     setRows((prev) => prev.map((r) => r.id === id ? { ...r, [field]: value } : r));
   }
 
+  const openFeeEditor = (r: Row) => {
+    setOpenFees(openFees === r.id ? null : r.id);
+    if (!feeDrafts[r.id]) {
+      setFeeDrafts((d) => ({
+        ...d,
+        [r.id]: {
+          monthly_subscription: r.monthly_subscription != null ? String(r.monthly_subscription) : "0",
+          commission_percent: r.commission_percent != null ? String(r.commission_percent) : "0",
+          lead_fee: r.lead_fee != null ? String(r.lead_fee) : "0",
+          success_fee: r.success_fee != null ? String(r.success_fee) : "0",
+          success_fee_type: (r.success_fee_type as "percent" | "fixed") ?? "percent",
+        },
+      }));
+    }
+  };
+
+  const saveFees = async (id: string) => {
+    const draft = feeDrafts[id];
+    if (!draft) return;
+    const toNum = (s: string) => {
+      const n = Number(s);
+      return Number.isFinite(n) && n >= 0 ? n : 0;
+    };
+    setBusy(id);
+    const { error } = await supabase.from("suppliers").update({
+      monthly_subscription: toNum(draft.monthly_subscription),
+      commission_percent: toNum(draft.commission_percent),
+      lead_fee: toNum(draft.lead_fee),
+      success_fee: toNum(draft.success_fee),
+      success_fee_type: draft.success_fee_type,
+    } as never).eq("id", id);
+    setBusy(null);
+    if (error) { toast.error("שמירה נכשלה"); return; }
+    toast.success("העמלות נשמרו");
+    setRows((prev) => prev.map((r) => r.id === id ? {
+      ...r,
+      monthly_subscription: toNum(draft.monthly_subscription),
+      commission_percent: toNum(draft.commission_percent),
+      lead_fee: toNum(draft.lead_fee),
+      success_fee: toNum(draft.success_fee),
+      success_fee_type: draft.success_fee_type,
+    } : r));
+    setOpenFees(null);
+  };
+
+  const updateDraft = (id: string, patch: Partial<FeeDraft>) => {
+    setFeeDrafts((d) => ({ ...d, [id]: { ...d[id], ...patch } }));
+  };
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -61,7 +124,7 @@ export default function AdminSupplierTrust() {
 
   return (
     <MobileShell>
-      <PageHeader title="אמון ספקים" subtitle={`${filtered.length} ספקים`} />
+      <PageHeader title="אמון ספקים ועמלות" subtitle={`${filtered.length} ספקים`} />
       <div className="px-5 -mt-2 mb-3">
         <div className="relative">
           <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -75,6 +138,8 @@ export default function AdminSupplierTrust() {
           {filtered.map((r) => {
             const total = r.successful_redemptions + r.complaints_count;
             const rate = total > 0 ? Math.round((r.successful_redemptions / total) * 100) : 0;
+            const isOpen = openFees === r.id;
+            const draft = feeDrafts[r.id];
             return (
               <div key={r.id} className="gb-card p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -119,6 +184,27 @@ export default function AdminSupplierTrust() {
                   </div>
                 </div>
 
+                <div className="mt-3 grid grid-cols-4 gap-2 text-center text-[10px]">
+                  <div className="bg-muted/40 rounded-lg py-1.5">
+                    <div className="font-bold text-foreground">₪{Number(r.monthly_subscription ?? 0)}</div>
+                    <div className="text-muted-foreground">מנוי חודשי</div>
+                  </div>
+                  <div className="bg-muted/40 rounded-lg py-1.5">
+                    <div className="font-bold text-foreground">₪{Number(r.lead_fee ?? 0)}</div>
+                    <div className="text-muted-foreground">עמלת ליד</div>
+                  </div>
+                  <div className="bg-muted/40 rounded-lg py-1.5">
+                    <div className="font-bold text-foreground">
+                      {r.success_fee_type === "fixed" ? `₪${Number(r.success_fee ?? 0)}` : `${Number(r.success_fee ?? 0)}%`}
+                    </div>
+                    <div className="text-muted-foreground">עמלת הצלחה</div>
+                  </div>
+                  <div className="bg-muted/40 rounded-lg py-1.5">
+                    <div className="font-bold text-foreground">{Number(r.commission_percent ?? 0)}%</div>
+                    <div className="text-muted-foreground">כללית</div>
+                  </div>
+                </div>
+
                 <div className="flex gap-2 mt-3">
                   <Button
                     size="sm"
@@ -143,6 +229,61 @@ export default function AdminSupplierTrust() {
                     <AlertTriangle className="h-4 w-4" />
                   </Link>
                 </div>
+
+                <button
+                  onClick={() => openFeeEditor(r)}
+                  className="mt-2 w-full h-9 rounded-lg bg-[#FFF8E1] border border-[#E0B84A]/40 text-[#5A4709] text-fs-xs font-bold inline-flex items-center justify-center gap-1"
+                >
+                  <Coins className="h-3.5 w-3.5" /> {isOpen ? "סגור" : "ערוך עמלות וחבילה"}
+                </button>
+
+                {isOpen && draft && (
+                  <div className="mt-3 space-y-3 border-t border-border pt-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <label className="block">
+                        <span className="text-fs-xs font-bold text-muted-foreground">מנוי חודשי (₪)</span>
+                        <Input type="number" min={0} step="0.01" value={draft.monthly_subscription}
+                          onChange={(e) => updateDraft(r.id, { monthly_subscription: e.target.value })}
+                          className="h-10 mt-1 rounded-lg" />
+                      </label>
+                      <label className="block">
+                        <span className="text-fs-xs font-bold text-muted-foreground">עמלת ליד (₪)</span>
+                        <Input type="number" min={0} step="0.01" value={draft.lead_fee}
+                          onChange={(e) => updateDraft(r.id, { lead_fee: e.target.value })}
+                          className="h-10 mt-1 rounded-lg" />
+                      </label>
+                      <label className="block">
+                        <span className="text-fs-xs font-bold text-muted-foreground">עמלת הצלחה</span>
+                        <Input type="number" min={0} step="0.01" value={draft.success_fee}
+                          onChange={(e) => updateDraft(r.id, { success_fee: e.target.value })}
+                          className="h-10 mt-1 rounded-lg" />
+                      </label>
+                      <label className="block">
+                        <span className="text-fs-xs font-bold text-muted-foreground">סוג עמלת הצלחה</span>
+                        <select value={draft.success_fee_type}
+                          onChange={(e) => updateDraft(r.id, { success_fee_type: e.target.value as "percent" | "fixed" })}
+                          className="h-10 mt-1 w-full rounded-lg border border-input bg-card px-2 text-sm">
+                          <option value="percent">אחוז (%)</option>
+                          <option value="fixed">סכום קבוע (₪)</option>
+                        </select>
+                      </label>
+                      <label className="block col-span-2">
+                        <span className="text-fs-xs font-bold text-muted-foreground">עמלה כללית (%) — legacy</span>
+                        <Input type="number" min={0} max={100} step="0.5" value={draft.commission_percent}
+                          onChange={(e) => updateDraft(r.id, { commission_percent: e.target.value })}
+                          className="h-10 mt-1 rounded-lg" />
+                      </label>
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled={busy === r.id}
+                      onClick={() => saveFees(r.id)}
+                      className="w-full"
+                    >
+                      <Save className="h-4 w-4 ml-1" /> {busy === r.id ? "שומר…" : "שמור עמלות"}
+                    </Button>
+                  </div>
+                )}
               </div>
             );
           })}
