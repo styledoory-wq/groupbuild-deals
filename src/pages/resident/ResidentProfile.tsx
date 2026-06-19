@@ -161,6 +161,14 @@ export default function ResidentProfile() {
             <LogOut className="h-[18px] w-[18px]" strokeWidth={2.2} />
             <span className="text-[15px] font-bold tracking-tight">התנתקות</span>
           </button>
+
+          <button
+            onClick={() => navigate("/resident/delete-account")}
+            className="mt-2 w-full h-[48px] rounded-[16px] px-4 flex items-center justify-center gap-2 text-[#6B7280] active:scale-[0.99] transition-transform"
+          >
+            <Trash2 className="h-4 w-4" strokeWidth={2} />
+            <span className="text-[13px] font-semibold tracking-tight">מחיקת חשבון</span>
+          </button>
         </div>
       </div>
       <BottomNav role="resident" />
