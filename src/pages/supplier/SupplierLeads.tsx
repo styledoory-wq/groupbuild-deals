@@ -34,6 +34,10 @@ type InterestRow = {
   notes: string | null;
   is_deleted?: boolean;
   deleted_at?: string | null;
+  direct_deposit_status?: string | null;
+  direct_deposit_amount?: number | null;
+  resident_marked_paid_at?: string | null;
+  supplier_confirmed_at?: string | null;
 };
 type ProfileLite = { id: string; full_name: string | null; phone: string | null; email: string | null };
 type InquiryRow = {
