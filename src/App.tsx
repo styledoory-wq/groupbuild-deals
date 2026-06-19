@@ -20,6 +20,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const SupplierProfile = lazy(() => import("./pages/SupplierProfile"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 const TermsResidents = lazy(() => import("./pages/TermsResidents"));
@@ -199,6 +200,7 @@ const App = () => (
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/thank-you" element={<ThankYou />} />
+                  <Route path="/unsubscribe" element={<Unsubscribe />} />
                   <Route path="/terms/residents" element={<TermsResidents />} />
                   <Route path="/terms/suppliers" element={<TermsSuppliers />} />
                   <Route path="/suppliers/:supplierId" element={<SupplierProfile />} />

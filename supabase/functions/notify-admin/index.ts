@@ -66,7 +66,6 @@ Deno.serve(async (req) => {
 
     const recipient = settings?.notification_email ?? null;
 
-    // Always log to server output for visibility in the meantime
     console.log("[notify-admin]", {
       event: body.event,
       title: body.title,
@@ -75,9 +74,37 @@ Deno.serve(async (req) => {
       details: scrubDetails(body.details),
     });
 
+    let delivered = false;
+    if (shouldNotify && recipient) {
+      try {
+        const detailsObj = (body.details ?? {}) as Record<string, unknown>;
+        const flat: Record<string, string> = {};
+        for (const [k, v] of Object.entries(detailsObj)) {
+          if (v == null) continue;
+          flat[k] = typeof v === "object" ? JSON.stringify(v) : String(v);
+        }
+        const { error: sendErr } = await admin.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "admin-notification",
+            recipientEmail: recipient,
+            idempotencyKey: `admin-${body.event}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            templateData: {
+              eventType: body.event,
+              eventTitle: body.title,
+              details: flat,
+            },
+          },
+        });
+        if (sendErr) console.error("[notify-admin] send failed", sendErr);
+        else delivered = true;
+      } catch (e) {
+        console.error("[notify-admin] send exception", e);
+      }
+    }
+
     return json({
       success: true,
-      delivered: false, // email delivery not yet wired (no domain)
+      delivered,
       logged: true,
       recipient,
     });
