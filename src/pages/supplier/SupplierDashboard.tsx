@@ -193,7 +193,7 @@ export default function SupplierDashboard() {
   if (loading) {
     return (
       <MobileShell>
-        <div className="min-h-[60vh] flex items-center justify-center bg-[#F2F2F7]">
+        <div className="min-h-[60vh] flex items-center justify-center bg-[#F7F5F0]">
           <LoadingState label="טוען את המסך שלך..." />
         </div>
       </MobileShell>
@@ -203,7 +203,7 @@ export default function SupplierDashboard() {
   if (error) {
     return (
       <MobileShell>
-        <div className="min-h-[60vh] flex items-center justify-center bg-[#F2F2F7]">
+        <div className="min-h-[60vh] flex items-center justify-center bg-[#F7F5F0]">
           <ErrorState
             title="שגיאה בטעינה"
             description={error}
@@ -245,7 +245,7 @@ export default function SupplierDashboard() {
   if (!dbSupplier || isPending || isRejected) {
     return (
       <MobileShell>
-        <div className="min-h-screen bg-[#F2F2F7]">
+        <div className="min-h-screen bg-[#F7F5F0]">
           <TopBar />
           <div className="px-5 mt-6">
             <div className="bg-white rounded-3xl p-7 border border-[#E5E5EA] shadow-sm text-center">
@@ -274,7 +274,7 @@ export default function SupplierDashboard() {
 
   return (
     <MobileShell>
-      <div className="min-h-screen bg-[#F2F2F7] w-full overflow-x-hidden pb-8">
+      <div className="min-h-screen bg-[#F7F5F0] w-full overflow-x-hidden pb-8">
         <TopBar />
 
         {/* KPI strip — 2x2 Apple-style tiles */}
@@ -348,7 +348,7 @@ export default function SupplierDashboard() {
         <div className="px-5 mt-3 space-y-3">
           {DEMO_COMPETITORS.map((c) => (
             <div key={c.id} className="bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-4 flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#F2F2F7] rounded-2xl flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 bg-[#F7F5F0] rounded-2xl flex items-center justify-center shrink-0">
                 <Radar className="w-5 h-5 text-[#1C1C1E]" strokeWidth={1.8} />
               </div>
               <div className="flex-1 min-w-0 text-right">
@@ -396,7 +396,7 @@ export default function SupplierDashboard() {
                   <button
                     key={d.id}
                     onClick={() => navigate(`/supplier/offers/${d.id}/marketing`)}
-                    className={`w-full p-4 text-right active:bg-[#F2F2F7] transition ${i < myDeals.length - 1 ? "border-b border-[#F2F2F7]" : ""}`}
+                    className={`w-full p-4 text-right active:bg-[#F7F5F0] transition ${i < myDeals.length - 1 ? "border-b border-[#F7F5F0]" : ""}`}
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="flex-1 min-w-0">
@@ -409,13 +409,13 @@ export default function SupplierDashboard() {
                       </div>
                       <div className="text-left shrink-0">
                         <div className="font-semibold text-[15px] text-[#1C1C1E] tracking-tight">{formatILS(priceFor(d))}</div>
-                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${active ? "bg-[#0E6B5A]/10 text-[#0E6B5A]" : "bg-[#F2F2F7] text-[#8E8E93]"}`}>
+                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${active ? "bg-[#0E6B5A]/10 text-[#0E6B5A]" : "bg-[#F7F5F0] text-[#8E8E93]"}`}>
                           {active ? "פעיל" : d.status}
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 h-1 rounded-full bg-[#F2F2F7] overflow-hidden">
+                      <div className="flex-1 h-1 rounded-full bg-[#F7F5F0] overflow-hidden">
                         <div className="h-full bg-[#0E6B5A] rounded-full transition-all" style={{ width: `${progress}%` }} />
                       </div>
                       <span className="text-[11px] font-medium text-[#8E8E93]">{c.paid}/{goal}</span>
