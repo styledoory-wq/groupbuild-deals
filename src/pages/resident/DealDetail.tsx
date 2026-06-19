@@ -634,6 +634,37 @@ export default function DealDetail() {
       ? Math.max(0, activeDisplay.effectivePrice - bestDisplay.effectivePrice)
       : null;
 
+  // ----- Build a 3-slot window of tiers (past / current / next) for the Achievement Blocks -----
+  const tierWindow: Array<{ tier: OfferTier; state: "past" | "active" | "future" }> = (() => {
+    if (sortedTiers.length === 0) return [];
+    if (sortedTiers.length <= 3) {
+      return sortedTiers.map((t, idx) => ({
+        tier: t,
+        state: (idx < activeIdx ? "past" : idx === activeIdx ? "active" : "future") as "past" | "active" | "future",
+      }));
+    }
+    let start = Math.max(0, activeIdx - 1);
+    if (activeIdx === -1) start = 0;
+    if (start + 3 > sortedTiers.length) start = sortedTiers.length - 3;
+    return sortedTiers.slice(start, start + 3).map((t) => {
+      const idxInAll = sortedTiers.findIndex((x) => x.minParticipants === t.minParticipants);
+      return {
+        tier: t,
+        state: (idxInAll < activeIdx ? "past" : idxInAll === activeIdx ? "active" : "future") as "past" | "active" | "future",
+      };
+    });
+  })();
+
+  const handleWhatsAppShare = () => {
+    if (typeof window === "undefined") return;
+    const url = window.location.href;
+    const tierLine = nextTier
+      ? `עוד ${peopleNeeded} שכנים שמצטרפים = כולם חוסכים עוד${savingsPerPerson && savingsPerPerson > 0 ? ` ${ils(savingsPerPerson)}` : ""}!`
+      : `כבר ${participantCount} שכנים בקבוצה — תצטרפו גם אתם!`;
+    const text = `🏘️ ${deal.title}\n\n${tierLine}\n\n${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+  };
+
   const SectionTitle = ({ children }: { children: React.ReactNode }) => (
     <h2 className="text-[16px] font-extrabold text-[#1F2937] mb-3 px-1 flex items-center gap-2">
       <span className="w-1 h-5 bg-[#0E6B5A] rounded-full" />
@@ -648,184 +679,189 @@ export default function DealDetail() {
         <PageHeader title="" subtitle="" back variant="navy" />
       </div>
 
-      {/* ===== SECTION 1 — DRAMATIC HERO with floating title card ===== */}
+      {/* ===== SECTION 1 — HERO IMAGE ===== */}
       <div className="px-4 mt-2">
-        <div className="relative">
-          <div className="relative rounded-[28px] overflow-hidden h-[360px] bg-gradient-to-br from-[#EAF2FF] to-[#FFF8E1]">
-            {heroImages.length > 0 && (
-              <div className="absolute inset-0">
-                <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-full">
-                  {heroImages.map((url, i) => (
-                    <img
-                      key={url + i}
-                      src={url}
-                      alt={`${deal.title} ${i + 1}`}
-                      className="w-full h-full object-cover shrink-0 snap-start"
-                      style={{ flex: "0 0 100%" }}
-                    />
+        <div className="relative rounded-[28px] overflow-hidden h-[260px] bg-gradient-to-br from-[#EAF2FF] to-[#FFF8E1]">
+          {heroImages.length > 0 && (
+            <div className="absolute inset-0">
+              <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-full">
+                {heroImages.map((url, i) => (
+                  <img
+                    key={url + i}
+                    src={url}
+                    alt={`${deal.title} ${i + 1}`}
+                    className="w-full h-full object-cover shrink-0 snap-start"
+                    style={{ flex: "0 0 100%" }}
+                  />
+                ))}
+              </div>
+              {heroImages.length > 1 && (
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-full">
+                  {heroImages.map((_, i) => (
+                    <span key={i} className="w-1.5 h-1.5 rounded-full bg-white/90" />
                   ))}
                 </div>
-                {heroImages.length > 1 && (
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-full">
-                    {heroImages.map((_, i) => (
-                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-white/90" />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-            {/* Gradient overlay so floating card pops */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#F7F5F0] via-transparent to-black/30 pointer-events-none" />
-
-            {/* Top-right status pill */}
-            <span
-              className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-[0_2px_6px_rgba(10,31,61,0.18)]"
-              style={{ color: statusMeta.fg, background: statusMeta.bg }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: statusMeta.dot }} />
-              {statusMeta.label}
-            </span>
-
-            {(hasCompletedJoin || hasPendingDeposit) && (
-              <div className="absolute top-4 left-4 bg-gradient-to-l from-[#1A8870] to-[#34A88E] text-[#1F2937] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
-                {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
-                <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Floating title card — overlaps hero */}
-          <div className="px-3 -mt-16 relative z-10">
-            <div className="bg-white/95 backdrop-blur-md p-5 rounded-3xl shadow-[0_12px_30px_-12px_rgba(10,31,61,0.25)]">
-              <div className="flex justify-between items-start mb-2 gap-2">
-                {category?.name ? (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2.5 py-1 rounded-full">
-                    <span>{category.icon ?? "🏷️"}</span>
-                    {category.name}
-                  </span>
-                ) : <span />}
-                {supplier && (
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-[12px] font-extrabold text-[#1F2937] truncate">{supplier.business_name}</span>
-                    <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="sm" />
-                  </div>
-                )}
-              </div>
-              <EditableField
-                table="deals"
-                id={deal.id}
-                field="title"
-                value={deal.title}
-                as="h1"
-                className="text-[22px] leading-[1.2] font-extrabold text-[#1F2937] tracking-tight"
-              />
+              )}
             </div>
-          </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F7F5F0] via-transparent to-black/20 pointer-events-none" />
+
+          <span
+            className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[11px] font-extrabold px-2.5 py-1 rounded-2xl bg-white/95 backdrop-blur-md shadow-[0_2px_6px_rgba(10,31,61,0.18)] border border-white text-[#0E6B5A]"
+          >
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: statusMeta.dot }} />
+            {statusMeta.label}
+          </span>
+
+          {(hasCompletedJoin || hasPendingDeposit) && (
+            <div className="absolute top-4 left-4 bg-gradient-to-l from-[#1A8870] to-[#34A88E] text-[#1F2937] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
+              {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
+              <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ===== SECTION 2 — GREEN PRICE + TIER CARD ===== */}
-      <div className="px-4 mt-4">
-        <div className="bg-[#0E6B5A] text-white rounded-[28px] p-6 shadow-[0_12px_30px_-12px_rgba(14,107,90,0.45)]">
-          <div className="flex justify-between items-end mb-5">
-            <div className="min-w-0">
-              <p className="text-[11px] opacity-80 mb-1 font-bold">מחיר נוכחי בקבוצה</p>
-              <div className="flex items-baseline gap-2 flex-wrap">
-                {display.effectivePrice != null ? (
+      {/* ===== SECTION 2 — HEADLINE + PRICE CARD ===== */}
+      <div className="px-4 -mt-10 relative z-10">
+        <div className="bg-white rounded-[24px] p-5 shadow-[0_12px_30px_-12px_rgba(10,31,61,0.25)]">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            {category?.name && (
+              <span className="bg-[#0E6B5A]/10 text-[#0E6B5A] px-3 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wide">
+                {category.icon ? `${category.icon} ` : ""}{category.name}
+              </span>
+            )}
+            {supplier && (
+              <div className="flex items-center gap-1 min-w-0">
+                <span className="text-[11px] font-bold text-[#6B7280] truncate">{supplier.business_name}</span>
+                {supplier.approval_status === "approved" && (
+                  <BadgeCheck className="h-3.5 w-3.5 text-[#2EA85A] shrink-0" strokeWidth={2.4} />
+                )}
+              </div>
+            )}
+          </div>
+          <EditableField
+            table="deals"
+            id={deal.id}
+            field="title"
+            value={deal.title}
+            as="h1"
+            className="text-[22px] leading-[1.2] font-black text-[#1F2937] tracking-tight mb-3"
+          />
+          {display.effectivePrice != null ? (
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-[28px] font-black text-[#1F2937] gb-num leading-none">{ils(display.effectivePrice)}</span>
+              {display.referencePrice && display.referencePrice > display.effectivePrice && (
+                <span className="text-[14px] line-through text-[#9CA3AF] gb-num">{ils(display.referencePrice)}</span>
+              )}
+              {savingsAmount ? (
+                <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
+                  חיסכון {ils(savingsAmount)}
+                </span>
+              ) : discountPct ? (
+                <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
+                  {discountPct}% הנחה
+                </span>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-[16px] font-black text-[#1F2937]">{display.headline}</p>
+          )}
+        </div>
+      </div>
+
+      {/* ===== SECTION 3 — ACHIEVEMENT BLOCKS + WHATSAPP SHARE ===== */}
+      {sortedTiers.length > 0 && (
+        <div className="px-4 mt-6">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h2 className="text-[16px] font-extrabold text-[#1F2937]">מסלול החיסכון שלכם</h2>
+            <span className="text-[#0E6B5A] text-[12px] font-bold">{participantCount} מצטרפים</span>
+          </div>
+
+          {/* 3 Achievement Blocks */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {tierWindow.map(({ tier, state }, idx) => {
+              const td = describeTier(offerType, tier);
+              if (state === "past") {
+                return (
+                  <div key={idx} className="bg-white rounded-2xl border-2 border-transparent p-3 h-24 flex flex-col justify-between opacity-50 relative overflow-hidden">
+                    <span className="text-[10px] font-bold text-[#9CA3AF] uppercase">התחלנו ב</span>
+                    <span className="text-[16px] font-black text-[#9CA3AF] line-through gb-num leading-tight">{td.headline}</span>
+                  </div>
+                );
+              }
+              if (state === "active") {
+                return (
+                  <div key={idx} className="bg-[#0E6B5A] rounded-2xl border-2 border-[#0E6B5A] p-3 h-24 flex flex-col justify-between shadow-lg shadow-[#0E6B5A]/30 relative">
+                    <span className="text-[10px] font-bold text-white/70 uppercase tracking-tighter">המחיר כרגע</span>
+                    <span className="text-[18px] font-black text-white gb-num leading-tight">{td.headline}</span>
+                    <div className="absolute -top-2 -right-2 bg-[#F5C547] text-[#0E6B5A] text-[9px] px-2 py-0.5 rounded-full font-black shadow-sm whitespace-nowrap">אנחנו כאן</div>
+                  </div>
+                );
+              }
+              return (
+                <div key={idx} className="bg-white rounded-2xl border-2 border-dashed border-[#0E6B5A]/30 p-3 h-24 flex flex-col justify-between relative">
+                  <span className="text-[10px] font-bold text-[#0E6B5A] uppercase tracking-tighter">היעד הבא</span>
+                  <span className="text-[18px] font-black text-[#1F2937] gb-num leading-tight">{td.headline}</span>
+                  <div className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-[#0E6B5A] rounded-full animate-ping" />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Dark motivation card with WhatsApp share */}
+          <div className="bg-[#062E27] text-white rounded-[24px] p-5 shadow-xl">
+            <div className="flex items-center justify-between mb-3 gap-3">
+              <div className="flex flex-col min-w-0">
+                {nextTier && peopleNeeded > 0 ? (
                   <>
-                    <span className="text-[36px] font-black leading-none gb-num">{ils(display.effectivePrice)}</span>
-                    {display.referencePrice && display.referencePrice > display.effectivePrice && (
-                      <span className="text-[14px] line-through opacity-60 gb-num">{ils(display.referencePrice)}</span>
-                    )}
+                    <span className="text-[11px] text-[#34A88E] font-bold">רק עוד {peopleNeeded} שכנים!</span>
+                    <span className="text-[16px] font-black leading-tight mt-0.5">
+                      {savingsPerPerson && savingsPerPerson > 0
+                        ? `כולם יחסכו עוד ${ils(savingsPerPerson)}`
+                        : `מגיעים למחיר ${describeTier(offerType, nextTier).headline}`}
+                    </span>
                   </>
                 ) : (
-                  <span className="text-[24px] font-black leading-tight">{display.headline}</span>
+                  <>
+                    <span className="text-[11px] text-[#34A88E] font-bold">הגענו למחיר המקסימלי!</span>
+                    <span className="text-[16px] font-black leading-tight mt-0.5">שתפו ותחזקו את הקבוצה</span>
+                  </>
                 )}
               </div>
-            </div>
-            {(savingsAmount || discountPct) && (
-              <div className="text-left shrink-0">
-                <p className="text-[11px] opacity-80 font-bold">
-                  {savingsAmount ? "חיסכון של" : "הנחה"}
-                </p>
-                <p className="text-[18px] font-black gb-num text-[#F7F5F0]">
-                  {savingsAmount ? ils(savingsAmount) : `${discountPct}%`}
-                </p>
+              <div className="bg-[#0E6B5A]/40 p-2 rounded-xl shrink-0">
+                <TrendingUp className="w-6 h-6 text-[#34A88E]" strokeWidth={2.2} />
               </div>
-            )}
+            </div>
+
+            <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden mb-4">
+              <div
+                className="bg-[#34A88E] h-full rounded-full transition-all duration-700"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleWhatsAppShare}
+              className="w-full bg-[#25D366] hover:bg-[#22c35e] text-white font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.97] shadow-lg"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+              שתפו בוואטסאפ של הבניין
+            </button>
+            <p className="text-center text-[11px] text-white/60 mt-2">כל שכן שמצטרף = כולם חוסכים יותר</p>
           </div>
 
-          {/* Tier stepper inside green card */}
-          {sortedTiers.length > 0 && (
-            <>
-              <div className="relative flex justify-between items-start gap-2 pt-2">
-                <div className="absolute top-[7px] left-2 right-2 h-1 bg-white/20 rounded-full" />
-                <div
-                  className="absolute top-[7px] right-2 h-1 bg-white rounded-full transition-all duration-700"
-                  style={{ width: `calc(${ladderFill}% - ${ladderFill > 0 ? '4px' : '0px'})` }}
-                />
-                {sortedTiers.map((t, idx) => {
-                  const td = describeTier(offerType, t);
-                  const isActive = idx === activeIdx;
-                  const isPast = activeIdx >= 0 && idx < activeIdx;
-                  return (
-                    <div key={idx} className="relative z-10 flex flex-col items-center gap-2 flex-1 min-w-0">
-                      <div
-                        className={cn(
-                          "rounded-full ring-4 ring-[#0E6B5A] transition-all",
-                          isActive
-                            ? "w-5 h-5 bg-white flex items-center justify-center"
-                            : isPast
-                              ? "w-3.5 h-3.5 bg-white"
-                              : "w-3.5 h-3.5 bg-white/40",
-                        )}
-                      >
-                        {isActive && <div className="w-2 h-2 rounded-full bg-[#0E6B5A]" />}
-                      </div>
-                      <div className={cn("text-center", !isActive && !isPast && "opacity-60")}>
-                        <div className="text-[10px] font-bold gb-num leading-tight">{td.headline}</div>
-                        <div className="text-[9px] opacity-80 leading-tight mt-0.5">{tierRange(t)}</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {nextTier && peopleNeeded > 0 ? (
-                <p className="text-center mt-4 text-[12px] font-bold">
-                  עוד {peopleNeeded} מצטרפים למחיר {describeTier(offerType, nextTier).headline}
-                  {savingsPerPerson && savingsPerPerson > 0 ? ` · חיסכון נוסף ${ils(savingsPerPerson)}` : ""}
-                </p>
-              ) : (
-                <p className="text-center mt-4 text-[12px] font-bold opacity-90">
-                  {participantCount} משתתפים בקבוצה כרגע
-                </p>
-              )}
-            </>
-          )}
-
-          {/* Fallback metric row when no tiers */}
-          {sortedTiers.length === 0 && daysRemaining !== null && (
-            <div className="mt-2 pt-4 border-t border-white/15 flex items-center justify-between text-[12px] font-bold">
-              <span className="opacity-80">{participantCount} משתתפים</span>
-              <span>{daysRemaining} ימים לסגירה</span>
+          {daysRemaining !== null && (
+            <div className="mt-3 flex items-center justify-center gap-2 text-[11px] font-bold text-[#6B7280]">
+              <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{daysRemaining} ימים לסגירה</span>
             </div>
           )}
         </div>
+      )}
 
-        {/* Compact info chips under card */}
-        {(daysRemaining !== null || participantCount > 0) && sortedTiers.length > 0 && (
-          <div className="mt-3 flex items-center justify-center gap-2 text-[11px] font-bold text-[#6B7280]">
-            <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />{participantCount} מצטרפים</span>
-            {daysRemaining !== null && (
-              <>
-                <span className="text-[#D1D5DB]">·</span>
-                <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{daysRemaining} ימים לסגירה</span>
-              </>
-            )}
-          </div>
-        )}
-      </div>
 
       {/* ===== SECTION 3 — OFFER DETAILS ===== */}
       {(deal.description || deal.offer_terms || deal.restrictions || (deal.service_areas && deal.service_areas.length > 0) || deal.join_deadline || deal.redemption_deadline || deal.appointment_required) && (
