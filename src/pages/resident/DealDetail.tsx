@@ -655,11 +655,20 @@ export default function DealDetail() {
     });
   })();
 
+  // Savings per person if we advance to the NEXT tier (immediate motivation)
+  const nextDisplay = nextTier ? describeTier(offerType, nextTier) : null;
+  const savingsToNext =
+    activeDisplay?.effectivePrice != null && nextDisplay?.effectivePrice != null
+      ? Math.max(0, activeDisplay.effectivePrice - nextDisplay.effectivePrice)
+      : null;
+  // Total max savings possible (from current to best tier)
+  const maxPossibleSavings = savingsPerPerson;
+
   const handleWhatsAppShare = () => {
     if (typeof window === "undefined") return;
     const url = window.location.href;
     const tierLine = nextTier
-      ? `עוד ${peopleNeeded} שכנים שמצטרפים = כולם חוסכים עוד${savingsPerPerson && savingsPerPerson > 0 ? ` ${ils(savingsPerPerson)}` : ""}!`
+      ? `עוד ${peopleNeeded} שכנים שמצטרפים = כולם חוסכים עוד${savingsToNext && savingsToNext > 0 ? ` ${ils(savingsToNext)}` : ""}!`
       : `כבר ${participantCount} שכנים בקבוצה — תצטרפו גם אתם!`;
     const text = `🏘️ ${deal.title}\n\n${tierLine}\n\n${url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
@@ -749,20 +758,25 @@ export default function DealDetail() {
             className="text-[22px] leading-[1.2] font-black text-[#1F2937] tracking-tight mb-3"
           />
           {display.effectivePrice != null ? (
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-[28px] font-black text-[#1F2937] gb-num leading-none">{ils(display.effectivePrice)}</span>
+            <div className="space-y-1.5">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-[28px] font-black text-[#1F2937] gb-num leading-none">{ils(display.effectivePrice)}</span>
+                {savingsAmount ? (
+                  <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
+                    חיסכון {ils(savingsAmount)}
+                  </span>
+                ) : discountPct ? (
+                  <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
+                    {discountPct}% הנחה
+                  </span>
+                ) : null}
+              </div>
               {display.referencePrice && display.referencePrice > display.effectivePrice && (
-                <span className="text-[14px] line-through text-[#9CA3AF] gb-num">{ils(display.referencePrice)}</span>
+                <div className="text-[11px] text-[#6B7280] flex items-center gap-1.5">
+                  <span>מחיר רגיל ללא רכישה קבוצתית:</span>
+                  <span className="line-through gb-num">{ils(display.referencePrice)}</span>
+                </div>
               )}
-              {savingsAmount ? (
-                <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
-                  חיסכון {ils(savingsAmount)}
-                </span>
-              ) : discountPct ? (
-                <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
-                  {discountPct}% הנחה
-                </span>
-              ) : null}
             </div>
           ) : (
             <p className="text-[16px] font-black text-[#1F2937]">{display.headline}</p>
@@ -782,27 +796,37 @@ export default function DealDetail() {
           <div className="grid grid-cols-3 gap-2 mb-4">
             {tierWindow.map(({ tier, state }, idx) => {
               const td = describeTier(offerType, tier);
+              const range = tierRange(tier);
               if (state === "past") {
                 return (
-                  <div key={idx} className="bg-white rounded-2xl border-2 border-transparent p-3 h-24 flex flex-col justify-between opacity-50 relative overflow-hidden">
-                    <span className="text-[10px] font-bold text-[#9CA3AF] uppercase">התחלנו ב</span>
-                    <span className="text-[16px] font-black text-[#9CA3AF] line-through gb-num leading-tight">{td.headline}</span>
+                  <div key={idx} className="bg-white rounded-2xl border-2 border-transparent p-3 h-28 flex flex-col justify-between opacity-50 relative overflow-hidden">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-[#9CA3AF] uppercase">התחלנו ב</span>
+                      <span className="text-[9px] font-bold text-[#9CA3AF] gb-num">{range} מצטרפים</span>
+                    </div>
+                    <span className="text-[15px] font-black text-[#9CA3AF] line-through gb-num leading-tight">{td.headline}</span>
                   </div>
                 );
               }
               if (state === "active") {
                 return (
-                  <div key={idx} className="bg-[#0E6B5A] rounded-2xl border-2 border-[#0E6B5A] p-3 h-24 flex flex-col justify-between shadow-lg shadow-[#0E6B5A]/30 relative">
-                    <span className="text-[10px] font-bold text-white/70 uppercase tracking-tighter">המחיר כרגע</span>
-                    <span className="text-[18px] font-black text-white gb-num leading-tight">{td.headline}</span>
+                  <div key={idx} className="bg-[#0E6B5A] rounded-2xl border-2 border-[#0E6B5A] p-3 h-28 flex flex-col justify-between shadow-lg shadow-[#0E6B5A]/30 relative">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-white/70 uppercase tracking-tighter">המחיר כרגע</span>
+                      <span className="text-[9px] font-bold text-white/80 gb-num">{range} מצטרפים</span>
+                    </div>
+                    <span className="text-[17px] font-black text-white gb-num leading-tight">{td.headline}</span>
                     <div className="absolute -top-2 -right-2 bg-[#F5C547] text-[#0E6B5A] text-[9px] px-2 py-0.5 rounded-full font-black shadow-sm whitespace-nowrap">אנחנו כאן</div>
                   </div>
                 );
               }
               return (
-                <div key={idx} className="bg-white rounded-2xl border-2 border-dashed border-[#0E6B5A]/30 p-3 h-24 flex flex-col justify-between relative">
-                  <span className="text-[10px] font-bold text-[#0E6B5A] uppercase tracking-tighter">היעד הבא</span>
-                  <span className="text-[18px] font-black text-[#1F2937] gb-num leading-tight">{td.headline}</span>
+                <div key={idx} className="bg-white rounded-2xl border-2 border-dashed border-[#0E6B5A]/30 p-3 h-28 flex flex-col justify-between relative">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-[#0E6B5A] uppercase tracking-tighter">היעד הבא</span>
+                    <span className="text-[9px] font-bold text-[#0E6B5A]/80 gb-num">{range} מצטרפים</span>
+                  </div>
+                  <span className="text-[17px] font-black text-[#1F2937] gb-num leading-tight">{td.headline}</span>
                   <div className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-[#0E6B5A] rounded-full animate-ping" />
                 </div>
               );
@@ -815,10 +839,10 @@ export default function DealDetail() {
               <div className="flex flex-col min-w-0">
                 {nextTier && peopleNeeded > 0 ? (
                   <>
-                    <span className="text-[11px] text-[#34A88E] font-bold">רק עוד {peopleNeeded} שכנים!</span>
+                    <span className="text-[11px] text-[#34A88E] font-bold">רק עוד {peopleNeeded} שכנים ליעד הבא!</span>
                     <span className="text-[16px] font-black leading-tight mt-0.5">
-                      {savingsPerPerson && savingsPerPerson > 0
-                        ? `כולם יחסכו עוד ${ils(savingsPerPerson)}`
+                      {savingsToNext && savingsToNext > 0
+                        ? `כולם יחסכו עוד ${ils(savingsToNext)} לאדם`
                         : `מגיעים למחיר ${describeTier(offerType, nextTier).headline}`}
                     </span>
                   </>
@@ -834,12 +858,19 @@ export default function DealDetail() {
               </div>
             </div>
 
-            <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden mb-4">
+            <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden mb-3">
               <div
                 className="bg-[#34A88E] h-full rounded-full transition-all duration-700"
                 style={{ width: `${progressPct}%` }}
               />
             </div>
+
+            {maxPossibleSavings && maxPossibleSavings > 0 && nextTier && (
+              <div className="mb-4 flex items-center justify-between bg-white/5 rounded-xl px-3 py-2 border border-white/10">
+                <span className="text-[11px] text-white/70 font-medium">חיסכון מקסימלי אפשרי לאדם</span>
+                <span className="text-[14px] font-black text-[#F5C547] gb-num">עד {ils(maxPossibleSavings)}</span>
+              </div>
+            )}
 
             <button
               type="button"
@@ -849,7 +880,7 @@ export default function DealDetail() {
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
               </svg>
-              שתפו בוואטסאפ של הבניין
+              שתפו עם השכנים בוואטסאפ
             </button>
             <p className="text-center text-[11px] text-white/60 mt-2">כל שכן שמצטרף = כולם חוסכים יותר</p>
           </div>
