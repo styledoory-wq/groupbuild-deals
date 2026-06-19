@@ -299,7 +299,6 @@ export default function Auth() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="סיסמה"
                   required
-                  minLength={6}
                   dir="rtl"
                   className={cn(fieldInput, "pl-12")}
                 />
@@ -441,9 +440,8 @@ export default function Auth() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="סיסמה (לפחות 6 תווים)"
+                  placeholder="סיסמה"
                   required
-                  minLength={6}
                   dir="rtl"
                   className={cn(fieldInput, "pl-12")}
                 />
