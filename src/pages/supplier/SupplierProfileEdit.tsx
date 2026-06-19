@@ -520,6 +520,14 @@ export default function SupplierProfileEdit() {
             <Save className="h-4 w-4 ml-2" /> {saving ? "שומר…" : "שמירה"}
           </Button>
         </div>
+
+        <button
+          type="button"
+          onClick={() => navigate("/supplier/delete-account")}
+          className="mt-2 w-full h-[44px] rounded-[14px] flex items-center justify-center gap-2 text-[#DC2626] text-[13px] font-semibold"
+        >
+          מחיקת חשבון
+        </button>
       </form>
     </MobileShell>
   );
