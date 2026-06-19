@@ -200,6 +200,7 @@ const App = () => (
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/thank-you" element={<ThankYou />} />
+                  <Route path="/unsubscribe" element={<Unsubscribe />} />
                   <Route path="/terms/residents" element={<TermsResidents />} />
                   <Route path="/terms/suppliers" element={<TermsSuppliers />} />
                   <Route path="/suppliers/:supplierId" element={<SupplierProfile />} />
