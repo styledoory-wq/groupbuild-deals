@@ -879,7 +879,9 @@ export default function DealDetail() {
                     <span className="text-[16px] font-black leading-tight mt-0.5">
                       {savingsToNext && savingsToNext > 0
                         ? `כולם יחסכו עוד ${ils(savingsToNext)} לאדם`
-                        : `מגיעים למחיר ${describeTier(offerType, nextTier).headline}`}
+                        : nextDisplay?.effectivePrice != null
+                          ? `מגיעים למחיר ${ils(nextDisplay.effectivePrice)}`
+                          : "מגיעים ליעד הבא"}
                     </span>
                   </>
                 ) : (
