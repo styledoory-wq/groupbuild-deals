@@ -96,6 +96,7 @@ export default function OfferEditor() {
 
   const [offerType, setOfferType] = useState<OfferType>("percentage");
   const [tiers, setTiers] = useState<TierRow[]>(defaultPercentageTiers());
+  const [unitPrice, setUnitPrice] = useState<string>("");
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
