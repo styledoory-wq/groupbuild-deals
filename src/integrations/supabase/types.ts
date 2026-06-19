@@ -364,6 +364,33 @@ export type Database = {
         }
         Relationships: []
       }
+      deal_reminder_log: {
+        Row: {
+          deadline_date: string
+          deal_id: string
+          id: string
+          reminder_kind: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          deadline_date: string
+          deal_id: string
+          id?: string
+          reminder_kind: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          deadline_date?: string
+          deal_id?: string
+          id?: string
+          reminder_kind?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           appointment_required: boolean
