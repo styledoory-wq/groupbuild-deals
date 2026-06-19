@@ -622,6 +622,8 @@ export default function DealDetail() {
   const activeIdx = activeTier
     ? sortedTiers.findIndex((t) => t.minParticipants === activeTier.minParticipants)
     : -1;
+  // "Has anyone actually joined?" — drives whether to show a starter slot.
+  const hasAnyJoiners = participantCount > 0 && activeIdx >= 0;
   const stepCount = sortedTiers.length;
   const ladderFill = stepCount > 1 && activeIdx >= 0
     ? Math.round((activeIdx / (stepCount - 1)) * 100)
@@ -634,35 +636,55 @@ export default function DealDetail() {
       ? Math.max(0, activeDisplay.effectivePrice - bestDisplay.effectivePrice)
       : null;
 
-  // ----- Build a 3-slot window of tiers (past / current / next) for the Achievement Blocks -----
-  const tierWindow: Array<{ tier: OfferTier; state: "past" | "active" | "future" }> = (() => {
+  // ----- Build a 3-slot window of tier blocks (starter / past / active / future) -----
+  type WindowItem =
+    | { kind: "starter"; price: number; rangeLabel: string }
+    | { kind: "tier"; tier: OfferTier; state: "past" | "active" | "future" };
+
+  const tierWindow: WindowItem[] = (() => {
     if (sortedTiers.length === 0) return [];
+    // No one has joined yet — show a synthetic "starter price" slot as the current state.
+    if (!hasAnyJoiners) {
+      const starterPrice = display.referencePrice ?? display.effectivePrice ?? 0;
+      const items: WindowItem[] = [{ kind: "starter", price: starterPrice, rangeLabel: "0 מצטרפים" }];
+      sortedTiers.slice(0, 2).forEach((t) => items.push({ kind: "tier", tier: t, state: "future" }));
+      return items;
+    }
     if (sortedTiers.length <= 3) {
       return sortedTiers.map((t, idx) => ({
+        kind: "tier" as const,
         tier: t,
         state: (idx < activeIdx ? "past" : idx === activeIdx ? "active" : "future") as "past" | "active" | "future",
       }));
     }
     let start = Math.max(0, activeIdx - 1);
-    if (activeIdx === -1) start = 0;
     if (start + 3 > sortedTiers.length) start = sortedTiers.length - 3;
     return sortedTiers.slice(start, start + 3).map((t) => {
       const idxInAll = sortedTiers.findIndex((x) => x.minParticipants === t.minParticipants);
       return {
+        kind: "tier" as const,
         tier: t,
         state: (idxInAll < activeIdx ? "past" : idxInAll === activeIdx ? "active" : "future") as "past" | "active" | "future",
       };
     });
   })();
 
+  // Current effective price — what the user actually pays right now.
+  const currentEffectivePrice = hasAnyJoiners
+    ? activeDisplay?.effectivePrice ?? display.effectivePrice ?? null
+    : display.referencePrice ?? display.effectivePrice ?? null;
+
   // Savings per person if we advance to the NEXT tier (immediate motivation)
   const nextDisplay = nextTier ? describeTier(offerType, nextTier) : null;
   const savingsToNext =
-    activeDisplay?.effectivePrice != null && nextDisplay?.effectivePrice != null
-      ? Math.max(0, activeDisplay.effectivePrice - nextDisplay.effectivePrice)
+    currentEffectivePrice != null && nextDisplay?.effectivePrice != null
+      ? Math.max(0, currentEffectivePrice - nextDisplay.effectivePrice)
       : null;
-  // Total max savings possible (from current to best tier)
-  const maxPossibleSavings = savingsPerPerson;
+  // Total max savings possible — from the reference (no-group) price all the way to the best tier
+  const maxPossibleSavings =
+    display.referencePrice != null && bestDisplay?.effectivePrice != null
+      ? Math.max(0, display.referencePrice - bestDisplay.effectivePrice)
+      : savingsPerPerson;
 
   const handleWhatsAppShare = () => {
     if (typeof window === "undefined") return;
