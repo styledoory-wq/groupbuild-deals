@@ -56,6 +56,12 @@ interface DealRow {
   deposit_amount: number | null;
   cover_image_url: string | null;
   gallery_images: string[] | null;
+  offer_terms: string | null;
+  restrictions: string | null;
+  service_areas: string[] | null;
+  join_deadline: string | null;
+  redemption_deadline: string | null;
+  appointment_required: boolean | null;
 }
 
 interface SupplierRow {
