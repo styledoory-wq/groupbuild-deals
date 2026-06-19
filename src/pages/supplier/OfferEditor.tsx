@@ -229,6 +229,10 @@ export default function OfferEditor() {
                   discounted_price: t.discounted_price != null ? String(t.discounted_price) : "",
                   label: t.label ?? "",
                 })));
+                const firstWithPrice = rawTiers.find((t) => t.original_price != null);
+                if (firstWithPrice?.original_price != null) {
+                  setUnitPrice(String(firstWithPrice.original_price));
+                }
               }
               setCoverImage(deal.cover_image_url ?? null);
               setGalleryImages((deal.gallery_images as string[] | null) ?? []);
