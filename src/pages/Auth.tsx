@@ -299,7 +299,6 @@ export default function Auth() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="סיסמה"
                   required
-                  minLength={6}
                   dir="rtl"
                   className={cn(fieldInput, "pl-12")}
                 />
