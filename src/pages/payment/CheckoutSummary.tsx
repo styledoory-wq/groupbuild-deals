@@ -391,6 +391,55 @@ export default function CheckoutSummary() {
                 )}
               </section>
 
+              {/* Join condition */}
+              {tiers.length > 1 && (
+                <section className="bg-white rounded-[20px] p-4 shadow-sm space-y-3">
+                  <div>
+                    <h3 className="text-sm font-extrabold">תנאי הצטרפות למחיר</h3>
+                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                      מה קורה אם מצטרפים יעזבו והמחיר יעלה למדרגה אחרת?
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setJoinMode("flexible")}
+                    className={`w-full text-right rounded-2xl border-2 p-3 transition ${
+                      joinMode === "flexible" ? "border-[#0E6B5A] bg-[#0E6B5A]/5" : "border-black/10 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-1 h-4 w-4 rounded-full border-2 shrink-0 ${joinMode === "flexible" ? "border-[#0E6B5A] bg-[#0E6B5A]" : "border-black/30"}`} />
+                      <div className="flex-1">
+                        <div className="text-sm font-extrabold">הצטרפות גמישה</div>
+                        <div className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                          נשארים בעסקה בכל מקרה, גם אם המחיר יעלה למדרגה אחרת.
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setJoinMode("conditional")}
+                    className={`w-full text-right rounded-2xl border-2 p-3 transition ${
+                      joinMode === "conditional" ? "border-[#0E6B5A] bg-[#0E6B5A]/5" : "border-black/10 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-1 h-4 w-4 rounded-full border-2 shrink-0 ${joinMode === "conditional" ? "border-[#0E6B5A] bg-[#0E6B5A]" : "border-black/30"}`} />
+                      <div className="flex-1">
+                        <div className="text-sm font-extrabold">רק אם המחיר נשאר {headlinePrice ? ils(headlinePrice) : "במדרגה הנוכחית"}</div>
+                        <div className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                          אם מספר המצטרפים יירד מתחת ל-{activeTier?.minParticipants ?? 0} ונאלץ לעלות במדרגה — תקבל התראה ותוכל לאשר מחדש או לבטל ללא חיוב.
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                </section>
+              )}
+
+
               {/* Contact */}
               <section className="bg-white rounded-[20px] p-4 shadow-sm space-y-3">
                 <h3 className="text-sm font-extrabold">פרטים ליצירת קשר</h3>
