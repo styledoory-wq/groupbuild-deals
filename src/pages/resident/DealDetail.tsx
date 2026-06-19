@@ -816,8 +816,22 @@ export default function DealDetail() {
 
           {/* 3 Achievement Blocks */}
           <div className="grid grid-cols-3 gap-2 mb-4">
-            {tierWindow.map(({ tier, state }, idx) => {
+            {tierWindow.map((item, idx) => {
+              if (item.kind === "starter") {
+                return (
+                  <div key={idx} className="bg-[#0E6B5A] rounded-2xl border-2 border-[#0E6B5A] p-3 h-28 flex flex-col justify-between shadow-lg shadow-[#0E6B5A]/30 relative">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-white/70 uppercase tracking-tighter">מחיר התחלתי</span>
+                      <span className="text-[9px] font-bold text-white/80 gb-num">{item.rangeLabel}</span>
+                    </div>
+                    <span className="text-[17px] font-black text-white gb-num leading-tight">{ils(item.price)}</span>
+                    <div className="absolute -top-2 -right-2 bg-[#F5C547] text-[#0E6B5A] text-[9px] px-2 py-0.5 rounded-full font-black shadow-sm whitespace-nowrap">אנחנו כאן</div>
+                  </div>
+                );
+              }
+              const { tier, state } = item;
               const td = describeTier(offerType, tier);
+              const tierPrice = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
               const range = tierRange(tier);
               if (state === "past") {
                 return (
@@ -826,7 +840,7 @@ export default function DealDetail() {
                       <span className="text-[10px] font-bold text-[#9CA3AF] uppercase">התחלנו ב</span>
                       <span className="text-[9px] font-bold text-[#9CA3AF] gb-num">{range} מצטרפים</span>
                     </div>
-                    <span className="text-[15px] font-black text-[#9CA3AF] line-through gb-num leading-tight">{td.headline}</span>
+                    <span className="text-[15px] font-black text-[#9CA3AF] line-through gb-num leading-tight">{tierPrice}</span>
                   </div>
                 );
               }
@@ -837,7 +851,7 @@ export default function DealDetail() {
                       <span className="text-[10px] font-bold text-white/70 uppercase tracking-tighter">המחיר כרגע</span>
                       <span className="text-[9px] font-bold text-white/80 gb-num">{range} מצטרפים</span>
                     </div>
-                    <span className="text-[17px] font-black text-white gb-num leading-tight">{td.headline}</span>
+                    <span className="text-[17px] font-black text-white gb-num leading-tight">{tierPrice}</span>
                     <div className="absolute -top-2 -right-2 bg-[#F5C547] text-[#0E6B5A] text-[9px] px-2 py-0.5 rounded-full font-black shadow-sm whitespace-nowrap">אנחנו כאן</div>
                   </div>
                 );
@@ -848,7 +862,7 @@ export default function DealDetail() {
                     <span className="text-[10px] font-bold text-[#0E6B5A] uppercase tracking-tighter">היעד הבא</span>
                     <span className="text-[9px] font-bold text-[#0E6B5A]/80 gb-num">{range} מצטרפים</span>
                   </div>
-                  <span className="text-[17px] font-black text-[#1F2937] gb-num leading-tight">{td.headline}</span>
+                  <span className="text-[17px] font-black text-[#1F2937] gb-num leading-tight">{tierPrice}</span>
                   <div className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-[#0E6B5A] rounded-full animate-ping" />
                 </div>
               );
