@@ -119,6 +119,7 @@ export default function OfferEditor() {
     if (next === offerType) return;
     setOfferType(next);
     setTiers(next === "percentage" ? defaultPercentageTiers() : defaultPriceTiers());
+    if (next === "price_comparison" && !unitPrice) setUnitPrice("5000");
   };
 
   useEffect(() => {
