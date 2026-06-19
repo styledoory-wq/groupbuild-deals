@@ -655,11 +655,20 @@ export default function DealDetail() {
     });
   })();
 
+  // Savings per person if we advance to the NEXT tier (immediate motivation)
+  const nextDisplay = nextTier ? describeTier(offerType, nextTier) : null;
+  const savingsToNext =
+    activeDisplay?.effectivePrice != null && nextDisplay?.effectivePrice != null
+      ? Math.max(0, activeDisplay.effectivePrice - nextDisplay.effectivePrice)
+      : null;
+  // Total max savings possible (from current to best tier)
+  const maxPossibleSavings = savingsPerPerson;
+
   const handleWhatsAppShare = () => {
     if (typeof window === "undefined") return;
     const url = window.location.href;
     const tierLine = nextTier
-      ? `עוד ${peopleNeeded} שכנים שמצטרפים = כולם חוסכים עוד${savingsPerPerson && savingsPerPerson > 0 ? ` ${ils(savingsPerPerson)}` : ""}!`
+      ? `עוד ${peopleNeeded} שכנים שמצטרפים = כולם חוסכים עוד${savingsToNext && savingsToNext > 0 ? ` ${ils(savingsToNext)}` : ""}!`
       : `כבר ${participantCount} שכנים בקבוצה — תצטרפו גם אתם!`;
     const text = `🏘️ ${deal.title}\n\n${tierLine}\n\n${url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
