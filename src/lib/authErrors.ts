@@ -16,10 +16,10 @@ export function translateAuthError(error: unknown): string {
     return "משתמש כבר רשום במערכת";
   }
   if (m.includes("password should be") || m.includes("password is too short") || m.includes("at least 6")) {
-    return "הסיסמה חייבת להכיל לפחות 6 תווים";
+    return "הסיסמה קצרה מדי — אפשר להשתמש באותיות בלבד, מספרים בלבד או שילוב שלהם";
   }
   if (m.includes("weak password") || m.includes("password is weak")) {
-    return "הסיסמה חלשה מדי, השתמש בלפחות 6 תווים עם מספרים";
+    return "אפשר להשתמש באותיות בלבד, מספרים בלבד או שילוב שלהם";
   }
   if (m.includes("rate limit") || m.includes("too many")) {
     return "יותר מדי ניסיונות, נסה שוב בעוד כמה דקות";
