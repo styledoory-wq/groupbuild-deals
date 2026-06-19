@@ -777,26 +777,15 @@ export default function OfferEditor() {
                     />
                   </Mini>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    <Mini label="מחיר לפני (₪)">
-                      <Input
-                        type="number"
-                        value={t.original_price}
-                        onChange={(e) => updateTier(i, { original_price: e.target.value })}
-                        className="h-9 rounded-lg"
-                        placeholder="5000"
-                      />
-                    </Mini>
-                    <Mini label="מחיר אחרי (₪)">
-                      <Input
-                        type="number"
-                        value={t.discounted_price}
-                        onChange={(e) => updateTier(i, { discounted_price: e.target.value })}
-                        className="h-9 rounded-lg"
-                        placeholder="4500"
-                      />
-                    </Mini>
-                  </div>
+                  <Mini label="מחיר אחרי הנחה (₪)">
+                    <Input
+                      type="number"
+                      value={t.discounted_price}
+                      onChange={(e) => updateTier(i, { discounted_price: e.target.value })}
+                      className="h-9 rounded-lg"
+                      placeholder="4500"
+                    />
+                  </Mini>
                 )}
               </div>
             ))}
