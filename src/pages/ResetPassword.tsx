@@ -28,7 +28,7 @@ export default function ResetPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) return toast.error("סיסמה חייבת להכיל לפחות 6 תווים");
+    if (password.trim().length === 0) return toast.error("יש להזין סיסמה חדשה");
     if (password !== confirm) return toast.error("הסיסמאות אינן תואמות");
     setLoading(true);
     try {
@@ -61,7 +61,7 @@ export default function ResetPassword() {
                   <Lock className="h-3.5 w-3.5 text-[#0E6B5A]" /> סיסמה חדשה
                 </Label>
                 <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                  required minLength={6} dir="ltr" placeholder="לפחות 6 תווים"
+                  required dir="ltr" placeholder="סיסמה חדשה"
                   className="h-12" />
               </div>
               <div className="space-y-1.5">
@@ -69,7 +69,7 @@ export default function ResetPassword() {
                   <Lock className="h-3.5 w-3.5 text-[#0E6B5A]" /> אישור סיסמה
                 </Label>
                 <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
-                  required minLength={6} dir="ltr"
+                  required dir="ltr"
                   className="h-12" />
               </div>
               <Button type="submit" disabled={loading}
