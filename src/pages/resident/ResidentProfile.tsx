@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LogOut, Building2, Phone, Mail, Pencil, FileText, Wallet,
-  ChevronLeft, Bell, Shield, Ticket, Camera,
+  ChevronLeft, Bell, Shield, Ticket, Camera, Trash2,
 } from "lucide-react";
 
 import { BottomNav } from "@/components/layout/BottomNav";

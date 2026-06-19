@@ -33,6 +33,7 @@ const CategorySuppliers = lazy(() => import("./pages/resident/CategorySuppliers"
 const DealDetail = lazy(() => import("./pages/resident/DealDetail"));
 const ResidentProfile = lazy(() => import("./pages/resident/ResidentProfile"));
 const ResidentProfileEdit = lazy(() => import("./pages/resident/ResidentProfileEdit"));
+const DeleteAccount = lazy(() => import("./pages/resident/DeleteAccount"));
 const Notifications = lazy(() => import("./pages/resident/Notifications"));
 const MyOffers = lazy(() => import("./pages/resident/MyOffers"));
 const MyDocuments = lazy(() => import("./pages/resident/MyDocuments"));
@@ -218,6 +219,8 @@ const App = () => (
                   <Route path="/resident/budget-planner" element={residentRoute(<BudgetPlanner />)} />
                   <Route path="/resident/profile" element={residentRoute(<ResidentProfile />)} />
                   <Route path="/resident/profile/edit" element={residentRoute(<ResidentProfileEdit />)} />
+                  <Route path="/resident/delete-account" element={residentRoute(<DeleteAccount />)} />
+                  <Route path="/supplier/delete-account" element={supplierRoute(<DeleteAccount />)} />
                   <Route path="/resident/notifications" element={residentRoute(<Notifications />)} />
                   <Route path="/resident/my-offers" element={residentRoute(<MyOffers />)} />
                   <Route path="/resident/documents" element={residentRoute(<MyDocuments />)} />
