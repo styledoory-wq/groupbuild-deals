@@ -34,6 +34,10 @@ type InterestRow = {
   notes: string | null;
   is_deleted?: boolean;
   deleted_at?: string | null;
+  direct_deposit_status?: string | null;
+  direct_deposit_amount?: number | null;
+  resident_marked_paid_at?: string | null;
+  supplier_confirmed_at?: string | null;
 };
 type ProfileLite = { id: string; full_name: string | null; phone: string | null; email: string | null };
 type InquiryRow = {
@@ -220,6 +224,46 @@ export default function SupplierLeads() {
     }
   };
 
+  const confirmDirectDeposit = async (interestId: string) => {
+    setStatusBusy(interestId);
+    try {
+      const { error } = await supabase.rpc("supplier_confirm_deposit", { _interest_id: interestId });
+      if (error) throw error;
+      setInterests((prev) => prev.map((i) => (i.id === interestId ? {
+        ...i,
+        direct_deposit_status: "confirmed_by_supplier",
+        supplier_confirmed_at: new Date().toISOString(),
+        status: "paid",
+        lead_status: "approved",
+        deposit_status: "paid",
+      } : i)));
+      toast.success("הפיקדון אושר — הדייר הצטרף לעסקה");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "אישור נכשל");
+    } finally {
+      setStatusBusy(null);
+    }
+  };
+
+  const disputeDirectDeposit = async (interestId: string) => {
+    const reason = window.prompt("סיבה (אופציונלי) — לדוגמה: 'לא התקבל בחשבון'");
+    if (reason === null) return;
+    setStatusBusy(interestId);
+    try {
+      const { error } = await supabase.rpc("supplier_dispute_deposit", { _interest_id: interestId, _reason: reason || null });
+      if (error) throw error;
+      setInterests((prev) => prev.map((i) => (i.id === interestId ? {
+        ...i,
+        direct_deposit_status: "disputed",
+      } : i)));
+      toast.success("סומן כלא התקבל — הדייר קיבל הודעה");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "פעולה נכשלה");
+    } finally {
+      setStatusBusy(null);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
     const safety = window.setTimeout(() => {
@@ -268,7 +312,7 @@ export default function SupplierLeads() {
           const dealIds = allDeals.map((d) => d.id);
           const { data: ints, error: iErr } = await supabase
             .from("deal_interests")
-            .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes,is_deleted,deleted_at")
+            .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes,is_deleted,deleted_at,direct_deposit_status,direct_deposit_amount,resident_marked_paid_at,supplier_confirmed_at")
             .in("deal_id", dealIds)
             .eq("is_demo", false)
             .order("created_at", { ascending: false });
@@ -484,6 +528,44 @@ export default function SupplierLeads() {
             </div>
           ) : (
             <>
+              {/* Direct deposit (resident → supplier) confirmation */}
+              {i.direct_deposit_status === "marked_paid_by_resident" && (
+                <div className="mb-2 rounded-xl border-2 border-[#0E6B5A] bg-[#F0F9F6] p-3">
+                  <div className="text-fs-xs font-bold text-[#0E6B5A] mb-1 inline-flex items-center gap-1">
+                    <Coins className="h-3.5 w-3.5" /> דייר סימן ששילם פיקדון של {ils(Number(i.direct_deposit_amount ?? i.deposit_amount))}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mb-2 leading-relaxed">
+                    בדוק בחשבון שלך (PayBox/Bit/בנק) ואשר את הקבלה. רק אחרי האישור שלך — ההצטרפות לעסקה תושלם ושובר ייווצר אם היעד יושלם.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => confirmDirectDeposit(i.id)}
+                      disabled={statusBusy === i.id}
+                      className="h-9 rounded-lg bg-[#0E6B5A] text-white text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> אשר קבלת פיקדון
+                    </button>
+                    <button onClick={() => disputeDirectDeposit(i.id)}
+                      disabled={statusBusy === i.id}
+                      className="h-9 rounded-lg bg-destructive/10 text-destructive border border-destructive/30 text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50">
+                      <X className="h-3.5 w-3.5" /> לא התקבל
+                    </button>
+                  </div>
+                </div>
+              )}
+              {i.direct_deposit_status === "awaiting_payment" && (
+                <div className="mb-2 text-fs-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+                  ממתין שהדייר יעביר את הפיקדון ויסמן ששילם
+                </div>
+              )}
+              {i.direct_deposit_status === "confirmed_by_supplier" && (
+                <div className="mb-2 text-fs-xs text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] rounded-lg px-3 py-2 inline-flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" /> פיקדון אושר על ידך
+                </div>
+              )}
+              {i.direct_deposit_status === "disputed" && (
+                <div className="mb-2 text-fs-xs text-destructive bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">
+                  סומן כלא התקבל — הדייר קיבל הודעה
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <button onClick={() => updateLeadStatus(i.id, "approved")}
                   disabled={statusBusy === i.id || i.lead_status === "approved"}

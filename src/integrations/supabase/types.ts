@@ -275,6 +275,8 @@ export type Database = {
           deposit_amount: number
           deposit_required: boolean
           deposit_status: string
+          direct_deposit_amount: number | null
+          direct_deposit_status: string | null
           estimated_quantity: number | null
           full_name: string | null
           id: string
@@ -287,7 +289,11 @@ export type Database = {
           phone: string | null
           project_name: string | null
           reapproval_deadline_at: string | null
+          resident_marked_paid_at: string | null
           status: string
+          supplier_confirmed_at: string | null
+          supplier_confirmed_by: string | null
+          supplier_dispute_reason: string | null
           terms_accepted_at: string | null
           updated_at: string
           user_id: string
@@ -301,6 +307,8 @@ export type Database = {
           deposit_amount?: number
           deposit_required?: boolean
           deposit_status?: string
+          direct_deposit_amount?: number | null
+          direct_deposit_status?: string | null
           estimated_quantity?: number | null
           full_name?: string | null
           id?: string
@@ -313,7 +321,11 @@ export type Database = {
           phone?: string | null
           project_name?: string | null
           reapproval_deadline_at?: string | null
+          resident_marked_paid_at?: string | null
           status?: string
+          supplier_confirmed_at?: string | null
+          supplier_confirmed_by?: string | null
+          supplier_dispute_reason?: string | null
           terms_accepted_at?: string | null
           updated_at?: string
           user_id: string
@@ -327,6 +339,8 @@ export type Database = {
           deposit_amount?: number
           deposit_required?: boolean
           deposit_status?: string
+          direct_deposit_amount?: number | null
+          direct_deposit_status?: string | null
           estimated_quantity?: number | null
           full_name?: string | null
           id?: string
@@ -339,7 +353,11 @@ export type Database = {
           phone?: string | null
           project_name?: string | null
           reapproval_deadline_at?: string | null
+          resident_marked_paid_at?: string | null
           status?: string
+          supplier_confirmed_at?: string | null
+          supplier_confirmed_by?: string | null
+          supplier_dispute_reason?: string | null
           terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
@@ -378,6 +396,8 @@ export type Database = {
           status: string
           supplier_commitment_accepted: boolean
           supplier_id: string
+          supplier_payment_instructions: string | null
+          supplier_payment_link: string | null
           target_participants: number | null
           tiers: Json
           title: string
@@ -416,6 +436,8 @@ export type Database = {
           status?: string
           supplier_commitment_accepted?: boolean
           supplier_id: string
+          supplier_payment_instructions?: string | null
+          supplier_payment_link?: string | null
           target_participants?: number | null
           tiers?: Json
           title: string
@@ -454,6 +476,8 @@ export type Database = {
           status?: string
           supplier_commitment_accepted?: boolean
           supplier_id?: string
+          supplier_payment_instructions?: string | null
+          supplier_payment_link?: string | null
           target_participants?: number | null
           tiers?: Json
           title?: string
@@ -1463,6 +1487,7 @@ export type Database = {
           is_deleted: boolean
           is_demo: boolean
           is_suspended: boolean
+          lead_fee: number
           logo_url: string | null
           monthly_subscription: number
           offers_products: boolean
@@ -1471,6 +1496,8 @@ export type Database = {
           serves_all_country: boolean
           service_areas: string[]
           short_description: string | null
+          success_fee: number
+          success_fee_type: string
           successful_redemptions: number
           supplier_kind: string | null
           trust_score: number
@@ -1501,6 +1528,7 @@ export type Database = {
           is_deleted?: boolean
           is_demo?: boolean
           is_suspended?: boolean
+          lead_fee?: number
           logo_url?: string | null
           monthly_subscription?: number
           offers_products?: boolean
@@ -1509,6 +1537,8 @@ export type Database = {
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
+          success_fee?: number
+          success_fee_type?: string
           successful_redemptions?: number
           supplier_kind?: string | null
           trust_score?: number
@@ -1539,6 +1569,7 @@ export type Database = {
           is_deleted?: boolean
           is_demo?: boolean
           is_suspended?: boolean
+          lead_fee?: number
           logo_url?: string | null
           monthly_subscription?: number
           offers_products?: boolean
@@ -1547,6 +1578,8 @@ export type Database = {
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
+          success_fee?: number
+          success_fee_type?: string
           successful_redemptions?: number
           supplier_kind?: string | null
           trust_score?: number
@@ -1939,8 +1972,20 @@ export type Database = {
         Args: { _notes?: string; _project_id: string }
         Returns: string
       }
+      resident_mark_deposit_paid: {
+        Args: { _interest_id: string }
+        Returns: undefined
+      }
       set_deposit_hidden: {
         Args: { _deposit_id: string; _hidden: boolean }
+        Returns: undefined
+      }
+      supplier_confirm_deposit: {
+        Args: { _interest_id: string }
+        Returns: undefined
+      }
+      supplier_dispute_deposit: {
+        Args: { _interest_id: string; _reason?: string }
         Returns: undefined
       }
       supplier_restore_inquiry: {

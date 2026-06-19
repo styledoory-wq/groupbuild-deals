@@ -89,6 +89,8 @@ export default function OfferEditor() {
   const [categoryId, setCategoryId] = useState<string>("");
   const [depositRequired, setDepositRequired] = useState<boolean>(false);
   const [depositAmount, setDepositAmount] = useState<string>("1000");
+  const [supplierPaymentLink, setSupplierPaymentLink] = useState<string>("");
+  const [supplierPaymentInstructions, setSupplierPaymentInstructions] = useState<string>("");
   const [depositLimits, setDepositLimits] = useState<DepositLimits>({ min: null, max: null });
   const [saving, setSaving] = useState(false);
 
@@ -212,6 +214,8 @@ export default function OfferEditor() {
               if (deal.category_id) setCategoryId(deal.category_id);
               setDepositRequired(!!deal.deposit_required);
               if (deal.deposit_amount != null) setDepositAmount(String(deal.deposit_amount));
+              if (deal.supplier_payment_link) setSupplierPaymentLink(String(deal.supplier_payment_link));
+              if (deal.supplier_payment_instructions) setSupplierPaymentInstructions(String(deal.supplier_payment_instructions));
               const rawType = (deal.offer_type ?? "percentage") as OfferType;
               setOfferType(rawType);
               const rawTiers = (Array.isArray(deal.tiers) ? deal.tiers : []) as import("@/lib/offerPricing").OfferTier[];
@@ -398,6 +402,8 @@ export default function OfferEditor() {
       offer_type: offerType,
       deposit_required: depositRequired,
       deposit_amount: depositRequired ? cleanDepositAmount : 0,
+      supplier_payment_link: depositRequired ? (supplierPaymentLink.trim() || null) : null,
+      supplier_payment_instructions: depositRequired ? (supplierPaymentInstructions.trim() || null) : null,
       tiers: cleanTiers as unknown as Json,
       highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as Json,
       status: "active",
@@ -541,21 +547,46 @@ export default function OfferEditor() {
               <span className="text-sm font-bold text-foreground">דורש פיקדון להצטרפות</span>
             </label>
             {depositRequired && (
-              <div>
-                <div className="text-fs-xs font-bold text-muted-foreground mb-1">סכום הפיקדון (₪)</div>
-                <Input
-                  type="number"
-                  min={1}
-                  step="0.01"
-                  value={depositAmount}
-                  onChange={(e) => setDepositAmount(e.target.value)}
-                  className="h-11 rounded-xl"
-                />
-                <p className="text-fs-xs text-muted-foreground mt-1">
-                  ניתן להזין כל סכום תקין, למשל 1346 או 1346.50.
-                  {depositLimits.min !== null ? ` מינימום: ${depositLimits.min}.` : ""}
-                  {depositLimits.max !== null ? ` מקסימום: ${depositLimits.max}.` : ""}
-                </p>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-fs-xs font-bold text-muted-foreground mb-1">סכום הפיקדון (₪)</div>
+                  <Input
+                    type="number"
+                    min={1}
+                    step="0.01"
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                    className="h-11 rounded-xl"
+                  />
+                  <p className="text-fs-xs text-muted-foreground mt-1">
+                    ניתן להזין כל סכום תקין, למשל 1346 או 1346.50.
+                    {depositLimits.min !== null ? ` מינימום: ${depositLimits.min}.` : ""}
+                    {depositLimits.max !== null ? ` מקסימום: ${depositLimits.max}.` : ""}
+                  </p>
+                </div>
+                <div>
+                  <div className="text-fs-xs font-bold text-muted-foreground mb-1">קישור תשלום ישיר אליך *</div>
+                  <Input
+                    type="url"
+                    placeholder="https://payboxapp.page.link/... או https://pay.bit.co.il/..."
+                    value={supplierPaymentLink}
+                    onChange={(e) => setSupplierPaymentLink(e.target.value)}
+                    className="h-11 rounded-xl"
+                    dir="ltr"
+                  />
+                  <p className="text-fs-xs text-muted-foreground mt-1 leading-relaxed">
+                    PayBox / Bit / Tranzila / כל קישור אחר. <b>הפיקדון משולם ישירות אליך</b> — GroupBuild לא גובה ולא מחזיקה את כספי הפיקדון.
+                  </p>
+                </div>
+                <div>
+                  <div className="text-fs-xs font-bold text-muted-foreground mb-1">הוראות נוספות (אופציונלי)</div>
+                  <Textarea
+                    placeholder='לדוגמה: "ניתן גם להעביר ב-Bit ל-050-1234567 / שם משפחה"'
+                    value={supplierPaymentInstructions}
+                    onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
+                    className="rounded-xl min-h-[60px]"
+                  />
+                </div>
               </div>
             )}
           </div>
