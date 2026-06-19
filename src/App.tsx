@@ -20,6 +20,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const SupplierProfile = lazy(() => import("./pages/SupplierProfile"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 const TermsResidents = lazy(() => import("./pages/TermsResidents"));
