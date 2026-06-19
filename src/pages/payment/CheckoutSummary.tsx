@@ -127,13 +127,16 @@ export default function CheckoutSummary() {
         // If user already has an awaiting_payment interest, jump straight to pay phase
         const { data: existing } = await supabase
           .from("deal_interests")
-          .select("id,direct_deposit_status")
+          .select("id,direct_deposit_status,join_condition")
           .eq("user_id", session.session.user.id)
           .eq("deal_id", d.id)
           .eq("is_deleted", false)
           .maybeSingle();
         if (!cancel && existing?.id) {
           setInterestId(existing.id);
+          if (existing.join_condition === "conditional" || existing.join_condition === "flexible") {
+            setJoinMode(existing.join_condition);
+          }
           if (existing.direct_deposit_status === "awaiting_payment" || existing.direct_deposit_status === "marked_paid_by_resident") {
             setPhase("pay");
           }
