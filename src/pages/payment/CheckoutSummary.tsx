@@ -74,6 +74,7 @@ export default function CheckoutSummary() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [joinMode, setJoinMode] = useState<"flexible" | "conditional">("flexible");
 
   useEffect(() => {
     let cancel = false;
