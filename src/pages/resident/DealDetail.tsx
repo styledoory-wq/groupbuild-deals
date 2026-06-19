@@ -56,6 +56,12 @@ interface DealRow {
   deposit_amount: number | null;
   cover_image_url: string | null;
   gallery_images: string[] | null;
+  offer_terms: string | null;
+  restrictions: string | null;
+  service_areas: string[] | null;
+  join_deadline: string | null;
+  redemption_deadline: string | null;
+  appointment_required: boolean | null;
 }
 
 interface SupplierRow {
@@ -178,7 +184,7 @@ export default function DealDetail() {
         const { data: dealData, error: dErr } = await supabase
           .from("deals")
           .select(
-            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images",
+            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images,offer_terms,restrictions,service_areas,join_deadline,redemption_deadline,appointment_required",
           )
           .eq("id", dealId)
           .eq("is_deleted", false)
@@ -763,7 +769,75 @@ export default function DealDetail() {
         </div>
       </div>
 
-      {/* Progress + benefits removed — info shown in tiers ladder & how-it-works */}
+      {/* ===== SECTION — OFFER DETAILS ===== */}
+      {(deal.description || deal.offer_terms || deal.restrictions || (deal.service_areas && deal.service_areas.length > 0) || deal.join_deadline || deal.redemption_deadline || deal.appointment_required) && (
+        <div className="px-4 mt-5">
+          <h2 className="text-[15px] font-extrabold text-[#1F2937] mb-3 px-1">פרטי ההצעה</h2>
+          <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] space-y-4">
+            {deal.description && (
+              <div>
+                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">תיאור</div>
+                <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{deal.description}</p>
+              </div>
+            )}
+            {deal.offer_terms && (
+              <div>
+                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">תנאי ההצעה</div>
+                <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{deal.offer_terms}</p>
+              </div>
+            )}
+            {deal.restrictions && (
+              <div>
+                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">הגבלות / חריגים</div>
+                <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{deal.restrictions}</p>
+              </div>
+            )}
+            {deal.service_areas && deal.service_areas.length > 0 && (
+              <div className="flex items-start gap-2">
+                <MapPin className="h-4 w-4 text-[#0E6B5A] mt-0.5 shrink-0" />
+                <div>
+                  <div className="text-[11px] font-extrabold text-[#6B7280] mb-0.5">אזורי שירות</div>
+                  <p className="text-[13px] text-[#1F2937]">{deal.service_areas.join(", ")}</p>
+                </div>
+              </div>
+            )}
+            {(deal.join_deadline || deal.redemption_deadline) && (
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                {deal.join_deadline && (
+                  <div className="bg-[#F4F6FA] rounded-2xl p-3">
+                    <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-[#6B7280] mb-1">
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      תאריך אחרון להצטרפות
+                    </div>
+                    <div className="text-[13px] font-extrabold text-[#1F2937]">
+                      {new Date(deal.join_deadline).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })}
+                    </div>
+                  </div>
+                )}
+                {deal.redemption_deadline && (
+                  <div className="bg-[#F4F6FA] rounded-2xl p-3">
+                    <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-[#6B7280] mb-1">
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      תאריך אחרון למימוש
+                    </div>
+                    <div className="text-[13px] font-extrabold text-[#1F2937]">
+                      {new Date(deal.redemption_deadline).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            {deal.appointment_required && (
+              <div className="flex items-center gap-2 bg-[#FFF8E1] rounded-xl px-3 py-2">
+                <Clock className="h-4 w-4 text-[#B07E2E] shrink-0" />
+                <span className="text-[12px] font-bold text-[#1F2937]">נדרשת קביעת פגישה לפני המימוש</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+
 
 
       {/* SECTION 4 removed — info already shown in hero, metrics strip & supplier card */}
