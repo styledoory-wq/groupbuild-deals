@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { translateAuthError } from "@/lib/authErrors";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ export default function ResetPassword() {
       await supabase.auth.signOut();
       navigate("/", { replace: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "עדכון הסיסמה נכשל");
+      toast.error(translateAuthError(err));
     } finally {
       setLoading(false);
     }
