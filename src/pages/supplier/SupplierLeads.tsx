@@ -224,6 +224,46 @@ export default function SupplierLeads() {
     }
   };
 
+  const confirmDirectDeposit = async (interestId: string) => {
+    setStatusBusy(interestId);
+    try {
+      const { error } = await supabase.rpc("supplier_confirm_deposit", { _interest_id: interestId });
+      if (error) throw error;
+      setInterests((prev) => prev.map((i) => (i.id === interestId ? {
+        ...i,
+        direct_deposit_status: "confirmed_by_supplier",
+        supplier_confirmed_at: new Date().toISOString(),
+        status: "paid",
+        lead_status: "approved",
+        deposit_status: "paid",
+      } : i)));
+      toast.success("הפיקדון אושר — הדייר הצטרף לעסקה");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "אישור נכשל");
+    } finally {
+      setStatusBusy(null);
+    }
+  };
+
+  const disputeDirectDeposit = async (interestId: string) => {
+    const reason = window.prompt("סיבה (אופציונלי) — לדוגמה: 'לא התקבל בחשבון'");
+    if (reason === null) return;
+    setStatusBusy(interestId);
+    try {
+      const { error } = await supabase.rpc("supplier_dispute_deposit", { _interest_id: interestId, _reason: reason || null });
+      if (error) throw error;
+      setInterests((prev) => prev.map((i) => (i.id === interestId ? {
+        ...i,
+        direct_deposit_status: "disputed",
+      } : i)));
+      toast.success("סומן כלא התקבל — הדייר קיבל הודעה");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "פעולה נכשלה");
+    } finally {
+      setStatusBusy(null);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
     const safety = window.setTimeout(() => {
