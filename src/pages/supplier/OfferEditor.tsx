@@ -96,6 +96,7 @@ export default function OfferEditor() {
 
   const [offerType, setOfferType] = useState<OfferType>("percentage");
   const [tiers, setTiers] = useState<TierRow[]>(defaultPercentageTiers());
+  const [unitPrice, setUnitPrice] = useState<string>("");
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
@@ -118,6 +119,7 @@ export default function OfferEditor() {
     if (next === offerType) return;
     setOfferType(next);
     setTiers(next === "percentage" ? defaultPercentageTiers() : defaultPriceTiers());
+    if (next === "price_comparison" && !unitPrice) setUnitPrice("5000");
   };
 
   useEffect(() => {
@@ -228,6 +230,10 @@ export default function OfferEditor() {
                   discounted_price: t.discounted_price != null ? String(t.discounted_price) : "",
                   label: t.label ?? "",
                 })));
+                const firstWithPrice = rawTiers.find((t) => t.original_price != null);
+                if (firstWithPrice?.original_price != null) {
+                  setUnitPrice(String(firstWithPrice.original_price));
+                }
               }
               setCoverImage(deal.cover_image_url ?? null);
               setGalleryImages((deal.gallery_images as string[] | null) ?? []);
@@ -325,6 +331,14 @@ export default function OfferEditor() {
 
     // Validate & build tier payload
     const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
+    let unitPriceVal: number | null = null;
+    if (offerType === "price_comparison") {
+      unitPriceVal = num(unitPrice);
+      if (!Number.isFinite(unitPriceVal) || (unitPriceVal as number) <= 0) {
+        toast.error("יש להזין מחיר יחידה תקין (לפני ההנחה)");
+        return;
+      }
+    }
     const cleanTiers: OfferTier[] = [];
     for (let i = 0; i < tiers.length; i++) {
       const t = tiers[i];
@@ -356,18 +370,14 @@ export default function OfferEditor() {
           label: t.label.trim() || null,
         });
       } else {
-        const before = num(t.original_price);
+        const before = unitPriceVal as number;
         const after = num(t.discounted_price);
-        if (!Number.isFinite(before) || before <= 0) {
-          toast.error(`מדרגה ${i + 1}: מחיר לפני חייב להיות מספר חיובי`);
-          return;
-        }
         if (!Number.isFinite(after) || after <= 0) {
           toast.error(`מדרגה ${i + 1}: מחיר אחרי חייב להיות מספר חיובי`);
           return;
         }
         if (after >= before) {
-          toast.error(`מדרגה ${i + 1}: המחיר אחרי חייב להיות קטן מהמחיר לפני`);
+          toast.error(`מדרגה ${i + 1}: המחיר אחרי חייב להיות קטן ממחיר היחידה`);
           return;
         }
         cleanTiers.push({
@@ -689,10 +699,28 @@ export default function OfferEditor() {
 
         {/* Tiers builder */}
         <div className="gb-card p-4 space-y-3">
+          {offerType === "price_comparison" && (
+            <div className="rounded-[16px] border border-[#ECEEF2] bg-white p-3 space-y-1">
+              <div className="text-fs-xs font-bold text-muted-foreground">מחיר יחידה לפני הנחה (₪)</div>
+              <Input
+                type="number"
+                min={1}
+                value={unitPrice}
+                onChange={(e) => setUnitPrice(e.target.value)}
+                className="h-11 rounded-xl"
+                placeholder="לדוגמה: 5000"
+              />
+              <p className="text-fs-xs text-muted-foreground leading-relaxed">
+                המחיר המקורי של היחידה. המדרגות שלמטה קובעות את המחיר אחרי ההנחה לפי כמות המצטרפים.
+              </p>
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-sm">מדרגות לפי כמות מצטרפים</h3>
             <span className="text-fs-xs text-muted-foreground">{tiers.length} מדרגות</span>
           </div>
+
 
           <div className="space-y-3">
             {tiers.map((t, i) => (
@@ -749,26 +777,15 @@ export default function OfferEditor() {
                     />
                   </Mini>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    <Mini label="מחיר לפני (₪)">
-                      <Input
-                        type="number"
-                        value={t.original_price}
-                        onChange={(e) => updateTier(i, { original_price: e.target.value })}
-                        className="h-9 rounded-lg"
-                        placeholder="5000"
-                      />
-                    </Mini>
-                    <Mini label="מחיר אחרי (₪)">
-                      <Input
-                        type="number"
-                        value={t.discounted_price}
-                        onChange={(e) => updateTier(i, { discounted_price: e.target.value })}
-                        className="h-9 rounded-lg"
-                        placeholder="4500"
-                      />
-                    </Mini>
-                  </div>
+                  <Mini label="מחיר אחרי הנחה (₪)">
+                    <Input
+                      type="number"
+                      value={t.discounted_price}
+                      onChange={(e) => updateTier(i, { discounted_price: e.target.value })}
+                      className="h-9 rounded-lg"
+                      placeholder="4500"
+                    />
+                  </Mini>
                 )}
               </div>
             ))}
