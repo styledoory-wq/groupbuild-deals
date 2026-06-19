@@ -214,6 +214,8 @@ export default function OfferEditor() {
               if (deal.category_id) setCategoryId(deal.category_id);
               setDepositRequired(!!deal.deposit_required);
               if (deal.deposit_amount != null) setDepositAmount(String(deal.deposit_amount));
+              if (deal.supplier_payment_link) setSupplierPaymentLink(String(deal.supplier_payment_link));
+              if (deal.supplier_payment_instructions) setSupplierPaymentInstructions(String(deal.supplier_payment_instructions));
               const rawType = (deal.offer_type ?? "percentage") as OfferType;
               setOfferType(rawType);
               const rawTiers = (Array.isArray(deal.tiers) ? deal.tiers : []) as import("@/lib/offerPricing").OfferTier[];
