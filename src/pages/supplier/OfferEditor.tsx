@@ -370,18 +370,14 @@ export default function OfferEditor() {
           label: t.label.trim() || null,
         });
       } else {
-        const before = num(t.original_price);
+        const before = unitPriceVal as number;
         const after = num(t.discounted_price);
-        if (!Number.isFinite(before) || before <= 0) {
-          toast.error(`מדרגה ${i + 1}: מחיר לפני חייב להיות מספר חיובי`);
-          return;
-        }
         if (!Number.isFinite(after) || after <= 0) {
           toast.error(`מדרגה ${i + 1}: מחיר אחרי חייב להיות מספר חיובי`);
           return;
         }
         if (after >= before) {
-          toast.error(`מדרגה ${i + 1}: המחיר אחרי חייב להיות קטן מהמחיר לפני`);
+          toast.error(`מדרגה ${i + 1}: המחיר אחרי חייב להיות קטן ממחיר היחידה`);
           return;
         }
         cleanTiers.push({
