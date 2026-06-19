@@ -184,7 +184,7 @@ export default function DealDetail() {
         const { data: dealData, error: dErr } = await supabase
           .from("deals")
           .select(
-            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images",
+            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images,offer_terms,restrictions,service_areas,join_deadline,redemption_deadline,appointment_required",
           )
           .eq("id", dealId)
           .eq("is_deleted", false)
