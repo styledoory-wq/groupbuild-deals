@@ -528,6 +528,44 @@ export default function SupplierLeads() {
             </div>
           ) : (
             <>
+              {/* Direct deposit (resident → supplier) confirmation */}
+              {i.direct_deposit_status === "marked_paid_by_resident" && (
+                <div className="mb-2 rounded-xl border-2 border-[#0E6B5A] bg-[#F0F9F6] p-3">
+                  <div className="text-fs-xs font-bold text-[#0E6B5A] mb-1 inline-flex items-center gap-1">
+                    <Coins className="h-3.5 w-3.5" /> דייר סימן ששילם פיקדון של {ils(Number(i.direct_deposit_amount ?? i.deposit_amount))}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mb-2 leading-relaxed">
+                    בדוק בחשבון שלך (PayBox/Bit/בנק) ואשר את הקבלה. רק אחרי האישור שלך — ההצטרפות לעסקה תושלם ושובר ייווצר אם היעד יושלם.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => confirmDirectDeposit(i.id)}
+                      disabled={statusBusy === i.id}
+                      className="h-9 rounded-lg bg-[#0E6B5A] text-white text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> אשר קבלת פיקדון
+                    </button>
+                    <button onClick={() => disputeDirectDeposit(i.id)}
+                      disabled={statusBusy === i.id}
+                      className="h-9 rounded-lg bg-destructive/10 text-destructive border border-destructive/30 text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50">
+                      <X className="h-3.5 w-3.5" /> לא התקבל
+                    </button>
+                  </div>
+                </div>
+              )}
+              {i.direct_deposit_status === "awaiting_payment" && (
+                <div className="mb-2 text-fs-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+                  ממתין שהדייר יעביר את הפיקדון ויסמן ששילם
+                </div>
+              )}
+              {i.direct_deposit_status === "confirmed_by_supplier" && (
+                <div className="mb-2 text-fs-xs text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] rounded-lg px-3 py-2 inline-flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" /> פיקדון אושר על ידך
+                </div>
+              )}
+              {i.direct_deposit_status === "disputed" && (
+                <div className="mb-2 text-fs-xs text-destructive bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">
+                  סומן כלא התקבל — הדייר קיבל הודעה
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <button onClick={() => updateLeadStatus(i.id, "approved")}
                   disabled={statusBusy === i.id || i.lead_status === "approved"}
