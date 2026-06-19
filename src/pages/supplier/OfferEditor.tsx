@@ -331,6 +331,14 @@ export default function OfferEditor() {
 
     // Validate & build tier payload
     const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
+    let unitPriceVal: number | null = null;
+    if (offerType === "price_comparison") {
+      unitPriceVal = num(unitPrice);
+      if (!Number.isFinite(unitPriceVal) || (unitPriceVal as number) <= 0) {
+        toast.error("יש להזין מחיר יחידה תקין (לפני ההנחה)");
+        return;
+      }
+    }
     const cleanTiers: OfferTier[] = [];
     for (let i = 0; i < tiers.length; i++) {
       const t = tiers[i];
