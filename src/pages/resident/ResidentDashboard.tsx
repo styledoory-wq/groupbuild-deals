@@ -249,7 +249,7 @@ export default function ResidentDashboard() {
   }, [areaDeals]);
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full bg-[#F2F2F7]">
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full bg-[#F7F5F0]">
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -389,7 +389,7 @@ export default function ResidentDashboard() {
                   {journeyStages.map((_, idx) => (
                     <div
                       key={idx}
-                      className={`flex-1 h-1 rounded-full ${idx <= currentIdx ? "bg-[#0E6B5A]" : "bg-[#F2F2F7]"}`}
+                      className={`flex-1 h-1 rounded-full ${idx <= currentIdx ? "bg-[#0E6B5A]" : "bg-[#F7F5F0]"}`}
                     />
                   ))}
                 </div>
@@ -413,7 +413,7 @@ export default function ResidentDashboard() {
                                 ? "bg-[#0E6B5A] text-white"
                                 : isPast
                                 ? "bg-[#0E6B5A]/10 text-[#0E6B5A]"
-                                : "bg-[#F2F2F7] text-[#1C1C1E]"
+                                : "bg-[#F7F5F0] text-[#1C1C1E]"
                             }`}
                           >
                             {isPast ? <Check className="h-5 w-5" strokeWidth={2.6} /> : <Icon className="h-5 w-5" strokeWidth={2.2} />}
@@ -464,7 +464,7 @@ export default function ResidentDashboard() {
         <div className="px-5 mt-3">
           {feedItems.length === 0 ? (
             <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-7 text-center">
-              <div className="h-12 w-12 mx-auto rounded-2xl bg-[#F2F2F7] flex items-center justify-center mb-3">
+              <div className="h-12 w-12 mx-auto rounded-2xl bg-[#F7F5F0] flex items-center justify-center mb-3">
                 <Sparkles className="h-5 w-5 text-[#8E8E93]" />
               </div>
               <p className="text-[13px] text-[#8E8E93] font-medium">עדיין אין הצעות פעילות באזור שלך</p>
@@ -535,7 +535,7 @@ function QuickAction({ icon: Icon, label, onClick }: { icon: typeof Calculator; 
       onClick={onClick}
       className="bg-white border border-[#E5E5EA] rounded-3xl p-4 flex flex-col items-center gap-2 shadow-sm active:scale-95 transition"
     >
-      <div className="h-10 w-10 rounded-2xl bg-[#F2F2F7] flex items-center justify-center">
+      <div className="h-10 w-10 rounded-2xl bg-[#F7F5F0] flex items-center justify-center">
         <Icon className="h-[18px] w-[18px] text-[#1C1C1E]" strokeWidth={2} />
       </div>
       <span className="text-[12px] font-semibold text-[#1C1C1E] tracking-tight">{label}</span>
@@ -550,7 +550,7 @@ function DealFeedCard({ deal, onClick }: { deal: MiniDeal; onClick: () => void }
       onClick={onClick}
       className="w-full text-right bg-white border border-[#E5E5EA] rounded-3xl overflow-hidden shadow-sm active:scale-[0.99] transition"
     >
-      <div className="relative h-44 bg-[#F2F2F7] overflow-hidden">
+      <div className="relative h-44 bg-[#F7F5F0] overflow-hidden">
         {deal.cover_image_url ? (
           <img src={deal.cover_image_url} alt={deal.title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
