@@ -617,6 +617,30 @@ export default function DealDetail() {
     { icon: Wrench,    title: "ביצוע והתקנה",    subtitle: "הספק מבצע את העבודה אצלכם" },
   ];
 
+  // Tier computations for the integrated green pricing card
+  const sortedTiers = [...tiers].sort((a, b) => a.minParticipants - b.minParticipants);
+  const activeIdx = activeTier
+    ? sortedTiers.findIndex((t) => t.minParticipants === activeTier.minParticipants)
+    : -1;
+  const stepCount = sortedTiers.length;
+  const ladderFill = stepCount > 1 && activeIdx >= 0
+    ? Math.round((activeIdx / (stepCount - 1)) * 100)
+    : activeIdx >= 0 ? 100 : 0;
+  const bestTier = sortedTiers[sortedTiers.length - 1];
+  const bestDisplay = bestTier ? describeTier(offerType, bestTier) : null;
+  const activeDisplay = activeTier ? describeTier(offerType, activeTier) : null;
+  const savingsPerPerson =
+    bestDisplay?.effectivePrice != null && activeDisplay?.effectivePrice != null
+      ? Math.max(0, activeDisplay.effectivePrice - bestDisplay.effectivePrice)
+      : null;
+
+  const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+    <h2 className="text-[16px] font-extrabold text-[#1F2937] mb-3 px-1 flex items-center gap-2">
+      <span className="w-1 h-5 bg-[#0E6B5A] rounded-full" />
+      {children}
+    </h2>
+  );
+
   return (
     <MobileShell>
       {/* Slim back header */}
@@ -624,104 +648,189 @@ export default function DealDetail() {
         <PageHeader title="" subtitle="" back variant="navy" />
       </div>
 
-      {/* ===== SECTION 1 — HERO ===== */}
+      {/* ===== SECTION 1 — DRAMATIC HERO with floating title card ===== */}
       <div className="px-4 mt-2">
-        <div className="relative rounded-[28px] overflow-hidden bg-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
-          {heroImages.length > 0 ? (
-            <div className="relative">
-              <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
-                {heroImages.map((url, i) => (
-                  <img
-                    key={url + i}
-                    src={url}
-                    alt={`${deal.title} ${i + 1}`}
-                    className="w-full h-[240px] object-cover shrink-0 snap-start"
-                    style={{ flex: "0 0 100%" }}
-                  />
-                ))}
-              </div>
-              {heroImages.length > 1 && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-full">
-                  {heroImages.map((_, i) => (
-                    <span key={i} className="w-1.5 h-1.5 rounded-full bg-white/90" />
+        <div className="relative">
+          <div className="relative rounded-[28px] overflow-hidden h-[360px] bg-gradient-to-br from-[#EAF2FF] to-[#FFF8E1]">
+            {heroImages.length > 0 && (
+              <div className="absolute inset-0">
+                <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-full">
+                  {heroImages.map((url, i) => (
+                    <img
+                      key={url + i}
+                      src={url}
+                      alt={`${deal.title} ${i + 1}`}
+                      className="w-full h-full object-cover shrink-0 snap-start"
+                      style={{ flex: "0 0 100%" }}
+                    />
                   ))}
                 </div>
-              )}
-              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/35 to-transparent pointer-events-none" />
-            </div>
-          ) : (
-            <div className="w-full h-[180px] bg-gradient-to-br from-[#EAF2FF] to-[#FFF8E1]" />
-          )}
-
-          <span
-            className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-[0_2px_6px_rgba(10,31,61,0.18)]"
-            style={{ color: statusMeta.fg, background: statusMeta.bg }}
-          >
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: statusMeta.dot }} />
-            {statusMeta.label}
-          </span>
-
-          {(hasCompletedJoin || hasPendingDeposit) && (
-            <div className="absolute top-4 left-4 bg-gradient-to-l from-[#1A8870] to-[#34A88E] text-[#1F2937] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
-              {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
-              <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
-            </div>
-          )}
-
-          <div className="p-5">
-            {category?.name && (
-              <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#6B7280] mb-2">
-                <span>{category.icon ?? "🏷️"}</span>
-                <span>{category.name}</span>
-              </div>
-            )}
-            <EditableField
-              table="deals"
-              id={deal.id}
-              field="title"
-              value={deal.title}
-              as="h1"
-              className="text-[24px] leading-[1.15] font-extrabold text-[#1F2937] tracking-tight"
-            />
-            {supplier && (
-              <div className="flex items-center gap-2 mt-2.5">
-                <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="sm" />
-                <span className="text-[13px] font-bold text-[#1F2937]">{supplier.business_name}</span>
-                {supplier.approval_status === "approved" && (
-                  <BadgeCheck className="h-4 w-4 text-[#2EA85A]" strokeWidth={2.4} />
+                {heroImages.length > 1 && (
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-full">
+                    {heroImages.map((_, i) => (
+                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-white/90" />
+                    ))}
+                  </div>
                 )}
               </div>
             )}
+            {/* Gradient overlay so floating card pops */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#F7F5F0] via-transparent to-black/30 pointer-events-none" />
+
+            {/* Top-right status pill */}
+            <span
+              className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-[0_2px_6px_rgba(10,31,61,0.18)]"
+              style={{ color: statusMeta.fg, background: statusMeta.bg }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: statusMeta.dot }} />
+              {statusMeta.label}
+            </span>
+
+            {(hasCompletedJoin || hasPendingDeposit) && (
+              <div className="absolute top-4 left-4 bg-gradient-to-l from-[#1A8870] to-[#34A88E] text-[#1F2937] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
+                {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
+                <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Floating title card — overlaps hero */}
+          <div className="px-3 -mt-16 relative z-10">
+            <div className="bg-white/95 backdrop-blur-md p-5 rounded-3xl shadow-[0_12px_30px_-12px_rgba(10,31,61,0.25)]">
+              <div className="flex justify-between items-start mb-2 gap-2">
+                {category?.name ? (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2.5 py-1 rounded-full">
+                    <span>{category.icon ?? "🏷️"}</span>
+                    {category.name}
+                  </span>
+                ) : <span />}
+                {supplier && (
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-[12px] font-extrabold text-[#1F2937] truncate">{supplier.business_name}</span>
+                    <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="sm" />
+                  </div>
+                )}
+              </div>
+              <EditableField
+                table="deals"
+                id={deal.id}
+                field="title"
+                value={deal.title}
+                as="h1"
+                className="text-[22px] leading-[1.2] font-extrabold text-[#1F2937] tracking-tight"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ===== SECTION 1b — COMPACT KEY METRICS STRIP ===== */}
+      {/* ===== SECTION 2 — GREEN PRICE + TIER CARD ===== */}
       <div className="px-4 mt-4">
-        <div className="bg-white rounded-[20px] px-4 py-3 shadow-[0_4px_12px_-6px_rgba(10,31,61,0.12)] flex items-center justify-between divide-x divide-x-reverse divide-[#ECEEF2]">
-          <div className="flex-1 text-center px-2">
-            <div className="text-[18px] font-extrabold text-[#E8742C] leading-none">{discountPct ? `${discountPct}%` : "—"}</div>
-            <div className="text-[10px] font-bold text-[#6B7280] mt-1">הנחה</div>
-          </div>
-          {savingsAmount ? (
-            <div className="flex-1 text-center px-2">
-              <div className="text-[18px] font-extrabold text-[#2EA85A] leading-none">{ils(savingsAmount)}</div>
-              <div className="text-[10px] font-bold text-[#6B7280] mt-1">חיסכון</div>
+        <div className="bg-[#0E6B5A] text-white rounded-[28px] p-6 shadow-[0_12px_30px_-12px_rgba(14,107,90,0.45)]">
+          <div className="flex justify-between items-end mb-5">
+            <div className="min-w-0">
+              <p className="text-[11px] opacity-80 mb-1 font-bold">מחיר נוכחי בקבוצה</p>
+              <div className="flex items-baseline gap-2 flex-wrap">
+                {display.effectivePrice != null ? (
+                  <>
+                    <span className="text-[36px] font-black leading-none gb-num">{ils(display.effectivePrice)}</span>
+                    {display.referencePrice && display.referencePrice > display.effectivePrice && (
+                      <span className="text-[14px] line-through opacity-60 gb-num">{ils(display.referencePrice)}</span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-[24px] font-black leading-tight">{display.headline}</span>
+                )}
+              </div>
             </div>
-          ) : null}
-          {daysRemaining !== null && (
-            <div className="flex-1 text-center px-2">
-              <div className="text-[18px] font-extrabold text-[#1F2937] leading-none">{daysRemaining}</div>
-              <div className="text-[10px] font-bold text-[#6B7280] mt-1">ימים לסגירה</div>
+            {(savingsAmount || discountPct) && (
+              <div className="text-left shrink-0">
+                <p className="text-[11px] opacity-80 font-bold">
+                  {savingsAmount ? "חיסכון של" : "הנחה"}
+                </p>
+                <p className="text-[18px] font-black gb-num text-[#F7F5F0]">
+                  {savingsAmount ? ils(savingsAmount) : `${discountPct}%`}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Tier stepper inside green card */}
+          {sortedTiers.length > 0 && (
+            <>
+              <div className="relative flex justify-between items-start gap-2 pt-2">
+                <div className="absolute top-[7px] left-2 right-2 h-1 bg-white/20 rounded-full" />
+                <div
+                  className="absolute top-[7px] right-2 h-1 bg-white rounded-full transition-all duration-700"
+                  style={{ width: `calc(${ladderFill}% - ${ladderFill > 0 ? '4px' : '0px'})` }}
+                />
+                {sortedTiers.map((t, idx) => {
+                  const td = describeTier(offerType, t);
+                  const isActive = idx === activeIdx;
+                  const isPast = activeIdx >= 0 && idx < activeIdx;
+                  return (
+                    <div key={idx} className="relative z-10 flex flex-col items-center gap-2 flex-1 min-w-0">
+                      <div
+                        className={cn(
+                          "rounded-full ring-4 ring-[#0E6B5A] transition-all",
+                          isActive
+                            ? "w-5 h-5 bg-white flex items-center justify-center"
+                            : isPast
+                              ? "w-3.5 h-3.5 bg-white"
+                              : "w-3.5 h-3.5 bg-white/40",
+                        )}
+                      >
+                        {isActive && <div className="w-2 h-2 rounded-full bg-[#0E6B5A]" />}
+                      </div>
+                      <div className={cn("text-center", !isActive && !isPast && "opacity-60")}>
+                        <div className="text-[10px] font-bold gb-num leading-tight">{td.headline}</div>
+                        <div className="text-[9px] opacity-80 leading-tight mt-0.5">{tierRange(t)}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {nextTier && peopleNeeded > 0 ? (
+                <p className="text-center mt-4 text-[12px] font-bold">
+                  עוד {peopleNeeded} מצטרפים למחיר {describeTier(offerType, nextTier).headline}
+                  {savingsPerPerson && savingsPerPerson > 0 ? ` · חיסכון נוסף ${ils(savingsPerPerson)}` : ""}
+                </p>
+              ) : (
+                <p className="text-center mt-4 text-[12px] font-bold opacity-90">
+                  {participantCount} משתתפים בקבוצה כרגע
+                </p>
+              )}
+            </>
+          )}
+
+          {/* Fallback metric row when no tiers */}
+          {sortedTiers.length === 0 && daysRemaining !== null && (
+            <div className="mt-2 pt-4 border-t border-white/15 flex items-center justify-between text-[12px] font-bold">
+              <span className="opacity-80">{participantCount} משתתפים</span>
+              <span>{daysRemaining} ימים לסגירה</span>
             </div>
           )}
         </div>
+
+        {/* Compact info chips under card */}
+        {(daysRemaining !== null || participantCount > 0) && sortedTiers.length > 0 && (
+          <div className="mt-3 flex items-center justify-center gap-2 text-[11px] font-bold text-[#6B7280]">
+            <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />{participantCount} מצטרפים</span>
+            {daysRemaining !== null && (
+              <>
+                <span className="text-[#D1D5DB]">·</span>
+                <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{daysRemaining} ימים לסגירה</span>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* ===== SECTION — OFFER DETAILS ===== */}
+      {/* ===== SECTION 3 — OFFER DETAILS ===== */}
       {(deal.description || deal.offer_terms || deal.restrictions || (deal.service_areas && deal.service_areas.length > 0) || deal.join_deadline || deal.redemption_deadline || deal.appointment_required) && (
-        <div className="px-4 mt-5">
-          <h2 className="text-[15px] font-extrabold text-[#1F2937] mb-3 px-1">פרטי ההצעה</h2>
+        <div className="px-4 mt-6">
+          <SectionTitle>פרטי ההצעה</SectionTitle>
           <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] space-y-4">
             {deal.description && (
               <div>
@@ -786,14 +895,9 @@ export default function DealDetail() {
         </div>
       )}
 
-
-
-
-      {/* SECTION 4 removed — info already shown in hero, metrics strip & supplier card */}
-
-      {/* ===== SECTION 5 — HOW IT WORKS ===== */}
-      <div className="px-4 mt-5">
-        <h2 className="text-[15px] font-extrabold text-[#1F2937] mb-3 px-1">איך זה עובד</h2>
+      {/* ===== SECTION 4 — HOW IT WORKS ===== */}
+      <div className="px-4 mt-6">
+        <SectionTitle>איך זה עובד</SectionTitle>
         <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
           <ol className="relative">
             {timeline.map((step, idx) => {
@@ -818,9 +922,10 @@ export default function DealDetail() {
         </div>
       </div>
 
-      {/* ===== SECTION 6 — SUPPLIER CARD ===== */}
+      {/* ===== SECTION 5 — SUPPLIER CARD ===== */}
       {supplier && (
-        <div className="px-4 mt-5">
+        <div className="px-4 mt-6">
+          <SectionTitle>על הספק</SectionTitle>
           <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
             <div className="flex items-center gap-3">
               <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="md" />
@@ -838,7 +943,7 @@ export default function DealDetail() {
             </div>
             <Link
               to={`/suppliers/${supplier.id}`}
-              className="mt-4 flex items-center justify-center gap-1 h-11 rounded-2xl bg-[#F4F6FA] text-[#1F2937] text-[13px] font-bold active:scale-[0.98] transition-transform"
+              className="mt-4 flex items-center justify-center gap-1 h-11 rounded-2xl border-2 border-[#0E6B5A]/20 text-[#0E6B5A] text-[13px] font-bold active:scale-[0.98] transition-transform"
             >
               צפייה בפרופיל הספק
               <ChevronLeft className="h-4 w-4" />
@@ -847,123 +952,10 @@ export default function DealDetail() {
         </div>
       )}
 
-      {/* ===== TIERS LADDER (horizontal stepper) ===== */}
-      {tiers.length > 0 && (() => {
-        const sortedTiers = [...tiers].sort((a, b) => a.minParticipants - b.minParticipants);
-        const activeIdx = activeTier
-          ? sortedTiers.findIndex((t) => t.minParticipants === activeTier.minParticipants)
-          : -1;
-        const stepCount = sortedTiers.length;
-        const ladderFill = stepCount > 1 && activeIdx >= 0
-          ? Math.round((activeIdx / (stepCount - 1)) * 100)
-          : activeIdx >= 0 ? 100 : 0;
-        const bestTier = sortedTiers[sortedTiers.length - 1];
-        const bestDisplay = bestTier ? describeTier(offerType, bestTier) : null;
-        const activeDisplay = activeTier ? describeTier(offerType, activeTier) : null;
-        const savingsPerPerson =
-          bestDisplay?.effectivePrice != null && activeDisplay?.effectivePrice != null
-            ? Math.max(0, activeDisplay.effectivePrice - bestDisplay.effectivePrice)
-            : null;
-        return (
-          <div className="px-4 mt-5">
-            <div className="flex items-center justify-between mb-3 px-1">
-              <h2 className="text-[15px] font-extrabold text-[#1F2937]">מדרגות מחיר לקבוצה</h2>
-              <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-md">
-                {participantCount} משתתפים כרגע
-              </span>
-            </div>
-            <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
-              {/* Horizontal stepper */}
-              <div className="relative pt-7 pb-2">
-                <div className="flex justify-between relative">
-                  {/* Track background */}
-                  <div className="absolute top-1.5 left-2 right-2 h-1 bg-[#ECEEF2] rounded-full" />
-                  {/* Progress fill (RTL: from right) */}
-                  <div
-                    className="absolute top-1.5 right-2 h-1 bg-[#0E6B5A] rounded-full transition-all duration-700"
-                    style={{ width: `calc(${ladderFill}% - ${ladderFill > 0 ? '4px' : '0px'})` }}
-                  />
-                  {sortedTiers.map((t, idx) => {
-                    const td = describeTier(offerType, t);
-                    const isActive = idx === activeIdx;
-                    const isPast = activeIdx >= 0 && idx < activeIdx;
-                    return (
-                      <div key={idx} className="relative flex flex-col items-center flex-1 min-w-0">
-                        <div
-                          className={cn(
-                            "rounded-full border-4 border-white z-10 transition-all",
-                            isActive
-                              ? "w-4 h-4 bg-[#0E6B5A] shadow-md ring-4 ring-[#0E6B5A]/20"
-                              : isPast
-                                ? "w-4 h-4 bg-[#0E6B5A] shadow-sm"
-                                : "w-4 h-4 bg-[#E5E7EB]",
-                          )}
-                        />
-                        <div className={cn("mt-2 text-center", !isActive && !isPast && "opacity-70")}>
-                          <div
-                            className={cn(
-                              "text-[10px] leading-tight",
-                              isActive ? "text-[#0E6B5A] font-extrabold" : "text-[#6B7280] font-medium",
-                            )}
-                          >
-                            {tierRange(t)} חברים
-                          </div>
-                          <div
-                            className={cn(
-                              "gb-num leading-tight mt-0.5",
-                              isActive ? "text-[13px] font-extrabold text-[#1F2937]" : "text-[11px] font-bold text-[#1F2937]",
-                            )}
-                          >
-                            {td.headline}
-                          </div>
-                        </div>
-                        {isActive && (
-                          <div className="absolute -top-1 left-1/2 -translate-x-1/2 -translate-y-full">
-                            <div className="bg-[#0E6B5A] text-white text-[9px] px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">
-                              המחיר שלך
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Unlock next tier promo */}
-              {nextTier && peopleNeeded > 0 && bestDisplay && (
-                <div className="mt-5 bg-[#F7F5F0] border border-[#ECEEF2] rounded-2xl p-3 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center border border-[#ECEEF2] shadow-sm shrink-0">
-                      <span className="text-[#0E6B5A] font-black text-sm">+{peopleNeeded}</span>
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[12px] font-extrabold text-[#1F2937] leading-tight">
-                        עוד {peopleNeeded} חברים למחיר הבא
-                      </div>
-                      {savingsPerPerson && savingsPerPerson > 0 ? (
-                        <div className="text-[10px] text-[#6B7280] leading-snug mt-0.5">
-                          חיסכון נוסף של {ils(savingsPerPerson)} לכל אחד מהקבוצה
-                        </div>
-                      ) : (
-                        <div className="text-[10px] text-[#6B7280] leading-snug mt-0.5">
-                          המחיר ירד אוטומטית עבור כל הקבוצה
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-[#0E6B5A] font-black text-[15px] gb-num shrink-0">
-                    {describeTier(offerType, nextTier).headline}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })()}
-
       {/* Spacer for sticky CTA */}
       <div aria-hidden className="h-40" />
+
+
 
       {/* ===== SECTION 7 — STICKY CTA ===== */}
       <div
