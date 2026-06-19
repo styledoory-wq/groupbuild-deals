@@ -749,20 +749,25 @@ export default function DealDetail() {
             className="text-[22px] leading-[1.2] font-black text-[#1F2937] tracking-tight mb-3"
           />
           {display.effectivePrice != null ? (
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-[28px] font-black text-[#1F2937] gb-num leading-none">{ils(display.effectivePrice)}</span>
+            <div className="space-y-1.5">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-[28px] font-black text-[#1F2937] gb-num leading-none">{ils(display.effectivePrice)}</span>
+                {savingsAmount ? (
+                  <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
+                    חיסכון {ils(savingsAmount)}
+                  </span>
+                ) : discountPct ? (
+                  <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
+                    {discountPct}% הנחה
+                  </span>
+                ) : null}
+              </div>
               {display.referencePrice && display.referencePrice > display.effectivePrice && (
-                <span className="text-[14px] line-through text-[#9CA3AF] gb-num">{ils(display.referencePrice)}</span>
+                <div className="text-[11px] text-[#6B7280] flex items-center gap-1.5">
+                  <span>מחיר רגיל ללא רכישה קבוצתית:</span>
+                  <span className="line-through gb-num">{ils(display.referencePrice)}</span>
+                </div>
               )}
-              {savingsAmount ? (
-                <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
-                  חיסכון {ils(savingsAmount)}
-                </span>
-              ) : discountPct ? (
-                <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
-                  {discountPct}% הנחה
-                </span>
-              ) : null}
             </div>
           ) : (
             <p className="text-[16px] font-black text-[#1F2937]">{display.headline}</p>
