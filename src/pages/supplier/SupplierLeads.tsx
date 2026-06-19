@@ -272,7 +272,7 @@ export default function SupplierLeads() {
           const dealIds = allDeals.map((d) => d.id);
           const { data: ints, error: iErr } = await supabase
             .from("deal_interests")
-            .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes,is_deleted,deleted_at")
+            .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes,is_deleted,deleted_at,direct_deposit_status,direct_deposit_amount,resident_marked_paid_at,supplier_confirmed_at")
             .in("deal_id", dealIds)
             .eq("is_demo", false)
             .order("created_at", { ascending: false });
