@@ -315,60 +315,79 @@ export default function ProjectManagement() {
           </button>
         </div>
 
-        {/* Project card */}
-        <div className="bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] relative">
-          <button
-            onClick={() => setEditInfoOpen(true)}
-            className="absolute top-3 left-3 w-8 h-8 rounded-full bg-[#0E6B5A]/10 flex items-center justify-center active:scale-95"
-            aria-label="עריכת פרטי פרויקט"
-          >
-            <Pencil className="h-3.5 w-3.5 text-[#0E6B5A]" />
-          </button>
-          <div className="flex items-start gap-3">
-            <div
-              className="w-20 h-20 rounded-2xl shrink-0 bg-cover bg-center"
-              style={{ backgroundImage: "linear-gradient(135deg,#0E6B5A 0%,#3aa089 100%)" }}
-            >
-              <div className="w-full h-full flex items-center justify-center text-[36px]">🏡</div>
+        {/* Project card / empty state */}
+        {!info.name && !info.manager && !info.targetDate ? (
+          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-center">
+            <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-[36px]" style={{ background: "linear-gradient(135deg,#0E6B5A 0%,#3aa089 100%)" }}>
+              🏡
             </div>
-            <div className="flex-1 min-w-0 pl-8">
-              <h2 className="text-[16px] font-extrabold text-[#1A1A1A] break-words" style={{ fontFamily: URBANIST }}>
-                {info.name || <span className="text-gray-400 font-medium">שם הפרוייקט</span>}
-              </h2>
-              <p className="text-[12px] text-gray-500 mt-0.5 break-words">{info.subtitle || "הוסיפו תיאור קצר"}</p>
+            <h2 className="text-[16px] font-extrabold text-[#1A1A1A] mt-4" style={{ fontFamily: URBANIST }}>
+              פרטי הפרויקט
+            </h2>
+            <p className="text-[13px] text-gray-500 mt-1 leading-relaxed">
+              הזינו את שם הפרויקט, שם מנהל הפרויקט ותאריך צפי סיום כדי לנהל את הבנייה בצורה מסודרת
+            </p>
+            <button
+              onClick={() => setEditInfoOpen(true)}
+              className="mt-5 w-full py-3 rounded-2xl text-white text-[14px] font-bold active:scale-[0.98] transition-transform"
+              style={{ background: BRAND, fontFamily: URBANIST }}
+            >
+              מילוי פרטי פרויקט
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] relative">
+            <button
+              onClick={() => setEditInfoOpen(true)}
+              className="absolute top-3 left-3 w-8 h-8 rounded-full bg-[#0E6B5A]/10 flex items-center justify-center active:scale-95"
+              aria-label="עריכת פרטי פרויקט"
+            >
+              <Pencil className="h-3.5 w-3.5 text-[#0E6B5A]" />
+            </button>
+            <div className="flex items-start gap-3">
+              <div
+                className="w-20 h-20 rounded-2xl shrink-0 bg-cover bg-center"
+                style={{ backgroundImage: "linear-gradient(135deg,#0E6B5A 0%,#3aa089 100%)" }}
+              >
+                <div className="w-full h-full flex items-center justify-center text-[36px]">🏡</div>
+              </div>
+              <div className="flex-1 min-w-0 pl-8">
+                <h2 className="text-[16px] font-extrabold text-[#1A1A1A] break-words" style={{ fontFamily: URBANIST }}>
+                  {info.name || <span className="text-gray-400 font-medium">שם הפרוייקט</span>}
+                </h2>
+                <p className="text-[12px] text-gray-500 mt-0.5 break-words">{info.subtitle || "הוסיפו תיאור קצר"}</p>
 
-
-              {/* Progress ring */}
-              <div className="mt-3 flex items-center gap-3">
-                <div className="relative w-14 h-14">
-                  <svg viewBox="0 0 36 36" className="w-14 h-14 -rotate-90">
-                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#E5E7EB" strokeWidth="3.5" />
-                    <circle
-                      cx="18" cy="18" r="15.5" fill="none"
-                      stroke={BRAND} strokeWidth="3.5" strokeLinecap="round"
-                      strokeDasharray={`${(overallPct / 100) * 97.4} 97.4`}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-[13px] font-extrabold text-[#1A1A1A] tabular-nums" style={{ fontFamily: URBANIST }}>
-                      {overallPct}%
-                    </span>
+                {/* Progress ring */}
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="relative w-14 h-14">
+                    <svg viewBox="0 0 36 36" className="w-14 h-14 -rotate-90">
+                      <circle cx="18" cy="18" r="15.5" fill="none" stroke="#E5E7EB" strokeWidth="3.5" />
+                      <circle
+                        cx="18" cy="18" r="15.5" fill="none"
+                        stroke={BRAND} strokeWidth="3.5" strokeLinecap="round"
+                        strokeDasharray={`${(overallPct / 100) * 97.4} 97.4`}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[13px] font-extrabold text-[#1A1A1A] tabular-nums" style={{ fontFamily: URBANIST }}>
+                        {overallPct}%
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="text-[11px] text-gray-500 leading-tight">
-                  התקדמות<br />כוללת
+                  <div className="text-[11px] text-gray-500 leading-tight">
+                    התקדמות<br />כוללת
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-3 gap-2 mt-4">
-            <InfoChip icon={<User className="h-3.5 w-3.5" />} label="מנהל" value={info.manager || "—"} />
-            <InfoChip icon={<Calendar className="h-3.5 w-3.5" />} label="יעד" value={info.targetDate ? formatDateShort(info.targetDate) : "—"} />
-
-            <InfoChip icon={<Clock className="h-3.5 w-3.5" />} label="עדכון" value="היום" />
+            <div className="grid grid-cols-3 gap-2 mt-4">
+              <InfoChip icon={<User className="h-3.5 w-3.5" />} label="מנהל" value={info.manager || "—"} />
+              <InfoChip icon={<Calendar className="h-3.5 w-3.5" />} label="יעד" value={info.targetDate ? formatDateShort(info.targetDate) : "—"} />
+              <InfoChip icon={<Clock className="h-3.5 w-3.5" />} label="עדכון" value="היום" />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Timeline */}
         <div className="mt-6 mb-2 flex items-center justify-between">
