@@ -524,7 +524,12 @@ export default function SupplierDashboard() {
             <div className="mt-3 overflow-x-auto no-scrollbar">
               <div className="flex gap-3 px-5 pb-1 snap-x snap-mandatory" dir="rtl">
                 {areaProjects.slice(0, 8).map((p, i) => {
-                  const isHot = i === 1;
+                  const ageDays = p.createdAt ? Math.floor((Date.now() - +new Date(p.createdAt)) / 86400000) : null;
+                  const isNew = ageDays !== null && ageDays <= 14;
+                  // "Hot" = largest project in the visible set (real signal: highest unit count)
+                  const maxUnits = Math.max(...areaProjects.slice(0, 8).map((x) => x.units || 0));
+                  const isHot = (p.units || 0) > 0 && p.units === maxUnits && maxUnits >= 30;
+                  const potential = (p.units || 0) * (avgDealPrice || 0);
                   return (
                     <div key={p.id} className="snap-start min-w-[180px] w-[180px] bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden flex flex-col">
                       <div className="relative h-[110px] overflow-hidden">
@@ -534,15 +539,23 @@ export default function SupplierDashboard() {
                           loading="lazy"
                           className="absolute inset-0 w-full h-full object-cover"
                         />
-                        <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-white shadow ${isHot ? "bg-[#EA6A3A]" : "bg-white/95 !text-[#0F172A]"}`}>
-                          {isHot ? <><Flame className="h-2.5 w-2.5" strokeWidth={3} /> חם</> : "חדש"}
-                        </span>
+                        {(isHot || isNew) && (
+                          <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shadow ${isHot ? "bg-[#EA6A3A] text-white" : "bg-white/95 text-[#0F172A]"}`}>
+                            {isHot ? <><Flame className="h-2.5 w-2.5" strokeWidth={3} /> חם</> : "חדש"}
+                          </span>
+                        )}
                       </div>
                       <div className="p-3 text-right flex-1 flex flex-col">
                         <h3 className="font-bold text-[14px] text-[#0F172A] tracking-tight truncate">{p.name}</h3>
                         <p className="text-[#8E95A2] text-[11px] truncate mt-0.5">{p.city}{p.units ? ` · ${p.units} יח״ד` : ""}</p>
-                        <div className="mt-2 text-[10px] text-[#8E95A2]">פוטנציאל הכנסה</div>
-                        <div className="font-bold text-[15px]" style={{ color: GREEN }}>{formatShortILS((p.units || 10) * 4000)}</div>
+                        {potential > 0 ? (
+                          <>
+                            <div className="mt-2 text-[10px] text-[#8E95A2]">פוטנציאל הכנסה</div>
+                            <div className="font-bold text-[15px]" style={{ color: GREEN }}>{formatShortILS(potential)}</div>
+                          </>
+                        ) : (
+                          <div className="mt-2 text-[11px] text-[#8E95A2] truncate">{p.stage ?? "פרויקט חדש"}</div>
+                        )}
                         <button
                           onClick={() => navigate("/supplier/offers/new")}
                           className={`mt-2.5 w-full h-9 rounded-full text-[12px] font-bold active:scale-95 transition ${isHot ? "text-white" : "border bg-white"}`}
