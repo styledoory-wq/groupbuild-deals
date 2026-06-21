@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, Save, Mail, Smartphone } from "lucide-react";
+import { Bell, Save, Mail, Smartphone, Globe, Check, X } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,13 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import {
+  enableWebPush,
+  disableWebPush,
+  hasActiveWebPush,
+  isWebPushSupported,
+  currentPermission,
+} from "@/lib/webPush";
 
 type Settings = {
   email_notifications_enabled: boolean;
