@@ -232,25 +232,24 @@ export default function SupplierOffers() {
     return base;
   };
 
-  // Top stats
+  // Top stats — real data only
   const totals = useMemo(() => {
     const active = deals.filter((d) => d.status === "active");
     const closed = deals.filter((d) => d.status === "closed");
     const newLeads = deals.reduce((s, d) => s + (participantsByDeal[d.id] ?? 0), 0);
+    const totalSaves = deals.reduce((s, d) => s + (savesByDeal[d.id] ?? 0), 0);
     const potential = active.reduce(
-      (s, d) => s + unitPriceForDeal(d) * Math.max(1, (participantsByDeal[d.id] ?? 0) + 2),
+      (s, d) => s + unitPriceForDeal(d) * Math.max(0, participantsByDeal[d.id] ?? 0),
       0,
     );
-    const totalViews = deals.reduce((s, d) => s + visualMetrics(d.id, participantsByDeal[d.id] ?? 0).views, 0);
-    const conv = totalViews > 0 ? Math.min(48, Math.round((newLeads / totalViews) * 1000) / 10 + 14) : 0;
     return {
       activeCount: active.length,
       closedCount: closed.length,
       newLeads,
+      totalSaves,
       potential,
-      conv,
     };
-  }, [deals, participantsByDeal]);
+  }, [deals, participantsByDeal, savesByDeal]);
 
   const filtered = useMemo(() => {
     if (filter === "all") return deals;
@@ -272,23 +271,27 @@ export default function SupplierOffers() {
         </Link>
       </div>
 
-      {/* Stats */}
+      {/* Stats — real-time aggregates */}
       {!loading && !error && supplierId && deals.length > 0 && (
         <div className="px-5 mt-4 flex gap-2">
           <StatCard
-            label="שיעור המרה" value={`${totals.conv.toFixed(0)}%`} delta="8% מהחודש הקודם"
-            tone="violet" icon={<TrendingUp className="h-3.5 w-3.5" />} seed={11}
-          />
-          <StatCard
-            label="לידים חדשים" value={`${totals.newLeads}`} delta="18% מהחודש הקודם"
+            label="מצטרפים" value={`${totals.newLeads}`}
+            subtitle={`ב-${deals.length} הצעות`}
             tone="amber" icon={<Users className="h-3.5 w-3.5" />} seed={27}
           />
           <StatCard
-            label="הכנסה צפויה" value={ILS(totals.potential)} delta="22% מהחודש הקודם"
+            label="שמירות" value={`${totals.totalSaves}`}
+            subtitle="סה״כ עניין"
+            tone="violet" icon={<Heart className="h-3.5 w-3.5" />} seed={11}
+          />
+          <StatCard
+            label="הכנסה צפויה" value={ILS(totals.potential)}
+            subtitle="לפי מצטרפים בפועל"
             tone="emerald" icon={<Wallet className="h-3.5 w-3.5" />} seed={43}
           />
           <StatCard
-            label="הצעות פעילות" value={`${totals.activeCount}`} delta={`${totals.closedCount} הסתיימו`}
+            label="פעילות" value={`${totals.activeCount}`}
+            subtitle={`${totals.closedCount} הסתיימו`}
             tone="sky" icon={<Briefcase className="h-3.5 w-3.5" />} seed={59}
           />
         </div>
