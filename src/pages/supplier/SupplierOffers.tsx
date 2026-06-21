@@ -245,8 +245,6 @@ export default function SupplierOffers() {
     return deals.filter((d) => d.status === filter);
   }, [deals, filter]);
 
-  const featured = filtered[0];
-  const rest = filtered.slice(1);
 
   // ---------- render ----------
   return (
