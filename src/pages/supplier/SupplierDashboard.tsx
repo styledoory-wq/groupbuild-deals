@@ -493,28 +493,31 @@ export default function SupplierDashboard() {
         {tasks.length > 0 && (
           <>
             <SectionHeader title="משימות שמחכות לך" badge={tasks.length.toString()} />
-            <div className="px-5 mt-3 bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden mx-5">
-              <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden">
-                {tasks.map((t, i) => {
-                  const Icon = t.icon;
-                  return (
+            <div className="px-5 mt-3 space-y-2.5">
+              {tasks.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <div
+                    key={t.id}
+                    className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-4 flex items-center gap-3"
+                  >
                     <button
-                      key={t.id}
                       onClick={() => navigate(t.to)}
-                      className={`w-full flex items-center gap-3 p-4 text-right active:bg-[#F7F8FA] transition ${i < tasks.length - 1 ? "border-b border-[#F2F4F7]" : ""}`}
+                      className="shrink-0 h-9 px-3 rounded-full text-[12px] font-bold text-white active:scale-95 transition"
+                      style={{ background: GREEN }}
                     >
-                      <ChevronLeft className="h-4 w-4 text-[#C7CCD4] shrink-0" />
-                      <div className="flex-1 min-w-0 text-right">
-                        <div className="font-semibold text-[14px] text-[#0F172A] tracking-tight truncate">{t.title}</div>
-                        <div className="text-[12px] text-[#8E95A2] truncate mt-0.5">{t.subtitle}</div>
-                      </div>
-                      <div className="h-10 w-10 rounded-2xl flex items-center justify-center shrink-0" style={{ background: t.iconBg }}>
-                        <Icon className="h-[18px] w-[18px]" style={{ color: t.iconColor }} strokeWidth={2.2} />
-                      </div>
+                      {t.cta}
                     </button>
-                  );
-                })}
-              </div>
+                    <div className="flex-1 min-w-0 text-right">
+                      <div className="font-bold text-[14px] text-[#0F172A] tracking-tight truncate">{t.title}</div>
+                      <div className="text-[12px] text-[#8E95A2] truncate mt-0.5">{t.subtitle}</div>
+                    </div>
+                    <div className="h-11 w-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: t.iconBg }}>
+                      <Icon className="h-[19px] w-[19px]" style={{ color: t.iconColor }} strokeWidth={2.2} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </>
         )}
