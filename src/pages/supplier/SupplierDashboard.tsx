@@ -148,36 +148,55 @@ export default function SupplierDashboard() {
           }));
           if (!cancelled) setCounts(cMap);
 
-          // Leads today
+          // Leads today + 14-day daily series for trends/charts
           if (dealIds.length > 0) {
             const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
-            const { count: todayCount } = await supabase
-              .from("deal_interests")
-              .select("id", { count: "exact", head: true })
-              .in("deal_id", dealIds)
-              .eq("is_deleted", false)
-              .eq("is_demo", false)
-              .gte("created_at", startOfDay.toISOString());
-            if (!cancelled) setLeadsToday(todayCount ?? 0);
+            const since14 = new Date(startOfDay); since14.setDate(since14.getDate() - 13);
+            const sinceIso = since14.toISOString();
 
-            // Recent activity: latest interests + favorites
-            const [{ data: recentLeads }, { data: recentFavs }] = await Promise.all([
+            const [{ data: leadRows14 }, { data: favRows14 }, { data: paidRows14 }] = await Promise.all([
               supabase.from("deal_interests")
-                .select("id, created_at, deal_id")
+                .select("created_at, deal_id, id")
                 .in("deal_id", dealIds).eq("is_deleted", false).eq("is_demo", false)
-                .order("created_at", { ascending: false }).limit(5),
+                .gte("created_at", sinceIso)
+                .order("created_at", { ascending: false }),
               supabase.from("favorites")
-                .select("id, created_at, deal_id")
+                .select("created_at, deal_id, id")
                 .in("deal_id", dealIds)
-                .order("created_at", { ascending: false }).limit(5),
+                .gte("created_at", sinceIso)
+                .order("created_at", { ascending: false }),
+              supabase.from("deposits")
+                .select("created_at, deal_id, id")
+                .in("deal_id", dealIds).eq("status", "paid").eq("is_deleted", false)
+                .gte("created_at", sinceIso),
             ]);
+
+            const bucketize = (rows: { created_at: string }[] | null | undefined): number[] => {
+              const arr = Array(14).fill(0);
+              (rows ?? []).forEach((r) => {
+                const t = new Date(r.created_at as string);
+                const dayIdx = 13 - Math.floor((startOfDay.getTime() - new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()) / 86400000);
+                if (dayIdx >= 0 && dayIdx < 14) arr[dayIdx] += 1;
+              });
+              return arr;
+            };
+
+            const dLeads = bucketize(leadRows14);
+            const dFavs = bucketize(favRows14);
+            const dPaid = bucketize(paidRows14);
+            if (!cancelled) {
+              setDaily({ leads: dLeads, favs: dFavs, paid: dPaid });
+              setLeadsToday(dLeads[13] ?? 0);
+            }
+
+            // Recent activity from already-fetched lists
             const titleMap = new Map(list.map(d => [d.id, d.title]));
             const items: ActivityItem[] = [];
-            (recentLeads ?? []).forEach((r) => items.push({
+            (leadRows14 ?? []).slice(0, 5).forEach((r) => items.push({
               id: `l-${r.id}`, type: "lead",
               title: "ליד חדש נכנס", subtitle: titleMap.get(r.deal_id) ?? "הצעה", at: r.created_at as string,
             }));
-            (recentFavs ?? []).forEach((r) => items.push({
+            (favRows14 ?? []).slice(0, 5).forEach((r) => items.push({
               id: `f-${r.id}`, type: "favorite",
               title: "משתמש שמר הצעה", subtitle: titleMap.get(r.deal_id) ?? "הצעה", at: r.created_at as string,
             }));
