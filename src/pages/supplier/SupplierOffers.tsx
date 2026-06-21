@@ -382,7 +382,8 @@ function FeaturedDealCard({
     offer_type: offerType, original_price: d.original_price, discounted_price: d.discounted_price,
     discount_percentage: d.discount_percentage, base_price: d.base_price, tiers,
   }, 0);
-  const goal = Math.max(participants + 1, tiers[0]?.minParticipants ?? 2);
+  const tierMax = tiers.reduce((m, t) => Math.max(m, Number(t?.minParticipants ?? 0)), 0);
+  const goal = Math.max(1, Number(d.target_participants ?? 0) || tierMax || 10);
   const pct = Math.min(100, Math.round((participants / goal) * 100));
   const potential = unitPrice * Math.max(0, participants);
   const nextDrop = tiers[1]?.discounted_price ?? null;
