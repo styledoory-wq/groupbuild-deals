@@ -369,49 +369,51 @@ export default function CategoriesList() {
           style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 10px)" }}
         >
           <div
-            className="rounded-3xl p-4 shadow-2xl shadow-[#0E6B5A]/15"
+            className="rounded-3xl p-3.5 shadow-2xl shadow-[#0E6B5A]/15"
             style={{ background: "#EFF7F3", border: `1px solid ${BRAND}22` }}
           >
-            {/* Row 1: trophy + title */}
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-[32px] leading-none shrink-0" aria-hidden>🏆</span>
-              <div className="flex-1 min-w-0 text-right">
-                <div
-                  className="text-[15px] font-extrabold text-[#1A1A1A] leading-tight"
-                  style={{ fontFamily: URBANIST }}
-                >
-                  {completedStages} {totalStages > 0 ? `ספקים ב-${totalStages} שלבים` : "שלבים"}
+            {/* Single row: trophy+title on right, stepper on left */}
+            <div className="flex items-center gap-3 mb-2">
+              {/* Right side: trophy + title */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[30px] leading-none" aria-hidden>🏆</span>
+                <div className="text-right">
+                  <div
+                    className="text-[14px] font-extrabold text-[#1A1A1A] leading-tight whitespace-nowrap"
+                    style={{ fontFamily: URBANIST }}
+                  >
+                    {completedStages} ספקים ב-{totalStages} שלבים
+                  </div>
+                  <div className="text-[10.5px] text-gray-500 mt-0.5 whitespace-nowrap">
+                    מתכנים ועד מסירת מפתח
+                  </div>
                 </div>
-                <div className="text-[11.5px] text-gray-500 mt-0.5">
-                  מתכנים ועד מסירת מפתח
-                </div>
+              </div>
+
+              {/* Left side: stepper circles */}
+              <div className="flex-1 flex items-center justify-end gap-1">
+                {meta.stages.map((s, i) => {
+                  const done = i < completedStages;
+                  const active = i === completedStages;
+                  return (
+                    <span
+                      key={s.key}
+                      className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-extrabold tabular-nums shrink-0"
+                      style={{
+                        background: done ? BRAND : active ? BRAND : "#E6E3DC",
+                        color: done || active ? "#FFFFFF" : "#9A958B",
+                        fontFamily: URBANIST,
+                      }}
+                    >
+                      {done ? "✓" : i + 1}
+                    </span>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Row 2: stepper circles — full width, centered */}
-            <div className="flex items-center justify-center gap-1.5 mb-2">
-              {meta.stages.map((s, i) => {
-                const done = i < completedStages;
-                const active = i === completedStages;
-                return (
-                  <span
-                    key={s.key}
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-extrabold tabular-nums shrink-0"
-                    style={{
-                      background: done ? BRAND : active ? "#FFFFFF" : "#E6E3DC",
-                      color: done ? "#FFFFFF" : active ? BRAND : "#9A958B",
-                      border: active ? `2px solid ${BRAND}` : "2px solid transparent",
-                      fontFamily: URBANIST,
-                    }}
-                  >
-                    {done ? "✓" : i + 1}
-                  </span>
-                );
-              })}
-            </div>
-
-            {/* Row 3: completion text */}
-            <div className="text-[11px] text-gray-500 text-center mb-3">
+            {/* Completion text aligned left under stepper */}
+            <div className="text-[10.5px] text-gray-500 text-left mb-3 pl-1">
               {completedStages} מתוך {totalStages} שלבים הושלמו
             </div>
 
@@ -419,7 +421,7 @@ export default function CategoriesList() {
             <button
               onClick={() => navigate("/resident/project-management")}
               className="w-full flex items-center justify-center gap-2 text-white font-extrabold py-3.5 rounded-2xl active:scale-[0.98] transition-transform"
-              style={{ background: BRAND, fontFamily: URBANIST }}
+              style={{ background: BRAND_DARK, fontFamily: URBANIST }}
             >
               <Briefcase className="h-4.5 w-4.5" />
               מעבר לניהול הפרויקט שלי
