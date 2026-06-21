@@ -77,6 +77,21 @@ const CREAM = "#F7F5F0";
 const INK = "#0B1220";
 const MUTED = "#6B7280";
 
+// Satori has no BiDi engine. For Hebrew strings, reverse word order while keeping
+// Latin/number tokens intact so they render visually correct when laid out LTR.
+function rtlText(s: string): string {
+  if (!s) return s;
+  // Split into tokens preserving spaces; reverse token order; within Hebrew tokens reverse chars.
+  const hebrewRe = /[\u0590-\u05FF]/;
+  const tokens = s.split(/(\s+)/);
+  const out = tokens.map(t => {
+    if (/^\s+$/.test(t)) return t;
+    if (hebrewRe.test(t)) return t.split("").reverse().join("");
+    return t;
+  });
+  return out.reverse().join("");
+}
+
 function buildTree(deal: Deal, fmt: Format, coverDataUrl: string | null, qrDataUrl: string, dealUrl: string) {
   const original = deal.original_price ?? null;
   const price = deal.discounted_price ?? null;
@@ -129,10 +144,10 @@ function buildTree(deal: Deal, fmt: Format, coverDataUrl: string | null, qrDataU
         } : { type: "div", props: { style: { width: "100%", height: imgH, borderRadius: 28, background: `linear-gradient(135deg, ${GREEN} 0%, ${GREEN_2} 100%)`, marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: 96 }, children: "GroupBuild" } },
 
         // Title
-        { type: "div", props: { lang: "he", style: { color: INK, fontSize: titleSize, fontWeight: 900, lineHeight: 1.1, textAlign: "right", direction: "rtl", marginBottom: 16, display: "flex" }, children: deal.title } },
+        { type: "div", props: { style: { color: INK, fontSize: titleSize, fontWeight: 900, lineHeight: 1.1, textAlign: "right", marginBottom: 16, display: "flex" }, children: rtlText(deal.title) } },
 
         // Tag line
-        { type: "div", props: { lang: "he", style: { color: MUTED, fontSize: isBanner ? 22 : 28, textAlign: "right", direction: "rtl", marginBottom: 28, display: "flex" }, children: "ככל שיותר מצטרפים — המחיר יורד" } },
+        { type: "div", props: { style: { color: MUTED, fontSize: isBanner ? 22 : 28, textAlign: "right", marginBottom: 28, display: "flex" }, children: rtlText("ככל שיותר מצטרפים — המחיר יורד") } },
 
         // Prices row
         {
@@ -150,11 +165,11 @@ function buildTree(deal: Deal, fmt: Format, coverDataUrl: string | null, qrDataU
           type: "div", props: {
             style: { marginTop: "auto", display: "flex", flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between", gap: 24 },
             children: [
-              { type: "div", props: { lang: "he", style: { background: GREEN, color: "#fff", padding: "22px 40px", borderRadius: 20, fontSize: isBanner ? 28 : 36, fontWeight: 900, display: "flex" }, children: "להצטרפות לחצו כאן ←" } },
+              { type: "div", props: { style: { background: GREEN, color: "#fff", padding: "22px 40px", borderRadius: 20, fontSize: isBanner ? 28 : 36, fontWeight: 900, display: "flex" }, children: rtlText("← להצטרפות לחצו כאן") } },
               { type: "div", props: { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6 },
                 children: [
                   { type: "img", props: { src: qrDataUrl, width: isBanner ? 110 : 150, height: isBanner ? 110 : 150 } },
-                  { type: "div", props: { lang: "he", style: { fontSize: 16, color: MUTED, display: "flex" }, children: "סרקו לפרטים" } },
+                  { type: "div", props: { style: { fontSize: 16, color: MUTED, display: "flex" }, children: rtlText("סרקו לפרטים") } },
                 ],
               } },
             ],
