@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
+import { HelpButton } from "@/components/OnboardingFlow";
 
 type DbSupplier = {
   id: string;
@@ -704,6 +705,7 @@ export default function SupplierDashboard() {
       </div>
 
       <BottomNav role="supplier" />
+      <HelpButton role="supplier" />
     </MobileShell>
   );
 }
