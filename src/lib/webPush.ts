@@ -71,7 +71,7 @@ export async function enableWebPush(userId: string): Promise<
       (await reg.pushManager.getSubscription()) ||
       (await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
       }));
   } catch (err) {
     return { ok: false, reason: "subscribe_failed", detail: String(err) };
