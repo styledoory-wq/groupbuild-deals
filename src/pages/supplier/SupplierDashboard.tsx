@@ -36,7 +36,7 @@ type DbDeal = {
   target_participants: number | null;
   cover_image_url: string | null;
   gallery_images: unknown;
-  end_date?: string | null;
+  ends_at?: string | null;
   description?: string | null;
 };
 
@@ -147,7 +147,7 @@ export default function SupplierDashboard() {
         if (supplierRow?.id && (supplierRow.approval_status === "approved" || supplierRow.approval_status === "active")) {
           const { data: dealRows, error: dealsErr } = await supabase
             .from("deals")
-            .select("id,title,status,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants,cover_image_url,gallery_images,end_date,description")
+            .select("id,title,status,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants,cover_image_url,gallery_images,ends_at,description")
             .eq("supplier_id", supplierRow.id)
             .eq("is_deleted", false)
             .order("created_at", { ascending: false });
@@ -173,8 +173,8 @@ export default function SupplierDashboard() {
           const now = new Date();
           const sevenDaysFromNow = new Date(now.getTime() + 7 * 86400000);
           const ending = list.filter((d) => {
-            if (!d.end_date) return false;
-            const e = new Date(d.end_date);
+            if (!d.ends_at) return false;
+            const e = new Date(d.ends_at);
             return e > now && e <= sevenDaysFromNow;
           }).length;
           if (!cancelled) setEndingSoonOffers(ending);
