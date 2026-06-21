@@ -65,6 +65,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminProjects = lazy(() => import("./pages/admin/AdminProjects"));
 const AdminResidents = lazy(() => import("./pages/admin/AdminResidents"));
 const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
+const AdminProjectStages = lazy(() => import("./pages/admin/AdminProjectStages"));
 const AdminDeals = lazy(() => import("./pages/admin/AdminDeals"));
 const AdminDeposits = lazy(() => import("./pages/admin/AdminDeposits"));
 const AdminStats = lazy(() => import("./pages/admin/AdminStats"));
@@ -258,6 +259,7 @@ const App = () => (
                   <Route path="/admin/suppliers-mock" element={<Navigate to="/admin/suppliers" replace />} />
                   <Route path="/admin/residents" element={adminRoute(<AdminResidents />)} />
                   <Route path="/admin/categories" element={adminRoute(<AdminCategories />)} />
+                  <Route path="/admin/project-stages" element={adminRoute(<AdminProjectStages />)} />
                   <Route path="/admin/deals" element={adminRoute(<AdminDeals />)} />
                   <Route path="/admin/deposits" element={adminRoute(<AdminDeposits />)} />
                   <Route path="/admin/payment-settings" element={adminRoute(<AdminPaymentSettings />)} />

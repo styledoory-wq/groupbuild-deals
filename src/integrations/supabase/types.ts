@@ -83,6 +83,41 @@ export type Database = {
         }
         Relationships: []
       }
+      category_project_stages: {
+        Row: {
+          category_id: string
+          created_at: string
+          display_order: number
+          id: string
+          project_type: string
+          stage_key: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          project_type: string
+          stage_key: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          project_type?: string
+          stage_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_project_stages_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           council_id: string | null
