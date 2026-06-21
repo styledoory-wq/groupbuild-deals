@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import originalLogo from "@/assets/groupbuild-logo-cropped.png";
+import brandMark from "@/assets/groupbuild-mark-exact.png.asset.json";
 
 const SPLASH_SHOWN_KEY = "gb:splash-shown";
 
@@ -52,22 +52,27 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      {/* Logo — exact original full logo */}
+      {/* Brand mark + wordmark */}
       <div
-        className="transition-all duration-700 ease-out flex items-center justify-center"
+        className="flex flex-col items-center transition-all duration-700 ease-out"
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0) scale(1)" : "translateY(8px) scale(0.94)",
-          width: "260px",
-          maxWidth: "72vw",
+          width: "min(44vw, 170px)",
         }}
       >
         <img
-          src={originalLogo}
+          src={brandMark.url}
           alt="GroupBuild"
           className="block h-auto w-full select-none object-contain"
           draggable={false}
         />
+        <span
+          className="mt-4 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-none tracking-tight text-foreground"
+          style={{ fontFamily: "'Rubik', 'Heebo', system-ui, sans-serif" }}
+        >
+          GroupBuild
+        </span>
       </div>
 
       {/* Gold accent loader */}
