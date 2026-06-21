@@ -943,7 +943,7 @@ function ModalShell({
 
 function ModalActions({ onCancel, onSave }: { onCancel: () => void; onSave: () => void }) {
   return (
-    <div className="flex gap-2 mt-5 sticky bottom-0 bg-white pt-3">
+    <div className="flex gap-2 mt-5">
       <button
         onClick={onCancel}
         className="flex-1 py-3 rounded-2xl text-[14px] font-bold text-gray-700 bg-gray-100 active:scale-[0.98]"
