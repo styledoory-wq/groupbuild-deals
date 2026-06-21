@@ -326,24 +326,27 @@ export default function SupplierDashboard() {
   }, [myDeals, counts]);
 
   const tasks = useMemo(() => {
-    const list: { id: string; icon: typeof Users; iconBg: string; iconColor: string; title: string; subtitle: string; to: string }[] = [];
+    const list: { id: string; icon: typeof Users; iconBg: string; iconColor: string; title: string; subtitle: string; cta: string; to: string }[] = [];
     const unanswered = totals.totalLeads - totals.totalPaid;
     if (unanswered > 0) list.push({
       id: "leads", icon: Users, iconBg: "#E8F5F1", iconColor: GREEN,
       title: `${unanswered} לידים שמחכים לטיפול`,
       subtitle: "ענה עכשיו והגדל את הסיכוי לסגירה",
+      cta: "טפל עכשיו",
       to: "/supplier/leads",
     });
     if (areaProjects.length > 0) list.push({
       id: "proj", icon: Building2, iconBg: "#FEF1E6", iconColor: "#D97706",
       title: `${areaProjects.length} פרויקטים חדשים באזורך`,
       subtitle: areaProjects[0] ? `${areaProjects[0].name} · ${areaProjects[0].city}` : "",
+      cta: "צור הצעה",
       to: "/supplier/offers/new",
     });
     if (myDeals.length === 0) list.push({
       id: "first", icon: Tag, iconBg: "#F3EAFB", iconColor: "#7C3AED",
       title: "צור את ההצעה הראשונה שלך",
       subtitle: "ספקים שמפרסמים הצעה מקבלים פי 4 לידים",
+      cta: "התחל",
       to: "/supplier/offers/new",
     });
     return list;
