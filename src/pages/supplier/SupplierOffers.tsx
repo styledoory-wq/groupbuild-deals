@@ -519,76 +519,97 @@ function FeaturedDealCard({
   );
 }
 
-// ---------- Compact card ----------
+// ---------- Compact card (default) ----------
 function CompactDealCard({
-  deal: d, participants, unitPrice, onChanged, featured = false,
-}: { deal: DealRow; participants: number; unitPrice: number; onChanged: () => void; featured?: boolean }) {
+  deal: d, participants, saves, unitPrice: _unitPrice, onChanged, onToggle, featured = false,
+}: {
+  deal: DealRow; participants: number; saves: number; unitPrice: number;
+  onChanged: () => void; onToggle: () => void; featured?: boolean;
+}) {
   const offerType = ((d.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(d.tiers) ? d.tiers : [];
   const display = describeOffer({
     offer_type: offerType, original_price: d.original_price, discounted_price: d.discounted_price,
     discount_percentage: d.discount_percentage, base_price: d.base_price, tiers,
   }, 0);
-  const m = visualMetrics(d.id, participants);
   const goal = Math.max(participants + 1, tiers[0]?.minParticipants ?? 3);
   const pct = Math.min(100, Math.round((participants / goal) * 100));
   const cover = d.cover_image_url || `https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=400&q=70`;
-  const highPerf = m.conv >= 22;
+  const highPerf = saves >= 5 || participants >= 3;
+
+  const stop = (e: React.MouseEvent) => { e.stopPropagation(); };
 
   return (
-    <Link to={`/supplier/offers/${d.id}/edit`} className="block">
-      <article className="rounded-[20px] bg-white border border-[#EEF0F4] p-3 flex gap-3 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_24px_-16px_rgba(16,24,40,0.12)] hover:shadow-[0_12px_32px_-14px_rgba(16,24,40,0.18)] hover:-translate-y-0.5 transition-all duration-300">
-        {/* Image */}
-        <div className="relative w-[110px] shrink-0 aspect-square rounded-[14px] overflow-hidden bg-[#F1F3F7]">
-          <img src={cover} alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute top-1.5 right-1.5">
-            <StatusPill status={d.status} />
+    <article
+      onClick={onToggle}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
+      className="cursor-pointer rounded-[20px] bg-white border border-[#EEF0F4] p-3 flex gap-3 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_24px_-16px_rgba(16,24,40,0.12)] hover:shadow-[0_12px_32px_-14px_rgba(16,24,40,0.18)] hover:-translate-y-0.5 transition-all duration-300"
+    >
+      {/* Image */}
+      <div className="relative w-[110px] shrink-0 aspect-square rounded-[14px] overflow-hidden bg-[#F1F3F7]">
+        <img src={cover} alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute top-1.5 right-1.5">
+          <StatusPill status={d.status} />
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        {featured && (
+          <span className="mb-1.5 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">
+            <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
+          </span>
+        )}
+        <div className="flex items-start justify-between gap-2">
+          <h4 className="text-[14px] font-bold text-[#0F172A] leading-snug line-clamp-2 flex-1">{d.title}</h4>
+          <div onClick={stop}>
+            <DealActionsMenu dealId={d.id} status={d.status} onChanged={onChanged} />
           </div>
         </div>
 
-        {/* Content */}
-        <div className="min-w-0 flex-1">
-          {featured && (
-            <span className="mb-1.5 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">
-              <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
+        <div className="mt-1.5 flex items-baseline gap-2">
+          <span className="text-[18px] font-extrabold text-emerald-600 leading-none">{display.headline}</span>
+          {d.original_price ? (
+            <span className="text-[11px] text-[#9CA3AF] line-through">
+              ₪{d.original_price.toLocaleString("he-IL")}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="mt-2">
+          <div className="flex items-center justify-between text-[10.5px] text-[#6B7280] mb-1">
+            <span className="font-bold text-emerald-700">{pct}%</span>
+            <span>{participants} מתוך {goal} מצטרפים</span>
+          </div>
+          <ProgressBar pct={pct} />
+        </div>
+
+        <div className="mt-2 flex items-center gap-3 text-[11px] text-[#6B7280]">
+          <span className="inline-flex items-center gap-1 text-rose-500"><Heart className="h-3 w-3" /> {compact(saves)}</span>
+          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {participants}</span>
+          <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {daysAgo(d.created_at)} ימים</span>
+          {highPerf ? (
+            <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+              <TrendingUp className="h-2.5 w-2.5" /> ביצועים גבוהים
+            </span>
+          ) : (
+            <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-semibold text-[#6B7280]">
+              פתיחה מורחבת <ChevronDown className="h-3 w-3" />
             </span>
           )}
-          <div className="flex items-start justify-between gap-2">
-            <h4 className="text-[14px] font-bold text-[#0F172A] leading-snug line-clamp-2 flex-1">{d.title}</h4>
-            <div onClick={(e) => e.preventDefault()}>
-              <DealActionsMenu dealId={d.id} status={d.status} onChanged={onChanged} />
-            </div>
-          </div>
-
-          <div className="mt-1.5 flex items-baseline gap-2">
-            <span className="text-[18px] font-extrabold text-emerald-600 leading-none">{display.headline}</span>
-            {d.original_price ? (
-              <span className="text-[11px] text-[#9CA3AF] line-through">
-                ₪{d.original_price.toLocaleString("he-IL")}
-              </span>
-            ) : null}
-          </div>
-
-          <div className="mt-2">
-            <div className="flex items-center justify-between text-[10.5px] text-[#6B7280] mb-1">
-              <span className="font-bold text-emerald-700">{pct}%</span>
-              <span>{participants} מתוך {goal} מצטרפים</span>
-            </div>
-            <ProgressBar pct={pct} />
-          </div>
-
-          <div className="mt-2 flex items-center gap-3 text-[11px] text-[#6B7280]">
-            <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {compact(m.views)}</span>
-            <span className="inline-flex items-center gap-1 text-rose-500"><Heart className="h-3 w-3" /> {compact(m.saves)}</span>
-            <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {participants}</span>
-            {highPerf && (
-              <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
-                <Sparkles className="h-2.5 w-2.5" /> ביצועים גבוהים
-              </span>
-            )}
-          </div>
         </div>
-      </article>
-    </Link>
+
+        <div className="mt-2.5 flex items-center justify-end gap-2" onClick={stop}>
+          <Link
+            to={`/supplier/offers/${d.id}/edit`}
+            className="h-8 px-3 rounded-[10px] bg-white border border-[#EEF0F4] text-[#1F2937] text-[11px] font-bold inline-flex items-center gap-1.5 hover:bg-[#F7F8FA]"
+          >
+            <Pencil className="h-3 w-3" /> ניהול הצעה
+          </Link>
+        </div>
+      </div>
+    </article>
   );
 }
