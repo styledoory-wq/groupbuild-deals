@@ -15,6 +15,7 @@ import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import { type StageId } from "@/lib/designSystem";
 import { getJourney, type JourneyId, VALID_JOURNEY_IDS } from "@/lib/journeys";
 import { QuoteRequestSheet } from "@/components/committee/QuoteRequestSheet";
+import { HelpButton } from "@/components/OnboardingFlow";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
   { id: "planning",     title: "תכנון ועיצוב",       description: "אדריכלות ועיצוב פנים",            icon: PencilRuler, dbStage: "planning" },
@@ -483,6 +484,7 @@ export default function ResidentDashboard() {
         </div>
       </div>
       <BottomNav role="resident" />
+      <HelpButton role="resident" />
 
       {isCommittee && quoteOpen && (
         <QuoteRequestSheet

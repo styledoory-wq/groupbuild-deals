@@ -57,6 +57,7 @@ function BottomNavImpl({ role }: { role: Role }) {
             <NavLink
               key={to}
               to={to}
+              data-tour={`nav-${to.split("/").pop()}`}
               onFocus={() => preloadRoute(to)}
               onMouseEnter={() => preloadRoute(to)}
               onPointerDown={() => preloadRoute(to)}
