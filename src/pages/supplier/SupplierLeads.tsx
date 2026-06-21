@@ -475,25 +475,28 @@ export default function SupplierLeads() {
           onTouchEnd={trashed ? undefined : makeSwipeEnd(q.id)}
         >
           <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="min-w-0">
-              <h4 className="font-bold text-sm text-foreground truncate">{name}</h4>
-              <p className="text-fs-xs text-muted-foreground truncate">{q.message ?? "פנייה כללית"}</p>
+            <div className="flex items-start gap-2.5 min-w-0">
+              <Avatar name={name} />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h4 className="font-extrabold text-[15px] text-foreground truncate">{name}</h4>
+                  <StageBadge stage={inquiryStage(q)} hot={isHot(q.created_at, inquiryStage(q))} />
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> {timeAgoHe(q.created_at)} · פנייה כללית
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30">
-                פנייה חדשה
-              </span>
-              {!trashed && (
-                <button
-                  onClick={() => setConfirmDelete({ kind: "inquiry", id: q.id })}
-                  disabled={statusBusy === q.id}
-                  aria-label="מחק פנייה"
-                  className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 disabled:opacity-50"
-                >
-                  {statusBusy === q.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                </button>
-              )}
-            </div>
+            {!trashed && (
+              <button
+                onClick={() => setConfirmDelete({ kind: "inquiry", id: q.id })}
+                disabled={statusBusy === q.id}
+                aria-label="מחק פנייה"
+                className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 disabled:opacity-50 shrink-0"
+              >
+                {statusBusy === q.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+              </button>
+            )}
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-fs-xs text-muted-foreground mb-2">
             {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
