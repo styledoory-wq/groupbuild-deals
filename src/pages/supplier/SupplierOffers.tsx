@@ -24,6 +24,7 @@ type DealRow = {
   offer_type: string | null;
   tiers: OfferTier[] | null;
   cover_image_url: string | null;
+  target_participants: number | null;
   created_at: string;
 };
 
