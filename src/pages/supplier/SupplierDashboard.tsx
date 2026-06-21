@@ -34,7 +34,6 @@ type DbDeal = {
   base_price: number | null;
   offer_type: string | null;
   target_participants: number | null;
-  image_url?: string | null;
 };
 
 type AreaProject = {
