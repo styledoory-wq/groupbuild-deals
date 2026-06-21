@@ -512,8 +512,8 @@ function FeaturedDealCard({
 
 // ---------- Compact card ----------
 function CompactDealCard({
-  deal: d, participants, unitPrice, onChanged,
-}: { deal: DealRow; participants: number; unitPrice: number; onChanged: () => void }) {
+  deal: d, participants, unitPrice, onChanged, featured = false,
+}: { deal: DealRow; participants: number; unitPrice: number; onChanged: () => void; featured?: boolean }) {
   const offerType = ((d.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(d.tiers) ? d.tiers : [];
   const display = describeOffer({
