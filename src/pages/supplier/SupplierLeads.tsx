@@ -171,18 +171,18 @@ function KpiSmall({
   };
   const c = palette[tone];
   return (
-    <div className="bg-white rounded-2xl border border-[#EEF0F3] p-3 shadow-sm">
-      <div className="flex items-center justify-between mb-1.5">
+    <div className="bg-white rounded-xl border border-[#EEF0F3] px-2 py-2 shadow-sm">
+      <div className="flex items-center justify-between mb-1">
         <div
-          className="h-7 w-7 rounded-lg inline-flex items-center justify-center"
+          className="h-5 w-5 rounded-md inline-flex items-center justify-center"
           style={{ background: c.bg, color: c.fg }}
         >
           {icon}
         </div>
-        <span className="text-[10px] font-bold" style={{ color: c.fg }}>{trend}</span>
+        <span className="text-[9px] font-bold leading-none" style={{ color: c.fg }}>{trend}</span>
       </div>
-      <div className="text-[18px] font-black text-[#0F172A] leading-none">{value}</div>
-      <div className="text-[11px] text-muted-foreground mt-1 font-bold">{label}</div>
+      <div className="text-[14px] font-black text-[#0F172A] leading-none">{value}</div>
+      <div className="text-[10px] text-muted-foreground mt-0.5 font-bold truncate">{label}</div>
     </div>
   );
 }
