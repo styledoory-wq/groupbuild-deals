@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, MessageCircle, Phone, CheckCircle2, CreditCard, Clock, Share2, Percent, PiggyBank, CalendarDays, MapPin, Layers, Store, Handshake, Target, PhoneCall, Wrench, BadgeCheck, Award, ChevronLeft } from "lucide-react";
+import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, TrendingDown, MessageCircle, Phone, CheckCircle2, CreditCard, Clock, Share2, Percent, PiggyBank, CalendarDays, MapPin, Layers, Store, Handshake, Target, PhoneCall, Wrench, BadgeCheck, Award, ChevronLeft, Building2, PartyPopper, Heart, Link2, Rocket, User as UserIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BackHeader, LoadingState, ErrorState } from "@/components/ds";
@@ -779,7 +779,7 @@ export default function DealDetail() {
             as="h1"
             className="text-[22px] leading-[1.2] font-black text-[#1F2937] tracking-tight mb-3"
           />
-          {display.effectivePrice != null ? (
+          {sortedTiers.length > 0 ? null : display.effectivePrice != null ? (
             <div className="space-y-1.5">
               <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-[28px] font-black text-[#1F2937] gb-num leading-none">{ils(display.effectivePrice)}</span>
@@ -806,125 +806,310 @@ export default function DealDetail() {
         </div>
       </div>
 
-      {/* ===== SECTION 3 — ACHIEVEMENT BLOCKS + WHATSAPP SHARE ===== */}
+      {/* ===== SECTION 3 — GROUP BUYING CAMPAIGN ===== */}
       {sortedTiers.length > 0 && (
-        <div className="px-4 mt-6">
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h2 className="text-[16px] font-extrabold text-[#1F2937]">מסלול החיסכון שלכם</h2>
-            <span className="text-[#0E6B5A] text-[12px] font-bold">{participantCount} מצטרפים</span>
-          </div>
-
-          {/* 3 Achievement Blocks */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            {tierWindow.map((item, idx) => {
-              if (item.kind === "starter") {
-                return (
-                  <div key={idx} className="bg-[#0E6B5A] rounded-2xl border-2 border-[#0E6B5A] p-3 h-28 flex flex-col justify-between shadow-lg shadow-[#0E6B5A]/30 relative">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-white/70 uppercase tracking-tighter">מחיר התחלתי</span>
-                      <span className="text-[9px] font-bold text-white/80 gb-num">{item.rangeLabel}</span>
-                    </div>
-                    <span className="text-[17px] font-black text-white gb-num leading-tight">{ils(item.price)}</span>
-                    <div className="absolute -top-2 -right-2 bg-[#F5C547] text-[#0E6B5A] text-[9px] px-2 py-0.5 rounded-full font-black shadow-sm whitespace-nowrap">אנחנו כאן</div>
-                  </div>
-                );
-              }
-              const { tier, state } = item;
-              const td = describeTier(offerType, tier);
-              const tierPrice = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
-              const range = tierRange(tier);
-              if (state === "past") {
-                return (
-                  <div key={idx} className="bg-white rounded-2xl border-2 border-transparent p-3 h-28 flex flex-col justify-between opacity-50 relative overflow-hidden">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-[#9CA3AF] uppercase">התחלנו ב</span>
-                      <span className="text-[9px] font-bold text-[#9CA3AF] gb-num">{range} מצטרפים</span>
-                    </div>
-                    <span className="text-[15px] font-black text-[#9CA3AF] line-through gb-num leading-tight">{tierPrice}</span>
-                  </div>
-                );
-              }
-              if (state === "active") {
-                return (
-                  <div key={idx} className="bg-[#0E6B5A] rounded-2xl border-2 border-[#0E6B5A] p-3 h-28 flex flex-col justify-between shadow-lg shadow-[#0E6B5A]/30 relative">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-white/70 uppercase tracking-tighter">המחיר כרגע</span>
-                      <span className="text-[9px] font-bold text-white/80 gb-num">{range} מצטרפים</span>
-                    </div>
-                    <span className="text-[17px] font-black text-white gb-num leading-tight">{tierPrice}</span>
-                    <div className="absolute -top-2 -right-2 bg-[#F5C547] text-[#0E6B5A] text-[9px] px-2 py-0.5 rounded-full font-black shadow-sm whitespace-nowrap">אנחנו כאן</div>
-                  </div>
-                );
-              }
-              return (
-                <div key={idx} className="bg-white rounded-2xl border-2 border-dashed border-[#0E6B5A]/30 p-3 h-28 flex flex-col justify-between relative">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-[#0E6B5A] uppercase tracking-tighter">היעד הבא</span>
-                    <span className="text-[9px] font-bold text-[#0E6B5A]/80 gb-num">{range} מצטרפים</span>
-                  </div>
-                  <span className="text-[17px] font-black text-[#1F2937] gb-num leading-tight">{tierPrice}</span>
-                  <div className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-[#0E6B5A] rounded-full animate-ping" />
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Dark motivation card with WhatsApp share */}
-          <div className="bg-[#062E27] text-white rounded-[24px] p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-3 gap-3">
-              <div className="flex flex-col min-w-0">
-                {nextTier && peopleNeeded > 0 ? (
-                  <>
-                    <span className="text-[11px] text-[#34A88E] font-bold">רק עוד {peopleNeeded} שכנים ליעד הבא!</span>
-                    <span className="text-[16px] font-black leading-tight mt-0.5">
-                      {savingsToNext && savingsToNext > 0
-                        ? `כולם יחסכו עוד ${ils(savingsToNext)} לאדם`
-                        : nextDisplay?.effectivePrice != null
-                          ? `מגיעים למחיר ${ils(nextDisplay.effectivePrice)}`
-                          : "מגיעים ליעד הבא"}
-                    </span>
-                  </>
+        <div className="px-4 mt-5 space-y-3">
+          {/* 3a — HERO STATUS CARD (green) — current price + community message */}
+          <div className="relative bg-gradient-to-br from-[#0E6B5A] to-[#0A5447] rounded-[24px] p-5 pt-6 shadow-[0_12px_30px_-12px_rgba(14,107,90,0.45)] overflow-hidden">
+            {/* corner ribbon */}
+            <div className="absolute -top-1 -right-1 bg-[#F5E6A8] text-[#0A5447] text-[10px] font-black px-3 py-1.5 rounded-bl-2xl rounded-tr-2xl leading-tight max-w-[120px] text-center shadow-md">
+              מחיר משתפר<br/>ככל שיותר<br/>מצטרפים!
+            </div>
+            <div className="flex items-stretch gap-3 mt-2">
+              {/* right side — current price card */}
+              <div className="bg-white rounded-2xl px-3 py-3 flex-1 min-w-0 text-center shadow-sm">
+                <div className="text-[10px] font-bold text-[#6B7280] mb-1">המחיר שלך כרגע</div>
+                {currentEffectivePrice != null ? (
+                  <div className="text-[26px] font-black text-[#1F2937] gb-num leading-none">{ils(currentEffectivePrice)}</div>
                 ) : (
-                  <>
-                    <span className="text-[11px] text-[#34A88E] font-bold">הגענו למחיר המקסימלי!</span>
-                    <span className="text-[16px] font-black leading-tight mt-0.5">שתפו ותחזקו את הקבוצה</span>
-                  </>
+                  <div className="text-[16px] font-black text-[#1F2937]">{display.headline}</div>
+                )}
+                <div className="text-[9px] font-medium text-[#6B7280] mt-1.5">ללא רכישה קבוצתית</div>
+              </div>
+              {/* left side — community message */}
+              <div className="flex-1 min-w-0 text-white flex flex-col justify-center text-right">
+                <div className="flex items-center gap-1.5 justify-end mb-1">
+                  <span className="text-[13px] font-black">יחד חוסכים יותר</span>
+                  <Users className="w-4 h-4 text-[#F5E6A8]" strokeWidth={2.4} />
+                </div>
+                <p className="text-[10.5px] leading-snug text-white/85 font-medium">
+                  כל הצטרפות מקרבת את כולנו למחיר נמוך יותר
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 3b — PROGRESS CARD (white) — neighbors needed + next price */}
+          {nextTier && peopleNeeded > 0 && (
+            <div className="bg-white rounded-[24px] p-4 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
+              <div className="flex items-stretch gap-3">
+                {/* right — progress */}
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-black text-[#1F2937] mb-2 leading-tight text-right">
+                    חסרים רק <span className="text-[#0E6B5A]">{peopleNeeded}</span> שכנים לדרגה הבאה!
+                  </div>
+                  {/* avatar dots */}
+                  <div className="flex items-center gap-1.5 justify-end mb-2.5 flex-row-reverse">
+                    {Array.from({ length: Math.max(progressTarget, participantCount) }).map((_, i) => {
+                      const filled = i < participantCount;
+                      return (
+                        <div
+                          key={i}
+                          className={cn(
+                            "w-7 h-7 rounded-full flex items-center justify-center shrink-0",
+                            filled
+                              ? "bg-[#0E6B5A] shadow-sm"
+                              : "border-2 border-dashed border-[#0E6B5A]/30 bg-white"
+                          )}
+                        >
+                          <UserIcon
+                            className={cn("w-3.5 h-3.5", filled ? "text-white" : "text-[#0E6B5A]/40")}
+                            strokeWidth={2.4}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* progress bar */}
+                  <div className="w-full bg-[#E8EBEF] h-1.5 rounded-full overflow-hidden mb-1.5">
+                    <div
+                      className="bg-gradient-to-l from-[#0E6B5A] to-[#34A88E] h-full rounded-full transition-all duration-700"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+                  <div className="text-[10px] font-bold text-[#6B7280] text-right gb-num">
+                    {participantCount} מתוך {progressTarget} הצטרפו
+                  </div>
+                </div>
+
+                {/* left — next price */}
+                <div className="bg-[#F0F9F6] border border-[#0E6B5A]/15 rounded-2xl p-3 w-[120px] shrink-0 flex flex-col items-center justify-center text-center relative">
+                  <Sparkles className="absolute top-1.5 left-1.5 w-3 h-3 text-[#F5C547]" />
+                  <div className="text-[10px] font-bold text-[#0E6B5A] mb-0.5">המחיר הבא</div>
+                  {nextDisplay?.effectivePrice != null && (
+                    <div className="text-[20px] font-black text-[#0E6B5A] gb-num leading-none">{ils(nextDisplay.effectivePrice)}</div>
+                  )}
+                  {savingsToNext && savingsToNext > 0 && (
+                    <div className="mt-2 bg-[#FFF8E1] text-[#8A6A1E] text-[9.5px] font-black px-2 py-1 rounded-lg leading-tight">
+                      תחסכו עוד {ils(savingsToNext)} לאדם
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 3c — TIER TIMELINE */}
+          <div className="pt-2">
+            <h2 className="text-[14px] font-black text-[#1F2937] text-center mb-3">
+              ככל שמצטרפים — המחיר לכולם יורד
+            </h2>
+
+            {/* 3 tier cards */}
+            <div className="grid grid-cols-3 gap-2">
+              {tierWindow.map((item, idx) => {
+                if (item.kind === "starter") {
+                  return (
+                    <div key={idx} className="bg-[#F4F6FA] rounded-2xl border border-[#E8EBEF] p-3 h-[110px] flex flex-col items-center justify-center text-center">
+                      <UserIcon className="w-4 h-4 text-[#9CA3AF] mb-1" />
+                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5">{item.rangeLabel}</div>
+                      <div className="text-[16px] font-black text-[#6B7280] gb-num leading-none">{ils(item.price)}</div>
+                      <div className="text-[9px] font-medium text-[#9CA3AF] mt-1">מחיר התחלתי</div>
+                    </div>
+                  );
+                }
+                const { tier, state } = item;
+                const td = describeTier(offerType, tier);
+                const tierPrice = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
+                const range = tierRange(tier);
+                const isNextTarget = nextTier && tier.minParticipants === nextTier.minParticipants;
+                const baseCard = "rounded-2xl p-3 h-[110px] flex flex-col items-center justify-center text-center relative";
+                if (state === "past") {
+                  return (
+                    <div key={idx} className={cn(baseCard, "bg-[#F4F6FA] border border-[#E8EBEF] opacity-60")}>
+                      <Users className="w-4 h-4 text-[#9CA3AF] mb-1" />
+                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">{range} מצטרפים</div>
+                      <div className="text-[16px] font-black text-[#6B7280] line-through gb-num leading-none">{tierPrice}</div>
+                    </div>
+                  );
+                }
+                if (state === "active") {
+                  return (
+                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#E8EBEF]")}>
+                      <Users className="w-4 h-4 text-[#6B7280] mb-1" />
+                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">{range} מצטרפים</div>
+                      <div className="text-[18px] font-black text-[#1F2937] gb-num leading-none">{tierPrice}</div>
+                      <div className="text-[9px] font-medium text-[#6B7280] mt-1">המחיר הנוכחי</div>
+                    </div>
+                  );
+                }
+                // future
+                return (
+                  <div key={idx} className={cn(baseCard, isNextTarget ? "bg-white border-2 border-[#0E6B5A] shadow-[0_4px_14px_-4px_rgba(14,107,90,0.35)]" : "bg-white border border-[#E8EBEF]")}>
+                    {isNextTarget && (
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-[#F5C547] text-[#5C3F00] text-[9px] px-2 py-0.5 rounded-full font-black shadow-sm whitespace-nowrap">
+                        יעד הבא!
+                      </div>
+                    )}
+                    <Users className={cn("w-4 h-4 mb-1", isNextTarget ? "text-[#0E6B5A]" : "text-[#6B7280]")} />
+                    <div className={cn("text-[10px] font-bold mb-0.5 gb-num", isNextTarget ? "text-[#0E6B5A]" : "text-[#6B7280]")}>{range} מצטרפים</div>
+                    <div className={cn("text-[18px] font-black gb-num leading-none", isNextTarget ? "text-[#0E6B5A]" : "text-[#1F2937]")}>{tierPrice}</div>
+                    {isNextTarget && savingsToNext && savingsToNext > 0 ? (
+                      <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">חיסכון של {ils(savingsToNext)} לאדם</div>
+                    ) : (
+                      <div className="text-[9px] font-medium text-[#6B7280] mt-1">היעד הבא</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* horizontal stepper dots */}
+            <div className="relative mt-3 px-2 h-6 flex items-center">
+              <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 h-[3px] bg-[#E8EBEF] rounded-full" />
+              <div
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-[3px] bg-[#0E6B5A] rounded-full transition-all duration-700"
+                style={{ width: `calc(${ladderFill}% - 0px)`, maxWidth: "calc(100% - 16px)" }}
+              />
+              <div className="relative w-full flex justify-between flex-row-reverse">
+                {tierWindow.map((item, idx) => {
+                  const isActive = item.kind === "tier" && item.state === "active";
+                  const isPast = item.kind === "tier" && item.state === "past";
+                  return (
+                    <span
+                      key={idx}
+                      className={cn(
+                        "w-3.5 h-3.5 rounded-full border-2 bg-white",
+                        isActive ? "border-[#0E6B5A] bg-[#0E6B5A]" : isPast ? "border-[#0E6B5A]" : "border-[#CBD5E0]"
+                      )}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* 3d — FOMO BUILDING CARD */}
+          {participantCount > 0 && (
+            <div className="bg-gradient-to-l from-[#F0F9F6] to-[#F7FBFA] border border-[#0E6B5A]/15 rounded-[20px] p-4">
+              <div className="flex items-center justify-between gap-3">
+                {/* right — neighbors joined */}
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex -space-x-2 flex-row-reverse">
+                    {Array.from({ length: Math.min(3, participantCount) }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-8 h-8 rounded-full border-2 border-white bg-gradient-to-br from-[#34A88E] to-[#0E6B5A] flex items-center justify-center text-white shadow-sm"
+                      >
+                        <UserIcon className="w-4 h-4" strokeWidth={2.4} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[12px] font-black text-[#1F2937] leading-tight gb-num">
+                      {participantCount} שכנים כבר
+                    </div>
+                    <div className="text-[11px] font-bold text-[#1F2937] leading-tight">הצטרפו 🎉</div>
+                  </div>
+                </div>
+
+                {/* left — building savings */}
+                {maxPossibleSavings && (
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="text-left">
+                      <div className="text-[10px] font-bold text-[#6B7280] leading-tight">הבניין כבר חסך יחד</div>
+                      <div className="text-[16px] font-black text-[#0E6B5A] gb-num leading-tight mt-0.5">
+                        {ils((display.referencePrice ?? 0) - (currentEffectivePrice ?? 0) > 0
+                          ? ((display.referencePrice ?? 0) - (currentEffectivePrice ?? 0)) * participantCount
+                          : 0)}
+                      </div>
+                      <div className="text-[9px] font-medium text-[#6B7280] leading-tight">בזכות הצטרפות שכנים</div>
+                    </div>
+                    <Building2 className="w-8 h-8 text-[#0E6B5A]/70" strokeWidth={1.8} />
+                  </div>
                 )}
               </div>
-              <div className="bg-[#0E6B5A]/40 p-2 rounded-xl shrink-0">
-                <TrendingUp className="w-6 h-6 text-[#34A88E]" strokeWidth={2.2} />
+            </div>
+          )}
+
+          {/* 3e — DARK SHARE CARD */}
+          <div className="bg-gradient-to-br from-[#062E27] to-[#0A4438] text-white rounded-[24px] p-5 shadow-xl relative overflow-hidden">
+            <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#34A88E]/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="text-center mb-1">
+              <div className="text-[15px] font-black leading-tight">
+                <span className="inline-block animate-bounce ml-1">🚀</span>
+                הזמינו שכנים והורידו מחיר לכולם!
+              </div>
+              <p className="text-[11px] text-white/70 mt-1.5">
+                {nextTier && peopleNeeded > 0
+                  ? `חסרים רק ${peopleNeeded} שכנים לדרגה הבאה`
+                  : "כל שיתוף מחזק את הקבוצה"}
+              </p>
+            </div>
+
+            {/* 3 stats with arrows */}
+            <div className="flex items-center justify-around gap-2 my-4">
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
+                  <Share2 className="w-5 h-5 text-white/90" strokeWidth={2.2} />
+                </div>
+                <div className="text-[11px] font-bold text-white/80 leading-tight">שתפו<br/>עם שכנים</div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-white/30 shrink-0 rotate-180" />
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
+                  <TrendingDown className="w-5 h-5 text-[#F5C547]" strokeWidth={2.4} />
+                </div>
+                <div className="text-[11px] font-bold text-white/80 leading-tight">המחיר יורד<br/>לכולם</div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-white/30 shrink-0 rotate-180" />
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
+                  <Heart className="w-5 h-5 text-[#FF7A7A]" strokeWidth={2.4} fill="currentColor" />
+                </div>
+                <div className="text-[11px] font-bold text-white/80 leading-tight">כולם<br/>חוסכים יותר</div>
               </div>
             </div>
 
-            <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden mb-3">
-              <div
-                className="bg-[#34A88E] h-full rounded-full transition-all duration-700"
-                style={{ width: `${progressPct}%` }}
-              />
+            {/* WhatsApp pulse button */}
+            <div className="relative">
+              <span className="absolute inset-0 rounded-2xl bg-[#25D366] animate-ping opacity-20 pointer-events-none" />
+              <button
+                type="button"
+                onClick={handleWhatsAppShare}
+                className="relative w-full bg-[#25D366] hover:bg-[#22c35e] text-white font-extrabold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.97] shadow-lg shadow-[#25D366]/30"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+                שתפו עכשיו בוואטסאפ
+              </button>
             </div>
 
-            {maxPossibleSavings && maxPossibleSavings > 0 && nextTier && (
-              <div className="mb-4 flex items-center justify-between bg-white/5 rounded-xl px-3 py-2 border border-white/10">
-                <span className="text-[11px] text-white/70 font-medium">חיסכון מקסימלי אפשרי לאדם</span>
-                <span className="text-[14px] font-black text-[#F5C547] gb-num">עד {ils(maxPossibleSavings)}</span>
-              </div>
-            )}
-
+            {/* copy link */}
             <button
               type="button"
-              onClick={handleWhatsAppShare}
-              className="w-full bg-[#25D366] hover:bg-[#22c35e] text-white font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.97] shadow-lg"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  navigator.clipboard?.writeText(window.location.href);
+                  toast.success("הקישור הועתק");
+                }
+              }}
+              className="mt-3 w-full flex items-center justify-center gap-1.5 text-[11px] font-bold text-white/70 hover:text-white underline underline-offset-4"
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-              </svg>
-              שתפו עם השכנים בוואטסאפ
+              <Link2 className="w-3.5 h-3.5" />
+              או העתק קישור
             </button>
-            <p className="text-center text-[11px] text-white/60 mt-2">כל שכן שמצטרף = כולם חוסכים יותר</p>
           </div>
 
+          {/* footnote */}
+          <p className="text-[11px] text-[#6B7280] text-center font-medium px-4">
+            ההצטרפות ללא התחייבות. המחיר מתעדכן אוטומטית לפי מספר המצטרפים.
+          </p>
+
           {daysRemaining !== null && (
-            <div className="mt-3 flex items-center justify-center gap-2 text-[11px] font-bold text-[#6B7280]">
+            <div className="mt-1 flex items-center justify-center gap-2 text-[11px] font-bold text-[#6B7280]">
               <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{daysRemaining} ימים לסגירה</span>
             </div>
           )}
