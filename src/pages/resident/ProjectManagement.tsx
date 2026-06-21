@@ -251,13 +251,16 @@ export default function ProjectManagement() {
               <div className="w-full h-full flex items-center justify-center text-[36px]">🏡</div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setEditOpen(true)}
+                className="flex items-center gap-1.5 w-full text-right active:scale-[0.99]"
+              >
                 <h2 className="text-[16px] font-extrabold text-[#1A1A1A] truncate" style={{ fontFamily: URBANIST }}>
-                  בית פרטי · נתניה
+                  {info.name}
                 </h2>
-                <Pencil className="h-3.5 w-3.5 text-gray-400 shrink-0" />
-              </div>
-              <p className="text-[12px] text-gray-500 mt-0.5">שטח בנוי: 180 מ"ר · 2 קומות</p>
+                <Pencil className="h-3.5 w-3.5 text-[#0E6B5A] shrink-0" />
+              </button>
+              <p className="text-[12px] text-gray-500 mt-0.5">{info.subtitle}</p>
 
               {/* Progress ring */}
               <div className="mt-3 flex items-center gap-3">
