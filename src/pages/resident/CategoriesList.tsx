@@ -145,7 +145,7 @@ export default function CategoriesList() {
       return {
         id,
         name: c?.name ?? id,
-        description: c?.description ?? "",
+        description: (c as any)?.description ?? "",
         emoji: c?.icon ?? stage.emoji,
         count: counts[id] ?? 0,
       };
