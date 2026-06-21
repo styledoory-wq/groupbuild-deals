@@ -333,24 +333,15 @@ export default function SupplierOffers() {
           />
         )}
 
-        {/* Featured card */}
-        {!loading && !error && featured && (
-          <FeaturedDealCard
-            deal={featured}
-            participants={participantsByDeal[featured.id] ?? 0}
-            unitPrice={unitPriceForDeal(featured)}
-            onChanged={refresh}
-          />
-        )}
-
-        {/* Rest */}
-        {!loading && !error && rest.map((d) => (
+        {/* Deals */}
+        {!loading && !error && filtered.map((d, i) => (
           <CompactDealCard
             key={d.id}
             deal={d}
             participants={participantsByDeal[d.id] ?? 0}
             unitPrice={unitPriceForDeal(d)}
             onChanged={refresh}
+            featured={i === 0}
           />
         ))}
       </div>
