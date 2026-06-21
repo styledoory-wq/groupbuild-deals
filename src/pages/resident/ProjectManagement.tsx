@@ -192,13 +192,25 @@ export default function ProjectManagement() {
     s.tasks.length > 0 && s.tasks.every((t) => completed[`${s.key}::${t}`])
   ).length;
 
-  // Budget
-  const budgetTotal = 680000;
-  const budgetUsed = 248500;
-  const groupSavings = 32400;
-  const overPct = 0; // under budget
+  // Editable project info
+  const [info, setInfo] = useState<ProjectInfo>(() => {
+    try {
+      const raw = localStorage.getItem(PROJECT_INFO_KEY);
+      if (raw) return { ...DEFAULT_INFO, ...JSON.parse(raw) };
+    } catch {}
+    return DEFAULT_INFO;
+  });
+  useEffect(() => {
+    try { localStorage.setItem(PROJECT_INFO_KEY, JSON.stringify(info)); } catch {}
+  }, [info]);
 
-  const statuses = ["הוזמן", "בתהליך", "הוזמן", "להזמין"];
+  const [editOpen, setEditOpen] = useState(false);
+
+  // Budget
+  const budgetTotal = info.budgetTotal;
+  const budgetUsed = info.budgetUsed;
+  const groupSavings = info.groupSavings;
+  const overPct = budgetUsed > budgetTotal ? Math.round(((budgetUsed - budgetTotal) / budgetTotal) * 100) : 0;
 
   return (
     <div
