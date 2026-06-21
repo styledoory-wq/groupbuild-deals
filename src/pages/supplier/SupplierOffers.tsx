@@ -72,10 +72,10 @@ const compact = (n: number) =>
 
 // ---------- small UI ----------
 function StatCard({
-  label, value, delta, tone, icon, seed,
+  label, value, delta, tone, icon, seed, className = "",
 }: {
   label: string; value: string; delta: string; tone: "violet" | "amber" | "emerald" | "sky";
-  icon: React.ReactNode; seed: number;
+  icon: React.ReactNode; seed: number; className?: string;
 }) {
   const tones = {
     violet: { bg: "bg-violet-50", fg: "text-violet-600", stroke: "stroke-violet-500" },
@@ -84,18 +84,18 @@ function StatCard({
     sky:    { bg: "bg-sky-50",    fg: "text-sky-600",    stroke: "stroke-sky-500" },
   }[tone];
   return (
-    <div className="rounded-[18px] bg-white border border-[#EEF0F4] p-3.5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.08)]">
-      <div className={`h-8 w-8 rounded-full ${tones.bg} ${tones.fg} flex items-center justify-center mb-2.5`}>
+    <div className={`rounded-[14px] bg-white border border-[#EEF0F4] p-2.5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.08)] flex-1 min-w-0 ${className}`}>
+      <div className={`h-7 w-7 rounded-full ${tones.bg} ${tones.fg} flex items-center justify-center mb-2`}>
         {icon}
       </div>
-      <div className="text-[20px] leading-none font-extrabold text-[#0F172A] tracking-tight">
+      <div className="text-[16px] leading-none font-extrabold text-[#0F172A] tracking-tight">
         {value}
       </div>
-      <div className="mt-1.5 text-[11px] text-[#6B7280] font-medium leading-tight">{label}</div>
-      <div className="mt-1.5 flex items-center gap-1 text-[10.5px] font-semibold text-emerald-600">
+      <div className="mt-1 text-[10px] text-[#6B7280] font-medium leading-tight truncate">{label}</div>
+      <div className="mt-1 flex items-center gap-0.5 text-[9.5px] font-semibold text-emerald-600">
         <ArrowUpRight className="h-2.5 w-2.5" /> {delta}
       </div>
-      <svg viewBox="0 0 64 22" className="mt-1 w-full h-5 overflow-visible">
+      <svg viewBox="0 0 64 22" className="mt-1.5 w-full h-4 overflow-visible">
         <path d={sparkPath(seed)} fill="none" strokeWidth="1.6" className={tones.stroke} strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
