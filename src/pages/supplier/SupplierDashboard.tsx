@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Plus, LogOut, Pencil, Clock, MapPin, Users, Eye, Heart,
   TrendingUp, Bell, Wallet, Target, Flame, Building2, Tag,
-  ChevronLeft, Activity, Sparkles,
+  Activity, Sparkles,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
