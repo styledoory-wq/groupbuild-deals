@@ -346,17 +346,21 @@ export default function SupplierOffers() {
           />
         )}
 
-        {/* Deals */}
-        {!loading && !error && filtered.map((d, i) => (
-          <CompactDealCard
-            key={d.id}
-            deal={d}
-            participants={participantsByDeal[d.id] ?? 0}
-            unitPrice={unitPriceForDeal(d)}
-            onChanged={refresh}
-            featured={i === 0}
-          />
-        ))}
+        {/* Deals — compact by default; expand on tap to full view */}
+        {!loading && !error && filtered.map((d, i) => {
+          const isExpanded = expandedId === d.id;
+          const commonProps = {
+            deal: d,
+            participants: participantsByDeal[d.id] ?? 0,
+            saves: savesByDeal[d.id] ?? 0,
+            unitPrice: unitPriceForDeal(d),
+            onChanged: refresh,
+            onToggle: () => setExpandedId(isExpanded ? null : d.id),
+          };
+          return isExpanded
+            ? <FeaturedDealCard key={d.id} {...commonProps} />
+            : <CompactDealCard key={d.id} {...commonProps} featured={i === 0} />;
+        })}
       </div>
       <BottomNav role="supplier" />
     </MobileShell>
