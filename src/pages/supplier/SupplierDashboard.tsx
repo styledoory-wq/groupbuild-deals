@@ -42,6 +42,7 @@ type AreaProject = {
   city: string;
   units: number;
   stage: string | null;
+  createdAt: string | null;
 };
 
 type ActivityItem = {
