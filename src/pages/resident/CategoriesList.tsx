@@ -339,12 +339,12 @@ export default function CategoriesList() {
                     <ChevronLeft className="h-4 w-4 text-gray-300 shrink-0" />
                     <div className="flex-1 min-w-0 text-right">
                       <div
-                        className="text-[13.5px] font-extrabold text-[#1A1A1A] leading-tight truncate"
+                        className="text-[13.5px] font-extrabold text-[#1A1A1A] leading-snug break-words"
                         style={{ fontFamily: URBANIST }}
                       >
                         {c.name}
                       </div>
-                      <div className="text-[11px] text-gray-500 leading-tight mt-0.5 line-clamp-1">
+                      <div className="text-[11px] text-gray-500 leading-snug mt-0.5">
                         {c.description || (c.count > 0 ? `${c.count} ספקים` : "בקרוב")}
                       </div>
                     </div>
