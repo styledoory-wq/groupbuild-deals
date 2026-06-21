@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   X, ChevronRight, ChevronLeft, Sparkles, Users, Tag, ScanLine,
-  CheckSquare, Briefcase, LayoutGrid, Search, Home, User, HelpCircle,
+  CheckSquare, Briefcase, HelpCircle, type LucideIcon,
 } from "lucide-react";
 
 const GREEN = "#0E6B5A";
@@ -10,7 +10,7 @@ const GREEN = "#0E6B5A";
 type Role = "resident" | "supplier";
 
 type Slide = {
-  icon: ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
+  icon: LucideIcon;
   title: string;
   body: string;
   accent?: string;
