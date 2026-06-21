@@ -382,16 +382,26 @@ export default function SupplierDashboard() {
   const TopBar = () => (
     <header className="px-5 pt-6 pb-2">
       <div className="flex items-start justify-between gap-3">
-        <button
-          onClick={() => navigate("/supplier/leads")}
-          className="shrink-0 h-12 w-12 rounded-2xl bg-white border border-[#EEF0F3] flex items-center justify-center shadow-sm active:scale-95 transition relative"
-          aria-label="התראות"
-        >
-          <Bell className="h-[18px] w-[18px] text-[#0F172A]" strokeWidth={2} />
-          {leadsToday > 0 && (
-            <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full bg-[#0E6B5A] ring-2 ring-white" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleLogout}
+            className="shrink-0 h-12 w-12 rounded-2xl bg-white border border-[#EEF0F3] flex items-center justify-center shadow-sm active:scale-95 transition relative"
+            aria-label="יציאה"
+            title="יציאה"
+          >
+            <LogOut className="h-[18px] w-[18px] text-[#0F172A]" strokeWidth={2} />
+          </button>
+          <button
+            onClick={() => navigate("/supplier/leads")}
+            className="shrink-0 h-12 w-12 rounded-2xl bg-white border border-[#EEF0F3] flex items-center justify-center shadow-sm active:scale-95 transition relative"
+            aria-label="התראות"
+          >
+            <Bell className="h-[18px] w-[18px] text-[#0F172A]" strokeWidth={2} />
+            {leadsToday > 0 && (
+              <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full bg-[#0E6B5A] ring-2 ring-white" />
+            )}
+          </button>
+        </div>
         <div className="flex items-center gap-3 flex-1 justify-end min-w-0">
           <div className="text-right min-w-0">
             <h1 className="text-[19px] font-bold text-[#0F172A] leading-tight tracking-[-0.02em] flex items-center gap-1.5 justify-end truncate">
