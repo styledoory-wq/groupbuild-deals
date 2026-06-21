@@ -555,15 +555,23 @@ export default function SupplierLeads() {
           onTouchEnd={trashed ? undefined : makeSwipeEnd(i.id)}
         >
           <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="min-w-0">
-              <h4 className="font-bold text-sm text-foreground truncate">{name}</h4>
-              <p className="text-fs-xs text-muted-foreground truncate">{dealTitle(i.deal_id)}</p>
+            <div className="flex items-start gap-2.5 min-w-0">
+              <Avatar name={name} />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h4 className="font-extrabold text-[15px] text-foreground truncate">{name}</h4>
+                  <StageBadge stage={interestStage(i)} hot={isHot(i.created_at, interestStage(i))} />
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1 truncate">
+                  <Clock className="h-3 w-3" /> {timeAgoHe(i.created_at)} · מקור: {dealTitle(i.deal_id)}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               {committed && (
-                <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30">
+                <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30">
                   <BadgeCheck className="h-3 w-3" />
-                  {i.deposit_status === "paid" ? "פיקדון שולם" : `התחייב ${ils(Number(i.deposit_amount))}`}
+                  {i.deposit_status === "paid" ? "שולם" : ils(Number(i.deposit_amount))}
                 </span>
               )}
               {!trashed && (
@@ -578,7 +586,7 @@ export default function SupplierLeads() {
               )}
             </div>
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-fs-xs text-muted-foreground mb-2">
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground mb-2">
             {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
             {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
             {i.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {i.city}</span>}
