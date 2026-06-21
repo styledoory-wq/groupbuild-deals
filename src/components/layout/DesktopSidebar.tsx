@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, ScanLine, CheckSquare, LogOut, type LucideIcon } from "lucide-react";
+import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, CheckSquare, LogOut, TrendingUp, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { preloadRoute } from "@/lib/routePreload";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -18,10 +18,10 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
   ],
   supplier: [
     { to: "/supplier", label: "בית", icon: Home },
-    { to: "/supplier/offers", label: "הצעות", icon: Briefcase },
-    { to: "/supplier/scan", label: "סריקה", icon: ScanLine },
-    { to: "/supplier/redemptions", label: "מימושים", icon: CheckSquare },
     { to: "/supplier/leads", label: "לידים", icon: Users },
+    { to: "/supplier/offers", label: "הצעות", icon: Briefcase },
+    { to: "/supplier/revenue", label: "הכנסות", icon: TrendingUp },
+    { to: "/supplier/account", label: "חשבון", icon: User },
   ],
   admin: [
     { to: "/admin", label: "בית", icon: Home },
