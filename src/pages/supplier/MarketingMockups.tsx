@@ -1,35 +1,37 @@
 import { useMemo } from "react";
 
 /**
- * WhatsApp Viral – v2 Mockup (single template, premium ad direction)
+ * Premium Dark — v3 Mockup
+ * מבוסס ויזואלית על הרפרנסים שצורפו (מטבחים / שיפוצים / דלתות כניסה).
  *
- * Goals:
- *  - תמונה תופסת ~85% מהמודעה
- *  - מחיר קבוצתי = האלמנט הכי דומיננטי
- *  - מחיר רגיל קטן ומחוק
- *  - QR קטן ומשולב
- *  - CTA כחלק מהקריאייטיב (לא כפתור מערכת)
- *  - תחושת מודעה, לא כרטיס מידע
+ *  - תמונה דומיננטית (כל הקנבס) + Overlay כהה תחתון
+ *  - מדליון הנחה צהוב גדול בצד
+ *  - כותרת על התמונה + שורה צהובה דקה ("במחיר קבוצתי!")
+ *  - בלוק תחתון: מחיר רגיל קטן ומחוק | המחיר בקבוצה - ענק, צהוב
+ *  - QR קטן ומשולב בפינה
+ *  - CTA כפסקה דקה במקום כפתור מערכת
  */
 
 const SAMPLE = {
-  title: "ערכת טיפוח פנים מקצועית",
-  supplier: "BeautyLab",
-  city: "תל אביב",
-  regularPrice: 480,
-  groupPrice: 199,
-  endsLabel: "נסגר היום ב-23:59",
-  spotsLeft: 3,
+  category: "מטבחים",
+  title: "מטבח חדש",
+  tagline: "במחיר קבוצתי!",
+  bullets: "איכות גבוהה · אחריות מלאה · התקנה מקצועית",
+  regularPrice: 28000,
+  groupPrice: 16900,
+  ctaSmall: "כל שיותר מצטרפים, המחיר יורד!",
+  ctaMain: "להצטרפות לחץ כאן",
   image:
-    "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1400&q=80",
-  qr: "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fgroupbuild.co.il%2Fd%2Fdemo&margin=0&color=0B3D2E",
+    "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1600&q=80",
+  qr: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fgroupbuild.co.il%2Fd%2Fdemo&margin=0",
 };
 
-function WhatsAppViralV2() {
+function PremiumDarkV3() {
   const discount = useMemo(
     () => Math.round((1 - SAMPLE.groupPrice / SAMPLE.regularPrice) * 100),
     []
   );
+  const fmt = (n: number) => n.toLocaleString("he-IL");
 
   return (
     <div
@@ -41,11 +43,11 @@ function WhatsAppViralV2() {
         overflow: "hidden",
         fontFamily:
           "'Heebo', 'Rubik', system-ui, -apple-system, Segoe UI, sans-serif",
-        background: "#000",
-        borderRadius: 24,
+        background: "#0a0a0a",
+        borderRadius: 28,
       }}
     >
-      {/* === IMAGE (85% of canvas) === */}
+      {/* === BACKGROUND IMAGE (full canvas) === */}
       <img
         src={SAMPLE.image}
         alt=""
@@ -55,339 +57,266 @@ function WhatsAppViralV2() {
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          filter: "saturate(1.05) contrast(1.05)",
+          filter: "saturate(1.05) contrast(1.08) brightness(0.92)",
         }}
       />
 
-      {/* Subtle top vignette so brand chip stays readable */}
+      {/* Top vignette - keeps brand chip readable */}
       <div
         style={{
           position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 260,
+          top: 0, left: 0, right: 0, height: 320,
           background:
-            "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%)",
+            "linear-gradient(180deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0) 100%)",
         }}
       />
 
-      {/* Strong bottom gradient for price overlay */}
+      {/* Bottom heavy gradient for the price block */}
       <div
         style={{
           position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 620,
+          bottom: 0, left: 0, right: 0, height: 560,
           background:
-            "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 38%, rgba(0,0,0,0.92) 100%)",
+            "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.95) 70%, #000 100%)",
         }}
       />
 
-      {/* === TOP BAR: Brand chip + Urgency pill === */}
+      {/* === TOP: Brand chip === */}
       <div
         style={{
           position: "absolute",
-          top: 40,
-          left: 40,
-          right: 40,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 16,
+          top: 44, right: 44,
+          display: "flex", alignItems: "center", gap: 12,
+          background: "rgba(255,255,255,0.10)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          border: "1px solid rgba(255,255,255,0.18)",
+          padding: "12px 22px 12px 16px",
+          borderRadius: 999,
         }}
       >
-        {/* Brand chip */}
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            background: "rgba(255,255,255,0.14)",
-            backdropFilter: "blur(14px)",
-            WebkitBackdropFilter: "blur(14px)",
-            border: "1px solid rgba(255,255,255,0.25)",
-            padding: "10px 18px 10px 14px",
-            borderRadius: 999,
+            width: 36, height: 36, borderRadius: 10,
+            background: "linear-gradient(135deg, #FFD23F 0%, #E59A00 100%)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#1a1a1a", fontWeight: 900, fontSize: 20,
           }}
         >
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 10,
-              background:
-                "linear-gradient(135deg, #25D366 0%, #0E6B5A 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 900,
-              color: "#fff",
-              fontSize: 18,
-              letterSpacing: -0.5,
-            }}
-          >
-            G
-          </div>
-          <span
-            style={{
-              color: "#fff",
-              fontWeight: 700,
-              fontSize: 20,
-              letterSpacing: -0.3,
-            }}
-          >
-            GroupBuild
-          </span>
+          G
         </div>
-
-        {/* Urgency pill */}
-        <div
+        <span
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            background: "#FF3B30",
-            color: "#fff",
-            padding: "10px 18px",
-            borderRadius: 999,
-            fontWeight: 800,
-            fontSize: 18,
-            boxShadow: "0 8px 24px rgba(255,59,48,0.45)",
+            color: "#fff", fontWeight: 700, fontSize: 22, letterSpacing: -0.3,
           }}
         >
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: 999,
-              background: "#fff",
-              boxShadow: "0 0 0 4px rgba(255,255,255,0.35)",
-            }}
-          />
-          נותרו {SAMPLE.spotsLeft} מקומות
-        </div>
-      </div>
-
-      {/* === FLOATING DISCOUNT MEDALLION === */}
-      <div
-        style={{
-          position: "absolute",
-          top: 150,
-          insetInlineStart: 50,
-          width: 190,
-          height: 190,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle at 30% 30%, #FFE066 0%, #FFC93C 55%, #E59A00 100%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#1a1a1a",
-          fontWeight: 900,
-          boxShadow:
-            "0 20px 40px rgba(0,0,0,0.45), inset 0 -8px 16px rgba(0,0,0,0.12)",
-          transform: "rotate(-8deg)",
-          border: "3px solid rgba(255,255,255,0.55)",
-        }}
-      >
-        <span style={{ fontSize: 24, lineHeight: 1, fontWeight: 700 }}>
-          חיסכון
-        </span>
-        <span style={{ fontSize: 76, lineHeight: 1, letterSpacing: -3 }}>
-          {discount}%
+          GroupBuild
         </span>
       </div>
 
-      {/* === BOTTOM CONTENT === */}
+      {/* === TITLE block (top-right, on the image) === */}
       <div
         style={{
           position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: "0 56px 56px",
+          top: 170, right: 56,
+          maxWidth: 620,
           color: "#fff",
         }}
       >
-        {/* Supplier + location */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            opacity: 0.85,
-            fontSize: 22,
-            marginBottom: 14,
-            fontWeight: 600,
-          }}
-        >
-          <span>{SAMPLE.supplier}</span>
-          <span style={{ opacity: 0.5 }}>•</span>
-          <span>{SAMPLE.city}</span>
-        </div>
-
-        {/* Product title */}
         <h1
           style={{
             margin: 0,
-            fontSize: 64,
-            lineHeight: 1.05,
+            fontSize: 124,
+            lineHeight: 0.95,
             fontWeight: 900,
-            letterSpacing: -1.5,
-            textShadow: "0 2px 20px rgba(0,0,0,0.45)",
-            marginBottom: 28,
+            letterSpacing: -3,
+            textShadow: "0 4px 24px rgba(0,0,0,0.55)",
           }}
         >
           {SAMPLE.title}
         </h1>
+        <div
+          style={{
+            marginTop: 14,
+            fontSize: 56,
+            fontWeight: 900,
+            color: "#FFC93C",
+            letterSpacing: -1.2,
+            textShadow: "0 2px 16px rgba(0,0,0,0.5)",
+          }}
+        >
+          {SAMPLE.tagline}
+        </div>
+        <div
+          style={{
+            marginTop: 18,
+            fontSize: 22,
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.85)",
+          }}
+        >
+          {SAMPLE.bullets}
+        </div>
+      </div>
 
-        {/* PRICE BLOCK — group price is the hero */}
+      {/* === DISCOUNT MEDALLION (left side, floating) === */}
+      <div
+        style={{
+          position: "absolute",
+          top: 470,
+          insetInlineStart: 60,
+          width: 230, height: 230,
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle at 30% 30%, #FFE066 0%, #FFC93C 55%, #E59A00 100%)",
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          color: "#1a1a1a", fontWeight: 900,
+          boxShadow:
+            "0 24px 50px rgba(0,0,0,0.55), inset 0 -10px 18px rgba(0,0,0,0.12)",
+          transform: "rotate(-10deg)",
+          border: "4px solid rgba(255,255,255,0.6)",
+        }}
+      >
+        <span style={{ fontSize: 28, lineHeight: 1, fontWeight: 800 }}>הנחה</span>
+        <span style={{ fontSize: 96, lineHeight: 1, letterSpacing: -4, marginTop: 4 }}>
+          {discount}%
+        </span>
+      </div>
+
+      {/* === BOTTOM PRICE BLOCK === */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0, left: 0, right: 0,
+          padding: "0 60px 56px",
+          color: "#fff",
+        }}
+      >
+        {/* prices row */}
         <div
           style={{
             display: "flex",
             alignItems: "flex-end",
+            justifyContent: "space-between",
             gap: 24,
-            marginBottom: 32,
+            marginBottom: 28,
           }}
         >
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span
+          {/* Regular price (small, struck) */}
+          <div style={{ paddingBottom: 18 }}>
+            <div
               style={{
                 fontSize: 22,
-                fontWeight: 700,
-                color: "#FFC93C",
-                letterSpacing: 1.5,
-                textTransform: "uppercase",
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.55)",
                 marginBottom: 4,
               }}
             >
-              מחיר קבוצתי
-            </span>
+              מחיר רגיל
+            </div>
             <div
               style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 6,
-                lineHeight: 0.9,
+                fontSize: 44,
+                fontWeight: 700,
+                color: "rgba(255,255,255,0.5)",
+                textDecoration: "line-through",
+                textDecorationThickness: 3,
+                letterSpacing: -1,
               }}
             >
-              <span
-                style={{
-                  fontSize: 240,
-                  fontWeight: 900,
-                  letterSpacing: -10,
-                  color: "#fff",
-                  textShadow: "0 6px 30px rgba(0,0,0,0.5)",
-                }}
-              >
-                ₪{SAMPLE.groupPrice}
-              </span>
+              ₪{fmt(SAMPLE.regularPrice)}
             </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              paddingBottom: 28,
-              gap: 6,
-            }}
-          >
-            <span style={{ fontSize: 16, opacity: 0.6 }}>במקום</span>
-            <span
+          {/* Group price (HERO) */}
+          <div style={{ textAlign: "left", flexShrink: 0 }}>
+            <div
               style={{
-                fontSize: 28,
-                fontWeight: 600,
-                color: "rgba(255,255,255,0.55)",
-                textDecoration: "line-through",
-                textDecorationThickness: 3,
+                fontSize: 26,
+                fontWeight: 800,
+                color: "#FFC93C",
+                letterSpacing: 0.5,
+                marginBottom: -6,
               }}
             >
-              ₪{SAMPLE.regularPrice}
-            </span>
+              המחיר בקבוצה
+            </div>
+            <div
+              style={{
+                fontSize: 200,
+                fontWeight: 900,
+                color: "#FFC93C",
+                letterSpacing: -8,
+                lineHeight: 1,
+                textShadow: "0 8px 30px rgba(255,201,60,0.35)",
+              }}
+            >
+              ₪{fmt(SAMPLE.groupPrice)}
+            </div>
           </div>
         </div>
 
-        {/* CTA RIBBON + QR */}
+        {/* CTA strip + QR */}
         <div
           style={{
             display: "flex",
-            alignItems: "stretch",
-            gap: 16,
+            alignItems: "center",
+            gap: 18,
           }}
         >
-          {/* CTA — WhatsApp-styled ribbon, integrated to the creative */}
+          {/* CTA (integrated to the creative, not system button) */}
           <div
             style={{
               flex: 1,
-              background:
-                "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
-              borderRadius: 22,
-              padding: "22px 28px",
               display: "flex",
-              alignItems: "center",
-              gap: 18,
-              boxShadow:
-                "0 18px 40px rgba(37,211,102,0.45), inset 0 1px 0 rgba(255,255,255,0.25)",
-              position: "relative",
-              overflow: "hidden",
+              flexDirection: "column",
+              gap: 10,
             }}
           >
-            {/* WhatsApp glyph */}
-            <svg
-              width={48}
-              height={48}
-              viewBox="0 0 24 24"
-              fill="#fff"
-              aria-hidden
-            >
-              <path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-            </svg>
-            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <span
-                style={{
-                  color: "#fff",
-                  fontSize: 32,
-                  fontWeight: 900,
-                  letterSpacing: -0.8,
-                  lineHeight: 1.1,
-                }}
-              >
-                הצטרפו לקבוצה בוואטסאפ
-              </span>
-              <span
-                style={{
-                  color: "rgba(255,255,255,0.85)",
-                  fontSize: 18,
-                  fontWeight: 600,
-                }}
-              >
-                {SAMPLE.endsLabel}
-              </span>
-            </div>
-
-            {/* decorative arrow */}
             <div
               style={{
-                marginInlineStart: "auto",
-                width: 56,
-                height: 56,
-                borderRadius: 999,
-                background: "rgba(255,255,255,0.22)",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                gap: 14,
+                fontSize: 22,
+                fontWeight: 700,
+                color: "rgba(255,255,255,0.85)",
               }}
             >
+              <span
+                style={{
+                  width: 8, height: 8, borderRadius: 999,
+                  background: "#FFC93C",
+                  boxShadow: "0 0 0 5px rgba(255,201,60,0.25)",
+                }}
+              />
+              {SAMPLE.ctaSmall}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                background: "linear-gradient(135deg, #FFD23F 0%, #E59A00 100%)",
+                color: "#0a0a0a",
+                padding: "20px 28px",
+                borderRadius: 18,
+                fontWeight: 900,
+                fontSize: 32,
+                letterSpacing: -0.5,
+                boxShadow:
+                  "0 18px 40px rgba(255,201,60,0.35), inset 0 1px 0 rgba(255,255,255,0.5)",
+                width: "fit-content",
+              }}
+            >
+              {SAMPLE.ctaMain}
               <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
                 <path
                   d="M15 6l-6 6 6 6"
-                  stroke="#fff"
-                  strokeWidth={3}
+                  stroke="#0a0a0a"
+                  strokeWidth={3.5}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
@@ -395,36 +324,25 @@ function WhatsAppViralV2() {
             </div>
           </div>
 
-          {/* Tiny QR — integrated, not a giant block */}
+          {/* Tiny integrated QR */}
           <div
             style={{
-              width: 110,
+              width: 130,
               background: "#fff",
-              borderRadius: 18,
+              borderRadius: 16,
               padding: 10,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center",
               gap: 4,
-              boxShadow: "0 12px 24px rgba(0,0,0,0.35)",
+              boxShadow: "0 14px 30px rgba(0,0,0,0.5)",
             }}
           >
             <img
               src={SAMPLE.qr}
               alt="QR"
-              style={{ width: 88, height: 88, display: "block" }}
+              style={{ width: 110, height: 110, display: "block" }}
             />
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: "#0E6B5A",
-                letterSpacing: 0.3,
-              }}
-            >
-              סרקו להצטרפות
-            </span>
           </div>
         </div>
       </div>
@@ -450,32 +368,24 @@ export default function MarketingMockups() {
               letterSpacing: -0.5,
             }}
           >
-            WhatsApp Viral — Mockup v2
+            Premium Dark — Mockup v3
           </h1>
           <p style={{ color: "#666", fontSize: 14 }}>
-            תבנית אחת בלבד · כיוון מודעה (לא כרטיס מערכת) · 1080×1080
+            מבוסס על הרפרנסים · תמונה דומיננטית · מחיר קבוצתי ענק · QR קטן ומשולב · 1080×1080
           </p>
         </header>
 
-        {/* Scaled mobile preview */}
         <div className="flex flex-col items-center gap-10">
+          {/* Scaled preview - feed view */}
           <div>
-            <p
-              style={{
-                textAlign: "center",
-                color: "#888",
-                fontSize: 12,
-                marginBottom: 8,
-              }}
-            >
+            <p style={{ textAlign: "center", color: "#888", fontSize: 12, marginBottom: 8 }}>
               תצוגה מוקטנת (40%) — איך זה ייראה בפיד
             </p>
             <div
               style={{
-                width: 432,
-                height: 432,
+                width: 432, height: 432,
                 overflow: "hidden",
-                borderRadius: 12,
+                borderRadius: 14,
                 boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
               }}
             >
@@ -483,35 +393,28 @@ export default function MarketingMockups() {
                 style={{
                   transform: "scale(0.4)",
                   transformOrigin: "top left",
-                  width: 1080,
-                  height: 1080,
+                  width: 1080, height: 1080,
                 }}
               >
-                <WhatsAppViralV2 />
+                <PremiumDarkV3 />
               </div>
             </div>
           </div>
 
-          {/* Full-size canvas, scrollable */}
+          {/* Full size */}
           <div>
-            <p
-              style={{
-                textAlign: "center",
-                color: "#888",
-                fontSize: 12,
-                marginBottom: 8,
-              }}
-            >
-              תצוגה מלאה 1080×1080
+            <p style={{ textAlign: "center", color: "#888", fontSize: 12, marginBottom: 8 }}>
+              גודל אמיתי — 1080×1080
             </p>
             <div
               style={{
-                boxShadow: "0 30px 80px rgba(0,0,0,0.3)",
-                borderRadius: 24,
-                overflow: "hidden",
+                overflow: "auto",
+                maxWidth: "100%",
+                borderRadius: 14,
+                boxShadow: "0 30px 80px rgba(0,0,0,0.35)",
               }}
             >
-              <WhatsAppViralV2 />
+              <PremiumDarkV3 />
             </div>
           </div>
         </div>
