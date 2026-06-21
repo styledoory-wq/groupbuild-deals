@@ -31,8 +31,8 @@ export default function SupplierMarketingTools() {
   const [activeFormat, setActiveFormat] = useState<FormatKey>("square");
   const [sending, setSending] = useState(false);
 
-  const generate = async () => {
-    if (!dealId) return;
+  const generate = async (): Promise<{ urls: Record<FormatKey, string>; dealUrl: string } | null> => {
+    if (!dealId) return null;
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-marketing-card", {
@@ -41,11 +41,14 @@ export default function SupplierMarketingTools() {
       if (error) throw error;
       const d = data as { ok?: boolean; dealUrl?: string; urls?: Record<string, string>; error?: string };
       if (!d.ok) throw new Error(d.error || "generation_failed");
-      setUrls(d.urls as Record<FormatKey, string>);
+      const u = d.urls as Record<FormatKey, string>;
+      setUrls(u);
       setDealUrl(d.dealUrl || "");
       toast.success("התמונות נוצרו בהצלחה");
+      return { urls: u, dealUrl: d.dealUrl || "" };
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "יצירה נכשלה");
+      return null;
     } finally {
       setGenerating(false);
       setLoading(false);
@@ -56,11 +59,30 @@ export default function SupplierMarketingTools() {
     if (!dealId) return;
     (async () => {
       const { data } = await supabase.from("deals").select("title").eq("id", dealId).maybeSingle();
-      setDealTitle(data?.title ?? "");
-      await generate();
-      if (searchParams.get("welcome") === "1") {
-        // Auto-send welcome email to supplier in background
-        try { await sendSelfEmailSilent(data?.title ?? ""); } catch { /* ignore */ }
+      const title = data?.title ?? "";
+      setDealTitle(title);
+      const result = await generate();
+      if (result && searchParams.get("welcome") === "1") {
+        const wa = `https://wa.me/?text=${encodeURIComponent(`🔥 ${title}\nהצטרפו לרכישה קבוצתית — ככל שיותר מצטרפים, המחיר יורד!\n${result.dealUrl}`)}`;
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user?.email) {
+            await supabase.functions.invoke("send-transactional-email", {
+              body: {
+                templateName: "marketing-card-ready",
+                recipientEmail: user.email,
+                idempotencyKey: `mkt-welcome-${dealId}`,
+                templateData: {
+                  name: user.user_metadata?.full_name || "",
+                  dealTitle: title,
+                  dealUrl: result.dealUrl,
+                  cardImageUrl: result.urls.square,
+                  whatsappUrl: wa,
+                },
+              },
+            });
+          }
+        } catch { /* silent */ }
         searchParams.delete("welcome");
         setSearchParams(searchParams, { replace: true });
       }
