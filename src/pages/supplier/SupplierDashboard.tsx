@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Plus, LogOut, Pencil, Clock, MapPin, Users, Eye, Heart,
   TrendingUp, Bell, Wallet, Target, Flame, Building2, Tag,
-  ChevronLeft, Activity, Sparkles,
+  Activity, Sparkles,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -34,6 +34,8 @@ type DbDeal = {
   base_price: number | null;
   offer_type: string | null;
   target_participants: number | null;
+  cover_image_url: string | null;
+  gallery_images: unknown;
 };
 
 type AreaProject = {
@@ -127,7 +129,7 @@ export default function SupplierDashboard() {
         if (supplierRow?.id && (supplierRow.approval_status === "approved" || supplierRow.approval_status === "active")) {
           const { data: dealRows, error: dealsErr } = await supabase
             .from("deals")
-            .select("id,title,status,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants")
+            .select("id,title,status,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants,cover_image_url,gallery_images")
             .eq("supplier_id", supplierRow.id)
             .eq("is_deleted", false)
             .order("created_at", { ascending: false });
@@ -324,24 +326,27 @@ export default function SupplierDashboard() {
   }, [myDeals, counts]);
 
   const tasks = useMemo(() => {
-    const list: { id: string; icon: typeof Users; iconBg: string; iconColor: string; title: string; subtitle: string; to: string }[] = [];
+    const list: { id: string; icon: typeof Users; iconBg: string; iconColor: string; title: string; subtitle: string; cta: string; to: string }[] = [];
     const unanswered = totals.totalLeads - totals.totalPaid;
     if (unanswered > 0) list.push({
       id: "leads", icon: Users, iconBg: "#E8F5F1", iconColor: GREEN,
       title: `${unanswered} לידים שמחכים לטיפול`,
       subtitle: "ענה עכשיו והגדל את הסיכוי לסגירה",
+      cta: "טפל עכשיו",
       to: "/supplier/leads",
     });
     if (areaProjects.length > 0) list.push({
       id: "proj", icon: Building2, iconBg: "#FEF1E6", iconColor: "#D97706",
       title: `${areaProjects.length} פרויקטים חדשים באזורך`,
       subtitle: areaProjects[0] ? `${areaProjects[0].name} · ${areaProjects[0].city}` : "",
+      cta: "צור הצעה",
       to: "/supplier/offers/new",
     });
     if (myDeals.length === 0) list.push({
       id: "first", icon: Tag, iconBg: "#F3EAFB", iconColor: "#7C3AED",
       title: "צור את ההצעה הראשונה שלך",
       subtitle: "ספקים שמפרסמים הצעה מקבלים פי 4 לידים",
+      cta: "התחל",
       to: "/supplier/offers/new",
     });
     return list;
@@ -488,28 +493,31 @@ export default function SupplierDashboard() {
         {tasks.length > 0 && (
           <>
             <SectionHeader title="משימות שמחכות לך" badge={tasks.length.toString()} />
-            <div className="px-5 mt-3 bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden mx-5">
-              <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden">
-                {tasks.map((t, i) => {
-                  const Icon = t.icon;
-                  return (
+            <div className="px-5 mt-3 space-y-2.5">
+              {tasks.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <div
+                    key={t.id}
+                    className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-4 flex items-center gap-3"
+                  >
                     <button
-                      key={t.id}
                       onClick={() => navigate(t.to)}
-                      className={`w-full flex items-center gap-3 p-4 text-right active:bg-[#F7F8FA] transition ${i < tasks.length - 1 ? "border-b border-[#F2F4F7]" : ""}`}
+                      className="shrink-0 h-9 px-3 rounded-full text-[12px] font-bold text-white active:scale-95 transition"
+                      style={{ background: GREEN }}
                     >
-                      <ChevronLeft className="h-4 w-4 text-[#C7CCD4] shrink-0" />
-                      <div className="flex-1 min-w-0 text-right">
-                        <div className="font-semibold text-[14px] text-[#0F172A] tracking-tight truncate">{t.title}</div>
-                        <div className="text-[12px] text-[#8E95A2] truncate mt-0.5">{t.subtitle}</div>
-                      </div>
-                      <div className="h-10 w-10 rounded-2xl flex items-center justify-center shrink-0" style={{ background: t.iconBg }}>
-                        <Icon className="h-[18px] w-[18px]" style={{ color: t.iconColor }} strokeWidth={2.2} />
-                      </div>
+                      {t.cta}
                     </button>
-                  );
-                })}
-              </div>
+                    <div className="flex-1 min-w-0 text-right">
+                      <div className="font-bold text-[14px] text-[#0F172A] tracking-tight truncate">{t.title}</div>
+                      <div className="text-[12px] text-[#8E95A2] truncate mt-0.5">{t.subtitle}</div>
+                    </div>
+                    <div className="h-11 w-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: t.iconBg }}>
+                      <Icon className="h-[19px] w-[19px]" style={{ color: t.iconColor }} strokeWidth={2.2} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </>
         )}
@@ -609,7 +617,17 @@ export default function SupplierDashboard() {
                       <h3 className="text-[12px] font-bold text-[#0F172A]">ההצעה המובילה</h3>
                     </div>
                     <div className="relative h-[90px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1F2937] to-[#0F172A] mb-2.5">
-                      <img src={BUILDING_IMAGES[0]} alt={topDeal.title} className="absolute inset-0 w-full h-full object-cover opacity-90" />
+                      {(() => {
+                        const gallery = Array.isArray(topDeal.gallery_images) ? (topDeal.gallery_images as string[]) : [];
+                        const img = topDeal.cover_image_url || gallery[0] || null;
+                        return img ? (
+                          <img src={img} alt={topDeal.title} className="absolute inset-0 w-full h-full object-cover" />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Tag className="h-7 w-7 text-white/40" strokeWidth={1.8} />
+                          </div>
+                        );
+                      })()}
                       <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold text-white bg-[#0E6B5A]/95">
                         <span className="h-1 w-1 rounded-full bg-white animate-pulse" /> פעילה
                       </span>
