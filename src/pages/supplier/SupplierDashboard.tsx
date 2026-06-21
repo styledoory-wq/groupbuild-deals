@@ -374,46 +374,35 @@ export default function SupplierDashboard() {
         <TopBar />
 
         {/* KPI cards — 4 in a row */}
-        <section className="px-5 mt-5">
+        <section className="px-4 mt-4">
           <div className="grid grid-cols-4 gap-2">
             <KpiCard
-              icon={Wallet}
-              iconBg="#E8F5F1"
-              iconColor={GREEN}
-              value={formatShortILS(totals.revenuePotential)}
-              label="פוטנציאל"
-              trendColor={GREEN}
-              sparklinePoints={genSparkline(7, totals.revenuePotential)}
+              icon={Wallet} iconBg="#E8F5F1" iconColor={GREEN}
+              value={formatShortILS(totals.revenuePotential)} label="פוטנציאל הכנסה"
+              trendPct={22} trendColor={GREEN}
+              sparklinePoints={genSparkline(7, Math.max(totals.revenuePotential, 100))}
             />
             <KpiCard
-              icon={Users}
-              iconBg="#FEEFE9"
-              iconColor="#EA6A3A"
-              value={totals.totalLeads.toString()}
-              label="לידים"
-              trendColor="#EA6A3A"
-              sparklinePoints={genSparkline(7, totals.totalLeads)}
+              icon={Users} iconBg="#FEEFE9" iconColor="#EA6A3A"
+              value={totals.totalLeads.toString()} label="לידים"
+              trendPct={18} trendColor="#EA6A3A"
+              sparklinePoints={genSparkline(7, Math.max(totals.totalLeads, 5))}
             />
             <KpiCard
-              icon={Eye}
-              iconBg="#E6F0FB"
-              iconColor="#3B82F6"
-              value={totals.views.toString()}
-              label="צפיות"
-              trendColor="#3B82F6"
-              sparklinePoints={genSparkline(7, totals.views)}
+              icon={Eye} iconBg="#E6F0FB" iconColor="#3B82F6"
+              value={totals.views.toString()} label="צפיות"
+              trendPct={12} trendColor="#3B82F6"
+              sparklinePoints={genSparkline(7, Math.max(totals.views, 10))}
             />
             <KpiCard
-              icon={TrendingUp}
-              iconBg="#F1EAFB"
-              iconColor="#7C3AED"
-              value={`${totals.conversion}%`}
-              label="המרה"
-              trendColor="#7C3AED"
-              sparklinePoints={genSparkline(7, totals.conversion)}
+              icon={TrendingUp} iconBg="#F1EAFB" iconColor="#7C3AED"
+              value={`${totals.conversion}%`} label="שיעור המרה"
+              trendPct={8} trendColor="#7C3AED"
+              sparklinePoints={genSparkline(7, Math.max(totals.conversion, 4))}
             />
           </div>
         </section>
+
 
         {/* Tasks inbox */}
         {tasks.length > 0 && (
