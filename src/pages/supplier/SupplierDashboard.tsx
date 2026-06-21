@@ -456,29 +456,30 @@ export default function SupplierDashboard() {
             <KpiCard
               icon={Wallet} iconBg="#E8F5F1" iconColor={GREEN}
               value={formatShortILS(totals.revenuePotential)} label="פוטנציאל הכנסה"
-              trendPct={22} trendColor={GREEN}
-              sparklinePoints={genSparkline(7, Math.max(totals.revenuePotential, 100))}
+              trendPct={totals.trends.revenue} trendColor={GREEN}
+              sparklinePoints={spark.revenue}
             />
             <KpiCard
               icon={Users} iconBg="#FEEFE9" iconColor="#EA6A3A"
               value={totals.totalLeads.toString()} label="לידים"
-              trendPct={18} trendColor="#EA6A3A"
-              sparklinePoints={genSparkline(7, Math.max(totals.totalLeads, 5))}
+              trendPct={totals.trends.leads} trendColor="#EA6A3A"
+              sparklinePoints={spark.leads}
             />
             <KpiCard
               icon={Eye} iconBg="#E6F0FB" iconColor="#3B82F6"
               value={totals.views.toString()} label="צפיות"
-              trendPct={12} trendColor="#3B82F6"
-              sparklinePoints={genSparkline(7, Math.max(totals.views, 10))}
+              trendPct={totals.trends.views} trendColor="#3B82F6"
+              sparklinePoints={spark.views}
             />
             <KpiCard
               icon={TrendingUp} iconBg="#F1EAFB" iconColor="#7C3AED"
               value={`${totals.conversion}%`} label="שיעור המרה"
-              trendPct={8} trendColor="#7C3AED"
-              sparklinePoints={genSparkline(7, Math.max(totals.conversion, 4))}
+              trendPct={totals.trends.conv} trendColor="#7C3AED"
+              sparklinePoints={spark.conv}
             />
           </div>
         </section>
+
 
 
         {/* Tasks inbox */}
