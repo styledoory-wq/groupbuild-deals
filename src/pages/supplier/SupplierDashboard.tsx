@@ -788,13 +788,14 @@ function WeekStat({ icon: Icon, color, value, label }: { icon: typeof Users; col
   );
 }
 
-function WeeklyChart({ leads, views, conv }: { leads: number; views: number; conv: number }) {
+function WeeklyChart({ leadsSeries, viewsSeries, convSeries }: { leadsSeries: number[]; viewsSeries: number[]; convSeries: number[] }) {
   const days = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
-  const seed = leads + views + conv + 1;
-  const series = (base: number) => days.map((_, i) => Math.max(2, Math.round(base * (0.4 + ((seed * (i + 2)) % 60) / 100))));
-  const sLeads = series(Math.max(leads, 3));
-  const sViews = series(Math.max(views, 5));
-  const sConv = series(Math.max(conv, 2));
+  const sLeads = leadsSeries.slice(-7);
+  const sViews = viewsSeries.slice(-7);
+  const sConv = convSeries.slice(-7);
+  while (sLeads.length < 7) sLeads.unshift(0);
+  while (sViews.length < 7) sViews.unshift(0);
+  while (sConv.length < 7) sConv.unshift(0);
   const all = [...sLeads, ...sViews, ...sConv];
   const max = Math.max(...all, 1);
   const w = 300, h = 100;
