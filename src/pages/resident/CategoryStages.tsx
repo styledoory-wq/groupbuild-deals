@@ -220,10 +220,10 @@ export default function CategoryStages() {
                   className="w-full bg-white rounded-2xl p-3 border border-gray-100 shadow-sm flex items-center gap-3 text-right active:scale-[0.99] transition-transform">
                   <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[14px] text-[#1A1A1A] truncate" style={{ fontFamily: URBANIST }}>
+                    <p className="font-bold text-[14px] text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
                       {s.business_name}
                     </p>
-                    <p className="text-[12px] text-gray-500 truncate">{catNames || "ספק"}</p>
+                    <p className="text-[12px] text-gray-500">{catNames || "ספק"}</p>
                   </div>
                   <ChevronLeft className="h-4 w-4 text-gray-400" />
                 </button>
@@ -254,7 +254,7 @@ export default function CategoryStages() {
                     </div>
                     <div className="min-w-0">
                       <div
-                        className="text-[15px] font-bold text-slate-900 truncate leading-tight"
+                        className="text-[15px] font-bold text-slate-900 leading-snug break-words"
                         style={{ fontFamily: URBANIST }}
                       >
                         {stage.title}

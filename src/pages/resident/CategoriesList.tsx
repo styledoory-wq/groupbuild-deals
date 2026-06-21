@@ -221,10 +221,10 @@ export default function CategoriesList() {
                   className="w-full bg-white rounded-2xl p-3 border border-gray-100 shadow-sm flex items-center gap-3 text-right active:scale-[0.99] transition-transform">
                   <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[14px] text-[#1A1A1A] truncate" style={{ fontFamily: URBANIST }}>
+                    <p className="font-bold text-[14px] text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
                       {s.business_name}
                     </p>
-                    <p className="text-[12px] text-gray-500 truncate">{catNames || "ספק"}</p>
+                    <p className="text-[12px] text-gray-500">{catNames || "ספק"}</p>
                   </div>
                   <ChevronLeft className="h-4 w-4 text-gray-400" />
                 </button>
@@ -339,12 +339,12 @@ export default function CategoriesList() {
                     <ChevronLeft className="h-4 w-4 text-gray-300 shrink-0" />
                     <div className="flex-1 min-w-0 text-right">
                       <div
-                        className="text-[13.5px] font-extrabold text-[#1A1A1A] leading-tight truncate"
+                        className="text-[13.5px] font-extrabold text-[#1A1A1A] leading-snug break-words"
                         style={{ fontFamily: URBANIST }}
                       >
                         {c.name}
                       </div>
-                      <div className="text-[11px] text-gray-500 leading-tight mt-0.5 line-clamp-1">
+                      <div className="text-[11px] text-gray-500 leading-snug mt-0.5">
                         {c.description || (c.count > 0 ? `${c.count} ספקים` : "בקרוב")}
                       </div>
                     </div>
