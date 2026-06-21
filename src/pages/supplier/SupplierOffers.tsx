@@ -162,18 +162,30 @@ export default function SupplierOffers() {
 
     const ids = rows.map((r) => r.id);
     if (ids.length > 0) {
-      const { data: interests } = await supabase
-        .from("deal_interests")
-        .select("deal_id")
-        .in("deal_id", ids)
-        .eq("is_deleted", false);
+      const [{ data: interests }, { data: favs }] = await Promise.all([
+        supabase
+          .from("deal_interests")
+          .select("deal_id")
+          .in("deal_id", ids)
+          .eq("is_deleted", false),
+        supabase
+          .from("favorites")
+          .select("deal_id")
+          .in("deal_id", ids),
+      ]);
       const counts: Record<string, number> = {};
       (interests ?? []).forEach((row: { deal_id: string }) => {
         counts[row.deal_id] = (counts[row.deal_id] ?? 0) + 1;
       });
       setParticipantsByDeal(counts);
+      const saves: Record<string, number> = {};
+      (favs ?? []).forEach((row: { deal_id: string }) => {
+        saves[row.deal_id] = (saves[row.deal_id] ?? 0) + 1;
+      });
+      setSavesByDeal(saves);
     } else {
       setParticipantsByDeal({});
+      setSavesByDeal({});
     }
   }, []);
 
