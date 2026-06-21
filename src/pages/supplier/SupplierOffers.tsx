@@ -264,22 +264,22 @@ export default function SupplierOffers() {
 
       {/* Stats */}
       {!loading && !error && supplierId && deals.length > 0 && (
-        <div className="px-5 mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="px-5 mt-4 flex gap-2">
           <StatCard
             label="שיעור המרה" value={`${totals.conv.toFixed(0)}%`} delta="8% מהחודש הקודם"
-            tone="violet" icon={<TrendingUp className="h-4 w-4" />} seed={11}
+            tone="violet" icon={<TrendingUp className="h-3.5 w-3.5" />} seed={11}
           />
           <StatCard
             label="לידים חדשים" value={`${totals.newLeads}`} delta="18% מהחודש הקודם"
-            tone="amber" icon={<Users className="h-4 w-4" />} seed={27}
+            tone="amber" icon={<Users className="h-3.5 w-3.5" />} seed={27}
           />
           <StatCard
             label="הכנסה צפויה" value={ILS(totals.potential)} delta="22% מהחודש הקודם"
-            tone="emerald" icon={<Wallet className="h-4 w-4" />} seed={43}
+            tone="emerald" icon={<Wallet className="h-3.5 w-3.5" />} seed={43}
           />
           <StatCard
             label="הצעות פעילות" value={`${totals.activeCount}`} delta={`${totals.closedCount} הסתיימו`}
-            tone="sky" icon={<Briefcase className="h-4 w-4" />} seed={59}
+            tone="sky" icon={<Briefcase className="h-3.5 w-3.5" />} seed={59}
           />
         </div>
       )}
