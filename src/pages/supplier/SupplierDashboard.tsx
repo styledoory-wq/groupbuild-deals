@@ -255,11 +255,18 @@ export default function SupplierDashboard() {
     return Number(d.base_price ?? d.original_price ?? 0);
   };
 
+  // Average deal price across the supplier's deals (for real revenue trend / area potential)
+  const avgDealPrice = useMemo(() => {
+    if (!myDeals.length) return 0;
+    const sum = myDeals.reduce((s, d) => s + priceFor(d), 0);
+    return sum / myDeals.length;
+  }, [myDeals]);
+
   const totals = useMemo(() => {
     const totalLeads = Object.values(counts).reduce((s, c) => s + c.interests, 0);
     const totalPaid = Object.values(counts).reduce((s, c) => s + c.paid, 0);
     const totalFavs = Object.values(counts).reduce((s, c) => s + c.favorites, 0);
-    // Views proxy: interests + favorites * 3 (until real view tracking exists)
+    // Views proxy: interests + favorites * 2 (until real view tracking exists)
     const views = totalLeads + totalFavs * 2;
     // Revenue potential: target_participants * price
     const revenuePotential = myDeals.reduce((s, d) => {
@@ -267,8 +274,43 @@ export default function SupplierDashboard() {
       return s + tgt * priceFor(d);
     }, 0);
     const conversion = totalLeads ? Math.round((totalPaid / totalLeads) * 100) : 0;
-    return { totalLeads, totalPaid, totalFavs, views, revenuePotential, conversion };
-  }, [counts, myDeals]);
+
+    // Real week-over-week trends from 14-day daily series
+    const sum = (a: number[]) => a.reduce((s, n) => s + n, 0);
+    const leadsThis = sum(daily.leads.slice(7));
+    const leadsPrev = sum(daily.leads.slice(0, 7));
+    const favsThis = sum(daily.favs.slice(7));
+    const favsPrev = sum(daily.favs.slice(0, 7));
+    const paidThis = sum(daily.paid.slice(7));
+    const paidPrev = sum(daily.paid.slice(0, 7));
+    const viewsThis = leadsThis + favsThis * 2;
+    const viewsPrev = leadsPrev + favsPrev * 2;
+    const convThis = leadsThis ? Math.round((paidThis / leadsThis) * 100) : 0;
+    const convPrev = leadsPrev ? Math.round((paidPrev / leadsPrev) * 100) : 0;
+    const trendPct = (cur: number, prev: number): number | null => {
+      if (prev === 0) return cur > 0 ? 100 : null;
+      return Math.round(((cur - prev) / prev) * 100);
+    };
+    const trends = {
+      revenue: trendPct(leadsThis, leadsPrev), // revenue scales with leads
+      leads: trendPct(leadsThis, leadsPrev),
+      views: trendPct(viewsThis, viewsPrev),
+      conv: trendPct(convThis, convPrev),
+    };
+    return { totalLeads, totalPaid, totalFavs, views, revenuePotential, conversion, trends };
+  }, [counts, myDeals, daily]);
+
+  // Real sparkline series (last 7 days)
+  const spark = useMemo(() => {
+    const last7 = <T,>(a: T[]) => a.slice(7);
+    const leads7 = last7(daily.leads);
+    const favs7 = last7(daily.favs);
+    const paid7 = last7(daily.paid);
+    const views7 = leads7.map((l, i) => l + favs7[i] * 2);
+    const revenue7 = leads7.map((l) => l * (avgDealPrice || 1));
+    const conv7 = leads7.map((l, i) => (l ? Math.round((paid7[i] / l) * 100) : 0));
+    return { leads: leads7, views: views7, revenue: revenue7, conv: conv7 };
+  }, [daily, avgDealPrice]);
 
   const topDeal = useMemo(() => {
     if (!myDeals.length) return null;
