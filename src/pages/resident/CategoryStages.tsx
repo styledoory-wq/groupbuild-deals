@@ -72,11 +72,12 @@ export default function CategoryStages() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const type = (params.get("type") as ProjectType) || "new";
-  const meta = TYPE_META[type] ?? TYPE_META.new;
+  const baseMeta = TYPE_META[type] ?? TYPE_META.new;
 
   const cached = getCachedValue<SupplierLite[]>("categories:suppliers", 5 * 60_000);
   const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
   const [search, setSearch] = useState("");
+  const [stageMap, setStageMap] = useState<Record<string, string[]> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,6 +95,32 @@ export default function CategoryStages() {
     })();
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("category_project_stages")
+        .select("stage_key,category_id,display_order")
+        .eq("project_type", type)
+        .order("display_order", { ascending: true });
+      if (cancelled) return;
+      const map: Record<string, string[]> = {};
+      (data ?? []).forEach((r: { stage_key: string; category_id: string }) => {
+        (map[r.stage_key] ||= []).push(r.category_id);
+      });
+      setStageMap(map);
+    })();
+    return () => { cancelled = true; };
+  }, [type]);
+
+  const meta = useMemo(() => {
+    if (!stageMap) return baseMeta;
+    return {
+      ...baseMeta,
+      stages: baseMeta.stages.map((s) => ({ ...s, catIds: stageMap[s.key] ?? s.catIds })),
+    };
+  }, [baseMeta, stageMap]);
 
   const counts = useMemo(() => {
     const map: Record<string, number> = {};
