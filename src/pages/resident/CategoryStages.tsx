@@ -254,7 +254,7 @@ export default function CategoryStages() {
                     </div>
                     <div className="min-w-0">
                       <div
-                        className="text-[15px] font-bold text-slate-900 truncate leading-tight"
+                        className="text-[15px] font-bold text-slate-900 leading-snug break-words"
                         style={{ fontFamily: URBANIST }}
                       >
                         {stage.title}
