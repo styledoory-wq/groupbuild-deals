@@ -2,6 +2,8 @@ import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Bell, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ScanFAB } from "@/components/supplier/ScanFAB";
+
 
 import { useApp } from "@/store/AppStore";
 
@@ -87,6 +89,8 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
           <div className={className}>{children}</div>
         </div>
       </main>
+
+      <ScanFAB />
     </div>
   );
 }

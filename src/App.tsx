@@ -63,6 +63,8 @@ const MarketingTemplatesPreview = lazy(() => import("./pages/supplier/MarketingT
 const MarketingMockups = lazy(() => import("./pages/supplier/MarketingMockups"));
 const SupplierLeads = lazy(() => import("./pages/supplier/SupplierLeads"));
 const SupplierReviews = lazy(() => import("./pages/supplier/SupplierReviews"));
+const SupplierAccount = lazy(() => import("./pages/supplier/SupplierAccount"));
+const SupplierRevenue = lazy(() => import("./pages/supplier/SupplierRevenue"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminProjects = lazy(() => import("./pages/admin/AdminProjects"));
@@ -258,6 +260,8 @@ const App = () => (
                   <Route path="/supplier/reviews" element={supplierRoute(<SupplierReviews />)} />
                   <Route path="/supplier/scan" element={supplierRoute(<SupplierScan />)} />
                   <Route path="/supplier/redemptions" element={supplierRoute(<SupplierRedemptions />)} />
+                  <Route path="/supplier/revenue" element={supplierRoute(<SupplierRevenue />)} />
+                  <Route path="/supplier/account" element={supplierRoute(<SupplierAccount />)} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/admin-login" element={<AdminLogin />} />
                   <Route path="/admin" element={adminRoute(<AdminDashboard />)} />
