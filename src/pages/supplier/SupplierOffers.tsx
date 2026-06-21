@@ -381,11 +381,11 @@ function FeaturedDealCard({
       {/* Top: side-by-side image + content */}
       <div className="flex gap-3 p-3">
         {/* Image column (visual left in RTL = end) */}
-        <div className="relative w-[42%] shrink-0 rounded-[16px] overflow-hidden bg-[#F1F3F7] self-stretch min-h-[420px]">
+        <div className="relative w-[44%] shrink-0 rounded-[16px] overflow-hidden bg-[#F1F3F7] self-stretch">
           <img src={cover} alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/55 to-transparent" />
 
-          {/* Featured badge top-start (top-right in RTL = visual top-right of image which is top-left of card image) */}
+          {/* Featured badge top-start of image (visual top-right) */}
           <div className="absolute top-2.5 right-2.5">
             <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-1 rounded-full bg-white/95 backdrop-blur text-orange-600 shadow-sm">
               <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
@@ -393,7 +393,7 @@ function FeaturedDealCard({
           </div>
 
           {/* Participants chip on bottom of image */}
-          <div className="absolute bottom-2.5 right-2.5 left-2.5 inline-flex items-center gap-2 bg-black/55 backdrop-blur-sm text-white rounded-full pl-2.5 pr-1 py-1">
+          <div className="absolute bottom-2.5 right-2.5 left-2.5 flex items-center gap-2 bg-black/55 backdrop-blur-sm text-white rounded-full pl-2.5 pr-1 py-1">
             <div className="flex -space-x-1.5 rtl:space-x-reverse">
               {[0, 1, 2].map((i) => (
                 <div key={i} className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 border-2 border-white/90" />
@@ -404,16 +404,16 @@ function FeaturedDealCard({
                 </div>
               )}
             </div>
-            <span className="text-[10.5px] font-semibold pr-1">{participants} הצטרפו השבוע</span>
+            <span className="text-[10.5px] font-semibold pr-1 truncate">{participants} הצטרפו השבוע</span>
           </div>
         </div>
 
         {/* Content column */}
         <div className="min-w-0 flex-1 flex flex-col">
-          {/* Status + menu */}
+          {/* Status pill at start (right), 3-dots menu at end (left) */}
           <div className="flex items-center justify-between gap-2">
-            <DealActionsMenu dealId={d.id} status={d.status} onChanged={onChanged} />
             <StatusPill status={d.status} />
+            <DealActionsMenu dealId={d.id} status={d.status} onChanged={onChanged} />
           </div>
 
           {/* Title */}
