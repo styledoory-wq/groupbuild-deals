@@ -59,6 +59,7 @@ const SupplierOffers = lazy(() => import("./pages/supplier/SupplierOffers"));
 const OfferEditor = lazy(() => import("./pages/supplier/OfferEditor"));
 const SupplierOfferMarketingEdit = lazy(() => import("./pages/supplier/SupplierOfferMarketingEdit"));
 const SupplierMarketingTools = lazy(() => import("./pages/supplier/SupplierMarketingTools"));
+const MarketingTemplatesPreview = lazy(() => import("./pages/supplier/MarketingTemplatesPreview"));
 const SupplierLeads = lazy(() => import("./pages/supplier/SupplierLeads"));
 const SupplierReviews = lazy(() => import("./pages/supplier/SupplierReviews"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
