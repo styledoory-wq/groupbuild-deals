@@ -145,6 +145,8 @@ export default function SupplierOffers() {
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [deals, setDeals] = useState<DealRow[]>([]);
   const [participantsByDeal, setParticipantsByDeal] = useState<Record<string, number>>({});
+  const [savesByDeal, setSavesByDeal] = useState<Record<string, number>>({});
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<StatusKey>("all");
 
   const loadDeals = useCallback(async (sid: string) => {
