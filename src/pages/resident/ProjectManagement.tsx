@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Share2, Pencil, Calendar, Clock, User, Check, TrendingUp,
-  Star, ChevronLeft, Sparkles, Zap,
+  Star, ChevronLeft, Sparkles, Zap, X,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -14,6 +14,34 @@ const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
 const BRAND = "#0E6B5A";
 const BRAND_DARK = "#0A5447";
+
+type ProjectInfo = {
+  name: string;
+  subtitle: string;
+  manager: string;
+  targetDate: string; // YYYY-MM-DD
+  budgetTotal: number;
+  budgetUsed: number;
+  groupSavings: number;
+};
+
+const PROJECT_INFO_KEY = "gb:pm:info";
+const DEFAULT_INFO: ProjectInfo = {
+  name: "בית פרטי · נתניה",
+  subtitle: 'שטח בנוי: 180 מ"ר · 2 קומות',
+  manager: "יוסי בניה",
+  targetDate: "2025-10-15",
+  budgetTotal: 680000,
+  budgetUsed: 248500,
+  groupSavings: 32400,
+};
+
+function formatDateShort(iso: string) {
+  if (!iso) return "—";
+  const [y, m, d] = iso.split("-");
+  if (!y || !m || !d) return iso;
+  return `${d}.${m}.${y.slice(2)}`;
+}
 
 type Stage = {
   key: string;
