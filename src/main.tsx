@@ -14,9 +14,12 @@ import "@fontsource/epilogue/700.css";
 
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import { initNative } from "@/lib/nativeInit";
+import { registerServiceWorker } from "@/lib/registerSW";
 
 // Fire-and-forget — no-op on web, sets up keyboard handling on iOS/Android.
 initNative();
+// Registers /sw.js in production only (skipped in Lovable preview/dev).
+registerServiceWorker();
 
 createRoot(document.getElementById("root")!).render(
   <AppErrorBoundary>
