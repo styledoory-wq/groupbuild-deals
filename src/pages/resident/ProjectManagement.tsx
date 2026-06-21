@@ -287,8 +287,8 @@ export default function ProjectManagement() {
           </div>
 
           <div className="grid grid-cols-3 gap-2 mt-4">
-            <InfoChip icon={<User className="h-3.5 w-3.5" />} label="מנהל" value="יוסי בניה" />
-            <InfoChip icon={<Calendar className="h-3.5 w-3.5" />} label="יעד" value="15.10.25" />
+            <InfoChip icon={<User className="h-3.5 w-3.5" />} label="מנהל" value={info.manager} onClick={() => setEditOpen(true)} />
+            <InfoChip icon={<Calendar className="h-3.5 w-3.5" />} label="יעד" value={formatDateShort(info.targetDate)} onClick={() => setEditOpen(true)} />
             <InfoChip icon={<Clock className="h-3.5 w-3.5" />} label="עדכון" value="היום" />
           </div>
         </div>
