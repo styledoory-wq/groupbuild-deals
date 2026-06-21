@@ -28,6 +28,7 @@ type Props = {
 };
 
 export function DealActionsMenu({ dealId, status, onChanged }: Props) {
+  const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDeactivate, setConfirmDeactivate] = useState(false);
   const [confirmActivate, setConfirmActivate] = useState(false);
@@ -78,6 +79,9 @@ export function DealActionsMenu({ dealId, status, onChanged }: Props) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-background z-50">
+          <DropdownMenuItem onClick={() => navigate(`/supplier/offers/${dealId}/marketing-tools`)}>
+            <Sparkles className="h-4 w-4 ml-2" /> כלי שיווק
+          </DropdownMenuItem>
           {isInactive ? (
             <DropdownMenuItem onClick={() => setConfirmActivate(true)}>
               <Power className="h-4 w-4 ml-2" /> הפעל הצעה
