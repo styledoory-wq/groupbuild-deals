@@ -252,6 +252,7 @@ const App = () => (
                   <Route path="/supplier/offers/:dealId/marketing-tools" element={supplierRoute(<SupplierMarketingTools />)} />
                   <Route path="/supplier/marketing-templates-preview" element={supplierRoute(<MarketingTemplatesPreview />)} />
                   <Route path="/marketing-templates-preview" element={<MarketingTemplatesPreview />} />
+                  <Route path="/marketing-mockups" element={<MarketingMockups />} />
                   <Route path="/settings/notifications" element={<NotificationSettings />} />
                   <Route path="/supplier/leads" element={supplierRoute(<SupplierLeads />)} />
                   <Route path="/supplier/reviews" element={supplierRoute(<SupplierReviews />)} />
