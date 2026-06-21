@@ -633,23 +633,25 @@ function Sparkline({ points, color }: { points: number[]; color: string }) {
 }
 
 function KpiCard({
-  icon: Icon, iconBg, iconColor, value, label, trendColor, sparklinePoints,
+  icon: Icon, iconBg, iconColor, value, label, trendColor, trendPct, sparklinePoints,
 }: {
-  icon: typeof Wallet; iconBg: string; iconColor: string; value: string; label: string; trendColor: string; sparklinePoints: number[];
+  icon: typeof Wallet; iconBg: string; iconColor: string; value: string; label: string; trendColor: string; trendPct: number; sparklinePoints: number[];
 }) {
   return (
     <div className="bg-white rounded-2xl border border-[#EEF0F3] shadow-sm p-2.5 flex flex-col">
-      <div className="h-7 w-7 rounded-xl flex items-center justify-center mb-1.5" style={{ background: iconBg }}>
+      <div className="h-7 w-7 rounded-xl flex items-center justify-center mb-2" style={{ background: iconBg }}>
         <Icon className="h-3.5 w-3.5" style={{ color: iconColor }} strokeWidth={2.4} />
       </div>
-      <div className="text-[14px] font-bold text-[#0F172A] tracking-tight leading-tight truncate">{value}</div>
-      <div className="text-[10px] text-[#8E95A2] font-medium leading-tight mt-0.5 truncate">{label}</div>
-      <div className="mt-1.5 -mb-0.5">
+      <div className="text-[15px] font-bold text-[#0F172A] tracking-tight leading-none truncate" dir="rtl">{value}</div>
+      <div className="text-[10px] text-[#8E95A2] font-medium leading-tight mt-1 truncate">{label}</div>
+      <div className="text-[9px] font-bold mt-1 truncate" style={{ color: trendColor }}>↑ {trendPct}% השבוע</div>
+      <div className="mt-1 -mb-0.5">
         <Sparkline points={sparklinePoints} color={trendColor} />
       </div>
     </div>
   );
 }
+
 
 function MiniStat({ icon: Icon, color, value, label }: { icon: typeof Eye; color: string; value: string; label: string }) {
   return (
