@@ -443,33 +443,42 @@ export default function SupplierDashboard() {
             />
             <div className="mt-3 overflow-x-auto no-scrollbar">
               <div className="flex gap-3 px-5 pb-1 snap-x snap-mandatory" dir="rtl">
-                {areaProjects.slice(0, 8).map((p, i) => (
-                  <div key={p.id} className="snap-start min-w-[200px] w-[200px] bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden">
-                    <div className="relative h-[110px] bg-gradient-to-br from-[#E8F0F5] to-[#D4DEE8] flex items-center justify-center">
-                      <Building2 className="h-10 w-10 text-white/80" strokeWidth={1.5} />
-                      <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold text-white ${i === 0 ? "bg-[#EA6A3A]" : "bg-[#0E6B5A]"}`}>
-                        {i === 0 ? <><Flame className="h-2.5 w-2.5" strokeWidth={3} /> חם</> : "חדש"}
-                      </span>
+                {areaProjects.slice(0, 8).map((p, i) => {
+                  const isHot = i === 1;
+                  return (
+                    <div key={p.id} className="snap-start min-w-[180px] w-[180px] bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden flex flex-col">
+                      <div className="relative h-[110px] overflow-hidden">
+                        <img
+                          src={BUILDING_IMAGES[i % BUILDING_IMAGES.length]}
+                          alt={p.name}
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-white shadow ${isHot ? "bg-[#EA6A3A]" : "bg-white/95 !text-[#0F172A]"}`}>
+                          {isHot ? <><Flame className="h-2.5 w-2.5" strokeWidth={3} /> חם</> : "חדש"}
+                        </span>
+                      </div>
+                      <div className="p-3 text-right flex-1 flex flex-col">
+                        <h3 className="font-bold text-[14px] text-[#0F172A] tracking-tight truncate">{p.name}</h3>
+                        <p className="text-[#8E95A2] text-[11px] truncate mt-0.5">{p.city}{p.units ? ` · ${p.units} יח״ד` : ""}</p>
+                        <div className="mt-2 text-[10px] text-[#8E95A2]">פוטנציאל הכנסה</div>
+                        <div className="font-bold text-[15px]" style={{ color: GREEN }}>{formatShortILS((p.units || 10) * 4000)}</div>
+                        <button
+                          onClick={() => navigate("/supplier/offers/new")}
+                          className={`mt-2.5 w-full h-9 rounded-full text-[12px] font-bold active:scale-95 transition ${isHot ? "text-white" : "border bg-white"}`}
+                          style={isHot ? { background: GREEN } : { borderColor: GREEN, color: GREEN }}
+                        >
+                          צור הצעה
+                        </button>
+                      </div>
                     </div>
-                    <div className="p-3 text-right">
-                      <h3 className="font-bold text-[14px] text-[#0F172A] tracking-tight truncate">{p.name}</h3>
-                      <p className="text-[#8E95A2] text-[11px] truncate mt-0.5">{p.city}{p.units ? ` · ${p.units} יח״ד` : ""}</p>
-                      <div className="mt-2 text-[10px] text-[#8E95A2]">פוטנציאל הכנסה</div>
-                      <div className="font-bold text-[14px]" style={{ color: GREEN }}>{formatShortILS((p.units || 10) * 4000)}</div>
-                      <button
-                        onClick={() => navigate("/supplier/offers/new")}
-                        className={`mt-2.5 w-full h-9 rounded-full text-[12px] font-bold active:scale-95 transition ${i === 0 ? "text-white" : "border bg-white"}`}
-                        style={i === 0 ? { background: GREEN } : { borderColor: GREEN, color: GREEN }}
-                      >
-                        צור הצעה
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </>
         )}
+
 
         {/* Featured top deal */}
         {topDeal && (() => {
