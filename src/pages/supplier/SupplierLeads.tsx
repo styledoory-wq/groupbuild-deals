@@ -606,6 +606,9 @@ export default function SupplierLeads() {
     const email = p?.email ?? null;
     const wa = normalizeWhatsappUrl(phone);
     const committed = i.deposit_required && ["committed", "paid"].includes(i.deposit_status);
+    const stage = interestStage(i);
+    const hot = isHot(i.created_at, stage);
+    const cover = dealCover(i.deal_id);
     const isSwiped = swipeId === i.id && !trashed;
     return (
       <div key={i.id} className="relative overflow-hidden rounded-2xl">
@@ -616,58 +619,84 @@ export default function SupplierLeads() {
           </button>
         )}
         <div
-          className="gb-card p-4 transition-transform relative z-10"
+          className="gb-card p-3.5 transition-transform relative z-10"
           style={isSwiped ? { transform: "translateX(80px)" } : undefined}
           onTouchStart={trashed ? undefined : onTouchStart}
           onTouchEnd={trashed ? undefined : makeSwipeEnd(i.id)}
         >
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="flex items-start gap-2.5 min-w-0">
-              <Avatar name={name} />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <h4 className="font-extrabold text-[15px] text-foreground truncate">{name}</h4>
-                  <StageBadge stage={interestStage(i)} hot={isHot(i.created_at, interestStage(i))} />
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1 truncate">
-                  <Clock className="h-3 w-3" /> {timeAgoHe(i.created_at)} · מקור: {dealTitle(i.deal_id)}
-                </p>
+          {/* Header: avatar + name + cover thumb + prominent time */}
+          <div className="flex items-start gap-2.5 mb-2.5">
+            <Avatar name={name} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h4 className="font-extrabold text-[16px] text-foreground truncate">{name}</h4>
+                <StageBadge stage={stage} hot={hot} />
+              </div>
+              <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                <span
+                  className={
+                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold " +
+                    (hot
+                      ? "bg-[#FFF1ED] text-[#C2410C] border border-[#FED7AA]"
+                      : "bg-[#F0F9F6] text-[#0E6B5A] border border-[#A7E0D0]")
+                  }
+                >
+                  <Clock className="h-3 w-3" /> {timeAgoHe(i.created_at)}
+                </span>
+                {i.city && (
+                  <span className="text-[11px] text-muted-foreground inline-flex items-center gap-0.5">
+                    <MapPin className="h-3 w-3" /> {i.city}
+                  </span>
+                )}
               </div>
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-              {committed && (
-                <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30">
-                  <BadgeCheck className="h-3 w-3" />
-                  {i.deposit_status === "paid" ? "שולם" : ils(Number(i.deposit_amount))}
-                </span>
-              )}
-              {!trashed && (
-                <button
-                  onClick={() => setConfirmDelete({ kind: "interest", id: i.id })}
-                  disabled={statusBusy === i.id}
-                  aria-label="מחק ליד"
-                  className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 disabled:opacity-50"
-                >
-                  {statusBusy === i.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                </button>
-              )}
+            {cover ? (
+              <Link to={`/deals/${i.deal_id}`} className="shrink-0">
+                <img
+                  src={cover}
+                  alt={dealTitle(i.deal_id)}
+                  loading="lazy"
+                  className="h-12 w-12 rounded-xl object-cover border border-[#EEF0F3]"
+                />
+              </Link>
+            ) : (
+              <div className="h-12 w-12 rounded-xl bg-[#F0F9F6] border border-[#A7E0D0] flex items-center justify-center shrink-0">
+                <Building2 className="h-5 w-5 text-[#0E6B5A]" />
+              </div>
+            )}
+          </div>
+
+          {/* Source deal pill */}
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <Link to={`/deals/${i.deal_id}`} className="text-[11px] text-[#0E6B5A] font-bold inline-flex items-center gap-1 truncate min-w-0">
+              <Building2 className="h-3 w-3 shrink-0" />
+              <span className="truncate">{dealTitle(i.deal_id)}</span>
+            </Link>
+            {committed && (
+              <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30 shrink-0">
+                <BadgeCheck className="h-3 w-3" />
+                {i.deposit_status === "paid" ? "שולם" : ils(Number(i.deposit_amount))}
+              </span>
+            )}
+          </div>
+
+          {(phone || email || i.project_name) && (
+            <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground mb-2">
+              {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
+              {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
+              {i.project_name && <span className="inline-flex items-center gap-1"><Building2 className="h-3 w-3" /> {i.project_name}</span>}
             </div>
-          </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground mb-2">
-            {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
-            {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
-            {i.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {i.city}</span>}
-            {i.project_name && <span className="inline-flex items-center gap-1"><Building2 className="h-3 w-3" /> {i.project_name}</span>}
-            <span>נרשם: {new Date(i.created_at).toLocaleDateString("he-IL")}</span>
-          </div>
-          {i.notes && (
-            <p className="text-fs-xs text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">{i.notes}</p>
           )}
+
+          {i.notes && (
+            <p className="text-[11px] text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">{i.notes}</p>
+          )}
+
           {trashed ? (
             <div className="flex items-center justify-between gap-2">
               <span className="text-fs-xs text-muted-foreground">ימחק בעוד {daysLeftToPurge(i.deleted_at)} ימים</span>
               <button onClick={() => restoreInterest(i.id)} disabled={statusBusy === i.id}
-                className="h-8 px-3 rounded-lg bg-muted text-foreground text-fs-xs font-bold inline-flex items-center gap-1 disabled:opacity-50">
+                className="h-7 px-2.5 rounded-md bg-muted text-foreground text-[11px] font-bold inline-flex items-center gap-1 disabled:opacity-50">
                 <RotateCcw className="h-3 w-3" /> שחזר
               </button>
             </div>
@@ -675,68 +704,85 @@ export default function SupplierLeads() {
             <>
               {/* Direct deposit (resident → supplier) confirmation */}
               {i.direct_deposit_status === "marked_paid_by_resident" && (
-                <div className="mb-2 rounded-xl border-2 border-[#0E6B5A] bg-[#F0F9F6] p-3">
-                  <div className="text-fs-xs font-bold text-[#0E6B5A] mb-1 inline-flex items-center gap-1">
+                <div className="mb-2 rounded-xl border-2 border-[#0E6B5A] bg-[#F0F9F6] p-2.5">
+                  <div className="text-[11px] font-bold text-[#0E6B5A] mb-1 inline-flex items-center gap-1">
                     <Coins className="h-3.5 w-3.5" /> דייר סימן ששילם פיקדון של {ils(Number(i.direct_deposit_amount ?? i.deposit_amount))}
                   </div>
-                  <p className="text-[11px] text-muted-foreground mb-2 leading-relaxed">
-                    בדוק בחשבון שלך (PayBox/Bit/בנק) ואשר את הקבלה. רק אחרי האישור שלך — ההצטרפות לעסקה תושלם ושובר ייווצר אם היעד יושלם.
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-1.5">
                     <button onClick={() => confirmDirectDeposit(i.id)}
                       disabled={statusBusy === i.id}
-                      className="h-9 rounded-lg bg-[#0E6B5A] text-white text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> אשר קבלת פיקדון
+                      className="h-8 rounded-md bg-[#0E6B5A] text-white text-[11px] font-bold flex items-center justify-center gap-1 disabled:opacity-50">
+                      <CheckCircle2 className="h-3 w-3" /> אשר קבלה
                     </button>
                     <button onClick={() => disputeDirectDeposit(i.id)}
                       disabled={statusBusy === i.id}
-                      className="h-9 rounded-lg bg-destructive/10 text-destructive border border-destructive/30 text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50">
-                      <X className="h-3.5 w-3.5" /> לא התקבל
+                      className="h-8 rounded-md bg-destructive/10 text-destructive border border-destructive/30 text-[11px] font-bold flex items-center justify-center gap-1 disabled:opacity-50">
+                      <X className="h-3 w-3" /> לא התקבל
                     </button>
                   </div>
                 </div>
               )}
               {i.direct_deposit_status === "awaiting_payment" && (
-                <div className="mb-2 text-fs-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
-                  ממתין שהדייר יעביר את הפיקדון ויסמן ששילם
+                <div className="mb-2 text-[11px] text-muted-foreground bg-muted/50 rounded-md px-2 py-1.5">
+                  ממתין שהדייר יעביר את הפיקדון
                 </div>
               )}
               {i.direct_deposit_status === "confirmed_by_supplier" && (
-                <div className="mb-2 text-fs-xs text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] rounded-lg px-3 py-2 inline-flex items-center gap-1">
+                <div className="mb-2 text-[11px] text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] rounded-md px-2 py-1.5 inline-flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" /> פיקדון אושר על ידך
                 </div>
               )}
               {i.direct_deposit_status === "disputed" && (
-                <div className="mb-2 text-fs-xs text-destructive bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">
-                  סומן כלא התקבל — הדייר קיבל הודעה
+                <div className="mb-2 text-[11px] text-destructive bg-destructive/10 border border-destructive/30 rounded-md px-2 py-1.5">
+                  סומן כלא התקבל
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-2 mb-2">
-                <button onClick={() => updateLeadStatus(i.id, "approved")}
-                  disabled={statusBusy === i.id || i.lead_status === "approved"}
-                  className="h-8 rounded-lg bg-[#059669] text-white text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50">
-                  <Check className="h-3 w-3" /> מאושר
-                </button>
-                <button onClick={() => updateLeadStatus(i.id, "rejected")}
-                  disabled={statusBusy === i.id || i.lead_status === "rejected"}
-                  className="h-8 rounded-lg bg-muted text-foreground text-fs-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50">
-                  <X className="h-3 w-3" /> לא רלוונטי
+
+              {/* Compact action row */}
+              <div className="flex items-center gap-1.5">
+                {phone && (
+                  <a href={`tel:${phone}`} aria-label="חיוג"
+                    className="h-8 px-3 rounded-md bg-[#0E6B5A] text-white text-[11px] font-extrabold inline-flex items-center justify-center gap-1">
+                    <Phone className="h-3 w-3" /> חיוג
+                  </a>
+                )}
+                {wa && (
+                  <a href={wa} target="_blank" rel="noreferrer" aria-label="וואטסאפ"
+                    className="h-8 px-3 rounded-md bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] text-[11px] font-extrabold inline-flex items-center justify-center gap-1">
+                    <MessageCircle className="h-3 w-3" /> וואטסאפ
+                  </a>
+                )}
+                <div className="flex-1" />
+                {i.lead_status !== "approved" && (
+                  <button onClick={() => updateLeadStatus(i.id, "approved")}
+                    disabled={statusBusy === i.id}
+                    aria-label="אשר ליד"
+                    className="h-8 w-8 rounded-md bg-[#059669] text-white inline-flex items-center justify-center disabled:opacity-50">
+                    <Check className="h-3.5 w-3.5" />
+                  </button>
+                )}
+                {i.lead_status !== "rejected" && (
+                  <button onClick={() => updateLeadStatus(i.id, "rejected")}
+                    disabled={statusBusy === i.id}
+                    aria-label="לא רלוונטי"
+                    className="h-8 w-8 rounded-md bg-muted text-foreground inline-flex items-center justify-center disabled:opacity-50">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+                <button
+                  onClick={() => setConfirmDelete({ kind: "interest", id: i.id })}
+                  disabled={statusBusy === i.id}
+                  aria-label="מחק ליד"
+                  className="h-8 w-8 rounded-md bg-destructive/10 text-destructive inline-flex items-center justify-center disabled:opacity-50"
+                >
+                  {statusBusy === i.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                 </button>
               </div>
-              {(phone || wa) && (
-                <div className="flex gap-2">
-                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#0E6B5A] text-white">חיוג</a>}
-                  {wa && (
-                    <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] inline-flex items-center justify-center gap-1">
-                      <MessageCircle className="h-3 w-3" /> וואטסאפ
-                    </a>
-                  )}
-                </div>
-              )}
+
               {isAdmin && i.deposit_required && i.deposit_status !== "paid" && (
                 <button onClick={() => markDepositPaid(i.user_id, i.deal_id)}
                   disabled={busyKey === i.user_id + i.deal_id}
-                  className="mt-2 w-full text-fs-xs font-bold py-2 rounded-lg bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/40 inline-flex items-center justify-center gap-1 disabled:opacity-50">
+                  className="mt-2 w-full text-[11px] font-bold py-1.5 rounded-md bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/40 inline-flex items-center justify-center gap-1 disabled:opacity-50">
                   <CheckCircle2 className="h-3 w-3" /> סמן פיקדון כשולם (אדמין)
                 </button>
               )}
