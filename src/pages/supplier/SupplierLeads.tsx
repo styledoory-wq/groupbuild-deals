@@ -154,6 +154,69 @@ function StageBadge({ stage, hot }: { stage: LeadStage; hot: boolean }) {
   return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A]">ממתין</span>;
 }
 
+function KpiSmall({
+  icon, label, value, trend, tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  trend: string;
+  tone: "green" | "blue" | "amber" | "violet";
+}) {
+  const palette: Record<string, { bg: string; fg: string }> = {
+    green: { bg: "#ECFDF5", fg: "#059669" },
+    blue: { bg: "#EFF6FF", fg: "#1D4ED8" },
+    amber: { bg: "#FFFBEB", fg: "#B45309" },
+    violet: { bg: "#F5F3FF", fg: "#6D28D9" },
+  };
+  const c = palette[tone];
+  return (
+    <div className="bg-white rounded-2xl border border-[#EEF0F3] p-3 shadow-sm">
+      <div className="flex items-center justify-between mb-1.5">
+        <div
+          className="h-7 w-7 rounded-lg inline-flex items-center justify-center"
+          style={{ background: c.bg, color: c.fg }}
+        >
+          {icon}
+        </div>
+        <span className="text-[10px] font-bold" style={{ color: c.fg }}>{trend}</span>
+      </div>
+      <div className="text-[18px] font-black text-[#0F172A] leading-none">{value}</div>
+      <div className="text-[11px] text-muted-foreground mt-1 font-bold">{label}</div>
+    </div>
+  );
+}
+
+function EmptyHero({
+  icon, title, description, cta,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  cta?: { to: string; label: string };
+}) {
+  return (
+    <div className="bg-white rounded-3xl border border-[#EEF0F3] p-8 text-center shadow-sm">
+      <div className="mx-auto h-16 w-16 rounded-2xl bg-[#F0F9F6] flex items-center justify-center mb-3">
+        {icon}
+      </div>
+      <h3 className="text-[15px] font-extrabold text-[#0F172A]">{title}</h3>
+      <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">{description}</p>
+      {cta && (
+        <Link
+          to={cta.to}
+          className="mt-4 inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-[#0E6B5A] text-white text-[13px] font-extrabold"
+        >
+          <PlusCircle className="h-4 w-4" />
+          {cta.label}
+        </Link>
+      )}
+    </div>
+  );
+}
+
+
+
 export default function SupplierLeads() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
