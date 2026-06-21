@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import brandMark from "@/assets/groupbuild-mark-exact.png.asset.json";
+import brandLogo from "@/assets/groupbuild-logo-cropped.png";
 
 const SPLASH_SHOWN_KEY = "gb:splash-shown";
 
