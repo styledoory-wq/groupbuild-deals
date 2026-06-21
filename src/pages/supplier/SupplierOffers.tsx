@@ -153,7 +153,7 @@ export default function SupplierOffers() {
   const loadDeals = useCallback(async (sid: string) => {
     const { data, error: dErr } = await supabase
       .from("deals")
-      .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, tiers, cover_image_url, created_at")
+      .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, tiers, cover_image_url, target_participants, created_at")
       .eq("supplier_id", sid)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
