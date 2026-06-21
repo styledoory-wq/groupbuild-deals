@@ -196,6 +196,51 @@ export default function NotificationSettings() {
           />
         </div>
 
+        {/* Browser web-push toggle */}
+        <div className="rounded-[20px] bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] p-4">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 rounded-[12px] bg-[#0E6B5A]/10 flex items-center justify-center shrink-0">
+              <Globe className="h-5 w-5 text-[#0E6B5A]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-sm text-[#1F2937]">התראות בדפדפן</h3>
+                {browserPushOn ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
+                    <Check className="h-3 w-3" /> פעיל
+                  </span>
+                ) : browserPermission === "denied" ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                    <X className="h-3 w-3" /> חסום
+                  </span>
+                ) : null}
+              </div>
+              <p className="text-fs-xs text-[#6B7280] leading-relaxed mt-1">
+                קבל/י התראות מ-GroupBuild גם כשהאפליקציה סגורה — ישירות מהדפדפן או ממסך הבית.
+                {!browserSupported && " הדפדפן הזה לא תומך בהתראות פוש."}
+                {browserPermission === "denied" &&
+                  " ההרשאה חסומה — שחרר/י אותה מהגדרות האתר בדפדפן ונסה/י שוב."}
+              </p>
+              <Button
+                onClick={toggleBrowserPush}
+                disabled={!browserSupported || browserBusy || browserPermission === "denied"}
+                className={
+                  "mt-3 h-10 px-4 rounded-[12px] font-bold text-sm " +
+                  (browserPushOn
+                    ? "bg-white border border-[#ECEEF2] text-[#1F2937] hover:bg-muted/40"
+                    : "bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white")
+                }
+              >
+                {browserBusy
+                  ? "רגע…"
+                  : browserPushOn
+                  ? "כיבוי התראות בדפדפן"
+                  : "הפעלת התראות בדפדפן"}
+              </Button>
+            </div>
+          </div>
+        </div>
+
         <div className="rounded-[20px] bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] p-4 space-y-2">
           <h3 className="font-bold text-sm mb-2 text-[#1F2937]">סוגי אירועים</h3>
           <div className="flex items-center gap-1 text-fs-xs text-[#6B7280] pb-2 border-b border-[#ECEEF2]">
