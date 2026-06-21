@@ -611,7 +611,17 @@ export default function SupplierDashboard() {
                       <h3 className="text-[12px] font-bold text-[#0F172A]">ההצעה המובילה</h3>
                     </div>
                     <div className="relative h-[90px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1F2937] to-[#0F172A] mb-2.5">
-                      <img src={BUILDING_IMAGES[0]} alt={topDeal.title} className="absolute inset-0 w-full h-full object-cover opacity-90" />
+                      {(() => {
+                        const gallery = Array.isArray(topDeal.gallery_images) ? (topDeal.gallery_images as string[]) : [];
+                        const img = topDeal.cover_image_url || gallery[0] || null;
+                        return img ? (
+                          <img src={img} alt={topDeal.title} className="absolute inset-0 w-full h-full object-cover" />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Tag className="h-7 w-7 text-white/40" strokeWidth={1.8} />
+                          </div>
+                        );
+                      })()}
                       <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold text-white bg-[#0E6B5A]/95">
                         <span className="h-1 w-1 rounded-full bg-white animate-pulse" /> פעילה
                       </span>
