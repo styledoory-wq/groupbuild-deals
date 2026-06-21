@@ -487,8 +487,9 @@ export default function ProjectManagement() {
       </div>
 
       {/* Sticky budget card */}
-      <div
-        className="fixed left-1/2 -translate-x-1/2 z-30 w-[92%] max-w-[var(--app-max-w)] rounded-2xl p-3.5 shadow-2xl shadow-black/30 text-white"
+      <button
+        onClick={() => setEditOpen(true)}
+        className="fixed left-1/2 -translate-x-1/2 z-30 w-[92%] max-w-[var(--app-max-w)] rounded-2xl p-3.5 shadow-2xl shadow-black/30 text-white text-right active:scale-[0.99] transition-transform"
         style={{
           bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 10px)",
           background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
@@ -500,6 +501,7 @@ export default function ProjectManagement() {
             <span className="text-[12.5px] font-extrabold" style={{ fontFamily: URBANIST }}>
               מעקב תקציב
             </span>
+            <Pencil className="h-3 w-3 text-white/70" />
           </div>
           <span className="text-[10px] font-bold bg-white/15 px-2 py-0.5 rounded-full">
             {overPct === 0 ? "בתקציב" : `${overPct}% חריגה`}
@@ -527,19 +529,33 @@ export default function ProjectManagement() {
         <div className="mt-2 h-1.5 w-full bg-white/15 rounded-full overflow-hidden">
           <div
             className="h-full bg-white/80 rounded-full"
-            style={{ width: `${Math.round((budgetUsed / budgetTotal) * 100)}%` }}
+            style={{ width: `${Math.min(100, Math.round((budgetUsed / budgetTotal) * 100))}%` }}
           />
         </div>
-      </div>
+      </button>
+
+      {editOpen && (
+        <EditProjectModal
+          info={info}
+          onClose={() => setEditOpen(false)}
+          onSave={(next) => { setInfo(next); setEditOpen(false); }}
+        />
+      )}
 
       <BottomNav role="resident" />
     </div>
   );
 }
 
-function InfoChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function InfoChip({
+  icon, label, value, onClick,
+}: { icon: React.ReactNode; label: string; value: string; onClick?: () => void }) {
+  const Comp: any = onClick ? "button" : "div";
   return (
-    <div className="bg-[#F0F9F6] rounded-xl px-2 py-2 text-center">
+    <Comp
+      onClick={onClick}
+      className={`bg-[#F0F9F6] rounded-xl px-2 py-2 text-center w-full ${onClick ? "active:scale-[0.97] transition-transform" : ""}`}
+    >
       <div className="flex items-center justify-center gap-1 text-[#0E6B5A] mb-0.5">
         {icon}
         <span className="text-[10px] font-bold">{label}</span>
@@ -547,6 +563,125 @@ function InfoChip({ icon, label, value }: { icon: React.ReactNode; label: string
       <div className="text-[11.5px] font-extrabold text-[#1A1A1A] truncate" style={{ fontFamily: URBANIST }}>
         {value}
       </div>
+    </Comp>
+  );
+}
+
+function EditProjectModal({
+  info, onClose, onSave,
+}: { info: ProjectInfo; onClose: () => void; onSave: (info: ProjectInfo) => void }) {
+  const [form, setForm] = useState<ProjectInfo>(info);
+  const set = <K extends keyof ProjectInfo>(k: K, v: ProjectInfo[K]) =>
+    setForm((p) => ({ ...p, [k]: v }));
+
+  return (
+    <div
+      dir="rtl"
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center"
+      onClick={onClose}
+      style={{ fontFamily: EPILOGUE }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 20px)" }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[16px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
+            עריכת פרטי הפרויקט
+          </h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:scale-95"
+            aria-label="סגירה"
+          >
+            <X className="h-4 w-4 text-gray-600" />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <Field label="שם הפרויקט">
+            <input
+              value={form.name}
+              onChange={(e) => set("name", e.target.value)}
+              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+            />
+          </Field>
+          <Field label="תיאור (שטח / קומות)">
+            <input
+              value={form.subtitle}
+              onChange={(e) => set("subtitle", e.target.value)}
+              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+            />
+          </Field>
+          <Field label="מנהל הפרויקט">
+            <input
+              value={form.manager}
+              onChange={(e) => set("manager", e.target.value)}
+              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+            />
+          </Field>
+          <Field label="תאריך יעד">
+            <input
+              type="date"
+              value={form.targetDate}
+              onChange={(e) => set("targetDate", e.target.value)}
+              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="תקציב כולל (₪)">
+              <input
+                type="number" inputMode="numeric" min={0}
+                value={form.budgetTotal}
+                onChange={(e) => set("budgetTotal", Number(e.target.value) || 0)}
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A]"
+              />
+            </Field>
+            <Field label="נוצל (₪)">
+              <input
+                type="number" inputMode="numeric" min={0}
+                value={form.budgetUsed}
+                onChange={(e) => set("budgetUsed", Number(e.target.value) || 0)}
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A]"
+              />
+            </Field>
+          </div>
+          <Field label="חיסכון קבוצתי (₪)">
+            <input
+              type="number" inputMode="numeric" min={0}
+              value={form.groupSavings}
+              onChange={(e) => set("groupSavings", Number(e.target.value) || 0)}
+              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A]"
+            />
+          </Field>
+        </div>
+
+        <div className="flex gap-2 mt-5">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 rounded-2xl text-[14px] font-bold text-gray-700 bg-gray-100 active:scale-[0.98]"
+          >
+            ביטול
+          </button>
+          <button
+            onClick={() => onSave(form)}
+            className="flex-1 py-3 rounded-2xl text-[14px] font-extrabold text-white active:scale-[0.98]"
+            style={{ background: BRAND, fontFamily: URBANIST }}
+          >
+            שמירה
+          </button>
+        </div>
+      </div>
     </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="block text-[12px] font-bold text-gray-600 mb-1">{label}</span>
+      {children}
+    </label>
   );
 }
