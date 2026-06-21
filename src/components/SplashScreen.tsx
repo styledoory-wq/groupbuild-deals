@@ -62,7 +62,7 @@ export function SplashScreen({ ready, minDurationMs = 1400 }: { ready: boolean; 
         }}
       >
         <img
-          src={brandMark.url}
+          src={brandLogo}
           alt="GroupBuild"
           className="block h-auto w-full select-none object-contain"
           draggable={false}
