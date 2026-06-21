@@ -504,6 +504,10 @@ export default function SupplierLeads() {
   }, []);
 
   const dealTitle = (id: string) => deals.find((d) => d.id === id)?.title ?? "עסקה שנמחקה";
+  const dealCover = (id: string): string | null => {
+    const d = deals.find((x) => x.id === id);
+    return d?.cover_image_url || (d?.gallery_images && d.gallery_images[0]) || null;
+  };
   const totalActive = interests.length + inquiries.length;
   const totalTrashed = trashedInterests.length + trashedInquiries.length;
 
