@@ -172,7 +172,7 @@ export default function CategoriesList() {
     >
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] px-5 pt-[calc(env(safe-area-inset-top)+18px)]"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 140px)" }}
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 210px)" }}
       >
         {/* Title */}
         <h1
