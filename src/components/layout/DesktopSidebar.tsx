@@ -1,9 +1,11 @@
 import { useEffect } from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, ScanLine, CheckSquare, type LucideIcon } from "lucide-react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, ScanLine, CheckSquare, LogOut, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { preloadRoute } from "@/lib/routePreload";
 import { BrandLogo } from "@/components/BrandLogo";
+import { useApp } from "@/store/AppStore";
+import { toast } from "sonner";
 import type { Role } from "@/types";
 
 const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
@@ -36,11 +38,19 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
  */
 export function DesktopSidebar({ role }: { role: Role }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useApp();
 
   useEffect(() => {
     document.body.classList.add("has-desktop-sidebar");
     return () => document.body.classList.remove("has-desktop-sidebar");
   }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    toast.success("התנתקת בהצלחה");
+    navigate("/", { replace: true });
+  };
 
   return (
     <aside
@@ -77,6 +87,16 @@ export function DesktopSidebar({ role }: { role: Role }) {
           );
         })}
       </nav>
+
+      <div className="px-3 py-4 border-t border-[#ECEEF2] space-y-1">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 h-12 px-4 rounded-[14px] text-[15px] font-bold text-[#1F2937] hover:bg-[#F4F6FA] w-full transition-colors"
+        >
+          <LogOut className="shrink-0" style={{ width: 20, height: 20 }} strokeWidth={2} />
+          <span className="truncate">יציאה</span>
+        </button>
+      </div>
 
       <div className="px-5 py-4 border-t border-[#ECEEF2] text-[11px] text-[#9CA3AF] text-center">
         GroupBuild © {new Date().getFullYear()}
