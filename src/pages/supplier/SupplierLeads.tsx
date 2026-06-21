@@ -430,7 +430,7 @@ export default function SupplierLeads() {
         }
 
         const { data: dealsData } = await supabase
-          .from("deals").select("id,title,is_deleted").eq("supplier_id", sup.id);
+          .from("deals").select("id,title,cover_image_url,gallery_images,is_deleted").eq("supplier_id", sup.id);
         const allDeals = (dealsData ?? []) as Array<DealLite & { is_deleted?: boolean }>;
         if (!cancelled) setDeals(allDeals);
 
