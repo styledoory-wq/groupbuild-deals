@@ -211,6 +211,7 @@ export default function ProjectManagement() {
   const budgetUsed = info.budgetUsed;
   const groupSavings = info.groupSavings;
   const overPct = budgetUsed > budgetTotal ? Math.round(((budgetUsed - budgetTotal) / budgetTotal) * 100) : 0;
+  const statuses = ["הוזמן", "בתהליך", "הוזמן", "להזמין"];
 
   return (
     <div
