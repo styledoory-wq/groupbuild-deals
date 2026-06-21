@@ -296,43 +296,47 @@ export default function SupplierDashboard() {
 
   const TopBar = () => (
     <header className="px-5 pt-6 pb-2">
-      <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between gap-3">
         <button
           onClick={() => navigate("/supplier/leads")}
-          className="shrink-0 h-11 w-11 rounded-2xl bg-white border border-[#EEF0F3] flex items-center justify-center shadow-sm active:scale-95 transition relative"
+          className="shrink-0 h-12 w-12 rounded-2xl bg-white border border-[#EEF0F3] flex items-center justify-center shadow-sm active:scale-95 transition relative"
           aria-label="התראות"
         >
-          <Bell className="h-[18px] w-[18px] text-[#1C1C1E]" strokeWidth={2} />
+          <Bell className="h-[18px] w-[18px] text-[#0F172A]" strokeWidth={2} />
           {leadsToday > 0 && (
-            <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-[#0E6B5A] ring-2 ring-white" />
+            <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full bg-[#0E6B5A] ring-2 ring-white" />
           )}
         </button>
-        <div className="flex-1" />
-        <div className="text-right">
-          <div className="text-[13px] text-[#8E95A2] font-medium leading-tight">בוקר טוב,</div>
-          <h1 className="text-[20px] font-bold text-[#0F172A] leading-tight tracking-[-0.02em] flex items-center gap-1.5 justify-end">
-            {firstName} <span className="text-[18px]">👋</span>
-          </h1>
+        <div className="flex items-center gap-3 flex-1 justify-end min-w-0">
+          <div className="text-right min-w-0">
+            <h1 className="text-[19px] font-bold text-[#0F172A] leading-tight tracking-[-0.02em] flex items-center gap-1.5 justify-end truncate">
+              <span className="truncate">בוקר טוב, {firstName}</span> <span>👋</span>
+            </h1>
+            <div className="text-[12px] text-[#8E95A2] font-medium mt-0.5">כיף לראות אותך שוב</div>
+          </div>
+          <button
+            onClick={() => navigate("/supplier/profile/edit")}
+            className="shrink-0 h-12 w-12 rounded-full bg-gradient-to-br from-[#0E6B5A] to-[#1A8870] text-white font-bold text-[16px] flex items-center justify-center shadow-md active:scale-95 transition ring-2 ring-white"
+            aria-label="פרופיל"
+          >
+            {initial}
+          </button>
         </div>
-        <button
-          onClick={() => navigate("/supplier/profile/edit")}
-          className="h-11 w-11 rounded-full bg-gradient-to-br from-[#0E6B5A] to-[#1A8870] text-white font-bold flex items-center justify-center shadow-md active:scale-95 transition"
-          aria-label="פרופיל"
-        >
-          {initial}
-        </button>
       </div>
       {leadsToday > 0 && (
-        <div className="mt-4 inline-flex items-center gap-2 bg-white border border-[#EEF0F3] rounded-full pl-3 pr-2 py-1.5 shadow-sm">
-          <span className="h-6 w-6 rounded-full bg-[#E8F5F1] flex items-center justify-center">
-            <Users className="h-3.5 w-3.5" style={{ color: GREEN }} strokeWidth={2.4} />
-          </span>
-          <span className="text-[12px] font-semibold text-[#0F172A]">לידים חדשים היום</span>
-          <span className="text-[12px] font-bold" style={{ color: GREEN }}>{leadsToday}</span>
+        <div className="mt-4 flex justify-start">
+          <div className="inline-flex items-center gap-2 bg-white border border-[#EEF0F3] rounded-2xl pl-3 pr-2 py-2 shadow-sm">
+            <span className="h-7 w-7 rounded-xl bg-[#E8F5F1] flex items-center justify-center">
+              <Users className="h-3.5 w-3.5" style={{ color: GREEN }} strokeWidth={2.4} />
+            </span>
+            <span className="text-[12px] font-semibold text-[#0F172A]">לידים חדשים היום</span>
+            <span className="text-[13px] font-bold" style={{ color: GREEN }}>{leadsToday}</span>
+          </div>
         </div>
       )}
     </header>
   );
+
 
   if (!dbSupplier || isPending || isRejected) {
     return (
