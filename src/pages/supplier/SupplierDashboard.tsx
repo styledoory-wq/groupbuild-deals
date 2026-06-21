@@ -589,11 +589,11 @@ export default function SupplierDashboard() {
                     <span className="text-[11px] font-bold text-[#0F172A]">ביצועים</span>
                   </div>
                   <div className="grid grid-cols-3 gap-1.5 mb-2">
-                    <MiniWeekStat icon={Users} color="#EA6A3A" value={totals.totalLeads.toString()} label="לידים" trend={18} />
-                    <MiniWeekStat icon={Eye} color="#3B82F6" value={totals.views.toString()} label="צפיות" trend={12} />
-                    <MiniWeekStat icon={Target} color="#7C3AED" value={`${totals.conversion}%`} label="המרה" trend={8} />
+                    <MiniWeekStat icon={Users} color="#EA6A3A" value={totals.totalLeads.toString()} label="לידים" trend={totals.trends.leads} />
+                    <MiniWeekStat icon={Eye} color="#3B82F6" value={totals.views.toString()} label="צפיות" trend={totals.trends.views} />
+                    <MiniWeekStat icon={Target} color="#7C3AED" value={`${totals.conversion}%`} label="המרה" trend={totals.trends.conv} />
                   </div>
-                  <WeeklyChart leads={totals.totalLeads} views={totals.views} conv={totals.conversion} />
+                  <WeeklyChart leadsSeries={spark.leads} viewsSeries={spark.views} convSeries={spark.conv} />
                 </div>
               )}
 
