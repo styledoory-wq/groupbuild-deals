@@ -58,6 +58,7 @@ const SupplierProfileEdit = lazy(() => import("./pages/supplier/SupplierProfileE
 const SupplierOffers = lazy(() => import("./pages/supplier/SupplierOffers"));
 const OfferEditor = lazy(() => import("./pages/supplier/OfferEditor"));
 const SupplierOfferMarketingEdit = lazy(() => import("./pages/supplier/SupplierOfferMarketingEdit"));
+const SupplierMarketingTools = lazy(() => import("./pages/supplier/SupplierMarketingTools"));
 const SupplierLeads = lazy(() => import("./pages/supplier/SupplierLeads"));
 const SupplierReviews = lazy(() => import("./pages/supplier/SupplierReviews"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -246,6 +247,7 @@ const App = () => (
                   <Route path="/supplier/offers/new" element={supplierRoute(<OfferEditor />)} />
                   <Route path="/supplier/offers/:dealId/edit" element={supplierRoute(<OfferEditor />)} />
                   <Route path="/supplier/offers/:dealId/marketing" element={supplierRoute(<SupplierOfferMarketingEdit />)} />
+                  <Route path="/supplier/offers/:dealId/marketing-tools" element={supplierRoute(<SupplierMarketingTools />)} />
                   <Route path="/settings/notifications" element={<NotificationSettings />} />
                   <Route path="/supplier/leads" element={supplierRoute(<SupplierLeads />)} />
                   <Route path="/supplier/reviews" element={supplierRoute(<SupplierReviews />)} />
