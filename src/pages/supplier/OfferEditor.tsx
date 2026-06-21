@@ -452,19 +452,35 @@ export default function OfferEditor() {
 
     setSaving(true);
     try {
-      const { error } = isEditing
-        ? await supabase.from("deals").update(payload as never).eq("id", dealId!)
-        : await supabase.from("deals").insert([payload as never]);
-      if (error) {
-        console.error("[OfferEditor] save error", error);
-        const msg = error.message?.includes("row-level")
-          ? "אין הרשאה לשמור הצעה. ודא שהספק אושר על ידי מנהל המערכת."
-          : `שמירת ההצעה נכשלה: ${error.message}`;
-        toast.error(msg);
-        return;
+      let savedId = dealId;
+      if (isEditing) {
+        const { error } = await supabase.from("deals").update(payload as never).eq("id", dealId!);
+        if (error) {
+          console.error("[OfferEditor] save error", error);
+          const msg = error.message?.includes("row-level")
+            ? "אין הרשאה לשמור הצעה. ודא שהספק אושר על ידי מנהל המערכת."
+            : `שמירת ההצעה נכשלה: ${error.message}`;
+          toast.error(msg);
+          return;
+        }
+      } else {
+        const { data, error } = await supabase.from("deals").insert([payload as never]).select("id").single();
+        if (error) {
+          console.error("[OfferEditor] save error", error);
+          const msg = error.message?.includes("row-level")
+            ? "אין הרשאה לשמור הצעה. ודא שהספק אושר על ידי מנהל המערכת."
+            : `שמירת ההצעה נכשלה: ${error.message}`;
+          toast.error(msg);
+          return;
+        }
+        savedId = (data as { id: string }).id;
       }
       toast.success(isEditing ? "ההצעה עודכנה בהצלחה!" : "ההצעה נשמרה בהצלחה!");
-      navigate("/supplier/offers", { replace: true });
+      if (!isEditing && savedId) {
+        navigate(`/supplier/offers/${savedId}/marketing-tools?welcome=1`, { replace: true });
+      } else {
+        navigate("/supplier/offers", { replace: true });
+      }
     } catch (err: unknown) {
       console.error("[OfferEditor] save exception", err);
       toast.error("אירעה שגיאה בשמירת ההצעה. נסה שוב.");
