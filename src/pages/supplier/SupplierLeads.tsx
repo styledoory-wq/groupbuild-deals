@@ -171,6 +171,7 @@ export default function SupplierLeads() {
   const [showTrash, setShowTrash] = useState(false);
   const [swipeId, setSwipeId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: "interest" | "inquiry"; id: string } | null>(null);
+  const [tab, setTab] = useState<TabKey>("all");
   const touchStartX = useRef(0);
 
   const updateLeadStatus = async (interestId: string, status: "approved" | "rejected") => {
