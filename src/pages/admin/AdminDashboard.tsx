@@ -83,6 +83,7 @@ export default function AdminDashboard() {
     content: [
       { to: "/admin/projects", icon: Building2, label: "פרויקטים", desc: `${stats.projects || projects.length} פעילים` },
       { to: "/admin/categories", icon: LayoutGrid, label: "קטגוריות", desc: `${categories.length} פעילות` },
+      { to: "/admin/project-stages", icon: LayoutGrid, label: "תחומי פרויקט", desc: "קטגוריות בכל שלב" },
       { to: "/admin/deals", icon: Tag, label: "עסקאות", desc: `${stats.activeDeals} פעילות` },
       { to: "/admin/regions", icon: MapPin, label: "אזורי שירות", desc: "ערים ואזורים" },
     ],
