@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Plus, Briefcase, Pencil, Eye, Heart, Users, TrendingUp,
-  Wallet, Calendar, Flame, Sparkles, SlidersHorizontal, Tag, Coins, ArrowUpRight,
+  Wallet, Calendar, Flame, ChevronDown, SlidersHorizontal, Tag, Coins, Clock,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { ScreenHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
@@ -35,18 +35,11 @@ function extractPriceNum(headline: string): number {
   return m ? parseFloat(m[0]) : 0;
 }
 
-// deterministic visual metric per id (display-only, no logic change)
+// sparkline seed from deterministic id hash (visual decoration only)
 function hashId(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
   return h;
-}
-function visualMetrics(id: string, participants: number) {
-  const h = hashId(id);
-  const views = 120 + (h % 380) + participants * 18;
-  const saves = 15 + ((h >> 3) % 70) + participants * 2;
-  const conv = Math.min(48, Math.max(8, Math.round((participants / Math.max(1, views)) * 1000) / 10 + 8 + ((h >> 5) % 12)));
-  return { views, saves, conv };
 }
 
 // generate a smooth sparkline path
@@ -70,11 +63,16 @@ const compact = (n: number) =>
   n >= 1_000 ? `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}K` :
   `${n}`;
 
+function daysAgo(iso: string): number {
+  const diff = Date.now() - new Date(iso).getTime();
+  return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+}
+
 // ---------- small UI ----------
 function StatCard({
-  label, value, delta, tone, icon, seed, className = "",
+  label, value, subtitle, tone, icon, seed, className = "",
 }: {
-  label: string; value: string; delta: string; tone: "violet" | "amber" | "emerald" | "sky";
+  label: string; value: string; subtitle: string; tone: "violet" | "amber" | "emerald" | "sky";
   icon: React.ReactNode; seed: number; className?: string;
 }) {
   const tones = {
@@ -92,8 +90,8 @@ function StatCard({
         {value}
       </div>
       <div className="mt-1 text-[10px] text-[#6B7280] font-medium leading-tight truncate">{label}</div>
-      <div className="mt-1 flex items-center gap-0.5 text-[9.5px] font-semibold text-emerald-600">
-        <ArrowUpRight className="h-2.5 w-2.5" /> {delta}
+      <div className="mt-1 text-[9.5px] font-semibold text-[#6B7280] truncate">
+        {subtitle}
       </div>
       <svg viewBox="0 0 64 22" className="mt-1.5 w-full h-4 overflow-visible">
         <path d={sparkPath(seed)} fill="none" strokeWidth="1.6" className={tones.stroke} strokeLinecap="round" strokeLinejoin="round" />
@@ -147,6 +145,8 @@ export default function SupplierOffers() {
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [deals, setDeals] = useState<DealRow[]>([]);
   const [participantsByDeal, setParticipantsByDeal] = useState<Record<string, number>>({});
+  const [savesByDeal, setSavesByDeal] = useState<Record<string, number>>({});
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<StatusKey>("all");
 
   const loadDeals = useCallback(async (sid: string) => {
@@ -162,18 +162,30 @@ export default function SupplierOffers() {
 
     const ids = rows.map((r) => r.id);
     if (ids.length > 0) {
-      const { data: interests } = await supabase
-        .from("deal_interests")
-        .select("deal_id")
-        .in("deal_id", ids)
-        .eq("is_deleted", false);
+      const [{ data: interests }, { data: favs }] = await Promise.all([
+        supabase
+          .from("deal_interests")
+          .select("deal_id")
+          .in("deal_id", ids)
+          .eq("is_deleted", false),
+        supabase
+          .from("favorites")
+          .select("deal_id")
+          .in("deal_id", ids),
+      ]);
       const counts: Record<string, number> = {};
       (interests ?? []).forEach((row: { deal_id: string }) => {
         counts[row.deal_id] = (counts[row.deal_id] ?? 0) + 1;
       });
       setParticipantsByDeal(counts);
+      const saves: Record<string, number> = {};
+      (favs ?? []).forEach((row: { deal_id: string }) => {
+        saves[row.deal_id] = (saves[row.deal_id] ?? 0) + 1;
+      });
+      setSavesByDeal(saves);
     } else {
       setParticipantsByDeal({});
+      setSavesByDeal({});
     }
   }, []);
 
@@ -220,25 +232,24 @@ export default function SupplierOffers() {
     return base;
   };
 
-  // Top stats
+  // Top stats — real data only
   const totals = useMemo(() => {
     const active = deals.filter((d) => d.status === "active");
     const closed = deals.filter((d) => d.status === "closed");
     const newLeads = deals.reduce((s, d) => s + (participantsByDeal[d.id] ?? 0), 0);
+    const totalSaves = deals.reduce((s, d) => s + (savesByDeal[d.id] ?? 0), 0);
     const potential = active.reduce(
-      (s, d) => s + unitPriceForDeal(d) * Math.max(1, (participantsByDeal[d.id] ?? 0) + 2),
+      (s, d) => s + unitPriceForDeal(d) * Math.max(0, participantsByDeal[d.id] ?? 0),
       0,
     );
-    const totalViews = deals.reduce((s, d) => s + visualMetrics(d.id, participantsByDeal[d.id] ?? 0).views, 0);
-    const conv = totalViews > 0 ? Math.min(48, Math.round((newLeads / totalViews) * 1000) / 10 + 14) : 0;
     return {
       activeCount: active.length,
       closedCount: closed.length,
       newLeads,
+      totalSaves,
       potential,
-      conv,
     };
-  }, [deals, participantsByDeal]);
+  }, [deals, participantsByDeal, savesByDeal]);
 
   const filtered = useMemo(() => {
     if (filter === "all") return deals;
@@ -260,23 +271,27 @@ export default function SupplierOffers() {
         </Link>
       </div>
 
-      {/* Stats */}
+      {/* Stats — real-time aggregates */}
       {!loading && !error && supplierId && deals.length > 0 && (
         <div className="px-5 mt-4 flex gap-2">
           <StatCard
-            label="שיעור המרה" value={`${totals.conv.toFixed(0)}%`} delta="8% מהחודש הקודם"
-            tone="violet" icon={<TrendingUp className="h-3.5 w-3.5" />} seed={11}
-          />
-          <StatCard
-            label="לידים חדשים" value={`${totals.newLeads}`} delta="18% מהחודש הקודם"
+            label="מצטרפים" value={`${totals.newLeads}`}
+            subtitle={`ב-${deals.length} הצעות`}
             tone="amber" icon={<Users className="h-3.5 w-3.5" />} seed={27}
           />
           <StatCard
-            label="הכנסה צפויה" value={ILS(totals.potential)} delta="22% מהחודש הקודם"
+            label="שמירות" value={`${totals.totalSaves}`}
+            subtitle="סה״כ עניין"
+            tone="violet" icon={<Heart className="h-3.5 w-3.5" />} seed={11}
+          />
+          <StatCard
+            label="הכנסה צפויה" value={ILS(totals.potential)}
+            subtitle="לפי מצטרפים בפועל"
             tone="emerald" icon={<Wallet className="h-3.5 w-3.5" />} seed={43}
           />
           <StatCard
-            label="הצעות פעילות" value={`${totals.activeCount}`} delta={`${totals.closedCount} הסתיימו`}
+            label="פעילות" value={`${totals.activeCount}`}
+            subtitle={`${totals.closedCount} הסתיימו`}
             tone="sky" icon={<Briefcase className="h-3.5 w-3.5" />} seed={59}
           />
         </div>
@@ -331,60 +346,63 @@ export default function SupplierOffers() {
           />
         )}
 
-        {/* Deals */}
-        {!loading && !error && filtered.map((d, i) => (
-          <CompactDealCard
-            key={d.id}
-            deal={d}
-            participants={participantsByDeal[d.id] ?? 0}
-            unitPrice={unitPriceForDeal(d)}
-            onChanged={refresh}
-            featured={i === 0}
-          />
-        ))}
+        {/* Deals — compact by default; expand on tap to full view */}
+        {!loading && !error && filtered.map((d, i) => {
+          const isExpanded = expandedId === d.id;
+          const commonProps = {
+            deal: d,
+            participants: participantsByDeal[d.id] ?? 0,
+            saves: savesByDeal[d.id] ?? 0,
+            unitPrice: unitPriceForDeal(d),
+            onChanged: refresh,
+            onToggle: () => setExpandedId(isExpanded ? null : d.id),
+          };
+          return isExpanded
+            ? <FeaturedDealCard key={d.id} {...commonProps} />
+            : <CompactDealCard key={d.id} {...commonProps} featured={i === 0} />;
+        })}
       </div>
       <BottomNav role="supplier" />
     </MobileShell>
   );
 }
 
-// ---------- Featured card ----------
+// ---------- Featured (expanded) card ----------
 function FeaturedDealCard({
-  deal: d, participants, unitPrice, onChanged,
-}: { deal: DealRow; participants: number; unitPrice: number; onChanged: () => void }) {
+  deal: d, participants, saves, unitPrice, onChanged, onToggle,
+}: {
+  deal: DealRow; participants: number; saves: number; unitPrice: number;
+  onChanged: () => void; onToggle: () => void;
+}) {
   const offerType = ((d.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(d.tiers) ? d.tiers : [];
   const display = describeOffer({
     offer_type: offerType, original_price: d.original_price, discounted_price: d.discounted_price,
     discount_percentage: d.discount_percentage, base_price: d.base_price, tiers,
   }, 0);
-  const m = visualMetrics(d.id, participants);
   const goal = Math.max(participants + 1, tiers[0]?.minParticipants ?? 2);
   const pct = Math.min(100, Math.round((participants / goal) * 100));
-  const potential = unitPrice * Math.max(1, participants + 2);
+  const potential = unitPrice * Math.max(0, participants);
   const nextDrop = tiers[1]?.discounted_price ?? null;
   const cover = d.cover_image_url || `https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=70`;
+  const ageDays = daysAgo(d.created_at);
+  const savingsPerUnit = Math.max(0, (d.original_price ?? 0) - unitPrice);
 
   return (
     <article className="rounded-[22px] bg-white border border-[#EEF0F4] overflow-hidden shadow-[0_2px_8px_rgba(16,24,40,0.04),0_16px_40px_-18px_rgba(16,24,40,0.12)]">
-      {/* Top: side-by-side image + content */}
       <div className="flex gap-3 p-3">
-        {/* Image column (visual left in RTL = end) */}
+        {/* Image */}
         <div className="relative w-[44%] shrink-0 rounded-[16px] overflow-hidden bg-[#F1F3F7] self-stretch">
           <img src={cover} alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/55 to-transparent" />
-
-          {/* Featured badge top-start of image (visual top-right) */}
           <div className="absolute top-2.5 right-2.5">
             <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-1 rounded-full bg-white/95 backdrop-blur text-orange-600 shadow-sm">
               <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
             </span>
           </div>
-
-          {/* Participants chip on bottom of image */}
           <div className="absolute bottom-2.5 right-2.5 left-2.5 flex items-center gap-2 bg-black/55 backdrop-blur-sm text-white rounded-full pl-2.5 pr-1 py-1">
             <div className="flex -space-x-1.5 rtl:space-x-reverse">
-              {[0, 1, 2].map((i) => (
+              {Array.from({ length: Math.min(3, Math.max(0, participants)) }).map((_, i) => (
                 <div key={i} className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 border-2 border-white/90" />
               ))}
               {participants > 3 && (
@@ -393,22 +411,19 @@ function FeaturedDealCard({
                 </div>
               )}
             </div>
-            <span className="text-[10.5px] font-semibold pr-1 truncate">{participants} הצטרפו השבוע</span>
+            <span className="text-[10.5px] font-semibold pr-1 truncate">{participants} מצטרפים</span>
           </div>
         </div>
 
-        {/* Content column */}
+        {/* Content */}
         <div className="min-w-0 flex-1 flex flex-col">
-          {/* Status pill at start (right), 3-dots menu at end (left) */}
           <div className="flex items-center justify-between gap-2">
             <StatusPill status={d.status} />
             <DealActionsMenu dealId={d.id} status={d.status} onChanged={onChanged} />
           </div>
 
-          {/* Title */}
           <h3 className="mt-1.5 text-[15px] font-extrabold text-[#0F172A] leading-snug line-clamp-2">{d.title}</h3>
 
-          {/* Price row: current price big on start (right), original strike on end (left) */}
           <div className="mt-2.5 flex items-start justify-between gap-2">
             <div className="text-right">
               <div className="text-[22px] font-extrabold text-emerald-600 leading-none tracking-tight">
@@ -426,7 +441,6 @@ function FeaturedDealCard({
             ) : null}
           </div>
 
-          {/* Progress */}
           <div className="mt-3">
             <div className="flex items-center justify-between text-[10.5px] text-[#6B7280] mb-1.5">
               <span className="font-bold text-emerald-700">{pct}%</span>
@@ -442,13 +456,12 @@ function FeaturedDealCard({
             </div>
           )}
 
-          {/* Metric grid 4 cols */}
-          <div className="mt-3 grid grid-cols-4 gap-1.5">
+          {/* Real metrics: saves, participants, days active */}
+          <div className="mt-3 grid grid-cols-3 gap-1.5">
             {[
-              { icon: <Eye className="h-3 w-3" />, value: compact(m.views), label: "צפיות", color: "text-sky-600 bg-sky-50" },
-              { icon: <Heart className="h-3 w-3" />, value: compact(m.saves), label: "שמירות", color: "text-rose-600 bg-rose-50" },
+              { icon: <Heart className="h-3 w-3" />, value: compact(saves), label: "שמירות", color: "text-rose-600 bg-rose-50" },
               { icon: <Users className="h-3 w-3" />, value: `${participants}`, label: "מצטרפים", color: "text-emerald-600 bg-emerald-50" },
-              { icon: <TrendingUp className="h-3 w-3" />, value: `${m.conv.toFixed(0)}%`, label: "המרה", color: "text-violet-600 bg-violet-50" },
+              { icon: <Clock className="h-3 w-3" />, value: `${ageDays}`, label: "ימי פעילות", color: "text-sky-600 bg-sky-50" },
             ].map((s, i) => (
               <div key={i} className="text-center">
                 <div className={`h-6 w-6 mx-auto rounded-full flex items-center justify-center ${s.color}`}>{s.icon}</div>
@@ -458,20 +471,19 @@ function FeaturedDealCard({
             ))}
           </div>
 
-          {/* Income chips inline */}
           <div className="mt-2.5 rounded-[12px] bg-emerald-50/70 border border-emerald-100 p-2 grid grid-cols-2 gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <Coins className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
               <div className="min-w-0">
                 <div className="text-[11.5px] font-extrabold text-emerald-700 leading-none truncate">{ILS(potential)}</div>
-                <div className="text-[9px] text-emerald-700/70 mt-0.5">פוטנציאל הכנסה</div>
+                <div className="text-[9px] text-emerald-700/70 mt-0.5">הכנסה ממצטרפים</div>
               </div>
             </div>
             <div className="flex items-center gap-1.5 min-w-0">
               <Tag className="h-3.5 w-3.5 text-amber-600 shrink-0" />
               <div className="min-w-0">
                 <div className="text-[11.5px] font-extrabold text-amber-700 leading-none truncate">
-                  {ILS(Math.max(0, (d.original_price ?? 0) - unitPrice))}
+                  {ILS(savingsPerUnit)}
                 </div>
                 <div className="text-[9px] text-amber-700/70 mt-0.5">חיסכון לדיירים</div>
               </div>
@@ -480,15 +492,14 @@ function FeaturedDealCard({
         </div>
       </div>
 
-      {/* Full-width footer */}
+      {/* Footer */}
       <div className="px-4 pb-4 pt-1 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-[10.5px] text-[#9CA3AF]">
-          <Calendar className="h-3 w-3" />
-          <div className="flex flex-col leading-tight">
-            <span className="text-[11px] text-[#1F2937] font-bold">{new Date(d.created_at).toLocaleDateString("he-IL")}</span>
-            <span>עדכון אחרון</span>
-          </div>
-        </div>
+        <button
+          onClick={onToggle}
+          className="h-9 px-3 rounded-[10px] text-[11px] font-bold text-[#6B7280] hover:bg-[#F1F3F7] inline-flex items-center gap-1"
+        >
+          <ChevronDown className="h-3.5 w-3.5 rotate-180" /> סגירה
+        </button>
         <div className="flex items-center gap-2">
           <Link
             to={`/supplier/offers/${d.id}/edit`}
@@ -508,76 +519,97 @@ function FeaturedDealCard({
   );
 }
 
-// ---------- Compact card ----------
+// ---------- Compact card (default) ----------
 function CompactDealCard({
-  deal: d, participants, unitPrice, onChanged, featured = false,
-}: { deal: DealRow; participants: number; unitPrice: number; onChanged: () => void; featured?: boolean }) {
+  deal: d, participants, saves, unitPrice: _unitPrice, onChanged, onToggle, featured = false,
+}: {
+  deal: DealRow; participants: number; saves: number; unitPrice: number;
+  onChanged: () => void; onToggle: () => void; featured?: boolean;
+}) {
   const offerType = ((d.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(d.tiers) ? d.tiers : [];
   const display = describeOffer({
     offer_type: offerType, original_price: d.original_price, discounted_price: d.discounted_price,
     discount_percentage: d.discount_percentage, base_price: d.base_price, tiers,
   }, 0);
-  const m = visualMetrics(d.id, participants);
   const goal = Math.max(participants + 1, tiers[0]?.minParticipants ?? 3);
   const pct = Math.min(100, Math.round((participants / goal) * 100));
   const cover = d.cover_image_url || `https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=400&q=70`;
-  const highPerf = m.conv >= 22;
+  const highPerf = saves >= 5 || participants >= 3;
+
+  const stop = (e: React.MouseEvent) => { e.stopPropagation(); };
 
   return (
-    <Link to={`/supplier/offers/${d.id}/edit`} className="block">
-      <article className="rounded-[20px] bg-white border border-[#EEF0F4] p-3 flex gap-3 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_24px_-16px_rgba(16,24,40,0.12)] hover:shadow-[0_12px_32px_-14px_rgba(16,24,40,0.18)] hover:-translate-y-0.5 transition-all duration-300">
-        {/* Image */}
-        <div className="relative w-[110px] shrink-0 aspect-square rounded-[14px] overflow-hidden bg-[#F1F3F7]">
-          <img src={cover} alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute top-1.5 right-1.5">
-            <StatusPill status={d.status} />
+    <article
+      onClick={onToggle}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
+      className="cursor-pointer rounded-[20px] bg-white border border-[#EEF0F4] p-3 flex gap-3 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_24px_-16px_rgba(16,24,40,0.12)] hover:shadow-[0_12px_32px_-14px_rgba(16,24,40,0.18)] hover:-translate-y-0.5 transition-all duration-300"
+    >
+      {/* Image */}
+      <div className="relative w-[110px] shrink-0 aspect-square rounded-[14px] overflow-hidden bg-[#F1F3F7]">
+        <img src={cover} alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute top-1.5 right-1.5">
+          <StatusPill status={d.status} />
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        {featured && (
+          <span className="mb-1.5 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">
+            <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
+          </span>
+        )}
+        <div className="flex items-start justify-between gap-2">
+          <h4 className="text-[14px] font-bold text-[#0F172A] leading-snug line-clamp-2 flex-1">{d.title}</h4>
+          <div onClick={stop}>
+            <DealActionsMenu dealId={d.id} status={d.status} onChanged={onChanged} />
           </div>
         </div>
 
-        {/* Content */}
-        <div className="min-w-0 flex-1">
-          {featured && (
-            <span className="mb-1.5 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">
-              <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
+        <div className="mt-1.5 flex items-baseline gap-2">
+          <span className="text-[18px] font-extrabold text-emerald-600 leading-none">{display.headline}</span>
+          {d.original_price ? (
+            <span className="text-[11px] text-[#9CA3AF] line-through">
+              ₪{d.original_price.toLocaleString("he-IL")}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="mt-2">
+          <div className="flex items-center justify-between text-[10.5px] text-[#6B7280] mb-1">
+            <span className="font-bold text-emerald-700">{pct}%</span>
+            <span>{participants} מתוך {goal} מצטרפים</span>
+          </div>
+          <ProgressBar pct={pct} />
+        </div>
+
+        <div className="mt-2 flex items-center gap-3 text-[11px] text-[#6B7280]">
+          <span className="inline-flex items-center gap-1 text-rose-500"><Heart className="h-3 w-3" /> {compact(saves)}</span>
+          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {participants}</span>
+          <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {daysAgo(d.created_at)} ימים</span>
+          {highPerf ? (
+            <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+              <TrendingUp className="h-2.5 w-2.5" /> ביצועים גבוהים
+            </span>
+          ) : (
+            <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-semibold text-[#6B7280]">
+              פתיחה מורחבת <ChevronDown className="h-3 w-3" />
             </span>
           )}
-          <div className="flex items-start justify-between gap-2">
-            <h4 className="text-[14px] font-bold text-[#0F172A] leading-snug line-clamp-2 flex-1">{d.title}</h4>
-            <div onClick={(e) => e.preventDefault()}>
-              <DealActionsMenu dealId={d.id} status={d.status} onChanged={onChanged} />
-            </div>
-          </div>
-
-          <div className="mt-1.5 flex items-baseline gap-2">
-            <span className="text-[18px] font-extrabold text-emerald-600 leading-none">{display.headline}</span>
-            {d.original_price ? (
-              <span className="text-[11px] text-[#9CA3AF] line-through">
-                ₪{d.original_price.toLocaleString("he-IL")}
-              </span>
-            ) : null}
-          </div>
-
-          <div className="mt-2">
-            <div className="flex items-center justify-between text-[10.5px] text-[#6B7280] mb-1">
-              <span className="font-bold text-emerald-700">{pct}%</span>
-              <span>{participants} מתוך {goal} מצטרפים</span>
-            </div>
-            <ProgressBar pct={pct} />
-          </div>
-
-          <div className="mt-2 flex items-center gap-3 text-[11px] text-[#6B7280]">
-            <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {compact(m.views)}</span>
-            <span className="inline-flex items-center gap-1 text-rose-500"><Heart className="h-3 w-3" /> {compact(m.saves)}</span>
-            <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {participants}</span>
-            {highPerf && (
-              <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
-                <Sparkles className="h-2.5 w-2.5" /> ביצועים גבוהים
-              </span>
-            )}
-          </div>
         </div>
-      </article>
-    </Link>
+
+        <div className="mt-2.5 flex items-center justify-end gap-2" onClick={stop}>
+          <Link
+            to={`/supplier/offers/${d.id}/edit`}
+            className="h-8 px-3 rounded-[10px] bg-white border border-[#EEF0F4] text-[#1F2937] text-[11px] font-bold inline-flex items-center gap-1.5 hover:bg-[#F7F8FA]"
+          >
+            <Pencil className="h-3 w-3" /> ניהול הצעה
+          </Link>
+        </div>
+      </div>
+    </article>
   );
 }
