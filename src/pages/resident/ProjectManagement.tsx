@@ -36,7 +36,7 @@ const DEFAULT_INFO: ProjectInfo = {
   subtitle: 'שטח בנוי: 180 מ"ר · 2 קומות',
   manager: "יוסי בניה",
   targetDate: "2025-10-15",
-  groupSavings: 32400,
+  groupSavings: 0,
 };
 
 function formatDateShort(iso: string) {
