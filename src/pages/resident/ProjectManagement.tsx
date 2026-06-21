@@ -653,27 +653,27 @@ function EditProjectModal({
           <div className="grid grid-cols-2 gap-3">
             <Field label="תקציב כולל (₪)">
               <input
-                type="number" inputMode="numeric" min={0}
+                type="text" inputMode="numeric" dir="ltr"
                 value={form.budgetTotal}
-                onChange={(e) => set("budgetTotal", Number(e.target.value) || 0)}
-                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A]"
+                onChange={(e) => set("budgetTotal", onlyDigits(e.target.value))}
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
               />
             </Field>
             <Field label="נוצל (₪)">
               <input
-                type="number" inputMode="numeric" min={0}
+                type="text" inputMode="numeric" dir="ltr"
                 value={form.budgetUsed}
-                onChange={(e) => set("budgetUsed", Number(e.target.value) || 0)}
-                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A]"
+                onChange={(e) => set("budgetUsed", onlyDigits(e.target.value))}
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
               />
             </Field>
           </div>
           <Field label="חיסכון קבוצתי (₪)">
             <input
-              type="number" inputMode="numeric" min={0}
+              type="text" inputMode="numeric" dir="ltr"
               value={form.groupSavings}
-              onChange={(e) => set("groupSavings", Number(e.target.value) || 0)}
-              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A]"
+              onChange={(e) => set("groupSavings", onlyDigits(e.target.value))}
+              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
             />
           </Field>
         </div>
@@ -686,7 +686,7 @@ function EditProjectModal({
             ביטול
           </button>
           <button
-            onClick={() => onSave(form)}
+            onClick={handleSave}
             className="flex-1 py-3 rounded-2xl text-[14px] font-extrabold text-white active:scale-[0.98]"
             style={{ background: BRAND, fontFamily: URBANIST }}
           >
