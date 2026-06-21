@@ -363,8 +363,9 @@ export default function ProjectManagement() {
           </div>
 
           <div className="grid grid-cols-3 gap-2 mt-4">
-            <InfoChip icon={<User className="h-3.5 w-3.5" />} label="מנהל" value={info.manager} />
-            <InfoChip icon={<Calendar className="h-3.5 w-3.5" />} label="יעד" value={formatDateShort(info.targetDate)} />
+            <InfoChip icon={<User className="h-3.5 w-3.5" />} label="מנהל" value={info.manager || "—"} />
+            <InfoChip icon={<Calendar className="h-3.5 w-3.5" />} label="יעד" value={info.targetDate ? formatDateShort(info.targetDate) : "—"} />
+
             <InfoChip icon={<Clock className="h-3.5 w-3.5" />} label="עדכון" value="היום" />
           </div>
         </div>
