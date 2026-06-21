@@ -779,7 +779,7 @@ export default function DealDetail() {
             as="h1"
             className="text-[22px] leading-[1.2] font-black text-[#1F2937] tracking-tight mb-3"
           />
-          {display.effectivePrice != null ? (
+          {sortedTiers.length > 0 ? null : display.effectivePrice != null ? (
             <div className="space-y-1.5">
               <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-[28px] font-black text-[#1F2937] gb-num leading-none">{ils(display.effectivePrice)}</span>
