@@ -378,133 +378,141 @@ function FeaturedDealCard({
 
   return (
     <article className="rounded-[22px] bg-white border border-[#EEF0F4] overflow-hidden shadow-[0_2px_8px_rgba(16,24,40,0.04),0_16px_40px_-18px_rgba(16,24,40,0.12)]">
-      {/* Image header */}
-      <div className="relative">
-        <div className="relative w-full aspect-[16/10] bg-[#F1F3F7] overflow-hidden">
+      {/* Top: side-by-side image + content */}
+      <div className="flex gap-3 p-3">
+        {/* Image column (visual left in RTL = end) */}
+        <div className="relative w-[42%] shrink-0 rounded-[16px] overflow-hidden bg-[#F1F3F7] self-stretch min-h-[420px]">
           <img src={cover} alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/55 to-transparent" />
+
+          {/* Featured badge top-start (top-right in RTL = visual top-right of image which is top-left of card image) */}
+          <div className="absolute top-2.5 right-2.5">
+            <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-1 rounded-full bg-white/95 backdrop-blur text-orange-600 shadow-sm">
+              <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
+            </span>
+          </div>
+
+          {/* Participants chip on bottom of image */}
+          <div className="absolute bottom-2.5 right-2.5 left-2.5 inline-flex items-center gap-2 bg-black/55 backdrop-blur-sm text-white rounded-full pl-2.5 pr-1 py-1">
+            <div className="flex -space-x-1.5 rtl:space-x-reverse">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 border-2 border-white/90" />
+              ))}
+              {participants > 3 && (
+                <div className="h-6 w-6 rounded-full bg-emerald-500 border-2 border-white/90 flex items-center justify-center text-[9px] font-bold">
+                  +{participants - 3}
+                </div>
+              )}
+            </div>
+            <span className="text-[10.5px] font-semibold pr-1">{participants} הצטרפו השבוע</span>
+          </div>
         </div>
 
-        {/* Top badges */}
-        <div className="absolute top-3 right-3 flex items-center gap-1.5">
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-white/95 backdrop-blur text-orange-600 shadow-sm">
-            <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
-          </span>
-        </div>
-        <div className="absolute top-3 left-3 flex items-center gap-1.5">
-          <StatusPill status={d.status} />
-          <div className="bg-white/95 backdrop-blur rounded-full">
+        {/* Content column */}
+        <div className="min-w-0 flex-1 flex flex-col">
+          {/* Status + menu */}
+          <div className="flex items-center justify-between gap-2">
             <DealActionsMenu dealId={d.id} status={d.status} onChanged={onChanged} />
+            <StatusPill status={d.status} />
           </div>
-        </div>
 
-        {/* Participants strip on image */}
-        <div className="absolute bottom-3 right-3 inline-flex items-center gap-2 bg-black/55 backdrop-blur-sm text-white rounded-full pl-3 pr-1 py-1">
-          <div className="flex -space-x-1.5 rtl:space-x-reverse">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 border-2 border-white/90" />
-            ))}
-            {participants > 3 && (
-              <div className="h-6 w-6 rounded-full bg-emerald-500 border-2 border-white/90 flex items-center justify-center text-[9px] font-bold">
-                +{participants - 3}
+          {/* Title */}
+          <h3 className="mt-1.5 text-[15px] font-extrabold text-[#0F172A] leading-snug line-clamp-2">{d.title}</h3>
+
+          {/* Price row: current price big on start (right), original strike on end (left) */}
+          <div className="mt-2.5 flex items-start justify-between gap-2">
+            <div className="text-right">
+              <div className="text-[22px] font-extrabold text-emerald-600 leading-none tracking-tight">
+                {display.headline}
               </div>
-            )}
+              <div className="text-[10px] text-[#6B7280] font-medium mt-1">מחיר נוכחי</div>
+            </div>
+            {d.original_price ? (
+              <div className="text-left">
+                <div className="text-[12px] text-[#9CA3AF] line-through">
+                  ₪{d.original_price.toLocaleString("he-IL")}
+                </div>
+                <div className="text-[10px] text-[#6B7280] mt-0.5">מחיר רגיל</div>
+              </div>
+            ) : null}
           </div>
-          <span className="text-[11px] font-semibold pr-1">{participants} הצטרפו השבוע</span>
+
+          {/* Progress */}
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-[10.5px] text-[#6B7280] mb-1.5">
+              <span className="font-bold text-emerald-700">{pct}%</span>
+              <span>{participants} מתוך {goal} מצטרפים</span>
+            </div>
+            <ProgressBar pct={pct} />
+          </div>
+
+          {nextDrop && (
+            <div className="mt-2.5 rounded-[10px] bg-emerald-50 border border-emerald-100 px-2.5 py-1.5 text-[10.5px] text-emerald-800 font-semibold flex items-center gap-1.5">
+              <TrendingUp className="h-3 w-3 shrink-0" />
+              <span className="truncate">עוד מצטרף 1 והמחיר ירד ל-₪{Math.round(Number(nextDrop)).toLocaleString("he-IL")}</span>
+            </div>
+          )}
+
+          {/* Metric grid 4 cols */}
+          <div className="mt-3 grid grid-cols-4 gap-1.5">
+            {[
+              { icon: <Eye className="h-3 w-3" />, value: compact(m.views), label: "צפיות", color: "text-sky-600 bg-sky-50" },
+              { icon: <Heart className="h-3 w-3" />, value: compact(m.saves), label: "שמירות", color: "text-rose-600 bg-rose-50" },
+              { icon: <Users className="h-3 w-3" />, value: `${participants}`, label: "מצטרפים", color: "text-emerald-600 bg-emerald-50" },
+              { icon: <TrendingUp className="h-3 w-3" />, value: `${m.conv.toFixed(0)}%`, label: "המרה", color: "text-violet-600 bg-violet-50" },
+            ].map((s, i) => (
+              <div key={i} className="text-center">
+                <div className={`h-6 w-6 mx-auto rounded-full flex items-center justify-center ${s.color}`}>{s.icon}</div>
+                <div className="mt-1 text-[12px] font-extrabold text-[#0F172A] leading-none">{s.value}</div>
+                <div className="mt-0.5 text-[9px] text-[#6B7280] font-medium">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Income chips inline */}
+          <div className="mt-2.5 rounded-[12px] bg-emerald-50/70 border border-emerald-100 p-2 grid grid-cols-2 gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Coins className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+              <div className="min-w-0">
+                <div className="text-[11.5px] font-extrabold text-emerald-700 leading-none truncate">{ILS(potential)}</div>
+                <div className="text-[9px] text-emerald-700/70 mt-0.5">פוטנציאל הכנסה</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Tag className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+              <div className="min-w-0">
+                <div className="text-[11.5px] font-extrabold text-amber-700 leading-none truncate">
+                  {ILS(Math.max(0, (d.original_price ?? 0) - unitPrice))}
+                </div>
+                <div className="text-[9px] text-amber-700/70 mt-0.5">חיסכון לדיירים</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Body */}
-      <div className="p-4">
-        <h3 className="text-[17px] font-extrabold text-[#0F172A] leading-snug line-clamp-2">{d.title}</h3>
-
-        {/* Price row */}
-        <div className="mt-3 flex items-baseline justify-between gap-3">
-          <div className="flex items-baseline gap-2">
-            <span className="text-[26px] font-extrabold text-emerald-600 leading-none tracking-tight">
-              {display.headline}
-            </span>
-            {d.original_price ? (
-              <span className="text-[12px] text-[#9CA3AF] line-through">
-                ₪{d.original_price.toLocaleString("he-IL")}
-              </span>
-            ) : null}
-          </div>
-          <div className="text-[10.5px] text-[#6B7280] font-medium">מחיר נוכחי</div>
-        </div>
-
-        {/* Progress */}
-        <div className="mt-3">
-          <div className="flex items-center justify-between text-[11.5px] text-[#6B7280] mb-1.5">
-            <span className="font-bold text-emerald-700">{pct}%</span>
-            <span>{participants} מתוך {goal} מצטרפים</span>
-          </div>
-          <ProgressBar pct={pct} />
-        </div>
-
-        {nextDrop && (
-          <div className="mt-3 rounded-[12px] bg-emerald-50 border border-emerald-100 px-3 py-2 text-[11.5px] text-emerald-800 font-semibold inline-flex items-center gap-1.5">
-            <TrendingUp className="h-3.5 w-3.5" />
-            עוד מצטרף 1 והמחיר ירד ל-₪{Math.round(Number(nextDrop)).toLocaleString("he-IL")}
-          </div>
-        )}
-
-        {/* Metric grid */}
-        <div className="mt-4 grid grid-cols-4 gap-2">
-          {[
-            { icon: <Eye className="h-3.5 w-3.5" />, value: compact(m.views), label: "צפיות", color: "text-sky-600 bg-sky-50" },
-            { icon: <Heart className="h-3.5 w-3.5" />, value: compact(m.saves), label: "שמירות", color: "text-rose-600 bg-rose-50" },
-            { icon: <Users className="h-3.5 w-3.5" />, value: `${participants}`, label: "מצטרפים", color: "text-emerald-600 bg-emerald-50" },
-            { icon: <TrendingUp className="h-3.5 w-3.5" />, value: `${m.conv.toFixed(0)}%`, label: "המרה", color: "text-violet-600 bg-violet-50" },
-          ].map((s, i) => (
-            <div key={i} className="text-center">
-              <div className={`h-7 w-7 mx-auto rounded-full flex items-center justify-center ${s.color}`}>{s.icon}</div>
-              <div className="mt-1 text-[14px] font-extrabold text-[#0F172A] leading-none">{s.value}</div>
-              <div className="mt-0.5 text-[10px] text-[#6B7280] font-medium">{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Income chips */}
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <div className="rounded-[12px] bg-emerald-50 border border-emerald-100 px-3 py-2 flex items-center gap-2">
-            <Coins className="h-4 w-4 text-emerald-600 shrink-0" />
-            <div className="min-w-0">
-              <div className="text-[13px] font-extrabold text-emerald-700 leading-none">{ILS(potential)}</div>
-              <div className="text-[10px] text-emerald-700/70 mt-0.5">פוטנציאל הכנסה</div>
-            </div>
-          </div>
-          <div className="rounded-[12px] bg-amber-50 border border-amber-100 px-3 py-2 flex items-center gap-2">
-            <Tag className="h-4 w-4 text-amber-600 shrink-0" />
-            <div className="min-w-0">
-              <div className="text-[13px] font-extrabold text-amber-700 leading-none">
-                {ILS(Math.max(0, (d.original_price ?? 0) - unitPrice))}
-              </div>
-              <div className="text-[10px] text-amber-700/70 mt-0.5">חיסכון לדיירים</div>
-            </div>
+      {/* Full-width footer */}
+      <div className="px-4 pb-4 pt-1 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 text-[10.5px] text-[#9CA3AF]">
+          <Calendar className="h-3 w-3" />
+          <div className="flex flex-col leading-tight">
+            <span className="text-[11px] text-[#1F2937] font-bold">{new Date(d.created_at).toLocaleDateString("he-IL")}</span>
+            <span>עדכון אחרון</span>
           </div>
         </div>
-
-        {/* Footer actions */}
-        <div className="mt-4 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-[10.5px] text-[#9CA3AF]">
-            <Calendar className="h-3 w-3" />
-            עודכן {new Date(d.created_at).toLocaleDateString("he-IL")}
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              to={`/supplier/offers/${d.id}/edit`}
-              className="h-9 px-3 rounded-[12px] bg-white border border-[#EEF0F4] text-[#1F2937] text-[12px] font-bold inline-flex items-center gap-1.5"
-            >
-              <Pencil className="h-3.5 w-3.5" /> ניהול
-            </Link>
-            <Link
-              to={`/deals/${d.id}`}
-              className="h-9 px-3.5 rounded-[12px] bg-[#0F172A] text-white text-[12px] font-bold inline-flex items-center gap-1.5 shadow-[0_8px_18px_-10px_rgba(15,23,42,0.6)]"
-            >
-              <Eye className="h-3.5 w-3.5" /> צפייה בהצעה
-            </Link>
-          </div>
+        <div className="flex items-center gap-2">
+          <Link
+            to={`/supplier/offers/${d.id}/edit`}
+            className="h-10 px-3 rounded-[12px] bg-white border border-[#EEF0F4] text-[#1F2937] text-[12px] font-bold inline-flex items-center gap-1.5"
+          >
+            <Pencil className="h-3.5 w-3.5" /> ניהול הצעה
+          </Link>
+          <Link
+            to={`/deals/${d.id}`}
+            className="h-10 px-4 rounded-[12px] bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-bold inline-flex items-center gap-1.5 shadow-[0_8px_18px_-10px_rgba(5,150,105,0.6)]"
+          >
+            <Eye className="h-3.5 w-3.5" /> צפייה בהצעה
+          </Link>
         </div>
       </div>
     </article>
