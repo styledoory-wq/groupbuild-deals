@@ -24,15 +24,18 @@ async function ensureWasm() {
   return wasmReady;
 }
 
-// Hebrew fonts (Heebo) — fetched once
-let fontsCache: { regular: ArrayBuffer; bold: ArrayBuffer } | null = null;
+// Hebrew + Latin fonts (Heebo) — fetched once
+let fontsCache: { regularHe: ArrayBuffer; boldHe: ArrayBuffer; regularLa: ArrayBuffer; boldLa: ArrayBuffer } | null = null;
 async function loadFonts() {
   if (fontsCache) return fontsCache;
-  const [reg, bold] = await Promise.all([
-    fetch("https://cdn.jsdelivr.net/npm/@fontsource/heebo@5.0.5/files/heebo-hebrew-400-normal.woff").then(r => r.arrayBuffer()),
-    fetch("https://cdn.jsdelivr.net/npm/@fontsource/heebo@5.0.5/files/heebo-hebrew-900-normal.woff").then(r => r.arrayBuffer()),
+  const base = "https://cdn.jsdelivr.net/npm/@fontsource/heebo@5.0.5/files";
+  const [rHe, bHe, rLa, bLa] = await Promise.all([
+    fetch(`${base}/heebo-hebrew-400-normal.woff`).then(r => r.arrayBuffer()),
+    fetch(`${base}/heebo-hebrew-900-normal.woff`).then(r => r.arrayBuffer()),
+    fetch(`${base}/heebo-latin-400-normal.woff`).then(r => r.arrayBuffer()),
+    fetch(`${base}/heebo-latin-900-normal.woff`).then(r => r.arrayBuffer()),
   ]);
-  fontsCache = { regular: reg, bold };
+  fontsCache = { regularHe: rHe, boldHe: bHe, regularLa: rLa, boldLa: bLa };
   return fontsCache;
 }
 
