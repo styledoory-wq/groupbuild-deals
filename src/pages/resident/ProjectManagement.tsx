@@ -913,10 +913,9 @@ function ModalShell({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 20px)" }}
+        className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl max-h-[80dvh] flex flex-col"
       >
-        <div className="flex items-center justify-between mb-4 sticky top-0 bg-white pt-1 -mt-1 z-10">
+        <div className="flex items-center justify-between p-5 pb-3 shrink-0">
           <h3 className="text-[16px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
             {title}
           </h3>
@@ -928,7 +927,15 @@ function ModalShell({
             <X className="h-4 w-4 text-gray-600" />
           </button>
         </div>
-        {children}
+        <div
+          className="flex-1 overflow-y-auto min-h-0 px-5"
+          style={{
+            paddingBottom: "calc(env(safe-area-inset-bottom) + 120px)",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
