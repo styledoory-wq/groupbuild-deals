@@ -112,7 +112,7 @@ export default function AdminProjectStages() {
 
   return (
     <MobileShell>
-      <PageHeader title="תחומי פרויקט" subtitle="ניהול קטגוריות בכל שלב" backTo="/admin" />
+      <PageHeader title="תחומי פרויקט" subtitle="ניהול קטגוריות בכל שלב" back="/admin" />
       <div className="px-4 pb-32 space-y-4">
         {/* Type selector */}
         <div className="grid grid-cols-3 gap-2">
