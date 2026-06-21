@@ -1,64 +1,79 @@
-## המטרה
-להפוך את `/resident/categories` ממסך קטלוג ספקים למערכת ניהול פרויקט בנייה מלאה — 3 מסכים מקושרים.
+# שדרוג כלי השיווק ל-AI + Templates
 
----
+## הזרימה החדשה
 
-## מסך 1 — בחירת סוג פרויקט (חדש)
-**נתיב:** `/resident/categories` (החלפת המסך הקיים)
+```
+ספק נכנס לכלי שיווק
+   ↓
+[שלב 1] AI Enhance (~6-10s, פעם אחת)
+   - מייצר כותרת שיווקית, סאב-טייטל, CTA, תג דחיפות
+   - מסיר רקע + מייצר רקע חדש מותאם לקטגוריה
+   - שומר ב-DB (cache לעתיד)
+   ↓
+[שלב 2] Render 4 Templates במקביל
+   - Premium Dark
+   - WhatsApp Viral
+   - Luxury Minimal
+   - Modern Green
+   ↓
+גלריה: 4 כרטיסים בבחירת המועדף
+   ↓
+פעולות: הורדה / שיתוף וואטסאפ / שלח במייל
+```
 
-3 כרטיסים גדולים אנכיים/grid:
-- 🏗️ בנייה חדשה
-- 🔨 שיפוץ
-- 🏢 בניין משותף
+## רכיבים שייבנו
 
-בחירה שומרת ב-`localStorage` (`gb:projectType`) ומובילה למסך 2.
+### 1. Edge Function חדש: `ai-enhance-deal`
+- קלט: `dealId`
+- פלט: `{ headline, subheadline, cta, urgencyTag, enhancedImageUrl }`
+- שלב א: Gemini 3 Flash → JSON עם copy (`Output.object` schema)
+- שלב ב: Gemini 2.5 Flash Image → רקע חדש מותאם (תמונת המוצר כקלט + prompt לפי קטגוריה)
+- שמירה ב-storage `marketing-cards/{dealId}/enhanced.png` + cache ב-DB
 
----
+### 2. טבלה חדשה: `deal_marketing_ai`
+שמירת תוצרי AI כדי לא להריץ שוב כל פעם:
+- `deal_id`, `headline`, `subheadline`, `cta`, `urgency_tag`, `enhanced_image_url`, `created_at`
+- RLS: ספק רואה רק שלו
 
-## מסך 2 — קטגוריות לפי סוג (חדש)
-**נתיב:** `/resident/categories/stages?type=new|reno|building`
+### 3. Edge Function מעודכן: `generate-marketing-card`
+- קלט: `dealId, templateKey, format` (תאימות לאחור)
+- טוען את `deal_marketing_ai` (אם אין → מפעיל ai-enhance-deal)
+- בוחר `buildTree` לפי `templateKey`:
+  - `premium-dark.ts` – רקע כהה, זהב, תמונה מלאה
+  - `whatsapp-viral.ts` – הסגנון שכבר אישרת ב-Mockup v2
+  - `luxury-minimal.ts` – ספליט, הרבה white space, טייפו עדין
+  - `modern-green.ts` – הסגנון הקיים (לתאימות)
+- כל buildTree מקבל את אותו `deal + aiCopy + image` ומחזיר tree ל-satori
 
-- כותרת + chip להחלפת סוג פרויקט
-- רשימת השלבים המתאימים לסוג (לפי הרשימות שהגדרת):
-  - **בנייה חדשה:** תכנון והיתרים · שלד · מעטפת · מערכות · גמרים · פיתוח חוץ
-  - **שיפוץ:** מטבח ואמבטיה · צבע וגבס · חשמל · אינסטלציה · מיזוג · ריצוף · דלתות וחלונות
-  - **בניין משותף:** מעליות · ניקיון · גינון · מצלמות · דלתות כניסה · חשמל משותף · חזית · סולארי
-- מיפוי לקטגוריות הספקים הקיימות במאגר (`categories` מ-AppStore). כל שלב פותח את `/resident/categories/:id` הקיים (CategorySuppliers).
-- חיפוש גלובלי נשמר (אותו מנגנון מהמסך הקיים).
-- בתחתית: כפתור CTA גדול ירוק — **"מעבר לניהול הפרויקט שלי"** → מסך 3.
+### 4. UI חדש: `SupplierMarketingTools.tsx` (rewrite)
+- Header: "המודעה שלך מוכנה"
+- בזמן יצירה: סטטוס מתקדם ("AI כותב כותרת..." → "משפר תמונה..." → "מייצר 4 וריאציות...")
+- גלריה 2×2 של 4 התבניות (מוקטנות) + indication "מומלץ" על אחת לפי AI
+- לחיצה על תבנית → מסך מלא עם:
+  - תצוגה גדולה
+  - בחירת פורמט (square/story/banner)
+  - כפתורי הורדה / וואטסאפ / מייל / העתק קישור
+- כפתור "צור מחדש עם AI" (force refresh)
 
----
+## פרטים טכניים
 
-## מסך 3 — ניהול הפרויקט (חדש)
-**נתיב:** `/resident/project-management`
+**מודלים:**
+- Text: `google/gemini-3-flash-preview` (JSON output, מהיר)
+- Image enhance: `google/gemini-2.5-flash-image` (Nano Banana, תומך edit + image input)
+- prompt דוגמה לתמונה: "Professional product photography of [title], on a [category-specific] background, soft studio lighting, e-commerce ad quality, 1:1"
 
-על פי המוקאפ השני:
-1. **כרטיס פרויקט עליון** — תמונה, שם, שטח, מנהל, תאריך יעד, עדכון אחרון, חישוב % התקדמות.
-2. **Timeline אופקי** — 8 שלבים (תכנון/שלד/מערכות/מעטפת/גמרים/פיתוח/בדק/סיום) עם השלב הנוכחי מודגש בעיגול ירוק גדול.
-3. **באנר התקדמות** — "X מתוך 8 שלבים הושלמו" + כפתור "צפייה בלוח זמנים".
-4. **כרטיס השלב הנוכחי** — שני טורים:
-   - **משימות בשלב זה** עם checkbox ירוק (state מקומי)
-   - **ספקים בשלב זה** — שואב מ-`suppliers` לפי קטגוריות השלב, עם דירוג + סטטוס (הוזמן/בתהליך)
-5. **המלצות עבורך** — 3 כרטיסים אופקיים (קבלן מומלץ / ביטוח / צבעים) לפי השלב הנוכחי.
-6. **כרטיס תקציב קבוע בתחתית** — מסך ירוק כהה: תקציב כולל, מנוצל, חיסכון קבוצתי, % חריגה.
+**ביצועים:**
+- enhance רץ פעם אחת ומאוחסן ב-DB → 4 ה-renders מקבלים את אותה תמונה משופרת
+- כל render רץ ב-invocation נפרד (כבר עובד היום) → 4 קריאות מקבילות, כל אחת ~2s
 
-נתונים: דמה מובנית ב-state (אין סכמת DB חדשה כרגע — מקבילה לעיצוב קיים של ProjectsList).
+**הגנות:**
+- אם AI נכשל → fallback לטקסטים מהדיל המקורי + תמונה מקורית
+- credit exhaustion (402) → toast ברור + שימוש בנתוני הדיל ללא AI
 
----
+## מה לא נכנס בשלב הזה
+- A/B testing של תבניות
+- שמירת בחירה של ספק
+- אנליטיקס על שיתופים
+- עריכה ידנית של כותרות שה-AI יצר (אפשר להוסיף אח"כ)
 
-## עיצוב
-- שמירה מלאה על הפלטה: ירוק `#0E6B5A`, רקע `#FBF8F3`, גופנים Urbanist/Epilogue, RTL, מובייל-first (390px).
-- אסתטיקה קיימת — כרטיסים מעוגלים, צללים רכים, אייקונים emoji.
-- כפתורי CTA בירוק המותג.
-
----
-
-## טכני
-- `src/pages/resident/CategoriesList.tsx` → הופך למסך בחירת סוג (Type Selection).
-- חדש: `src/pages/resident/CategoryStages.tsx` (מסך 2).
-- חדש: `src/pages/resident/ProjectManagement.tsx` (מסך 3).
-- הוספת 2 routes ב-`src/App.tsx`.
-- לוגיקת חיפוש הספקים הקיימת מהמסך הישן עוברת למסך 2.
-- אין שינויי backend/DB.
-
-מאשר ואני בונה?
+האם לאשר ולהתחיל פיתוח?
