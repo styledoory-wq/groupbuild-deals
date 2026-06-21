@@ -72,10 +72,10 @@ const compact = (n: number) =>
 
 // ---------- small UI ----------
 function StatCard({
-  label, value, delta, tone, icon, seed,
+  label, value, delta, tone, icon, seed, className = "",
 }: {
   label: string; value: string; delta: string; tone: "violet" | "amber" | "emerald" | "sky";
-  icon: React.ReactNode; seed: number;
+  icon: React.ReactNode; seed: number; className?: string;
 }) {
   const tones = {
     violet: { bg: "bg-violet-50", fg: "text-violet-600", stroke: "stroke-violet-500" },
@@ -84,18 +84,18 @@ function StatCard({
     sky:    { bg: "bg-sky-50",    fg: "text-sky-600",    stroke: "stroke-sky-500" },
   }[tone];
   return (
-    <div className="rounded-[18px] bg-white border border-[#EEF0F4] p-3.5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.08)]">
-      <div className={`h-8 w-8 rounded-full ${tones.bg} ${tones.fg} flex items-center justify-center mb-2.5`}>
+    <div className={`rounded-[14px] bg-white border border-[#EEF0F4] p-2.5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.08)] flex-1 min-w-0 ${className}`}>
+      <div className={`h-7 w-7 rounded-full ${tones.bg} ${tones.fg} flex items-center justify-center mb-2`}>
         {icon}
       </div>
-      <div className="text-[20px] leading-none font-extrabold text-[#0F172A] tracking-tight">
+      <div className="text-[16px] leading-none font-extrabold text-[#0F172A] tracking-tight">
         {value}
       </div>
-      <div className="mt-1.5 text-[11px] text-[#6B7280] font-medium leading-tight">{label}</div>
-      <div className="mt-1.5 flex items-center gap-1 text-[10.5px] font-semibold text-emerald-600">
+      <div className="mt-1 text-[10px] text-[#6B7280] font-medium leading-tight truncate">{label}</div>
+      <div className="mt-1 flex items-center gap-0.5 text-[9.5px] font-semibold text-emerald-600">
         <ArrowUpRight className="h-2.5 w-2.5" /> {delta}
       </div>
-      <svg viewBox="0 0 64 22" className="mt-1 w-full h-5 overflow-visible">
+      <svg viewBox="0 0 64 22" className="mt-1.5 w-full h-4 overflow-visible">
         <path d={sparkPath(seed)} fill="none" strokeWidth="1.6" className={tones.stroke} strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
@@ -245,8 +245,6 @@ export default function SupplierOffers() {
     return deals.filter((d) => d.status === filter);
   }, [deals, filter]);
 
-  const featured = filtered[0];
-  const rest = filtered.slice(1);
 
   // ---------- render ----------
   return (
@@ -264,22 +262,22 @@ export default function SupplierOffers() {
 
       {/* Stats */}
       {!loading && !error && supplierId && deals.length > 0 && (
-        <div className="px-5 mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="px-5 mt-4 flex gap-2">
           <StatCard
             label="שיעור המרה" value={`${totals.conv.toFixed(0)}%`} delta="8% מהחודש הקודם"
-            tone="violet" icon={<TrendingUp className="h-4 w-4" />} seed={11}
+            tone="violet" icon={<TrendingUp className="h-3.5 w-3.5" />} seed={11}
           />
           <StatCard
             label="לידים חדשים" value={`${totals.newLeads}`} delta="18% מהחודש הקודם"
-            tone="amber" icon={<Users className="h-4 w-4" />} seed={27}
+            tone="amber" icon={<Users className="h-3.5 w-3.5" />} seed={27}
           />
           <StatCard
             label="הכנסה צפויה" value={ILS(totals.potential)} delta="22% מהחודש הקודם"
-            tone="emerald" icon={<Wallet className="h-4 w-4" />} seed={43}
+            tone="emerald" icon={<Wallet className="h-3.5 w-3.5" />} seed={43}
           />
           <StatCard
             label="הצעות פעילות" value={`${totals.activeCount}`} delta={`${totals.closedCount} הסתיימו`}
-            tone="sky" icon={<Briefcase className="h-4 w-4" />} seed={59}
+            tone="sky" icon={<Briefcase className="h-3.5 w-3.5" />} seed={59}
           />
         </div>
       )}
@@ -333,24 +331,15 @@ export default function SupplierOffers() {
           />
         )}
 
-        {/* Featured card */}
-        {!loading && !error && featured && (
-          <FeaturedDealCard
-            deal={featured}
-            participants={participantsByDeal[featured.id] ?? 0}
-            unitPrice={unitPriceForDeal(featured)}
-            onChanged={refresh}
-          />
-        )}
-
-        {/* Rest */}
-        {!loading && !error && rest.map((d) => (
+        {/* Deals */}
+        {!loading && !error && filtered.map((d, i) => (
           <CompactDealCard
             key={d.id}
             deal={d}
             participants={participantsByDeal[d.id] ?? 0}
             unitPrice={unitPriceForDeal(d)}
             onChanged={refresh}
+            featured={i === 0}
           />
         ))}
       </div>
@@ -521,8 +510,8 @@ function FeaturedDealCard({
 
 // ---------- Compact card ----------
 function CompactDealCard({
-  deal: d, participants, unitPrice, onChanged,
-}: { deal: DealRow; participants: number; unitPrice: number; onChanged: () => void }) {
+  deal: d, participants, unitPrice, onChanged, featured = false,
+}: { deal: DealRow; participants: number; unitPrice: number; onChanged: () => void; featured?: boolean }) {
   const offerType = ((d.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(d.tiers) ? d.tiers : [];
   const display = describeOffer({
@@ -548,6 +537,11 @@ function CompactDealCard({
 
         {/* Content */}
         <div className="min-w-0 flex-1">
+          {featured && (
+            <span className="mb-1.5 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">
+              <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
+            </span>
+          )}
           <div className="flex items-start justify-between gap-2">
             <h4 className="text-[14px] font-bold text-[#0F172A] leading-snug line-clamp-2 flex-1">{d.title}</h4>
             <div onClick={(e) => e.preventDefault()}>
