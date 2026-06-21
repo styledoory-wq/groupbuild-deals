@@ -171,10 +171,10 @@ async function renderPng(deal: Deal, fmt: Format, coverDataUrl: string | null, q
     width: fmt.w,
     height: fmt.h,
     fonts: [
-      { name: "Heebo", data: fonts.regularLa, weight: 400, style: "normal", lang: "en" },
-      { name: "Heebo", data: fonts.boldLa, weight: 900, style: "normal", lang: "en" },
-      { name: "Heebo", data: fonts.regularHe, weight: 400, style: "normal", lang: "he" },
-      { name: "Heebo", data: fonts.boldHe, weight: 900, style: "normal", lang: "he" },
+      { name: "Heebo", data: fonts.regularLa, weight: 400, style: "normal" },
+      { name: "Heebo", data: fonts.boldLa, weight: 900, style: "normal" },
+      { name: "Heebo", data: fonts.regularHe, weight: 400, style: "normal", lang: "he-IL" },
+      { name: "Heebo", data: fonts.boldHe, weight: 900, style: "normal", lang: "he-IL" },
     ],
   });
   const resvg = new Resvg(svg, { fitTo: { mode: "width", value: fmt.w } });
