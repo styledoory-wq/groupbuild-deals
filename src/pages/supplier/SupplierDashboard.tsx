@@ -55,6 +55,16 @@ type ActivityItem = {
 const BG = "#F7F8FA";
 const GREEN = "#0E6B5A";
 
+const BUILDING_IMAGES = [
+  "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=70",
+  "https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=400&q=70",
+  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=400&q=70",
+  "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=400&q=70",
+  "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=400&q=70",
+  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=70",
+];
+
+
 export default function SupplierDashboard() {
   const navigate = useNavigate();
   const { user, logout } = useApp();
