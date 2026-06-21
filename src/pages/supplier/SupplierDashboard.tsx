@@ -490,70 +490,78 @@ export default function SupplierDashboard() {
         )}
 
 
-        {/* Featured top deal */}
-        {topDeal && (() => {
-          const c = counts[topDeal.id] ?? { interests: 0, paid: 0, favorites: 0 };
-          const goal = Math.max(1, Number(topDeal.target_participants ?? 0) || 10);
-          const progress = Math.min(100, Math.round((c.interests / goal) * 100));
-          return (
-            <>
-              <SectionHeader
-                title="ההצעה המובילה שלך"
-                icon={<Flame className="h-4 w-4 text-[#EA6A3A]" />}
-              />
-              <div className="px-5 mt-3">
-                <button
-                  onClick={() => navigate(`/supplier/offers/${topDeal.id}/edit`)}
-                  className="block w-full text-right bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden active:scale-[0.99] transition"
-                >
-                  <div className="relative h-[160px] bg-gradient-to-br from-[#1F2937] to-[#0F172A]">
-                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-white bg-[#0E6B5A]/90 backdrop-blur">
-                      <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" /> פעילה
-                    </span>
-                  </div>
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="text-left">
-                        <div className="text-[10px] text-[#8E95A2] font-medium">מחיר נוכחי</div>
-                        <div className="font-bold text-[22px] tracking-tight" style={{ color: GREEN }}>{formatILS(priceFor(topDeal))}</div>
-                      </div>
-                      <h3 className="font-bold text-[17px] text-[#0F172A] tracking-tight leading-tight flex-1">{topDeal.title}</h3>
-                    </div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-[11px] font-semibold text-[#8E95A2] shrink-0">{progress}%</span>
-                      <div className="flex-1 h-2 rounded-full bg-[#F2F4F7] overflow-hidden">
-                        <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${GREEN}, #1A8870)` }} />
-                      </div>
-                      <span className="text-[11px] font-medium text-[#8E95A2] shrink-0">{c.interests}/{goal}</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#F2F4F7]">
-                      <MiniStat icon={Eye} color="#3B82F6" value={(c.interests + c.favorites * 2).toString()} label="צפיות" />
-                      <MiniStat icon={Heart} color="#EA6A3A" value={c.favorites.toString()} label="שמירות" />
-                      <MiniStat icon={Users} color={GREEN} value={c.interests.toString()} label="מצטרפים" />
-                    </div>
-                  </div>
-                </button>
-              </div>
-            </>
-          );
-        })()}
-
-        {/* Weekly business stats */}
-        {myDeals.length > 0 && (
+        {/* Weekly business + Featured deal side-by-side */}
+        {(myDeals.length > 0 || topDeal) && (
           <>
-            <SectionHeader title="העסק שלך השבוע" icon={<Activity className="h-4 w-4" style={{ color: GREEN }} />} />
-            <div className="px-5 mt-3">
-              <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-5">
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  <WeekStat icon={Users} color="#EA6A3A" value={totals.totalLeads.toString()} label="לידים" />
-                  <WeekStat icon={Eye} color="#3B82F6" value={totals.views.toString()} label="צפיות" />
-                  <WeekStat icon={Target} color="#7C3AED" value={`${totals.conversion}%`} label="המרה" />
+            <div className="px-5 mt-7 flex items-center justify-between">
+              <button onClick={() => navigate("/supplier/offers")} className="text-[12px] font-semibold" style={{ color: GREEN }}>הצג הכל</button>
+              <h2 className="text-[16px] font-bold text-[#0F172A] tracking-[-0.01em]">העסק שלך השבוע</h2>
+            </div>
+            <div className="px-4 mt-3 grid grid-cols-2 gap-3">
+              {/* Weekly chart card */}
+              {myDeals.length > 0 && (
+                <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-3">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-[#F7F8FA] text-[10px] font-semibold text-[#0F172A]">השבוע ▾</span>
+                    <span className="text-[11px] font-bold text-[#0F172A]">ביצועים</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5 mb-2">
+                    <MiniWeekStat icon={Users} color="#EA6A3A" value={totals.totalLeads.toString()} label="לידים" trend={18} />
+                    <MiniWeekStat icon={Eye} color="#3B82F6" value={totals.views.toString()} label="צפיות" trend={12} />
+                    <MiniWeekStat icon={Target} color="#7C3AED" value={`${totals.conversion}%`} label="המרה" trend={8} />
+                  </div>
+                  <WeeklyChart leads={totals.totalLeads} views={totals.views} conv={totals.conversion} />
                 </div>
-                <WeeklyChart leads={totals.totalLeads} views={totals.views} conv={totals.conversion} />
-              </div>
+              )}
+
+              {/* Featured deal card */}
+              {topDeal && (() => {
+                const c = counts[topDeal.id] ?? { interests: 0, paid: 0, favorites: 0 };
+                const goal = Math.max(1, Number(topDeal.target_participants ?? 0) || 10);
+                const progress = Math.min(100, Math.round((c.interests / goal) * 100));
+                return (
+                  <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-3 flex flex-col">
+                    <div className="flex items-center justify-between mb-2">
+                      <Flame className="h-3.5 w-3.5 text-[#EA6A3A]" strokeWidth={2.4} />
+                      <h3 className="text-[12px] font-bold text-[#0F172A]">ההצעה המובילה</h3>
+                    </div>
+                    <div className="relative h-[90px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1F2937] to-[#0F172A] mb-2.5">
+                      <img src={BUILDING_IMAGES[0]} alt={topDeal.title} className="absolute inset-0 w-full h-full object-cover opacity-90" />
+                      <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold text-white bg-[#0E6B5A]/95">
+                        <span className="h-1 w-1 rounded-full bg-white animate-pulse" /> פעילה
+                      </span>
+                    </div>
+                    <div className="flex items-start justify-between gap-1.5 mb-1.5">
+                      <div className="text-left">
+                        <div className="font-bold text-[14px] tracking-tight leading-none" style={{ color: GREEN }}>{formatShortILS(priceFor(topDeal))}</div>
+                      </div>
+                      <h4 className="font-bold text-[12px] text-[#0F172A] tracking-tight leading-tight flex-1 line-clamp-2 text-right">{topDeal.title}</h4>
+                    </div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-[9px] font-semibold text-[#8E95A2] shrink-0">{progress}%</span>
+                      <div className="flex-1 h-1.5 rounded-full bg-[#F2F4F7] overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${GREEN}, #1A8870)` }} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1 mb-2">
+                      <TinyStat icon={Eye} color="#3B82F6" value={(c.interests + c.favorites * 2).toString()} label="צפיות" />
+                      <TinyStat icon={Heart} color="#EA6A3A" value={c.favorites.toString()} label="שמירות" />
+                      <TinyStat icon={Users} color={GREEN} value={c.interests.toString()} label="מצטרפים" />
+                    </div>
+                    <button
+                      onClick={() => navigate(`/supplier/offers/${topDeal.id}/edit`)}
+                      className="mt-auto w-full h-8 rounded-full border text-[11px] font-bold active:scale-95 transition"
+                      style={{ borderColor: GREEN, color: GREEN }}
+                    >
+                      ניהול הצעה
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           </>
         )}
+
 
         {/* Recent activity */}
         {activity.length > 0 && (
