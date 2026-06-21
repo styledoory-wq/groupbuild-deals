@@ -35,17 +35,26 @@ export default function SupplierMarketingTools() {
     if (!dealId) return null;
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-marketing-card", {
-        body: { dealId },
+      // Render each format in a separate invocation to stay within Edge Function CPU limits.
+      const formats: FormatKey[] = ["square", "story", "banner"];
+      const results = await Promise.all(
+        formats.map((format) =>
+          supabase.functions.invoke("generate-marketing-card", { body: { dealId, format } })
+        )
+      );
+      const u = {} as Record<FormatKey, string>;
+      let dUrl = "";
+      results.forEach((res, i) => {
+        if (res.error) throw res.error;
+        const d = res.data as { ok?: boolean; dealUrl?: string; url?: string; format?: FormatKey; error?: string };
+        if (!d.ok || !d.url) throw new Error(d.error || "generation_failed");
+        u[formats[i]] = d.url;
+        if (d.dealUrl) dUrl = d.dealUrl;
       });
-      if (error) throw error;
-      const d = data as { ok?: boolean; dealUrl?: string; urls?: Record<string, string>; error?: string };
-      if (!d.ok) throw new Error(d.error || "generation_failed");
-      const u = d.urls as Record<FormatKey, string>;
       setUrls(u);
-      setDealUrl(d.dealUrl || "");
+      setDealUrl(dUrl);
       toast.success("התמונות נוצרו בהצלחה");
-      return { urls: u, dealUrl: d.dealUrl || "" };
+      return { urls: u, dealUrl: dUrl };
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "יצירה נכשלה");
       return null;
@@ -54,6 +63,7 @@ export default function SupplierMarketingTools() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     if (!dealId) return;
