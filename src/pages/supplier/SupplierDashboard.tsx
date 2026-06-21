@@ -110,7 +110,7 @@ export default function SupplierDashboard() {
         if (supplierRow?.id && (supplierRow.approval_status === "approved" || supplierRow.approval_status === "active")) {
           const { data: dealRows, error: dealsErr } = await supabase
             .from("deals")
-            .select("id,title,status,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants,image_url")
+            .select("id,title,status,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants")
             .eq("supplier_id", supplierRow.id)
             .eq("is_deleted", false)
             .order("created_at", { ascending: false });
@@ -495,9 +495,6 @@ export default function SupplierDashboard() {
                   className="block w-full text-right bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden active:scale-[0.99] transition"
                 >
                   <div className="relative h-[160px] bg-gradient-to-br from-[#1F2937] to-[#0F172A]">
-                    {topDeal.image_url && (
-                      <img src={topDeal.image_url} alt={topDeal.title} className="absolute inset-0 w-full h-full object-cover opacity-90" />
-                    )}
                     <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-white bg-[#0E6B5A]/90 backdrop-blur">
                       <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" /> פעילה
                     </span>
