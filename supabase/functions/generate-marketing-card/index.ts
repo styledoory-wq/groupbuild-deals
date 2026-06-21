@@ -129,10 +129,10 @@ function buildTree(deal: Deal, fmt: Format, coverDataUrl: string | null, qrDataU
         } : { type: "div", props: { style: { width: "100%", height: imgH, borderRadius: 28, background: `linear-gradient(135deg, ${GREEN} 0%, ${GREEN_2} 100%)`, marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: 96 }, children: "GroupBuild" } },
 
         // Title
-        { type: "div", props: { style: { color: INK, fontSize: titleSize, fontWeight: 900, lineHeight: 1.1, textAlign: "right", direction: "rtl", marginBottom: 16 }, children: deal.title } },
+        { type: "div", props: { lang: "he", style: { color: INK, fontSize: titleSize, fontWeight: 900, lineHeight: 1.1, textAlign: "right", direction: "rtl", marginBottom: 16, display: "flex" }, children: deal.title } },
 
         // Tag line
-        { type: "div", props: { style: { color: MUTED, fontSize: isBanner ? 22 : 28, textAlign: "right", direction: "rtl", marginBottom: 28 }, children: "ככל שיותר מצטרפים — המחיר יורד" } },
+        { type: "div", props: { lang: "he", style: { color: MUTED, fontSize: isBanner ? 22 : 28, textAlign: "right", direction: "rtl", marginBottom: 28, display: "flex" }, children: "ככל שיותר מצטרפים — המחיר יורד" } },
 
         // Prices row
         {
@@ -150,11 +150,11 @@ function buildTree(deal: Deal, fmt: Format, coverDataUrl: string | null, qrDataU
           type: "div", props: {
             style: { marginTop: "auto", display: "flex", flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between", gap: 24 },
             children: [
-              { type: "div", props: { style: { background: GREEN, color: "#fff", padding: "22px 40px", borderRadius: 20, fontSize: isBanner ? 28 : 36, fontWeight: 900, display: "flex" }, children: "להצטרפות לחצו כאן ←" } },
+              { type: "div", props: { lang: "he", style: { background: GREEN, color: "#fff", padding: "22px 40px", borderRadius: 20, fontSize: isBanner ? 28 : 36, fontWeight: 900, display: "flex" }, children: "להצטרפות לחצו כאן ←" } },
               { type: "div", props: { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6 },
                 children: [
                   { type: "img", props: { src: qrDataUrl, width: isBanner ? 110 : 150, height: isBanner ? 110 : 150 } },
-                  { type: "div", props: { style: { fontSize: 16, color: MUTED }, children: "סרקו לפרטים" } },
+                  { type: "div", props: { lang: "he", style: { fontSize: 16, color: MUTED, display: "flex" }, children: "סרקו לפרטים" } },
                 ],
               } },
             ],
@@ -165,14 +165,16 @@ function buildTree(deal: Deal, fmt: Format, coverDataUrl: string | null, qrDataU
   };
 }
 
-async function renderPng(deal: Deal, fmt: Format, coverDataUrl: string | null, qrDataUrl: string, dealUrl: string, fonts: { regular: ArrayBuffer; bold: ArrayBuffer }) {
+async function renderPng(deal: Deal, fmt: Format, coverDataUrl: string | null, qrDataUrl: string, dealUrl: string, fonts: { regularHe: ArrayBuffer; boldHe: ArrayBuffer; regularLa: ArrayBuffer; boldLa: ArrayBuffer }) {
   const tree = buildTree(deal, fmt, coverDataUrl, qrDataUrl, dealUrl);
   const svg = await satori(tree as never, {
     width: fmt.w,
     height: fmt.h,
     fonts: [
-      { name: "Heebo", data: fonts.regular, weight: 400, style: "normal" },
-      { name: "Heebo", data: fonts.bold, weight: 900, style: "normal" },
+      { name: "Heebo", data: fonts.regularLa, weight: 400, style: "normal", lang: "en" },
+      { name: "Heebo", data: fonts.boldLa, weight: 900, style: "normal", lang: "en" },
+      { name: "Heebo", data: fonts.regularHe, weight: 400, style: "normal", lang: "he" },
+      { name: "Heebo", data: fonts.boldHe, weight: 900, style: "normal", lang: "he" },
     ],
   });
   const resvg = new Resvg(svg, { fitTo: { mode: "width", value: fmt.w } });
