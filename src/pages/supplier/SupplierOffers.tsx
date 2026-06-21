@@ -24,6 +24,7 @@ type DealRow = {
   offer_type: string | null;
   tiers: OfferTier[] | null;
   cover_image_url: string | null;
+  target_participants: number | null;
   created_at: string;
 };
 
@@ -152,7 +153,7 @@ export default function SupplierOffers() {
   const loadDeals = useCallback(async (sid: string) => {
     const { data, error: dErr } = await supabase
       .from("deals")
-      .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, tiers, cover_image_url, created_at")
+      .select("id, title, status, original_price, discounted_price, discount_percentage, base_price, offer_type, tiers, cover_image_url, target_participants, created_at")
       .eq("supplier_id", sid)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
@@ -167,7 +168,8 @@ export default function SupplierOffers() {
           .from("deal_interests")
           .select("deal_id")
           .in("deal_id", ids)
-          .eq("is_deleted", false),
+          .eq("is_deleted", false)
+          .eq("is_demo", false),
         supabase
           .from("favorites")
           .select("deal_id")
@@ -380,7 +382,8 @@ function FeaturedDealCard({
     offer_type: offerType, original_price: d.original_price, discounted_price: d.discounted_price,
     discount_percentage: d.discount_percentage, base_price: d.base_price, tiers,
   }, 0);
-  const goal = Math.max(participants + 1, tiers[0]?.minParticipants ?? 2);
+  const tierMax = tiers.reduce((m, t) => Math.max(m, Number(t?.minParticipants ?? 0)), 0);
+  const goal = Math.max(1, Number(d.target_participants ?? 0) || tierMax || 10);
   const pct = Math.min(100, Math.round((participants / goal) * 100));
   const potential = unitPrice * Math.max(0, participants);
   const nextDrop = tiers[1]?.discounted_price ?? null;
@@ -532,7 +535,8 @@ function CompactDealCard({
     offer_type: offerType, original_price: d.original_price, discounted_price: d.discounted_price,
     discount_percentage: d.discount_percentage, base_price: d.base_price, tiers,
   }, 0);
-  const goal = Math.max(participants + 1, tiers[0]?.minParticipants ?? 3);
+  const tierMax = tiers.reduce((m, t) => Math.max(m, Number(t?.minParticipants ?? 0)), 0);
+  const goal = Math.max(1, Number(d.target_participants ?? 0) || tierMax || 10);
   const pct = Math.min(100, Math.round((participants / goal) * 100));
   const cover = d.cover_image_url || `https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=400&q=70`;
   const highPerf = saves >= 5 || participants >= 3;
