@@ -172,7 +172,7 @@ export default function CategoriesList() {
     >
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] px-5 pt-[calc(env(safe-area-inset-top)+18px)]"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 140px)" }}
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 210px)" }}
       >
         {/* Title */}
         <h1
@@ -369,46 +369,53 @@ export default function CategoriesList() {
           style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 10px)" }}
         >
           <div
-            className="rounded-3xl p-3 shadow-2xl shadow-[#0E6B5A]/20"
-            style={{ background: "#EFF7F3", border: `1px solid ${BRAND}33` }}
+            className="rounded-3xl p-4 shadow-2xl shadow-[#0E6B5A]/15"
+            style={{ background: "#EFF7F3", border: `1px solid ${BRAND}22` }}
           >
-            <div className="flex items-center gap-3 px-1 pt-1 pb-2">
-              <span className="text-[28px] leading-none" aria-hidden>🏆</span>
+            {/* Row 1: trophy + title */}
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-[32px] leading-none shrink-0" aria-hidden>🏆</span>
               <div className="flex-1 min-w-0 text-right">
                 <div
-                  className="text-[14px] font-extrabold text-[#1A1A1A] leading-tight"
+                  className="text-[15px] font-extrabold text-[#1A1A1A] leading-tight"
                   style={{ fontFamily: URBANIST }}
                 >
                   {completedStages} {totalStages > 0 ? `ספקים ב-${totalStages} שלבים` : "שלבים"}
                 </div>
-                <div className="text-[11px] text-gray-500 mt-0.5">
+                <div className="text-[11.5px] text-gray-500 mt-0.5">
                   מתכנים ועד מסירת מפתח
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                {meta.stages.map((s, i) => {
-                  const done = i < completedStages;
-                  const active = i === completedStages;
-                  return (
-                    <span
-                      key={s.key}
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[9.5px] font-extrabold tabular-nums"
-                      style={{
-                        background: done ? BRAND : active ? "#FFFFFF" : "#E6E3DC",
-                        color: done ? "#FFFFFF" : active ? BRAND : "#9A958B",
-                        border: active ? `1.5px solid ${BRAND}` : "none",
-                        fontFamily: URBANIST,
-                      }}
-                    >
-                      {done ? "✓" : i + 1}
-                    </span>
-                  );
-                })}
-              </div>
             </div>
-            <div className="text-[11px] text-gray-500 text-left px-1 pb-1.5">
+
+            {/* Row 2: stepper circles — full width, centered */}
+            <div className="flex items-center justify-center gap-1.5 mb-2">
+              {meta.stages.map((s, i) => {
+                const done = i < completedStages;
+                const active = i === completedStages;
+                return (
+                  <span
+                    key={s.key}
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-extrabold tabular-nums shrink-0"
+                    style={{
+                      background: done ? BRAND : active ? "#FFFFFF" : "#E6E3DC",
+                      color: done ? "#FFFFFF" : active ? BRAND : "#9A958B",
+                      border: active ? `2px solid ${BRAND}` : "2px solid transparent",
+                      fontFamily: URBANIST,
+                    }}
+                  >
+                    {done ? "✓" : i + 1}
+                  </span>
+                );
+              })}
+            </div>
+
+            {/* Row 3: completion text */}
+            <div className="text-[11px] text-gray-500 text-center mb-3">
               {completedStages} מתוך {totalStages} שלבים הושלמו
             </div>
+
+            {/* CTA */}
             <button
               onClick={() => navigate("/resident/project-management")}
               className="w-full flex items-center justify-center gap-2 text-white font-extrabold py-3.5 rounded-2xl active:scale-[0.98] transition-transform"
