@@ -77,6 +77,12 @@ export default function SupplierDashboard() {
   const [areaSet, setAreaSet] = useState(false);
   const [leadsToday, setLeadsToday] = useState(0);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
+  // Real 14-day daily series (index 0 = 13 days ago, index 13 = today)
+  const [daily, setDaily] = useState<{ leads: number[]; favs: number[]; paid: number[] }>({
+    leads: Array(14).fill(0), favs: Array(14).fill(0), paid: Array(14).fill(0),
+  });
+  // Area project engagement (real interests count per project, when project is referenced by a deal)
+  const [areaHeat, setAreaHeat] = useState<Record<string, number>>({});
 
   useEffect(() => {
     let cancelled = false;
