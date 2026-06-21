@@ -79,6 +79,12 @@ export default function NotificationSettings() {
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [userId, setUserId] = useState<string | null>(null);
 
+  const [browserPushOn, setBrowserPushOn] = useState(false);
+  const [browserBusy, setBrowserBusy] = useState(false);
+  const [browserSupported, setBrowserSupported] = useState(true);
+  const [browserPermission, setBrowserPermission] =
+    useState<NotificationPermission | "unsupported">("default");
+
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
@@ -96,9 +102,43 @@ export default function NotificationSettings() {
       if (row) {
         setSettings((prev) => ({ ...prev, ...(row as Partial<Settings>) }));
       }
+      setBrowserSupported(isWebPushSupported());
+      setBrowserPermission(currentPermission());
+      setBrowserPushOn(await hasActiveWebPush());
       setLoading(false);
     })();
   }, [navigate]);
+
+  const toggleBrowserPush = async () => {
+    if (!userId || browserBusy) return;
+    setBrowserBusy(true);
+    try {
+      if (browserPushOn) {
+        await disableWebPush(userId);
+        setBrowserPushOn(false);
+        toast.success("התראות הדפדפן בוטלו");
+      } else {
+        const res = await enableWebPush(userId);
+        if (res.ok) {
+          setBrowserPushOn(true);
+          setBrowserPermission("granted");
+          toast.success("התראות הדפדפן הופעלו");
+        } else {
+          const messages: Record<string, string> = {
+            unsupported: "הדפדפן הזה לא תומך בהתראות פוש.",
+            denied: "ההרשאה נדחתה. אפשר/י התראות מתוך הגדרות הדפדפן.",
+            no_sw: "Service worker לא זמין כאן (לרוב בתצוגה מקדימה). נסה/י באתר הפעיל.",
+            subscribe_failed: "ההרשמה להתראות נכשלה. נסה/י שוב.",
+            save_failed: "שמירת המכשיר נכשלה.",
+          };
+          toast.error(messages[res.reason] || "ההפעלה נכשלה");
+          setBrowserPermission(currentPermission());
+        }
+      }
+    } finally {
+      setBrowserBusy(false);
+    }
+  };
 
   const save = async () => {
     if (!userId) return;
