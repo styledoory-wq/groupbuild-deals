@@ -549,9 +549,9 @@ export default function SupplierLeads() {
                   <h4 className="font-extrabold text-[15px] text-foreground truncate">{name}</h4>
                   <StageBadge stage={inquiryStage(q)} hot={isHot(q.created_at, inquiryStage(q))} />
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">
+                <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#F0F9F6] text-[#0E6B5A] border border-[#A7E0D0]">
                   <Clock className="h-3 w-3" /> {timeAgoHe(q.created_at)} · פנייה כללית
-                </p>
+                </div>
               </div>
             </div>
             {!trashed && (
