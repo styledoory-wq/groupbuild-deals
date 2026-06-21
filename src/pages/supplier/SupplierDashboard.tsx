@@ -129,7 +129,7 @@ export default function SupplierDashboard() {
         if (supplierRow?.id && (supplierRow.approval_status === "approved" || supplierRow.approval_status === "active")) {
           const { data: dealRows, error: dealsErr } = await supabase
             .from("deals")
-            .select("id,title,status,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants")
+            .select("id,title,status,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants,cover_image_url,gallery_images")
             .eq("supplier_id", supplierRow.id)
             .eq("is_deleted", false)
             .order("created_at", { ascending: false });
