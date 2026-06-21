@@ -168,7 +168,8 @@ export default function SupplierOffers() {
           .from("deal_interests")
           .select("deal_id")
           .in("deal_id", ids)
-          .eq("is_deleted", false),
+          .eq("is_deleted", false)
+          .eq("is_demo", false),
         supabase
           .from("favorites")
           .select("deal_id")
