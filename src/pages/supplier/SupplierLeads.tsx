@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2, Check, X, Trash2, RotateCcw, Archive, FileText, Calendar, Tag, Coins } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2, Check, X, Trash2, RotateCcw, Archive, FileText, Calendar, Tag, Coins, Flame, TrendingUp, Clock, Sparkles, ArrowLeft, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { ScreenHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
+import { ScreenHeader, LoadingState, ErrorState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -78,6 +79,144 @@ const daysLeftToPurge = (deletedAt?: string | null) => {
   return Math.max(0, Math.ceil(ms / 86400_000));
 };
 
+type LeadStage = "new" | "in_progress" | "closed";
+type TabKey = "all" | "new" | "in_progress" | "closed";
+
+const HOURS_24 = 24 * 3600_000;
+const HOURS_72 = 72 * 3600_000;
+
+function initialsOf(name: string | null | undefined): string {
+  const t = (name ?? "").trim();
+  if (!t) return "ד";
+  const parts = t.split(/\s+/);
+  return (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "");
+}
+function avatarHue(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 360;
+  return `hsl(${h} 55% 92%)`;
+}
+function timeAgoHe(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "עכשיו";
+  if (m < 60) return `לפני ${m} ד׳`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `לפני ${h} שע׳`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `לפני ${d} ימים`;
+  return new Date(iso).toLocaleDateString("he-IL");
+}
+function interestStage(i: InterestRow): LeadStage {
+  if (["paid", "committed"].includes(i.deposit_status) || i.direct_deposit_status === "confirmed_by_supplier") return "closed";
+  if (i.lead_status === "approved" || i.direct_deposit_status === "marked_paid_by_resident" || i.direct_deposit_status === "awaiting_payment") return "in_progress";
+  return "new";
+}
+function inquiryStage(q: InquiryRow): LeadStage {
+  if (q.status === "closed" || q.status === "won") return "closed";
+  if (q.status === "in_progress" || q.status === "contacted") return "in_progress";
+  return "new";
+}
+function isHot(createdAt: string, stage: LeadStage): boolean {
+  const age = Date.now() - new Date(createdAt).getTime();
+  return stage !== "closed" && age < HOURS_24;
+}
+
+function Avatar({ name }: { name: string }) {
+  return (
+    <div
+      className="h-11 w-11 rounded-full flex items-center justify-center text-[#0E6B5A] font-extrabold text-sm shrink-0"
+      style={{ background: avatarHue(name) }}
+      aria-hidden
+    >
+      {initialsOf(name).toUpperCase()}
+    </div>
+  );
+}
+
+function StageBadge({ stage, hot }: { stage: LeadStage; hot: boolean }) {
+  if (hot) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#FFF1ED] text-[#C2410C] border border-[#FED7AA]">
+        <Flame className="h-3 w-3" /> ליד חם
+      </span>
+    );
+  }
+  if (stage === "closed") {
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"><CheckCircle2 className="h-3 w-3" /> נסגר</span>;
+  }
+  if (stage === "in_progress") {
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE]">בטיפול</span>;
+  }
+  if (stage === "new") {
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">חדש</span>;
+  }
+  return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A]">ממתין</span>;
+}
+
+function KpiSmall({
+  icon, label, value, trend, tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  trend: string;
+  tone: "green" | "blue" | "amber" | "violet";
+}) {
+  const palette: Record<string, { bg: string; fg: string }> = {
+    green: { bg: "#ECFDF5", fg: "#059669" },
+    blue: { bg: "#EFF6FF", fg: "#1D4ED8" },
+    amber: { bg: "#FFFBEB", fg: "#B45309" },
+    violet: { bg: "#F5F3FF", fg: "#6D28D9" },
+  };
+  const c = palette[tone];
+  return (
+    <div className="bg-white rounded-2xl border border-[#EEF0F3] p-3 shadow-sm">
+      <div className="flex items-center justify-between mb-1.5">
+        <div
+          className="h-7 w-7 rounded-lg inline-flex items-center justify-center"
+          style={{ background: c.bg, color: c.fg }}
+        >
+          {icon}
+        </div>
+        <span className="text-[10px] font-bold" style={{ color: c.fg }}>{trend}</span>
+      </div>
+      <div className="text-[18px] font-black text-[#0F172A] leading-none">{value}</div>
+      <div className="text-[11px] text-muted-foreground mt-1 font-bold">{label}</div>
+    </div>
+  );
+}
+
+function EmptyHero({
+  icon, title, description, cta,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  cta?: { to: string; label: string };
+}) {
+  return (
+    <div className="bg-white rounded-3xl border border-[#EEF0F3] p-8 text-center shadow-sm">
+      <div className="mx-auto h-16 w-16 rounded-2xl bg-[#F0F9F6] flex items-center justify-center mb-3">
+        {icon}
+      </div>
+      <h3 className="text-[15px] font-extrabold text-[#0F172A]">{title}</h3>
+      <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">{description}</p>
+      {cta && (
+        <Link
+          to={cta.to}
+          className="mt-4 inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-[#0E6B5A] text-white text-[13px] font-extrabold"
+        >
+          <PlusCircle className="h-4 w-4" />
+          {cta.label}
+        </Link>
+      )}
+    </div>
+  );
+}
+
+
+
 export default function SupplierLeads() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +234,7 @@ export default function SupplierLeads() {
   const [showTrash, setShowTrash] = useState(false);
   const [swipeId, setSwipeId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: "interest" | "inquiry"; id: string } | null>(null);
+  const [tab, setTab] = useState<TabKey>("all");
   const touchStartX = useRef(0);
 
   const updateLeadStatus = async (interestId: string, status: "approved" | "rejected") => {
@@ -398,25 +538,28 @@ export default function SupplierLeads() {
           onTouchEnd={trashed ? undefined : makeSwipeEnd(q.id)}
         >
           <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="min-w-0">
-              <h4 className="font-bold text-sm text-foreground truncate">{name}</h4>
-              <p className="text-fs-xs text-muted-foreground truncate">{q.message ?? "פנייה כללית"}</p>
+            <div className="flex items-start gap-2.5 min-w-0">
+              <Avatar name={name} />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h4 className="font-extrabold text-[15px] text-foreground truncate">{name}</h4>
+                  <StageBadge stage={inquiryStage(q)} hot={isHot(q.created_at, inquiryStage(q))} />
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> {timeAgoHe(q.created_at)} · פנייה כללית
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30">
-                פנייה חדשה
-              </span>
-              {!trashed && (
-                <button
-                  onClick={() => setConfirmDelete({ kind: "inquiry", id: q.id })}
-                  disabled={statusBusy === q.id}
-                  aria-label="מחק פנייה"
-                  className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 disabled:opacity-50"
-                >
-                  {statusBusy === q.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                </button>
-              )}
-            </div>
+            {!trashed && (
+              <button
+                onClick={() => setConfirmDelete({ kind: "inquiry", id: q.id })}
+                disabled={statusBusy === q.id}
+                aria-label="מחק פנייה"
+                className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 disabled:opacity-50 shrink-0"
+              >
+                {statusBusy === q.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+              </button>
+            )}
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-fs-xs text-muted-foreground mb-2">
             {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
@@ -475,15 +618,23 @@ export default function SupplierLeads() {
           onTouchEnd={trashed ? undefined : makeSwipeEnd(i.id)}
         >
           <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="min-w-0">
-              <h4 className="font-bold text-sm text-foreground truncate">{name}</h4>
-              <p className="text-fs-xs text-muted-foreground truncate">{dealTitle(i.deal_id)}</p>
+            <div className="flex items-start gap-2.5 min-w-0">
+              <Avatar name={name} />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h4 className="font-extrabold text-[15px] text-foreground truncate">{name}</h4>
+                  <StageBadge stage={interestStage(i)} hot={isHot(i.created_at, interestStage(i))} />
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-1 truncate">
+                  <Clock className="h-3 w-3" /> {timeAgoHe(i.created_at)} · מקור: {dealTitle(i.deal_id)}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               {committed && (
-                <span className="text-fs-xs font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30">
+                <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30">
                   <BadgeCheck className="h-3 w-3" />
-                  {i.deposit_status === "paid" ? "פיקדון שולם" : `התחייב ${ils(Number(i.deposit_amount))}`}
+                  {i.deposit_status === "paid" ? "שולם" : ils(Number(i.deposit_amount))}
                 </span>
               )}
               {!trashed && (
@@ -498,22 +649,12 @@ export default function SupplierLeads() {
               )}
             </div>
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-fs-xs text-muted-foreground mb-2">
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground mb-2">
             {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
             {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
             {i.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {i.city}</span>}
             {i.project_name && <span className="inline-flex items-center gap-1"><Building2 className="h-3 w-3" /> {i.project_name}</span>}
             <span>נרשם: {new Date(i.created_at).toLocaleDateString("he-IL")}</span>
-            {i.lead_status && i.lead_status !== "new" && (
-              <span className={
-                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold " +
-                (i.lead_status === "approved" ? "bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"
-                  : i.lead_status === "rejected" ? "bg-muted text-muted-foreground border border-border"
-                  : "bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30")
-              }>
-                {i.lead_status === "approved" ? "מאושר" : i.lead_status === "rejected" ? "לא רלוונטי" : i.lead_status}
-              </span>
-            )}
           </div>
           {i.notes && (
             <p className="text-fs-xs text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">{i.notes}</p>
@@ -602,24 +743,138 @@ export default function SupplierLeads() {
     );
   };
 
+  // --- CRM stats & filtering ---
+  const stats = useMemo(() => {
+    const allLeads = [
+      ...interests.map((i) => ({ created_at: i.created_at, stage: interestStage(i), revenue: Number(i.deposit_amount ?? 0) })),
+      ...inquiries.map((q) => ({ created_at: q.created_at, stage: inquiryStage(q), revenue: 0 })),
+    ];
+    const now = Date.now();
+    const newThisWeek = allLeads.filter((l) => now - new Date(l.created_at).getTime() < 7 * 86400_000).length;
+    const newToday = allLeads.filter((l) => now - new Date(l.created_at).getTime() < HOURS_24).length;
+    const closed = allLeads.filter((l) => l.stage === "closed").length;
+    const conversion = allLeads.length ? Math.round((closed / allLeads.length) * 100) : 0;
+    const expectedRevenue = interests
+      .filter((i) => interestStage(i) !== "closed" && i.deposit_required)
+      .reduce((s, i) => s + Number(i.deposit_amount ?? 0), 0);
+    // avg response time: time between created_at and supplier_confirmed_at (interests only)
+    const responded = interests.filter((i) => i.supplier_confirmed_at);
+    const avgRespHours = responded.length
+      ? Math.round(
+          (responded.reduce((s, i) => s + (new Date(i.supplier_confirmed_at!).getTime() - new Date(i.created_at).getTime()), 0) /
+            responded.length) /
+            3600_000,
+        )
+      : null;
+    return { total: allLeads.length, newThisWeek, newToday, closed, conversion, expectedRevenue, avgRespHours };
+  }, [interests, inquiries]);
+
+  const filteredInterests = useMemo(() => {
+    if (tab === "all") return interests;
+    return interests.filter((i) => interestStage(i) === tab);
+  }, [interests, tab]);
+  const filteredInquiries = useMemo(() => {
+    if (tab === "all") return inquiries;
+    return inquiries.filter((q) => inquiryStage(q) === tab);
+  }, [inquiries, tab]);
+
+  const tabCounts = useMemo(() => ({
+    all: interests.length + inquiries.length,
+    new: interests.filter((i) => interestStage(i) === "new").length + inquiries.filter((q) => inquiryStage(q) === "new").length,
+    in_progress: interests.filter((i) => interestStage(i) === "in_progress").length + inquiries.filter((q) => inquiryStage(q) === "in_progress").length,
+    closed: interests.filter((i) => interestStage(i) === "closed").length + inquiries.filter((q) => inquiryStage(q) === "closed").length,
+  }), [interests, inquiries]);
+
+  const filteredEmpty = filteredInterests.length === 0 && filteredInquiries.length === 0;
+
   return (
     <MobileShell>
-      <ScreenHeader title="לידים ופניות" subtitle="כל הדיירים שהצטרפו להצעות שלך" />
+      <ScreenHeader title="לידים ופניות" subtitle="ה-CRM שלך לניהול דיירים פוטנציאליים" />
 
-      <div className="px-5 -mt-4 relative z-10 pb-24">
+      <div className="px-4 -mt-4 relative z-10 pb-24 space-y-3">
         {loading ? (
           <LoadingState />
         ) : error ? (
           <ErrorState title="שגיאה בטעינה" description={error} />
         ) : (
           <>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Users className="h-4 w-4 text-[#0E6B5A]" />
-                {showTrash ? `סל מחזור · ${totalTrashed} פריטים` : `סה"כ ${totalActive} פניות${deals.length ? ` · ${deals.length} הצעות` : ""}`}
+            {/* === Hero CRM card === */}
+            <div
+              className="rounded-3xl p-4 text-white relative overflow-hidden"
+              style={{
+                background: "linear-gradient(135deg, #0E6B5A 0%, #14856F 55%, #16A085 100%)",
+                boxShadow: "0 12px 32px -12px rgba(14,107,90,0.45)",
+              }}
+            >
+              <div className="absolute -top-8 -left-8 h-32 w-32 rounded-full bg-white/10" aria-hidden />
+              <div className="relative z-10 flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[11px] font-bold opacity-90 inline-flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" /> מרכז הלידים
+                  </div>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-[34px] font-black leading-none">{stats.total}</span>
+                    <span className="text-[12px] opacity-90 font-bold">לידים פעילים</span>
+                  </div>
+                  <div className="mt-1.5 text-[12px] opacity-95 inline-flex items-center gap-1">
+                    <TrendingUp className="h-3.5 w-3.5" /> {stats.newThisWeek} חדשים השבוע · {stats.newToday} היום
+                  </div>
+                </div>
+                <div className="h-12 w-12 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center shrink-0">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <button
+                onClick={() => setTab("new")}
+                className="relative z-10 mt-3 w-full h-10 rounded-xl bg-white text-[#0E6B5A] font-extrabold text-[13px] inline-flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.99] transition-transform"
+              >
+                צפה בלידים חדשים
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* === 4 KPI cards === */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <KpiSmall icon={<Users className="h-3.5 w-3.5" />} label="לידים" value={String(stats.total)} trend={`+${stats.newThisWeek}`} tone="green" />
+              <KpiSmall icon={<TrendingUp className="h-3.5 w-3.5" />} label="שיעור המרה" value={`${stats.conversion}%`} trend={stats.closed ? `${stats.closed} נסגרו` : "—"} tone="blue" />
+              <KpiSmall icon={<Coins className="h-3.5 w-3.5" />} label="הכנסה צפויה" value={stats.expectedRevenue ? ils(stats.expectedRevenue) : "—"} trend="פיקדונות פתוחים" tone="amber" />
+              <KpiSmall icon={<Clock className="h-3.5 w-3.5" />} label="זמן תגובה" value={stats.avgRespHours == null ? "—" : `${stats.avgRespHours} שע׳`} trend="ממוצע" tone="violet" />
+            </div>
+
+            {/* === Tabs === */}
+            <div className="flex items-center gap-1 bg-white rounded-2xl p-1 border border-[#EEF0F3] overflow-x-auto">
+              {([
+                { k: "all", label: "הכל" },
+                { k: "new", label: "חדשים" },
+                { k: "in_progress", label: "בטיפול" },
+                { k: "closed", label: "נסגרו" },
+              ] as { k: TabKey; label: string }[]).map((t) => {
+                const active = tab === t.k;
+                const count = tabCounts[t.k];
+                return (
+                  <button
+                    key={t.k}
+                    onClick={() => setTab(t.k)}
+                    className={
+                      "flex-1 min-w-[64px] h-9 rounded-xl text-[12px] font-extrabold inline-flex items-center justify-center gap-1 transition-colors " +
+                      (active ? "bg-[#0E6B5A] text-white" : "text-[#475569] hover:bg-muted/60")
+                    }
+                  >
+                    {t.label}
+                    <span className={"text-[10px] font-bold px-1.5 py-0.5 rounded-md " + (active ? "bg-white/20" : "bg-muted text-muted-foreground")}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* === Trash toggle row === */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <Users className="h-3.5 w-3.5 text-[#0E6B5A]" />
+                {showTrash ? `סל מחזור · ${totalTrashed} פריטים` : `מציג ${tabCounts[tab]} מתוך ${tabCounts.all}`}
               </div>
               <button onClick={() => { setShowTrash((v) => !v); setSwipeId(null); }}
-                className="text-fs-xs font-bold inline-flex items-center gap-1 px-3 h-8 rounded-lg bg-muted text-foreground">
+                className="text-[11px] font-bold inline-flex items-center gap-1 px-2.5 h-7 rounded-lg bg-muted text-foreground">
                 <Archive className="h-3 w-3" />
                 {showTrash ? "חזרה ללידים" : `סל מחזור${totalTrashed ? ` (${totalTrashed})` : ""}`}
               </button>
@@ -627,29 +882,36 @@ export default function SupplierLeads() {
 
             {showTrash ? (
               totalTrashed === 0 ? (
-                <EmptyState
+                <EmptyHero
                   icon={<Archive className="h-7 w-7 text-[#9CA3AF]" />}
                   title="סל המחזור ריק"
                   description="פריטים שנמחקו יופיעו כאן למשך 30 ימים לפני מחיקה לצמיתות."
                 />
               ) : (
                 <div className="space-y-3">
-                  <p className="text-fs-xs text-muted-foreground">פריטים בסל המחזור נמחקים לצמיתות לאחר {TRASH_DAYS} ימים.</p>
+                  <p className="text-[11px] text-muted-foreground">פריטים בסל המחזור נמחקים לצמיתות לאחר {TRASH_DAYS} ימים.</p>
                   {trashedInquiries.map((q) => renderInquiry(q, true))}
                   {trashedInterests.map((i) => renderInterest(i, true))}
                 </div>
               )
-            ) : totalActive === 0 && quoteRequests.length === 0 ? (
-              <EmptyState
+            ) : tabCounts.all === 0 && quoteRequests.length === 0 ? (
+              <EmptyHero
+                icon={<Inbox className="h-7 w-7 text-[#0E6B5A]" />}
+                title="עדיין אין לידים חדשים"
+                description="פרסם עוד הצעות כדי לקבל יותר פניות מדיירים בסביבה."
+                cta={{ to: "/supplier/offers/new", label: "צור הצעה חדשה" }}
+              />
+            ) : filteredEmpty && tab !== "all" ? (
+              <EmptyHero
                 icon={<Inbox className="h-7 w-7 text-[#9CA3AF]" />}
-                title="אין לידים עדיין"
-                description="כשדיירים יביעו עניין בהצעות או בשירותים שלך — הם יופיעו כאן."
+                title={tab === "new" ? "אין לידים חדשים כרגע" : tab === "in_progress" ? "אין לידים בטיפול" : "עדיין לא נסגרו לידים"}
+                description="נסה ללחוץ על 'הכל' כדי לראות את כל הפניות שלך."
               />
             ) : (
               <div className="space-y-3">
-                {quoteRequests.length > 0 && (
+                {tab === "all" && quoteRequests.length > 0 && (
                   <div className="space-y-2">
-                    <h3 className="text-xs font-bold text-muted-foreground mt-2 inline-flex items-center gap-1.5">
+                    <h3 className="text-[11px] font-bold text-muted-foreground inline-flex items-center gap-1.5">
                       <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" />
                       בקשות הצעת מחיר מוועדי בתים ({quoteRequests.length})
                     </h3>
@@ -703,21 +965,22 @@ export default function SupplierLeads() {
                     })}
                   </div>
                 )}
-                {inquiries.length > 0 && (
+                {filteredInquiries.length > 0 && (
                   <div className="space-y-2">
-                    <h3 className="text-xs font-bold text-muted-foreground mt-2">פניות כלליות (ללא הצעה)</h3>
-                    {inquiries.map((q) => renderInquiry(q, false))}
+                    <h3 className="text-[11px] font-bold text-muted-foreground mt-1">פניות כלליות</h3>
+                    {filteredInquiries.map((q) => renderInquiry(q, false))}
                   </div>
                 )}
-                {interests.length > 0 && (
-                  <h3 className="text-xs font-bold text-muted-foreground mt-3">לידים על הצעות פעילות</h3>
+                {filteredInterests.length > 0 && (
+                  <h3 className="text-[11px] font-bold text-muted-foreground mt-2">לידים על הצעות פעילות</h3>
                 )}
-                {interests.map((i) => renderInterest(i, false))}
+                {filteredInterests.map((i) => renderInterest(i, false))}
               </div>
             )}
           </>
         )}
       </div>
+
 
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent dir="rtl">
