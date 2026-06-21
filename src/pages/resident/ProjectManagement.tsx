@@ -333,9 +333,10 @@ export default function ProjectManagement() {
             </div>
             <div className="flex-1 min-w-0 pl-8">
               <h2 className="text-[16px] font-extrabold text-[#1A1A1A] break-words" style={{ fontFamily: URBANIST }}>
-                {info.name}
+                {info.name || <span className="text-gray-400 font-medium">שם הפרוייקט</span>}
               </h2>
-              <p className="text-[12px] text-gray-500 mt-0.5 break-words">{info.subtitle}</p>
+              <p className="text-[12px] text-gray-500 mt-0.5 break-words">{info.subtitle || "הוסיפו תיאור קצר"}</p>
+
 
               {/* Progress ring */}
               <div className="mt-3 flex items-center gap-3">
