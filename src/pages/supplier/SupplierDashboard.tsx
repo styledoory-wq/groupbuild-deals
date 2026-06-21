@@ -745,8 +745,11 @@ function Sparkline({ points, color }: { points: number[]; color: string }) {
 function KpiCard({
   icon: Icon, iconBg, iconColor, value, label, trendColor, trendPct, sparklinePoints,
 }: {
-  icon: typeof Wallet; iconBg: string; iconColor: string; value: string; label: string; trendColor: string; trendPct: number; sparklinePoints: number[];
+  icon: typeof Wallet; iconBg: string; iconColor: string; value: string; label: string; trendColor: string; trendPct: number | null; sparklinePoints: number[];
 }) {
+  const hasTrend = trendPct !== null && Number.isFinite(trendPct);
+  const arrow = hasTrend ? ((trendPct as number) >= 0 ? "↑" : "↓") : "";
+  const absPct = hasTrend ? Math.abs(trendPct as number) : 0;
   return (
     <div className="bg-white rounded-2xl border border-[#EEF0F3] shadow-sm p-2.5 flex flex-col">
       <div className="h-7 w-7 rounded-xl flex items-center justify-center mb-2" style={{ background: iconBg }}>
@@ -754,7 +757,9 @@ function KpiCard({
       </div>
       <div className="text-[15px] font-bold text-[#0F172A] tracking-tight leading-none truncate" dir="rtl">{value}</div>
       <div className="text-[10px] text-[#8E95A2] font-medium leading-tight mt-1 truncate">{label}</div>
-      <div className="text-[9px] font-bold mt-1 truncate" style={{ color: trendColor }}>↑ {trendPct}% השבוע</div>
+      <div className="text-[9px] font-bold mt-1 truncate" style={{ color: hasTrend ? trendColor : "#8E95A2" }}>
+        {hasTrend ? `${arrow} ${absPct}% השבוע` : "אין נתוני שבוע קודם"}
+      </div>
       <div className="mt-1 -mb-0.5">
         <Sparkline points={sparklinePoints} color={trendColor} />
       </div>
