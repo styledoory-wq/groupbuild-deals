@@ -119,7 +119,7 @@ export default function NotificationSettings() {
         toast.success("התראות הדפדפן בוטלו");
       } else {
         const res = await enableWebPush(userId);
-        if (res.ok) {
+        if (res.ok === true) {
           setBrowserPushOn(true);
           setBrowserPermission("granted");
           toast.success("התראות הדפדפן הופעלו");
@@ -131,7 +131,8 @@ export default function NotificationSettings() {
             subscribe_failed: "ההרשמה להתראות נכשלה. נסה/י שוב.",
             save_failed: "שמירת המכשיר נכשלה.",
           };
-          toast.error(messages[res.reason] || "ההפעלה נכשלה");
+          const reason = (res as { reason: string }).reason;
+          toast.error(messages[reason] || "ההפעלה נכשלה");
           setBrowserPermission(currentPermission());
         }
       }
