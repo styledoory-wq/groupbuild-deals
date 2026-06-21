@@ -79,6 +79,81 @@ const daysLeftToPurge = (deletedAt?: string | null) => {
   return Math.max(0, Math.ceil(ms / 86400_000));
 };
 
+type LeadStage = "new" | "in_progress" | "closed";
+type TabKey = "all" | "new" | "in_progress" | "closed";
+
+const HOURS_24 = 24 * 3600_000;
+const HOURS_72 = 72 * 3600_000;
+
+function initialsOf(name: string | null | undefined): string {
+  const t = (name ?? "").trim();
+  if (!t) return "ד";
+  const parts = t.split(/\s+/);
+  return (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "");
+}
+function avatarHue(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 360;
+  return `hsl(${h} 55% 92%)`;
+}
+function timeAgoHe(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "עכשיו";
+  if (m < 60) return `לפני ${m} ד׳`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `לפני ${h} שע׳`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `לפני ${d} ימים`;
+  return new Date(iso).toLocaleDateString("he-IL");
+}
+function interestStage(i: InterestRow): LeadStage {
+  if (["paid", "committed"].includes(i.deposit_status) || i.direct_deposit_status === "confirmed_by_supplier") return "closed";
+  if (i.lead_status === "approved" || i.direct_deposit_status === "marked_paid_by_resident" || i.direct_deposit_status === "awaiting_payment") return "in_progress";
+  return "new";
+}
+function inquiryStage(q: InquiryRow): LeadStage {
+  if (q.status === "closed" || q.status === "won") return "closed";
+  if (q.status === "in_progress" || q.status === "contacted") return "in_progress";
+  return "new";
+}
+function isHot(createdAt: string, stage: LeadStage): boolean {
+  const age = Date.now() - new Date(createdAt).getTime();
+  return stage !== "closed" && age < HOURS_24;
+}
+
+function Avatar({ name }: { name: string }) {
+  return (
+    <div
+      className="h-11 w-11 rounded-full flex items-center justify-center text-[#0E6B5A] font-extrabold text-sm shrink-0"
+      style={{ background: avatarHue(name) }}
+      aria-hidden
+    >
+      {initialsOf(name).toUpperCase()}
+    </div>
+  );
+}
+
+function StageBadge({ stage, hot }: { stage: LeadStage; hot: boolean }) {
+  if (hot) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#FFF1ED] text-[#C2410C] border border-[#FED7AA]">
+        <Flame className="h-3 w-3" /> ליד חם
+      </span>
+    );
+  }
+  if (stage === "closed") {
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"><CheckCircle2 className="h-3 w-3" /> נסגר</span>;
+  }
+  if (stage === "in_progress") {
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE]">בטיפול</span>;
+  }
+  if (stage === "new") {
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">חדש</span>;
+  }
+  return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A]">ממתין</span>;
+}
+
 export default function SupplierLeads() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
