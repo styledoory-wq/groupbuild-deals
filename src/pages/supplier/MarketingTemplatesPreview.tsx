@@ -1,23 +1,224 @@
 import { useState } from "react";
+import logo from "@/assets/groupbuild-logo-cropped.png";
 
-// Sample data for preview
 const SAMPLE = {
   title: "שיפוץ מטבח מלא",
+  punch: "במחיר קבוצתי!",
   category: "מטבחים",
-  subtitle: "מטבח מעוצב עם שיש קיסר וגימור פרמיום",
-  regularPrice: 48000,
-  groupPrice: 32900,
-  discountPct: 31,
-  validUntil: "31.07.2026",
+  bullets: ["איכות גבוהה", "אחריות מלאה", "התקנה מקצועית"],
+  regularPrice: 28000,
+  groupPrice: 16900,
+  discountPct: 40,
   image:
     "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1600&q=80",
-  brand: "GroupBuild",
-  cta: "הזמן עכשיו",
+  url: "groupbuild.co.il/offer/12345",
 };
 
 const nis = (n: number) => "₪" + n.toLocaleString("he-IL");
 
-/* ---------- Template 1: Premium Dark ---------- */
+/* ---------- Brand header (logo + tagline) ---------- */
+function BrandHeader({ dark = false }: { dark?: boolean }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+      <img
+        src={logo}
+        alt="GroupBuild"
+        style={{
+          width: 56,
+          height: 56,
+          objectFit: "contain",
+          background: "#F2B400",
+          borderRadius: 14,
+          padding: 6,
+        }}
+      />
+      <div style={{ lineHeight: 1 }}>
+        <div
+          style={{
+            fontWeight: 900,
+            fontSize: 30,
+            color: dark ? "#fff" : "#0b1a3a",
+            letterSpacing: -0.5,
+          }}
+        >
+          GroupBuild
+        </div>
+        <div
+          style={{
+            fontSize: 14,
+            color: dark ? "rgba(255,255,255,.7)" : "#6b7280",
+            marginTop: 4,
+          }}
+        >
+          קונים יחד, משלמים פחות
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Price box (regular + group + discount badge) ---------- */
+function PriceBox({
+  accent,
+  badgeBg,
+  badgeText = "#fff",
+}: {
+  accent: string;
+  badgeBg: string;
+  badgeText?: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "stretch",
+        gap: 10,
+        background: "#fff",
+        borderRadius: 14,
+        padding: 12,
+        boxShadow: "0 6px 20px rgba(0,0,0,.08)",
+      }}
+    >
+      <div
+        style={{
+          background: "#f3f4f6",
+          borderRadius: 10,
+          padding: "10px 14px",
+          minWidth: 120,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ fontSize: 14, color: "#6b7280" }}>מחיר רגיל</div>
+        <div
+          style={{
+            fontSize: 22,
+            color: "#9ca3af",
+            textDecoration: "line-through",
+            fontWeight: 700,
+          }}
+        >
+          {nis(SAMPLE.regularPrice)}
+        </div>
+      </div>
+      <div
+        style={{
+          background: accent,
+          color: "#0b1a3a",
+          borderRadius: 10,
+          padding: "10px 18px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          flex: 1,
+        }}
+      >
+        <div style={{ fontSize: 14, fontWeight: 700, opacity: 0.85 }}>
+          המחיר בקבוצה
+        </div>
+        <div
+          style={{
+            fontSize: 38,
+            fontWeight: 900,
+            letterSpacing: -1,
+            lineHeight: 1,
+          }}
+        >
+          {nis(SAMPLE.groupPrice)}
+        </div>
+      </div>
+      <div
+        style={{
+          width: 78,
+          height: 78,
+          borderRadius: "50%",
+          background: badgeBg,
+          color: badgeText,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          alignSelf: "center",
+          fontWeight: 900,
+          lineHeight: 1,
+          boxShadow: "0 6px 14px rgba(0,0,0,.15)",
+        }}
+      >
+        <div style={{ fontSize: 13 }}>הנחה</div>
+        <div style={{ fontSize: 26, marginTop: 2 }}>{SAMPLE.discountPct}%</div>
+      </div>
+    </div>
+  );
+}
+
+/* Fake QR placeholder */
+function QR({ size = 88, bg = "#fff" }: { size?: number; bg?: string }) {
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        background: bg,
+        borderRadius: 8,
+        padding: 6,
+        boxShadow: "0 2px 8px rgba(0,0,0,.12)",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          backgroundImage:
+            "repeating-conic-gradient(#111 0 25%, #fff 0 50%)",
+          backgroundSize: "10px 10px",
+          borderRadius: 4,
+        }}
+      />
+    </div>
+  );
+}
+
+function CTA({
+  bg,
+  color = "#0b1a3a",
+  text = "להצטרפות להצעה",
+}: {
+  bg: string;
+  color?: string;
+  text?: string;
+}) {
+  return (
+    <div
+      style={{
+        background: bg,
+        color,
+        padding: "16px 26px",
+        borderRadius: 12,
+        fontWeight: 900,
+        fontSize: 22,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {text}
+    </div>
+  );
+}
+
+function FooterLine({ color = "#fff" }: { color?: string }) {
+  return (
+    <div
+      style={{ fontSize: 16, color, opacity: 0.85, display: "flex", gap: 8 }}
+    >
+      <span>👥</span>
+      <span>ככל שיותר מצטרפים – המחיר יורד!</span>
+    </div>
+  );
+}
+
+/* =================================================================
+   1. PREMIUM DARK
+================================================================= */
 function PremiumDark() {
   return (
     <div
@@ -25,154 +226,242 @@ function PremiumDark() {
       style={{
         width: 1080,
         height: 1080,
-        background:
-          "linear-gradient(160deg,#0b0d10 0%,#16191f 55%,#0b0d10 100%)",
+        background: "#0d0f12",
         position: "relative",
         fontFamily: "'Heebo', sans-serif",
         color: "#fff",
         overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {/* Image dominant */}
+      {/* Image bg full */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          height: 720,
           backgroundImage: `url(${SAMPLE.image})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
+          opacity: 0.55,
         }}
       />
-      {/* Image vignette */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          height: 720,
           background:
-            "linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,0) 35%, rgba(11,13,16,.95) 100%)",
+            "linear-gradient(90deg, rgba(13,15,18,.95) 0%, rgba(13,15,18,.78) 45%, rgba(13,15,18,.25) 100%)",
         }}
       />
-      {/* Discount badge */}
+
+      {/* Content right side */}
       <div
         style={{
-          position: "absolute",
-          top: 48,
-          right: 48,
-          background:
-            "linear-gradient(135deg,#D4AF37 0%,#F4D77A 50%,#B8902C 100%)",
-          color: "#1a1408",
-          borderRadius: 999,
-          padding: "18px 36px",
-          fontWeight: 900,
-          fontSize: 44,
-          letterSpacing: -1,
-          boxShadow: "0 18px 40px rgba(212,175,55,.35)",
+          position: "relative",
+          padding: 56,
+          width: 640,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
         }}
       >
-        −{SAMPLE.discountPct}%
-      </div>
-      {/* Brand */}
-      <div
-        style={{
-          position: "absolute",
-          top: 60,
-          left: 56,
-          fontSize: 22,
-          fontWeight: 700,
-          letterSpacing: 6,
-          color: "rgba(255,255,255,.85)",
-        }}
-      >
-        GROUPBUILD
-      </div>
-      {/* Bottom content */}
-      <div style={{ position: "absolute", left: 56, right: 56, bottom: 64 }}>
-        <div
-          style={{
-            fontSize: 26,
-            color: "#D4AF37",
-            fontWeight: 600,
-            letterSpacing: 4,
-            marginBottom: 14,
-          }}
-        >
-          {SAMPLE.category.toUpperCase()}
-        </div>
-        <div
-          style={{
-            fontSize: 72,
-            fontWeight: 900,
-            lineHeight: 1.05,
-            marginBottom: 26,
-            letterSpacing: -2,
-          }}
-        >
-          {SAMPLE.title}
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-            gap: 24,
-            borderTop: "1px solid rgba(212,175,55,.35)",
-            paddingTop: 28,
-          }}
-        >
-          <div>
-            <div
-              style={{
-                fontSize: 22,
-                color: "rgba(255,255,255,.55)",
-                marginBottom: 6,
-                textDecoration: "line-through",
-              }}
-            >
-              {nis(SAMPLE.regularPrice)}
-            </div>
-            <div
-              style={{
-                fontSize: 132,
-                fontWeight: 900,
-                lineHeight: 1,
-                color: "#fff",
-                letterSpacing: -4,
-              }}
-            >
-              {nis(SAMPLE.groupPrice)}
-            </div>
-            <div
-              style={{
-                fontSize: 22,
-                color: "rgba(255,255,255,.7)",
-                marginTop: 8,
-              }}
-            >
-              מחיר קבוצתי בלעדי
-            </div>
+        <BrandHeader dark />
+
+        <div>
+          <div
+            style={{
+              fontSize: 88,
+              fontWeight: 900,
+              lineHeight: 1.02,
+              letterSpacing: -2,
+            }}
+          >
+            {SAMPLE.title}
           </div>
           <div
             style={{
-              background: "#fff",
-              color: "#0b0d10",
-              borderRadius: 16,
-              padding: "26px 40px",
-              fontWeight: 800,
-              fontSize: 32,
+              fontSize: 56,
+              fontWeight: 900,
+              color: "#F2B400",
+              marginTop: 4,
+              letterSpacing: -1,
             }}
           >
-            {SAMPLE.cta}
+            {SAMPLE.punch}
           </div>
+          <div
+            style={{
+              fontSize: 22,
+              color: "rgba(255,255,255,.8)",
+              marginTop: 18,
+            }}
+          >
+            {SAMPLE.bullets.join(" · ")}
+          </div>
+        </div>
+
+        <PriceBox accent="#F2B400" badgeBg="#0b1a3a" />
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <FooterLine />
+          <CTA bg="#F2B400" />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <QR size={84} />
+          <div style={{ fontSize: 16, opacity: 0.65 }}>{SAMPLE.url}</div>
         </div>
       </div>
     </div>
   );
 }
 
-/* ---------- Template 2: Clean White ---------- */
+/* =================================================================
+   2. CLEAN WHITE
+================================================================= */
 function CleanWhite() {
+  return (
+    <div
+      dir="rtl"
+      style={{
+        width: 1080,
+        height: 1080,
+        background: "#fff",
+        position: "relative",
+        fontFamily: "'Heebo', sans-serif",
+        color: "#0b1a3a",
+        overflow: "hidden",
+        display: "flex",
+      }}
+    >
+      {/* Left content */}
+      <div
+        style={{
+          width: 600,
+          padding: 56,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <BrandHeader />
+
+        <div>
+          <div
+            style={{
+              fontSize: 84,
+              fontWeight: 900,
+              lineHeight: 1.02,
+              letterSpacing: -2,
+            }}
+          >
+            חדר אמבטיה
+          </div>
+          <div
+            style={{
+              fontSize: 58,
+              fontWeight: 900,
+              color: "#1d6aff",
+              marginTop: 4,
+            }}
+          >
+            מעוצב ומושלם
+          </div>
+          <div
+            style={{
+              display: "inline-block",
+              background: "#1d6aff",
+              color: "#fff",
+              padding: "10px 22px",
+              borderRadius: 999,
+              fontWeight: 800,
+              fontSize: 22,
+              marginTop: 18,
+            }}
+          >
+            במחיר קבוצתי משתלם
+          </div>
+        </div>
+
+        <PriceBox accent="#dbe8ff" badgeBg="#1d6aff" />
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 18,
+          }}
+        >
+          {SAMPLE.bullets.map((b) => (
+            <div
+              key={b}
+              style={{
+                fontSize: 16,
+                color: "#475569",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <div
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: "50%",
+                  background: "#f1f5fb",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 22,
+                }}
+              >
+                ✓
+              </div>
+              {b}
+            </div>
+          ))}
+        </div>
+
+        <div
+          style={{
+            background: "#1d6aff",
+            borderRadius: 14,
+            padding: "18px 22px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            color: "#fff",
+          }}
+        >
+          <QR size={70} />
+          <div style={{ fontSize: 20, fontWeight: 700, textAlign: "center", flex: 1 }}>
+            ככל שיותר מצטרפים – המחיר יורד!
+          </div>
+        </div>
+      </div>
+
+      {/* Right image */}
+      <div
+        style={{
+          flex: 1,
+          backgroundImage: `url(${SAMPLE.image})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0 100%)",
+        }}
+      />
+    </div>
+  );
+}
+
+/* =================================================================
+   3. LUXURY MINIMAL  (centered, lots of whitespace)
+================================================================= */
+function LuxuryMinimal() {
   return (
     <div
       dir="rtl"
@@ -182,229 +471,93 @@ function CleanWhite() {
         background: "#fafafa",
         position: "relative",
         fontFamily: "'Heebo', sans-serif",
-        color: "#0a0a0a",
+        color: "#0b1a3a",
         overflow: "hidden",
-      }}
-    >
-      {/* Top: text */}
-      <div
-        style={{
-          padding: "84px 84px 0",
-          height: 540,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 56,
-          }}
-        >
-          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: 4 }}>
-            GROUPBUILD
-          </div>
-          <div
-            style={{
-              fontSize: 20,
-              color: "#666",
-              border: "1px solid #e5e5e5",
-              borderRadius: 999,
-              padding: "10px 22px",
-            }}
-          >
-            {SAMPLE.category}
-          </div>
-        </div>
-        <div
-          style={{
-            fontSize: 88,
-            fontWeight: 800,
-            lineHeight: 1,
-            letterSpacing: -3,
-            marginBottom: 24,
-          }}
-        >
-          {SAMPLE.title}.
-        </div>
-        <div style={{ fontSize: 30, color: "#555", lineHeight: 1.3 }}>
-          {SAMPLE.subtitle}
-        </div>
-      </div>
-
-      {/* Bottom: image with overlay price card */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 540,
-          backgroundImage: `url(${SAMPLE.image})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          left: 84,
-          bottom: 84,
-          background: "#fff",
-          borderRadius: 28,
-          padding: "36px 44px",
-          boxShadow: "0 30px 80px rgba(0,0,0,.18)",
-          minWidth: 460,
-        }}
-      >
-        <div style={{ fontSize: 20, color: "#888", marginBottom: 8 }}>
-          מחיר קבוצתי
-        </div>
-        <div
-          style={{
-            fontSize: 96,
-            fontWeight: 800,
-            letterSpacing: -3,
-            lineHeight: 1,
-          }}
-        >
-          {nis(SAMPLE.groupPrice)}
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-            marginTop: 14,
-            fontSize: 22,
-          }}
-        >
-          <span style={{ color: "#999", textDecoration: "line-through" }}>
-            {nis(SAMPLE.regularPrice)}
-          </span>
-          <span
-            style={{
-              background: "#0a0a0a",
-              color: "#fff",
-              padding: "6px 14px",
-              borderRadius: 8,
-              fontWeight: 700,
-            }}
-          >
-            חיסכון {SAMPLE.discountPct}%
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Template 3: Luxury Minimal ---------- */
-function LuxuryMinimal() {
-  return (
-    <div
-      dir="rtl"
-      style={{
-        width: 1080,
-        height: 1080,
-        background: "#f4f1ec",
-        position: "relative",
-        fontFamily: "'Heebo', sans-serif",
-        color: "#1a1a1a",
-        overflow: "hidden",
-        padding: 64,
+        padding: 56,
         boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {/* Top label */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          fontSize: 20,
-          letterSpacing: 6,
-          color: "#6b6055",
-        }}
-      >
-        <span>GROUPBUILD · קולקציה</span>
-        <span>{SAMPLE.validUntil}</span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <BrandHeader />
+        <div
+          style={{
+            fontSize: 16,
+            color: "#6b7280",
+            border: "1px solid #e5e7eb",
+            borderRadius: 999,
+            padding: "8px 18px",
+          }}
+        >
+          {SAMPLE.category}
+        </div>
       </div>
 
-      {/* Big centered image */}
+      {/* Title */}
+      <div style={{ textAlign: "center", marginTop: 26 }}>
+        <div style={{ fontSize: 72, fontWeight: 900, letterSpacing: -2, lineHeight: 1 }}>
+          מזגן עילי
+        </div>
+        <div
+          style={{
+            fontSize: 44,
+            fontWeight: 800,
+            color: "#1d6aff",
+            marginTop: 6,
+          }}
+        >
+          מתקדם וחסכוני
+        </div>
+        <div
+          style={{
+            display: "inline-block",
+            background: "#e8f3ec",
+            color: "#0E6B5A",
+            padding: "10px 22px",
+            borderRadius: 999,
+            fontWeight: 800,
+            fontSize: 22,
+            marginTop: 16,
+          }}
+        >
+          במחיר קבוצתי
+        </div>
+      </div>
+
+      {/* Image */}
       <div
         style={{
-          marginTop: 56,
-          width: "100%",
-          height: 640,
+          flex: 1,
+          marginTop: 24,
           backgroundImage: `url(${SAMPLE.image})`,
-          backgroundSize: "cover",
+          backgroundSize: "contain",
+          backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
-          borderRadius: 4,
         }}
       />
 
-      {/* Bottom split */}
+      <PriceBox accent="#d4f5e2" badgeBg="#0E6B5A" />
+
       <div
         style={{
           display: "flex",
+          alignItems: "center",
           justifyContent: "space-between",
-          alignItems: "flex-end",
-          marginTop: 56,
+          marginTop: 22,
         }}
       >
-        <div>
-          <div
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 84,
-              fontWeight: 500,
-              lineHeight: 1,
-              letterSpacing: -1,
-            }}
-          >
-            {SAMPLE.title}
-          </div>
-          <div
-            style={{
-              fontSize: 22,
-              color: "#6b6055",
-              marginTop: 14,
-              letterSpacing: 2,
-            }}
-          >
-            ⎯⎯ {SAMPLE.category}
-          </div>
-        </div>
-        <div style={{ textAlign: "left" }}>
-          <div
-            style={{
-              fontSize: 18,
-              letterSpacing: 4,
-              color: "#6b6055",
-              marginBottom: 6,
-            }}
-          >
-            FROM
-          </div>
-          <div
-            style={{
-              fontSize: 72,
-              fontWeight: 300,
-              letterSpacing: -2,
-              lineHeight: 1,
-            }}
-          >
-            {nis(SAMPLE.groupPrice)}
-          </div>
-        </div>
+        <QR size={86} />
+        <FooterLine color="#374151" />
+        <CTA bg="#0E6B5A" color="#fff" />
       </div>
     </div>
   );
 }
 
-/* ---------- Template 4: WhatsApp Viral ---------- */
+/* =================================================================
+   4. WHATSAPP VIRAL
+================================================================= */
 function WhatsAppViral() {
   return (
     <div
@@ -412,139 +565,152 @@ function WhatsAppViral() {
       style={{
         width: 1080,
         height: 1080,
+        background: "#0a3d2e",
         position: "relative",
         fontFamily: "'Heebo', sans-serif",
+        color: "#fff",
         overflow: "hidden",
-        background: "#075E54",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {/* Image background full */}
+      {/* image top */}
       <div
         style={{
-          position: "absolute",
-          inset: 0,
+          height: 460,
+          position: "relative",
           backgroundImage: `url(${SAMPLE.image})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.25) 30%, rgba(0,0,0,.85) 100%)",
-        }}
-      />
-
-      {/* Giant discount burst */}
-      <div
-        style={{
-          position: "absolute",
-          top: 60,
-          right: -40,
-          width: 360,
-          height: 360,
-          background: "#FFD60A",
-          borderRadius: "50%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#0a0a0a",
-          transform: "rotate(-12deg)",
-          boxShadow: "0 20px 50px rgba(0,0,0,.4)",
-        }}
-      >
-        <div style={{ fontSize: 40, fontWeight: 800, marginBottom: -10 }}>
-          חיסכון
-        </div>
-        <div style={{ fontSize: 160, fontWeight: 900, lineHeight: 1, letterSpacing: -6 }}>
-          {SAMPLE.discountPct}%
-        </div>
-      </div>
-
-      {/* Brand chip */}
-      <div
-        style={{
-          position: "absolute",
-          top: 60,
-          left: 60,
-          background: "rgba(255,255,255,.95)",
-          color: "#075E54",
-          borderRadius: 999,
-          padding: "12px 24px",
-          fontWeight: 800,
-          fontSize: 22,
-        }}
-      >
-        ⚡ מבצע קבוצתי
-      </div>
-
-      {/* Bottom price + CTA */}
-      <div
-        style={{
-          position: "absolute",
-          left: 60,
-          right: 60,
-          bottom: 60,
-          color: "#fff",
-        }}
       >
         <div
           style={{
-            fontSize: 56,
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 30%, rgba(10,61,46,.85) 100%)",
+          }}
+        />
+        <div style={{ position: "absolute", top: 36, right: 36 }}>
+          <BrandHeader dark />
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            top: 36,
+            left: 36,
+            background: "#FFD60A",
+            color: "#0b1a3a",
+            borderRadius: 999,
+            padding: "12px 24px",
             fontWeight: 900,
-            lineHeight: 1.05,
-            marginBottom: 8,
-            textShadow: "0 4px 24px rgba(0,0,0,.6)",
+            fontSize: 22,
+          }}
+        >
+          ⚡ מבצע קבוצתי
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            bottom: 30,
+            right: 36,
+            fontSize: 64,
+            fontWeight: 900,
+            lineHeight: 1,
+            letterSpacing: -2,
+            textShadow: "0 4px 18px rgba(0,0,0,.5)",
           }}
         >
           {SAMPLE.title}
+          <div style={{ fontSize: 40, color: "#FFD60A", marginTop: 8 }}>
+            {SAMPLE.punch}
+          </div>
         </div>
-        <div
-          style={{
-            fontSize: 26,
-            color: "rgba(255,255,255,.85)",
-            marginBottom: 24,
-            textDecoration: "line-through",
-          }}
-        >
-          במקום {nis(SAMPLE.regularPrice)}
+      </div>
+
+      {/* bottom */}
+      <div
+        style={{
+          flex: 1,
+          padding: 48,
+          display: "flex",
+          flexDirection: "column",
+          gap: 24,
+          position: "relative",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+          <div
+            style={{
+              background: "#FFD60A",
+              color: "#0b1a3a",
+              borderRadius: "50%",
+              width: 150,
+              height: 150,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 900,
+              lineHeight: 1,
+              transform: "rotate(-8deg)",
+              boxShadow: "0 10px 30px rgba(0,0,0,.4)",
+            }}
+          >
+            <div style={{ fontSize: 22 }}>חיסכון</div>
+            <div style={{ fontSize: 70, marginTop: 4, letterSpacing: -3 }}>
+              {SAMPLE.discountPct}%
+            </div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 22, color: "rgba(255,255,255,.7)", textDecoration: "line-through" }}>
+              במקום {nis(SAMPLE.regularPrice)}
+            </div>
+            <div style={{ fontSize: 28, color: "rgba(255,255,255,.85)", marginTop: 4 }}>
+              המחיר בקבוצה
+            </div>
+            <div
+              style={{
+                fontSize: 130,
+                fontWeight: 900,
+                color: "#FFD60A",
+                letterSpacing: -5,
+                lineHeight: 1,
+              }}
+            >
+              {nis(SAMPLE.groupPrice)}
+            </div>
+          </div>
         </div>
-        <div
-          style={{
-            fontSize: 170,
-            fontWeight: 900,
-            lineHeight: 1,
-            color: "#FFD60A",
-            letterSpacing: -6,
-            textShadow: "0 8px 30px rgba(0,0,0,.5)",
-            marginBottom: 28,
-          }}
-        >
-          {nis(SAMPLE.groupPrice)}
-        </div>
+
         <div
           style={{
             background: "#25D366",
-            color: "#fff",
-            borderRadius: 20,
-            padding: "30px 0",
+            borderRadius: 18,
+            padding: "26px 0",
             textAlign: "center",
             fontWeight: 900,
-            fontSize: 44,
-            boxShadow: "0 16px 40px rgba(37,211,102,.5)",
+            fontSize: 40,
+            color: "#fff",
+            boxShadow: "0 14px 36px rgba(37,211,102,.5)",
           }}
         >
           הצטרף לקבוצה עכשיו ←
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <QR size={86} />
+          <FooterLine />
         </div>
       </div>
     </div>
   );
 }
 
-/* ---------- Template 5: Modern Green ---------- */
+/* =================================================================
+   5. MODERN GREEN
+================================================================= */
 function ModernGreen() {
   return (
     <div
@@ -552,163 +718,124 @@ function ModernGreen() {
       style={{
         width: 1080,
         height: 1080,
+        background: "#fff",
         position: "relative",
         fontFamily: "'Heebo', sans-serif",
+        color: "#0b1a3a",
         overflow: "hidden",
-        background: "#fff",
         display: "flex",
-        flexDirection: "column",
       }}
     >
-      {/* Image top 60% */}
+      {/* image left */}
       <div
         style={{
-          height: 640,
-          position: "relative",
+          flex: 1,
           backgroundImage: `url(${SAMPLE.image})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: 40,
-            right: 40,
-            background: "rgba(255,255,255,.95)",
-            borderRadius: 14,
-            padding: "10px 20px",
-            fontSize: 22,
-            fontWeight: 700,
-            color: "#0E6B5A",
-          }}
-        >
-          {SAMPLE.category}
-        </div>
-        <div
-          style={{
-            position: "absolute",
-            top: 40,
-            left: 40,
-            background: "#0E6B5A",
-            color: "#fff",
-            borderRadius: 999,
-            padding: "14px 28px",
-            fontSize: 28,
-            fontWeight: 900,
-          }}
-        >
-          −{SAMPLE.discountPct}%
-        </div>
-      </div>
-
-      {/* Bottom emerald panel */}
+      />
+      {/* right panel */}
       <div
         style={{
-          flex: 1,
+          width: 600,
+          padding: 48,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
           background:
-            "linear-gradient(135deg,#0E6B5A 0%,#0a5547 60%,#083d34 100%)",
-          color: "#fff",
-          padding: "44px 60px",
-          position: "relative",
+            "linear-gradient(180deg, #f8fbf9 0%, #ecf6f1 100%)",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <div
-              style={{
-                fontSize: 44,
-                fontWeight: 900,
-                lineHeight: 1.05,
-                letterSpacing: -1,
-              }}
-            >
-              {SAMPLE.title}
-            </div>
-            <div
-              style={{
-                fontSize: 22,
-                color: "rgba(255,255,255,.75)",
-                marginTop: 8,
-              }}
-            >
-              בתוקף עד {SAMPLE.validUntil}
-            </div>
-          </div>
-          <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: 4, opacity: .9 }}>
-            GROUPBUILD
-          </div>
-        </div>
+        <BrandHeader />
 
-        <div
-          style={{
-            marginTop: 26,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            gap: 24,
-          }}
-        >
-          <div>
-            <div
-              style={{
-                fontSize: 22,
-                color: "rgba(255,255,255,.6)",
-                textDecoration: "line-through",
-              }}
-            >
-              {nis(SAMPLE.regularPrice)}
-            </div>
-            <div
-              style={{
-                fontSize: 120,
-                fontWeight: 900,
-                lineHeight: 1,
-                letterSpacing: -4,
-              }}
-            >
-              {nis(SAMPLE.groupPrice)}
-            </div>
+        <div>
+          <div style={{ fontSize: 76, fontWeight: 900, lineHeight: 1.02, letterSpacing: -2 }}>
+            פרגולה ודק
           </div>
           <div
             style={{
-              background: "#fff",
-              color: "#0E6B5A",
-              borderRadius: 16,
-              padding: "22px 36px",
+              fontSize: 52,
               fontWeight: 900,
-              fontSize: 28,
-              whiteSpace: "nowrap",
+              color: "#0E6B5A",
+              marginTop: 4,
             }}
           >
-            {SAMPLE.cta} ←
+            לגינה מושלמת
+          </div>
+          <div
+            style={{
+              display: "inline-block",
+              background: "#0E6B5A",
+              color: "#fff",
+              padding: "10px 22px",
+              borderRadius: 999,
+              fontWeight: 800,
+              fontSize: 22,
+              marginTop: 18,
+            }}
+          >
+            במחיר קבוצתי מיוחד
           </div>
         </div>
+
+        <PriceBox accent="#d4f5e2" badgeBg="#0E6B5A" />
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 18,
+          }}
+        >
+          {["עץ איכותי", "התקנה מקצועית", "אחריות מלאה"].map((b) => (
+            <div
+              key={b}
+              style={{
+                fontSize: 15,
+                color: "#475569",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <span style={{ color: "#0E6B5A", fontSize: 20 }}>●</span>
+              {b}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <QR size={84} />
+          <CTA bg="#0E6B5A" color="#fff" />
+        </div>
+
+        <FooterLine color="#475569" />
       </div>
     </div>
   );
 }
 
 const TEMPLATES = [
-  { key: "premium-dark", name: "Premium Dark", desc: "יוקרה כהה · תמונה דומיננטית · תג זהב", Comp: PremiumDark },
-  { key: "clean-white", name: "Clean White", desc: "Apple-like · טיפוגרפיה גדולה · כרטיס מחיר צף", Comp: CleanWhite },
-  { key: "luxury-minimal", name: "Luxury Minimal", desc: "מינימליסטי עם Serif · דגש על תמונה", Comp: LuxuryMinimal },
-  { key: "whatsapp-viral", name: "WhatsApp Viral", desc: "אגרסיבי · % ענק · CTA ירוק", Comp: WhatsAppViral },
-  { key: "modern-green", name: "Modern Green", desc: "GroupBuild brand · פאנל אמרלד תחתון", Comp: ModernGreen },
+  { key: "premium-dark", name: "Premium Dark", desc: "רקע כהה · זהב · יוקרה", Comp: PremiumDark },
+  { key: "clean-white", name: "Clean White", desc: "לבן נקי · כחול · Apple-like", Comp: CleanWhite },
+  { key: "luxury-minimal", name: "Luxury Minimal", desc: "ממורכז · אוויר · מינימליסטי", Comp: LuxuryMinimal },
+  { key: "whatsapp-viral", name: "WhatsApp Viral", desc: "% ענק · CTA ירוק · ויראלי", Comp: WhatsAppViral },
+  { key: "modern-green", name: "Modern Green", desc: "GroupBuild brand · אמרלד", Comp: ModernGreen },
 ];
 
 export default function MarketingTemplatesPreview() {
   const [active, setActive] = useState(TEMPLATES[0].key);
   const Comp = TEMPLATES.find((t) => t.key === active)!.Comp;
-  // scale 1080 -> ~360 for mobile preview
-  const scale = typeof window !== "undefined" && window.innerWidth < 500 ? 0.32 : 0.5;
+  const scale = typeof window !== "undefined" && window.innerWidth < 500 ? 0.34 : 0.5;
 
   return (
     <div dir="rtl" className="min-h-screen bg-neutral-100 p-4 pb-24">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold mb-1">תצוגה מקדימה · תבניות שיווק</h1>
         <p className="text-sm text-neutral-600 mb-5">
-          5 תבניות בעיצוב Premium. בחר תבנית כדי לראות בגודל מלא (פוסט 1080×1080).
+          5 תבניות בעיצוב מסחרי (1080×1080). בחר תבנית לתצוגה מוגדלת.
         </p>
 
         <div className="flex gap-2 overflow-x-auto pb-3 mb-5 -mx-4 px-4">
@@ -737,7 +864,7 @@ export default function MarketingTemplatesPreview() {
               height: 1080 * scale,
               margin: "0 auto",
               overflow: "hidden",
-              borderRadius: 12,
+              borderRadius: 16,
               boxShadow: "0 20px 60px rgba(0,0,0,.15)",
             }}
           >
@@ -756,10 +883,10 @@ export default function MarketingTemplatesPreview() {
 
         <div className="mt-8 space-y-6">
           <div className="text-sm font-semibold text-neutral-700">
-            כל 5 התבניות במבט אחד
+            כל 5 התבניות
           </div>
           {TEMPLATES.map((t) => {
-            const s = 0.28;
+            const s = scale * 0.62;
             const TComp = t.Comp;
             return (
               <div key={t.key} className="bg-white rounded-2xl p-3 shadow-sm">
@@ -773,7 +900,7 @@ export default function MarketingTemplatesPreview() {
                     height: 1080 * s,
                     margin: "0 auto",
                     overflow: "hidden",
-                    borderRadius: 10,
+                    borderRadius: 12,
                   }}
                 >
                   <div
