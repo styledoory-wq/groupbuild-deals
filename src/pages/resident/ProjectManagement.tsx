@@ -32,10 +32,10 @@ const BUDGET_KEY = "gb:pm:budget";
 const CURRENT_IDX_KEY = "gb:pm:currentIdx";
 
 const DEFAULT_INFO: ProjectInfo = {
-  name: "בית פרטי · נתניה",
-  subtitle: 'שטח בנוי: 180 מ"ר · 2 קומות',
-  manager: "יוסי בניה",
-  targetDate: "2025-10-15",
+  name: "",
+  subtitle: "",
+  manager: "",
+  targetDate: "",
   groupSavings: 0,
 };
 
@@ -333,9 +333,10 @@ export default function ProjectManagement() {
             </div>
             <div className="flex-1 min-w-0 pl-8">
               <h2 className="text-[16px] font-extrabold text-[#1A1A1A] break-words" style={{ fontFamily: URBANIST }}>
-                {info.name}
+                {info.name || <span className="text-gray-400 font-medium">שם הפרוייקט</span>}
               </h2>
-              <p className="text-[12px] text-gray-500 mt-0.5 break-words">{info.subtitle}</p>
+              <p className="text-[12px] text-gray-500 mt-0.5 break-words">{info.subtitle || "הוסיפו תיאור קצר"}</p>
+
 
               {/* Progress ring */}
               <div className="mt-3 flex items-center gap-3">
@@ -362,8 +363,9 @@ export default function ProjectManagement() {
           </div>
 
           <div className="grid grid-cols-3 gap-2 mt-4">
-            <InfoChip icon={<User className="h-3.5 w-3.5" />} label="מנהל" value={info.manager} />
-            <InfoChip icon={<Calendar className="h-3.5 w-3.5" />} label="יעד" value={formatDateShort(info.targetDate)} />
+            <InfoChip icon={<User className="h-3.5 w-3.5" />} label="מנהל" value={info.manager || "—"} />
+            <InfoChip icon={<Calendar className="h-3.5 w-3.5" />} label="יעד" value={info.targetDate ? formatDateShort(info.targetDate) : "—"} />
+
             <InfoChip icon={<Clock className="h-3.5 w-3.5" />} label="עדכון" value="היום" />
           </div>
         </div>
