@@ -55,6 +55,16 @@ type ActivityItem = {
 const BG = "#F7F8FA";
 const GREEN = "#0E6B5A";
 
+const BUILDING_IMAGES = [
+  "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=70",
+  "https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=400&q=70",
+  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=400&q=70",
+  "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=400&q=70",
+  "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=400&q=70",
+  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=70",
+];
+
+
 export default function SupplierDashboard() {
   const navigate = useNavigate();
   const { user, logout } = useApp();
@@ -296,43 +306,47 @@ export default function SupplierDashboard() {
 
   const TopBar = () => (
     <header className="px-5 pt-6 pb-2">
-      <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between gap-3">
         <button
           onClick={() => navigate("/supplier/leads")}
-          className="shrink-0 h-11 w-11 rounded-2xl bg-white border border-[#EEF0F3] flex items-center justify-center shadow-sm active:scale-95 transition relative"
+          className="shrink-0 h-12 w-12 rounded-2xl bg-white border border-[#EEF0F3] flex items-center justify-center shadow-sm active:scale-95 transition relative"
           aria-label="התראות"
         >
-          <Bell className="h-[18px] w-[18px] text-[#1C1C1E]" strokeWidth={2} />
+          <Bell className="h-[18px] w-[18px] text-[#0F172A]" strokeWidth={2} />
           {leadsToday > 0 && (
-            <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-[#0E6B5A] ring-2 ring-white" />
+            <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full bg-[#0E6B5A] ring-2 ring-white" />
           )}
         </button>
-        <div className="flex-1" />
-        <div className="text-right">
-          <div className="text-[13px] text-[#8E95A2] font-medium leading-tight">בוקר טוב,</div>
-          <h1 className="text-[20px] font-bold text-[#0F172A] leading-tight tracking-[-0.02em] flex items-center gap-1.5 justify-end">
-            {firstName} <span className="text-[18px]">👋</span>
-          </h1>
+        <div className="flex items-center gap-3 flex-1 justify-end min-w-0">
+          <div className="text-right min-w-0">
+            <h1 className="text-[19px] font-bold text-[#0F172A] leading-tight tracking-[-0.02em] flex items-center gap-1.5 justify-end truncate">
+              <span className="truncate">בוקר טוב, {firstName}</span> <span>👋</span>
+            </h1>
+            <div className="text-[12px] text-[#8E95A2] font-medium mt-0.5">כיף לראות אותך שוב</div>
+          </div>
+          <button
+            onClick={() => navigate("/supplier/profile/edit")}
+            className="shrink-0 h-12 w-12 rounded-full bg-gradient-to-br from-[#0E6B5A] to-[#1A8870] text-white font-bold text-[16px] flex items-center justify-center shadow-md active:scale-95 transition ring-2 ring-white"
+            aria-label="פרופיל"
+          >
+            {initial}
+          </button>
         </div>
-        <button
-          onClick={() => navigate("/supplier/profile/edit")}
-          className="h-11 w-11 rounded-full bg-gradient-to-br from-[#0E6B5A] to-[#1A8870] text-white font-bold flex items-center justify-center shadow-md active:scale-95 transition"
-          aria-label="פרופיל"
-        >
-          {initial}
-        </button>
       </div>
       {leadsToday > 0 && (
-        <div className="mt-4 inline-flex items-center gap-2 bg-white border border-[#EEF0F3] rounded-full pl-3 pr-2 py-1.5 shadow-sm">
-          <span className="h-6 w-6 rounded-full bg-[#E8F5F1] flex items-center justify-center">
-            <Users className="h-3.5 w-3.5" style={{ color: GREEN }} strokeWidth={2.4} />
-          </span>
-          <span className="text-[12px] font-semibold text-[#0F172A]">לידים חדשים היום</span>
-          <span className="text-[12px] font-bold" style={{ color: GREEN }}>{leadsToday}</span>
+        <div className="mt-4 flex justify-start">
+          <div className="inline-flex items-center gap-2 bg-white border border-[#EEF0F3] rounded-2xl pl-3 pr-2 py-2 shadow-sm">
+            <span className="h-7 w-7 rounded-xl bg-[#E8F5F1] flex items-center justify-center">
+              <Users className="h-3.5 w-3.5" style={{ color: GREEN }} strokeWidth={2.4} />
+            </span>
+            <span className="text-[12px] font-semibold text-[#0F172A]">לידים חדשים היום</span>
+            <span className="text-[13px] font-bold" style={{ color: GREEN }}>{leadsToday}</span>
+          </div>
         </div>
       )}
     </header>
   );
+
 
   if (!dbSupplier || isPending || isRejected) {
     return (
@@ -370,46 +384,35 @@ export default function SupplierDashboard() {
         <TopBar />
 
         {/* KPI cards — 4 in a row */}
-        <section className="px-5 mt-5">
+        <section className="px-4 mt-4">
           <div className="grid grid-cols-4 gap-2">
             <KpiCard
-              icon={Wallet}
-              iconBg="#E8F5F1"
-              iconColor={GREEN}
-              value={formatShortILS(totals.revenuePotential)}
-              label="פוטנציאל"
-              trendColor={GREEN}
-              sparklinePoints={genSparkline(7, totals.revenuePotential)}
+              icon={Wallet} iconBg="#E8F5F1" iconColor={GREEN}
+              value={formatShortILS(totals.revenuePotential)} label="פוטנציאל הכנסה"
+              trendPct={22} trendColor={GREEN}
+              sparklinePoints={genSparkline(7, Math.max(totals.revenuePotential, 100))}
             />
             <KpiCard
-              icon={Users}
-              iconBg="#FEEFE9"
-              iconColor="#EA6A3A"
-              value={totals.totalLeads.toString()}
-              label="לידים"
-              trendColor="#EA6A3A"
-              sparklinePoints={genSparkline(7, totals.totalLeads)}
+              icon={Users} iconBg="#FEEFE9" iconColor="#EA6A3A"
+              value={totals.totalLeads.toString()} label="לידים"
+              trendPct={18} trendColor="#EA6A3A"
+              sparklinePoints={genSparkline(7, Math.max(totals.totalLeads, 5))}
             />
             <KpiCard
-              icon={Eye}
-              iconBg="#E6F0FB"
-              iconColor="#3B82F6"
-              value={totals.views.toString()}
-              label="צפיות"
-              trendColor="#3B82F6"
-              sparklinePoints={genSparkline(7, totals.views)}
+              icon={Eye} iconBg="#E6F0FB" iconColor="#3B82F6"
+              value={totals.views.toString()} label="צפיות"
+              trendPct={12} trendColor="#3B82F6"
+              sparklinePoints={genSparkline(7, Math.max(totals.views, 10))}
             />
             <KpiCard
-              icon={TrendingUp}
-              iconBg="#F1EAFB"
-              iconColor="#7C3AED"
-              value={`${totals.conversion}%`}
-              label="המרה"
-              trendColor="#7C3AED"
-              sparklinePoints={genSparkline(7, totals.conversion)}
+              icon={TrendingUp} iconBg="#F1EAFB" iconColor="#7C3AED"
+              value={`${totals.conversion}%`} label="שיעור המרה"
+              trendPct={8} trendColor="#7C3AED"
+              sparklinePoints={genSparkline(7, Math.max(totals.conversion, 4))}
             />
           </div>
         </section>
+
 
         {/* Tasks inbox */}
         {tasks.length > 0 && (
@@ -450,98 +453,115 @@ export default function SupplierDashboard() {
             />
             <div className="mt-3 overflow-x-auto no-scrollbar">
               <div className="flex gap-3 px-5 pb-1 snap-x snap-mandatory" dir="rtl">
-                {areaProjects.slice(0, 8).map((p, i) => (
-                  <div key={p.id} className="snap-start min-w-[200px] w-[200px] bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden">
-                    <div className="relative h-[110px] bg-gradient-to-br from-[#E8F0F5] to-[#D4DEE8] flex items-center justify-center">
-                      <Building2 className="h-10 w-10 text-white/80" strokeWidth={1.5} />
-                      <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold text-white ${i === 0 ? "bg-[#EA6A3A]" : "bg-[#0E6B5A]"}`}>
-                        {i === 0 ? <><Flame className="h-2.5 w-2.5" strokeWidth={3} /> חם</> : "חדש"}
+                {areaProjects.slice(0, 8).map((p, i) => {
+                  const isHot = i === 1;
+                  return (
+                    <div key={p.id} className="snap-start min-w-[180px] w-[180px] bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden flex flex-col">
+                      <div className="relative h-[110px] overflow-hidden">
+                        <img
+                          src={BUILDING_IMAGES[i % BUILDING_IMAGES.length]}
+                          alt={p.name}
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-white shadow ${isHot ? "bg-[#EA6A3A]" : "bg-white/95 !text-[#0F172A]"}`}>
+                          {isHot ? <><Flame className="h-2.5 w-2.5" strokeWidth={3} /> חם</> : "חדש"}
+                        </span>
+                      </div>
+                      <div className="p-3 text-right flex-1 flex flex-col">
+                        <h3 className="font-bold text-[14px] text-[#0F172A] tracking-tight truncate">{p.name}</h3>
+                        <p className="text-[#8E95A2] text-[11px] truncate mt-0.5">{p.city}{p.units ? ` · ${p.units} יח״ד` : ""}</p>
+                        <div className="mt-2 text-[10px] text-[#8E95A2]">פוטנציאל הכנסה</div>
+                        <div className="font-bold text-[15px]" style={{ color: GREEN }}>{formatShortILS((p.units || 10) * 4000)}</div>
+                        <button
+                          onClick={() => navigate("/supplier/offers/new")}
+                          className={`mt-2.5 w-full h-9 rounded-full text-[12px] font-bold active:scale-95 transition ${isHot ? "text-white" : "border bg-white"}`}
+                          style={isHot ? { background: GREEN } : { borderColor: GREEN, color: GREEN }}
+                        >
+                          צור הצעה
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
+
+
+        {/* Weekly business + Featured deal side-by-side */}
+        {(myDeals.length > 0 || topDeal) && (
+          <>
+            <div className="px-5 mt-7 flex items-center justify-between">
+              <button onClick={() => navigate("/supplier/offers")} className="text-[12px] font-semibold" style={{ color: GREEN }}>הצג הכל</button>
+              <h2 className="text-[16px] font-bold text-[#0F172A] tracking-[-0.01em]">העסק שלך השבוע</h2>
+            </div>
+            <div className="px-4 mt-3 grid grid-cols-2 gap-3">
+              {/* Weekly chart card */}
+              {myDeals.length > 0 && (
+                <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-3">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-[#F7F8FA] text-[10px] font-semibold text-[#0F172A]">השבוע ▾</span>
+                    <span className="text-[11px] font-bold text-[#0F172A]">ביצועים</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5 mb-2">
+                    <MiniWeekStat icon={Users} color="#EA6A3A" value={totals.totalLeads.toString()} label="לידים" trend={18} />
+                    <MiniWeekStat icon={Eye} color="#3B82F6" value={totals.views.toString()} label="צפיות" trend={12} />
+                    <MiniWeekStat icon={Target} color="#7C3AED" value={`${totals.conversion}%`} label="המרה" trend={8} />
+                  </div>
+                  <WeeklyChart leads={totals.totalLeads} views={totals.views} conv={totals.conversion} />
+                </div>
+              )}
+
+              {/* Featured deal card */}
+              {topDeal && (() => {
+                const c = counts[topDeal.id] ?? { interests: 0, paid: 0, favorites: 0 };
+                const goal = Math.max(1, Number(topDeal.target_participants ?? 0) || 10);
+                const progress = Math.min(100, Math.round((c.interests / goal) * 100));
+                return (
+                  <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-3 flex flex-col">
+                    <div className="flex items-center justify-between mb-2">
+                      <Flame className="h-3.5 w-3.5 text-[#EA6A3A]" strokeWidth={2.4} />
+                      <h3 className="text-[12px] font-bold text-[#0F172A]">ההצעה המובילה</h3>
+                    </div>
+                    <div className="relative h-[90px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#1F2937] to-[#0F172A] mb-2.5">
+                      <img src={BUILDING_IMAGES[0]} alt={topDeal.title} className="absolute inset-0 w-full h-full object-cover opacity-90" />
+                      <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold text-white bg-[#0E6B5A]/95">
+                        <span className="h-1 w-1 rounded-full bg-white animate-pulse" /> פעילה
                       </span>
                     </div>
-                    <div className="p-3 text-right">
-                      <h3 className="font-bold text-[14px] text-[#0F172A] tracking-tight truncate">{p.name}</h3>
-                      <p className="text-[#8E95A2] text-[11px] truncate mt-0.5">{p.city}{p.units ? ` · ${p.units} יח״ד` : ""}</p>
-                      <div className="mt-2 text-[10px] text-[#8E95A2]">פוטנציאל הכנסה</div>
-                      <div className="font-bold text-[14px]" style={{ color: GREEN }}>{formatShortILS((p.units || 10) * 4000)}</div>
-                      <button
-                        onClick={() => navigate("/supplier/offers/new")}
-                        className={`mt-2.5 w-full h-9 rounded-full text-[12px] font-bold active:scale-95 transition ${i === 0 ? "text-white" : "border bg-white"}`}
-                        style={i === 0 ? { background: GREEN } : { borderColor: GREEN, color: GREEN }}
-                      >
-                        צור הצעה
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Featured top deal */}
-        {topDeal && (() => {
-          const c = counts[topDeal.id] ?? { interests: 0, paid: 0, favorites: 0 };
-          const goal = Math.max(1, Number(topDeal.target_participants ?? 0) || 10);
-          const progress = Math.min(100, Math.round((c.interests / goal) * 100));
-          return (
-            <>
-              <SectionHeader
-                title="ההצעה המובילה שלך"
-                icon={<Flame className="h-4 w-4 text-[#EA6A3A]" />}
-              />
-              <div className="px-5 mt-3">
-                <button
-                  onClick={() => navigate(`/supplier/offers/${topDeal.id}/edit`)}
-                  className="block w-full text-right bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden active:scale-[0.99] transition"
-                >
-                  <div className="relative h-[160px] bg-gradient-to-br from-[#1F2937] to-[#0F172A]">
-                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-white bg-[#0E6B5A]/90 backdrop-blur">
-                      <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" /> פעילה
-                    </span>
-                  </div>
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-start justify-between gap-1.5 mb-1.5">
                       <div className="text-left">
-                        <div className="text-[10px] text-[#8E95A2] font-medium">מחיר נוכחי</div>
-                        <div className="font-bold text-[22px] tracking-tight" style={{ color: GREEN }}>{formatILS(priceFor(topDeal))}</div>
+                        <div className="font-bold text-[14px] tracking-tight leading-none" style={{ color: GREEN }}>{formatShortILS(priceFor(topDeal))}</div>
                       </div>
-                      <h3 className="font-bold text-[17px] text-[#0F172A] tracking-tight leading-tight flex-1">{topDeal.title}</h3>
+                      <h4 className="font-bold text-[12px] text-[#0F172A] tracking-tight leading-tight flex-1 line-clamp-2 text-right">{topDeal.title}</h4>
                     </div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-[11px] font-semibold text-[#8E95A2] shrink-0">{progress}%</span>
-                      <div className="flex-1 h-2 rounded-full bg-[#F2F4F7] overflow-hidden">
-                        <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${GREEN}, #1A8870)` }} />
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-[9px] font-semibold text-[#8E95A2] shrink-0">{progress}%</span>
+                      <div className="flex-1 h-1.5 rounded-full bg-[#F2F4F7] overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${GREEN}, #1A8870)` }} />
                       </div>
-                      <span className="text-[11px] font-medium text-[#8E95A2] shrink-0">{c.interests}/{goal}</span>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#F2F4F7]">
-                      <MiniStat icon={Eye} color="#3B82F6" value={(c.interests + c.favorites * 2).toString()} label="צפיות" />
-                      <MiniStat icon={Heart} color="#EA6A3A" value={c.favorites.toString()} label="שמירות" />
-                      <MiniStat icon={Users} color={GREEN} value={c.interests.toString()} label="מצטרפים" />
+                    <div className="grid grid-cols-3 gap-1 mb-2">
+                      <TinyStat icon={Eye} color="#3B82F6" value={(c.interests + c.favorites * 2).toString()} label="צפיות" />
+                      <TinyStat icon={Heart} color="#EA6A3A" value={c.favorites.toString()} label="שמירות" />
+                      <TinyStat icon={Users} color={GREEN} value={c.interests.toString()} label="מצטרפים" />
                     </div>
+                    <button
+                      onClick={() => navigate(`/supplier/offers/${topDeal.id}/edit`)}
+                      className="mt-auto w-full h-8 rounded-full border text-[11px] font-bold active:scale-95 transition"
+                      style={{ borderColor: GREEN, color: GREEN }}
+                    >
+                      ניהול הצעה
+                    </button>
                   </div>
-                </button>
-              </div>
-            </>
-          );
-        })()}
-
-        {/* Weekly business stats */}
-        {myDeals.length > 0 && (
-          <>
-            <SectionHeader title="העסק שלך השבוע" icon={<Activity className="h-4 w-4" style={{ color: GREEN }} />} />
-            <div className="px-5 mt-3">
-              <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-5">
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  <WeekStat icon={Users} color="#EA6A3A" value={totals.totalLeads.toString()} label="לידים" />
-                  <WeekStat icon={Eye} color="#3B82F6" value={totals.views.toString()} label="צפיות" />
-                  <WeekStat icon={Target} color="#7C3AED" value={`${totals.conversion}%`} label="המרה" />
-                </div>
-                <WeeklyChart leads={totals.totalLeads} views={totals.views} conv={totals.conversion} />
-              </div>
+                );
+              })()}
             </div>
           </>
         )}
+
 
         {/* Recent activity */}
         {activity.length > 0 && (
@@ -640,23 +660,25 @@ function Sparkline({ points, color }: { points: number[]; color: string }) {
 }
 
 function KpiCard({
-  icon: Icon, iconBg, iconColor, value, label, trendColor, sparklinePoints,
+  icon: Icon, iconBg, iconColor, value, label, trendColor, trendPct, sparklinePoints,
 }: {
-  icon: typeof Wallet; iconBg: string; iconColor: string; value: string; label: string; trendColor: string; sparklinePoints: number[];
+  icon: typeof Wallet; iconBg: string; iconColor: string; value: string; label: string; trendColor: string; trendPct: number; sparklinePoints: number[];
 }) {
   return (
     <div className="bg-white rounded-2xl border border-[#EEF0F3] shadow-sm p-2.5 flex flex-col">
-      <div className="h-7 w-7 rounded-xl flex items-center justify-center mb-1.5" style={{ background: iconBg }}>
+      <div className="h-7 w-7 rounded-xl flex items-center justify-center mb-2" style={{ background: iconBg }}>
         <Icon className="h-3.5 w-3.5" style={{ color: iconColor }} strokeWidth={2.4} />
       </div>
-      <div className="text-[14px] font-bold text-[#0F172A] tracking-tight leading-tight truncate">{value}</div>
-      <div className="text-[10px] text-[#8E95A2] font-medium leading-tight mt-0.5 truncate">{label}</div>
-      <div className="mt-1.5 -mb-0.5">
+      <div className="text-[15px] font-bold text-[#0F172A] tracking-tight leading-none truncate" dir="rtl">{value}</div>
+      <div className="text-[10px] text-[#8E95A2] font-medium leading-tight mt-1 truncate">{label}</div>
+      <div className="text-[9px] font-bold mt-1 truncate" style={{ color: trendColor }}>↑ {trendPct}% השבוע</div>
+      <div className="mt-1 -mb-0.5">
         <Sparkline points={sparklinePoints} color={trendColor} />
       </div>
     </div>
   );
 }
+
 
 function MiniStat({ icon: Icon, color, value, label }: { icon: typeof Eye; color: string; value: string; label: string }) {
   return (
@@ -720,3 +742,25 @@ function SectionHeader({ title, subtitle, action, badge, icon }: { title: string
     </div>
   );
 }
+
+function MiniWeekStat({ icon: Icon, color, value, label, trend }: { icon: typeof Users; color: string; value: string; label: string; trend: number }) {
+  return (
+    <div className="flex flex-col items-center text-center px-0.5">
+      <Icon className="h-3 w-3 mb-1" style={{ color }} strokeWidth={2.4} />
+      <div className="font-bold text-[13px] text-[#0F172A] leading-none">{value}</div>
+      <div className="text-[9px] text-[#8E95A2] font-medium mt-0.5">{label}</div>
+      <div className="text-[9px] font-bold mt-0.5" style={{ color }}>↑ {trend}%</div>
+    </div>
+  );
+}
+
+function TinyStat({ icon: Icon, color, value, label }: { icon: typeof Eye; color: string; value: string; label: string }) {
+  return (
+    <div className="flex flex-col items-center text-center">
+      <Icon className="h-3 w-3 mb-0.5" style={{ color }} strokeWidth={2.4} />
+      <div className="font-bold text-[11px] text-[#0F172A] leading-none">{value}</div>
+      <div className="text-[8px] text-[#8E95A2] font-medium mt-0.5">{label}</div>
+    </div>
+  );
+}
+
