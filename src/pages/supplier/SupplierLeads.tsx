@@ -592,16 +592,6 @@ export default function SupplierLeads() {
             {i.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {i.city}</span>}
             {i.project_name && <span className="inline-flex items-center gap-1"><Building2 className="h-3 w-3" /> {i.project_name}</span>}
             <span>נרשם: {new Date(i.created_at).toLocaleDateString("he-IL")}</span>
-            {i.lead_status && i.lead_status !== "new" && (
-              <span className={
-                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold " +
-                (i.lead_status === "approved" ? "bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"
-                  : i.lead_status === "rejected" ? "bg-muted text-muted-foreground border border-border"
-                  : "bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30")
-              }>
-                {i.lead_status === "approved" ? "מאושר" : i.lead_status === "rejected" ? "לא רלוונטי" : i.lead_status}
-              </span>
-            )}
           </div>
           {i.notes && (
             <p className="text-fs-xs text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">{i.notes}</p>
