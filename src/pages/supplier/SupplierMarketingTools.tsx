@@ -90,24 +90,6 @@ export default function SupplierMarketingTools() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dealId]);
 
-  const sendSelfEmailSilent = async (titleOverride?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user?.email) return;
-    await supabase.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: "marketing-card-ready",
-        recipientEmail: user.email,
-        idempotencyKey: `mkt-welcome-${dealId}`,
-        templateData: {
-          name: user.user_metadata?.full_name || "",
-          dealTitle: titleOverride || dealTitle,
-          dealUrl,
-          cardImageUrl: urls.square,
-          whatsappUrl: waUrl,
-        },
-      },
-    });
-  };
 
   const copy = async (text: string) => {
     try {
