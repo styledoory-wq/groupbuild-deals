@@ -370,7 +370,7 @@ function FeaturedDealCard({
     discount_percentage: d.discount_percentage, base_price: d.base_price, tiers,
   }, 0);
   const m = visualMetrics(d.id, participants);
-  const goal = Math.max(participants + 1, tiers[0]?.min_quantity ?? 2);
+  const goal = Math.max(participants + 1, tiers[0]?.minParticipants ?? 2);
   const pct = Math.min(100, Math.round((participants / goal) * 100));
   const potential = unitPrice * Math.max(1, participants + 2);
   const nextDrop = tiers[1]?.discounted_price ?? null;
@@ -522,7 +522,7 @@ function CompactDealCard({
     discount_percentage: d.discount_percentage, base_price: d.base_price, tiers,
   }, 0);
   const m = visualMetrics(d.id, participants);
-  const goal = Math.max(participants + 1, tiers[0]?.min_quantity ?? 3);
+  const goal = Math.max(participants + 1, tiers[0]?.minParticipants ?? 3);
   const pct = Math.min(100, Math.round((participants / goal) * 100));
   const cover = d.cover_image_url || `https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=400&q=70`;
   const highPerf = m.conv >= 22;
