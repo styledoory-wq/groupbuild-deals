@@ -42,6 +42,7 @@ type AreaProject = {
   city: string;
   units: number;
   stage: string | null;
+  createdAt: string | null;
 };
 
 type ActivityItem = {
@@ -77,6 +78,12 @@ export default function SupplierDashboard() {
   const [areaSet, setAreaSet] = useState(false);
   const [leadsToday, setLeadsToday] = useState(0);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
+  // Real 14-day daily series (index 0 = 13 days ago, index 13 = today)
+  const [daily, setDaily] = useState<{ leads: number[]; favs: number[]; paid: number[] }>({
+    leads: Array(14).fill(0), favs: Array(14).fill(0), paid: Array(14).fill(0),
+  });
+  // Area project engagement (real interests count per project, when project is referenced by a deal)
+  const [areaHeat, setAreaHeat] = useState<Record<string, number>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -142,36 +149,55 @@ export default function SupplierDashboard() {
           }));
           if (!cancelled) setCounts(cMap);
 
-          // Leads today
+          // Leads today + 14-day daily series for trends/charts
           if (dealIds.length > 0) {
             const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
-            const { count: todayCount } = await supabase
-              .from("deal_interests")
-              .select("id", { count: "exact", head: true })
-              .in("deal_id", dealIds)
-              .eq("is_deleted", false)
-              .eq("is_demo", false)
-              .gte("created_at", startOfDay.toISOString());
-            if (!cancelled) setLeadsToday(todayCount ?? 0);
+            const since14 = new Date(startOfDay); since14.setDate(since14.getDate() - 13);
+            const sinceIso = since14.toISOString();
 
-            // Recent activity: latest interests + favorites
-            const [{ data: recentLeads }, { data: recentFavs }] = await Promise.all([
+            const [{ data: leadRows14 }, { data: favRows14 }, { data: paidRows14 }] = await Promise.all([
               supabase.from("deal_interests")
-                .select("id, created_at, deal_id")
+                .select("created_at, deal_id, id")
                 .in("deal_id", dealIds).eq("is_deleted", false).eq("is_demo", false)
-                .order("created_at", { ascending: false }).limit(5),
+                .gte("created_at", sinceIso)
+                .order("created_at", { ascending: false }),
               supabase.from("favorites")
-                .select("id, created_at, deal_id")
+                .select("created_at, deal_id, id")
                 .in("deal_id", dealIds)
-                .order("created_at", { ascending: false }).limit(5),
+                .gte("created_at", sinceIso)
+                .order("created_at", { ascending: false }),
+              supabase.from("deposits")
+                .select("created_at, deal_id, id")
+                .in("deal_id", dealIds).eq("status", "paid").eq("is_deleted", false)
+                .gte("created_at", sinceIso),
             ]);
+
+            const bucketize = (rows: { created_at: string }[] | null | undefined): number[] => {
+              const arr = Array(14).fill(0);
+              (rows ?? []).forEach((r) => {
+                const t = new Date(r.created_at as string);
+                const dayIdx = 13 - Math.floor((startOfDay.getTime() - new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()) / 86400000);
+                if (dayIdx >= 0 && dayIdx < 14) arr[dayIdx] += 1;
+              });
+              return arr;
+            };
+
+            const dLeads = bucketize(leadRows14);
+            const dFavs = bucketize(favRows14);
+            const dPaid = bucketize(paidRows14);
+            if (!cancelled) {
+              setDaily({ leads: dLeads, favs: dFavs, paid: dPaid });
+              setLeadsToday(dLeads[13] ?? 0);
+            }
+
+            // Recent activity from already-fetched lists
             const titleMap = new Map(list.map(d => [d.id, d.title]));
             const items: ActivityItem[] = [];
-            (recentLeads ?? []).forEach((r) => items.push({
+            (leadRows14 ?? []).slice(0, 5).forEach((r) => items.push({
               id: `l-${r.id}`, type: "lead",
               title: "ליד חדש נכנס", subtitle: titleMap.get(r.deal_id) ?? "הצעה", at: r.created_at as string,
             }));
-            (recentFavs ?? []).forEach((r) => items.push({
+            (favRows14 ?? []).slice(0, 5).forEach((r) => items.push({
               id: `f-${r.id}`, type: "favorite",
               title: "משתמש שמר הצעה", subtitle: titleMap.get(r.deal_id) ?? "הצעה", at: r.created_at as string,
             }));
@@ -190,14 +216,15 @@ export default function SupplierDashboard() {
             if (cityNames.length > 0) {
               const { data: projRows } = await supabase
                 .from("projects")
-                .select("id,name,city,apartment_count,building_count,current_stage")
+                .select("id,name,city,apartment_count,building_count,current_stage,created_at")
                 .in("city", cityNames).eq("is_active", true).eq("is_deleted", false)
                 .order("created_at", { ascending: false }).limit(12);
               if (!cancelled) {
-                setAreaProjects((projRows ?? []).map((p: { id: string; name: string; city: string; apartment_count: number | null; building_count: number | null; current_stage: string | null }) => ({
+                setAreaProjects((projRows ?? []).map((p: { id: string; name: string; city: string; apartment_count: number | null; building_count: number | null; current_stage: string | null; created_at: string | null }) => ({
                   id: p.id, name: p.name, city: p.city,
                   units: (p.apartment_count ?? 0) || (p.building_count ?? 0),
                   stage: p.current_stage,
+                  createdAt: p.created_at,
                 })));
               }
             }
@@ -230,11 +257,18 @@ export default function SupplierDashboard() {
     return Number(d.base_price ?? d.original_price ?? 0);
   };
 
+  // Average deal price across the supplier's deals (for real revenue trend / area potential)
+  const avgDealPrice = useMemo(() => {
+    if (!myDeals.length) return 0;
+    const sum = myDeals.reduce((s, d) => s + priceFor(d), 0);
+    return sum / myDeals.length;
+  }, [myDeals]);
+
   const totals = useMemo(() => {
     const totalLeads = Object.values(counts).reduce((s, c) => s + c.interests, 0);
     const totalPaid = Object.values(counts).reduce((s, c) => s + c.paid, 0);
     const totalFavs = Object.values(counts).reduce((s, c) => s + c.favorites, 0);
-    // Views proxy: interests + favorites * 3 (until real view tracking exists)
+    // Views proxy: interests + favorites * 2 (until real view tracking exists)
     const views = totalLeads + totalFavs * 2;
     // Revenue potential: target_participants * price
     const revenuePotential = myDeals.reduce((s, d) => {
@@ -242,8 +276,43 @@ export default function SupplierDashboard() {
       return s + tgt * priceFor(d);
     }, 0);
     const conversion = totalLeads ? Math.round((totalPaid / totalLeads) * 100) : 0;
-    return { totalLeads, totalPaid, totalFavs, views, revenuePotential, conversion };
-  }, [counts, myDeals]);
+
+    // Real week-over-week trends from 14-day daily series
+    const sum = (a: number[]) => a.reduce((s, n) => s + n, 0);
+    const leadsThis = sum(daily.leads.slice(7));
+    const leadsPrev = sum(daily.leads.slice(0, 7));
+    const favsThis = sum(daily.favs.slice(7));
+    const favsPrev = sum(daily.favs.slice(0, 7));
+    const paidThis = sum(daily.paid.slice(7));
+    const paidPrev = sum(daily.paid.slice(0, 7));
+    const viewsThis = leadsThis + favsThis * 2;
+    const viewsPrev = leadsPrev + favsPrev * 2;
+    const convThis = leadsThis ? Math.round((paidThis / leadsThis) * 100) : 0;
+    const convPrev = leadsPrev ? Math.round((paidPrev / leadsPrev) * 100) : 0;
+    const trendPct = (cur: number, prev: number): number | null => {
+      if (prev === 0) return cur > 0 ? 100 : null;
+      return Math.round(((cur - prev) / prev) * 100);
+    };
+    const trends = {
+      revenue: trendPct(leadsThis, leadsPrev), // revenue scales with leads
+      leads: trendPct(leadsThis, leadsPrev),
+      views: trendPct(viewsThis, viewsPrev),
+      conv: trendPct(convThis, convPrev),
+    };
+    return { totalLeads, totalPaid, totalFavs, views, revenuePotential, conversion, trends };
+  }, [counts, myDeals, daily]);
+
+  // Real sparkline series (last 7 days)
+  const spark = useMemo(() => {
+    const last7 = <T,>(a: T[]) => a.slice(7);
+    const leads7 = last7(daily.leads);
+    const favs7 = last7(daily.favs);
+    const paid7 = last7(daily.paid);
+    const views7 = leads7.map((l, i) => l + favs7[i] * 2);
+    const revenue7 = leads7.map((l) => l * (avgDealPrice || 1));
+    const conv7 = leads7.map((l, i) => (l ? Math.round((paid7[i] / l) * 100) : 0));
+    return { leads: leads7, views: views7, revenue: revenue7, conv: conv7 };
+  }, [daily, avgDealPrice]);
 
   const topDeal = useMemo(() => {
     if (!myDeals.length) return null;
@@ -389,29 +458,30 @@ export default function SupplierDashboard() {
             <KpiCard
               icon={Wallet} iconBg="#E8F5F1" iconColor={GREEN}
               value={formatShortILS(totals.revenuePotential)} label="פוטנציאל הכנסה"
-              trendPct={22} trendColor={GREEN}
-              sparklinePoints={genSparkline(7, Math.max(totals.revenuePotential, 100))}
+              trendPct={totals.trends.revenue} trendColor={GREEN}
+              sparklinePoints={spark.revenue}
             />
             <KpiCard
               icon={Users} iconBg="#FEEFE9" iconColor="#EA6A3A"
               value={totals.totalLeads.toString()} label="לידים"
-              trendPct={18} trendColor="#EA6A3A"
-              sparklinePoints={genSparkline(7, Math.max(totals.totalLeads, 5))}
+              trendPct={totals.trends.leads} trendColor="#EA6A3A"
+              sparklinePoints={spark.leads}
             />
             <KpiCard
               icon={Eye} iconBg="#E6F0FB" iconColor="#3B82F6"
               value={totals.views.toString()} label="צפיות"
-              trendPct={12} trendColor="#3B82F6"
-              sparklinePoints={genSparkline(7, Math.max(totals.views, 10))}
+              trendPct={totals.trends.views} trendColor="#3B82F6"
+              sparklinePoints={spark.views}
             />
             <KpiCard
               icon={TrendingUp} iconBg="#F1EAFB" iconColor="#7C3AED"
               value={`${totals.conversion}%`} label="שיעור המרה"
-              trendPct={8} trendColor="#7C3AED"
-              sparklinePoints={genSparkline(7, Math.max(totals.conversion, 4))}
+              trendPct={totals.trends.conv} trendColor="#7C3AED"
+              sparklinePoints={spark.conv}
             />
           </div>
         </section>
+
 
 
         {/* Tasks inbox */}
@@ -454,7 +524,12 @@ export default function SupplierDashboard() {
             <div className="mt-3 overflow-x-auto no-scrollbar">
               <div className="flex gap-3 px-5 pb-1 snap-x snap-mandatory" dir="rtl">
                 {areaProjects.slice(0, 8).map((p, i) => {
-                  const isHot = i === 1;
+                  const ageDays = p.createdAt ? Math.floor((Date.now() - +new Date(p.createdAt)) / 86400000) : null;
+                  const isNew = ageDays !== null && ageDays <= 14;
+                  // "Hot" = largest project in the visible set (real signal: highest unit count)
+                  const maxUnits = Math.max(...areaProjects.slice(0, 8).map((x) => x.units || 0));
+                  const isHot = (p.units || 0) > 0 && p.units === maxUnits && maxUnits >= 30;
+                  const potential = (p.units || 0) * (avgDealPrice || 0);
                   return (
                     <div key={p.id} className="snap-start min-w-[180px] w-[180px] bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden flex flex-col">
                       <div className="relative h-[110px] overflow-hidden">
@@ -464,15 +539,23 @@ export default function SupplierDashboard() {
                           loading="lazy"
                           className="absolute inset-0 w-full h-full object-cover"
                         />
-                        <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-white shadow ${isHot ? "bg-[#EA6A3A]" : "bg-white/95 !text-[#0F172A]"}`}>
-                          {isHot ? <><Flame className="h-2.5 w-2.5" strokeWidth={3} /> חם</> : "חדש"}
-                        </span>
+                        {(isHot || isNew) && (
+                          <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shadow ${isHot ? "bg-[#EA6A3A] text-white" : "bg-white/95 text-[#0F172A]"}`}>
+                            {isHot ? <><Flame className="h-2.5 w-2.5" strokeWidth={3} /> חם</> : "חדש"}
+                          </span>
+                        )}
                       </div>
                       <div className="p-3 text-right flex-1 flex flex-col">
                         <h3 className="font-bold text-[14px] text-[#0F172A] tracking-tight truncate">{p.name}</h3>
                         <p className="text-[#8E95A2] text-[11px] truncate mt-0.5">{p.city}{p.units ? ` · ${p.units} יח״ד` : ""}</p>
-                        <div className="mt-2 text-[10px] text-[#8E95A2]">פוטנציאל הכנסה</div>
-                        <div className="font-bold text-[15px]" style={{ color: GREEN }}>{formatShortILS((p.units || 10) * 4000)}</div>
+                        {potential > 0 ? (
+                          <>
+                            <div className="mt-2 text-[10px] text-[#8E95A2]">פוטנציאל הכנסה</div>
+                            <div className="font-bold text-[15px]" style={{ color: GREEN }}>{formatShortILS(potential)}</div>
+                          </>
+                        ) : (
+                          <div className="mt-2 text-[11px] text-[#8E95A2] truncate">{p.stage ?? "פרויקט חדש"}</div>
+                        )}
                         <button
                           onClick={() => navigate("/supplier/offers/new")}
                           className={`mt-2.5 w-full h-9 rounded-full text-[12px] font-bold active:scale-95 transition ${isHot ? "text-white" : "border bg-white"}`}
@@ -506,11 +589,11 @@ export default function SupplierDashboard() {
                     <span className="text-[11px] font-bold text-[#0F172A]">ביצועים</span>
                   </div>
                   <div className="grid grid-cols-3 gap-1.5 mb-2">
-                    <MiniWeekStat icon={Users} color="#EA6A3A" value={totals.totalLeads.toString()} label="לידים" trend={18} />
-                    <MiniWeekStat icon={Eye} color="#3B82F6" value={totals.views.toString()} label="צפיות" trend={12} />
-                    <MiniWeekStat icon={Target} color="#7C3AED" value={`${totals.conversion}%`} label="המרה" trend={8} />
+                    <MiniWeekStat icon={Users} color="#EA6A3A" value={totals.totalLeads.toString()} label="לידים" trend={totals.trends.leads} />
+                    <MiniWeekStat icon={Eye} color="#3B82F6" value={totals.views.toString()} label="צפיות" trend={totals.trends.views} />
+                    <MiniWeekStat icon={Target} color="#7C3AED" value={`${totals.conversion}%`} label="המרה" trend={totals.trends.conv} />
                   </div>
-                  <WeeklyChart leads={totals.totalLeads} views={totals.views} conv={totals.conversion} />
+                  <WeeklyChart leadsSeries={spark.leads} viewsSeries={spark.views} convSeries={spark.conv} />
                 </div>
               )}
 
@@ -662,8 +745,11 @@ function Sparkline({ points, color }: { points: number[]; color: string }) {
 function KpiCard({
   icon: Icon, iconBg, iconColor, value, label, trendColor, trendPct, sparklinePoints,
 }: {
-  icon: typeof Wallet; iconBg: string; iconColor: string; value: string; label: string; trendColor: string; trendPct: number; sparklinePoints: number[];
+  icon: typeof Wallet; iconBg: string; iconColor: string; value: string; label: string; trendColor: string; trendPct: number | null; sparklinePoints: number[];
 }) {
+  const hasTrend = trendPct !== null && Number.isFinite(trendPct);
+  const arrow = hasTrend ? ((trendPct as number) >= 0 ? "↑" : "↓") : "";
+  const absPct = hasTrend ? Math.abs(trendPct as number) : 0;
   return (
     <div className="bg-white rounded-2xl border border-[#EEF0F3] shadow-sm p-2.5 flex flex-col">
       <div className="h-7 w-7 rounded-xl flex items-center justify-center mb-2" style={{ background: iconBg }}>
@@ -671,7 +757,9 @@ function KpiCard({
       </div>
       <div className="text-[15px] font-bold text-[#0F172A] tracking-tight leading-none truncate" dir="rtl">{value}</div>
       <div className="text-[10px] text-[#8E95A2] font-medium leading-tight mt-1 truncate">{label}</div>
-      <div className="text-[9px] font-bold mt-1 truncate" style={{ color: trendColor }}>↑ {trendPct}% השבוע</div>
+      <div className="text-[9px] font-bold mt-1 truncate" style={{ color: hasTrend ? trendColor : "#8E95A2" }}>
+        {hasTrend ? `${arrow} ${absPct}% השבוע` : "אין נתוני שבוע קודם"}
+      </div>
       <div className="mt-1 -mb-0.5">
         <Sparkline points={sparklinePoints} color={trendColor} />
       </div>
@@ -700,13 +788,14 @@ function WeekStat({ icon: Icon, color, value, label }: { icon: typeof Users; col
   );
 }
 
-function WeeklyChart({ leads, views, conv }: { leads: number; views: number; conv: number }) {
+function WeeklyChart({ leadsSeries, viewsSeries, convSeries }: { leadsSeries: number[]; viewsSeries: number[]; convSeries: number[] }) {
   const days = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
-  const seed = leads + views + conv + 1;
-  const series = (base: number) => days.map((_, i) => Math.max(2, Math.round(base * (0.4 + ((seed * (i + 2)) % 60) / 100))));
-  const sLeads = series(Math.max(leads, 3));
-  const sViews = series(Math.max(views, 5));
-  const sConv = series(Math.max(conv, 2));
+  const sLeads = leadsSeries.slice(-7);
+  const sViews = viewsSeries.slice(-7);
+  const sConv = convSeries.slice(-7);
+  while (sLeads.length < 7) sLeads.unshift(0);
+  while (sViews.length < 7) sViews.unshift(0);
+  while (sConv.length < 7) sConv.unshift(0);
   const all = [...sLeads, ...sViews, ...sConv];
   const max = Math.max(...all, 1);
   const w = 300, h = 100;
@@ -743,13 +832,17 @@ function SectionHeader({ title, subtitle, action, badge, icon }: { title: string
   );
 }
 
-function MiniWeekStat({ icon: Icon, color, value, label, trend }: { icon: typeof Users; color: string; value: string; label: string; trend: number }) {
+function MiniWeekStat({ icon: Icon, color, value, label, trend }: { icon: typeof Users; color: string; value: string; label: string; trend: number | null }) {
+  const has = trend !== null && Number.isFinite(trend);
+  const arrow = has ? ((trend as number) >= 0 ? "↑" : "↓") : "";
   return (
     <div className="flex flex-col items-center text-center px-0.5">
       <Icon className="h-3 w-3 mb-1" style={{ color }} strokeWidth={2.4} />
       <div className="font-bold text-[13px] text-[#0F172A] leading-none">{value}</div>
       <div className="text-[9px] text-[#8E95A2] font-medium mt-0.5">{label}</div>
-      <div className="text-[9px] font-bold mt-0.5" style={{ color }}>↑ {trend}%</div>
+      <div className="text-[9px] font-bold mt-0.5" style={{ color: has ? color : "#8E95A2" }}>
+        {has ? `${arrow} ${Math.abs(trend as number)}%` : "—"}
+      </div>
     </div>
   );
 }
