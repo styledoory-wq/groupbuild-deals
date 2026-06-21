@@ -1222,6 +1222,7 @@ export type Database = {
           current_stage: string
           deleted_at: string | null
           id: string
+          image_url: string | null
           is_active: boolean
           is_deleted: boolean
           name: string
@@ -1236,6 +1237,7 @@ export type Database = {
           current_stage?: string
           deleted_at?: string | null
           id: string
+          image_url?: string | null
           is_active?: boolean
           is_deleted?: boolean
           name: string
@@ -1250,6 +1252,7 @@ export type Database = {
           current_stage?: string
           deleted_at?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_deleted?: boolean
           name?: string
