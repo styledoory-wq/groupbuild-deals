@@ -832,13 +832,17 @@ function SectionHeader({ title, subtitle, action, badge, icon }: { title: string
   );
 }
 
-function MiniWeekStat({ icon: Icon, color, value, label, trend }: { icon: typeof Users; color: string; value: string; label: string; trend: number }) {
+function MiniWeekStat({ icon: Icon, color, value, label, trend }: { icon: typeof Users; color: string; value: string; label: string; trend: number | null }) {
+  const has = trend !== null && Number.isFinite(trend);
+  const arrow = has ? ((trend as number) >= 0 ? "↑" : "↓") : "";
   return (
     <div className="flex flex-col items-center text-center px-0.5">
       <Icon className="h-3 w-3 mb-1" style={{ color }} strokeWidth={2.4} />
       <div className="font-bold text-[13px] text-[#0F172A] leading-none">{value}</div>
       <div className="text-[9px] text-[#8E95A2] font-medium mt-0.5">{label}</div>
-      <div className="text-[9px] font-bold mt-0.5" style={{ color }}>↑ {trend}%</div>
+      <div className="text-[9px] font-bold mt-0.5" style={{ color: has ? color : "#8E95A2" }}>
+        {has ? `${arrow} ${Math.abs(trend as number)}%` : "—"}
+      </div>
     </div>
   );
 }
