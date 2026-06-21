@@ -35,18 +35,11 @@ function extractPriceNum(headline: string): number {
   return m ? parseFloat(m[0]) : 0;
 }
 
-// deterministic visual metric per id (display-only, no logic change)
+// sparkline seed from deterministic id hash (visual decoration only)
 function hashId(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
   return h;
-}
-function visualMetrics(id: string, participants: number) {
-  const h = hashId(id);
-  const views = 120 + (h % 380) + participants * 18;
-  const saves = 15 + ((h >> 3) % 70) + participants * 2;
-  const conv = Math.min(48, Math.max(8, Math.round((participants / Math.max(1, views)) * 1000) / 10 + 8 + ((h >> 5) % 12)));
-  return { views, saves, conv };
 }
 
 // generate a smooth sparkline path
@@ -70,11 +63,16 @@ const compact = (n: number) =>
   n >= 1_000 ? `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}K` :
   `${n}`;
 
+function daysAgo(iso: string): number {
+  const diff = Date.now() - new Date(iso).getTime();
+  return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+}
+
 // ---------- small UI ----------
 function StatCard({
-  label, value, delta, tone, icon, seed, className = "",
+  label, value, subtitle, tone, icon, seed, className = "",
 }: {
-  label: string; value: string; delta: string; tone: "violet" | "amber" | "emerald" | "sky";
+  label: string; value: string; subtitle: string; tone: "violet" | "amber" | "emerald" | "sky";
   icon: React.ReactNode; seed: number; className?: string;
 }) {
   const tones = {
@@ -92,8 +90,8 @@ function StatCard({
         {value}
       </div>
       <div className="mt-1 text-[10px] text-[#6B7280] font-medium leading-tight truncate">{label}</div>
-      <div className="mt-1 flex items-center gap-0.5 text-[9.5px] font-semibold text-emerald-600">
-        <ArrowUpRight className="h-2.5 w-2.5" /> {delta}
+      <div className="mt-1 text-[9.5px] font-semibold text-[#6B7280] truncate">
+        {subtitle}
       </div>
       <svg viewBox="0 0 64 22" className="mt-1.5 w-full h-4 overflow-visible">
         <path d={sparkPath(seed)} fill="none" strokeWidth="1.6" className={tones.stroke} strokeLinecap="round" strokeLinejoin="round" />
