@@ -36,7 +36,7 @@ const DEFAULT_INFO: ProjectInfo = {
   subtitle: 'שטח בנוי: 180 מ"ר · 2 קומות',
   manager: "יוסי בניה",
   targetDate: "2025-10-15",
-  groupSavings: 32400,
+  groupSavings: 0,
 };
 
 function formatDateShort(iso: string) {
@@ -270,7 +270,7 @@ export default function ProjectManagement() {
       const raw = localStorage.getItem(BUDGET_KEY);
       if (raw) return JSON.parse(raw);
     } catch {}
-    return BUDGET_TEMPLATE.map((b) => ({ id: uid(), label: b.label, planned: b.planned, actual: 0, catId: b.catId }));
+    return [];
   });
   useEffect(() => {
     try { localStorage.setItem(BUDGET_KEY, JSON.stringify(budget)); } catch {}
