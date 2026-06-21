@@ -199,8 +199,11 @@ async function renderPng(deal: Deal, fmt: Format, coverDataUrl: string | null, q
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const { dealId } = await req.json();
+    const { dealId, format } = await req.json();
     if (!dealId) return new Response(JSON.stringify({ error: "dealId required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+    // Render ONE format per invocation to stay within the 2s CPU budget.
+    const fmt = FORMATS.find((f) => f.key === format) ?? FORMATS[0];
 
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
     const { data: deal, error } = await supabase
@@ -219,19 +222,15 @@ Deno.serve(async (req) => {
       QRCode.toDataURL(dealUrl, { margin: 1, width: 256, color: { dark: "#0B1220", light: "#FFFFFF" } }),
     ]);
 
-    const urls: Record<string, string> = {};
-    for (const fmt of FORMATS) {
-      const png = await renderPng(deal as Deal, fmt, coverDataUrl, qrDataUrl, dealUrl, fonts);
-      const path = `${deal.id}/${fmt.key}-${Date.now()}.png`;
-      const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, png, {
-        contentType: "image/png", upsert: true,
-      });
-      if (upErr) throw upErr;
-      const { data: signed } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60 * 60 * 24 * 365);
-      urls[fmt.key] = signed?.signedUrl ?? "";
-    }
+    const png = await renderPng(deal as Deal, fmt, coverDataUrl, qrDataUrl, dealUrl, fonts);
+    const path = `${deal.id}/${fmt.key}-${Date.now()}.png`;
+    const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, png, {
+      contentType: "image/png", upsert: true,
+    });
+    if (upErr) throw upErr;
+    const { data: signed } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60 * 60 * 24 * 365);
 
-    return new Response(JSON.stringify({ ok: true, dealUrl, urls }), {
+    return new Response(JSON.stringify({ ok: true, dealUrl, format: fmt.key, url: signed?.signedUrl ?? "" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
@@ -241,3 +240,4 @@ Deno.serve(async (req) => {
     });
   }
 });
+
