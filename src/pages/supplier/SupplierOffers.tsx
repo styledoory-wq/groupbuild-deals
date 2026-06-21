@@ -367,43 +367,42 @@ export default function SupplierOffers() {
   );
 }
 
-// ---------- Featured card ----------
+// ---------- Featured (expanded) card ----------
 function FeaturedDealCard({
-  deal: d, participants, unitPrice, onChanged,
-}: { deal: DealRow; participants: number; unitPrice: number; onChanged: () => void }) {
+  deal: d, participants, saves, unitPrice, onChanged, onToggle,
+}: {
+  deal: DealRow; participants: number; saves: number; unitPrice: number;
+  onChanged: () => void; onToggle: () => void;
+}) {
   const offerType = ((d.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(d.tiers) ? d.tiers : [];
   const display = describeOffer({
     offer_type: offerType, original_price: d.original_price, discounted_price: d.discounted_price,
     discount_percentage: d.discount_percentage, base_price: d.base_price, tiers,
   }, 0);
-  const m = visualMetrics(d.id, participants);
   const goal = Math.max(participants + 1, tiers[0]?.minParticipants ?? 2);
   const pct = Math.min(100, Math.round((participants / goal) * 100));
-  const potential = unitPrice * Math.max(1, participants + 2);
+  const potential = unitPrice * Math.max(0, participants);
   const nextDrop = tiers[1]?.discounted_price ?? null;
   const cover = d.cover_image_url || `https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=70`;
+  const ageDays = daysAgo(d.created_at);
+  const savingsPerUnit = Math.max(0, (d.original_price ?? 0) - unitPrice);
 
   return (
     <article className="rounded-[22px] bg-white border border-[#EEF0F4] overflow-hidden shadow-[0_2px_8px_rgba(16,24,40,0.04),0_16px_40px_-18px_rgba(16,24,40,0.12)]">
-      {/* Top: side-by-side image + content */}
       <div className="flex gap-3 p-3">
-        {/* Image column (visual left in RTL = end) */}
+        {/* Image */}
         <div className="relative w-[44%] shrink-0 rounded-[16px] overflow-hidden bg-[#F1F3F7] self-stretch">
           <img src={cover} alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/55 to-transparent" />
-
-          {/* Featured badge top-start of image (visual top-right) */}
           <div className="absolute top-2.5 right-2.5">
             <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-1 rounded-full bg-white/95 backdrop-blur text-orange-600 shadow-sm">
               <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
             </span>
           </div>
-
-          {/* Participants chip on bottom of image */}
           <div className="absolute bottom-2.5 right-2.5 left-2.5 flex items-center gap-2 bg-black/55 backdrop-blur-sm text-white rounded-full pl-2.5 pr-1 py-1">
             <div className="flex -space-x-1.5 rtl:space-x-reverse">
-              {[0, 1, 2].map((i) => (
+              {Array.from({ length: Math.min(3, Math.max(0, participants)) }).map((_, i) => (
                 <div key={i} className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 border-2 border-white/90" />
               ))}
               {participants > 3 && (
@@ -412,22 +411,19 @@ function FeaturedDealCard({
                 </div>
               )}
             </div>
-            <span className="text-[10.5px] font-semibold pr-1 truncate">{participants} הצטרפו השבוע</span>
+            <span className="text-[10.5px] font-semibold pr-1 truncate">{participants} מצטרפים</span>
           </div>
         </div>
 
-        {/* Content column */}
+        {/* Content */}
         <div className="min-w-0 flex-1 flex flex-col">
-          {/* Status pill at start (right), 3-dots menu at end (left) */}
           <div className="flex items-center justify-between gap-2">
             <StatusPill status={d.status} />
             <DealActionsMenu dealId={d.id} status={d.status} onChanged={onChanged} />
           </div>
 
-          {/* Title */}
           <h3 className="mt-1.5 text-[15px] font-extrabold text-[#0F172A] leading-snug line-clamp-2">{d.title}</h3>
 
-          {/* Price row: current price big on start (right), original strike on end (left) */}
           <div className="mt-2.5 flex items-start justify-between gap-2">
             <div className="text-right">
               <div className="text-[22px] font-extrabold text-emerald-600 leading-none tracking-tight">
@@ -445,7 +441,6 @@ function FeaturedDealCard({
             ) : null}
           </div>
 
-          {/* Progress */}
           <div className="mt-3">
             <div className="flex items-center justify-between text-[10.5px] text-[#6B7280] mb-1.5">
               <span className="font-bold text-emerald-700">{pct}%</span>
@@ -461,13 +456,12 @@ function FeaturedDealCard({
             </div>
           )}
 
-          {/* Metric grid 4 cols */}
-          <div className="mt-3 grid grid-cols-4 gap-1.5">
+          {/* Real metrics: saves, participants, days active */}
+          <div className="mt-3 grid grid-cols-3 gap-1.5">
             {[
-              { icon: <Eye className="h-3 w-3" />, value: compact(m.views), label: "צפיות", color: "text-sky-600 bg-sky-50" },
-              { icon: <Heart className="h-3 w-3" />, value: compact(m.saves), label: "שמירות", color: "text-rose-600 bg-rose-50" },
+              { icon: <Heart className="h-3 w-3" />, value: compact(saves), label: "שמירות", color: "text-rose-600 bg-rose-50" },
               { icon: <Users className="h-3 w-3" />, value: `${participants}`, label: "מצטרפים", color: "text-emerald-600 bg-emerald-50" },
-              { icon: <TrendingUp className="h-3 w-3" />, value: `${m.conv.toFixed(0)}%`, label: "המרה", color: "text-violet-600 bg-violet-50" },
+              { icon: <Clock className="h-3 w-3" />, value: `${ageDays}`, label: "ימי פעילות", color: "text-sky-600 bg-sky-50" },
             ].map((s, i) => (
               <div key={i} className="text-center">
                 <div className={`h-6 w-6 mx-auto rounded-full flex items-center justify-center ${s.color}`}>{s.icon}</div>
@@ -477,20 +471,19 @@ function FeaturedDealCard({
             ))}
           </div>
 
-          {/* Income chips inline */}
           <div className="mt-2.5 rounded-[12px] bg-emerald-50/70 border border-emerald-100 p-2 grid grid-cols-2 gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <Coins className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
               <div className="min-w-0">
                 <div className="text-[11.5px] font-extrabold text-emerald-700 leading-none truncate">{ILS(potential)}</div>
-                <div className="text-[9px] text-emerald-700/70 mt-0.5">פוטנציאל הכנסה</div>
+                <div className="text-[9px] text-emerald-700/70 mt-0.5">הכנסה ממצטרפים</div>
               </div>
             </div>
             <div className="flex items-center gap-1.5 min-w-0">
               <Tag className="h-3.5 w-3.5 text-amber-600 shrink-0" />
               <div className="min-w-0">
                 <div className="text-[11.5px] font-extrabold text-amber-700 leading-none truncate">
-                  {ILS(Math.max(0, (d.original_price ?? 0) - unitPrice))}
+                  {ILS(savingsPerUnit)}
                 </div>
                 <div className="text-[9px] text-amber-700/70 mt-0.5">חיסכון לדיירים</div>
               </div>
@@ -499,15 +492,14 @@ function FeaturedDealCard({
         </div>
       </div>
 
-      {/* Full-width footer */}
+      {/* Footer */}
       <div className="px-4 pb-4 pt-1 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-[10.5px] text-[#9CA3AF]">
-          <Calendar className="h-3 w-3" />
-          <div className="flex flex-col leading-tight">
-            <span className="text-[11px] text-[#1F2937] font-bold">{new Date(d.created_at).toLocaleDateString("he-IL")}</span>
-            <span>עדכון אחרון</span>
-          </div>
-        </div>
+        <button
+          onClick={onToggle}
+          className="h-9 px-3 rounded-[10px] text-[11px] font-bold text-[#6B7280] hover:bg-[#F1F3F7] inline-flex items-center gap-1"
+        >
+          <ChevronDown className="h-3.5 w-3.5 rotate-180" /> סגירה
+        </button>
         <div className="flex items-center gap-2">
           <Link
             to={`/supplier/offers/${d.id}/edit`}
