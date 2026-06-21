@@ -216,14 +216,15 @@ export default function SupplierDashboard() {
             if (cityNames.length > 0) {
               const { data: projRows } = await supabase
                 .from("projects")
-                .select("id,name,city,apartment_count,building_count,current_stage")
+                .select("id,name,city,apartment_count,building_count,current_stage,created_at")
                 .in("city", cityNames).eq("is_active", true).eq("is_deleted", false)
                 .order("created_at", { ascending: false }).limit(12);
               if (!cancelled) {
-                setAreaProjects((projRows ?? []).map((p: { id: string; name: string; city: string; apartment_count: number | null; building_count: number | null; current_stage: string | null }) => ({
+                setAreaProjects((projRows ?? []).map((p: { id: string; name: string; city: string; apartment_count: number | null; building_count: number | null; current_stage: string | null; created_at: string | null }) => ({
                   id: p.id, name: p.name, city: p.city,
                   units: (p.apartment_count ?? 0) || (p.building_count ?? 0),
                   stage: p.current_stage,
+                  createdAt: p.created_at,
                 })));
               }
             }
