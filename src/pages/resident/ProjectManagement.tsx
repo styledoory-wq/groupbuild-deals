@@ -270,7 +270,7 @@ export default function ProjectManagement() {
       const raw = localStorage.getItem(BUDGET_KEY);
       if (raw) return JSON.parse(raw);
     } catch {}
-    return BUDGET_TEMPLATE.map((b) => ({ id: uid(), label: b.label, planned: b.planned, actual: 0, catId: b.catId }));
+    return [];
   });
   useEffect(() => {
     try { localStorage.setItem(BUDGET_KEY, JSON.stringify(budget)); } catch {}
