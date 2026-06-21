@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Plus, Briefcase, Pencil, Eye, Heart, Users, TrendingUp,
-  Wallet, Calendar, Flame, Sparkles, SlidersHorizontal, Tag, Coins, ArrowUpRight,
+  Wallet, Calendar, Flame, ChevronDown, SlidersHorizontal, Tag, Coins, Clock,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { ScreenHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
