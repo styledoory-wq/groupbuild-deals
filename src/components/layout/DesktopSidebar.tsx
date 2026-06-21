@@ -4,7 +4,7 @@ import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, H
 import { cn } from "@/lib/utils";
 import { preloadRoute } from "@/lib/routePreload";
 import { BrandLogo } from "@/components/BrandLogo";
-import { supabase } from "@/integrations/supabase/client";
+import { useApp } from "@/store/AppStore";
 import { toast } from "sonner";
 import type { Role } from "@/types";
 
@@ -39,6 +39,7 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
 export function DesktopSidebar({ role }: { role: Role }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { logout } = useApp();
 
   useEffect(() => {
     document.body.classList.add("has-desktop-sidebar");
@@ -46,7 +47,7 @@ export function DesktopSidebar({ role }: { role: Role }) {
   }, []);
 
   const handleLogout = async () => {
-    try { await supabase.auth.signOut(); } catch (e) { console.warn(e); }
+    await logout();
     toast.success("התנתקת בהצלחה");
     navigate("/", { replace: true });
   };
