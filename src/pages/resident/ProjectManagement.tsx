@@ -32,10 +32,10 @@ const BUDGET_KEY = "gb:pm:budget";
 const CURRENT_IDX_KEY = "gb:pm:currentIdx";
 
 const DEFAULT_INFO: ProjectInfo = {
-  name: "בית פרטי · נתניה",
-  subtitle: 'שטח בנוי: 180 מ"ר · 2 קומות',
-  manager: "יוסי בניה",
-  targetDate: "2025-10-15",
+  name: "",
+  subtitle: "",
+  manager: "",
+  targetDate: "",
   groupSavings: 0,
 };
 
