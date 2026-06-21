@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Share2, Pencil, Calendar, Clock, User, Check, TrendingUp,
-  Star, ChevronLeft, Sparkles, Zap, X,
+  Star, ChevronLeft, Sparkles, Zap, X, Plus, Trash2, RefreshCw,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -20,19 +20,22 @@ type ProjectInfo = {
   subtitle: string;
   manager: string;
   targetDate: string; // YYYY-MM-DD
-  budgetTotal: number;
-  budgetUsed: number;
   groupSavings: number;
 };
 
+type ScheduleItem = { start: string; end: string };
+type BudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string };
+
 const PROJECT_INFO_KEY = "gb:pm:info";
+const SCHEDULE_KEY = "gb:pm:schedule";
+const BUDGET_KEY = "gb:pm:budget";
+const CURRENT_IDX_KEY = "gb:pm:currentIdx";
+
 const DEFAULT_INFO: ProjectInfo = {
   name: "בית פרטי · נתניה",
   subtitle: 'שטח בנוי: 180 מ"ר · 2 קומות',
   manager: "יוסי בניה",
   targetDate: "2025-10-15",
-  budgetTotal: 680000,
-  budgetUsed: 248500,
   groupSavings: 32400,
 };
 
@@ -129,18 +132,30 @@ const STAGES: Stage[] = [
   },
 ];
 
-const CURRENT_STAGE_IDX = 3; // "מערכות" (4th)
+// Default budget items derived from stage categories (used for auto-sync)
+const BUDGET_TEMPLATE: Array<{ label: string; planned: number; catId: string }> = [
+  { label: "תכנון אדריכלי וייעוץ", planned: 35000, catId: "architect" },
+  { label: "קבלן שלד וביסוס", planned: 180000, catId: "contractor" },
+  { label: "חלונות וחיפוי חוץ", planned: 60000, catId: "windows" },
+  { label: "חשמל ותאורה", planned: 45000, catId: "electric" },
+  { label: "אינסטלציה", planned: 32000, catId: "plumbing" },
+  { label: "מיזוג אוויר", planned: 28000, catId: "ac" },
+  { label: "ריצוף וחיפוי", planned: 55000, catId: "flooring" },
+  { label: "מטבח", planned: 75000, catId: "kitchen" },
+  { label: "צבע ונגרות", planned: 38000, catId: "painting" },
+  { label: "פיתוח חוץ וגינון", planned: 42000, catId: "garden" },
+];
 
 interface SupplierLite {
   id: string; business_name: string; short_description: string | null;
   logo_url: string | null; categories: string[];
 }
 
+const uid = () => Math.random().toString(36).slice(2, 9);
+
 export default function ProjectManagement() {
   const navigate = useNavigate();
   const { categories } = useApp();
-  const [currentIdx, setCurrentIdx] = useState(CURRENT_STAGE_IDX);
-  const current = STAGES[currentIdx];
 
   // Task completion local state
   const [completed, setCompleted] = useState<Record<string, boolean>>(() => {
@@ -151,6 +166,39 @@ export default function ProjectManagement() {
   }, [completed]);
 
   const toggleTask = (key: string) => setCompleted((p) => ({ ...p, [key]: !p[key] }));
+
+  // Auto-advance stage: derive first incomplete stage; allow manual override.
+  const autoIdx = useMemo(() => {
+    for (let i = 0; i < STAGES.length; i++) {
+      const s = STAGES[i];
+      if (s.tasks.length === 0) continue;
+      const allDone = s.tasks.every((t) => completed[`${s.key}::${t}`]);
+      if (!allDone) return i;
+    }
+    return STAGES.length - 1;
+  }, [completed]);
+
+  const [manualIdx, setManualIdx] = useState<number | null>(() => {
+    try {
+      const raw = localStorage.getItem(CURRENT_IDX_KEY);
+      return raw === null ? null : Number(raw);
+    } catch { return null; }
+  });
+  // Clear manual override if user navigates back to the auto stage
+  useEffect(() => {
+    if (manualIdx === autoIdx) {
+      setManualIdx(null);
+      try { localStorage.removeItem(CURRENT_IDX_KEY); } catch {}
+    }
+  }, [manualIdx, autoIdx]);
+
+  const currentIdx = manualIdx ?? autoIdx;
+  const current = STAGES[currentIdx];
+
+  const setStage = (i: number) => {
+    setManualIdx(i);
+    try { localStorage.setItem(CURRENT_IDX_KEY, String(i)); } catch {}
+  };
 
   // Suppliers
   const cached = getCachedValue<SupplierLite[]>("categories:suppliers", 5 * 60_000);
@@ -192,7 +240,7 @@ export default function ProjectManagement() {
     s.tasks.length > 0 && s.tasks.every((t) => completed[`${s.key}::${t}`])
   ).length;
 
-  // Editable project info
+  // Editable project info (name / subtitle / manager / targetDate / groupSavings)
   const [info, setInfo] = useState<ProjectInfo>(() => {
     try {
       const raw = localStorage.getItem(PROJECT_INFO_KEY);
@@ -204,14 +252,40 @@ export default function ProjectManagement() {
     try { localStorage.setItem(PROJECT_INFO_KEY, JSON.stringify(info)); } catch {}
   }, [info]);
 
-  const [editOpen, setEditOpen] = useState(false);
+  // Schedule per stage
+  const [schedule, setSchedule] = useState<Record<string, ScheduleItem>>(() => {
+    try {
+      const raw = localStorage.getItem(SCHEDULE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return {};
+  });
+  useEffect(() => {
+    try { localStorage.setItem(SCHEDULE_KEY, JSON.stringify(schedule)); } catch {}
+  }, [schedule]);
 
-  // Budget
-  const budgetTotal = info.budgetTotal;
-  const budgetUsed = info.budgetUsed;
+  // Budget items
+  const [budget, setBudget] = useState<BudgetItem[]>(() => {
+    try {
+      const raw = localStorage.getItem(BUDGET_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return BUDGET_TEMPLATE.map((b) => ({ id: uid(), label: b.label, planned: b.planned, actual: 0, catId: b.catId }));
+  });
+  useEffect(() => {
+    try { localStorage.setItem(BUDGET_KEY, JSON.stringify(budget)); } catch {}
+  }, [budget]);
+
+  const budgetTotal = budget.reduce((s, b) => s + (b.planned || 0), 0);
+  const budgetUsed = budget.reduce((s, b) => s + (b.actual || 0), 0);
   const groupSavings = info.groupSavings;
-  const overPct = budgetUsed > budgetTotal ? Math.round(((budgetUsed - budgetTotal) / budgetTotal) * 100) : 0;
+  const overPct = budgetUsed > budgetTotal && budgetTotal > 0
+    ? Math.round(((budgetUsed - budgetTotal) / budgetTotal) * 100) : 0;
   const statuses = ["הוזמן", "בתהליך", "הוזמן", "להזמין"];
+
+  const [editInfoOpen, setEditInfoOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [budgetOpen, setBudgetOpen] = useState(false);
 
   return (
     <div
@@ -242,7 +316,14 @@ export default function ProjectManagement() {
         </div>
 
         {/* Project card */}
-        <div className="bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)]">
+        <div className="bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] relative">
+          <button
+            onClick={() => setEditInfoOpen(true)}
+            className="absolute top-3 left-3 w-8 h-8 rounded-full bg-[#0E6B5A]/10 flex items-center justify-center active:scale-95"
+            aria-label="עריכת פרטי פרויקט"
+          >
+            <Pencil className="h-3.5 w-3.5 text-[#0E6B5A]" />
+          </button>
           <div className="flex items-start gap-3">
             <div
               className="w-20 h-20 rounded-2xl shrink-0 bg-cover bg-center"
@@ -250,17 +331,11 @@ export default function ProjectManagement() {
             >
               <div className="w-full h-full flex items-center justify-center text-[36px]">🏡</div>
             </div>
-            <div className="flex-1 min-w-0">
-              <button
-                onClick={() => setEditOpen(true)}
-                className="flex items-center gap-1.5 w-full text-right active:scale-[0.99]"
-              >
-                <h2 className="text-[16px] font-extrabold text-[#1A1A1A] truncate" style={{ fontFamily: URBANIST }}>
-                  {info.name}
-                </h2>
-                <Pencil className="h-3.5 w-3.5 text-[#0E6B5A] shrink-0" />
-              </button>
-              <p className="text-[12px] text-gray-500 mt-0.5">{info.subtitle}</p>
+            <div className="flex-1 min-w-0 pl-8">
+              <h2 className="text-[16px] font-extrabold text-[#1A1A1A] break-words" style={{ fontFamily: URBANIST }}>
+                {info.name}
+              </h2>
+              <p className="text-[12px] text-gray-500 mt-0.5 break-words">{info.subtitle}</p>
 
               {/* Progress ring */}
               <div className="mt-3 flex items-center gap-3">
@@ -287,8 +362,8 @@ export default function ProjectManagement() {
           </div>
 
           <div className="grid grid-cols-3 gap-2 mt-4">
-            <InfoChip icon={<User className="h-3.5 w-3.5" />} label="מנהל" value={info.manager} onClick={() => setEditOpen(true)} />
-            <InfoChip icon={<Calendar className="h-3.5 w-3.5" />} label="יעד" value={formatDateShort(info.targetDate)} onClick={() => setEditOpen(true)} />
+            <InfoChip icon={<User className="h-3.5 w-3.5" />} label="מנהל" value={info.manager} />
+            <InfoChip icon={<Calendar className="h-3.5 w-3.5" />} label="יעד" value={formatDateShort(info.targetDate)} />
             <InfoChip icon={<Clock className="h-3.5 w-3.5" />} label="עדכון" value="היום" />
           </div>
         </div>
@@ -306,11 +381,11 @@ export default function ProjectManagement() {
           <div className="flex items-center gap-1 min-w-max relative">
             {STAGES.map((s, i) => {
               const isCurrent = i === currentIdx;
-              const isDone = i < currentIdx;
+              const isDone = i < autoIdx;
               return (
                 <button
                   key={s.key}
-                  onClick={() => setCurrentIdx(i)}
+                  onClick={() => setStage(i)}
                   className="flex flex-col items-center gap-1 px-2 py-1 shrink-0"
                 >
                   <div
@@ -327,9 +402,6 @@ export default function ProjectManagement() {
                   <div className={`text-[10.5px] font-bold whitespace-nowrap ${isCurrent ? "text-[#0E6B5A]" : "text-gray-500"}`}>
                     {s.short}
                   </div>
-                  {i < STAGES.length - 1 && (
-                    <div className="absolute top-4 h-0.5 bg-gray-200" style={{ display: "none" }} />
-                  )}
                 </button>
               );
             })}
@@ -347,7 +419,10 @@ export default function ProjectManagement() {
               <div className="text-[10.5px] text-gray-500">הפרויקט מתקדם כמתוכנן</div>
             </div>
           </div>
-          <button className="text-[11px] font-bold text-[#0E6B5A] bg-white border border-[#0E6B5A]/20 px-2.5 py-1.5 rounded-full whitespace-nowrap active:scale-95">
+          <button
+            onClick={() => setScheduleOpen(true)}
+            className="text-[11px] font-bold text-[#0E6B5A] bg-white border border-[#0E6B5A]/20 px-2.5 py-1.5 rounded-full whitespace-nowrap active:scale-95"
+          >
             📅 לוח זמנים
           </button>
         </div>
@@ -366,9 +441,6 @@ export default function ProjectManagement() {
                 </div>
               </div>
             </div>
-            <button className="text-[11px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2.5 py-1.5 rounded-full active:scale-95 whitespace-nowrap">
-              עריכת שלב
-            </button>
           </div>
 
           {/* Tasks */}
@@ -488,7 +560,7 @@ export default function ProjectManagement() {
 
       {/* Sticky budget card */}
       <button
-        onClick={() => setEditOpen(true)}
+        onClick={() => setBudgetOpen(true)}
         className="fixed left-1/2 -translate-x-1/2 z-30 w-[92%] max-w-[var(--app-max-w)] rounded-2xl p-3.5 shadow-2xl shadow-black/30 text-white text-right active:scale-[0.99] transition-transform"
         style={{
           bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 10px)",
@@ -499,7 +571,7 @@ export default function ProjectManagement() {
           <div className="flex items-center gap-1.5">
             <TrendingUp className="h-4 w-4" />
             <span className="text-[12.5px] font-extrabold" style={{ fontFamily: URBANIST }}>
-              מעקב תקציב
+              בניית תקציב
             </span>
             <Pencil className="h-3 w-3 text-white/70" />
           </div>
@@ -529,16 +601,37 @@ export default function ProjectManagement() {
         <div className="mt-2 h-1.5 w-full bg-white/15 rounded-full overflow-hidden">
           <div
             className="h-full bg-white/80 rounded-full"
-            style={{ width: `${Math.min(100, Math.round((budgetUsed / budgetTotal) * 100))}%` }}
+            style={{ width: budgetTotal > 0 ? `${Math.min(100, Math.round((budgetUsed / budgetTotal) * 100))}%` : "0%" }}
           />
         </div>
       </button>
 
-      {editOpen && (
-        <EditProjectModal
+      {editInfoOpen && (
+        <EditInfoModal
           info={info}
-          onClose={() => setEditOpen(false)}
-          onSave={(next) => { setInfo(next); setEditOpen(false); }}
+          onClose={() => setEditInfoOpen(false)}
+          onSave={(next) => { setInfo(next); setEditInfoOpen(false); }}
+        />
+      )}
+
+      {scheduleOpen && (
+        <ScheduleModal
+          schedule={schedule}
+          onClose={() => setScheduleOpen(false)}
+          onSave={(next) => { setSchedule(next); setScheduleOpen(false); }}
+        />
+      )}
+
+      {budgetOpen && (
+        <BudgetModal
+          budget={budget}
+          groupSavings={info.groupSavings}
+          onClose={() => setBudgetOpen(false)}
+          onSave={(items, savings) => {
+            setBudget(items);
+            setInfo((p) => ({ ...p, groupSavings: savings }));
+            setBudgetOpen(false);
+          }}
         />
       )}
 
@@ -567,7 +660,9 @@ function InfoChip({
   );
 }
 
-function EditProjectModal({
+/* ===================== Edit Info Modal ===================== */
+
+function EditInfoModal({
   info, onClose, onSave,
 }: { info: ProjectInfo; onClose: () => void; onSave: (info: ProjectInfo) => void }) {
   const [form, setForm] = useState({
@@ -575,26 +670,240 @@ function EditProjectModal({
     subtitle: info.subtitle,
     manager: info.manager,
     targetDate: info.targetDate,
-    budgetTotal: String(info.budgetTotal ?? ""),
-    budgetUsed: String(info.budgetUsed ?? ""),
-    groupSavings: String(info.groupSavings ?? ""),
   });
-  const set = (k: keyof typeof form, v: string) =>
-    setForm((p) => ({ ...p, [k]: v }));
+  const set = (k: keyof typeof form, v: string) => setForm((p) => ({ ...p, [k]: v }));
   const handleSave = () => {
     onSave({
+      ...info,
       name: form.name.trim() || info.name,
       subtitle: form.subtitle.trim(),
       manager: form.manager.trim(),
       targetDate: form.targetDate,
-      budgetTotal: Math.max(0, parseInt(form.budgetTotal, 10) || 0),
-      budgetUsed: Math.max(0, parseInt(form.budgetUsed, 10) || 0),
-      groupSavings: Math.max(0, parseInt(form.groupSavings, 10) || 0),
     });
   };
-  // allow only digits
+
+  return (
+    <ModalShell title="עריכת פרטי הפרויקט" onClose={onClose}>
+      <div className="space-y-3">
+        <Field label="שם הפרויקט">
+          <TextInput value={form.name} onChange={(v) => set("name", v)} />
+        </Field>
+        <Field label="תיאור (שטח / קומות)">
+          <TextInput value={form.subtitle} onChange={(v) => set("subtitle", v)} />
+        </Field>
+        <Field label="מנהל הפרויקט">
+          <TextInput value={form.manager} onChange={(v) => set("manager", v)} />
+        </Field>
+        <Field label="תאריך יעד">
+          <input
+            type="date"
+            value={form.targetDate}
+            onChange={(e) => set("targetDate", e.target.value)}
+            className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+          />
+        </Field>
+      </div>
+      <ModalActions onCancel={onClose} onSave={handleSave} />
+    </ModalShell>
+  );
+}
+
+/* ===================== Schedule Modal ===================== */
+
+function ScheduleModal({
+  schedule, onClose, onSave,
+}: {
+  schedule: Record<string, ScheduleItem>;
+  onClose: () => void;
+  onSave: (s: Record<string, ScheduleItem>) => void;
+}) {
+  const [form, setForm] = useState<Record<string, ScheduleItem>>(() => {
+    const next: Record<string, ScheduleItem> = {};
+    STAGES.forEach((s) => {
+      next[s.key] = schedule[s.key] || { start: "", end: "" };
+    });
+    return next;
+  });
+  const set = (key: string, field: keyof ScheduleItem, v: string) =>
+    setForm((p) => ({ ...p, [key]: { ...p[key], [field]: v } }));
+
+  return (
+    <ModalShell title="לוח זמנים — שלבי הפרויקט" onClose={onClose}>
+      <div className="space-y-3">
+        {STAGES.map((s) => (
+          <div key={s.key} className="bg-[#FAFAF7] rounded-2xl p-3 border border-gray-100">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[16px]" aria-hidden>{s.emoji}</span>
+              <div className="text-[13px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
+                {s.num}. {s.title}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="התחלה">
+                <input
+                  type="date"
+                  value={form[s.key].start}
+                  onChange={(e) => set(s.key, "start", e.target.value)}
+                  className="w-full bg-white rounded-xl px-2.5 py-2 text-[13px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+                />
+              </Field>
+              <Field label="סיום">
+                <input
+                  type="date"
+                  value={form[s.key].end}
+                  onChange={(e) => set(s.key, "end", e.target.value)}
+                  className="w-full bg-white rounded-xl px-2.5 py-2 text-[13px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+                />
+              </Field>
+            </div>
+          </div>
+        ))}
+      </div>
+      <ModalActions onCancel={onClose} onSave={() => onSave(form)} />
+    </ModalShell>
+  );
+}
+
+/* ===================== Budget Modal ===================== */
+
+function BudgetModal({
+  budget, groupSavings, onClose, onSave,
+}: {
+  budget: BudgetItem[];
+  groupSavings: number;
+  onClose: () => void;
+  onSave: (items: BudgetItem[], savings: number) => void;
+}) {
+  const [items, setItems] = useState<BudgetItem[]>(budget);
+  const [savings, setSavings] = useState<string>(String(groupSavings ?? ""));
   const onlyDigits = (v: string) => v.replace(/[^\d]/g, "");
 
+  const update = (id: string, patch: Partial<BudgetItem>) =>
+    setItems((p) => p.map((it) => (it.id === id ? { ...it, ...patch } : it)));
+  const remove = (id: string) => setItems((p) => p.filter((it) => it.id !== id));
+  const add = () =>
+    setItems((p) => [...p, { id: uid(), label: "", planned: 0, actual: 0 }]);
+
+  // Auto-sync from resident task completions (mark related budget items as fully spent)
+  const syncFromSelections = () => {
+    try {
+      const completed = JSON.parse(localStorage.getItem("gb:pm:tasks") || "{}");
+      const completedCats = new Set<string>();
+      STAGES.forEach((s) => {
+        const allDone = s.tasks.length > 0 && s.tasks.every((t) => completed[`${s.key}::${t}`]);
+        if (allDone) s.catIds.forEach((c) => completedCats.add(c));
+      });
+      setItems((p) =>
+        p.map((it) =>
+          it.catId && completedCats.has(it.catId) && (!it.actual || it.actual === 0)
+            ? { ...it, actual: it.planned }
+            : it
+        )
+      );
+    } catch {}
+  };
+
+  const totalPlanned = items.reduce((s, b) => s + (b.planned || 0), 0);
+  const totalActual = items.reduce((s, b) => s + (b.actual || 0), 0);
+
+  const handleSave = () => {
+    const clean = items
+      .filter((it) => it.label.trim() || it.planned > 0 || it.actual > 0)
+      .map((it) => ({
+        ...it,
+        label: it.label.trim() || "ללא שם",
+        planned: Math.max(0, Math.round(it.planned || 0)),
+        actual: Math.max(0, Math.round(it.actual || 0)),
+      }));
+    onSave(clean, Math.max(0, parseInt(savings, 10) || 0));
+  };
+
+  return (
+    <ModalShell title="בניית תקציב" onClose={onClose}>
+      <div className="bg-[#F0F9F6] rounded-2xl p-3 border border-[#0E6B5A]/15 mb-3">
+        <div className="flex items-center justify-between text-[12px]">
+          <div className="text-gray-600">
+            סה״כ מתוכנן: <span className="font-extrabold tabular-nums text-[#0A5447]">₪{totalPlanned.toLocaleString()}</span>
+          </div>
+          <div className="text-gray-600">
+            נוצל: <span className="font-extrabold tabular-nums text-[#0A5447]">₪{totalActual.toLocaleString()}</span>
+          </div>
+        </div>
+        <button
+          onClick={syncFromSelections}
+          className="mt-2 w-full flex items-center justify-center gap-1.5 text-[12px] font-bold text-[#0E6B5A] bg-white border border-[#0E6B5A]/20 rounded-xl py-2 active:scale-[0.98]"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          סנכרון אוטומטי לפי בחירות הדייר
+        </button>
+      </div>
+
+      <div className="space-y-2">
+        {items.map((it) => (
+          <div key={it.id} className="bg-[#FAFAF7] rounded-2xl p-3 border border-gray-100">
+            <div className="flex items-center gap-2 mb-2">
+              <input
+                value={it.label}
+                onChange={(e) => update(it.id, { label: e.target.value })}
+                placeholder="שם סעיף"
+                className="flex-1 bg-white rounded-xl px-2.5 py-2 text-[13px] font-bold outline-none border border-gray-200 focus:border-[#0E6B5A]"
+              />
+              <button
+                onClick={() => remove(it.id)}
+                className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center active:scale-95"
+                aria-label="מחיקה"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="מתוכנן (₪)">
+                <input
+                  type="text" inputMode="numeric" dir="ltr"
+                  value={it.planned ? String(it.planned) : ""}
+                  onChange={(e) => update(it.id, { planned: parseInt(onlyDigits(e.target.value), 10) || 0 })}
+                  className="w-full bg-white rounded-xl px-2.5 py-2 text-[13px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+                />
+              </Field>
+              <Field label="נוצל (₪)">
+                <input
+                  type="text" inputMode="numeric" dir="ltr"
+                  value={it.actual ? String(it.actual) : ""}
+                  onChange={(e) => update(it.id, { actual: parseInt(onlyDigits(e.target.value), 10) || 0 })}
+                  className="w-full bg-white rounded-xl px-2.5 py-2 text-[13px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+                />
+              </Field>
+            </div>
+          </div>
+        ))}
+        <button
+          onClick={add}
+          className="w-full flex items-center justify-center gap-1.5 text-[13px] font-bold text-[#0E6B5A] bg-white border-2 border-dashed border-[#0E6B5A]/30 rounded-2xl py-3 active:scale-[0.98]"
+        >
+          <Plus className="h-4 w-4" />
+          הוספת סעיף
+        </button>
+
+        <Field label="חיסכון קבוצתי (₪)">
+          <input
+            type="text" inputMode="numeric" dir="ltr"
+            value={savings}
+            onChange={(e) => setSavings(onlyDigits(e.target.value))}
+            className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+          />
+        </Field>
+      </div>
+
+      <ModalActions onCancel={onClose} onSave={handleSave} />
+    </ModalShell>
+  );
+}
+
+/* ===================== Shared bits ===================== */
+
+function ModalShell({
+  title, children, onClose,
+}: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
     <div
       dir="rtl"
@@ -607,9 +916,9 @@ function EditProjectModal({
         className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 20px)" }}
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 sticky top-0 bg-white pt-1 -mt-1 z-10">
           <h3 className="text-[16px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
-            עריכת פרטי הפרויקט
+            {title}
           </h3>
           <button
             onClick={onClose}
@@ -619,82 +928,39 @@ function EditProjectModal({
             <X className="h-4 w-4 text-gray-600" />
           </button>
         </div>
-
-        <div className="space-y-3">
-          <Field label="שם הפרויקט">
-            <input
-              value={form.name}
-              onChange={(e) => set("name", e.target.value)}
-              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
-            />
-          </Field>
-          <Field label="תיאור (שטח / קומות)">
-            <input
-              value={form.subtitle}
-              onChange={(e) => set("subtitle", e.target.value)}
-              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
-            />
-          </Field>
-          <Field label="מנהל הפרויקט">
-            <input
-              value={form.manager}
-              onChange={(e) => set("manager", e.target.value)}
-              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
-            />
-          </Field>
-          <Field label="תאריך יעד">
-            <input
-              type="date"
-              value={form.targetDate}
-              onChange={(e) => set("targetDate", e.target.value)}
-              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="תקציב כולל (₪)">
-              <input
-                type="text" inputMode="numeric" dir="ltr"
-                value={form.budgetTotal}
-                onChange={(e) => set("budgetTotal", onlyDigits(e.target.value))}
-                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
-              />
-            </Field>
-            <Field label="נוצל (₪)">
-              <input
-                type="text" inputMode="numeric" dir="ltr"
-                value={form.budgetUsed}
-                onChange={(e) => set("budgetUsed", onlyDigits(e.target.value))}
-                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
-              />
-            </Field>
-          </div>
-          <Field label="חיסכון קבוצתי (₪)">
-            <input
-              type="text" inputMode="numeric" dir="ltr"
-              value={form.groupSavings}
-              onChange={(e) => set("groupSavings", onlyDigits(e.target.value))}
-              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
-            />
-          </Field>
-        </div>
-
-        <div className="flex gap-2 mt-5">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 rounded-2xl text-[14px] font-bold text-gray-700 bg-gray-100 active:scale-[0.98]"
-          >
-            ביטול
-          </button>
-          <button
-            onClick={handleSave}
-            className="flex-1 py-3 rounded-2xl text-[14px] font-extrabold text-white active:scale-[0.98]"
-            style={{ background: BRAND, fontFamily: URBANIST }}
-          >
-            שמירה
-          </button>
-        </div>
+        {children}
       </div>
     </div>
+  );
+}
+
+function ModalActions({ onCancel, onSave }: { onCancel: () => void; onSave: () => void }) {
+  return (
+    <div className="flex gap-2 mt-5 sticky bottom-0 bg-white pt-3">
+      <button
+        onClick={onCancel}
+        className="flex-1 py-3 rounded-2xl text-[14px] font-bold text-gray-700 bg-gray-100 active:scale-[0.98]"
+      >
+        ביטול
+      </button>
+      <button
+        onClick={onSave}
+        className="flex-1 py-3 rounded-2xl text-[14px] font-extrabold text-white active:scale-[0.98]"
+        style={{ background: BRAND, fontFamily: URBANIST }}
+      >
+        שמירה
+      </button>
+    </div>
+  );
+}
+
+function TextInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+    />
   );
 }
 
