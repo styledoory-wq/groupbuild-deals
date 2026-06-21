@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Download, Copy, Share2, Mail, RefreshCw, Image as ImageIcon, Sparkles } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState } from "@/components/ds";
@@ -21,6 +21,7 @@ const FORMAT_RATIO: Record<FormatKey, string> = {
 
 export default function SupplierMarketingTools() {
   const { dealId } = useParams<{ dealId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -57,9 +58,34 @@ export default function SupplierMarketingTools() {
       const { data } = await supabase.from("deals").select("title").eq("id", dealId).maybeSingle();
       setDealTitle(data?.title ?? "");
       await generate();
+      if (searchParams.get("welcome") === "1") {
+        // Auto-send welcome email to supplier in background
+        try { await sendSelfEmailSilent(data?.title ?? ""); } catch { /* ignore */ }
+        searchParams.delete("welcome");
+        setSearchParams(searchParams, { replace: true });
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dealId]);
+
+  const sendSelfEmailSilent = async (titleOverride?: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) return;
+    await supabase.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "marketing-card-ready",
+        recipientEmail: user.email,
+        idempotencyKey: `mkt-welcome-${dealId}`,
+        templateData: {
+          name: user.user_metadata?.full_name || "",
+          dealTitle: titleOverride || dealTitle,
+          dealUrl,
+          cardImageUrl: urls.square,
+          whatsappUrl: waUrl,
+        },
+      },
+    });
+  };
 
   const copy = async (text: string) => {
     try {
