@@ -399,6 +399,53 @@ export type Database = {
         }
         Relationships: []
       }
+      deal_marketing_ai: {
+        Row: {
+          created_at: string
+          cta: string | null
+          deal_id: string
+          enhanced_image_url: string | null
+          headline: string | null
+          id: string
+          recommended_template: string | null
+          subheadline: string | null
+          updated_at: string
+          urgency_tag: string | null
+        }
+        Insert: {
+          created_at?: string
+          cta?: string | null
+          deal_id: string
+          enhanced_image_url?: string | null
+          headline?: string | null
+          id?: string
+          recommended_template?: string | null
+          subheadline?: string | null
+          updated_at?: string
+          urgency_tag?: string | null
+        }
+        Update: {
+          created_at?: string
+          cta?: string | null
+          deal_id?: string
+          enhanced_image_url?: string | null
+          headline?: string | null
+          id?: string
+          recommended_template?: string | null
+          subheadline?: string | null
+          updated_at?: string
+          urgency_tag?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_marketing_ai_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: true
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_reminder_log: {
         Row: {
           deadline_date: string
