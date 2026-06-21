@@ -539,6 +539,11 @@ function CompactDealCard({
 
         {/* Content */}
         <div className="min-w-0 flex-1">
+          {featured && (
+            <span className="mb-1.5 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">
+              <Flame className="h-3 w-3 fill-orange-500 text-orange-500" /> הצעה מובילה
+            </span>
+          )}
           <div className="flex items-start justify-between gap-2">
             <h4 className="text-[14px] font-bold text-[#0F172A] leading-snug line-clamp-2 flex-1">{d.title}</h4>
             <div onClick={(e) => e.preventDefault()}>
