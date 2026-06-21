@@ -570,9 +570,30 @@ function InfoChip({
 function EditProjectModal({
   info, onClose, onSave,
 }: { info: ProjectInfo; onClose: () => void; onSave: (info: ProjectInfo) => void }) {
-  const [form, setForm] = useState<ProjectInfo>(info);
-  const set = <K extends keyof ProjectInfo>(k: K, v: ProjectInfo[K]) =>
+  const [form, setForm] = useState({
+    name: info.name,
+    subtitle: info.subtitle,
+    manager: info.manager,
+    targetDate: info.targetDate,
+    budgetTotal: String(info.budgetTotal ?? ""),
+    budgetUsed: String(info.budgetUsed ?? ""),
+    groupSavings: String(info.groupSavings ?? ""),
+  });
+  const set = (k: keyof typeof form, v: string) =>
     setForm((p) => ({ ...p, [k]: v }));
+  const handleSave = () => {
+    onSave({
+      name: form.name.trim() || info.name,
+      subtitle: form.subtitle.trim(),
+      manager: form.manager.trim(),
+      targetDate: form.targetDate,
+      budgetTotal: Math.max(0, parseInt(form.budgetTotal, 10) || 0),
+      budgetUsed: Math.max(0, parseInt(form.budgetUsed, 10) || 0),
+      groupSavings: Math.max(0, parseInt(form.groupSavings, 10) || 0),
+    });
+  };
+  // allow only digits
+  const onlyDigits = (v: string) => v.replace(/[^\d]/g, "");
 
   return (
     <div
