@@ -93,6 +93,7 @@ export default function OfferEditor() {
   const [supplierPaymentInstructions, setSupplierPaymentInstructions] = useState<string>("");
   const [depositLimits, setDepositLimits] = useState<DepositLimits>({ min: null, max: null });
   const [saving, setSaving] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const [offerType, setOfferType] = useState<OfferType>("percentage");
   const [tiers, setTiers] = useState<TierRow[]>(defaultPercentageTiers());
