@@ -77,7 +77,10 @@ interface SupplierRow {
 export default function DealDetail() {
   const { dealId } = useParams();
   const navigate = useNavigate();
-  const { categories } = useApp();
+  const { categories, user } = useApp();
+  const [supplierUserId, setSupplierUserId] = useState<string | null>(null);
+  const isSupplierPreview =
+    !!user && user.role === "supplier" && !!supplierUserId && supplierUserId === user.id;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
