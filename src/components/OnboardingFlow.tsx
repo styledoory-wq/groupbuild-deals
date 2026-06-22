@@ -58,13 +58,13 @@ const SUPPLIER_SLIDES: Slide[] = [
   },
   {
     icon: Users,
-    title: "לידים אמיתיים",
-    body: "כל ליד שמגיע כולל שם, טלפון ואת ההצעה שעניינה אותו. אתם רואים פעילות בזמן אמת ויכולים לפנות מיד.",
+    title: "לידים אמיתיים, CRM פשוט",
+    body: "כל ליד שמגיע כולל שם, טלפון וההצעה שעניינה אותו. חיוג, וואטסאפ והערות פנימיות במסך אחד.",
   },
   {
     icon: ScanLine,
-    title: "סריקה ומימוש",
-    body: "כשלקוח מגיע עם שובר — סורקים QR, מאשרים את המימוש, וההכנסה נרשמת אוטומטית במסך 'הכנסות ותשלומים'.",
+    title: "סריקה תמיד בהישג יד",
+    body: "כפתור הסריקה הצף נמצא בכל מסך. סורקים QR של הלקוח, מאשרים מימוש — וההכנסה נרשמת אוטומטית.",
   },
 ];
 
@@ -77,11 +77,12 @@ const RESIDENT_TOUR: TourStep[] = [
 ];
 
 const SUPPLIER_TOUR: TourStep[] = [
-  { selector: '[data-tour="nav-supplier"]', title: "בית", body: "סקירת הביצועים שלכם: לידים, עסקאות פעילות והכנסות." },
-  { selector: '[data-tour="nav-offers"]', title: "הצעות", body: "ניהול ההצעות שלכם — יצירה, עריכה, הפעלה והשהיה." },
-  { selector: '[data-tour="nav-scan"]', title: "סריקה", body: "סורקים QR של שובר לקוח כדי לאשר מימוש בעסק." },
-  { selector: '[data-tour="nav-redemptions"]', title: "מימושים", body: "כל ההכנסות והעסקאות שנסגרו, עם פילוח לפי סטטוס תשלום." },
-  { selector: '[data-tour="nav-leads"]', title: "לידים", body: "רשימת הלקוחות שהביעו עניין — שם, טלפון וההצעה שעניינה אותם." },
+  { selector: '[data-tour="nav-supplier"]', title: "בית", body: "מרכז פעולות — לידים חדשים, הצעה מובילה ופעילות אחרונה במבט אחד." },
+  { selector: '[data-tour="nav-leads"]', title: "לידים", body: "ה-CRM שלכם. כל ליד עם שם, טלפון, חיוג מהיר, וואטסאפ והערות פנימיות." },
+  { selector: '[data-tour="nav-offers"]', title: "הצעות", body: "ניהול ההצעות — יצירה, עריכה, הפעלה והשהיה. מחיר מדורג לפי כמות מצטרפים." },
+  { selector: '[data-tour="nav-revenue"]', title: "הכנסות", body: "כל ההכנסות והמימושים במקום אחד, כולל גרף חודשי והיסטוריית עסקאות." },
+  { selector: '[data-tour="nav-account"]', title: "חשבון", body: "פרטי העסק, מנוי, התראות, תמיכה ויציאה." },
+  { selector: '[data-tour="fab-scan"]', title: "סריקת QR", body: "הכפתור הצף הזה מלווה אתכם בכל מסך — סורקים שובר לקוח ומאשרים מימוש בלחיצה." },
 ];
 
 const storageKey = (role: Role) => `gb_onboarded_${role}_v1`;
