@@ -329,6 +329,8 @@ export type Database = {
           supplier_confirmed_at: string | null
           supplier_confirmed_by: string | null
           supplier_dispute_reason: string | null
+          supplier_notes: string | null
+          supplier_starred: boolean
           terms_accepted_at: string | null
           updated_at: string
           user_id: string
@@ -361,6 +363,8 @@ export type Database = {
           supplier_confirmed_at?: string | null
           supplier_confirmed_by?: string | null
           supplier_dispute_reason?: string | null
+          supplier_notes?: string | null
+          supplier_starred?: boolean
           terms_accepted_at?: string | null
           updated_at?: string
           user_id: string
@@ -393,6 +397,8 @@ export type Database = {
           supplier_confirmed_at?: string | null
           supplier_confirmed_by?: string | null
           supplier_dispute_reason?: string | null
+          supplier_notes?: string | null
+          supplier_starred?: boolean
           terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
@@ -1506,6 +1512,8 @@ export type Database = {
           source: string
           status: string
           supplier_id: string
+          supplier_notes: string | null
+          supplier_starred: boolean
           updated_at: string
           user_id: string
         }
@@ -1524,6 +1532,8 @@ export type Database = {
           source?: string
           status?: string
           supplier_id: string
+          supplier_notes?: string | null
+          supplier_starred?: boolean
           updated_at?: string
           user_id: string
         }
@@ -1542,6 +1552,8 @@ export type Database = {
           source?: string
           status?: string
           supplier_id?: string
+          supplier_notes?: string | null
+          supplier_starred?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -2114,6 +2126,10 @@ export type Database = {
       }
       supplier_soft_delete_interest: {
         Args: { _interest_id: string }
+        Returns: undefined
+      }
+      supplier_update_interest_meta: {
+        Args: { _interest_id: string; _notes?: string; _starred?: boolean }
         Returns: undefined
       }
       user_can_review: {
