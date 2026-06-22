@@ -1554,7 +1554,7 @@ export default function DealDetail() {
         </DialogContent>
       </Dialog>
 
-      <BottomNav role="resident" />
+      <BottomNav role={isSupplierPreview ? "supplier" : "resident"} />
     </MobileShell>
   );
 }
