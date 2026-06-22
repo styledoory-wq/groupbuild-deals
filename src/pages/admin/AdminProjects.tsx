@@ -402,30 +402,60 @@ export default function AdminProjects() {
   );
 }
 
-function Chip({ icon, value, label, tone = "neutral" }: { icon?: React.ReactNode; value: React.ReactNode; label: string; tone?: "neutral" | "positive" }) {
-  const valueCls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
+function ProjThumb({ url, size = 36 }: { url?: string | null; size?: number }) {
   return (
-    <span className="inline-flex items-center gap-1 whitespace-nowrap">
-      {icon && <span className="text-[#9CA3AF]">{icon}</span>}
-      <span className={cn("font-extrabold tabular-nums", valueCls)}>{value}</span>
-      <span className="text-[#6B7280]">{label}</span>
+    <div
+      className="rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0 flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
+      {url ? (
+        <img src={url} alt="" className="w-full h-full object-cover" />
+      ) : (
+        <Building2 className="h-4 w-4 text-[#9CA3AF]" />
+      )}
+    </div>
+  );
+}
+
+function Num({ value }: { value: number | string }) {
+  return <div className="text-center text-[12px] font-bold tabular-nums text-[#0F172A]">{value}</div>;
+}
+
+function InlineKv({ label, value, tone = "neutral" }: { label: string; value: React.ReactNode; tone?: "neutral" | "positive" }) {
+  const cls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
+  return (
+    <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+      <span className={cn("font-extrabold tabular-nums", cls)}>{value}</span>
+      <span className="text-[#9CA3AF] text-[10px]">{label}</span>
     </span>
   );
 }
 
-function ActionBtn({
-  icon, label, onClick, primary,
-}: { icon: React.ReactNode; label: string; onClick: () => void; primary?: boolean }) {
-  const base = "h-8 rounded-[10px] text-[11px] font-bold flex items-center justify-center gap-1 transition-colors px-2";
+function Sep() {
+  return <span className="text-[#E5E7EB] text-[10px]">·</span>;
+}
+
+function IconBtn({
+  icon, label, onClick, primary, danger, compact,
+}: { icon: React.ReactNode; label: string; onClick: () => void; primary?: boolean; danger?: boolean; compact?: boolean }) {
+  const size = compact ? "h-7 w-7" : "h-8 w-8";
   const cls = primary
-    ? "bg-[#0E6B5A] text-white hover:bg-[#0a574a]"
-    : "bg-[#F4F6FA] text-[#1F2937] hover:bg-[#ECEEF2]";
+    ? "bg-[#0E6B5A] text-white hover:bg-[#0a574a] border-[#0E6B5A]"
+    : danger
+      ? "bg-white text-[#B91C1C] hover:bg-[#FEE2E2] border-[#ECEEF2]"
+      : "bg-white text-[#1F2937] hover:bg-[#F4F6FA] border-[#ECEEF2]";
   return (
-    <button onClick={onClick} className={cn(base, cls)}>
-      {icon}<span className="truncate">{label}</span>
+    <button
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className={cn("rounded-[8px] border flex items-center justify-center transition-colors", size, cls)}
+    >
+      {icon}
     </button>
   );
 }
+
 
 function CityCombobox({ value, cities, onChange }: { value: string; cities: string[]; onChange: (city: string) => void }) {
   const [open, setOpen] = useState(false);
