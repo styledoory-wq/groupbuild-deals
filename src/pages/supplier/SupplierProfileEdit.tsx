@@ -420,11 +420,13 @@ export default function SupplierProfileEdit() {
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
               <ImageIcon className="h-3.5 w-3.5 text-[#0E6B5A]" /> גלריית עבודות
+              <span className="text-[10px] font-normal text-muted-foreground mr-auto">{gallery.length}/{MAX_GALLERY_IMAGES}</span>
             </Label>
             <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleGalleryUpload} />
-            <Button type="button" variant="outline" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery} className="h-9 rounded-xl text-xs w-full">
-              <Plus className="h-3.5 w-3.5 ml-1" /> {uploadingGallery ? "מעלה..." : "הוספת תמונות"}
+            <Button type="button" variant="outline" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery || gallery.length >= MAX_GALLERY_IMAGES} className="h-9 rounded-xl text-xs w-full">
+              <Plus className="h-3.5 w-3.5 ml-1" /> {uploadingGallery ? "מעלה..." : gallery.length >= MAX_GALLERY_IMAGES ? "הגעת למקסימום" : "הוספת תמונות"}
             </Button>
+
             {gallery.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {gallery.map((g, idx) => (
