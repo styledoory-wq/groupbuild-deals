@@ -122,7 +122,21 @@ export function describeOffer(p: Partial<OfferPricing>, participants = 0): Offer
   // Tiered offer takes precedence
   if (p.tiers && p.tiers.length > 0) {
     const active = getActiveTier(p.tiers, participants);
-    if (active) return describeTier(type, active);
+    if (active) {
+      const desc = describeTier(type, active);
+      // For percentage tiers, show max potential discount across all tiers
+      if (type === "percentage") {
+        const maxPct = Math.max(
+          ...p.tiers.map((t) => Number(t.discount_percentage || 0))
+        );
+        if (maxPct > 0 && maxPct !== desc.discountPercent) {
+          desc.savings = `חיסכון: עד ${maxPct}%`;
+        } else if (maxPct > 0) {
+          desc.savings = `חיסכון: עד ${maxPct}%`;
+        }
+      }
+      return desc;
+    }
   }
 
   if (type === "price_comparison" && p.original_price && p.discounted_price) {
