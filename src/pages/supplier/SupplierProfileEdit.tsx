@@ -138,12 +138,24 @@ export default function SupplierProfileEdit() {
     }
   };
 
+  const MAX_GALLERY_IMAGES = 6;
+
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
+    const remaining = MAX_GALLERY_IMAGES - gallery.length;
+    if (remaining <= 0) {
+      toast.error(`ניתן להעלות עד ${MAX_GALLERY_IMAGES} תמונות בלבד`);
+      if (galleryInputRef.current) galleryInputRef.current.value = "";
+      return;
+    }
+    const toUpload = files.slice(0, remaining);
+    if (files.length > remaining) {
+      toast.message(`הועלו ${remaining} תמונות בלבד (מקסימום ${MAX_GALLERY_IMAGES})`);
+    }
     setUploadingGallery(true);
     try {
-      for (const file of files) {
+      for (const file of toUpload) {
         const url = await uploadSupplierGalleryImage(file);
         setGallery((g) => [...g, { image_url: url, caption: null }]);
       }
@@ -155,6 +167,7 @@ export default function SupplierProfileEdit() {
       if (galleryInputRef.current) galleryInputRef.current.value = "";
     }
   };
+
 
   const handleCatalogUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
