@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2, Check, X, Trash2, RotateCcw, Archive, FileText, Calendar, Coins, Flame, TrendingUp, Clock, PlusCircle } from "lucide-react";
+import {
+  Inbox, Loader2, Phone, Mail, MessageCircle, Building2, CheckCircle2, Check, X,
+  Trash2, RotateCcw, Archive, Clock, PlusCircle, Search, ArrowUpDown, Star,
+  StickyNote, Send, Flame,
+} from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { ScreenHeader, LoadingState, ErrorState } from "@/components/ds";
@@ -9,6 +13,15 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ils } from "@/lib/offerPricing";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
@@ -33,6 +46,8 @@ type InterestRow = {
   estimated_quantity: number | null;
   lead_status: string | null;
   notes: string | null;
+  supplier_notes?: string | null;
+  supplier_starred?: boolean | null;
   is_deleted?: boolean;
   deleted_at?: string | null;
   direct_deposit_status?: string | null;
@@ -41,55 +56,25 @@ type InterestRow = {
   supplier_confirmed_at?: string | null;
 };
 type ProfileLite = { id: string; full_name: string | null; phone: string | null; email: string | null };
-type InquiryRow = {
-  id: string;
-  user_id: string;
-  full_name: string | null;
-  phone: string | null;
-  email: string | null;
-  city: string | null;
-  project_name: string | null;
-  category_id: string | null;
-  message: string | null;
-  source: string;
-  status: string;
-  created_at: string;
-  is_deleted?: boolean;
-  deleted_at?: string | null;
-};
-type QuoteRequestRow = {
-  id: string;
-  user_id: string;
-  project_id: string;
-  title: string;
-  description: string | null;
-  category_id: string | null;
-  supplier_id: string | null;
-  residents_count: number | null;
-  target_price_per_unit: number | null;
-  deadline: string | null;
-  status: string;
-  created_at: string;
-};
 
 const TRASH_DAYS = 30;
+const HOURS_24 = 24 * 3600_000;
+
+type LeadStage = "new" | "in_progress" | "offer_sent" | "closed";
+type TabKey = "all" | "new" | "in_progress" | "offer_sent" | "closed";
+type SortKey = "newest" | "oldest" | "status" | "deal" | "joiners";
+
 const daysLeftToPurge = (deletedAt?: string | null) => {
   if (!deletedAt) return TRASH_DAYS;
   const ms = new Date(deletedAt).getTime() + TRASH_DAYS * 86400_000 - Date.now();
   return Math.max(0, Math.ceil(ms / 86400_000));
 };
 
-type LeadStage = "new" | "in_progress" | "closed";
-type TabKey = "all" | "new" | "in_progress" | "closed";
-
-const HOURS_24 = 24 * 3600_000;
-const HOURS_72 = 72 * 3600_000;
-
 function initialsOf(name: string | null | undefined): string {
   const t = (name ?? "").trim();
   if (!t) return "ד";
   const parts = t.split(/\s+/);
-  return (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "");
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).trim() || "ד";
 }
 function avatarHue(seed: string): string {
   let h = 0;
@@ -109,12 +94,8 @@ function timeAgoHe(iso: string): string {
 }
 function interestStage(i: InterestRow): LeadStage {
   if (["paid", "committed"].includes(i.deposit_status) || i.direct_deposit_status === "confirmed_by_supplier") return "closed";
-  if (i.lead_status === "approved" || i.direct_deposit_status === "marked_paid_by_resident" || i.direct_deposit_status === "awaiting_payment") return "in_progress";
-  return "new";
-}
-function inquiryStage(q: InquiryRow): LeadStage {
-  if (q.status === "closed" || q.status === "won") return "closed";
-  if (q.status === "in_progress" || q.status === "contacted") return "in_progress";
+  if (i.lead_status === "approved" || i.direct_deposit_status === "marked_paid_by_resident" || i.direct_deposit_status === "awaiting_payment") return "offer_sent";
+  if (i.status === "pending_deposit") return "in_progress";
   return "new";
 }
 function isHot(createdAt: string, stage: LeadStage): boolean {
@@ -122,100 +103,27 @@ function isHot(createdAt: string, stage: LeadStage): boolean {
   return stage !== "closed" && age < HOURS_24;
 }
 
-function Avatar({ name }: { name: string }) {
-  return (
-    <div
-      className="h-11 w-11 rounded-full flex items-center justify-center text-[#0E6B5A] font-extrabold text-sm shrink-0"
-      style={{ background: avatarHue(name) }}
-      aria-hidden
-    >
-      {initialsOf(name).toUpperCase()}
-    </div>
-  );
-}
-
-function StageBadge({ stage, hot }: { stage: LeadStage; hot: boolean }) {
+function StageChip({ stage, hot }: { stage: LeadStage; hot: boolean }) {
+  const cfg: Record<LeadStage, { bg: string; fg: string; label: string }> = {
+    new:         { bg: "#ECFDF5", fg: "#059669", label: "חדש" },
+    in_progress: { bg: "#EFF6FF", fg: "#1D4ED8", label: "בטיפול" },
+    offer_sent:  { bg: "#F5F3FF", fg: "#6D28D9", label: "הצעה נשלחה" },
+    closed:      { bg: "#F1F5F9", fg: "#334155", label: "נסגר" },
+  };
   if (hot) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#FFF1ED] text-[#C2410C] border border-[#FED7AA]">
-        <Flame className="h-3 w-3" /> ליד חם
+      <span className="inline-flex items-center gap-1 px-2 h-5 rounded-full text-[10px] font-extrabold bg-[#FFF1ED] text-[#C2410C] border border-[#FED7AA]">
+        <Flame className="h-3 w-3" /> חם
       </span>
     );
   }
-  if (stage === "closed") {
-    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"><CheckCircle2 className="h-3 w-3" /> נסגר</span>;
-  }
-  if (stage === "in_progress") {
-    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE]">בטיפול</span>;
-  }
-  if (stage === "new") {
-    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">חדש</span>;
-  }
-  return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A]">ממתין</span>;
-}
-
-function KpiSmall({
-  icon, label, value, trend, tone,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  trend: string;
-  tone: "green" | "blue" | "amber" | "violet";
-}) {
-  const palette: Record<string, { bg: string; fg: string }> = {
-    green: { bg: "#ECFDF5", fg: "#059669" },
-    blue: { bg: "#EFF6FF", fg: "#1D4ED8" },
-    amber: { bg: "#FFFBEB", fg: "#B45309" },
-    violet: { bg: "#F5F3FF", fg: "#6D28D9" },
-  };
-  const c = palette[tone];
+  const c = cfg[stage];
   return (
-    <div className="bg-white rounded-xl border border-[#EEF0F3] px-2 py-2 shadow-sm">
-      <div className="flex items-center justify-between mb-1">
-        <div
-          className="h-5 w-5 rounded-md inline-flex items-center justify-center"
-          style={{ background: c.bg, color: c.fg }}
-        >
-          {icon}
-        </div>
-        <span className="text-[9px] font-bold leading-none" style={{ color: c.fg }}>{trend}</span>
-      </div>
-      <div className="text-[14px] font-black text-[#0F172A] leading-none">{value}</div>
-      <div className="text-[10px] text-muted-foreground mt-0.5 font-bold truncate">{label}</div>
-    </div>
+    <span className="inline-flex items-center gap-1 px-2 h-5 rounded-full text-[10px] font-extrabold border" style={{ background: c.bg, color: c.fg, borderColor: `${c.fg}33` }}>
+      {c.label}
+    </span>
   );
 }
-
-function EmptyHero({
-  icon, title, description, cta,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  cta?: { to: string; label: string };
-}) {
-  return (
-    <div className="bg-white rounded-3xl border border-[#EEF0F3] p-8 text-center shadow-sm">
-      <div className="mx-auto h-16 w-16 rounded-2xl bg-[#F0F9F6] flex items-center justify-center mb-3">
-        {icon}
-      </div>
-      <h3 className="text-[15px] font-extrabold text-[#0F172A]">{title}</h3>
-      <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">{description}</p>
-      {cta && (
-        <Link
-          to={cta.to}
-          className="mt-4 inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-[#0E6B5A] text-white text-[13px] font-extrabold"
-        >
-          <PlusCircle className="h-4 w-4" />
-          {cta.label}
-        </Link>
-      )}
-    </div>
-  );
-}
-
-
 
 export default function SupplierLeads() {
   const [loading, setLoading] = useState(true);
@@ -223,18 +131,17 @@ export default function SupplierLeads() {
   const [deals, setDeals] = useState<DealLite[]>([]);
   const [interests, setInterests] = useState<InterestRow[]>([]);
   const [trashedInterests, setTrashedInterests] = useState<InterestRow[]>([]);
-  const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
-  const [trashedInquiries, setTrashedInquiries] = useState<InquiryRow[]>([]);
-  const [quoteRequests, setQuoteRequests] = useState<QuoteRequestRow[]>([]);
-  const [requesterProfiles, setRequesterProfiles] = useState<Record<string, ProfileLite>>({});
   const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [statusBusy, setStatusBusy] = useState<string | null>(null);
   const [showTrash, setShowTrash] = useState(false);
   const [swipeId, setSwipeId] = useState<string | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<{ kind: "interest" | "inquiry"; id: string } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string } | null>(null);
   const [tab, setTab] = useState<TabKey>("all");
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("newest");
+  const [noteEdit, setNoteEdit] = useState<{ id: string; value: string } | null>(null);
   const touchStartX = useRef(0);
 
   const updateLeadStatus = async (interestId: string, status: "approved" | "rejected") => {
@@ -251,9 +158,41 @@ export default function SupplierLeads() {
         status: status === "approved" ? (i.deposit_required ? "pending_deposit" : "approved") : "rejected",
         deposit_status: status === "approved" && i.deposit_required ? "pending" : i.deposit_status,
       } : i)));
-      toast.success(status === "approved" ? "הליד אושר" : "הליד סומן כלא רלוונטי");
+      toast.success(status === "approved" ? "הליד אושר — סטטוס: הצעה נשלחה" : "הליד סומן כלא רלוונטי");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "עדכון נכשל");
+    } finally {
+      setStatusBusy(null);
+    }
+  };
+
+  const toggleStar = async (i: InterestRow) => {
+    const next = !i.supplier_starred;
+    setInterests((prev) => prev.map((x) => (x.id === i.id ? { ...x, supplier_starred: next } : x)));
+    try {
+      const { error } = await (supabase.rpc as any)("supplier_update_interest_meta", {
+        _interest_id: i.id, _starred: next, _notes: null,
+      });
+      if (error) throw error;
+    } catch (e) {
+      setInterests((prev) => prev.map((x) => (x.id === i.id ? { ...x, supplier_starred: !next } : x)));
+      toast.error(e instanceof Error ? e.message : "פעולה נכשלה");
+    }
+  };
+
+  const saveNotes = async () => {
+    if (!noteEdit) return;
+    setStatusBusy(noteEdit.id);
+    try {
+      const { error } = await (supabase.rpc as any)("supplier_update_interest_meta", {
+        _interest_id: noteEdit.id, _notes: noteEdit.value, _starred: null,
+      });
+      if (error) throw error;
+      setInterests((prev) => prev.map((x) => (x.id === noteEdit.id ? { ...x, supplier_notes: noteEdit.value } : x)));
+      toast.success("ההערה נשמרה");
+      setNoteEdit(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "שמירה נכשלה");
     } finally {
       setStatusBusy(null);
     }
@@ -294,62 +233,19 @@ export default function SupplierLeads() {
       setStatusBusy(null);
     }
   };
-  const softDeleteInquiry = async (id: string) => {
-    setStatusBusy(id);
-    try {
-      const { error } = await supabase.rpc("supplier_soft_delete_inquiry", { _inquiry_id: id });
-      if (error) throw error;
-      setInquiries((prev) => {
-        const removed = prev.find((i) => i.id === id);
-        if (removed) setTrashedInquiries((t) => [{ ...removed, is_deleted: true, deleted_at: new Date().toISOString() }, ...t]);
-        return prev.filter((i) => i.id !== id);
-      });
-      setSwipeId(null);
-      toast.success(`הועבר לסל מחזור · ימחק בעוד ${TRASH_DAYS} ימים`);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "מחיקה נכשלה");
-    } finally {
-      setStatusBusy(null);
-    }
-  };
-  const restoreInquiry = async (id: string) => {
-    setStatusBusy(id);
-    try {
-      const { error } = await supabase.rpc("supplier_restore_inquiry", { _inquiry_id: id });
-      if (error) throw error;
-      setTrashedInquiries((prev) => {
-        const restored = prev.find((i) => i.id === id);
-        if (restored) setInquiries((arr) => [{ ...restored, is_deleted: false, deleted_at: null }, ...arr]);
-        return prev.filter((i) => i.id !== id);
-      });
-      toast.success("הפנייה שוחזרה");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "שחזור נכשל");
-    } finally {
-      setStatusBusy(null);
-    }
-  };
 
   const markDepositPaid = async (userId: string, dealId: string) => {
     const key = userId + dealId;
     setBusyKey(key);
     try {
       const { data: pending, error: pErr } = await supabase
-        .from("deposits")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("deal_id", dealId)
-        .eq("status", "pending")
-        .eq("is_deleted", false)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .from("deposits").select("id").eq("user_id", userId).eq("deal_id", dealId)
+        .eq("status", "pending").eq("is_deleted", false)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
       if (pErr) throw pErr;
       if (!pending) { toast.message("אין פיקדון ממתין לאישור"); return; }
-      const { error: uErr } = await supabase
-        .from("deposits")
-        .update({ status: "paid", paid_at: new Date().toISOString() })
-        .eq("id", pending.id);
+      const { error: uErr } = await supabase.from("deposits")
+        .update({ status: "paid", paid_at: new Date().toISOString() }).eq("id", pending.id);
       if (uErr) throw uErr;
       setInterests((prev) => prev.map((i) => (
         i.user_id === userId && i.deal_id === dealId
@@ -370,12 +266,9 @@ export default function SupplierLeads() {
       const { error } = await supabase.rpc("supplier_confirm_deposit", { _interest_id: interestId });
       if (error) throw error;
       setInterests((prev) => prev.map((i) => (i.id === interestId ? {
-        ...i,
-        direct_deposit_status: "confirmed_by_supplier",
+        ...i, direct_deposit_status: "confirmed_by_supplier",
         supplier_confirmed_at: new Date().toISOString(),
-        status: "paid",
-        lead_status: "approved",
-        deposit_status: "paid",
+        status: "paid", lead_status: "approved", deposit_status: "paid",
       } : i)));
       toast.success("הפיקדון אושר — הדייר הצטרף לעסקה");
     } catch (e) {
@@ -392,10 +285,7 @@ export default function SupplierLeads() {
     try {
       const { error } = await supabase.rpc("supplier_dispute_deposit", { _interest_id: interestId, _reason: reason || null });
       if (error) throw error;
-      setInterests((prev) => prev.map((i) => (i.id === interestId ? {
-        ...i,
-        direct_deposit_status: "disputed",
-      } : i)));
+      setInterests((prev) => prev.map((i) => (i.id === interestId ? { ...i, direct_deposit_status: "disputed" } : i)));
       toast.success("סומן כלא התקבל — הדייר קיבל הודעה");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "פעולה נכשלה");
@@ -407,10 +297,7 @@ export default function SupplierLeads() {
   useEffect(() => {
     let cancelled = false;
     const safety = window.setTimeout(() => {
-      if (!cancelled) {
-        setError("טעינת הלידים נמשכת יותר מדי זמן. נסו לרענן את המסך.");
-        setLoading(false);
-      }
+      if (!cancelled) { setError("טעינת הלידים נמשכת יותר מדי זמן. נסו לרענן."); setLoading(false); }
     }, 12000);
     (async () => {
       try {
@@ -434,25 +321,13 @@ export default function SupplierLeads() {
         const allDeals = (dealsData ?? []) as Array<DealLite & { is_deleted?: boolean }>;
         if (!cancelled) setDeals(allDeals);
 
-        // Inquiries (active + trashed)
-        const { data: inqData } = await supabase
-          .from("supplier_inquiries")
-          .select("id,user_id,full_name,phone,email,city,project_name,category_id,message,source,status,created_at,is_deleted,deleted_at")
-          .eq("supplier_id", sup.id)
-          .order("created_at", { ascending: false });
-        const allInq = (inqData ?? []) as InquiryRow[];
-        if (!cancelled) {
-          setInquiries(allInq.filter((q) => !q.is_deleted));
-          setTrashedInquiries(allInq.filter((q) => q.is_deleted));
-        }
-
         let activeList: InterestRow[] = [];
         let trashedList: InterestRow[] = [];
         if (allDeals.length) {
           const dealIds = allDeals.map((d) => d.id);
-          const { data: ints, error: iErr } = await supabase
-            .from("deal_interests")
-            .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes,is_deleted,deleted_at,direct_deposit_status,direct_deposit_amount,resident_marked_paid_at,supplier_confirmed_at")
+          const { data: ints, error: iErr } = await (supabase
+            .from("deal_interests") as any)
+            .select("id,user_id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at,is_demo,full_name,phone,city,project_name,estimated_quantity,lead_status,notes,supplier_notes,supplier_starred,is_deleted,deleted_at,direct_deposit_status,direct_deposit_amount,resident_marked_paid_at,supplier_confirmed_at")
             .in("deal_id", dealIds)
             .eq("is_demo", false)
             .order("created_at", { ascending: false });
@@ -463,18 +338,8 @@ export default function SupplierLeads() {
           if (!cancelled) { setInterests(activeList); setTrashedInterests(trashedList); }
         }
 
-        // Committee quote requests addressed to this supplier OR matching their categories (RLS-protected)
-        const { data: qrData } = await supabase
-          .from("committee_quote_requests")
-          .select("id,user_id,project_id,title,description,category_id,supplier_id,residents_count,target_price_per_unit,deadline,status,created_at")
-          .eq("status", "open")
-          .order("created_at", { ascending: false });
-        const qrs = (qrData ?? []) as QuoteRequestRow[];
-        if (!cancelled) setQuoteRequests(qrs);
-
         const userIds = Array.from(new Set([
           ...activeList.map((i) => i.user_id), ...trashedList.map((i) => i.user_id),
-          ...allInq.map((i) => i.user_id),
         ]));
         if (userIds.length) {
           const { data: profs } = await supabase
@@ -482,15 +347,6 @@ export default function SupplierLeads() {
           const map: Record<string, ProfileLite> = {};
           (profs ?? []).forEach((p) => { map[(p as ProfileLite).id] = p as ProfileLite; });
           if (!cancelled) setProfiles(map);
-        }
-
-        const qrUserIds = Array.from(new Set(qrs.map((q) => q.user_id)));
-        if (qrUserIds.length) {
-          const { data: rprofs } = await supabase
-            .from("profiles").select("id,full_name,phone,email").in("id", qrUserIds);
-          const rmap: Record<string, ProfileLite> = {};
-          (rprofs ?? []).forEach((p) => { rmap[(p as ProfileLite).id] = p as ProfileLite; });
-          if (!cancelled) setRequesterProfiles(rmap);
         }
       } catch (e) {
         console.error("[SupplierLeads] load error", e);
@@ -508,11 +364,7 @@ export default function SupplierLeads() {
     const d = deals.find((x) => x.id === id);
     return d?.cover_image_url || (d?.gallery_images && d.gallery_images[0]) || null;
   };
-  const totalActive = interests.length + inquiries.length;
-  const totalTrashed = trashedInterests.length + trashedInquiries.length;
 
-  // Swipe handlers — in RTL, "swipe right" means moving the finger toward the right side of the screen.
-  // We reveal the delete action when the user swipes right by >60px (or left by >60px to support both directions).
   const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
   const makeSwipeEnd = (id: string) => (e: React.TouchEvent) => {
     const dx = e.changedTouches[0].clientX - touchStartX.current;
@@ -520,347 +372,294 @@ export default function SupplierLeads() {
     else if (Math.abs(dx) < 10 && swipeId === id) setSwipeId(null);
   };
 
-  const renderInquiry = (q: InquiryRow, trashed: boolean) => {
-    const p = profiles[q.user_id];
-    const name = q.full_name?.trim() || p?.full_name?.trim() || "דייר";
-    const phone = q.phone?.trim() || p?.phone?.trim() || null;
-    const email = q.email || p?.email || null;
-    const wa = normalizeWhatsappUrl(phone);
-    const isSwiped = swipeId === q.id && !trashed;
-    return (
-      <div key={q.id} className="relative overflow-hidden rounded-2xl">
-        {isSwiped && (
-          <button onClick={() => setConfirmDelete({ kind: "inquiry", id: q.id })}
-            className="absolute top-0 bottom-0 left-0 w-20 bg-destructive text-destructive-foreground rounded-2xl flex items-center justify-center gap-1 text-fs-xs font-bold z-0">
-            <Trash2 className="h-4 w-4" /> מחק
-          </button>
-        )}
-        <div
-          className="gb-card p-4 border-r-4 border-[#0E6B5A]/60 transition-transform relative z-10"
-          style={isSwiped ? { transform: "translateX(80px)" } : undefined}
-          onTouchStart={trashed ? undefined : onTouchStart}
-          onTouchEnd={trashed ? undefined : makeSwipeEnd(q.id)}
-        >
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="flex items-start gap-2.5 min-w-0">
-              <Avatar name={name} />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <h4 className="font-extrabold text-[15px] text-foreground truncate">{name}</h4>
-                  <StageBadge stage={inquiryStage(q)} hot={isHot(q.created_at, inquiryStage(q))} />
-                </div>
-                <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#F0F9F6] text-[#0E6B5A] border border-[#A7E0D0]">
-                  <Clock className="h-3 w-3" /> {timeAgoHe(q.created_at)} · פנייה כללית
-                </div>
-              </div>
-            </div>
-            {!trashed && (
-              <button
-                onClick={() => setConfirmDelete({ kind: "inquiry", id: q.id })}
-                disabled={statusBusy === q.id}
-                aria-label="מחק פנייה"
-                className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 disabled:opacity-50 shrink-0"
-              >
-                {statusBusy === q.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-              </button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-fs-xs text-muted-foreground mb-2">
-            {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
-            {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
-            {q.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {q.city}</span>}
-            {q.project_name && <span className="inline-flex items-center gap-1"><Building2 className="h-3 w-3" /> {q.project_name}</span>}
-            <span>נרשם: {new Date(q.created_at).toLocaleDateString("he-IL")}</span>
-          </div>
-          {trashed ? (
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-fs-xs text-muted-foreground">ימחק בעוד {daysLeftToPurge(q.deleted_at)} ימים</span>
-              <button onClick={() => restoreInquiry(q.id)} disabled={statusBusy === q.id}
-                className="h-8 px-3 rounded-lg bg-muted text-foreground text-fs-xs font-bold inline-flex items-center gap-1 disabled:opacity-50">
-                <RotateCcw className="h-3 w-3" /> שחזר
-              </button>
-            </div>
-          ) : (
-            <>
-              {(phone || wa) && (
-                <div className="flex gap-2 mt-2">
-                  {phone && <a href={`tel:${phone}`} className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#0E6B5A] text-white">חיוג</a>}
-                  {wa && (
-                    <a href={wa} target="_blank" rel="noreferrer" className="flex-1 text-center text-fs-xs font-bold py-2 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] inline-flex items-center justify-center gap-1">
-                      <MessageCircle className="h-3 w-3" /> וואטסאפ
-                    </a>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    );
-  };
+  // === Stats ===
+  const stats = useMemo(() => {
+    let s_new = 0, s_in = 0, s_off = 0, s_closed = 0;
+    for (const i of interests) {
+      const st = interestStage(i);
+      if (st === "new") s_new++;
+      else if (st === "in_progress") s_in++;
+      else if (st === "offer_sent") s_off++;
+      else s_closed++;
+    }
+    return { total: interests.length, new: s_new, in_progress: s_in, offer_sent: s_off, closed: s_closed };
+  }, [interests]);
 
-  const renderInterest = (i: InterestRow, trashed: boolean) => {
+  // === Filter + search + sort ===
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let arr = interests.filter((i) => tab === "all" || interestStage(i) === tab);
+    if (q) {
+      arr = arr.filter((i) => {
+        const p = profiles[i.user_id];
+        const name = (i.full_name || p?.full_name || "").toLowerCase();
+        const phone = (i.phone || p?.phone || "").toLowerCase();
+        const proj = (i.project_name || "").toLowerCase();
+        const deal = dealTitle(i.deal_id).toLowerCase();
+        return name.includes(q) || phone.includes(q) || proj.includes(q) || deal.includes(q);
+      });
+    }
+    const stageOrder: Record<LeadStage, number> = { new: 0, in_progress: 1, offer_sent: 2, closed: 3 };
+    const sorted = [...arr];
+    if (sort === "newest") sorted.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+    else if (sort === "oldest") sorted.sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at));
+    else if (sort === "status") sorted.sort((a, b) => stageOrder[interestStage(a)] - stageOrder[interestStage(b)]);
+    else if (sort === "deal") sorted.sort((a, b) => dealTitle(a.deal_id).localeCompare(dealTitle(b.deal_id), "he"));
+    else if (sort === "joiners") sorted.sort((a, b) => (b.estimated_quantity ?? 0) - (a.estimated_quantity ?? 0));
+    // Starred first regardless of sort
+    sorted.sort((a, b) => Number(!!b.supplier_starred) - Number(!!a.supplier_starred));
+    return sorted;
+  }, [interests, profiles, tab, query, sort, deals]);
+
+  const renderLead = (i: InterestRow, trashed: boolean) => {
     const p = profiles[i.user_id];
     const name = i.full_name?.trim() || p?.full_name?.trim() || "דייר";
     const phone = i.phone?.trim() || p?.phone?.trim() || null;
     const email = p?.email ?? null;
     const wa = normalizeWhatsappUrl(phone);
-    const committed = i.deposit_required && ["committed", "paid"].includes(i.deposit_status);
     const stage = interestStage(i);
     const hot = isHot(i.created_at, stage);
     const cover = dealCover(i.deal_id);
     const isSwiped = swipeId === i.id && !trashed;
+    const starred = !!i.supplier_starred;
+    const joiners = i.estimated_quantity ?? 1;
+
     return (
       <div key={i.id} className="relative overflow-hidden rounded-2xl">
         {isSwiped && (
-          <button onClick={() => setConfirmDelete({ kind: "interest", id: i.id })}
-            className="absolute top-0 bottom-0 left-0 w-20 bg-destructive text-destructive-foreground rounded-2xl flex items-center justify-center gap-1 text-fs-xs font-bold z-0">
+          <button onClick={() => setConfirmDelete({ id: i.id })}
+            className="absolute top-0 bottom-0 left-0 w-20 bg-destructive text-destructive-foreground rounded-2xl flex items-center justify-center gap-1 text-[12px] font-bold z-0">
             <Trash2 className="h-4 w-4" /> מחק
           </button>
         )}
         <div
-          className="gb-card p-3.5 transition-transform relative z-10"
+          className="bg-white rounded-2xl border border-[#EEF0F3] p-3 transition-transform relative z-10"
           style={isSwiped ? { transform: "translateX(80px)" } : undefined}
           onTouchStart={trashed ? undefined : onTouchStart}
           onTouchEnd={trashed ? undefined : makeSwipeEnd(i.id)}
         >
-          {/* Header: avatar + name + status + time */}
-          <div className="flex items-start gap-2.5 mb-2">
-            <Avatar name={name} />
+          {/* Row 1: cover + name/deal/meta + star */}
+          <div className="flex items-start gap-2.5">
+            {cover ? (
+              <img src={cover} alt="" loading="lazy"
+                className="h-14 w-14 rounded-xl object-cover shrink-0 border border-[#EEF0F3]" />
+            ) : (
+              <div className="h-14 w-14 rounded-xl flex items-center justify-center text-[#0E6B5A] font-extrabold text-[15px] shrink-0"
+                style={{ background: avatarHue(name) }}>
+                {initialsOf(name).toUpperCase()}
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="font-extrabold text-[15px] text-foreground truncate">{name}</h4>
-                <StageBadge stage={stage} hot={hot} />
+                <h4 className="font-extrabold text-[14px] text-foreground truncate max-w-[150px]">{name}</h4>
+                <StageChip stage={stage} hot={hot} />
               </div>
-              <div className="mt-0.5 text-[11px] text-muted-foreground inline-flex items-center gap-1 flex-wrap">
+              <Link to={`/deals/${i.deal_id}`}
+                className="block text-[12px] text-[#0E6B5A] font-bold truncate mt-0.5">
+                {i.project_name || dealTitle(i.deal_id)}
+              </Link>
+              <div className="mt-0.5 text-[11px] text-muted-foreground inline-flex items-center gap-1.5">
                 <Clock className="h-3 w-3" /> {timeAgoHe(i.created_at)}
-                {i.city && <><span className="opacity-50">·</span><MapPin className="h-3 w-3" />{i.city}</>}
+                <span className="opacity-50">·</span>
+                <span>{joiners} {joiners === 1 ? "מצטרף" : "מצטרפים"}</span>
               </div>
             </div>
-            {committed && (
-              <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30 shrink-0 self-start">
-                <BadgeCheck className="h-3 w-3" />
-                {i.deposit_status === "paid" ? "שולם" : ils(Number(i.deposit_amount))}
-              </span>
+            {!trashed && (
+              <button onClick={() => toggleStar(i)} aria-label={starred ? "הסר חשוב" : "סמן חשוב"}
+                className="h-8 w-8 rounded-lg inline-flex items-center justify-center shrink-0"
+                style={{
+                  background: starred ? "#FFFBEB" : "transparent",
+                  color: starred ? "#B45309" : "#94A3B8",
+                }}>
+                <Star className="h-4 w-4" fill={starred ? "#F59E0B" : "none"} />
+              </button>
             )}
           </div>
 
-          {/* Single project/deal row + contact info — no duplicate cover card */}
-          <div className="space-y-1 mb-2">
-            <Link to={`/deals/${i.deal_id}`} className="text-[12px] text-[#0E6B5A] font-bold inline-flex items-center gap-1 truncate max-w-full">
-              <Building2 className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{i.project_name || dealTitle(i.deal_id)}</span>
-            </Link>
-            {(phone || email) && (
-              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
-                {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
-                {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
+          {/* Internal notes preview */}
+          {i.supplier_notes && (
+            <button onClick={() => setNoteEdit({ id: i.id, value: i.supplier_notes ?? "" })}
+              className="mt-2 w-full text-right text-[11px] text-foreground/80 bg-[#FFFBEB] border border-[#FDE68A] rounded-lg px-2 py-1.5 flex items-start gap-1.5">
+              <StickyNote className="h-3 w-3 mt-0.5 shrink-0 text-[#B45309]" />
+              <span className="line-clamp-2 whitespace-pre-line">{i.supplier_notes}</span>
+            </button>
+          )}
+
+          {/* Direct deposit blocks */}
+          {!trashed && i.direct_deposit_status === "marked_paid_by_resident" && (
+            <div className="mt-2 rounded-xl border border-[#0E6B5A] bg-[#F0F9F6] p-2">
+              <div className="text-[11px] font-bold text-[#0E6B5A] mb-1.5">
+                דייר סימן ששילם {ils(Number(i.direct_deposit_amount ?? i.deposit_amount))}
               </div>
-            )}
-          </div>
-
-          {i.notes && (
-            <p className="text-[11px] text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">{i.notes}</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button onClick={() => confirmDirectDeposit(i.id)} disabled={statusBusy === i.id}
+                  className="h-8 rounded-md bg-[#0E6B5A] text-white text-[11px] font-bold inline-flex items-center justify-center gap-1 disabled:opacity-50">
+                  <CheckCircle2 className="h-3 w-3" /> אשר
+                </button>
+                <button onClick={() => disputeDirectDeposit(i.id)} disabled={statusBusy === i.id}
+                  className="h-8 rounded-md bg-destructive/10 text-destructive border border-destructive/30 text-[11px] font-bold inline-flex items-center justify-center gap-1 disabled:opacity-50">
+                  <X className="h-3 w-3" /> לא התקבל
+                </button>
+              </div>
+            </div>
           )}
 
           {trashed ? (
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-fs-xs text-muted-foreground">ימחק בעוד {daysLeftToPurge(i.deleted_at)} ימים</span>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <span className="text-[11px] text-muted-foreground">ימחק בעוד {daysLeftToPurge(i.deleted_at)} ימים</span>
               <button onClick={() => restoreInterest(i.id)} disabled={statusBusy === i.id}
                 className="h-7 px-2.5 rounded-md bg-muted text-foreground text-[11px] font-bold inline-flex items-center gap-1 disabled:opacity-50">
                 <RotateCcw className="h-3 w-3" /> שחזר
               </button>
             </div>
           ) : (
-            <>
-              {/* Direct deposit (resident → supplier) confirmation */}
-              {i.direct_deposit_status === "marked_paid_by_resident" && (
-                <div className="mb-2 rounded-xl border-2 border-[#0E6B5A] bg-[#F0F9F6] p-2.5">
-                  <div className="text-[11px] font-bold text-[#0E6B5A] mb-1 inline-flex items-center gap-1">
-                    <Coins className="h-3.5 w-3.5" /> דייר סימן ששילם פיקדון של {ils(Number(i.direct_deposit_amount ?? i.deposit_amount))}
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <button onClick={() => confirmDirectDeposit(i.id)}
-                      disabled={statusBusy === i.id}
-                      className="h-8 rounded-md bg-[#0E6B5A] text-white text-[11px] font-bold flex items-center justify-center gap-1 disabled:opacity-50">
-                      <CheckCircle2 className="h-3 w-3" /> אשר קבלה
-                    </button>
-                    <button onClick={() => disputeDirectDeposit(i.id)}
-                      disabled={statusBusy === i.id}
-                      className="h-8 rounded-md bg-destructive/10 text-destructive border border-destructive/30 text-[11px] font-bold flex items-center justify-center gap-1 disabled:opacity-50">
-                      <X className="h-3 w-3" /> לא התקבל
-                    </button>
-                  </div>
-                </div>
+            /* Quick action bar */
+            <div className="mt-2.5 flex items-center gap-1">
+              {phone ? (
+                <a href={`tel:${phone}`} aria-label="חיוג"
+                  className="flex-1 h-9 rounded-lg bg-[#0E6B5A] text-white text-[11px] font-extrabold inline-flex items-center justify-center gap-1">
+                  <Phone className="h-3.5 w-3.5" /> חיוג
+                </a>
+              ) : <div className="flex-1 h-9 rounded-lg bg-muted/40 text-muted-foreground text-[11px] inline-flex items-center justify-center">אין טלפון</div>}
+              {wa && (
+                <a href={wa} target="_blank" rel="noreferrer" aria-label="וואטסאפ"
+                  className="flex-1 h-9 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] text-[11px] font-extrabold inline-flex items-center justify-center gap-1">
+                  <MessageCircle className="h-3.5 w-3.5" /> וואטסאפ
+                </a>
               )}
-              {i.direct_deposit_status === "awaiting_payment" && (
-                <div className="mb-2 text-[11px] text-muted-foreground bg-muted/50 rounded-md px-2 py-1.5">
-                  ממתין שהדייר יעביר את הפיקדון
-                </div>
-              )}
-              {i.direct_deposit_status === "confirmed_by_supplier" && (
-                <div className="mb-2 text-[11px] text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] rounded-md px-2 py-1.5 inline-flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" /> פיקדון אושר על ידך
-                </div>
-              )}
-              {i.direct_deposit_status === "disputed" && (
-                <div className="mb-2 text-[11px] text-destructive bg-destructive/10 border border-destructive/30 rounded-md px-2 py-1.5">
-                  סומן כלא התקבל
-                </div>
-              )}
-
-              {/* Compact action row */}
-              <div className="flex items-center gap-1.5">
-                {phone && (
-                  <a href={`tel:${phone}`} aria-label="חיוג"
-                    className="h-8 px-3 rounded-md bg-[#0E6B5A] text-white text-[11px] font-extrabold inline-flex items-center justify-center gap-1">
-                    <Phone className="h-3 w-3" /> חיוג
-                  </a>
-                )}
-                {wa && (
-                  <a href={wa} target="_blank" rel="noreferrer" aria-label="וואטסאפ"
-                    className="h-8 px-3 rounded-md bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] text-[11px] font-extrabold inline-flex items-center justify-center gap-1">
-                    <MessageCircle className="h-3 w-3" /> וואטסאפ
-                  </a>
-                )}
-                <div className="flex-1" />
-                {i.lead_status !== "approved" && (
-                  <button onClick={() => updateLeadStatus(i.id, "approved")}
-                    disabled={statusBusy === i.id}
-                    aria-label="אשר ליד"
-                    className="h-8 w-8 rounded-md bg-[#059669] text-white inline-flex items-center justify-center disabled:opacity-50">
-                    <Check className="h-3.5 w-3.5" />
-                  </button>
-                )}
-                {i.lead_status !== "rejected" && (
-                  <button onClick={() => updateLeadStatus(i.id, "rejected")}
-                    disabled={statusBusy === i.id}
-                    aria-label="לא רלוונטי"
-                    className="h-8 w-8 rounded-md bg-muted text-foreground inline-flex items-center justify-center disabled:opacity-50">
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-                <button
-                  onClick={() => setConfirmDelete({ kind: "interest", id: i.id })}
-                  disabled={statusBusy === i.id}
-                  aria-label="מחק ליד"
-                  className="h-8 w-8 rounded-md bg-destructive/10 text-destructive inline-flex items-center justify-center disabled:opacity-50"
-                >
-                  {statusBusy === i.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                </button>
-              </div>
-
-              {isAdmin && i.deposit_required && i.deposit_status !== "paid" && (
-                <button onClick={() => markDepositPaid(i.user_id, i.deal_id)}
-                  disabled={busyKey === i.user_id + i.deal_id}
-                  className="mt-2 w-full text-[11px] font-bold py-1.5 rounded-md bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/40 inline-flex items-center justify-center gap-1 disabled:opacity-50">
-                  <CheckCircle2 className="h-3 w-3" /> סמן פיקדון כשולם (אדמין)
+              {i.lead_status !== "approved" && (
+                <button onClick={() => updateLeadStatus(i.id, "approved")} disabled={statusBusy === i.id}
+                  aria-label="שלח הצעה"
+                  className="flex-1 h-9 rounded-lg bg-[#EEF2FF] text-[#3730A3] border border-[#C7D2FE] text-[11px] font-extrabold inline-flex items-center justify-center gap-1 disabled:opacity-50">
+                  <Send className="h-3.5 w-3.5" /> הצעה
                 </button>
               )}
-            </>
+              <button onClick={() => setNoteEdit({ id: i.id, value: i.supplier_notes ?? "" })}
+                aria-label="הערה" title="הערה פנימית"
+                className="h-9 w-9 rounded-lg bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A] inline-flex items-center justify-center shrink-0">
+                <StickyNote className="h-4 w-4" />
+              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button aria-label="עוד"
+                    className="h-9 w-9 rounded-lg bg-muted text-foreground inline-flex items-center justify-center shrink-0">
+                    ⋯
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="text-[12px]">
+                  {email && (
+                    <DropdownMenuItem onClick={() => window.location.assign(`mailto:${email}`)}>
+                      <Mail className="h-3.5 w-3.5 ml-1" /> שלח אימייל
+                    </DropdownMenuItem>
+                  )}
+                  {i.lead_status !== "rejected" && (
+                    <DropdownMenuItem onClick={() => updateLeadStatus(i.id, "rejected")}>
+                      <X className="h-3.5 w-3.5 ml-1" /> סמן כלא רלוונטי
+                    </DropdownMenuItem>
+                  )}
+                  {isAdmin && i.deposit_required && i.deposit_status !== "paid" && (
+                    <DropdownMenuItem onClick={() => markDepositPaid(i.user_id, i.deal_id)}
+                      disabled={busyKey === i.user_id + i.deal_id}>
+                      <Check className="h-3.5 w-3.5 ml-1" /> סמן פיקדון כשולם (אדמין)
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-destructive" onClick={() => setConfirmDelete({ id: i.id })}>
+                    <Trash2 className="h-3.5 w-3.5 ml-1" /> מחק ליד
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
         </div>
       </div>
     );
   };
 
-  // --- CRM stats & filtering ---
-  const stats = useMemo(() => {
-    const allLeads = [
-      ...interests.map((i) => ({ created_at: i.created_at, stage: interestStage(i), revenue: Number(i.deposit_amount ?? 0) })),
-      ...inquiries.map((q) => ({ created_at: q.created_at, stage: inquiryStage(q), revenue: 0 })),
-    ];
-    const now = Date.now();
-    const newThisWeek = allLeads.filter((l) => now - new Date(l.created_at).getTime() < 7 * 86400_000).length;
-    const newToday = allLeads.filter((l) => now - new Date(l.created_at).getTime() < HOURS_24).length;
-    const closed = allLeads.filter((l) => l.stage === "closed").length;
-    const conversion = allLeads.length ? Math.round((closed / allLeads.length) * 100) : 0;
-    const expectedRevenue = interests
-      .filter((i) => interestStage(i) !== "closed" && i.deposit_required)
-      .reduce((s, i) => s + Number(i.deposit_amount ?? 0), 0);
-    // avg response time: time between created_at and supplier_confirmed_at (interests only)
-    const responded = interests.filter((i) => i.supplier_confirmed_at);
-    const avgRespHours = responded.length
-      ? Math.round(
-          (responded.reduce((s, i) => s + (new Date(i.supplier_confirmed_at!).getTime() - new Date(i.created_at).getTime()), 0) /
-            responded.length) /
-            3600_000,
-        )
-      : null;
-    return { total: allLeads.length, newThisWeek, newToday, closed, conversion, expectedRevenue, avgRespHours };
-  }, [interests, inquiries]);
-
-  const filteredInterests = useMemo(() => {
-    if (tab === "all") return interests;
-    return interests.filter((i) => interestStage(i) === tab);
-  }, [interests, tab]);
-  const filteredInquiries = useMemo(() => {
-    if (tab === "all") return inquiries;
-    return inquiries.filter((q) => inquiryStage(q) === tab);
-  }, [inquiries, tab]);
-
-  const tabCounts = useMemo(() => ({
-    all: interests.length + inquiries.length,
-    new: interests.filter((i) => interestStage(i) === "new").length + inquiries.filter((q) => inquiryStage(q) === "new").length,
-    in_progress: interests.filter((i) => interestStage(i) === "in_progress").length + inquiries.filter((q) => inquiryStage(q) === "in_progress").length,
-    closed: interests.filter((i) => interestStage(i) === "closed").length + inquiries.filter((q) => inquiryStage(q) === "closed").length,
-  }), [interests, inquiries]);
-
-  const filteredEmpty = filteredInterests.length === 0 && filteredInquiries.length === 0;
+  const totalTrashed = trashedInterests.length;
 
   return (
     <MobileShell>
-      <ScreenHeader title="לידים ופניות" subtitle="ה-CRM שלך לניהול דיירים פוטנציאליים" />
+      <ScreenHeader title="לידים" subtitle="ניהול לקוחות והמרות" />
 
-      <div className="px-4 -mt-4 relative z-10 pb-24 space-y-3">
+      <div className="px-4 -mt-4 relative z-10 pb-24 space-y-2.5">
         {loading ? (
           <LoadingState />
         ) : error ? (
           <ErrorState title="שגיאה בטעינה" description={error} />
         ) : (
           <>
-            {/* === Compact summary strip === */}
-            <div className="flex items-center justify-between gap-2 px-1 pt-1">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[22px] font-black leading-none text-foreground">{stats.total}</span>
-                <span className="text-[12px] text-muted-foreground font-bold">לידים פעילים</span>
-              </div>
-              <div className="text-[11px] text-muted-foreground inline-flex items-center gap-2">
-                <span className="inline-flex items-center gap-0.5 text-[#059669] font-bold">
-                  <TrendingUp className="h-3 w-3" /> {stats.newThisWeek} השבוע
-                </span>
-                <span className="opacity-50">·</span>
-                <span>{stats.conversion}% המרה</span>
-              </div>
+            {/* Compact stats strip */}
+            <div className="flex items-center justify-between gap-2 px-1 text-[11px] font-bold">
+              <span><span className="text-[#059669]">{stats.new}</span> <span className="text-muted-foreground">חדשים</span></span>
+              <span className="text-muted-foreground/40">·</span>
+              <span><span className="text-[#1D4ED8]">{stats.in_progress}</span> <span className="text-muted-foreground">בטיפול</span></span>
+              <span className="text-muted-foreground/40">·</span>
+              <span><span className="text-[#6D28D9]">{stats.offer_sent}</span> <span className="text-muted-foreground">הצעה</span></span>
+              <span className="text-muted-foreground/40">·</span>
+              <span><span className="text-[#334155]">{stats.closed}</span> <span className="text-muted-foreground">נסגרו</span></span>
             </div>
 
-            {/* === Tabs (filters) === */}
-            <div className="flex items-center gap-1 bg-white rounded-2xl p-1 border border-[#EEF0F3] overflow-x-auto">
+            {/* Search + Sort */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="חיפוש לפי שם, טלפון, פרויקט או הצעה"
+                  className="w-full h-10 rounded-xl bg-white border border-[#EEF0F3] pr-8 pl-3 text-[12px] font-medium text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-[#0E6B5A]"
+                />
+                {query && (
+                  <button onClick={() => setQuery("")} aria-label="נקה"
+                    className="absolute left-1.5 top-1/2 -translate-y-1/2 h-6 w-6 inline-flex items-center justify-center text-muted-foreground">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="h-10 px-3 rounded-xl bg-white border border-[#EEF0F3] inline-flex items-center gap-1 text-[12px] font-bold text-foreground shrink-0">
+                    <ArrowUpDown className="h-3.5 w-3.5" /> מיון
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="text-[12px]">
+                  <DropdownMenuLabel>מיון לפי</DropdownMenuLabel>
+                  <DropdownMenuRadioGroup value={sort} onValueChange={(v) => setSort(v as SortKey)}>
+                    <DropdownMenuRadioItem value="newest">חדש ביותר</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="oldest">ישן ביותר</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="status">סטטוס</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="deal">הצעה</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="joiners">מספר מצטרפים</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex items-center gap-1 bg-white rounded-xl p-1 border border-[#EEF0F3] overflow-x-auto">
               {([
-                { k: "all", label: "הכל" },
-                { k: "new", label: "חדשים" },
-                { k: "in_progress", label: "בטיפול" },
-                { k: "closed", label: "נסגרו" },
-              ] as { k: TabKey; label: string }[]).map((t) => {
+                { k: "all", label: "הכל", count: stats.total },
+                { k: "new", label: "חדשים", count: stats.new },
+                { k: "in_progress", label: "בטיפול", count: stats.in_progress },
+                { k: "offer_sent", label: "הצעה", count: stats.offer_sent },
+                { k: "closed", label: "נסגרו", count: stats.closed },
+              ] as { k: TabKey; label: string; count: number }[]).map((t) => {
                 const active = tab === t.k;
-                const count = tabCounts[t.k];
                 return (
-                  <button
-                    key={t.k}
-                    onClick={() => setTab(t.k)}
+                  <button key={t.k} onClick={() => setTab(t.k)}
                     className={
-                      "flex-1 min-w-[64px] h-9 rounded-xl text-[12px] font-extrabold inline-flex items-center justify-center gap-1 transition-colors " +
+                      "flex-1 min-w-[56px] h-8 rounded-lg text-[11px] font-extrabold inline-flex items-center justify-center gap-1 transition-colors " +
                       (active ? "bg-[#0E6B5A] text-white" : "text-[#475569] hover:bg-muted/60")
-                    }
-                  >
+                    }>
                     {t.label}
-                    <span className={"text-[10px] font-bold px-1.5 py-0.5 rounded-md " + (active ? "bg-white/20" : "bg-muted text-muted-foreground")}>{count}</span>
+                    <span className={"text-[9px] font-bold px-1 rounded " + (active ? "bg-white/20" : "bg-muted text-muted-foreground")}>{t.count}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* === Trash toggle (subtle) === */}
+            {/* Trash toggle */}
             {(totalTrashed > 0 || showTrash) && (
               <div className="flex items-center justify-end">
                 <button onClick={() => { setShowTrash((v) => !v); setSwipeId(null); }}
@@ -871,111 +670,77 @@ export default function SupplierLeads() {
               </div>
             )}
 
+            {/* List */}
             {showTrash ? (
               totalTrashed === 0 ? (
-                <EmptyHero
-                  icon={<Archive className="h-7 w-7 text-[#9CA3AF]" />}
-                  title="סל המחזור ריק"
-                  description="פריטים שנמחקו יופיעו כאן למשך 30 ימים לפני מחיקה לצמיתות."
-                />
+                <div className="bg-white rounded-2xl border border-[#EEF0F3] p-6 text-center">
+                  <div className="mx-auto h-12 w-12 rounded-xl bg-[#F0F9F6] flex items-center justify-center mb-2">
+                    <Archive className="h-5 w-5 text-[#9CA3AF]" />
+                  </div>
+                  <h3 className="text-[13px] font-extrabold">סל המחזור ריק</h3>
+                </div>
               ) : (
-                <div className="space-y-3">
-                  <p className="text-[11px] text-muted-foreground">פריטים בסל המחזור נמחקים לצמיתות לאחר {TRASH_DAYS} ימים.</p>
-                  {trashedInquiries.map((q) => renderInquiry(q, true))}
-                  {trashedInterests.map((i) => renderInterest(i, true))}
+                <div className="space-y-2">
+                  <p className="text-[11px] text-muted-foreground">פריטים נמחקים אחרי {TRASH_DAYS} ימים.</p>
+                  {trashedInterests.map((i) => renderLead(i, true))}
                 </div>
               )
-            ) : tabCounts.all === 0 && quoteRequests.length === 0 ? (
-              <EmptyHero
-                icon={<Inbox className="h-7 w-7 text-[#0E6B5A]" />}
-                title="עדיין אין לידים חדשים"
-                description="פרסם עוד הצעות כדי לקבל יותר פניות מדיירים בסביבה."
-                cta={{ to: "/supplier/offers/new", label: "צור הצעה חדשה" }}
-              />
-            ) : filteredEmpty && tab !== "all" ? (
-              <EmptyHero
-                icon={<Inbox className="h-7 w-7 text-[#9CA3AF]" />}
-                title={tab === "new" ? "אין לידים חדשים כרגע" : tab === "in_progress" ? "אין לידים בטיפול" : "עדיין לא נסגרו לידים"}
-                description="נסה ללחוץ על 'הכל' כדי לראות את כל הפניות שלך."
-              />
-            ) : (
-              <div className="space-y-3">
-                {/* Unified leads timeline — interests + inquiries merged, newest first */}
-                {[
-                  ...filteredInterests.map((i) => ({ kind: "interest" as const, t: i.created_at, node: renderInterest(i, false), key: `i-${i.id}` })),
-                  ...filteredInquiries.map((q) => ({ kind: "inquiry" as const, t: q.created_at, node: renderInquiry(q, false), key: `q-${q.id}` })),
-                ]
-                  .sort((a, b) => new Date(b.t).getTime() - new Date(a.t).getTime())
-                  .map((item) => <div key={item.key}>{item.node}</div>)}
-
-                {/* Committee quote requests — shown last as a separate, optional section */}
-                {tab === "all" && quoteRequests.length > 0 && (
-                  <div className="space-y-2 pt-2">
-                    <h3 className="text-[11px] font-bold text-muted-foreground inline-flex items-center gap-1.5">
-                      <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" />
-                      בקשות הצעת מחיר מוועדי בתים ({quoteRequests.length})
-                    </h3>
-                    {quoteRequests.map((q) => {
-                      const p = requesterProfiles[q.user_id];
-                      const addressed = !!q.supplier_id;
-                      return (
-                        <div key={q.id} className="gb-card p-4 border-r-4 border-[#0E6B5A]">
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <h4 className="font-bold text-[15px] text-[#1C1C1E] leading-tight">{q.title}</h4>
-                            {addressed && (
-                              <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] whitespace-nowrap">
-                                פנייה ישירה
-                              </span>
-                            )}
-                          </div>
-                          {q.description && (
-                            <p className="text-xs text-muted-foreground mb-3 leading-relaxed">{q.description}</p>
-                          )}
-                          <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-[#1C1C1E] mb-3">
-                            {q.residents_count != null && (
-                              <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#0E6B5A]" />{q.residents_count} דיירים</span>
-                            )}
-                            {q.target_price_per_unit != null && (
-                              <span className="inline-flex items-center gap-1"><Coins className="h-3.5 w-3.5 text-[#0E6B5A]" />יעד {ils(q.target_price_per_unit)}</span>
-                            )}
-                            {q.deadline && (
-                              <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5 text-[#0E6B5A]" />עד {new Date(q.deadline).toLocaleDateString("he-IL")}</span>
-                            )}
-                          </div>
-                          {p && (
-                            <div className="pt-3 border-t border-border flex flex-wrap gap-2">
-                              {p.full_name && <span className="text-xs font-bold">{p.full_name}</span>}
-                              {p.phone && (
-                                <a href={`tel:${p.phone}`} className="inline-flex items-center gap-1 text-xs text-[#0E6B5A] font-bold">
-                                  <Phone className="h-3.5 w-3.5" />{p.phone}
-                                </a>
-                              )}
-                              {p.email && (
-                                <a href={`mailto:${p.email}`} className="inline-flex items-center gap-1 text-xs text-[#0E6B5A] font-bold">
-                                  <Mail className="h-3.5 w-3.5" />שלח הצעה
-                                </a>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+            ) : visible.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-[#EEF0F3] p-8 text-center">
+                <div className="mx-auto h-14 w-14 rounded-xl bg-[#F0F9F6] flex items-center justify-center mb-2">
+                  <Inbox className="h-6 w-6 text-[#0E6B5A]" />
+                </div>
+                <h3 className="text-[14px] font-extrabold">{query ? "לא נמצאו לידים תואמים" : "אין לידים בקטגוריה זו"}</h3>
+                <p className="text-[12px] text-muted-foreground mt-1">{query ? "נסה מילים אחרות" : "פרסם הצעה נוספת כדי לקבל יותר פניות"}</p>
+                {!query && (
+                  <Link to="/supplier/offers/new"
+                    className="mt-3 inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#0E6B5A] text-white text-[12px] font-extrabold">
+                    <PlusCircle className="h-4 w-4" /> צור הצעה
+                  </Link>
                 )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {visible.map((i) => renderLead(i, false))}
               </div>
             )}
           </>
         )}
       </div>
 
+      {/* Notes dialog */}
+      <Dialog open={!!noteEdit} onOpenChange={(o) => !o && setNoteEdit(null)}>
+        <DialogContent dir="rtl" className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-right">הערות פנימיות</DialogTitle>
+            <DialogDescription className="text-right text-[12px] text-muted-foreground">
+              ההערות גלויות רק לך — הדייר לא רואה אותן.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={noteEdit?.value ?? ""}
+            onChange={(e) => setNoteEdit((n) => n ? { ...n, value: e.target.value } : n)}
+            placeholder="לדוגמה: התקשרתי, ביקש לחזור ביום ראשון..."
+            rows={5}
+            className="text-[13px]"
+            dir="rtl"
+          />
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setNoteEdit(null)}>ביטול</Button>
+            <Button onClick={saveNotes} disabled={!noteEdit || statusBusy === noteEdit?.id}
+              className="bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white">
+              {statusBusy === noteEdit?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "שמור"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
             <AlertDialogTitle>להעביר לסל המחזור?</AlertDialogTitle>
             <AlertDialogDescription>
-              הליד יישמר בסל המחזור למשך {TRASH_DAYS} ימים, ולאחר מכן יימחק לצמיתות.
-              ניתן לשחזר אותו בכל עת מתוך סל המחזור.
+              הליד יישמר {TRASH_DAYS} ימים ואז יימחק לצמיתות. אפשר לשחזר בכל עת.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -985,11 +750,9 @@ export default function SupplierLeads() {
               onClick={async (e) => {
                 e.preventDefault();
                 if (!confirmDelete) return;
-                if (confirmDelete.kind === "interest") await softDeleteInterest(confirmDelete.id);
-                else await softDeleteInquiry(confirmDelete.id);
+                await softDeleteInterest(confirmDelete.id);
                 setConfirmDelete(null);
-              }}
-            >
+              }}>
               העבר לסל מחזור
             </AlertDialogAction>
           </AlertDialogFooter>
