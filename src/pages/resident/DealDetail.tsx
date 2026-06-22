@@ -920,12 +920,29 @@ export default function DealDetail() {
             {/* 3 tier cards */}
             <div className="grid grid-cols-3 gap-2">
               {tierWindow.map((item, idx) => {
+                const baseCard = "rounded-2xl p-3 h-[110px] flex flex-col items-center justify-center text-center relative";
+                if (item.kind === "starter") {
+                  // "Current state" — no one has joined yet. Show reference (no-group) price
+                  // or a neutral label for percentage offers without a base price.
+                  const refPrice = display.referencePrice;
+                  return (
+                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#E8EBEF]")}>
+                      <UserIcon className="w-4 h-4 text-[#6B7280] mb-1" strokeWidth={2.4} />
+                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">0 מצטרפים</div>
+                      {refPrice != null ? (
+                        <div className="text-[18px] font-black text-[#1F2937] gb-num leading-none">{ils(refPrice)}</div>
+                      ) : (
+                        <div className="text-[13px] font-black text-[#1F2937] leading-tight">מחיר רגיל</div>
+                      )}
+                      <div className="text-[9px] font-medium text-[#6B7280] mt-1">המצב כרגע</div>
+                    </div>
+                  );
+                }
                 const { tier, state } = item;
                 const td = describeTier(offerType, tier);
                 const tierPrice = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
                 const range = tierRange(tier);
                 const isNextTarget = nextTier && tier.minParticipants === nextTier.minParticipants;
-                const baseCard = "rounded-2xl p-3 h-[110px] flex flex-col items-center justify-center text-center relative";
                 if (state === "past") {
                   return (
                     <div key={idx} className={cn(baseCard, "bg-[#F4F6FA] border border-[#E8EBEF] opacity-60")}>
