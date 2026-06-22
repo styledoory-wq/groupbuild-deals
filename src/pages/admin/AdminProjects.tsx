@@ -345,16 +345,15 @@ export default function AdminProjects() {
 function Metric({
   icon, label, value, tone = "neutral", compact,
 }: {
-  icon: React.ReactNode; label: string; value: React.ReactNode;
+  icon?: React.ReactNode; label: string; value: React.ReactNode;
   tone?: "neutral" | "positive" | "warning"; compact?: boolean;
 }) {
+  void icon;
   const toneCls = tone === "positive" ? "text-[#0E6B5A]" : tone === "warning" ? "text-[#B45309]" : "text-[#0F172A]";
   return (
-    <div className="px-3 py-2.5 min-w-0">
-      <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-[#9CA3AF]">
-        {icon}<span>{label}</span>
-      </div>
-      <div className={cn("mt-0.5 font-extrabold tracking-tight truncate", compact ? "text-[12px]" : "text-[15px]", toneCls)}>
+    <div className="px-2 py-1.5 min-w-0">
+      <div className="text-[9px] font-bold uppercase text-[#9CA3AF] truncate">{label}</div>
+      <div className={cn("font-extrabold tracking-tight truncate leading-tight", compact ? "text-[11px]" : "text-[13px]", toneCls)}>
         {value}
       </div>
     </div>
