@@ -137,6 +137,16 @@ export default function Auth() {
     }
   };
 
+  const getSiteOrigin = () => {
+    const host = window.location.hostname;
+    // Always send confirmation links to the production custom domain,
+    // even if the user signs up from the lovable.app preview.
+    if (host.endsWith("lovable.app") || host.endsWith("lovable.dev")) {
+      return "https://www.groupbuild.co.il";
+    }
+    return window.location.origin;
+  };
+
   const handleForgotPassword = async () => {
     if (!email.trim()) {
       toast.error("הזינו אימייל ואז לחצו 'שכחתי סיסמה'");
@@ -145,7 +155,7 @@ export default function Auth() {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${getSiteOrigin()}/reset-password`,
       });
       if (error) throw error;
       toast.success("שלחנו אליכם קישור לאיפוס סיסמה במייל");
@@ -167,12 +177,13 @@ export default function Auth() {
     }
     setLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${getSiteOrigin()}/`;
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: redirectUrl,
+
           data: {
             full_name: fullName,
             city,
