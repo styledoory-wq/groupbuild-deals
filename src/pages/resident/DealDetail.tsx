@@ -154,10 +154,14 @@ export default function DealDetail() {
 
         const { data: supData } = await supabase
           .from("suppliers")
-          .select("id,business_name,logo_url,approval_status,service_areas,phone,whatsapp_url")
+          .select("id,business_name,logo_url,approval_status,service_areas,phone,whatsapp_url,user_id")
           .eq("id", d.supplier_id)
           .maybeSingle();
-        if (!cancelled) setSupplier((supData as SupplierRow | null) ?? null);
+        if (!cancelled) {
+          const sup = (supData as (SupplierRow & { user_id?: string | null }) | null) ?? null;
+          setSupplier(sup);
+          setSupplierUserId(sup?.user_id ?? null);
+        }
 
         await loadParticipantCount(d.id);
 
