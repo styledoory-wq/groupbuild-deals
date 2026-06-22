@@ -557,7 +557,12 @@ export default function DealDetail() {
     participantCount,
   );
   const activeTier = tiers.length > 0 ? getActiveTier(tiers, participantCount) : null;
-  const nextTier = tiers.length > 0 ? getNextTier(tiers, participantCount) : null;
+  // "Next tier" = the tier strictly above the currently-active one.
+  // When 0 joined, the first tier IS the active/starting state — the next target should be tier 2.
+  const _sortedAll = tiers.length > 0 ? [...tiers].sort((a, b) => a.minParticipants - b.minParticipants) : [];
+  const nextTier = activeTier
+    ? _sortedAll.find((t) => t.minParticipants > activeTier.minParticipants) ?? null
+    : null;
   const peopleNeeded = nextTier ? Math.max(0, nextTier.minParticipants - participantCount) : 0;
   // Progress target: next tier's threshold, or the highest tier's min if maxed out.
   const progressTarget = nextTier
@@ -636,20 +641,11 @@ export default function DealDetail() {
       ? Math.max(0, activeDisplay.effectivePrice - bestDisplay.effectivePrice)
       : null;
 
-  // ----- Build a 3-slot window of tier blocks (starter / past / active / future) -----
-  type WindowItem =
-    | { kind: "starter"; price: number; rangeLabel: string }
-    | { kind: "tier"; tier: OfferTier; state: "past" | "active" | "future" };
+  // ----- Build a 3-slot window of tier blocks (past / active / future) -----
+  type WindowItem = { kind: "tier"; tier: OfferTier; state: "past" | "active" | "future" };
 
   const tierWindow: WindowItem[] = (() => {
     if (sortedTiers.length === 0) return [];
-    // No one has joined yet — show a synthetic "starter price" slot as the current state.
-    if (!hasAnyJoiners) {
-      const starterPrice = display.referencePrice ?? display.effectivePrice ?? 0;
-      const items: WindowItem[] = [{ kind: "starter", price: starterPrice, rangeLabel: "0 מצטרפים" }];
-      sortedTiers.slice(0, 2).forEach((t) => items.push({ kind: "tier", tier: t, state: "future" }));
-      return items;
-    }
     if (sortedTiers.length <= 3) {
       return sortedTiers.map((t, idx) => ({
         kind: "tier" as const,
@@ -670,15 +666,18 @@ export default function DealDetail() {
   })();
 
   // Current effective price — what the user actually pays right now.
-  const currentEffectivePrice = hasAnyJoiners
-    ? activeDisplay?.effectivePrice ?? display.effectivePrice ?? null
-    : display.referencePrice ?? display.effectivePrice ?? null;
+  const currentEffectivePrice = activeDisplay?.effectivePrice ?? display.effectivePrice ?? null;
 
   // Savings per person if we advance to the NEXT tier (immediate motivation)
   const nextDisplay = nextTier ? describeTier(offerType, nextTier) : null;
   const savingsToNext =
     currentEffectivePrice != null && nextDisplay?.effectivePrice != null
       ? Math.max(0, currentEffectivePrice - nextDisplay.effectivePrice)
+      : null;
+  // For percentage offers (no shekel prices), motivation is shown as extra discount points.
+  const extraDiscountToNext =
+    nextDisplay?.discountPercent != null && activeDisplay?.discountPercent != null
+      ? Math.max(0, nextDisplay.discountPercent - activeDisplay.discountPercent)
       : null;
   // Total max savings possible — from the reference (no-group) price all the way to the best tier
   const maxPossibleSavings =
@@ -882,18 +881,24 @@ export default function DealDetail() {
                   </div>
                 </div>
 
-                {/* left — next price */}
+                {/* left — next price / next discount */}
                 <div className="bg-[#F0F9F6] border border-[#0E6B5A]/15 rounded-2xl p-3 w-[120px] shrink-0 flex flex-col items-center justify-center text-center relative">
                   <Sparkles className="absolute top-1.5 left-1.5 w-3 h-3 text-[#F5C547]" />
                   <div className="text-[10px] font-bold text-[#0E6B5A] mb-0.5">המחיר הבא</div>
-                  {nextDisplay?.effectivePrice != null && (
+                  {nextDisplay?.effectivePrice != null ? (
                     <div className="text-[20px] font-black text-[#0E6B5A] gb-num leading-none">{ils(nextDisplay.effectivePrice)}</div>
-                  )}
-                  {savingsToNext && savingsToNext > 0 && (
+                  ) : nextDisplay?.discountPercent != null ? (
+                    <div className="text-[20px] font-black text-[#0E6B5A] gb-num leading-none">{nextDisplay.discountPercent}%<span className="text-[10px] font-bold mr-1">הנחה</span></div>
+                  ) : null}
+                  {savingsToNext && savingsToNext > 0 ? (
                     <div className="mt-2 bg-[#FFF8E1] text-[#8A6A1E] text-[9.5px] font-black px-2 py-1 rounded-lg leading-tight">
                       תחסכו עוד {ils(savingsToNext)} לאדם
                     </div>
-                  )}
+                  ) : extraDiscountToNext && extraDiscountToNext > 0 ? (
+                    <div className="mt-2 bg-[#FFF8E1] text-[#8A6A1E] text-[9.5px] font-black px-2 py-1 rounded-lg leading-tight">
+                      +{extraDiscountToNext}% הנחה לכולם
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -908,16 +913,6 @@ export default function DealDetail() {
             {/* 3 tier cards */}
             <div className="grid grid-cols-3 gap-2">
               {tierWindow.map((item, idx) => {
-                if (item.kind === "starter") {
-                  return (
-                    <div key={idx} className="bg-[#F4F6FA] rounded-2xl border border-[#E8EBEF] p-3 h-[110px] flex flex-col items-center justify-center text-center">
-                      <UserIcon className="w-4 h-4 text-[#9CA3AF] mb-1" />
-                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5">{item.rangeLabel}</div>
-                      <div className="text-[16px] font-black text-[#6B7280] gb-num leading-none">{ils(item.price)}</div>
-                      <div className="text-[9px] font-medium text-[#9CA3AF] mt-1">מחיר התחלתי</div>
-                    </div>
-                  );
-                }
                 const { tier, state } = item;
                 const td = describeTier(offerType, tier);
                 const tierPrice = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
@@ -956,6 +951,8 @@ export default function DealDetail() {
                     <div className={cn("text-[18px] font-black gb-num leading-none", isNextTarget ? "text-[#0E6B5A]" : "text-[#1F2937]")}>{tierPrice}</div>
                     {isNextTarget && savingsToNext && savingsToNext > 0 ? (
                       <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">חיסכון של {ils(savingsToNext)} לאדם</div>
+                    ) : isNextTarget && extraDiscountToNext && extraDiscountToNext > 0 ? (
+                      <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">+{extraDiscountToNext}% הנחה לכולם</div>
                     ) : (
                       <div className="text-[9px] font-medium text-[#6B7280] mt-1">היעד הבא</div>
                     )}
