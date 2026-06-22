@@ -641,20 +641,11 @@ export default function DealDetail() {
       ? Math.max(0, activeDisplay.effectivePrice - bestDisplay.effectivePrice)
       : null;
 
-  // ----- Build a 3-slot window of tier blocks (starter / past / active / future) -----
-  type WindowItem =
-    | { kind: "starter"; price: number; rangeLabel: string }
-    | { kind: "tier"; tier: OfferTier; state: "past" | "active" | "future" };
+  // ----- Build a 3-slot window of tier blocks (past / active / future) -----
+  type WindowItem = { kind: "tier"; tier: OfferTier; state: "past" | "active" | "future" };
 
   const tierWindow: WindowItem[] = (() => {
     if (sortedTiers.length === 0) return [];
-    // No one has joined yet — show a synthetic "starter price" slot as the current state.
-    if (!hasAnyJoiners) {
-      const starterPrice = display.referencePrice ?? display.effectivePrice ?? 0;
-      const items: WindowItem[] = [{ kind: "starter", price: starterPrice, rangeLabel: "0 מצטרפים" }];
-      sortedTiers.slice(0, 2).forEach((t) => items.push({ kind: "tier", tier: t, state: "future" }));
-      return items;
-    }
     if (sortedTiers.length <= 3) {
       return sortedTiers.map((t, idx) => ({
         kind: "tier" as const,
@@ -675,15 +666,18 @@ export default function DealDetail() {
   })();
 
   // Current effective price — what the user actually pays right now.
-  const currentEffectivePrice = hasAnyJoiners
-    ? activeDisplay?.effectivePrice ?? display.effectivePrice ?? null
-    : display.referencePrice ?? display.effectivePrice ?? null;
+  const currentEffectivePrice = activeDisplay?.effectivePrice ?? display.effectivePrice ?? null;
 
   // Savings per person if we advance to the NEXT tier (immediate motivation)
   const nextDisplay = nextTier ? describeTier(offerType, nextTier) : null;
   const savingsToNext =
     currentEffectivePrice != null && nextDisplay?.effectivePrice != null
       ? Math.max(0, currentEffectivePrice - nextDisplay.effectivePrice)
+      : null;
+  // For percentage offers (no shekel prices), motivation is shown as extra discount points.
+  const extraDiscountToNext =
+    nextDisplay?.discountPercent != null && activeDisplay?.discountPercent != null
+      ? Math.max(0, nextDisplay.discountPercent - activeDisplay.discountPercent)
       : null;
   // Total max savings possible — from the reference (no-group) price all the way to the best tier
   const maxPossibleSavings =
