@@ -780,6 +780,16 @@ export default function OfferEditor() {
                   </Mini>
                 </div>
 
+                {Number(t.minParticipants) === 1 && (
+                  <div className="mb-2 flex items-start gap-2 rounded-lg bg-[#FFF8E1] border border-[#F5C547]/40 px-2.5 py-2 text-[11px] text-[#8A6A1E] font-medium leading-snug">
+                    <span className="text-[14px] leading-none">⚠️</span>
+                    <span>
+                      שימו לב — משתתף אחד אינו קבוצת רכישה. מומלץ להתחיל את המדרגה הראשונה מ-2 מצטרפים ומעלה, כך הדיירים יבינו שהמחיר משתפר רק כשמצטרפים יחד.
+                    </span>
+                  </div>
+                )}
+
+
                 {offerType === "percentage" ? (
                   <Mini label="אחוז הנחה (1-100)">
                     <Input
