@@ -757,7 +757,7 @@ export default function DealDetail() {
             {statusMeta.label}
           </span>
 
-          {(hasCompletedJoin || hasPendingDeposit) && (
+          {!isSupplierPreview && (hasCompletedJoin || hasPendingDeposit) && (
             <div className="absolute top-4 left-4 bg-gradient-to-l from-[#1A8870] to-[#34A88E] text-[#1F2937] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
               {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
               <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
