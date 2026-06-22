@@ -7,7 +7,10 @@ import { LoadingState } from "@/components/ds";
 import { useApp, formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
-import { Building2, Check, MapPin, Plus, Pencil, Trash2, Search, Settings2, Users, Tag, Gift, TrendingUp } from "lucide-react";
+import {
+  Building2, MapPin, Plus, Pencil, Trash2, Search, Settings2,
+  Users, Tag, Gift, Wallet, TrendingUp, Home,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -24,6 +27,12 @@ import type { Project, ProjectStatus } from "@/types";
 
 const statusLabel: Record<ProjectStatus, string> = {
   planning: "בתכנון", construction: "בבנייה", delivery: "במסירה", completed: "הושלם",
+};
+const statusTone: Record<ProjectStatus, string> = {
+  planning: "bg-[#FEF3C7] text-[#92400E]",
+  construction: "bg-[#DBEAFE] text-[#1E40AF]",
+  delivery: "bg-[#E0F2FE] text-[#075985]",
+  completed: "bg-[#DCFCE7] text-[#166534]",
 };
 
 type FormState = {
@@ -123,9 +132,12 @@ export default function AdminProjects() {
 
   const kpi = useMemo(() => {
     const totalApts = projects.reduce((s, p) => s + (p.apartmentCount ?? 0), 0);
-    let totalUsers = 0, totalDeposits = 0;
-    Object.values(metrics).forEach((m) => { totalUsers += m.users; totalDeposits += m.deposits; });
-    return { active: projects.length, apartments: totalApts, users: totalUsers, deposits: totalDeposits };
+    let totalUsers = 0, totalDeposits = 0, totalDeals = 0, totalSuppliers = 0;
+    Object.values(metrics).forEach((m) => {
+      totalUsers += m.users; totalDeposits += m.deposits;
+      totalDeals += m.deals; totalSuppliers += m.suppliers;
+    });
+    return { active: projects.length, apartments: totalApts, users: totalUsers, deposits: totalDeposits, deals: totalDeals, suppliers: totalSuppliers };
   }, [projects, metrics]);
 
   const openCreate = () => { setForm(emptyForm); setOpen(true); };
@@ -201,10 +213,12 @@ export default function AdminProjects() {
       />
       <AdminKpiRow
         items={[
-          { label: "פרויקטים פעילים", value: kpi.active, tone: "positive" },
-          { label: "סה״כ דירות", value: kpi.apartments },
-          { label: "משתמשים רשומים", value: kpi.users },
-          { label: "סה״כ פיקדונות", value: formatILS(kpi.deposits), tone: "positive" },
+          { label: "פרויקטים", value: kpi.active, tone: "positive" },
+          { label: "דירות", value: kpi.apartments },
+          { label: "משתמשים", value: kpi.users },
+          { label: "ספקים פעילים", value: kpi.suppliers },
+          { label: "הצעות פעילות", value: kpi.deals },
+          { label: "פיקדונות", value: formatILS(kpi.deposits), tone: "positive" },
         ]}
       />
 
@@ -228,48 +242,77 @@ export default function AdminProjects() {
             לא נמצאו פרויקטים
           </div>
         ) : (
-          <div className="grid gap-2 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProjects.map((p) => {
               const m = metrics[p.id] ?? { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 };
               const participation = p.apartmentCount > 0 ? Math.min(100, Math.round((m.users / p.apartmentCount) * 100)) : 0;
+              const partTone = participation >= 50 ? "#0E6B5A" : participation >= 20 ? "#D97706" : "#6B7280";
               return (
-                <article key={p.id} dir="rtl" className="bg-white border border-[#ECEEF2] rounded-[12px] overflow-hidden flex flex-col">
-                  <div className="flex items-center gap-2 px-2.5 py-2 border-b border-[#F1F3F7]">
+                <article
+                  key={p.id}
+                  dir="rtl"
+                  className="bg-white border border-[#ECEEF2] rounded-[14px] overflow-hidden flex flex-col hover:shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08)] hover:border-[#0E6B5A]/30 transition-all"
+                >
+                  {/* Hero image */}
+                  <div className="relative h-28 bg-gradient-to-br from-[#0E6B5A]/10 to-[#F4F6FA] overflow-hidden">
                     {m.imageUrl ? (
-                      <img src={m.imageUrl} alt="" className="h-8 w-8 rounded-[8px] object-cover bg-[#F4F6FA] shrink-0" />
+                      <img src={m.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
                     ) : (
-                      <div className="h-8 w-8 rounded-[8px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                        <Building2 className="h-4 w-4 text-[#0E6B5A]" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Building2 className="h-10 w-10 text-[#0E6B5A]/40" />
                       </div>
                     )}
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-[12px] text-[#0F172A] truncate leading-tight">{p.name}</h3>
-                      <div className="flex items-center gap-1 text-[10px] text-[#6B7280] mt-0.5 truncate">
-                        <MapPin className="h-2.5 w-2.5 shrink-0" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                    <div className="absolute top-2 left-2">
+                      <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold", statusTone[p.status])}>
+                        {statusLabel[p.status]}
+                      </span>
+                    </div>
+                    <div className="absolute bottom-2 right-2.5 left-2.5 text-white">
+                      <h3 className="font-extrabold text-[15px] leading-tight truncate">{p.name}</h3>
+                      <div className="flex items-center gap-1 text-[11px] opacity-90 mt-0.5">
+                        <MapPin className="h-3 w-3 shrink-0" />
                         <span className="truncate">{p.city}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#F1F3F7]">
-                    <Metric icon={null} label="דירות" value={p.apartmentCount} />
-                    <Metric icon={null} label="משתמשים" value={m.users} />
-                  </div>
-                  <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#F1F3F7] border-t border-[#F1F3F7]">
-                    <Metric icon={null} label="הצעות" value={m.deals} />
-                    <Metric icon={null} label="ספקים" value={m.suppliers} />
-                  </div>
-                  <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#F1F3F7] border-t border-[#F1F3F7]">
-                    <Metric icon={null} label="פיקדונות" value={formatILS(m.deposits)} tone="positive" compact />
-                    <Metric icon={null} label="פעילות" value={`${participation}%`}
-                      tone={participation >= 50 ? "positive" : participation >= 20 ? "warning" : "neutral"} />
+                  {/* Participation progress */}
+                  <div className="px-3 pt-3">
+                    <div className="flex items-baseline justify-between mb-1">
+                      <span className="text-[10px] font-bold uppercase text-[#6B7280] tracking-wide">השתתפות</span>
+                      <span className="text-[12px] font-extrabold" style={{ color: partTone }}>
+                        {m.users}/{p.apartmentCount} · {participation}%
+                      </span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-[#F1F3F7] overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${participation}%`, backgroundColor: partTone }} />
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-1 p-1.5 border-t border-[#F1F3F7] mt-auto">
+                  {/* Metrics grid */}
+                  <div className="grid grid-cols-2 gap-1.5 px-3 pt-3 pb-2">
+                    <MetricChip icon={<Home className="h-3 w-3" />} label="דירות" value={p.apartmentCount} />
+                    <MetricChip icon={<Users className="h-3 w-3" />} label="משתמשים" value={m.users} />
+                    <MetricChip icon={<Gift className="h-3 w-3" />} label="הצעות" value={m.deals} tone={m.deals > 0 ? "positive" : "neutral"} />
+                    <MetricChip icon={<Tag className="h-3 w-3" />} label="ספקים" value={m.suppliers} />
+                  </div>
+
+                  {/* Deposits highlight strip */}
+                  <div className="mx-3 mb-3 rounded-[10px] bg-gradient-to-l from-[#0E6B5A]/8 to-[#0E6B5A]/3 border border-[#0E6B5A]/15 px-3 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#0E6B5A]">
+                      <Wallet className="h-3.5 w-3.5" />
+                      פיקדונות שנאספו
+                    </div>
+                    <div className="text-[14px] font-extrabold text-[#0E6B5A]">{formatILS(m.deposits)}</div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="grid grid-cols-3 gap-1 px-2 pb-2 mt-auto">
                     <ActionBtn icon={<Settings2 className="h-3 w-3" />} label="ניהול"
                       onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} primary />
                     <ActionBtn icon={<Pencil className="h-3 w-3" />} label="עריכה" onClick={() => openEdit(p)} />
-                    <ActionBtn icon={<Trash2 className="h-3 w-3" />} label="מחיקה" onClick={() => setDeleteId(p.id)} danger />
+                    <ActionBtn icon={<Trash2 className="h-3 w-3" />} label="הסרה" onClick={() => setDeleteId(p.id)} danger />
                   </div>
                 </article>
               );
@@ -342,20 +385,17 @@ export default function AdminProjects() {
   );
 }
 
-function Metric({
-  icon, label, value, tone = "neutral", compact,
-}: {
-  icon?: React.ReactNode; label: string; value: React.ReactNode;
-  tone?: "neutral" | "positive" | "warning"; compact?: boolean;
-}) {
-  void icon;
-  const toneCls = tone === "positive" ? "text-[#0E6B5A]" : tone === "warning" ? "text-[#B45309]" : "text-[#0F172A]";
+function MetricChip({
+  icon, label, value, tone = "neutral",
+}: { icon: React.ReactNode; label: string; value: React.ReactNode; tone?: "neutral" | "positive" }) {
+  const valueCls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
   return (
-    <div className="px-2 py-1.5 min-w-0">
-      <div className="text-[9px] font-bold uppercase text-[#9CA3AF] truncate">{label}</div>
-      <div className={cn("font-extrabold tracking-tight truncate leading-tight", compact ? "text-[11px]" : "text-[13px]", toneCls)}>
-        {value}
+    <div className="bg-[#F8F9FB] rounded-[8px] px-2 py-1.5">
+      <div className="flex items-center gap-1 text-[10px] font-semibold text-[#6B7280]">
+        <span className="text-[#9CA3AF]">{icon}</span>
+        {label}
       </div>
+      <div className={cn("text-[14px] font-extrabold leading-tight mt-0.5", valueCls)}>{value}</div>
     </div>
   );
 }
@@ -391,26 +431,21 @@ function CityCombobox({ value, cities, onChange }: { value: string; cities: stri
         onFocus={() => setOpen(true)}
         onChange={(e) => { onChange(e.target.value); setOpen(true); }}
         onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}
-        placeholder="הקלידו עיר לבחירה"
-        autoComplete="off"
-        role="combobox"
-        aria-expanded={open}
-        aria-autocomplete="list"
+        onBlur={() => setTimeout(() => setOpen(false), 120)}
+        placeholder="התחל להקליד שם עיר…"
       />
-      {open && (
-        <div className="absolute right-0 left-0 top-[calc(100%+0.25rem)] z-[80] max-h-56 overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-lg">
-          {filteredCities.length > 0 ? (
-            filteredCities.map((city) => (
-              <button key={city} type="button" onMouseDown={(e) => e.preventDefault()}
-                onClick={() => { onChange(city); setOpen(false); }}
-                className="flex min-h-10 w-full items-center justify-between px-3 py-2 text-right text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
-                <span>{city}</span>
-                <Check className={cn("h-4 w-4", value === city ? "opacity-100" : "opacity-0")} />
-              </button>
-            ))
-          ) : (
-            <div className="px-3 py-3 text-center text-sm text-muted-foreground">לא נמצאו ערים</div>
-          )}
+      {open && filteredCities.length > 0 && (
+        <div className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-[10px] border border-[#ECEEF2] bg-white shadow-lg">
+          {filteredCities.map((city) => (
+            <button
+              key={city}
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); onChange(city); setOpen(false); }}
+              className="w-full text-right px-3 py-2 text-[13px] hover:bg-[#F4F6FA]"
+            >
+              {city}
+            </button>
+          ))}
         </div>
       )}
     </div>
