@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { LoadingState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminKpiRow } from "@/components/admin/AdminKpiRow";
+import { AdminTable, StatusPill, type Column } from "@/components/admin/AdminTable";
+import { LoadingState } from "@/components/ds";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Lock, Search } from "lucide-react";
+import { Search, ImageIcon, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 type DbDeal = {
   id: string;
@@ -18,6 +21,8 @@ type DbDeal = {
   status: string;
   category_id: string | null;
   supplier_id: string;
+  project_id: string | null;
+  cover_image_url: string | null;
   original_price: number | null;
   discounted_price: number | null;
   discount_percentage: number | null;
@@ -25,27 +30,38 @@ type DbDeal = {
   offer_type: string | null;
   target_participants: number | null;
   auto_closed_at: string | null;
-  max_redemptions: number | null;
+  deposit_amount: number;
 };
 
-type SupplierMap = Record<string, { business_name: string }>;
-type DealCounts = { interests: number; paid: number; eligible: number; redeemed: number };
+type DealCounts = { paid: number; deposits: number };
+
+const STATUS_OPTIONS = [
+  { value: "all", label: "כל הסטטוסים" },
+  { value: "active", label: "פעילה" },
+  { value: "closed", label: "נסגרה" },
+  { value: "redeemed", label: "מומשה" },
+  { value: "inactive", label: "מושבתת" },
+  { value: "draft", label: "טיוטה" },
+];
 
 export default function AdminDeals() {
-  const { categories } = useApp();
+  const { categories, projects } = useApp();
   const [deals, setDeals] = useState<DbDeal[]>([]);
-  const [suppliers, setSuppliers] = useState<SupplierMap>({});
+  const [suppliers, setSuppliers] = useState<Record<string, string>>({});
   const [counts, setCounts] = useState<Record<string, DealCounts>>({});
   const [loading, setLoading] = useState(true);
-  const [showInactive, setShowInactive] = useState(true);
   const [query, setQuery] = useState("");
+  const [projectFilter, setProjectFilter] = useState("all");
+  const [supplierFilter, setSupplierFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from("deals")
-        .select("id,title,status,category_id,supplier_id,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants,auto_closed_at,max_redemptions")
+        .select("id,title,status,category_id,supplier_id,project_id,cover_image_url,original_price,discounted_price,discount_percentage,base_price,offer_type,target_participants,auto_closed_at,deposit_amount")
         .eq("is_deleted", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -58,27 +74,27 @@ export default function AdminDeals() {
           .from("suppliers")
           .select("id,business_name")
           .in("id", supplierIds);
-        const m: SupplierMap = {};
-        (srows ?? []).forEach((s: { id: string; business_name: string }) => { m[s.id] = { business_name: s.business_name }; });
+        const m: Record<string, string> = {};
+        (srows ?? []).forEach((s: { id: string; business_name: string }) => { m[s.id] = s.business_name; });
         setSuppliers(m);
       }
 
-      const cMap: Record<string, DealCounts> = {};
-      await Promise.all(list.map(async (d) => {
-        const [{ count: interests }, { count: paid }, { count: eligible }, { count: redeemed }] = await Promise.all([
-          supabase.from("deal_interests").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("is_deleted", false),
-          supabase.from("deposits").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "paid").eq("is_deleted", false),
-          supabase.from("vouchers").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "eligible"),
-          supabase.from("vouchers").select("*", { count: "exact", head: true }).eq("deal_id", d.id).eq("status", "redeemed"),
-        ]);
-        cMap[d.id] = {
-          interests: interests ?? 0,
-          paid: paid ?? 0,
-          eligible: eligible ?? 0,
-          redeemed: redeemed ?? 0,
-        };
-      }));
-      setCounts(cMap);
+      // Fetch all paid deposits in one query and aggregate locally — much faster
+      const dealIds = list.map((d) => d.id);
+      const { data: deps } = await supabase
+        .from("deposits")
+        .select("deal_id,amount")
+        .in("deal_id", dealIds)
+        .eq("status", "paid")
+        .eq("is_deleted", false);
+      const c: Record<string, DealCounts> = {};
+      list.forEach((d) => { c[d.id] = { paid: 0, deposits: 0 }; });
+      (deps ?? []).forEach((d: { deal_id: string; amount: number }) => {
+        if (!c[d.deal_id]) c[d.deal_id] = { paid: 0, deposits: 0 };
+        c[d.deal_id].paid += 1;
+        c[d.deal_id].deposits += Number(d.amount ?? 0);
+      });
+      setCounts(c);
     } catch (err) {
       console.error("[AdminDeals]", err);
       toast.error(err instanceof Error ? err.message : "טעינת ההצעות נכשלה");
@@ -89,16 +105,26 @@ export default function AdminDeals() {
 
   useEffect(() => { load(); }, [load]);
 
+  const supplierOptions = useMemo(
+    () => Object.entries(suppliers).sort((a, b) => a[1].localeCompare(b[1], "he")),
+    [suppliers],
+  );
+
   const visibleDeals = useMemo(() => {
-    const base = showInactive ? deals : deals.filter((d) => d.status === "active");
     const q = query.trim().toLowerCase();
-    if (!q) return base;
-    return base.filter((d) => {
-      const supplier = suppliers[d.supplier_id]?.business_name ?? "";
-      const category = categories.find((c) => c.id === d.category_id)?.name ?? "";
-      return [d.title, supplier, category].some((s) => (s ?? "").toLowerCase().includes(q));
+    return deals.filter((d) => {
+      if (statusFilter !== "all" && d.status !== statusFilter) return false;
+      if (projectFilter !== "all" && d.project_id !== projectFilter) return false;
+      if (supplierFilter !== "all" && d.supplier_id !== supplierFilter) return false;
+      if (categoryFilter !== "all" && d.category_id !== categoryFilter) return false;
+      if (q) {
+        const supplier = suppliers[d.supplier_id] ?? "";
+        const project = projects.find((p) => p.id === d.project_id)?.name ?? "";
+        if (![d.title, supplier, project].some((s) => (s ?? "").toLowerCase().includes(q))) return false;
+      }
+      return true;
     });
-  }, [deals, showInactive, query, suppliers, categories]);
+  }, [deals, query, statusFilter, projectFilter, supplierFilter, categoryFilter, suppliers, projects]);
 
   const priceFor = (d: DbDeal): number => {
     if (d.offer_type === "price_comparison" && d.discounted_price != null) return Number(d.discounted_price);
@@ -108,89 +134,153 @@ export default function AdminDeals() {
     return Number(d.base_price ?? d.original_price ?? 0);
   };
 
-  const statusLabel = (d: DbDeal) => {
-    if (d.status === "closed" || d.auto_closed_at) return { label: "נסגרה", cls: "bg-emerald-500/10 text-emerald-700" };
-    if (d.status === "redeemed") return { label: "מומשה", cls: "bg-blue-500/10 text-blue-700" };
-    if (d.status === "active") return { label: "פעילה", cls: "bg-success/10 text-success" };
-    return { label: d.status, cls: "bg-muted text-muted-foreground" };
+  const kpi = useMemo(() => {
+    const active = deals.filter((d) => d.status === "active").length;
+    const pending = deals.filter((d) => d.status === "draft" || d.status === "pending").length;
+    let participants = 0;
+    let deposits = 0;
+    let expected = 0;
+    deals.forEach((d) => {
+      const c = counts[d.id];
+      if (!c) return;
+      participants += c.paid;
+      deposits += c.deposits;
+      expected += c.paid * priceFor(d);
+    });
+    return { active, pending, participants, deposits, expected };
+  }, [deals, counts]);
+
+  const statusPill = (d: DbDeal) => {
+    if (d.status === "closed" || d.auto_closed_at) return <StatusPill tone="positive">נסגרה</StatusPill>;
+    if (d.status === "redeemed") return <StatusPill tone="positive">מומשה</StatusPill>;
+    if (d.status === "active") return <StatusPill tone="positive">פעילה</StatusPill>;
+    if (d.status === "draft" || d.status === "pending") return <StatusPill tone="warning">ממתינה</StatusPill>;
+    return <StatusPill tone="neutral">{d.status}</StatusPill>;
   };
+
+  const columns: Column<DbDeal>[] = [
+    {
+      key: "deal",
+      header: "הצעה",
+      width: "30%",
+      cell: (d) => (
+        <div className="flex items-center gap-3 min-w-0">
+          {d.cover_image_url ? (
+            <img src={d.cover_image_url} alt="" className="h-10 w-10 rounded-[10px] object-cover bg-[#F4F6FA] shrink-0" />
+          ) : (
+            <div className="h-10 w-10 rounded-[10px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
+              <ImageIcon className="h-4 w-4 text-[#9CA3AF]" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <div className="font-bold text-[13px] truncate flex items-center gap-1.5">
+              {d.title}
+              {d.auto_closed_at && <Lock className="h-3 w-3 text-[#B45309]" />}
+            </div>
+            <div className="text-[11px] text-[#9CA3AF] truncate">
+              {categories.find((c) => c.id === d.category_id)?.name ?? "—"}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    { key: "supplier", header: "ספק", cell: (d) => <span className="text-[12px] text-[#1F2937] truncate block">{suppliers[d.supplier_id] ?? "—"}</span> },
+    { key: "project", header: "פרויקט", cell: (d) => <span className="text-[12px] text-[#6B7280] truncate block">{projects.find((p) => p.id === d.project_id)?.name ?? "—"}</span> },
+    {
+      key: "progress",
+      header: "מצטרפים / יעד",
+      cell: (d) => {
+        const c = counts[d.id] ?? { paid: 0, deposits: 0 };
+        const target = d.target_participants ?? 0;
+        const pct = target > 0 ? Math.min(100, Math.round((c.paid / target) * 100)) : 0;
+        return (
+          <div className="min-w-[120px]">
+            <div className="flex items-baseline justify-between text-[12px]">
+              <span className="font-bold text-[#0F172A]">{c.paid}{target ? `/${target}` : ""}</span>
+              {target > 0 && <span className="text-[11px] text-[#6B7280]">{pct}%</span>}
+            </div>
+            {target > 0 && (
+              <div className="mt-1 h-1.5 rounded-full bg-[#F1F3F7] overflow-hidden">
+                <div className="h-full bg-[#0E6B5A]" style={{ width: `${pct}%` }} />
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+    { key: "deposits", header: "פיקדונות", cell: (d) => <span className="text-[12px] font-bold text-[#0E6B5A]">{formatILS(counts[d.id]?.deposits ?? 0)}</span> },
+    { key: "status", header: "סטטוס", cell: (d) => statusPill(d) },
+    {
+      key: "actions",
+      header: "",
+      width: "48px",
+      cell: (d) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
+        </div>
+      ),
+    },
+  ];
 
   return (
     <MobileShell>
-      <PageHeader title="ניהול עסקאות" subtitle={`${visibleDeals.length} מוצגות מתוך ${deals.length}`} back={false} />
-      <div className="px-5 -mt-2 mb-3 space-y-2">
-        <div className="relative">
-          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+      <AdminPageHeader
+        title="ניהול הצעות"
+        description={`${visibleDeals.length} מוצגות מתוך ${deals.length}`}
+      />
+      <AdminKpiRow
+        items={[
+          { label: "פעילות", value: kpi.active, tone: "positive" },
+          { label: "ממתינות לאישור", value: kpi.pending, tone: kpi.pending > 0 ? "warning" : "neutral" },
+          { label: "סה״כ מצטרפים", value: kpi.participants },
+          { label: "פיקדונות שנאספו", value: formatILS(kpi.deposits), tone: "positive" },
+          { label: "הכנסה צפויה", value: formatILS(kpi.expected) },
+        ]}
+      />
+
+      {/* Filters */}
+      <div dir="rtl" className="bg-white border-b border-[#ECEEF2] px-5 lg:px-8 py-3 flex flex-wrap gap-2 items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="חיפוש לפי שם הצעה, ספק או קטגוריה"
-            className="h-10 pr-9 text-sm"
+            placeholder="חיפוש לפי שם הצעה, ספק או פרויקט"
+            className="h-9 pr-9 text-[13px] border-[#ECEEF2]"
           />
         </div>
-        <div className="flex items-center justify-end gap-2">
-          <Label htmlFor="show-inactive" className="text-xs text-muted-foreground">הצג מושבתות</Label>
-          <Switch id="show-inactive" checked={showInactive} onCheckedChange={setShowInactive} />
-        </div>
+        <FilterSelect value={projectFilter} onChange={setProjectFilter} placeholder="פרויקט"
+          options={[{ value: "all", label: "כל הפרויקטים" }, ...projects.map((p) => ({ value: p.id, label: p.name }))]} />
+        <FilterSelect value={supplierFilter} onChange={setSupplierFilter} placeholder="ספק"
+          options={[{ value: "all", label: "כל הספקים" }, ...supplierOptions.map(([id, name]) => ({ value: id, label: name }))]} />
+        <FilterSelect value={categoryFilter} onChange={setCategoryFilter} placeholder="קטגוריה"
+          options={[{ value: "all", label: "כל הקטגוריות" }, ...categories.map((c) => ({ value: c.id, label: c.name }))]} />
+        <FilterSelect value={statusFilter} onChange={setStatusFilter} placeholder="סטטוס" options={STATUS_OPTIONS} />
       </div>
-      {loading ? (
-        <LoadingState fullHeight={false} />
-      ) : (
-        <div className="px-5 relative z-10 space-y-3">
-          {visibleDeals.length === 0 && (
-            <div className="gb-card p-8 text-center text-sm text-muted-foreground">אין הצעות להצגה</div>
-          )}
-          {visibleDeals.map((d) => {
-            const supplier = suppliers[d.supplier_id];
-            const category = categories.find((c) => c.id === d.category_id);
-            const cnt = counts[d.id] ?? { interests: 0, paid: 0, eligible: 0, redeemed: 0 };
-            const st = statusLabel(d);
-            const target = d.target_participants ?? 0;
-            const totalIssued = cnt.eligible + cnt.redeemed;
-            const rate = totalIssued > 0 ? Math.round((cnt.redeemed / totalIssued) * 100) : 0;
-            const isLocked = !!d.auto_closed_at;
-            return (
-              <div key={d.id} className="gb-card p-4">
-                <div className="flex items-start gap-3 mb-2">
-                  <div className="h-10 w-10 rounded-xl bg-[#F4F6FA] flex items-center justify-center text-lg">{category?.icon ?? "🏷️"}</div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-sm truncate">{d.title}</h3>
-                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span className={`text-fs-xs font-bold px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>
-                      {isLocked && (
-                        <span className="text-fs-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 inline-flex items-center gap-1">
-                          <Lock className="h-3 w-3" /> נעולה
-                        </span>
-                      )}
-                      <p className="text-fs-xs text-muted-foreground truncate">{supplier?.business_name ?? "—"}</p>
-                    </div>
-                  </div>
-                  <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
-                </div>
-                <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border text-center text-fs-xs">
-                  <div>
-                    <div className="font-bold text-primary">{formatILS(priceFor(d))}</div>
-                    <div className="text-muted-foreground">מחיר</div>
-                  </div>
-                  <div className="border-x border-border">
-                    <div className="font-bold text-foreground">{cnt.paid}{target ? `/${target}` : ""}</div>
-                    <div className="text-muted-foreground">הצטרפו</div>
-                  </div>
-                  <div className="border-l border-border">
-                    <div className="font-bold text-emerald-700">{cnt.eligible + cnt.redeemed}</div>
-                    <div className="text-muted-foreground">זכאים</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-blue-700">{cnt.redeemed} <span className="text-fs-xs text-muted-foreground">({rate}%)</span></div>
-                    <div className="text-muted-foreground">מומשו</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+
+      <div className="p-5 lg:p-8">
+        {loading ? <LoadingState fullHeight={false} /> : (
+          <AdminTable columns={columns} rows={visibleDeals} empty="לא נמצאו הצעות התואמות לסינון" />
+        )}
+      </div>
       <BottomNav role="admin" />
     </MobileShell>
+  );
+}
+
+function FilterSelect({
+  value, onChange, placeholder, options,
+}: { value: string; onChange: (v: string) => void; placeholder: string; options: { value: string; label: string }[] }) {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="h-9 w-[140px] text-[12px] border-[#ECEEF2] bg-white">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent className="bg-white z-50 max-h-[300px]">
+        {options.map((o) => (
+          <SelectItem key={o.value} value={o.value} className="text-[12px]">{o.label}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
