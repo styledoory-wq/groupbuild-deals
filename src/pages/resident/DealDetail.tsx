@@ -557,12 +557,8 @@ export default function DealDetail() {
     participantCount,
   );
   const activeTier = tiers.length > 0 ? getActiveTier(tiers, participantCount) : null;
-  // "Next tier" = the tier strictly above the currently-active one.
-  // When 0 joined, the first tier IS the active/starting state — the next target should be tier 2.
-  const _sortedAll = tiers.length > 0 ? [...tiers].sort((a, b) => a.minParticipants - b.minParticipants) : [];
-  const nextTier = activeTier
-    ? _sortedAll.find((t) => t.minParticipants > activeTier.minParticipants) ?? null
-    : null;
+  // Use the shared helper — preserves the supplier's tier data exactly as configured.
+  const nextTier = tiers.length > 0 ? getNextTier(tiers, participantCount) : null;
   const peopleNeeded = nextTier ? Math.max(0, nextTier.minParticipants - participantCount) : 0;
   // Progress target: next tier's threshold, or the highest tier's min if maxed out.
   const progressTarget = nextTier
@@ -642,10 +638,21 @@ export default function DealDetail() {
       : null;
 
   // ----- Build a 3-slot window of tier blocks (past / active / future) -----
-  type WindowItem = { kind: "tier"; tier: OfferTier; state: "past" | "active" | "future" };
+  // When no one has joined yet, prepend a synthetic "current state" card so the
+  // user sees both where things stand now AND the first price-drop target.
+  type WindowItem =
+    | { kind: "starter"; state: "active" }
+    | { kind: "tier"; tier: OfferTier; state: "past" | "active" | "future" };
 
   const tierWindow: WindowItem[] = (() => {
     if (sortedTiers.length === 0) return [];
+    if (!hasAnyJoiners) {
+      const visible = sortedTiers.slice(0, 2);
+      return [
+        { kind: "starter", state: "active" } as const,
+        ...visible.map((t) => ({ kind: "tier" as const, tier: t, state: "future" as const })),
+      ];
+    }
     if (sortedTiers.length <= 3) {
       return sortedTiers.map((t, idx) => ({
         kind: "tier" as const,
@@ -913,12 +920,29 @@ export default function DealDetail() {
             {/* 3 tier cards */}
             <div className="grid grid-cols-3 gap-2">
               {tierWindow.map((item, idx) => {
+                const baseCard = "rounded-2xl p-3 h-[110px] flex flex-col items-center justify-center text-center relative";
+                if (item.kind === "starter") {
+                  // "Current state" — no one has joined yet. Show reference (no-group) price
+                  // or a neutral label for percentage offers without a base price.
+                  const refPrice = display.referencePrice;
+                  return (
+                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#E8EBEF]")}>
+                      <UserIcon className="w-4 h-4 text-[#6B7280] mb-1" strokeWidth={2.4} />
+                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">0 מצטרפים</div>
+                      {refPrice != null ? (
+                        <div className="text-[18px] font-black text-[#1F2937] gb-num leading-none">{ils(refPrice)}</div>
+                      ) : (
+                        <div className="text-[13px] font-black text-[#1F2937] leading-tight">מחיר רגיל</div>
+                      )}
+                      <div className="text-[9px] font-medium text-[#6B7280] mt-1">המצב כרגע</div>
+                    </div>
+                  );
+                }
                 const { tier, state } = item;
                 const td = describeTier(offerType, tier);
                 const tierPrice = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
                 const range = tierRange(tier);
                 const isNextTarget = nextTier && tier.minParticipants === nextTier.minParticipants;
-                const baseCard = "rounded-2xl p-3 h-[110px] flex flex-col items-center justify-center text-center relative";
                 if (state === "past") {
                   return (
                     <div key={idx} className={cn(baseCard, "bg-[#F4F6FA] border border-[#E8EBEF] opacity-60")}>
