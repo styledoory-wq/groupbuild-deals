@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2, Check, X, Trash2, RotateCcw, Archive, FileText, Calendar, Tag, Coins, Flame, TrendingUp, Clock, Sparkles, ArrowLeft, PlusCircle } from "lucide-react";
+import { Inbox, Loader2, Users, BadgeCheck, Phone, Mail, MessageCircle, MapPin, Building2, CheckCircle2, Check, X, Trash2, RotateCcw, Archive, FileText, Calendar, Coins, Flame, TrendingUp, Clock, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { ScreenHeader, LoadingState, ErrorState } from "@/components/ds";
@@ -624,69 +624,40 @@ export default function SupplierLeads() {
           onTouchStart={trashed ? undefined : onTouchStart}
           onTouchEnd={trashed ? undefined : makeSwipeEnd(i.id)}
         >
-          {/* Header: avatar + name + cover thumb + prominent time */}
-          <div className="flex items-start gap-2.5 mb-2.5">
+          {/* Header: avatar + name + status + time */}
+          <div className="flex items-start gap-2.5 mb-2">
             <Avatar name={name} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="font-extrabold text-[16px] text-foreground truncate">{name}</h4>
+                <h4 className="font-extrabold text-[15px] text-foreground truncate">{name}</h4>
                 <StageBadge stage={stage} hot={hot} />
               </div>
-              <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                <span
-                  className={
-                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold " +
-                    (hot
-                      ? "bg-[#FFF1ED] text-[#C2410C] border border-[#FED7AA]"
-                      : "bg-[#F0F9F6] text-[#0E6B5A] border border-[#A7E0D0]")
-                  }
-                >
-                  <Clock className="h-3 w-3" /> {timeAgoHe(i.created_at)}
-                </span>
-                {i.city && (
-                  <span className="text-[11px] text-muted-foreground inline-flex items-center gap-0.5">
-                    <MapPin className="h-3 w-3" /> {i.city}
-                  </span>
-                )}
+              <div className="mt-0.5 text-[11px] text-muted-foreground inline-flex items-center gap-1 flex-wrap">
+                <Clock className="h-3 w-3" /> {timeAgoHe(i.created_at)}
+                {i.city && <><span className="opacity-50">·</span><MapPin className="h-3 w-3" />{i.city}</>}
               </div>
             </div>
-            {cover ? (
-              <Link to={`/deals/${i.deal_id}`} className="shrink-0">
-                <img
-                  src={cover}
-                  alt={dealTitle(i.deal_id)}
-                  loading="lazy"
-                  className="h-12 w-12 rounded-xl object-cover border border-[#EEF0F3]"
-                />
-              </Link>
-            ) : (
-              <div className="h-12 w-12 rounded-xl bg-[#F0F9F6] border border-[#A7E0D0] flex items-center justify-center shrink-0">
-                <Building2 className="h-5 w-5 text-[#0E6B5A]" />
-              </div>
-            )}
-          </div>
-
-          {/* Source deal pill */}
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <Link to={`/deals/${i.deal_id}`} className="text-[11px] text-[#0E6B5A] font-bold inline-flex items-center gap-1 truncate min-w-0">
-              <Building2 className="h-3 w-3 shrink-0" />
-              <span className="truncate">{dealTitle(i.deal_id)}</span>
-            </Link>
             {committed && (
-              <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30 shrink-0">
+              <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30 shrink-0 self-start">
                 <BadgeCheck className="h-3 w-3" />
                 {i.deposit_status === "paid" ? "שולם" : ils(Number(i.deposit_amount))}
               </span>
             )}
           </div>
 
-          {(phone || email || i.project_name) && (
-            <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground mb-2">
-              {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
-              {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
-              {i.project_name && <span className="inline-flex items-center gap-1"><Building2 className="h-3 w-3" /> {i.project_name}</span>}
-            </div>
-          )}
+          {/* Single project/deal row + contact info — no duplicate cover card */}
+          <div className="space-y-1 mb-2">
+            <Link to={`/deals/${i.deal_id}`} className="text-[12px] text-[#0E6B5A] font-bold inline-flex items-center gap-1 truncate max-w-full">
+              <Building2 className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{i.project_name || dealTitle(i.deal_id)}</span>
+            </Link>
+            {(phone || email) && (
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
+                {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
+              </div>
+            )}
+          </div>
 
           {i.notes && (
             <p className="text-[11px] text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">{i.notes}</p>
@@ -848,48 +819,22 @@ export default function SupplierLeads() {
           <ErrorState title="שגיאה בטעינה" description={error} />
         ) : (
           <>
-            {/* === Hero CRM card === */}
-            <div
-              className="rounded-2xl px-3.5 py-2.5 text-white relative overflow-hidden"
-              style={{
-                background: "linear-gradient(135deg, #0E6B5A 0%, #14856F 55%, #16A085 100%)",
-                boxShadow: "0 8px 20px -10px rgba(14,107,90,0.4)",
-              }}
-            >
-              <div className="absolute -top-6 -left-6 h-20 w-20 rounded-full bg-white/10" aria-hidden />
-              <div className="relative z-10 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-[10px] font-bold opacity-90 inline-flex items-center gap-1">
-                    <Sparkles className="h-3 w-3" /> מרכז הלידים
-                  </div>
-                  <div className="mt-0.5 flex items-baseline gap-1.5">
-                    <span className="text-[22px] font-black leading-none">{stats.total}</span>
-                    <span className="text-[11px] opacity-90 font-bold">פעילים</span>
-                    <span className="text-[10px] opacity-80">·</span>
-                    <span className="text-[11px] opacity-95 inline-flex items-center gap-0.5">
-                      <TrendingUp className="h-3 w-3" /> {stats.newThisWeek} השבוע
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setTab("new")}
-                  className="shrink-0 h-8 px-3 rounded-lg bg-white text-[#0E6B5A] font-extrabold text-[11px] inline-flex items-center gap-1 shadow-sm active:scale-[0.98] transition-transform"
-                >
-                  לידים חדשים
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                </button>
+            {/* === Compact summary strip === */}
+            <div className="flex items-center justify-between gap-2 px-1 pt-1">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[22px] font-black leading-none text-foreground">{stats.total}</span>
+                <span className="text-[12px] text-muted-foreground font-bold">לידים פעילים</span>
+              </div>
+              <div className="text-[11px] text-muted-foreground inline-flex items-center gap-2">
+                <span className="inline-flex items-center gap-0.5 text-[#059669] font-bold">
+                  <TrendingUp className="h-3 w-3" /> {stats.newThisWeek} השבוע
+                </span>
+                <span className="opacity-50">·</span>
+                <span>{stats.conversion}% המרה</span>
               </div>
             </div>
 
-            {/* === 4 KPI cards === */}
-            <div className="grid grid-cols-4 gap-1.5">
-              <KpiSmall icon={<Users className="h-3 w-3" />} label="לידים" value={String(stats.total)} trend={`+${stats.newThisWeek}`} tone="green" />
-              <KpiSmall icon={<TrendingUp className="h-3 w-3" />} label="המרה" value={`${stats.conversion}%`} trend={stats.closed ? `${stats.closed}` : "—"} tone="blue" />
-              <KpiSmall icon={<Coins className="h-3 w-3" />} label="צפוי" value={stats.expectedRevenue ? ils(stats.expectedRevenue) : "—"} trend="₪" tone="amber" />
-              <KpiSmall icon={<Clock className="h-3 w-3" />} label="תגובה" value={stats.avgRespHours == null ? "—" : `${stats.avgRespHours}ש׳`} trend="ממוצע" tone="violet" />
-            </div>
-
-            {/* === Tabs === */}
+            {/* === Tabs (filters) === */}
             <div className="flex items-center gap-1 bg-white rounded-2xl p-1 border border-[#EEF0F3] overflow-x-auto">
               {([
                 { k: "all", label: "הכל" },
@@ -915,18 +860,16 @@ export default function SupplierLeads() {
               })}
             </div>
 
-            {/* === Trash toggle row === */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <Users className="h-3.5 w-3.5 text-[#0E6B5A]" />
-                {showTrash ? `סל מחזור · ${totalTrashed} פריטים` : `מציג ${tabCounts[tab]} מתוך ${tabCounts.all}`}
+            {/* === Trash toggle (subtle) === */}
+            {(totalTrashed > 0 || showTrash) && (
+              <div className="flex items-center justify-end">
+                <button onClick={() => { setShowTrash((v) => !v); setSwipeId(null); }}
+                  className="text-[11px] font-bold inline-flex items-center gap-1 px-2.5 h-7 rounded-lg bg-muted text-foreground">
+                  <Archive className="h-3 w-3" />
+                  {showTrash ? "חזרה ללידים" : `סל מחזור${totalTrashed ? ` (${totalTrashed})` : ""}`}
+                </button>
               </div>
-              <button onClick={() => { setShowTrash((v) => !v); setSwipeId(null); }}
-                className="text-[11px] font-bold inline-flex items-center gap-1 px-2.5 h-7 rounded-lg bg-muted text-foreground">
-                <Archive className="h-3 w-3" />
-                {showTrash ? "חזרה ללידים" : `סל מחזור${totalTrashed ? ` (${totalTrashed})` : ""}`}
-              </button>
-            </div>
+            )}
 
             {showTrash ? (
               totalTrashed === 0 ? (
@@ -957,8 +900,17 @@ export default function SupplierLeads() {
               />
             ) : (
               <div className="space-y-3">
+                {/* Unified leads timeline — interests + inquiries merged, newest first */}
+                {[
+                  ...filteredInterests.map((i) => ({ kind: "interest" as const, t: i.created_at, node: renderInterest(i, false), key: `i-${i.id}` })),
+                  ...filteredInquiries.map((q) => ({ kind: "inquiry" as const, t: q.created_at, node: renderInquiry(q, false), key: `q-${q.id}` })),
+                ]
+                  .sort((a, b) => new Date(b.t).getTime() - new Date(a.t).getTime())
+                  .map((item) => <div key={item.key}>{item.node}</div>)}
+
+                {/* Committee quote requests — shown last as a separate, optional section */}
                 {tab === "all" && quoteRequests.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 pt-2">
                     <h3 className="text-[11px] font-bold text-muted-foreground inline-flex items-center gap-1.5">
                       <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" />
                       בקשות הצעת מחיר מוועדי בתים ({quoteRequests.length})
@@ -982,9 +934,6 @@ export default function SupplierLeads() {
                           <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-[#1C1C1E] mb-3">
                             {q.residents_count != null && (
                               <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#0E6B5A]" />{q.residents_count} דיירים</span>
-                            )}
-                            {q.category_id && (
-                              <span className="inline-flex items-center gap-1"><Tag className="h-3.5 w-3.5 text-[#0E6B5A]" />{q.category_id}</span>
                             )}
                             {q.target_price_per_unit != null && (
                               <span className="inline-flex items-center gap-1"><Coins className="h-3.5 w-3.5 text-[#0E6B5A]" />יעד {ils(q.target_price_per_unit)}</span>
@@ -1013,16 +962,6 @@ export default function SupplierLeads() {
                     })}
                   </div>
                 )}
-                {filteredInquiries.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-[11px] font-bold text-muted-foreground mt-1">פניות כלליות</h3>
-                    {filteredInquiries.map((q) => renderInquiry(q, false))}
-                  </div>
-                )}
-                {filteredInterests.length > 0 && (
-                  <h3 className="text-[11px] font-bold text-muted-foreground mt-2">לידים על הצעות פעילות</h3>
-                )}
-                {filteredInterests.map((i) => renderInterest(i, false))}
               </div>
             )}
           </>
