@@ -723,6 +723,29 @@ export default function DealDetail() {
         <PageHeader title="" subtitle="" back variant="navy" />
       </div>
 
+      {isSupplierPreview && (
+        <div className="px-4 mt-2">
+          <div className="rounded-2xl border border-[#0E6B5A]/25 bg-[#E8F4F1] px-3.5 py-2.5 flex items-center gap-2.5 shadow-[0_4px_12px_-8px_rgba(10,31,61,0.18)]">
+            <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0">
+              <span aria-hidden className="text-base">👁️</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[12px] font-extrabold text-[#0E6B5A] leading-tight">תצוגה מקדימה – כך הדייר רואה את ההצעה שלך</div>
+              <div className="text-[10.5px] text-[#1F2937]/70 leading-tight mt-0.5">פעולות הצטרפות ותשלום מוסתרות כאן</div>
+            </div>
+            <Link
+              to={`/supplier/offers/${deal.id}/edit`}
+              className="h-9 px-3 rounded-xl bg-[#0E6B5A] text-white text-[11px] font-extrabold inline-flex items-center gap-1 shrink-0"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              עריכה
+            </Link>
+          </div>
+        </div>
+      )}
+
+
+
       {/* ===== SECTION 1 — HERO IMAGE ===== */}
       <div className="px-4 mt-2">
         <div className="relative rounded-[28px] overflow-hidden h-[260px] bg-gradient-to-br from-[#EAF2FF] to-[#FFF8E1]">
