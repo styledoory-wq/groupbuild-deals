@@ -881,18 +881,24 @@ export default function DealDetail() {
                   </div>
                 </div>
 
-                {/* left — next price */}
+                {/* left — next price / next discount */}
                 <div className="bg-[#F0F9F6] border border-[#0E6B5A]/15 rounded-2xl p-3 w-[120px] shrink-0 flex flex-col items-center justify-center text-center relative">
                   <Sparkles className="absolute top-1.5 left-1.5 w-3 h-3 text-[#F5C547]" />
                   <div className="text-[10px] font-bold text-[#0E6B5A] mb-0.5">המחיר הבא</div>
-                  {nextDisplay?.effectivePrice != null && (
+                  {nextDisplay?.effectivePrice != null ? (
                     <div className="text-[20px] font-black text-[#0E6B5A] gb-num leading-none">{ils(nextDisplay.effectivePrice)}</div>
-                  )}
-                  {savingsToNext && savingsToNext > 0 && (
+                  ) : nextDisplay?.discountPercent != null ? (
+                    <div className="text-[20px] font-black text-[#0E6B5A] gb-num leading-none">{nextDisplay.discountPercent}%<span className="text-[10px] font-bold mr-1">הנחה</span></div>
+                  ) : null}
+                  {savingsToNext && savingsToNext > 0 ? (
                     <div className="mt-2 bg-[#FFF8E1] text-[#8A6A1E] text-[9.5px] font-black px-2 py-1 rounded-lg leading-tight">
                       תחסכו עוד {ils(savingsToNext)} לאדם
                     </div>
-                  )}
+                  ) : extraDiscountToNext && extraDiscountToNext > 0 ? (
+                    <div className="mt-2 bg-[#FFF8E1] text-[#8A6A1E] text-[9.5px] font-black px-2 py-1 rounded-lg leading-tight">
+                      +{extraDiscountToNext}% הנחה לכולם
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
