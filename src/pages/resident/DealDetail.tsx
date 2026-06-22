@@ -557,7 +557,12 @@ export default function DealDetail() {
     participantCount,
   );
   const activeTier = tiers.length > 0 ? getActiveTier(tiers, participantCount) : null;
-  const nextTier = tiers.length > 0 ? getNextTier(tiers, participantCount) : null;
+  // "Next tier" = the tier strictly above the currently-active one.
+  // When 0 joined, the first tier IS the active/starting state — the next target should be tier 2.
+  const _sortedAll = tiers.length > 0 ? [...tiers].sort((a, b) => a.minParticipants - b.minParticipants) : [];
+  const nextTier = activeTier
+    ? _sortedAll.find((t) => t.minParticipants > activeTier.minParticipants) ?? null
+    : null;
   const peopleNeeded = nextTier ? Math.max(0, nextTier.minParticipants - participantCount) : 0;
   // Progress target: next tier's threshold, or the highest tier's min if maxed out.
   const progressTarget = nextTier
