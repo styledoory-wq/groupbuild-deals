@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Home, Tag, User, Briefcase, BarChart3, Users, Building2, ShieldCheck, Heart, CheckSquare, LogOut, TrendingUp, type LucideIcon } from "lucide-react";
+import { Home, Tag, User, Briefcase, Users, Building2, ShieldCheck, Heart, CheckSquare, LogOut, TrendingUp, CreditCard, AlertTriangle, Settings, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { preloadRoute } from "@/lib/routePreload";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -24,11 +24,13 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
     { to: "/supplier/account", label: "חשבון", icon: User },
   ],
   admin: [
-    { to: "/admin", label: "בית", icon: Home },
+    { to: "/admin", label: "דשבורד", icon: Home },
     { to: "/admin/projects", label: "פרויקטים", icon: Building2 },
     { to: "/admin/suppliers", label: "ספקים", icon: ShieldCheck },
-    { to: "/admin/deals", label: "עסקאות", icon: Tag },
-    { to: "/admin/stats", label: "סטטיסטיקה", icon: BarChart3 },
+    { to: "/admin/deals", label: "הצעות", icon: Tag },
+    { to: "/admin/payments", label: "תשלומים", icon: CreditCard },
+    { to: "/admin/control", label: "בקרה", icon: AlertTriangle },
+    { to: "/admin/settings", label: "הגדרות", icon: Settings },
   ],
 };
 
