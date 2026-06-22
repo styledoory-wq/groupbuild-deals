@@ -376,23 +376,14 @@ export default function AdminProjects() {
   );
 }
 
-function InlineStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+function Chip({ icon, value, label, tone = "neutral" }: { icon?: React.ReactNode; value: React.ReactNode; label: string; tone?: "neutral" | "positive" }) {
+  const valueCls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
   return (
-    <div className="text-center">
-      <div className="flex items-center justify-center text-[#9CA3AF] mb-0.5">{icon}</div>
-      <div className="text-[14px] font-extrabold text-[#0F172A] leading-none">{value}</div>
-      <div className="text-[10px] text-[#6B7280] mt-0.5">{label}</div>
-    </div>
-  );
-}
-
-function BlockStat({ label, value, tone = "neutral" }: { label: string; value: React.ReactNode; tone?: "neutral" | "positive" | "warning" }) {
-  const cls = tone === "positive" ? "text-[#0E6B5A]" : tone === "warning" ? "text-[#B45309]" : "text-[#0F172A]";
-  return (
-    <div className="text-center">
-      <div className={cn("text-[14px] font-extrabold leading-none", cls)}>{value}</div>
-      <div className="text-[10px] text-[#6B7280] mt-1">{label}</div>
-    </div>
+    <span className="inline-flex items-center gap-1 whitespace-nowrap">
+      {icon && <span className="text-[#9CA3AF]">{icon}</span>}
+      <span className={cn("font-extrabold tabular-nums", valueCls)}>{value}</span>
+      <span className="text-[#6B7280]">{label}</span>
+    </span>
   );
 }
 
