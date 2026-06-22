@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, TrendingDown, MessageCircle, Phone, CheckCircle2, CreditCard, Clock, Share2, Percent, PiggyBank, CalendarDays, MapPin, Layers, Store, Handshake, Target, PhoneCall, Wrench, BadgeCheck, Award, ChevronLeft, Building2, PartyPopper, Heart, Link2, Rocket, User as UserIcon } from "lucide-react";
+import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, TrendingDown, MessageCircle, Phone, CheckCircle2, CreditCard, Clock, Share2, Percent, PiggyBank, CalendarDays, MapPin, Layers, Store, Handshake, Target, PhoneCall, Wrench, BadgeCheck, Award, ChevronLeft, Building2, PartyPopper, Heart, Link2, Rocket, User as UserIcon, Pencil } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BackHeader, LoadingState, ErrorState } from "@/components/ds";
@@ -77,7 +77,10 @@ interface SupplierRow {
 export default function DealDetail() {
   const { dealId } = useParams();
   const navigate = useNavigate();
-  const { categories } = useApp();
+  const { categories, user } = useApp();
+  const [supplierUserId, setSupplierUserId] = useState<string | null>(null);
+  const isSupplierPreview =
+    !!user && user.role === "supplier" && !!supplierUserId && supplierUserId === user.id;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -151,10 +154,14 @@ export default function DealDetail() {
 
         const { data: supData } = await supabase
           .from("suppliers")
-          .select("id,business_name,logo_url,approval_status,service_areas,phone,whatsapp_url")
+          .select("id,business_name,logo_url,approval_status,service_areas,phone,whatsapp_url,user_id")
           .eq("id", d.supplier_id)
           .maybeSingle();
-        if (!cancelled) setSupplier((supData as SupplierRow | null) ?? null);
+        if (!cancelled) {
+          const sup = (supData as (SupplierRow & { user_id?: string | null }) | null) ?? null;
+          setSupplier(sup);
+          setSupplierUserId(sup?.user_id ?? null);
+        }
 
         await loadParticipantCount(d.id);
 
@@ -716,6 +723,29 @@ export default function DealDetail() {
         <PageHeader title="" subtitle="" back variant="navy" />
       </div>
 
+      {isSupplierPreview && (
+        <div className="px-4 mt-2">
+          <div className="rounded-2xl border border-[#0E6B5A]/25 bg-[#E8F4F1] px-3.5 py-2.5 flex items-center gap-2.5 shadow-[0_4px_12px_-8px_rgba(10,31,61,0.18)]">
+            <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0">
+              <span aria-hidden className="text-base">👁️</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[12px] font-extrabold text-[#0E6B5A] leading-tight">תצוגה מקדימה – כך הדייר רואה את ההצעה שלך</div>
+              <div className="text-[10.5px] text-[#1F2937]/70 leading-tight mt-0.5">פעולות הצטרפות ותשלום מוסתרות כאן</div>
+            </div>
+            <Link
+              to={`/supplier/offers/${deal.id}/edit`}
+              className="h-9 px-3 rounded-xl bg-[#0E6B5A] text-white text-[11px] font-extrabold inline-flex items-center gap-1 shrink-0"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              עריכה
+            </Link>
+          </div>
+        </div>
+      )}
+
+
+
       {/* ===== SECTION 1 — HERO IMAGE ===== */}
       <div className="px-4 mt-2">
         <div className="relative rounded-[28px] overflow-hidden h-[260px] bg-gradient-to-br from-[#EAF2FF] to-[#FFF8E1]">
@@ -750,7 +780,7 @@ export default function DealDetail() {
             {statusMeta.label}
           </span>
 
-          {(hasCompletedJoin || hasPendingDeposit) && (
+          {!isSupplierPreview && (hasCompletedJoin || hasPendingDeposit) && (
             <div className="absolute top-4 left-4 bg-gradient-to-l from-[#1A8870] to-[#34A88E] text-[#1F2937] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
               {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
               <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
@@ -1268,7 +1298,8 @@ export default function DealDetail() {
 
 
 
-      {/* ===== SECTION 7 — STICKY CTA ===== */}
+      {/* ===== SECTION 7 — STICKY CTA (residents only) ===== */}
+      {!isSupplierPreview && (
       <div
         className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
@@ -1328,11 +1359,39 @@ export default function DealDetail() {
           )}
         </div>
       </div>
+      )}
+
+      {/* ===== SECTION 7B — SUPPLIER PREVIEW STICKY (edit shortcut) ===== */}
+      {isSupplierPreview && (
+        <div
+          className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
+        >
+          <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0]/95 to-transparent">
+            <div className="flex items-stretch gap-2">
+              <Link
+                to={`/supplier/offers/${deal.id}/edit`}
+                className="flex-1 h-14 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#0E6B5A]/40 flex items-center justify-center gap-2"
+              >
+                <Pencil className="h-4 w-4" />
+                עריכת ההצעה
+              </Link>
+              <Link
+                to="/supplier/offers"
+                className="h-14 px-4 rounded-2xl bg-white border-2 border-[#0E6B5A]/25 text-[#0E6B5A] font-extrabold text-[13px] flex items-center justify-center"
+              >
+                סגור
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
 
 
 
       {/* Join modal */}
-      <Dialog open={showJoinModal} onOpenChange={setShowJoinModal}>
+      <Dialog open={showJoinModal && !isSupplierPreview} onOpenChange={setShowJoinModal}>
         <DialogContent dir="rtl" className="text-right max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>הצטרפות להצעה</DialogTitle>
@@ -1495,7 +1554,7 @@ export default function DealDetail() {
         </DialogContent>
       </Dialog>
 
-      <BottomNav role="resident" />
+      <BottomNav role={isSupplierPreview ? "supplier" : "resident"} />
     </MobileShell>
   );
 }
