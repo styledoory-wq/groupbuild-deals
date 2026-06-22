@@ -44,7 +44,7 @@ export default function AdminControl() {
         ] = await Promise.all([
           supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false).eq("approval_status", "pending"),
           supabase.from("complaints").select("id", { count: "exact", head: true }).eq("status", "open"),
-          supabase.from("deposit_attempt_logs").select("id", { count: "exact", head: true }).eq("status", "failed").gte("created_at", sevenDaysAgo),
+          supabase.from("deposit_attempt_logs").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
           supabase.from("supplier_inquiries").select("id", { count: "exact", head: true }).is("responded_at", null).lte("created_at", sevenDaysAgo),
           supabase.from("committee_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
           supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).is("image_url", null),
