@@ -229,7 +229,7 @@ export default function AdminProjects() {
         </div>
       </div>
 
-      <div className="p-3 lg:p-6">
+      <div className="p-2.5 lg:p-6">
         {loadingMetrics && projects.length === 0 ? (
           <LoadingState fullHeight={false} />
         ) : filteredProjects.length === 0 ? (
@@ -237,7 +237,7 @@ export default function AdminProjects() {
             לא נמצאו פרויקטים
           </div>
         ) : (
-          <div className="grid gap-3 grid-cols-1 xl:grid-cols-2">
+          <div className="grid gap-2 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
             {filteredProjects.map((p) => {
               const m = metrics[p.id] ?? { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 };
               const participation = p.apartmentCount > 0 ? Math.min(100, Math.round((m.users / p.apartmentCount) * 100)) : 0;
@@ -246,64 +246,64 @@ export default function AdminProjects() {
                 <article
                   key={p.id}
                   dir="rtl"
-                  className="bg-white border border-[#ECEEF2] rounded-[14px] p-3 hover:shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08)] hover:border-[#0E6B5A]/30 transition-all"
+                  className="bg-white border border-[#ECEEF2] rounded-[12px] p-2.5 hover:shadow-[0_4px_16px_-6px_rgba(15,23,42,0.08)] hover:border-[#0E6B5A]/30 transition-all"
                 >
-                  {/* Top: title + image + 3 inline stats */}
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-stretch gap-2.5">
                     {/* Image */}
-                    <div className="relative shrink-0 w-[88px] h-[88px] rounded-[10px] overflow-hidden bg-[#F4F6FA]">
+                    <div className="relative shrink-0 w-[64px] h-[64px] rounded-[10px] overflow-hidden bg-[#F4F6FA]">
                       {m.imageUrl ? (
                         <img src={m.imageUrl} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Building2 className="h-7 w-7 text-[#9CA3AF]" />
+                          <Building2 className="h-5 w-5 text-[#9CA3AF]" />
                         </div>
                       )}
-                      <span className={cn(
-                        "absolute top-1 left-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold",
-                        statusPill[p.status],
-                      )}>
-                        {statusLabel[p.status]}
-                      </span>
                     </div>
 
-                    {/* Title + stats */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-extrabold text-[15px] leading-tight text-[#0F172A] truncate">{p.name}</h3>
-                      <div className="flex items-center gap-1 text-[11px] text-[#6B7280] mt-0.5">
-                        <MapPin className="h-3 w-3 shrink-0" />
-                        <span className="truncate">{p.city}</span>
+                    {/* Right pane */}
+                    <div className="flex-1 min-w-0 flex flex-col">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="font-extrabold text-[13.5px] leading-tight text-[#0F172A] truncate">{p.name}</h3>
+                          <div className="flex items-center gap-1 text-[11px] text-[#6B7280] mt-0.5">
+                            <MapPin className="h-2.5 w-2.5 shrink-0" />
+                            <span className="truncate">{p.city}</span>
+                          </div>
+                        </div>
+                        <span className={cn(
+                          "shrink-0 px-1.5 py-0.5 rounded-md text-[9px] font-bold whitespace-nowrap",
+                          statusPill[p.status],
+                        )}>
+                          {statusLabel[p.status]}
+                        </span>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2 mt-2.5">
-                        <InlineStat icon={<Home className="h-3 w-3" />} label="דירות" value={p.apartmentCount} />
-                        <InlineStat icon={<Users className="h-3 w-3" />} label="משתמשים" value={m.users} />
-                        <InlineStat icon={<Tag className="h-3 w-3" />} label="ספקים" value={m.suppliers} />
+                      {/* Inline stats */}
+                      <div className="flex items-center gap-x-3 gap-y-0.5 flex-wrap mt-1.5 text-[11px] text-[#1F2937]">
+                        <Chip icon={<Home className="h-2.5 w-2.5" />} value={p.apartmentCount} label="דירות" />
+                        <Chip icon={<Users className="h-2.5 w-2.5" />} value={m.users} label="משתמשים" />
+                        <Chip icon={<Tag className="h-2.5 w-2.5" />} value={m.suppliers} label="ספקים" />
+                        <Chip value={m.deals} label="הצעות" />
+                        <Chip value={formatILS(m.deposits)} label="פיקדונות" tone="positive" />
                       </div>
                     </div>
                   </div>
 
-                  {/* Second row of stats */}
-                  <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-[#F1F3F7]">
-                    <BlockStat label="הצעות" value={m.deals} />
-                    <BlockStat label="פיקדונות" value={formatILS(m.deposits)} tone="positive" />
-                    <BlockStat label="השתתפות" value={`${participation}%`} tone={participation >= 50 ? "positive" : participation >= 20 ? "warning" : "neutral"} />
-                  </div>
-
-                  {/* Progress */}
-                  <div className="mt-2.5">
-                    <div className="h-1.5 rounded-full bg-[#F1F3F7] overflow-hidden">
+                  {/* Progress + participation */}
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex-1 h-1.5 rounded-full bg-[#F1F3F7] overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{ width: `${participation}%`, backgroundColor: partTone }} />
                     </div>
+                    <span className="text-[10.5px] font-extrabold tabular-nums" style={{ color: partTone }}>{participation}%</span>
                   </div>
 
                   {/* Actions */}
-                  <div className="grid grid-cols-3 gap-1.5 mt-3">
-                    <ActionBtn icon={<Settings2 className="h-3.5 w-3.5" />} label="ניהול פרויקט"
+                  <div className="grid grid-cols-3 gap-1.5 mt-2">
+                    <ActionBtn icon={<Settings2 className="h-3 w-3" />} label="ניהול"
                       onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} primary />
-                    <ActionBtn icon={<Eye className="h-3.5 w-3.5" />} label="צפייה"
+                    <ActionBtn icon={<Eye className="h-3 w-3" />} label="צפייה"
                       onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} />
-                    <ActionBtn icon={<Pencil className="h-3.5 w-3.5" />} label="עריכה" onClick={() => openEdit(p)} />
+                    <ActionBtn icon={<Pencil className="h-3 w-3" />} label="עריכה" onClick={() => openEdit(p)} />
                   </div>
                 </article>
               );
@@ -376,23 +376,14 @@ export default function AdminProjects() {
   );
 }
 
-function InlineStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+function Chip({ icon, value, label, tone = "neutral" }: { icon?: React.ReactNode; value: React.ReactNode; label: string; tone?: "neutral" | "positive" }) {
+  const valueCls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
   return (
-    <div className="text-center">
-      <div className="flex items-center justify-center text-[#9CA3AF] mb-0.5">{icon}</div>
-      <div className="text-[14px] font-extrabold text-[#0F172A] leading-none">{value}</div>
-      <div className="text-[10px] text-[#6B7280] mt-0.5">{label}</div>
-    </div>
-  );
-}
-
-function BlockStat({ label, value, tone = "neutral" }: { label: string; value: React.ReactNode; tone?: "neutral" | "positive" | "warning" }) {
-  const cls = tone === "positive" ? "text-[#0E6B5A]" : tone === "warning" ? "text-[#B45309]" : "text-[#0F172A]";
-  return (
-    <div className="text-center">
-      <div className={cn("text-[14px] font-extrabold leading-none", cls)}>{value}</div>
-      <div className="text-[10px] text-[#6B7280] mt-1">{label}</div>
-    </div>
+    <span className="inline-flex items-center gap-1 whitespace-nowrap">
+      {icon && <span className="text-[#9CA3AF]">{icon}</span>}
+      <span className={cn("font-extrabold tabular-nums", valueCls)}>{value}</span>
+      <span className="text-[#6B7280]">{label}</span>
+    </span>
   );
 }
 
