@@ -624,69 +624,40 @@ export default function SupplierLeads() {
           onTouchStart={trashed ? undefined : onTouchStart}
           onTouchEnd={trashed ? undefined : makeSwipeEnd(i.id)}
         >
-          {/* Header: avatar + name + cover thumb + prominent time */}
-          <div className="flex items-start gap-2.5 mb-2.5">
+          {/* Header: avatar + name + status + time */}
+          <div className="flex items-start gap-2.5 mb-2">
             <Avatar name={name} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="font-extrabold text-[16px] text-foreground truncate">{name}</h4>
+                <h4 className="font-extrabold text-[15px] text-foreground truncate">{name}</h4>
                 <StageBadge stage={stage} hot={hot} />
               </div>
-              <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                <span
-                  className={
-                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold " +
-                    (hot
-                      ? "bg-[#FFF1ED] text-[#C2410C] border border-[#FED7AA]"
-                      : "bg-[#F0F9F6] text-[#0E6B5A] border border-[#A7E0D0]")
-                  }
-                >
-                  <Clock className="h-3 w-3" /> {timeAgoHe(i.created_at)}
-                </span>
-                {i.city && (
-                  <span className="text-[11px] text-muted-foreground inline-flex items-center gap-0.5">
-                    <MapPin className="h-3 w-3" /> {i.city}
-                  </span>
-                )}
+              <div className="mt-0.5 text-[11px] text-muted-foreground inline-flex items-center gap-1 flex-wrap">
+                <Clock className="h-3 w-3" /> {timeAgoHe(i.created_at)}
+                {i.city && <><span className="opacity-50">·</span><MapPin className="h-3 w-3" />{i.city}</>}
               </div>
             </div>
-            {cover ? (
-              <Link to={`/deals/${i.deal_id}`} className="shrink-0">
-                <img
-                  src={cover}
-                  alt={dealTitle(i.deal_id)}
-                  loading="lazy"
-                  className="h-12 w-12 rounded-xl object-cover border border-[#EEF0F3]"
-                />
-              </Link>
-            ) : (
-              <div className="h-12 w-12 rounded-xl bg-[#F0F9F6] border border-[#A7E0D0] flex items-center justify-center shrink-0">
-                <Building2 className="h-5 w-5 text-[#0E6B5A]" />
-              </div>
-            )}
-          </div>
-
-          {/* Source deal pill */}
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <Link to={`/deals/${i.deal_id}`} className="text-[11px] text-[#0E6B5A] font-bold inline-flex items-center gap-1 truncate min-w-0">
-              <Building2 className="h-3 w-3 shrink-0" />
-              <span className="truncate">{dealTitle(i.deal_id)}</span>
-            </Link>
             {committed && (
-              <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30 shrink-0">
+              <span className="text-[10px] font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#1F2937] border border-[#0E6B5A]/30 shrink-0 self-start">
                 <BadgeCheck className="h-3 w-3" />
                 {i.deposit_status === "paid" ? "שולם" : ils(Number(i.deposit_amount))}
               </span>
             )}
           </div>
 
-          {(phone || email || i.project_name) && (
-            <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground mb-2">
-              {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
-              {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
-              {i.project_name && <span className="inline-flex items-center gap-1"><Building2 className="h-3 w-3" /> {i.project_name}</span>}
-            </div>
-          )}
+          {/* Single project/deal row + contact info — no duplicate cover card */}
+          <div className="space-y-1 mb-2">
+            <Link to={`/deals/${i.deal_id}`} className="text-[12px] text-[#0E6B5A] font-bold inline-flex items-center gap-1 truncate max-w-full">
+              <Building2 className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{i.project_name || dealTitle(i.deal_id)}</span>
+            </Link>
+            {(phone || email) && (
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                {phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {phone}</span>}
+                {email && <span className="inline-flex items-center gap-1 truncate"><Mail className="h-3 w-3" /> {email}</span>}
+              </div>
+            )}
+          </div>
 
           {i.notes && (
             <p className="text-[11px] text-foreground/80 bg-muted/40 rounded-lg px-2 py-1.5 mb-2 whitespace-pre-line">{i.notes}</p>
