@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { useApp } from "@/store/AppStore";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminKpiRow } from "@/components/admin/AdminKpiRow";
+import { LoadingState } from "@/components/ds";
+import { useApp, formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
-import { Building2, Check, MapPin, Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Building2, Check, MapPin, Plus, Pencil, Trash2, Search, Eye, Settings2, Users, Tag, Gift, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -17,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 import type { Project, ProjectStatus } from "@/types";
 
 const statusLabel: Record<ProjectStatus, string> = {
@@ -32,11 +35,19 @@ type FormState = {
   status: ProjectStatus;
 };
 
-const emptyForm: FormState = {
-  name: "", city: "", buildingCount: "", apartmentCount: "", status: "planning",
+const emptyForm: FormState = { name: "", city: "", buildingCount: "", apartmentCount: "", status: "planning" };
+
+type ProjectMetrics = {
+  users: number;
+  suppliers: number;
+  deals: number;
+  deposits: number;
+  paid: number;
+  imageUrl?: string | null;
 };
 
 export default function AdminProjects() {
+  const navigate = useNavigate();
   const { projects, setProjects } = useApp();
   const { cities } = useRegions();
   const cityNames = useMemo(
@@ -48,6 +59,59 @@ export default function AdminProjects() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [query, setQuery] = useState("");
+  const [metrics, setMetrics] = useState<Record<string, ProjectMetrics>>({});
+  const [loadingMetrics, setLoadingMetrics] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      setLoadingMetrics(true);
+      try {
+        const [projRes, profilesRes, dealsRes, depositsRes] = await Promise.all([
+          supabase.from("projects").select("id,image_url"),
+          supabase.from("profiles").select("project_id").eq("is_deleted", false).not("project_id", "is", null),
+          supabase.from("deals").select("id,project_id,supplier_id,status").eq("is_deleted", false),
+          supabase.from("deposits").select("amount,deal_id,status").eq("status", "paid").eq("is_deleted", false),
+        ]);
+
+        const dealById = new Map((dealsRes.data ?? []).map((d) => [d.id, d]));
+        const m: Record<string, ProjectMetrics> = {};
+        const ensure = (id: string): ProjectMetrics => {
+          if (!m[id]) m[id] = { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 };
+          return m[id];
+        };
+
+        (projRes.data ?? []).forEach((p: { id: string; image_url: string | null }) => {
+          ensure(p.id).imageUrl = p.image_url;
+        });
+        (profilesRes.data ?? []).forEach((p: { project_id: string | null }) => {
+          if (p.project_id) ensure(p.project_id).users += 1;
+        });
+        const supplierByProj: Record<string, Set<string>> = {};
+        (dealsRes.data ?? []).forEach((d) => {
+          if (!d.project_id) return;
+          if (d.status === "active") ensure(d.project_id).deals += 1;
+          if (d.supplier_id) {
+            (supplierByProj[d.project_id] ??= new Set()).add(d.supplier_id);
+          }
+        });
+        Object.entries(supplierByProj).forEach(([pid, s]) => { ensure(pid).suppliers = s.size; });
+        (depositsRes.data ?? []).forEach((dep: { amount: number; deal_id: string }) => {
+          const deal = dealById.get(dep.deal_id);
+          if (deal?.project_id) {
+            const pm = ensure(deal.project_id);
+            pm.deposits += Number(dep.amount ?? 0);
+            pm.paid += 1;
+          }
+        });
+
+        setMetrics(m);
+      } catch (err) {
+        console.error("[AdminProjects metrics]", err);
+      } finally {
+        setLoadingMetrics(false);
+      }
+    })();
+  }, [projects.length]);
 
   const filteredProjects = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -57,12 +121,17 @@ export default function AdminProjects() {
     );
   }, [projects, query]);
 
+  const kpi = useMemo(() => {
+    const totalApts = projects.reduce((s, p) => s + (p.apartmentCount ?? 0), 0);
+    let totalUsers = 0, totalDeposits = 0;
+    Object.values(metrics).forEach((m) => { totalUsers += m.users; totalDeposits += m.deposits; });
+    return { active: projects.length, apartments: totalApts, users: totalUsers, deposits: totalDeposits };
+  }, [projects, metrics]);
+
   const openCreate = () => { setForm(emptyForm); setOpen(true); };
   const openEdit = (p: Project) => {
     setForm({
-      id: p.id,
-      name: p.name ?? "",
-      city: p.city ?? "",
+      id: p.id, name: p.name ?? "", city: p.city ?? "",
       buildingCount: String(p.buildingCount ?? ""),
       apartmentCount: String(p.apartmentCount ?? ""),
       status: p.status ?? "planning",
@@ -71,14 +140,10 @@ export default function AdminProjects() {
   };
 
   const save = async () => {
-    if (!form.name.trim() || !form.city.trim()) {
-      toast.error("יש למלא שם פרויקט ועיר");
-      return;
-    }
+    if (!form.name.trim() || !form.city.trim()) { toast.error("יש למלא שם פרויקט ועיר"); return; }
     const payload: Project = {
       id: form.id ?? `p_${Date.now()}`,
-      name: form.name.trim(),
-      city: form.city.trim(),
+      name: form.name.trim(), city: form.city.trim(),
       buildingCount: parseInt(form.buildingCount) || 0,
       apartmentCount: parseInt(form.apartmentCount) || 0,
       status: form.status,
@@ -86,122 +151,139 @@ export default function AdminProjects() {
     setSaving(true);
     try {
       const { error } = await supabase.from("projects").upsert({
-        id: payload.id,
-        name: payload.name,
-        city: payload.city,
-        building_count: payload.buildingCount,
-        apartment_count: payload.apartmentCount,
-        status: payload.status,
-        is_active: true,
-        is_deleted: false,
-        deleted_at: null,
+        id: payload.id, name: payload.name, city: payload.city,
+        building_count: payload.buildingCount, apartment_count: payload.apartmentCount,
+        status: payload.status, is_active: true, is_deleted: false, deleted_at: null,
       });
       if (error) throw error;
-
       if (form.id) {
         setProjects(projects.map((p) => (p.id === form.id ? payload : p)));
-        toast.success("הפרויקט נשמר במערכת");
+        toast.success("הפרויקט נשמר");
       } else {
         setProjects([payload, ...projects]);
-        toast.success("פרויקט חדש נשמר במערכת");
+        toast.success("פרויקט חדש נוצר");
       }
       setOpen(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "שמירת הפרויקט נכשלה");
-    } finally {
-      setSaving(false);
-    }
+      toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
+    } finally { setSaving(false); }
   };
 
   const confirmDelete = async () => {
     if (!deleteId) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from("projects")
+      const { error } = await supabase.from("projects")
         .update({ is_deleted: true, is_active: false, deleted_at: new Date().toISOString() })
         .eq("id", deleteId);
       if (error) throw error;
       setProjects(projects.filter((p) => p.id !== deleteId));
-      toast.success("הפרויקט הוסר מהרשימה ונשמר כסגור");
+      toast.success("הפרויקט הוסר");
       setDeleteId(null);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "מחיקת הפרויקט נכשלה");
-    } finally {
-      setSaving(false);
-    }
+      toast.error(err instanceof Error ? err.message : "מחיקה נכשלה");
+    } finally { setSaving(false); }
   };
 
   return (
     <MobileShell>
-      <PageHeader title="ניהול פרויקטים" subtitle={`${projects.length} פרויקטים פעילים`} back={false} />
-      <div className="px-5 -mt-4 relative z-10 mb-4">
-        <button
-          onClick={openCreate}
-          className="w-full h-12 rounded-2xl bg-[#0E6B5A] text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center gap-2"
-        >
-          <Plus className="h-5 w-5" /> הוספת פרויקט
-        </button>
-      </div>
-      <div className="px-5 mb-3">
-        <div className="relative">
-          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+      <AdminPageHeader
+        title="ניהול פרויקטים"
+        description={`${filteredProjects.length} מוצגים מתוך ${projects.length}`}
+        actions={
+          <button
+            onClick={openCreate}
+            className="h-9 px-3 rounded-[10px] bg-[#0E6B5A] text-white text-[12px] font-bold flex items-center gap-1.5 hover:bg-[#0a574a] transition-colors"
+          >
+            <Plus className="h-4 w-4" /> פרויקט חדש
+          </button>
+        }
+      />
+      <AdminKpiRow
+        items={[
+          { label: "פרויקטים פעילים", value: kpi.active, tone: "positive" },
+          { label: "סה״כ דירות", value: kpi.apartments },
+          { label: "משתמשים רשומים", value: kpi.users },
+          { label: "סה״כ פיקדונות", value: formatILS(kpi.deposits), tone: "positive" },
+        ]}
+      />
+
+      <div dir="rtl" className="bg-white border-b border-[#ECEEF2] px-5 lg:px-8 py-3">
+        <div className="relative max-w-md">
+          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="חיפוש לפי שם פרויקט, עיר או סטטוס"
-            className="h-10 pr-9 text-sm"
+            className="h-9 pr-9 text-[13px] border-[#ECEEF2]"
           />
         </div>
       </div>
-      <div className="px-5 space-y-3">
-        {filteredProjects.length === 0 && (
-          <div className="gb-card p-6 text-center text-sm text-muted-foreground">
+
+      <div className="p-5 lg:p-8">
+        {loadingMetrics && projects.length === 0 ? (
+          <LoadingState fullHeight={false} />
+        ) : filteredProjects.length === 0 ? (
+          <div className="bg-white border border-[#ECEEF2] rounded-[14px] px-6 py-12 text-center text-[13px] text-[#6B7280] font-medium">
             לא נמצאו פרויקטים
           </div>
-        )}
-        {filteredProjects.map((p) => (
-          <div key={p.id} className="gb-card p-4">
-            <div className="flex items-start gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                <Building2 className="h-6 w-6 text-[#0E6B5A]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold truncate">{p.name}</h3>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                  <MapPin className="h-3 w-3" /> {p.city}
-                </div>
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  <Tag>{p.buildingCount} בניינים</Tag>
-                  <Tag>{p.apartmentCount} דירות</Tag>
-                  <Tag accent>{statusLabel[p.status]}</Tag>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-[#ECEEF2]">
-              <button
-                onClick={() => openEdit(p)}
-                className="h-9 rounded-[12px] bg-[#F4F6FA] text-[#1F2937] text-[12px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
-              >
-                <Pencil className="h-3.5 w-3.5" /> עריכה
-              </button>
-              <button
-                onClick={() => setDeleteId(p.id)}
-                className="h-9 rounded-[12px] bg-[#FEE2E2] text-[#DC2626] text-[12px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
-              >
-                <Trash2 className="h-3.5 w-3.5" /> מחיקה
-              </button>
-            </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredProjects.map((p) => {
+              const m = metrics[p.id] ?? { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 };
+              const participation = p.apartmentCount > 0 ? Math.min(100, Math.round((m.users / p.apartmentCount) * 100)) : 0;
+              return (
+                <article key={p.id} dir="rtl" className="bg-white border border-[#ECEEF2] rounded-[14px] overflow-hidden flex flex-col">
+                  {/* Header strip */}
+                  <div className="flex items-center gap-3 px-4 pt-3 pb-3 border-b border-[#F1F3F7]">
+                    {m.imageUrl ? (
+                      <img src={m.imageUrl} alt="" className="h-11 w-11 rounded-[10px] object-cover bg-[#F4F6FA] shrink-0" />
+                    ) : (
+                      <div className="h-11 w-11 rounded-[10px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
+                        <Building2 className="h-5 w-5 text-[#0E6B5A]" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-bold text-[14px] text-[#0F172A] truncate">{p.name}</h3>
+                      <div className="flex items-center gap-2 text-[11px] text-[#6B7280] mt-0.5">
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{p.city}</span>
+                        <span className="text-[#D1D5DB]">•</span>
+                        <span>{statusLabel[p.status]}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Metrics grid — dense */}
+                  <div className="grid grid-cols-3 divide-x divide-x-reverse divide-[#F1F3F7]">
+                    <Metric icon={<Building2 className="h-3 w-3" />} label="דירות" value={p.apartmentCount} />
+                    <Metric icon={<Users className="h-3 w-3" />} label="משתמשים" value={m.users} />
+                    <Metric icon={<Tag className="h-3 w-3" />} label="ספקים" value={m.suppliers} />
+                  </div>
+                  <div className="grid grid-cols-3 divide-x divide-x-reverse divide-[#F1F3F7] border-t border-[#F1F3F7]">
+                    <Metric icon={<Gift className="h-3 w-3" />} label="הצעות" value={m.deals} />
+                    <Metric icon={<span className="text-[10px]">₪</span>} label="פיקדונות" value={formatILS(m.deposits)} compact />
+                    <Metric icon={<TrendingUp className="h-3 w-3" />} label="השתתפות" value={`${participation}%`}
+                      tone={participation >= 50 ? "positive" : participation >= 20 ? "warning" : "neutral"} />
+                  </div>
+
+                  {/* Actions row */}
+                  <div className="grid grid-cols-3 gap-1 p-2 border-t border-[#F1F3F7] mt-auto">
+                    <ActionBtn icon={<Settings2 className="h-3.5 w-3.5" />} label="ניהול"
+                      onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} primary />
+                    <ActionBtn icon={<Pencil className="h-3.5 w-3.5" />} label="עריכה" onClick={() => openEdit(p)} />
+                    <ActionBtn icon={<Trash2 className="h-3.5 w-3.5" />} label="מחיקה" onClick={() => setDeleteId(p.id)} danger />
+                  </div>
+                </article>
+              );
+            })}
           </div>
-        ))}
+        )}
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent dir="rtl" className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-right">
-              {form.id ? "עריכת פרויקט" : "הוספת פרויקט חדש"}
-            </DialogTitle>
+            <DialogTitle className="text-right">{form.id ? "עריכת פרויקט" : "הוספת פרויקט חדש"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 mt-2">
             <div>
@@ -210,11 +292,7 @@ export default function AdminProjects() {
             </div>
             <div>
               <Label className="text-xs">עיר *</Label>
-              <CityCombobox
-                value={form.city}
-                cities={cityNames}
-                onChange={(city) => setForm({ ...form, city })}
-              />
+              <CityCombobox value={form.city} cities={cityNames} onChange={(city) => setForm({ ...form, city })} />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -230,17 +308,9 @@ export default function AdminProjects() {
               <Label className="text-xs">סטטוס</Label>
               <div className="grid grid-cols-4 gap-1.5 mt-1">
                 {(Object.keys(statusLabel) as ProjectStatus[]).map((st) => (
-                  <button
-                    key={st}
-                    type="button"
-                    onClick={() => setForm({ ...form, status: st })}
-                    className={
-                      "h-9 rounded-[12px] text-[12px] font-bold border transition " +
-                      (form.status === st
-                        ? "bg-[#0E6B5A] text-white border-[#1F2937]"
-                        : "bg-white text-[#1F2937] border-[#ECEEF2]")
-                    }
-                  >
+                  <button key={st} type="button" onClick={() => setForm({ ...form, status: st })}
+                    className={"h-9 rounded-[12px] text-[12px] font-bold border transition " +
+                      (form.status === st ? "bg-[#0E6B5A] text-white border-[#0E6B5A]" : "bg-white text-[#1F2937] border-[#ECEEF2]")}>
                     {statusLabel[st]}
                   </button>
                 ))}
@@ -260,7 +330,7 @@ export default function AdminProjects() {
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-right">מחיקת פרויקט</AlertDialogTitle>
-            <AlertDialogDescription className="text-right">הפרויקט יוסר מהרשימות הפעילות אך הנתונים יישמרו במערכת.</AlertDialogDescription>
+            <AlertDialogDescription className="text-right">הפרויקט יוסר מהרשימות הפעילות אך הנתונים יישמרו.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>ביטול</AlertDialogCancel>
@@ -274,32 +344,56 @@ export default function AdminProjects() {
   );
 }
 
+function Metric({
+  icon, label, value, tone = "neutral", compact,
+}: {
+  icon: React.ReactNode; label: string; value: React.ReactNode;
+  tone?: "neutral" | "positive" | "warning"; compact?: boolean;
+}) {
+  const toneCls = tone === "positive" ? "text-[#0E6B5A]" : tone === "warning" ? "text-[#B45309]" : "text-[#0F172A]";
+  return (
+    <div className="px-3 py-2.5 min-w-0">
+      <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-[#9CA3AF]">
+        {icon}<span>{label}</span>
+      </div>
+      <div className={cn("mt-0.5 font-extrabold tracking-tight truncate", compact ? "text-[12px]" : "text-[15px]", toneCls)}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function ActionBtn({
+  icon, label, onClick, primary, danger,
+}: { icon: React.ReactNode; label: string; onClick: () => void; primary?: boolean; danger?: boolean }) {
+  const base = "h-8 rounded-[10px] text-[11px] font-bold flex items-center justify-center gap-1 transition-colors";
+  const cls = primary
+    ? "bg-[#0E6B5A] text-white hover:bg-[#0a574a]"
+    : danger
+      ? "bg-[#FEE2E2] text-[#B91C1C] hover:bg-[#FCA5A5]/40"
+      : "bg-[#F4F6FA] text-[#1F2937] hover:bg-[#ECEEF2]";
+  return (
+    <button onClick={onClick} className={cn(base, cls)}>
+      {icon}{label}
+    </button>
+  );
+}
+
 function CityCombobox({ value, cities, onChange }: { value: string; cities: string[]; onChange: (city: string) => void }) {
   const [open, setOpen] = useState(false);
-
   const filteredCities = useMemo(() => {
     const q = value.trim().toLocaleLowerCase("he");
     const list = q ? cities.filter((city) => city.toLocaleLowerCase("he").includes(q)) : cities;
     return list.slice(0, 60);
   }, [cities, value]);
 
-  const selectCity = (city: string) => {
-    onChange(city);
-    setOpen(false);
-  };
-
   return (
     <div className="relative">
       <Input
         value={value}
         onFocus={() => setOpen(true)}
-        onChange={(e) => {
-          onChange(e.target.value);
-          setOpen(true);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") setOpen(false);
-        }}
+        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+        onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}
         placeholder="הקלידו עיר לבחירה"
         autoComplete="off"
         role="combobox"
@@ -310,13 +404,9 @@ function CityCombobox({ value, cities, onChange }: { value: string; cities: stri
         <div className="absolute right-0 left-0 top-[calc(100%+0.25rem)] z-[80] max-h-56 overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-lg">
           {filteredCities.length > 0 ? (
             filteredCities.map((city) => (
-              <button
-                key={city}
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => selectCity(city)}
-                className="flex min-h-10 w-full items-center justify-between px-3 py-2 text-right text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
-              >
+              <button key={city} type="button" onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { onChange(city); setOpen(false); }}
+                className="flex min-h-10 w-full items-center justify-between px-3 py-2 text-right text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
                 <span>{city}</span>
                 <Check className={cn("h-4 w-4", value === city ? "opacity-100" : "opacity-0")} />
               </button>
@@ -327,13 +417,5 @@ function CityCombobox({ value, cities, onChange }: { value: string; cities: stri
         </div>
       )}
     </div>
-  );
-}
-
-function Tag({ children, accent }: { children: React.ReactNode; accent?: boolean }) {
-  return (
-    <span className={"text-[11px] font-bold px-2 py-1 rounded-full " + (accent ? "bg-[#FFF8E1] text-[#1F2937]" : "bg-[#F4F6FA] text-[#6B7280]")}>
-      {children}
-    </span>
   );
 }
