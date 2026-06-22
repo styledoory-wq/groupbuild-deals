@@ -19,6 +19,7 @@ export function ScanFAB() {
       onClick={() => navigate("/supplier/scan")}
       aria-label="סריקת קוד"
       title="סריקת קוד"
+      data-tour="fab-scan"
       className="fixed z-[95] left-5 lg:left-8 h-14 w-14 rounded-full bg-[#0E6B5A] text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform"
       style={{
         bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h, 64px) + 16px)",
