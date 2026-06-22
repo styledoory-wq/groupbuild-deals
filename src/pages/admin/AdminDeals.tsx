@@ -220,13 +220,14 @@ export default function AdminDeals() {
         ) : (
           <div dir="rtl" className="bg-white border border-[#ECEEF2] rounded-[14px] overflow-hidden">
             {/* Header — desktop only */}
-            <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_120px_90px_110px_90px_44px] gap-3 px-4 py-2.5 border-b border-[#ECEEF2] bg-[#F8F9FB] text-[10px] font-bold uppercase tracking-wider text-[#6B7280]">
+            <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_120px_110px_110px_110px_90px_44px] gap-3 px-4 py-2.5 border-b border-[#ECEEF2] bg-[#F8F9FB] text-[10px] font-bold uppercase tracking-wider text-[#6B7280]">
               <div>הצעה</div>
               <div>ספק</div>
               <div>פרויקט</div>
               <div>מצטרפים / יעד</div>
-              <div>אחוז התקדמות</div>
+              <div>התקדמות</div>
               <div>פיקדונות</div>
+              <div>הכנסה צפויה</div>
               <div>סטטוס</div>
               <div />
             </div>
@@ -241,74 +242,90 @@ export default function AdminDeals() {
                 const supplierName = suppliers[d.supplier_id] ?? "—";
                 const projectName = projects.find((p) => p.id === d.project_id)?.name ?? "—";
                 const categoryName = categories.find((cat) => cat.id === d.category_id)?.name ?? "—";
+                const expected = c.paid * priceFor(d);
 
                 return (
-                  <li key={d.id} className="px-3 lg:px-4 py-2.5 lg:grid lg:grid-cols-[2fr_1fr_1fr_120px_90px_110px_90px_44px] lg:gap-3 lg:items-center hover:bg-[#FAFBFC] transition-colors">
-                    {/* Deal cell (image + title + category) */}
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-10 h-10 rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0">
-                        {d.cover_image_url ? (
-                          <img src={d.cover_image_url} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <ImageIcon className="h-4 w-4 text-[#9CA3AF]" />
-                          </div>
-                        )}
+                  <li key={d.id} className="hover:bg-[#FAFBFC] transition-colors">
+                    {/* Desktop row */}
+                    <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_120px_110px_110px_110px_90px_44px] gap-3 px-4 py-2 items-center">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-9 h-9 rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0">
+                          {d.cover_image_url ? (
+                            <img src={d.cover_image_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <ImageIcon className="h-3.5 w-3.5 text-[#9CA3AF]" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-bold text-[13px] text-[#0F172A] truncate">{d.title}</div>
+                          <div className="text-[11px] text-[#9CA3AF] truncate">{categoryName}</div>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-bold text-[13px] text-[#0F172A] truncate">{d.title}</div>
-                        <div className="text-[11px] text-[#9CA3AF] truncate">{categoryName}</div>
+                      <div className="text-[12px] text-[#0F172A] truncate">{supplierName}</div>
+                      <div className="text-[12px] text-[#0F172A] truncate">{projectName}</div>
+                      <div className="text-[12px] font-bold text-[#0F172A] tabular-nums">
+                        {target ? `${c.paid} / ${target}` : c.paid}
                       </div>
-                      {/* Mobile right-side: status + menu */}
-                      <div className="lg:hidden flex items-center gap-1.5 shrink-0">
-                        <span className={cn("px-1.5 py-0.5 rounded-md text-[10px] font-bold", meta.bg, meta.text)}>
+                      <div className="flex items-center gap-1.5">
+                        <div className="text-[12px] font-extrabold w-9 tabular-nums" style={{ color: pctTone }}>{target ? `${pct}%` : "—"}</div>
+                        <div className="flex-1 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${target ? pct : 0}%`, backgroundColor: pctTone }} />
+                        </div>
+                      </div>
+                      <div className="text-[12px] font-extrabold text-[#0E6B5A] tabular-nums">{formatILS(c.deposits)}</div>
+                      <div className="text-[12px] font-bold text-[#0F172A] tabular-nums">{formatILS(expected)}</div>
+                      <div>
+                        <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap", meta.bg, meta.text)}>
                           {meta.label}
                         </span>
+                      </div>
+                      <div className="flex justify-end">
                         <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
                       </div>
                     </div>
 
-                    {/* Mobile metrics grid */}
-                    <div className="grid grid-cols-4 gap-2 mt-2 lg:hidden text-center">
-                      <MiniCell label="ספק" value={supplierName} truncate />
-                      <MiniCell label="פרויקט" value={projectName} truncate />
-                      <MiniCell label="מצטרפים" value={target ? `${c.paid}/${target}` : String(c.paid)} />
-                      <MiniCell label="פיקדונות" value={formatILS(c.deposits)} tone="positive" />
-                    </div>
-                    {target > 0 && (
-                      <div className="mt-2 lg:hidden">
-                        <div className="flex justify-between text-[10px] font-bold mb-0.5">
-                          <span className="text-[#6B7280]">התקדמות</span>
-                          <span style={{ color: pctTone }}>{pct}%</span>
+                    {/* Mobile row — ultra dense, ~64px */}
+                    <div className="lg:hidden px-3 py-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-9 h-9 rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0">
+                          {d.cover_image_url ? (
+                            <img src={d.cover_image_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <ImageIcon className="h-3.5 w-3.5 text-[#9CA3AF]" />
+                            </div>
+                          )}
                         </div>
-                        <div className="h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
-                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: pctTone }} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <div className="font-bold text-[12.5px] text-[#0F172A] truncate flex-1 min-w-0">{d.title}</div>
+                            <span className={cn("shrink-0 px-1.5 py-0.5 rounded-md text-[9.5px] font-bold whitespace-nowrap", meta.bg, meta.text)}>
+                              {meta.label}
+                            </span>
+                          </div>
+                          <div className="text-[10.5px] text-[#6B7280] truncate mt-0.5">
+                            {supplierName} <span className="text-[#D1D5DB]">·</span> {projectName}
+                          </div>
                         </div>
+                        <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
                       </div>
-                    )}
-
-                    {/* Desktop columns */}
-                    <div className="hidden lg:block text-[12px] text-[#0F172A] truncate">{supplierName}</div>
-                    <div className="hidden lg:block text-[12px] text-[#0F172A] truncate">{projectName}</div>
-                    <div className="hidden lg:block text-[12px] font-bold text-[#0F172A]">
-                      {target ? `${c.paid} / ${target}` : c.paid}
-                    </div>
-                    <div className="hidden lg:block">
-                      <div className="flex items-center gap-1.5">
-                        <div className="text-[12px] font-extrabold w-10" style={{ color: pctTone }}>{target ? `${pct}%` : "—"}</div>
+                      <div className="flex items-center gap-2 mt-1.5 pr-[44px]">
                         <div className="flex-1 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
-                          <div className="h-full rounded-full transition-all" style={{ width: `${target ? pct : 0}%`, backgroundColor: pctTone }} />
+                          <div className="h-full rounded-full" style={{ width: `${target ? pct : 0}%`, backgroundColor: pctTone }} />
                         </div>
+                        <span className="text-[10px] font-extrabold tabular-nums w-8 text-left" style={{ color: pctTone }}>
+                          {target ? `${pct}%` : "—"}
+                        </span>
+                        <span className="text-[10.5px] font-bold tabular-nums text-[#0F172A] whitespace-nowrap">
+                          {target ? `${c.paid}/${target}` : c.paid}
+                        </span>
+                        <span className="text-[#D1D5DB] text-[10px]">·</span>
+                        <span className="text-[10.5px] font-extrabold tabular-nums text-[#0E6B5A] whitespace-nowrap">
+                          {formatILS(c.deposits)}
+                        </span>
                       </div>
-                    </div>
-                    <div className="hidden lg:block text-[12px] font-extrabold text-[#0E6B5A]">{formatILS(c.deposits)}</div>
-                    <div className="hidden lg:block">
-                      <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-bold", meta.bg, meta.text)}>
-                        {meta.label}
-                      </span>
-                    </div>
-                    <div className="hidden lg:flex justify-end">
-                      <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
                     </div>
                   </li>
                 );
@@ -349,15 +366,6 @@ export default function AdminDeals() {
   );
 }
 
-function MiniCell({ label, value, tone = "neutral", truncate }: { label: string; value: React.ReactNode; tone?: "neutral" | "positive"; truncate?: boolean }) {
-  const cls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
-  return (
-    <div className="min-w-0">
-      <div className="text-[9px] text-[#9CA3AF] font-semibold uppercase tracking-wide">{label}</div>
-      <div className={cn("text-[11px] font-bold mt-0.5", cls, truncate && "truncate")}>{value}</div>
-    </div>
-  );
-}
 
 function PageBtn({ children, disabled, onClick, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (

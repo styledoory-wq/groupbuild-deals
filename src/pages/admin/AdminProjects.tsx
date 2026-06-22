@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
 import {
   Building2, MapPin, Plus, Pencil, Trash2, Search, Settings2,
-  Users, Tag, Eye, Home,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -237,80 +237,106 @@ export default function AdminProjects() {
             לא נמצאו פרויקטים
           </div>
         ) : (
-          <div className="grid gap-2 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
-            {filteredProjects.map((p) => {
-              const m = metrics[p.id] ?? { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 };
-              const participation = p.apartmentCount > 0 ? Math.min(100, Math.round((m.users / p.apartmentCount) * 100)) : 0;
-              const partTone = participation >= 50 ? "#0E6B5A" : participation >= 20 ? "#D97706" : "#9CA3AF";
-              return (
-                <article
-                  key={p.id}
-                  dir="rtl"
-                  className="bg-white border border-[#ECEEF2] rounded-[12px] p-2.5 hover:shadow-[0_4px_16px_-6px_rgba(15,23,42,0.08)] hover:border-[#0E6B5A]/30 transition-all"
-                >
-                  <div className="flex items-stretch gap-2.5">
-                    {/* Image */}
-                    <div className="relative shrink-0 w-[64px] h-[64px] rounded-[10px] overflow-hidden bg-[#F4F6FA]">
-                      {m.imageUrl ? (
-                        <img src={m.imageUrl} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Building2 className="h-5 w-5 text-[#9CA3AF]" />
-                        </div>
-                      )}
-                    </div>
+          <div dir="rtl" className="bg-white border border-[#ECEEF2] rounded-[14px] overflow-hidden">
+            {/* Header — desktop */}
+            <div className="hidden lg:grid grid-cols-[2fr_70px_80px_70px_80px_120px_140px_120px] gap-3 px-4 py-2.5 border-b border-[#ECEEF2] bg-[#F8F9FB] text-[10px] font-bold uppercase tracking-wider text-[#6B7280]">
+              <div>פרויקט</div>
+              <div className="text-center">דירות</div>
+              <div className="text-center">משתמשים</div>
+              <div className="text-center">ספקים</div>
+              <div className="text-center">הצעות</div>
+              <div className="text-center">פיקדונות</div>
+              <div>השתתפות</div>
+              <div className="text-left">פעולות</div>
+            </div>
 
-                    {/* Right pane */}
-                    <div className="flex-1 min-w-0 flex flex-col">
-                      <div className="flex items-start justify-between gap-2">
+            <ul className="divide-y divide-[#F1F3F7]">
+              {filteredProjects.map((p) => {
+                const m = metrics[p.id] ?? { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 };
+                const participation = p.apartmentCount > 0 ? Math.min(100, Math.round((m.users / p.apartmentCount) * 100)) : 0;
+                const partTone = participation >= 50 ? "#0E6B5A" : participation >= 20 ? "#D97706" : "#9CA3AF";
+                return (
+                  <li key={p.id} className="hover:bg-[#FAFBFC] transition-colors">
+                    {/* Desktop row */}
+                    <div className="hidden lg:grid grid-cols-[2fr_70px_80px_70px_80px_120px_140px_120px] gap-3 px-4 py-2 items-center">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <ProjThumb url={m.imageUrl} />
                         <div className="min-w-0">
-                          <h3 className="font-extrabold text-[13.5px] leading-tight text-[#0F172A] truncate">{p.name}</h3>
+                          <div className="flex items-center gap-1.5">
+                            <div className="font-extrabold text-[13px] text-[#0F172A] truncate">{p.name}</div>
+                            <span className={cn("shrink-0 px-1.5 py-0.5 rounded-md text-[9.5px] font-bold whitespace-nowrap", statusPill[p.status])}>
+                              {statusLabel[p.status]}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-1 text-[11px] text-[#6B7280] mt-0.5">
                             <MapPin className="h-2.5 w-2.5 shrink-0" />
                             <span className="truncate">{p.city}</span>
                           </div>
                         </div>
-                        <span className={cn(
-                          "shrink-0 px-1.5 py-0.5 rounded-md text-[9px] font-bold whitespace-nowrap",
-                          statusPill[p.status],
-                        )}>
-                          {statusLabel[p.status]}
-                        </span>
                       </div>
-
-                      {/* Inline stats */}
-                      <div className="flex items-center gap-x-3 gap-y-0.5 flex-wrap mt-1.5 text-[11px] text-[#1F2937]">
-                        <Chip icon={<Home className="h-2.5 w-2.5" />} value={p.apartmentCount} label="דירות" />
-                        <Chip icon={<Users className="h-2.5 w-2.5" />} value={m.users} label="משתמשים" />
-                        <Chip icon={<Tag className="h-2.5 w-2.5" />} value={m.suppliers} label="ספקים" />
-                        <Chip value={m.deals} label="הצעות" />
-                        <Chip value={formatILS(m.deposits)} label="פיקדונות" tone="positive" />
+                      <Num value={p.apartmentCount} />
+                      <Num value={m.users} />
+                      <Num value={m.suppliers} />
+                      <Num value={m.deals} />
+                      <div className="text-center text-[12px] font-extrabold tabular-nums text-[#0E6B5A]">{formatILS(m.deposits)}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${participation}%`, backgroundColor: partTone }} />
+                        </div>
+                        <span className="text-[11px] font-extrabold tabular-nums w-9 text-left" style={{ color: partTone }}>{participation}%</span>
+                      </div>
+                      <div className="flex items-center justify-end gap-1">
+                        <IconBtn label="ניהול" onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} icon={<Settings2 className="h-3.5 w-3.5" />} primary />
+                        <IconBtn label="צפייה" onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} icon={<Eye className="h-3.5 w-3.5" />} />
+                        <IconBtn label="עריכה" onClick={() => openEdit(p)} icon={<Pencil className="h-3.5 w-3.5" />} />
+                        <IconBtn label="מחיקה" onClick={() => setDeleteId(p.id)} icon={<Trash2 className="h-3.5 w-3.5" />} danger />
                       </div>
                     </div>
-                  </div>
 
-                  {/* Progress + participation */}
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="flex-1 h-1.5 rounded-full bg-[#F1F3F7] overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${participation}%`, backgroundColor: partTone }} />
+                    {/* Mobile row — ultra dense */}
+                    <div className="lg:hidden px-2.5 py-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <ProjThumb url={m.imageUrl} size={40} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <div className="font-extrabold text-[12.5px] text-[#0F172A] truncate flex-1 min-w-0">{p.name}</div>
+                            <span className={cn("shrink-0 px-1.5 py-0.5 rounded-md text-[9.5px] font-bold whitespace-nowrap", statusPill[p.status])}>
+                              {statusLabel[p.status]}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-x-2 gap-y-0 text-[10.5px] text-[#374151] mt-0.5 flex-wrap">
+                            <InlineKv label="דירות" value={p.apartmentCount} />
+                            <Sep />
+                            <InlineKv label="משת׳" value={m.users} />
+                            <Sep />
+                            <InlineKv label="ספקים" value={m.suppliers} />
+                            <Sep />
+                            <InlineKv label="הצעות" value={m.deals} />
+                            <Sep />
+                            <InlineKv label="פיק׳" value={formatILS(m.deposits)} tone="positive" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1.5 pr-[48px]">
+                        <div className="flex-1 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${participation}%`, backgroundColor: partTone }} />
+                        </div>
+                        <span className="text-[10px] font-extrabold tabular-nums w-9 text-left" style={{ color: partTone }}>{participation}% השתת׳</span>
+                        <div className="flex items-center gap-0.5">
+                          <IconBtn label="ניהול" onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} icon={<Settings2 className="h-3.5 w-3.5" />} primary compact />
+                          <IconBtn label="עריכה" onClick={() => openEdit(p)} icon={<Pencil className="h-3.5 w-3.5" />} compact />
+                          <IconBtn label="מחיקה" onClick={() => setDeleteId(p.id)} icon={<Trash2 className="h-3.5 w-3.5" />} danger compact />
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-[10.5px] font-extrabold tabular-nums" style={{ color: partTone }}>{participation}%</span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="grid grid-cols-3 gap-1.5 mt-2">
-                    <ActionBtn icon={<Settings2 className="h-3 w-3" />} label="ניהול"
-                      onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} primary />
-                    <ActionBtn icon={<Eye className="h-3 w-3" />} label="צפייה"
-                      onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} />
-                    <ActionBtn icon={<Pencil className="h-3 w-3" />} label="עריכה" onClick={() => openEdit(p)} />
-                  </div>
-                </article>
-              );
-            })}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
       </div>
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent dir="rtl" className="max-w-md">
@@ -376,30 +402,60 @@ export default function AdminProjects() {
   );
 }
 
-function Chip({ icon, value, label, tone = "neutral" }: { icon?: React.ReactNode; value: React.ReactNode; label: string; tone?: "neutral" | "positive" }) {
-  const valueCls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
+function ProjThumb({ url, size = 36 }: { url?: string | null; size?: number }) {
   return (
-    <span className="inline-flex items-center gap-1 whitespace-nowrap">
-      {icon && <span className="text-[#9CA3AF]">{icon}</span>}
-      <span className={cn("font-extrabold tabular-nums", valueCls)}>{value}</span>
-      <span className="text-[#6B7280]">{label}</span>
+    <div
+      className="rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0 flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
+      {url ? (
+        <img src={url} alt="" className="w-full h-full object-cover" />
+      ) : (
+        <Building2 className="h-4 w-4 text-[#9CA3AF]" />
+      )}
+    </div>
+  );
+}
+
+function Num({ value }: { value: number | string }) {
+  return <div className="text-center text-[12px] font-bold tabular-nums text-[#0F172A]">{value}</div>;
+}
+
+function InlineKv({ label, value, tone = "neutral" }: { label: string; value: React.ReactNode; tone?: "neutral" | "positive" }) {
+  const cls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
+  return (
+    <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+      <span className={cn("font-extrabold tabular-nums", cls)}>{value}</span>
+      <span className="text-[#9CA3AF] text-[10px]">{label}</span>
     </span>
   );
 }
 
-function ActionBtn({
-  icon, label, onClick, primary,
-}: { icon: React.ReactNode; label: string; onClick: () => void; primary?: boolean }) {
-  const base = "h-8 rounded-[10px] text-[11px] font-bold flex items-center justify-center gap-1 transition-colors px-2";
+function Sep() {
+  return <span className="text-[#E5E7EB] text-[10px]">·</span>;
+}
+
+function IconBtn({
+  icon, label, onClick, primary, danger, compact,
+}: { icon: React.ReactNode; label: string; onClick: () => void; primary?: boolean; danger?: boolean; compact?: boolean }) {
+  const size = compact ? "h-7 w-7" : "h-8 w-8";
   const cls = primary
-    ? "bg-[#0E6B5A] text-white hover:bg-[#0a574a]"
-    : "bg-[#F4F6FA] text-[#1F2937] hover:bg-[#ECEEF2]";
+    ? "bg-[#0E6B5A] text-white hover:bg-[#0a574a] border-[#0E6B5A]"
+    : danger
+      ? "bg-white text-[#B91C1C] hover:bg-[#FEE2E2] border-[#ECEEF2]"
+      : "bg-white text-[#1F2937] hover:bg-[#F4F6FA] border-[#ECEEF2]";
   return (
-    <button onClick={onClick} className={cn(base, cls)}>
-      {icon}<span className="truncate">{label}</span>
+    <button
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className={cn("rounded-[8px] border flex items-center justify-center transition-colors", size, cls)}
+    >
+      {icon}
     </button>
   );
 }
+
 
 function CityCombobox({ value, cities, onChange }: { value: string; cities: string[]; onChange: (city: string) => void }) {
   const [open, setOpen] = useState(false);
