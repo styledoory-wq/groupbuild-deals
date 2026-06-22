@@ -104,11 +104,13 @@ export function describeTier(type: OfferType, t: OfferTier): OfferDisplay {
     };
   }
   if (type === "percentage" && t.discount_percentage) {
+    const pct = Number(t.discount_percentage);
     return {
-      headline: `${t.discount_percentage}% הנחה`,
+      headline: `${pct}% הנחה`,
+      savings: `חיסכון: ${pct}%`,
       effectivePrice: null,
       referencePrice: null,
-      discountPercent: Number(t.discount_percentage),
+      discountPercent: pct,
     };
   }
   return { headline: "—", effectivePrice: null, referencePrice: null, discountPercent: null };
