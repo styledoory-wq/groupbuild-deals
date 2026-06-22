@@ -527,7 +527,7 @@ export default function DealDetail() {
       <MobileShell>
         <BackHeader title="טוען עסקה..." />
         <LoadingState label="טוען פרטי עסקה..." />
-        <BottomNav role="resident" />
+        <BottomNav role={user?.role === "supplier" ? "supplier" : "resident"} />
       </MobileShell>
     );
   }
