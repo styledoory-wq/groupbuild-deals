@@ -220,7 +220,7 @@ export default function AdminProjects() {
         </div>
       </div>
 
-      <div className="p-5 lg:p-8">
+      <div className="p-3 lg:p-6">
         {loadingMetrics && projects.length === 0 ? (
           <LoadingState fullHeight={false} />
         ) : filteredProjects.length === 0 ? (
@@ -228,50 +228,48 @@ export default function AdminProjects() {
             לא נמצאו פרויקטים
           </div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-2 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProjects.map((p) => {
               const m = metrics[p.id] ?? { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 };
               const participation = p.apartmentCount > 0 ? Math.min(100, Math.round((m.users / p.apartmentCount) * 100)) : 0;
               return (
-                <article key={p.id} dir="rtl" className="bg-white border border-[#ECEEF2] rounded-[14px] overflow-hidden flex flex-col">
-                  {/* Header strip */}
-                  <div className="flex items-center gap-3 px-4 pt-3 pb-3 border-b border-[#F1F3F7]">
+                <article key={p.id} dir="rtl" className="bg-white border border-[#ECEEF2] rounded-[12px] overflow-hidden flex flex-col">
+                  <div className="flex items-center gap-2 px-2.5 py-2 border-b border-[#F1F3F7]">
                     {m.imageUrl ? (
-                      <img src={m.imageUrl} alt="" className="h-11 w-11 rounded-[10px] object-cover bg-[#F4F6FA] shrink-0" />
+                      <img src={m.imageUrl} alt="" className="h-8 w-8 rounded-[8px] object-cover bg-[#F4F6FA] shrink-0" />
                     ) : (
-                      <div className="h-11 w-11 rounded-[10px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                        <Building2 className="h-5 w-5 text-[#0E6B5A]" />
+                      <div className="h-8 w-8 rounded-[8px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
+                        <Building2 className="h-4 w-4 text-[#0E6B5A]" />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-[14px] text-[#0F172A] truncate">{p.name}</h3>
-                      <div className="flex items-center gap-2 text-[11px] text-[#6B7280] mt-0.5">
-                        <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{p.city}</span>
-                        <span className="text-[#D1D5DB]">•</span>
-                        <span>{statusLabel[p.status]}</span>
+                      <h3 className="font-bold text-[12px] text-[#0F172A] truncate leading-tight">{p.name}</h3>
+                      <div className="flex items-center gap-1 text-[10px] text-[#6B7280] mt-0.5 truncate">
+                        <MapPin className="h-2.5 w-2.5 shrink-0" />
+                        <span className="truncate">{p.city}</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Metrics grid — dense */}
-                  <div className="grid grid-cols-3 divide-x divide-x-reverse divide-[#F1F3F7]">
-                    <Metric icon={<Building2 className="h-3 w-3" />} label="דירות" value={p.apartmentCount} />
-                    <Metric icon={<Users className="h-3 w-3" />} label="משתמשים" value={m.users} />
-                    <Metric icon={<Tag className="h-3 w-3" />} label="ספקים" value={m.suppliers} />
+                  <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#F1F3F7]">
+                    <Metric icon={null} label="דירות" value={p.apartmentCount} />
+                    <Metric icon={null} label="משתמשים" value={m.users} />
                   </div>
-                  <div className="grid grid-cols-3 divide-x divide-x-reverse divide-[#F1F3F7] border-t border-[#F1F3F7]">
-                    <Metric icon={<Gift className="h-3 w-3" />} label="הצעות" value={m.deals} />
-                    <Metric icon={<span className="text-[10px]">₪</span>} label="פיקדונות" value={formatILS(m.deposits)} compact />
-                    <Metric icon={<TrendingUp className="h-3 w-3" />} label="השתתפות" value={`${participation}%`}
+                  <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#F1F3F7] border-t border-[#F1F3F7]">
+                    <Metric icon={null} label="הצעות" value={m.deals} />
+                    <Metric icon={null} label="ספקים" value={m.suppliers} />
+                  </div>
+                  <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#F1F3F7] border-t border-[#F1F3F7]">
+                    <Metric icon={null} label="פיקדונות" value={formatILS(m.deposits)} tone="positive" compact />
+                    <Metric icon={null} label="פעילות" value={`${participation}%`}
                       tone={participation >= 50 ? "positive" : participation >= 20 ? "warning" : "neutral"} />
                   </div>
 
-                  {/* Actions row */}
-                  <div className="grid grid-cols-3 gap-1 p-2 border-t border-[#F1F3F7] mt-auto">
-                    <ActionBtn icon={<Settings2 className="h-3.5 w-3.5" />} label="ניהול"
+                  <div className="grid grid-cols-3 gap-1 p-1.5 border-t border-[#F1F3F7] mt-auto">
+                    <ActionBtn icon={<Settings2 className="h-3 w-3" />} label="ניהול"
                       onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} primary />
-                    <ActionBtn icon={<Pencil className="h-3.5 w-3.5" />} label="עריכה" onClick={() => openEdit(p)} />
-                    <ActionBtn icon={<Trash2 className="h-3.5 w-3.5" />} label="מחיקה" onClick={() => setDeleteId(p.id)} danger />
+                    <ActionBtn icon={<Pencil className="h-3 w-3" />} label="עריכה" onClick={() => openEdit(p)} />
+                    <ActionBtn icon={<Trash2 className="h-3 w-3" />} label="מחיקה" onClick={() => setDeleteId(p.id)} danger />
                   </div>
                 </article>
               );
@@ -347,16 +345,15 @@ export default function AdminProjects() {
 function Metric({
   icon, label, value, tone = "neutral", compact,
 }: {
-  icon: React.ReactNode; label: string; value: React.ReactNode;
+  icon?: React.ReactNode; label: string; value: React.ReactNode;
   tone?: "neutral" | "positive" | "warning"; compact?: boolean;
 }) {
+  void icon;
   const toneCls = tone === "positive" ? "text-[#0E6B5A]" : tone === "warning" ? "text-[#B45309]" : "text-[#0F172A]";
   return (
-    <div className="px-3 py-2.5 min-w-0">
-      <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-[#9CA3AF]">
-        {icon}<span>{label}</span>
-      </div>
-      <div className={cn("mt-0.5 font-extrabold tracking-tight truncate", compact ? "text-[12px]" : "text-[15px]", toneCls)}>
+    <div className="px-2 py-1.5 min-w-0">
+      <div className="text-[9px] font-bold uppercase text-[#9CA3AF] truncate">{label}</div>
+      <div className={cn("font-extrabold tracking-tight truncate leading-tight", compact ? "text-[11px]" : "text-[13px]", toneCls)}>
         {value}
       </div>
     </div>

@@ -23,22 +23,22 @@ export function AdminKpiRow({ items }: { items: Kpi[] }) {
   return (
     <div
       dir="rtl"
-      className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 divide-x divide-x-reverse divide-[#ECEEF2] border-b border-[#ECEEF2] bg-white"
+      className="flex overflow-x-auto lg:grid lg:grid-cols-7 lg:overflow-visible divide-x divide-x-reverse divide-[#ECEEF2] border-b border-[#ECEEF2] bg-white scrollbar-none"
     >
       {items.map((k, i) => (
-        <div key={i} className="px-4 lg:px-5 py-4 min-w-0">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">
+        <div key={i} className="px-3 lg:px-4 py-2 min-w-[110px] lg:min-w-0 shrink-0 lg:shrink">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[#6B7280] truncate">
             {k.label}
           </div>
           <div
             className={cn(
-              "mt-1.5 text-[20px] lg:text-[22px] font-extrabold tracking-tight leading-none truncate",
+              "mt-0.5 text-[14px] lg:text-[15px] font-extrabold tracking-tight leading-tight truncate",
               toneText[k.tone ?? "neutral"],
             )}
           >
             {k.value}
           </div>
-          {k.hint && <div className="mt-1 text-[11px] text-[#9CA3AF] truncate">{k.hint}</div>}
+          {k.hint && <div className="text-[10px] text-[#9CA3AF] truncate">{k.hint}</div>}
         </div>
       ))}
     </div>
