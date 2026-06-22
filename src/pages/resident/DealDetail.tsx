@@ -545,7 +545,7 @@ export default function DealDetail() {
             </Button>
           </Link>
         </div>
-        <BottomNav role="resident" />
+        <BottomNav role={user?.role === "supplier" ? "supplier" : "resident"} />
       </MobileShell>
     );
   }
