@@ -78,7 +78,7 @@ export default function AdminDashboard() {
 
         const acts: Activity[] = [];
         (recentInterests.data ?? []).forEach((i) => acts.push({
-          id: `i-${i.id}`, type: "lead", label: `ליד חדש: ${i.customer_name ?? "אנונימי"}`, time: i.created_at,
+          id: `i-${i.id}`, type: "lead", label: `ליד חדש: ${i.full_name ?? "אנונימי"}`, time: i.created_at,
         }));
         (recentSuppliers.data ?? []).forEach((s) => acts.push({
           id: `s-${s.id}`, type: "supplier", label: `ספק חדש: ${s.business_name}`, time: s.created_at,
