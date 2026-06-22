@@ -24,7 +24,9 @@ export function translateAuthError(error: unknown): string {
   if (m.includes("rate limit") || m.includes("too many")) {
     return "יותר מדי ניסיונות, נסה שוב בעוד כמה דקות";
   }
-  if (m.includes("email not confirmed")) return "האימייל טרם אומת, בדוק את תיבת הדואר שלך";
+  if (m.includes("email not confirmed") || m.includes("not confirmed") || m.includes("confirm your email")) {
+    return "יש לאשר את כתובת המייל לפני ההתחברות — שלחנו לך קישור אישור לתיבת הדואר";
+  }
   if (m.includes("network") || m.includes("failed to fetch")) return "אין חיבור לאינטרנט, נסה שוב";
 
   // Already Hebrew? pass through
