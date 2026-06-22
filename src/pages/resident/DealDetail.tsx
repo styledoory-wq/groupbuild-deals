@@ -1391,7 +1391,7 @@ export default function DealDetail() {
 
 
       {/* Join modal */}
-      <Dialog open={showJoinModal} onOpenChange={setShowJoinModal}>
+      <Dialog open={showJoinModal && !isSupplierPreview} onOpenChange={setShowJoinModal}>
         <DialogContent dir="rtl" className="text-right max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>הצטרפות להצעה</DialogTitle>
