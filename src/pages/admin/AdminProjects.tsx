@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
 import {
   Building2, MapPin, Plus, Pencil, Trash2, Search, Settings2,
-  Users, Tag, Eye, Home,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
