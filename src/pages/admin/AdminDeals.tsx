@@ -6,10 +6,7 @@ import { AdminKpiRow } from "@/components/admin/AdminKpiRow";
 import { LoadingState } from "@/components/ds";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Search, ImageIcon, Lock, Users, Wallet, Building2, Tag,
-  TrendingUp, Clock,
-} from "lucide-react";
+import { Search, ImageIcon, Plus, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
 import { Input } from "@/components/ui/input";
@@ -41,20 +38,23 @@ type DealCounts = { paid: number; deposits: number };
 const STATUS_OPTIONS = [
   { value: "all", label: "כל הסטטוסים" },
   { value: "active", label: "פעילה" },
+  { value: "pending", label: "ממתינה" },
   { value: "closed", label: "נסגרה" },
   { value: "redeemed", label: "מומשה" },
-  { value: "inactive", label: "מושבתת" },
+  { value: "inactive", label: "בטלה" },
   { value: "draft", label: "טיוטה" },
 ];
 
 const statusMeta: Record<string, { label: string; bg: string; text: string }> = {
   active:   { label: "פעילה",   bg: "bg-[#DCFCE7]", text: "text-[#166534]" },
+  pending:  { label: "בהמתנה",  bg: "bg-[#FEF3C7]", text: "text-[#92400E]" },
+  draft:    { label: "טיוטה",   bg: "bg-[#FEF3C7]", text: "text-[#92400E]" },
   closed:   { label: "נסגרה",   bg: "bg-[#E0F2FE]", text: "text-[#075985]" },
   redeemed: { label: "מומשה",   bg: "bg-[#EDE9FE]", text: "text-[#5B21B6]" },
-  draft:    { label: "טיוטה",   bg: "bg-[#FEF3C7]", text: "text-[#92400E]" },
-  pending:  { label: "ממתינה",  bg: "bg-[#FEF3C7]", text: "text-[#92400E]" },
-  inactive: { label: "מושבתת",  bg: "bg-[#F3F4F6]", text: "text-[#374151]" },
+  inactive: { label: "בטלה",    bg: "bg-[#FEE2E2]", text: "text-[#B91C1C]" },
 };
+
+const PAGE_SIZE = 12;
 
 export default function AdminDeals() {
   const { categories, projects } = useApp();
@@ -67,6 +67,7 @@ export default function AdminDeals() {
   const [supplierFilter, setSupplierFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -115,6 +116,7 @@ export default function AdminDeals() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { setPage(1); }, [query, projectFilter, supplierFilter, categoryFilter, statusFilter]);
 
   const supplierOptions = useMemo(
     () => Object.entries(suppliers).sort((a, b) => a[1].localeCompare(b[1], "he")),
@@ -159,40 +161,53 @@ export default function AdminDeals() {
     return { active, pending, participants, deposits, expected };
   }, [deals, counts]);
 
+  const totalPages = Math.max(1, Math.ceil(visibleDeals.length / PAGE_SIZE));
+  const pageDeals = useMemo(
+    () => visibleDeals.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [visibleDeals, page],
+  );
+  const rangeStart = visibleDeals.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(page * PAGE_SIZE, visibleDeals.length);
+
   return (
     <MobileShell>
       <AdminPageHeader
         title="ניהול הצעות"
-        description={`${visibleDeals.length} מוצגות מתוך ${deals.length}`}
+        description={`${deals.length} הצעות`}
+        actions={
+          <button className="h-9 px-3 rounded-[10px] bg-[#0E6B5A] text-white text-[12px] font-bold flex items-center gap-1.5 hover:bg-[#0a574a] transition-colors">
+            <Plus className="h-4 w-4" /> הצעה חדשה
+          </button>
+        }
       />
       <AdminKpiRow
         items={[
-          { label: "פעילות", value: kpi.active, tone: "positive" },
-          { label: "ממתינות", value: kpi.pending, tone: kpi.pending > 0 ? "warning" : "neutral" },
-          { label: "מצטרפים", value: kpi.participants },
-          { label: "פיקדונות", value: formatILS(kpi.deposits), tone: "positive" },
-          { label: "הכנסה צפויה", value: formatILS(kpi.expected) },
+          { label: "הצעות פעילות", value: kpi.active, tone: "positive" },
+          { label: "פיקדונות שאספו", value: formatILS(kpi.deposits), tone: "positive" },
+          { label: "הכנסות צפויות", value: formatILS(kpi.expected) },
+          { label: "מצטרפים סהכ", value: kpi.participants.toLocaleString() },
+          { label: "ממתינות לאישור", value: kpi.pending, tone: kpi.pending > 0 ? "warning" : "neutral" },
         ]}
       />
 
       {/* Filters */}
-      <div dir="rtl" className="bg-white border-b border-[#ECEEF2] px-5 lg:px-8 py-3 flex flex-wrap gap-2 items-center">
+      <div dir="rtl" className="bg-white border-b border-[#ECEEF2] px-4 lg:px-8 py-2.5 flex flex-wrap gap-2 items-center">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="חיפוש לפי שם הצעה, ספק או פרויקט"
+            placeholder="חיפוש הצעה, ספק או פרויקט…"
             className="h-9 pr-9 text-[13px] border-[#ECEEF2]"
           />
         </div>
+        <FilterSelect value={statusFilter} onChange={setStatusFilter} placeholder="סינון" options={STATUS_OPTIONS} />
         <FilterSelect value={projectFilter} onChange={setProjectFilter} placeholder="פרויקט"
           options={[{ value: "all", label: "כל הפרויקטים" }, ...projects.map((p) => ({ value: p.id, label: p.name }))]} />
         <FilterSelect value={supplierFilter} onChange={setSupplierFilter} placeholder="ספק"
           options={[{ value: "all", label: "כל הספקים" }, ...supplierOptions.map(([id, name]) => ({ value: id, label: name }))]} />
         <FilterSelect value={categoryFilter} onChange={setCategoryFilter} placeholder="קטגוריה"
           options={[{ value: "all", label: "כל הקטגוריות" }, ...categories.map((c) => ({ value: c.id, label: c.name }))]} />
-        <FilterSelect value={statusFilter} onChange={setStatusFilter} placeholder="סטטוס" options={STATUS_OPTIONS} />
       </div>
 
       <div className="p-3 lg:p-6">
@@ -203,116 +218,129 @@ export default function AdminDeals() {
             לא נמצאו הצעות התואמות לסינון
           </div>
         ) : (
-          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {visibleDeals.map((d) => {
-              const c = counts[d.id] ?? { paid: 0, deposits: 0 };
-              const target = d.target_participants ?? 0;
-              const pct = target > 0 ? Math.min(100, Math.round((c.paid / target) * 100)) : 0;
-              const pctTone = pct >= 80 ? "#0E6B5A" : pct >= 40 ? "#0E6B5A" : pct > 0 ? "#D97706" : "#9CA3AF";
-              const meta = statusMeta[d.status] ?? { label: d.status, bg: "bg-[#F3F4F6]", text: "text-[#374151]" };
-              const supplierName = suppliers[d.supplier_id] ?? "—";
-              const projectName = projects.find((p) => p.id === d.project_id)?.name ?? "—";
-              const categoryName = categories.find((cat) => cat.id === d.category_id)?.name ?? "—";
-              const expected = c.paid * priceFor(d);
+          <div dir="rtl" className="bg-white border border-[#ECEEF2] rounded-[14px] overflow-hidden">
+            {/* Header — desktop only */}
+            <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_120px_90px_110px_90px_44px] gap-3 px-4 py-2.5 border-b border-[#ECEEF2] bg-[#F8F9FB] text-[10px] font-bold uppercase tracking-wider text-[#6B7280]">
+              <div>הצעה</div>
+              <div>ספק</div>
+              <div>פרויקט</div>
+              <div>מצטרפים / יעד</div>
+              <div>אחוז התקדמות</div>
+              <div>פיקדונות</div>
+              <div>סטטוס</div>
+              <div />
+            </div>
 
-              return (
-                <article
-                  key={d.id}
-                  dir="rtl"
-                  className="bg-white border border-[#ECEEF2] rounded-[14px] overflow-hidden flex flex-col hover:shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08)] hover:border-[#0E6B5A]/30 transition-all"
-                >
-                  {/* Cover */}
-                  <div className="relative h-32 bg-[#F4F6FA] overflow-hidden">
-                    {d.cover_image_url ? (
-                      <img src={d.cover_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="h-10 w-10 text-[#9CA3AF]" />
+            <ul className="divide-y divide-[#F1F3F7]">
+              {pageDeals.map((d) => {
+                const c = counts[d.id] ?? { paid: 0, deposits: 0 };
+                const target = d.target_participants ?? 0;
+                const pct = target > 0 ? Math.min(100, Math.round((c.paid / target) * 100)) : 0;
+                const pctTone = pct >= 80 ? "#0E6B5A" : pct >= 40 ? "#0E6B5A" : pct > 0 ? "#D97706" : "#9CA3AF";
+                const meta = statusMeta[d.status] ?? { label: d.status, bg: "bg-[#F3F4F6]", text: "text-[#374151]" };
+                const supplierName = suppliers[d.supplier_id] ?? "—";
+                const projectName = projects.find((p) => p.id === d.project_id)?.name ?? "—";
+                const categoryName = categories.find((cat) => cat.id === d.category_id)?.name ?? "—";
+
+                return (
+                  <li key={d.id} className="px-3 lg:px-4 py-2.5 lg:grid lg:grid-cols-[2fr_1fr_1fr_120px_90px_110px_90px_44px] lg:gap-3 lg:items-center hover:bg-[#FAFBFC] transition-colors">
+                    {/* Deal cell (image + title + category) */}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-10 h-10 rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0">
+                        {d.cover_image_url ? (
+                          <img src={d.cover_image_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ImageIcon className="h-4 w-4 text-[#9CA3AF]" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
-
-                    {/* Status pill */}
-                    <div className="absolute top-2 right-2 flex items-center gap-1.5">
-                      <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold", meta.bg, meta.text)}>
-                        {meta.label}
-                      </span>
-                      {d.auto_closed_at && (
-                        <span className="px-1.5 py-0.5 rounded-full bg-white/95 text-[#B45309] text-[10px] font-bold flex items-center gap-0.5">
-                          <Lock className="h-2.5 w-2.5" /> נעולה
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold text-[13px] text-[#0F172A] truncate">{d.title}</div>
+                        <div className="text-[11px] text-[#9CA3AF] truncate">{categoryName}</div>
+                      </div>
+                      {/* Mobile right-side: status + menu */}
+                      <div className="lg:hidden flex items-center gap-1.5 shrink-0">
+                        <span className={cn("px-1.5 py-0.5 rounded-md text-[10px] font-bold", meta.bg, meta.text)}>
+                          {meta.label}
                         </span>
-                      )}
-                    </div>
-
-                    {/* Category chip */}
-                    <div className="absolute top-2 left-2">
-                      <span className="px-2 py-0.5 rounded-full bg-white/95 text-[#0F172A] text-[10px] font-bold">
-                        {categoryName}
-                      </span>
-                    </div>
-
-                    {/* Title overlay */}
-                    <div className="absolute bottom-2 right-2.5 left-2.5 text-white">
-                      <h3 className="font-extrabold text-[15px] leading-tight line-clamp-1">{d.title}</h3>
-                      <div className="flex items-center gap-1.5 text-[11px] opacity-90 mt-0.5">
-                        <Tag className="h-3 w-3" />
-                        <span className="truncate">{supplierName}</span>
-                      </div>
-                    </div>
-
-                    {/* Actions menu */}
-                    <div className="absolute bottom-2 left-2" onClick={(e) => e.stopPropagation()}>
-                      <div className="bg-white/95 rounded-full">
                         <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
                       </div>
                     </div>
-                  </div>
 
-                  {/* Project chip */}
-                  <div className="px-3 pt-2.5 pb-1">
-                    <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#6B7280]">
-                      <Building2 className="h-3 w-3" />
-                      <span className="truncate">{projectName}</span>
+                    {/* Mobile metrics grid */}
+                    <div className="grid grid-cols-4 gap-2 mt-2 lg:hidden text-center">
+                      <MiniCell label="ספק" value={supplierName} truncate />
+                      <MiniCell label="פרויקט" value={projectName} truncate />
+                      <MiniCell label="מצטרפים" value={target ? `${c.paid}/${target}` : String(c.paid)} />
+                      <MiniCell label="פיקדונות" value={formatILS(c.deposits)} tone="positive" />
                     </div>
-                  </div>
+                    {target > 0 && (
+                      <div className="mt-2 lg:hidden">
+                        <div className="flex justify-between text-[10px] font-bold mb-0.5">
+                          <span className="text-[#6B7280]">התקדמות</span>
+                          <span style={{ color: pctTone }}>{pct}%</span>
+                        </div>
+                        <div className="h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: pctTone }} />
+                        </div>
+                      </div>
+                    )}
 
-                  {/* Progress */}
-                  <div className="px-3 pt-1">
-                    <div className="flex items-baseline justify-between mb-1">
-                      <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-[#6B7280] tracking-wide">
-                        <Users className="h-3 w-3" /> מצטרפים
+                    {/* Desktop columns */}
+                    <div className="hidden lg:block text-[12px] text-[#0F172A] truncate">{supplierName}</div>
+                    <div className="hidden lg:block text-[12px] text-[#0F172A] truncate">{projectName}</div>
+                    <div className="hidden lg:block text-[12px] font-bold text-[#0F172A]">
+                      {target ? `${c.paid} / ${target}` : c.paid}
+                    </div>
+                    <div className="hidden lg:block">
+                      <div className="flex items-center gap-1.5">
+                        <div className="text-[12px] font-extrabold w-10" style={{ color: pctTone }}>{target ? `${pct}%` : "—"}</div>
+                        <div className="flex-1 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${target ? pct : 0}%`, backgroundColor: pctTone }} />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="hidden lg:block text-[12px] font-extrabold text-[#0E6B5A]">{formatILS(c.deposits)}</div>
+                    <div className="hidden lg:block">
+                      <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-bold", meta.bg, meta.text)}>
+                        {meta.label}
                       </span>
-                      <span className="text-[12px] font-extrabold" style={{ color: pctTone }}>
-                        {c.paid}{target ? `/${target}` : ""}{target ? ` · ${pct}%` : ""}
-                      </span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-[#F1F3F7] overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${target > 0 ? pct : 0}%`, backgroundColor: pctTone }} />
+                    <div className="hidden lg:flex justify-end">
+                      <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
                     </div>
-                  </div>
+                  </li>
+                );
+              })}
+            </ul>
 
-                  {/* Metrics */}
-                  <div className="grid grid-cols-2 gap-1.5 px-3 pt-3 pb-3">
-                    <div className="rounded-[10px] bg-gradient-to-l from-[#0E6B5A]/10 to-[#0E6B5A]/3 border border-[#0E6B5A]/15 px-2.5 py-1.5">
-                      <div className="flex items-center gap-1 text-[10px] font-semibold text-[#0E6B5A]">
-                        <Wallet className="h-3 w-3" /> פיקדונות
-                      </div>
-                      <div className="text-[14px] font-extrabold text-[#0E6B5A] leading-tight mt-0.5">
-                        {formatILS(c.deposits)}
-                      </div>
-                    </div>
-                    <div className="rounded-[10px] bg-[#F8F9FB] px-2.5 py-1.5">
-                      <div className="flex items-center gap-1 text-[10px] font-semibold text-[#6B7280]">
-                        <TrendingUp className="h-3 w-3" /> צפי הכנסה
-                      </div>
-                      <div className="text-[14px] font-extrabold text-[#0F172A] leading-tight mt-0.5">
-                        {formatILS(expected)}
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-4 py-3 border-t border-[#ECEEF2] bg-[#FAFBFC] text-[12px] text-[#6B7280]">
+              <div>הצגת {rangeStart}-{rangeEnd} מתוך {visibleDeals.length} הצעות</div>
+              <div className="flex items-center gap-1">
+                <PageBtn disabled={page === 1} onClick={() => setPage(page - 1)} aria-label="הקודם">
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </PageBtn>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const start = Math.max(1, Math.min(page - 2, totalPages - 4));
+                  const n = start + i;
+                  if (n > totalPages) return null;
+                  return (
+                    <button key={n} onClick={() => setPage(n)}
+                      className={cn(
+                        "h-7 min-w-[28px] px-2 rounded-md text-[12px] font-bold transition-colors",
+                        n === page ? "bg-[#0E6B5A] text-white" : "bg-white text-[#1F2937] border border-[#ECEEF2] hover:bg-[#F4F6FA]",
+                      )}>
+                      {n}
+                    </button>
+                  );
+                })}
+                <PageBtn disabled={page >= totalPages} onClick={() => setPage(page + 1)} aria-label="הבא">
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </PageBtn>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -321,12 +349,35 @@ export default function AdminDeals() {
   );
 }
 
+function MiniCell({ label, value, tone = "neutral", truncate }: { label: string; value: React.ReactNode; tone?: "neutral" | "positive"; truncate?: boolean }) {
+  const cls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
+  return (
+    <div className="min-w-0">
+      <div className="text-[9px] text-[#9CA3AF] font-semibold uppercase tracking-wide">{label}</div>
+      <div className={cn("text-[11px] font-bold mt-0.5", cls, truncate && "truncate")}>{value}</div>
+    </div>
+  );
+}
+
+function PageBtn({ children, disabled, onClick, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="h-7 w-7 rounded-md bg-white border border-[#ECEEF2] flex items-center justify-center hover:bg-[#F4F6FA] disabled:opacity-40 disabled:cursor-not-allowed"
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+}
+
 function FilterSelect({
   value, onChange, placeholder, options,
 }: { value: string; onChange: (v: string) => void; placeholder: string; options: { value: string; label: string }[] }) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="h-9 w-[140px] text-[12px] border-[#ECEEF2] bg-white">
+      <SelectTrigger className="h-9 w-[130px] text-[12px] border-[#ECEEF2] bg-white">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="bg-white z-50 max-h-[300px]">

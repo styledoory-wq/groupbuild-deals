@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
 import {
   Building2, MapPin, Plus, Pencil, Trash2, Search, Settings2,
-  Users, Tag, Gift, Wallet, TrendingUp, Home,
+  Users, Tag, Eye, Home,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -28,11 +28,11 @@ import type { Project, ProjectStatus } from "@/types";
 const statusLabel: Record<ProjectStatus, string> = {
   planning: "בתכנון", construction: "בבנייה", delivery: "במסירה", completed: "הושלם",
 };
-const statusTone: Record<ProjectStatus, string> = {
+const statusPill: Record<ProjectStatus, string> = {
   planning: "bg-[#FEF3C7] text-[#92400E]",
-  construction: "bg-[#DBEAFE] text-[#1E40AF]",
+  construction: "bg-[#DCFCE7] text-[#166534]",
   delivery: "bg-[#E0F2FE] text-[#075985]",
-  completed: "bg-[#DCFCE7] text-[#166534]",
+  completed: "bg-[#F1F5F9] text-[#475569]",
 };
 
 type FormState = {
@@ -43,7 +43,6 @@ type FormState = {
   apartmentCount: string;
   status: ProjectStatus;
 };
-
 const emptyForm: FormState = { name: "", city: "", buildingCount: "", apartmentCount: "", status: "planning" };
 
 type ProjectMetrics = {
@@ -99,9 +98,7 @@ export default function AdminProjects() {
         (dealsRes.data ?? []).forEach((d) => {
           if (!d.project_id) return;
           if (d.status === "active") ensure(d.project_id).deals += 1;
-          if (d.supplier_id) {
-            (supplierByProj[d.project_id] ??= new Set()).add(d.supplier_id);
-          }
+          if (d.supplier_id) (supplierByProj[d.project_id] ??= new Set()).add(d.supplier_id);
         });
         Object.entries(supplierByProj).forEach(([pid, s]) => { ensure(pid).suppliers = s.size; });
         (depositsRes.data ?? []).forEach((dep: { amount: number; deal_id: string }) => {
@@ -201,7 +198,7 @@ export default function AdminProjects() {
     <MobileShell>
       <AdminPageHeader
         title="ניהול פרויקטים"
-        description={`${filteredProjects.length} מוצגים מתוך ${projects.length}`}
+        description={`${projects.length} פרויקטים`}
         actions={
           <button
             onClick={openCreate}
@@ -213,22 +210,20 @@ export default function AdminProjects() {
       />
       <AdminKpiRow
         items={[
-          { label: "פרויקטים", value: kpi.active, tone: "positive" },
-          { label: "דירות", value: kpi.apartments },
-          { label: "משתמשים", value: kpi.users },
+          { label: "פרויקטים פעילים", value: kpi.active, tone: "positive" },
           { label: "ספקים פעילים", value: kpi.suppliers },
-          { label: "הצעות פעילות", value: kpi.deals },
-          { label: "פיקדונות", value: formatILS(kpi.deposits), tone: "positive" },
+          { label: "משתמשים רשומים", value: kpi.users.toLocaleString() },
+          { label: "פיקדונות שנאספו", value: formatILS(kpi.deposits), tone: "positive" },
         ]}
       />
 
-      <div dir="rtl" className="bg-white border-b border-[#ECEEF2] px-5 lg:px-8 py-3">
+      <div dir="rtl" className="bg-white border-b border-[#ECEEF2] px-4 lg:px-8 py-2.5">
         <div className="relative max-w-md">
           <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="חיפוש לפי שם פרויקט, עיר או סטטוס"
+            placeholder="חיפוש פרויקט, כתובת או עיר…"
             className="h-9 pr-9 text-[13px] border-[#ECEEF2]"
           />
         </div>
@@ -242,77 +237,73 @@ export default function AdminProjects() {
             לא נמצאו פרויקטים
           </div>
         ) : (
-          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-3 grid-cols-1 xl:grid-cols-2">
             {filteredProjects.map((p) => {
               const m = metrics[p.id] ?? { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 };
               const participation = p.apartmentCount > 0 ? Math.min(100, Math.round((m.users / p.apartmentCount) * 100)) : 0;
-              const partTone = participation >= 50 ? "#0E6B5A" : participation >= 20 ? "#D97706" : "#6B7280";
+              const partTone = participation >= 50 ? "#0E6B5A" : participation >= 20 ? "#D97706" : "#9CA3AF";
               return (
                 <article
                   key={p.id}
                   dir="rtl"
-                  className="bg-white border border-[#ECEEF2] rounded-[14px] overflow-hidden flex flex-col hover:shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08)] hover:border-[#0E6B5A]/30 transition-all"
+                  className="bg-white border border-[#ECEEF2] rounded-[14px] p-3 hover:shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08)] hover:border-[#0E6B5A]/30 transition-all"
                 >
-                  {/* Hero image */}
-                  <div className="relative h-28 bg-gradient-to-br from-[#0E6B5A]/10 to-[#F4F6FA] overflow-hidden">
-                    {m.imageUrl ? (
-                      <img src={m.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Building2 className="h-10 w-10 text-[#0E6B5A]/40" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                    <div className="absolute top-2 left-2">
-                      <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold", statusTone[p.status])}>
+                  {/* Top: title + image + 3 inline stats */}
+                  <div className="flex items-start gap-3">
+                    {/* Image */}
+                    <div className="relative shrink-0 w-[88px] h-[88px] rounded-[10px] overflow-hidden bg-[#F4F6FA]">
+                      {m.imageUrl ? (
+                        <img src={m.imageUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Building2 className="h-7 w-7 text-[#9CA3AF]" />
+                        </div>
+                      )}
+                      <span className={cn(
+                        "absolute top-1 left-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold",
+                        statusPill[p.status],
+                      )}>
                         {statusLabel[p.status]}
                       </span>
                     </div>
-                    <div className="absolute bottom-2 right-2.5 left-2.5 text-white">
-                      <h3 className="font-extrabold text-[15px] leading-tight truncate">{p.name}</h3>
-                      <div className="flex items-center gap-1 text-[11px] opacity-90 mt-0.5">
+
+                    {/* Title + stats */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-extrabold text-[15px] leading-tight text-[#0F172A] truncate">{p.name}</h3>
+                      <div className="flex items-center gap-1 text-[11px] text-[#6B7280] mt-0.5">
                         <MapPin className="h-3 w-3 shrink-0" />
                         <span className="truncate">{p.city}</span>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 mt-2.5">
+                        <InlineStat icon={<Home className="h-3 w-3" />} label="דירות" value={p.apartmentCount} />
+                        <InlineStat icon={<Users className="h-3 w-3" />} label="משתמשים" value={m.users} />
+                        <InlineStat icon={<Tag className="h-3 w-3" />} label="ספקים" value={m.suppliers} />
                       </div>
                     </div>
                   </div>
 
-                  {/* Participation progress */}
-                  <div className="px-3 pt-3">
-                    <div className="flex items-baseline justify-between mb-1">
-                      <span className="text-[10px] font-bold uppercase text-[#6B7280] tracking-wide">השתתפות</span>
-                      <span className="text-[12px] font-extrabold" style={{ color: partTone }}>
-                        {m.users}/{p.apartmentCount} · {participation}%
-                      </span>
-                    </div>
+                  {/* Second row of stats */}
+                  <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-[#F1F3F7]">
+                    <BlockStat label="הצעות" value={m.deals} />
+                    <BlockStat label="פיקדונות" value={formatILS(m.deposits)} tone="positive" />
+                    <BlockStat label="השתתפות" value={`${participation}%`} tone={participation >= 50 ? "positive" : participation >= 20 ? "warning" : "neutral"} />
+                  </div>
+
+                  {/* Progress */}
+                  <div className="mt-2.5">
                     <div className="h-1.5 rounded-full bg-[#F1F3F7] overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{ width: `${participation}%`, backgroundColor: partTone }} />
                     </div>
                   </div>
 
-                  {/* Metrics grid */}
-                  <div className="grid grid-cols-2 gap-1.5 px-3 pt-3 pb-2">
-                    <MetricChip icon={<Home className="h-3 w-3" />} label="דירות" value={p.apartmentCount} />
-                    <MetricChip icon={<Users className="h-3 w-3" />} label="משתמשים" value={m.users} />
-                    <MetricChip icon={<Gift className="h-3 w-3" />} label="הצעות" value={m.deals} tone={m.deals > 0 ? "positive" : "neutral"} />
-                    <MetricChip icon={<Tag className="h-3 w-3" />} label="ספקים" value={m.suppliers} />
-                  </div>
-
-                  {/* Deposits highlight strip */}
-                  <div className="mx-3 mb-3 rounded-[10px] bg-gradient-to-l from-[#0E6B5A]/8 to-[#0E6B5A]/3 border border-[#0E6B5A]/15 px-3 py-2 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#0E6B5A]">
-                      <Wallet className="h-3.5 w-3.5" />
-                      פיקדונות שנאספו
-                    </div>
-                    <div className="text-[14px] font-extrabold text-[#0E6B5A]">{formatILS(m.deposits)}</div>
-                  </div>
-
                   {/* Actions */}
-                  <div className="grid grid-cols-3 gap-1 px-2 pb-2 mt-auto">
-                    <ActionBtn icon={<Settings2 className="h-3 w-3" />} label="ניהול"
+                  <div className="grid grid-cols-3 gap-1.5 mt-3">
+                    <ActionBtn icon={<Settings2 className="h-3.5 w-3.5" />} label="ניהול פרויקט"
                       onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} primary />
-                    <ActionBtn icon={<Pencil className="h-3 w-3" />} label="עריכה" onClick={() => openEdit(p)} />
-                    <ActionBtn icon={<Trash2 className="h-3 w-3" />} label="הסרה" onClick={() => setDeleteId(p.id)} danger />
+                    <ActionBtn icon={<Eye className="h-3.5 w-3.5" />} label="צפייה"
+                      onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} />
+                    <ActionBtn icon={<Pencil className="h-3.5 w-3.5" />} label="עריכה" onClick={() => openEdit(p)} />
                   </div>
                 </article>
               );
@@ -385,33 +376,36 @@ export default function AdminProjects() {
   );
 }
 
-function MetricChip({
-  icon, label, value, tone = "neutral",
-}: { icon: React.ReactNode; label: string; value: React.ReactNode; tone?: "neutral" | "positive" }) {
-  const valueCls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
+function InlineStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
-    <div className="bg-[#F8F9FB] rounded-[8px] px-2 py-1.5">
-      <div className="flex items-center gap-1 text-[10px] font-semibold text-[#6B7280]">
-        <span className="text-[#9CA3AF]">{icon}</span>
-        {label}
-      </div>
-      <div className={cn("text-[14px] font-extrabold leading-tight mt-0.5", valueCls)}>{value}</div>
+    <div className="text-center">
+      <div className="flex items-center justify-center text-[#9CA3AF] mb-0.5">{icon}</div>
+      <div className="text-[14px] font-extrabold text-[#0F172A] leading-none">{value}</div>
+      <div className="text-[10px] text-[#6B7280] mt-0.5">{label}</div>
+    </div>
+  );
+}
+
+function BlockStat({ label, value, tone = "neutral" }: { label: string; value: React.ReactNode; tone?: "neutral" | "positive" | "warning" }) {
+  const cls = tone === "positive" ? "text-[#0E6B5A]" : tone === "warning" ? "text-[#B45309]" : "text-[#0F172A]";
+  return (
+    <div className="text-center">
+      <div className={cn("text-[14px] font-extrabold leading-none", cls)}>{value}</div>
+      <div className="text-[10px] text-[#6B7280] mt-1">{label}</div>
     </div>
   );
 }
 
 function ActionBtn({
-  icon, label, onClick, primary, danger,
-}: { icon: React.ReactNode; label: string; onClick: () => void; primary?: boolean; danger?: boolean }) {
-  const base = "h-8 rounded-[10px] text-[11px] font-bold flex items-center justify-center gap-1 transition-colors";
+  icon, label, onClick, primary,
+}: { icon: React.ReactNode; label: string; onClick: () => void; primary?: boolean }) {
+  const base = "h-8 rounded-[10px] text-[11px] font-bold flex items-center justify-center gap-1 transition-colors px-2";
   const cls = primary
     ? "bg-[#0E6B5A] text-white hover:bg-[#0a574a]"
-    : danger
-      ? "bg-[#FEE2E2] text-[#B91C1C] hover:bg-[#FCA5A5]/40"
-      : "bg-[#F4F6FA] text-[#1F2937] hover:bg-[#ECEEF2]";
+    : "bg-[#F4F6FA] text-[#1F2937] hover:bg-[#ECEEF2]";
   return (
     <button onClick={onClick} className={cn(base, cls)}>
-      {icon}{label}
+      {icon}<span className="truncate">{label}</span>
     </button>
   );
 }
