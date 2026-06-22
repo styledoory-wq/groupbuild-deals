@@ -951,6 +951,8 @@ export default function DealDetail() {
                     <div className={cn("text-[18px] font-black gb-num leading-none", isNextTarget ? "text-[#0E6B5A]" : "text-[#1F2937]")}>{tierPrice}</div>
                     {isNextTarget && savingsToNext && savingsToNext > 0 ? (
                       <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">חיסכון של {ils(savingsToNext)} לאדם</div>
+                    ) : isNextTarget && extraDiscountToNext && extraDiscountToNext > 0 ? (
+                      <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">+{extraDiscountToNext}% הנחה לכולם</div>
                     ) : (
                       <div className="text-[9px] font-medium text-[#6B7280] mt-1">היעד הבא</div>
                     )}
