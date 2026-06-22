@@ -252,16 +252,16 @@ export default function AdminProjects() {
                   </div>
 
                   <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#F1F3F7]">
-                    <MetricRow label="דירות" value={p.apartmentCount} />
-                    <MetricRow label="משתמשים" value={m.users} />
+                    <Metric icon={null} label="דירות" value={p.apartmentCount} />
+                    <Metric icon={null} label="משתמשים" value={m.users} />
                   </div>
                   <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#F1F3F7] border-t border-[#F1F3F7]">
-                    <MetricRow label="הצעות" value={m.deals} />
-                    <MetricRow label="ספקים" value={m.suppliers} />
+                    <Metric icon={null} label="הצעות" value={m.deals} />
+                    <Metric icon={null} label="ספקים" value={m.suppliers} />
                   </div>
                   <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#F1F3F7] border-t border-[#F1F3F7]">
-                    <MetricRow label="פיקדונות" value={formatILS(m.deposits)} tone="positive" compact />
-                    <MetricRow label="פעילות" value={`${participation}%`}
+                    <Metric icon={null} label="פיקדונות" value={formatILS(m.deposits)} tone="positive" compact />
+                    <Metric icon={null} label="פעילות" value={`${participation}%`}
                       tone={participation >= 50 ? "positive" : participation >= 20 ? "warning" : "neutral"} />
                   </div>
 
