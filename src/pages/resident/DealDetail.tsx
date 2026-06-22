@@ -638,10 +638,21 @@ export default function DealDetail() {
       : null;
 
   // ----- Build a 3-slot window of tier blocks (past / active / future) -----
-  type WindowItem = { kind: "tier"; tier: OfferTier; state: "past" | "active" | "future" };
+  // When no one has joined yet, prepend a synthetic "current state" card so the
+  // user sees both where things stand now AND the first price-drop target.
+  type WindowItem =
+    | { kind: "starter"; state: "active" }
+    | { kind: "tier"; tier: OfferTier; state: "past" | "active" | "future" };
 
   const tierWindow: WindowItem[] = (() => {
     if (sortedTiers.length === 0) return [];
+    if (!hasAnyJoiners) {
+      const visible = sortedTiers.slice(0, 2);
+      return [
+        { kind: "starter", state: "active" } as const,
+        ...visible.map((t) => ({ kind: "tier" as const, tier: t, state: "future" as const })),
+      ];
+    }
     if (sortedTiers.length <= 3) {
       return sortedTiers.map((t, idx) => ({
         kind: "tier" as const,
