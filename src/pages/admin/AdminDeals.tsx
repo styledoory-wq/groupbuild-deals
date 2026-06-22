@@ -366,15 +366,6 @@ export default function AdminDeals() {
   );
 }
 
-function MiniCell({ label, value, tone = "neutral", truncate }: { label: string; value: React.ReactNode; tone?: "neutral" | "positive"; truncate?: boolean }) {
-  const cls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
-  return (
-    <div className="min-w-0">
-      <div className="text-[9px] text-[#9CA3AF] font-semibold uppercase tracking-wide">{label}</div>
-      <div className={cn("text-[11px] font-bold mt-0.5", cls, truncate && "truncate")}>{value}</div>
-    </div>
-  );
-}
 
 function PageBtn({ children, disabled, onClick, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
