@@ -169,6 +169,7 @@ export function describeOffer(p: Partial<OfferPricing>, participants = 0): Offer
     }
     return {
       headline: `${pct}% הנחה`,
+      savings: `חיסכון: ${pct}%`,
       effectivePrice: null,
       referencePrice: null,
       discountPercent: pct,
