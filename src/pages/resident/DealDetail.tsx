@@ -907,16 +907,6 @@ export default function DealDetail() {
             {/* 3 tier cards */}
             <div className="grid grid-cols-3 gap-2">
               {tierWindow.map((item, idx) => {
-                if (item.kind === "starter") {
-                  return (
-                    <div key={idx} className="bg-[#F4F6FA] rounded-2xl border border-[#E8EBEF] p-3 h-[110px] flex flex-col items-center justify-center text-center">
-                      <UserIcon className="w-4 h-4 text-[#9CA3AF] mb-1" />
-                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5">{item.rangeLabel}</div>
-                      <div className="text-[16px] font-black text-[#6B7280] gb-num leading-none">{ils(item.price)}</div>
-                      <div className="text-[9px] font-medium text-[#9CA3AF] mt-1">מחיר התחלתי</div>
-                    </div>
-                  );
-                }
                 const { tier, state } = item;
                 const td = describeTier(offerType, tier);
                 const tierPrice = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
