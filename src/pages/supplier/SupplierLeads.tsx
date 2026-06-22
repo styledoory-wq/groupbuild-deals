@@ -819,48 +819,22 @@ export default function SupplierLeads() {
           <ErrorState title="שגיאה בטעינה" description={error} />
         ) : (
           <>
-            {/* === Hero CRM card === */}
-            <div
-              className="rounded-2xl px-3.5 py-2.5 text-white relative overflow-hidden"
-              style={{
-                background: "linear-gradient(135deg, #0E6B5A 0%, #14856F 55%, #16A085 100%)",
-                boxShadow: "0 8px 20px -10px rgba(14,107,90,0.4)",
-              }}
-            >
-              <div className="absolute -top-6 -left-6 h-20 w-20 rounded-full bg-white/10" aria-hidden />
-              <div className="relative z-10 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-[10px] font-bold opacity-90 inline-flex items-center gap-1">
-                    <Sparkles className="h-3 w-3" /> מרכז הלידים
-                  </div>
-                  <div className="mt-0.5 flex items-baseline gap-1.5">
-                    <span className="text-[22px] font-black leading-none">{stats.total}</span>
-                    <span className="text-[11px] opacity-90 font-bold">פעילים</span>
-                    <span className="text-[10px] opacity-80">·</span>
-                    <span className="text-[11px] opacity-95 inline-flex items-center gap-0.5">
-                      <TrendingUp className="h-3 w-3" /> {stats.newThisWeek} השבוע
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setTab("new")}
-                  className="shrink-0 h-8 px-3 rounded-lg bg-white text-[#0E6B5A] font-extrabold text-[11px] inline-flex items-center gap-1 shadow-sm active:scale-[0.98] transition-transform"
-                >
-                  לידים חדשים
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                </button>
+            {/* === Compact summary strip === */}
+            <div className="flex items-center justify-between gap-2 px-1 pt-1">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[22px] font-black leading-none text-foreground">{stats.total}</span>
+                <span className="text-[12px] text-muted-foreground font-bold">לידים פעילים</span>
+              </div>
+              <div className="text-[11px] text-muted-foreground inline-flex items-center gap-2">
+                <span className="inline-flex items-center gap-0.5 text-[#059669] font-bold">
+                  <TrendingUp className="h-3 w-3" /> {stats.newThisWeek} השבוע
+                </span>
+                <span className="opacity-50">·</span>
+                <span>{stats.conversion}% המרה</span>
               </div>
             </div>
 
-            {/* === 4 KPI cards === */}
-            <div className="grid grid-cols-4 gap-1.5">
-              <KpiSmall icon={<Users className="h-3 w-3" />} label="לידים" value={String(stats.total)} trend={`+${stats.newThisWeek}`} tone="green" />
-              <KpiSmall icon={<TrendingUp className="h-3 w-3" />} label="המרה" value={`${stats.conversion}%`} trend={stats.closed ? `${stats.closed}` : "—"} tone="blue" />
-              <KpiSmall icon={<Coins className="h-3 w-3" />} label="צפוי" value={stats.expectedRevenue ? ils(stats.expectedRevenue) : "—"} trend="₪" tone="amber" />
-              <KpiSmall icon={<Clock className="h-3 w-3" />} label="תגובה" value={stats.avgRespHours == null ? "—" : `${stats.avgRespHours}ש׳`} trend="ממוצע" tone="violet" />
-            </div>
-
-            {/* === Tabs === */}
+            {/* === Tabs (filters) === */}
             <div className="flex items-center gap-1 bg-white rounded-2xl p-1 border border-[#EEF0F3] overflow-x-auto">
               {([
                 { k: "all", label: "הכל" },
@@ -886,18 +860,16 @@ export default function SupplierLeads() {
               })}
             </div>
 
-            {/* === Trash toggle row === */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <Users className="h-3.5 w-3.5 text-[#0E6B5A]" />
-                {showTrash ? `סל מחזור · ${totalTrashed} פריטים` : `מציג ${tabCounts[tab]} מתוך ${tabCounts.all}`}
+            {/* === Trash toggle (subtle) === */}
+            {(totalTrashed > 0 || showTrash) && (
+              <div className="flex items-center justify-end">
+                <button onClick={() => { setShowTrash((v) => !v); setSwipeId(null); }}
+                  className="text-[11px] font-bold inline-flex items-center gap-1 px-2.5 h-7 rounded-lg bg-muted text-foreground">
+                  <Archive className="h-3 w-3" />
+                  {showTrash ? "חזרה ללידים" : `סל מחזור${totalTrashed ? ` (${totalTrashed})` : ""}`}
+                </button>
               </div>
-              <button onClick={() => { setShowTrash((v) => !v); setSwipeId(null); }}
-                className="text-[11px] font-bold inline-flex items-center gap-1 px-2.5 h-7 rounded-lg bg-muted text-foreground">
-                <Archive className="h-3 w-3" />
-                {showTrash ? "חזרה ללידים" : `סל מחזור${totalTrashed ? ` (${totalTrashed})` : ""}`}
-              </button>
-            </div>
+            )}
 
             {showTrash ? (
               totalTrashed === 0 ? (
@@ -928,8 +900,17 @@ export default function SupplierLeads() {
               />
             ) : (
               <div className="space-y-3">
+                {/* Unified leads timeline — interests + inquiries merged, newest first */}
+                {[
+                  ...filteredInterests.map((i) => ({ kind: "interest" as const, t: i.created_at, node: renderInterest(i, false), key: `i-${i.id}` })),
+                  ...filteredInquiries.map((q) => ({ kind: "inquiry" as const, t: q.created_at, node: renderInquiry(q, false), key: `q-${q.id}` })),
+                ]
+                  .sort((a, b) => new Date(b.t).getTime() - new Date(a.t).getTime())
+                  .map((item) => <div key={item.key}>{item.node}</div>)}
+
+                {/* Committee quote requests — shown last as a separate, optional section */}
                 {tab === "all" && quoteRequests.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 pt-2">
                     <h3 className="text-[11px] font-bold text-muted-foreground inline-flex items-center gap-1.5">
                       <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" />
                       בקשות הצעת מחיר מוועדי בתים ({quoteRequests.length})
@@ -953,9 +934,6 @@ export default function SupplierLeads() {
                           <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-[#1C1C1E] mb-3">
                             {q.residents_count != null && (
                               <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#0E6B5A]" />{q.residents_count} דיירים</span>
-                            )}
-                            {q.category_id && (
-                              <span className="inline-flex items-center gap-1"><Tag className="h-3.5 w-3.5 text-[#0E6B5A]" />{q.category_id}</span>
                             )}
                             {q.target_price_per_unit != null && (
                               <span className="inline-flex items-center gap-1"><Coins className="h-3.5 w-3.5 text-[#0E6B5A]" />יעד {ils(q.target_price_per_unit)}</span>
@@ -984,16 +962,6 @@ export default function SupplierLeads() {
                     })}
                   </div>
                 )}
-                {filteredInquiries.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-[11px] font-bold text-muted-foreground mt-1">פניות כלליות</h3>
-                    {filteredInquiries.map((q) => renderInquiry(q, false))}
-                  </div>
-                )}
-                {filteredInterests.length > 0 && (
-                  <h3 className="text-[11px] font-bold text-muted-foreground mt-2">לידים על הצעות פעילות</h3>
-                )}
-                {filteredInterests.map((i) => renderInterest(i, false))}
               </div>
             )}
           </>
