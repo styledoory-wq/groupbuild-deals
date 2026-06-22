@@ -1298,7 +1298,8 @@ export default function DealDetail() {
 
 
 
-      {/* ===== SECTION 7 — STICKY CTA ===== */}
+      {/* ===== SECTION 7 — STICKY CTA (residents only) ===== */}
+      {!isSupplierPreview && (
       <div
         className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
@@ -1358,6 +1359,34 @@ export default function DealDetail() {
           )}
         </div>
       </div>
+      )}
+
+      {/* ===== SECTION 7B — SUPPLIER PREVIEW STICKY (edit shortcut) ===== */}
+      {isSupplierPreview && (
+        <div
+          className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
+        >
+          <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0]/95 to-transparent">
+            <div className="flex items-stretch gap-2">
+              <Link
+                to={`/supplier/offers/${deal.id}/edit`}
+                className="flex-1 h-14 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#0E6B5A]/40 flex items-center justify-center gap-2"
+              >
+                <Pencil className="h-4 w-4" />
+                עריכת ההצעה
+              </Link>
+              <Link
+                to="/supplier/offers"
+                className="h-14 px-4 rounded-2xl bg-white border-2 border-[#0E6B5A]/25 text-[#0E6B5A] font-extrabold text-[13px] flex items-center justify-center"
+              >
+                סגור
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
 
 
 
