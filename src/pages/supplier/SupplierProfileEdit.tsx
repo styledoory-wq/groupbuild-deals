@@ -138,12 +138,24 @@ export default function SupplierProfileEdit() {
     }
   };
 
+  const MAX_GALLERY_IMAGES = 6;
+
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
+    const remaining = MAX_GALLERY_IMAGES - gallery.length;
+    if (remaining <= 0) {
+      toast.error(`ניתן להעלות עד ${MAX_GALLERY_IMAGES} תמונות בלבד`);
+      if (galleryInputRef.current) galleryInputRef.current.value = "";
+      return;
+    }
+    const toUpload = files.slice(0, remaining);
+    if (files.length > remaining) {
+      toast.message(`הועלו ${remaining} תמונות בלבד (מקסימום ${MAX_GALLERY_IMAGES})`);
+    }
     setUploadingGallery(true);
     try {
-      for (const file of files) {
+      for (const file of toUpload) {
         const url = await uploadSupplierGalleryImage(file);
         setGallery((g) => [...g, { image_url: url, caption: null }]);
       }
@@ -155,6 +167,7 @@ export default function SupplierProfileEdit() {
       if (galleryInputRef.current) galleryInputRef.current.value = "";
     }
   };
+
 
   const handleCatalogUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -407,11 +420,13 @@ export default function SupplierProfileEdit() {
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
               <ImageIcon className="h-3.5 w-3.5 text-[#0E6B5A]" /> גלריית עבודות
+              <span className="text-[10px] font-normal text-muted-foreground mr-auto">{gallery.length}/{MAX_GALLERY_IMAGES}</span>
             </Label>
             <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleGalleryUpload} />
-            <Button type="button" variant="outline" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery} className="h-9 rounded-xl text-xs w-full">
-              <Plus className="h-3.5 w-3.5 ml-1" /> {uploadingGallery ? "מעלה..." : "הוספת תמונות"}
+            <Button type="button" variant="outline" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery || gallery.length >= MAX_GALLERY_IMAGES} className="h-9 rounded-xl text-xs w-full">
+              <Plus className="h-3.5 w-3.5 ml-1" /> {uploadingGallery ? "מעלה..." : gallery.length >= MAX_GALLERY_IMAGES ? "הגעת למקסימום" : "הוספת תמונות"}
             </Button>
+
             {gallery.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {gallery.map((g, idx) => (
