@@ -7,7 +7,7 @@ import { LoadingState } from "@/components/ds";
 import { useApp, formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
-import { Building2, Check, MapPin, Plus, Pencil, Trash2, Search, Eye, Settings2, Users, Tag, Gift, TrendingUp } from "lucide-react";
+import { Building2, Check, MapPin, Plus, Pencil, Trash2, Search, Settings2, Users, Tag, Gift, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
