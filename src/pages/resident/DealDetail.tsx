@@ -1309,6 +1309,29 @@ export default function DealDetail() {
         </DialogContent>
       </Dialog>
 
+      {/* ===== Payment instructions (manual Bit / bank transfer) ===== */}
+      <Dialog open={showPaymentInstructions} onOpenChange={setShowPaymentInstructions}>
+        <DialogContent className="max-w-sm rounded-3xl p-5" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-right text-[17px] font-black text-[#1F2937]">השלמת הפיקדון</DialogTitle>
+            <DialogDescription className="text-right text-[12px] text-muted-foreground">
+              העבר/י לספק בביט או בהעברה בנקאית, ואז סמן/י שביצעת.
+            </DialogDescription>
+          </DialogHeader>
+          {pendingDepositId && (
+            <PaymentInstructionsCard
+              depositId={pendingDepositId}
+              amount={pendingDepositAmount}
+              supplierPaymentInfo={supplierPaymentInfo}
+              onDeclared={() => {
+                setShowPaymentInstructions(false);
+                setInterestDepositStatus("awaiting_confirmation");
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
 
       {/* ===== SECTION 5 — SUPPLIER CARD ===== */}
       {supplier && (
