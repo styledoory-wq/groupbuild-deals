@@ -762,7 +762,7 @@ export default function OfferEditor() {
                     {Number(t.minParticipants) === 1 && (
                       <div className="flex items-start gap-1.5 rounded-lg bg-[#FFF8E1] border border-[#F5C547]/40 px-2 py-1.5 text-[10px] text-[#8A6A1E] font-medium leading-snug">
                         <span>⚠️</span>
-                        <span>משתתף אחד אינו קבוצת רכישה. מומלץ להתחיל מ-2 ומעלה.</span>
+                        <span>שים לב: 1 משתתף אינו קבוצת רכישה — הנחה זו תינתן גם לרוכש בודד. השאר 1 אם זו כוונתך (מבצע פתיחה), או התחל מ-2 ומעלה לקבוצת רכישה אמיתית.</span>
                       </div>
                     )}
                   </div>
