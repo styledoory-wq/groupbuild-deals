@@ -397,48 +397,28 @@ export default function DealDetail() {
         interestId = insertedInterest?.id ?? null;
       }
 
-      let paymentUrl: string | null = null;
       let depositId: string | null = null;
+      let depositAmount: number = Number(deal.deposit_amount ?? 0);
+      let paymentInfo: SupplierPaymentInfo | null = null;
       if (depositRequired) {
         const { data: paymentResponse, error: paymentErr } = await supabase.functions.invoke("create-deposit", {
-          body: { deal_id: deal.id, user_id: session.session.user.id },
+          body: { deal_id: deal.id, user_id: session.session.user.id, interest_id: interestId ?? undefined },
         });
         if (paymentErr) {
           console.error("[create_deposit_failed]", paymentErr);
-          toast.error("התשלום נכשל, נסה שנית");
+          toast.error("יצירת הפיקדון נכשלה, נסה שנית");
           return;
         }
         if (paymentResponse?.error) {
           console.error("[create_deposit_error_response]", paymentResponse);
-          toast.error(paymentResponse.message ?? "התשלום נכשל, נסה שנית");
+          toast.error(paymentResponse.message ?? "יצירת הפיקדון נכשלה");
           return;
         }
-        paymentUrl = typeof paymentResponse?.payment_url === "string" ? paymentResponse.payment_url : null;
         depositId = typeof paymentResponse?.deposit_id === "string" ? paymentResponse.deposit_id : null;
-
-        // Async Make scenario: poll for provider_payment_url for up to ~30s.
-        if (!paymentUrl && depositId) {
-          toast.loading("ממתינים לקישור התשלום מהספק...", { id: "wait-payment-url" });
-          const started = Date.now();
-          while (Date.now() - started < 30000) {
-            await new Promise((r) => setTimeout(r, 1500));
-            const { data: depRow } = await supabase
-              .from("deposits")
-              .select("provider_payment_url,status")
-              .eq("id", depositId)
-              .maybeSingle();
-            if (depRow?.provider_payment_url) {
-              paymentUrl = depRow.provider_payment_url;
-              break;
-            }
-            if (depRow?.status === "failed" || depRow?.status === "cancelled") break;
-          }
-          toast.dismiss("wait-payment-url");
-        }
-
-        if (!paymentUrl) {
-          console.error("[create_deposit_missing_url] full response:", paymentResponse);
-          toast.error("שגיאה בחיבור לספק התשלום — פנה לתמיכה");
+        if (typeof paymentResponse?.amount === "number") depositAmount = paymentResponse.amount;
+        paymentInfo = (paymentResponse?.supplier_payment_info ?? null) as SupplierPaymentInfo | null;
+        if (!depositId) {
+          toast.error("שגיאה ביצירת הפיקדון — פנה לתמיכה");
           return;
         }
       }
@@ -448,11 +428,11 @@ export default function DealDetail() {
         setInterested(true);
         setInterestStatus("pending_deposit");
         setInterestDepositStatus("pending");
-        setPendingPaymentUrl(paymentUrl);
+        setPendingPaymentUrl(null);
         setShowJoinModal(false);
-        toast.success("פרטי הבקשה נשמרו — ההצטרפות תושלם רק אחרי תשלום הפיקדון");
-        if (paymentUrl) {
-          navigate(`/payment/checkout?url=${encodeURIComponent(paymentUrl)}&deal_id=${encodeURIComponent(deal.id)}`);
+        toast.success("פרטי הבקשה נשמרו — סיים את ההעברה לספק להשלמת ההצטרפות");
+        if (depositId) {
+          openPaymentInstructions(depositId, depositAmount, paymentInfo);
           return;
         }
       } else {
