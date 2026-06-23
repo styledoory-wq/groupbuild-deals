@@ -693,6 +693,14 @@ export default function DealDetail() {
     nextDisplay?.discountPercent != null && activeDisplay?.discountPercent != null
       ? Math.max(0, nextDisplay.discountPercent - activeDisplay.discountPercent)
       : null;
+  // Total group savings — relative to the FIRST tier's price (entry-point price),
+  // so we don't show fake savings just because someone joined the lowest tier.
+  const firstTier = sortedTiers[0];
+  const firstTierDisplay = firstTier ? describeTier(offerType, firstTier) : null;
+  const groupSavings =
+    firstTierDisplay?.effectivePrice != null && currentEffectivePrice != null
+      ? Math.max(0, firstTierDisplay.effectivePrice - currentEffectivePrice) * participantCount
+      : 0;
   // Total max savings possible — from the reference (no-group) price all the way to the best tier
   const maxPossibleSavings =
     display.referencePrice != null && bestDisplay?.effectivePrice != null
