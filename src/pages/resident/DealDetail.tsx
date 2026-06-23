@@ -103,6 +103,7 @@ export default function DealDetail() {
 
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const [howOpen, setHowOpen] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [joinCondition, setJoinCondition] = useState<"flexible" | "conditional">("flexible");
   const [joinForm, setJoinForm] = useState({
@@ -1257,11 +1258,13 @@ export default function DealDetail() {
         </div>
       )}
 
-      {/* ===== SECTION 4 — HOW IT WORKS ===== */}
-      <div className="px-4 mt-6">
-        <SectionTitle>איך זה עובד</SectionTitle>
-        <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
-          <ol className="relative">
+      {/* ===== SECTION 4 — HOW IT WORKS (modal, triggered by floating button) ===== */}
+      <Dialog open={howOpen} onOpenChange={setHowOpen}>
+        <DialogContent className="max-w-sm rounded-3xl p-5" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-right text-[17px] font-black text-[#1F2937]">איך זה עובד</DialogTitle>
+          </DialogHeader>
+          <ol className="relative mt-2">
             {timeline.map((step, idx) => {
               const last = idx === timeline.length - 1;
               return (
@@ -1281,8 +1284,9 @@ export default function DealDetail() {
               );
             })}
           </ol>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
+
 
       {/* ===== SECTION 5 — SUPPLIER CARD ===== */}
       {supplier && (
@@ -1407,6 +1411,20 @@ export default function DealDetail() {
           </div>
         </div>
       )}
+
+      {/* Floating "How it works" button — fixed above the sticky CTA */}
+      <button
+        type="button"
+        onClick={() => setHowOpen(true)}
+        aria-label="איך זה עובד"
+        className="fixed z-50 left-3 h-10 px-3.5 rounded-full bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-8px_rgba(10,31,61,0.25)] flex items-center gap-1.5 text-[12px] font-extrabold text-[#1F2937] active:scale-[0.96] transition-transform"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 84px)" }}
+      >
+        <span className="w-5 h-5 rounded-full bg-[#1A8870] text-white text-[11px] font-black flex items-center justify-center">?</span>
+        איך זה עובד
+      </button>
+
+
 
 
 
