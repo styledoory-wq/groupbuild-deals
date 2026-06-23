@@ -630,6 +630,14 @@ export default function OfferEditor() {
               <Field label="תיאור קצר">
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="תארו את ההצעה במשפט-שניים..." className="rounded-xl min-h-[70px]" />
               </Field>
+              <Field label="פירוט מוצר (אופציונלי)">
+                <Textarea
+                  value={productDetails}
+                  onChange={(e) => setProductDetails(e.target.value)}
+                  placeholder="מה כלול, מפרט טכני, גודל/כמות, מותג, אחריות..."
+                  className="rounded-xl min-h-[90px]"
+                />
+              </Field>
             </div>
 
             <div className="gb-card p-4">
