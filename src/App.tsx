@@ -205,6 +205,8 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Welcome />} />
                   <Route path="/about" element={<Landing />} />
+                  <Route path="/site" element={<SiteLanding />} />
+                  <Route path="/landing" element={<SiteLanding />} />
                   <Route path="/index" element={<Navigate to="/" replace />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
