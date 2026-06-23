@@ -9,14 +9,33 @@ export function FavoriteButton({
   dealId,
   initial = false,
   className,
+  onChange,
 }: {
   dealId: string;
   initial?: boolean;
   className?: string;
+  onChange?: (isFavorite: boolean) => void;
 }) {
   const [on, setOn] = useState(initial);
   const [busy, setBusy] = useState(false);
   useEffect(() => setOn(initial), [initial]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: session } = await supabase.auth.getSession();
+      const uid = session.session?.user?.id;
+      if (!uid) return;
+      const { data, error } = await supabase
+        .from("favorites")
+        .select("deal_id")
+        .eq("user_id", uid)
+        .eq("deal_id", dealId)
+        .maybeSingle();
+      if (!cancelled && !error) setOn(Boolean(data));
+    })();
+    return () => { cancelled = true; };
+  }, [dealId]);
 
   const handle = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -32,6 +51,7 @@ export function FavoriteButton({
     setBusy(true);
     try {
       await toggleFavorite(dealId, next);
+      onChange?.(next);
     } catch (err) {
       setOn(!next);
       toast.error(err instanceof Error ? err.message : "פעולה נכשלה");
