@@ -680,7 +680,12 @@ export default function DealDetail() {
   })();
 
   // Current effective price — what the user actually pays right now.
-  const currentEffectivePrice = activeDisplay?.effectivePrice ?? display.effectivePrice ?? null;
+  // When nobody has joined yet, show the BASE price (reference) so the user
+  // understands the group discount hasn't kicked in. Falls back to the first
+  // tier / display price only if no reference price is configured.
+  const currentEffectivePrice = hasAnyJoiners
+    ? (activeDisplay?.effectivePrice ?? display.effectivePrice ?? null)
+    : (display.referencePrice ?? display.effectivePrice ?? null);
 
   // Savings per person if we advance to the NEXT tier (immediate motivation)
   const nextDisplay = nextTier ? describeTier(offerType, nextTier) : null;
