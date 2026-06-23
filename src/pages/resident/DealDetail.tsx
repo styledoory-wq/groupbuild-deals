@@ -1068,7 +1068,7 @@ export default function DealDetail() {
                 {maxPossibleSavings && (
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="text-left">
-                      <div className="text-[10px] font-bold text-[#6B7280] leading-tight">הבניין כבר חסך יחד</div>
+                      <div className="text-[10px] font-bold text-[#6B7280] leading-tight">הקבוצה חסכה יחד</div>
                       <div className="text-[16px] font-black text-[#0E6B5A] gb-num leading-tight mt-0.5">
                         {ils((display.referencePrice ?? 0) - (currentEffectivePrice ?? 0) > 0
                           ? ((display.referencePrice ?? 0) - (currentEffectivePrice ?? 0)) * participantCount
