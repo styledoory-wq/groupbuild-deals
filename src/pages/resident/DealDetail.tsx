@@ -1072,15 +1072,13 @@ export default function DealDetail() {
                   </div>
                 </div>
 
-                {/* left — building savings */}
-                {maxPossibleSavings && (
+                {/* left — group savings (only when there's actual savings) */}
+                {groupSavings > 0 && (
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="text-left">
                       <div className="text-[10px] font-bold text-[#6B7280] leading-tight">הקבוצה חסכה יחד</div>
                       <div className="text-[16px] font-black text-[#0E6B5A] gb-num leading-tight mt-0.5">
-                        {ils((display.referencePrice ?? 0) - (currentEffectivePrice ?? 0) > 0
-                          ? ((display.referencePrice ?? 0) - (currentEffectivePrice ?? 0)) * participantCount
-                          : 0)}
+                        {ils(groupSavings)}
                       </div>
                       <div className="text-[9px] font-medium text-[#6B7280] leading-tight">בזכות הצטרפות שכנים</div>
                     </div>
