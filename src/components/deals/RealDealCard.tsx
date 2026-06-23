@@ -174,7 +174,11 @@ function RealDealCardImpl({
               <div className="text-[14px] font-extrabold text-[#1F2937] leading-tight truncate">{display.headline}</div>
               {bestSavings && bestSavings > 0 ? (
                 <div className="text-[10px] font-bold text-emerald-600 inline-flex items-center gap-0.5 mt-0.5">
-                  <TrendingDown className="h-2.5 w-2.5" /> חוסכים {ils(bestSavings)}
+                  <TrendingDown className="h-2.5 w-2.5" /> חוסכים עד {ils(bestSavings)}
+                </div>
+              ) : bestDiscountPct && bestDiscountPct > 0 ? (
+                <div className="text-[10px] font-bold text-emerald-600 inline-flex items-center gap-0.5 mt-0.5">
+                  <TrendingDown className="h-2.5 w-2.5" /> עד {Math.round(bestDiscountPct)}% הנחה
                 </div>
               ) : null}
             </div>
