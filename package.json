@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@capacitor-mlkit/barcode-scanning": "^8.1.0",
-    "@capacitor/android": "^8.3.4",
-    "@capacitor/core": "^8.3.4",
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
     "@capacitor/geolocation": "^8.2.0",
-    "@capacitor/ios": "^8.3.4",
+    "@capacitor/ios": "^8.4.1",
     "@capacitor/keyboard": "^8.0.3",
     "@capacitor/push-notifications": "^8.1.1",
     "@fontsource-variable/epilogue": "^5.2.8",
@@ -79,7 +79,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.3.4",
+    "@capacitor/cli": "^8.4.1",
     "@eslint/js": "^9.32.0",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.6.0",
