@@ -673,9 +673,12 @@ export type Database = {
       deposits: {
         Row: {
           amount: number
+          confirmed_by: string | null
           created_at: string
           currency: string
           deal_id: string
+          declared_paid_at: string | null
+          declared_payment_method: string | null
           deleted_at: string | null
           gross_deposit_amount: number
           hidden_at: string | null
@@ -697,13 +700,17 @@ export type Database = {
           status: Database["public"]["Enums"]["deposit_status"]
           supplier_deduction_amount: number
           supplier_deduction_basis: string
+          supplier_id: string | null
           user_id: string
         }
         Insert: {
           amount: number
+          confirmed_by?: string | null
           created_at?: string
           currency?: string
           deal_id: string
+          declared_paid_at?: string | null
+          declared_payment_method?: string | null
           deleted_at?: string | null
           gross_deposit_amount: number
           hidden_at?: string | null
@@ -725,13 +732,17 @@ export type Database = {
           status?: Database["public"]["Enums"]["deposit_status"]
           supplier_deduction_amount: number
           supplier_deduction_basis?: string
+          supplier_id?: string | null
           user_id: string
         }
         Update: {
           amount?: number
+          confirmed_by?: string | null
           created_at?: string
           currency?: string
           deal_id?: string
+          declared_paid_at?: string | null
+          declared_payment_method?: string | null
           deleted_at?: string | null
           gross_deposit_amount?: number
           hidden_at?: string | null
@@ -753,9 +764,18 @@ export type Database = {
           status?: Database["public"]["Enums"]["deposit_status"]
           supplier_deduction_amount?: number
           supplier_deduction_basis?: string
+          supplier_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "deposits_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       device_tokens: {
         Row: {
@@ -1595,8 +1615,13 @@ export type Database = {
       suppliers: {
         Row: {
           approval_status: string
+          bank_account_holder: string | null
+          bank_account_number: string | null
+          bank_branch: string | null
+          bank_name: string | null
           billing_notes: string | null
           billing_status: string
+          bit_phone: string | null
           business_name: string
           catalog_url: string | null
           categories: string[]
@@ -1619,6 +1644,7 @@ export type Database = {
           monthly_subscription: number
           offers_products: boolean
           offers_services: boolean
+          payment_instructions_note: string | null
           phone: string | null
           serves_all_country: boolean
           service_areas: string[]
@@ -1636,8 +1662,13 @@ export type Database = {
         }
         Insert: {
           approval_status?: string
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_branch?: string | null
+          bank_name?: string | null
           billing_notes?: string | null
           billing_status?: string
+          bit_phone?: string | null
           business_name: string
           catalog_url?: string | null
           categories?: string[]
@@ -1660,6 +1691,7 @@ export type Database = {
           monthly_subscription?: number
           offers_products?: boolean
           offers_services?: boolean
+          payment_instructions_note?: string | null
           phone?: string | null
           serves_all_country?: boolean
           service_areas?: string[]
@@ -1677,8 +1709,13 @@ export type Database = {
         }
         Update: {
           approval_status?: string
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_branch?: string | null
+          bank_name?: string | null
           billing_notes?: string | null
           billing_status?: string
+          bit_phone?: string | null
           business_name?: string
           catalog_url?: string | null
           categories?: string[]
@@ -1701,6 +1738,7 @@ export type Database = {
           monthly_subscription?: number
           offers_products?: boolean
           offers_services?: boolean
+          payment_instructions_note?: string | null
           phone?: string | null
           serves_all_country?: boolean
           service_areas?: string[]
@@ -1973,7 +2011,15 @@ export type Database = {
       auto_leave_expired_reapprovals: { Args: never; Returns: number }
       claim_supplier_profile_by_email: { Args: never; Returns: string }
       close_expired_deals: { Args: never; Returns: number }
+      confirm_deposit_received: {
+        Args: { _deposit_id: string }
+        Returns: undefined
+      }
       deal_effective_target: { Args: { _deal_id: string }; Returns: number }
+      declare_deposit_paid: {
+        Args: { _deposit_id: string; _method: string }
+        Returns: undefined
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -2146,13 +2192,20 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "resident" | "supplier" | "committee"
-      deposit_status: "pending" | "paid" | "failed" | "cancelled" | "refunded"
+      deposit_status:
+        | "pending"
+        | "paid"
+        | "failed"
+        | "cancelled"
+        | "refunded"
+        | "awaiting_confirmation"
       payment_provider_enum:
         | "grow"
         | "cardcom"
         | "grow_make"
         | "stripe"
         | "direct_to_supplier"
+        | "manual"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2281,13 +2334,21 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "resident", "supplier", "committee"],
-      deposit_status: ["pending", "paid", "failed", "cancelled", "refunded"],
+      deposit_status: [
+        "pending",
+        "paid",
+        "failed",
+        "cancelled",
+        "refunded",
+        "awaiting_confirmation",
+      ],
       payment_provider_enum: [
         "grow",
         "cardcom",
         "grow_make",
         "stripe",
         "direct_to_supplier",
+        "manual",
       ],
     },
   },

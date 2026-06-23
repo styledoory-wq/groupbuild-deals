@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { PaymentInstructionsCard, type SupplierPaymentInfo } from "@/components/deals/PaymentInstructionsCard";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
@@ -94,11 +95,52 @@ export default function DealDetail() {
   const [isGuest, setIsGuest] = useState<boolean>(false);
   const [pendingPaymentUrl, setPendingPaymentUrl] = useState<string | null>(null);
   const [resumingPayment, setResumingPayment] = useState(false);
+  const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
+  const [pendingDepositId, setPendingDepositId] = useState<string | null>(null);
+  const [pendingDepositAmount, setPendingDepositAmount] = useState<number>(0);
+  const [supplierPaymentInfo, setSupplierPaymentInfo] = useState<SupplierPaymentInfo | null>(null);
+
+  const openPaymentInstructions = (
+    depositId: string,
+    amount: number,
+    info: SupplierPaymentInfo | null,
+  ) => {
+    setPendingDepositId(depositId);
+    setPendingDepositAmount(amount);
+    setSupplierPaymentInfo(info);
+    setShowPaymentInstructions(true);
+  };
 
   const handleResumePayment = async () => {
     if (!deal) return;
-    // Direct-to-supplier flow: route back to checkout to show the supplier payment link and "I paid" button.
-    navigate(`/checkout/${deal.id}`);
+    setResumingPayment(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const uid = session.session?.user?.id;
+      if (!uid) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: dep } = await (supabase.from("deposits") as any)
+        .select("id,amount,status")
+        .eq("user_id", uid)
+        .eq("deal_id", deal.id)
+        .eq("is_deleted", false)
+        .in("status", ["pending", "awaiting_confirmation"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const { data: sup } = await supabase
+        .from("suppliers")
+        .select("business_name,bit_phone,bank_account_holder,bank_name,bank_branch,bank_account_number,payment_instructions_note")
+        .eq("id", deal.supplier_id)
+        .maybeSingle();
+      if (dep) {
+        openPaymentInstructions(dep.id as string, Number(dep.amount ?? deal.deposit_amount ?? 0), (sup ?? null) as SupplierPaymentInfo | null);
+      } else {
+        toast.error("לא נמצא פיקדון פעיל");
+      }
+    } finally {
+      setResumingPayment(false);
+    }
   };
 
   // Join modal state
@@ -284,10 +326,10 @@ export default function DealDetail() {
     if (!deal) return;
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
-      window.location.href = `/auth?redirect=/checkout/${deal.id}`;
+      window.location.href = `/auth?redirect=/deal/${deal.id}`;
       return;
     }
-    navigate(`/checkout/${deal.id}`);
+    setShowJoinModal(true);
   };
 
   const submitJoin = async () => {
@@ -355,48 +397,28 @@ export default function DealDetail() {
         interestId = insertedInterest?.id ?? null;
       }
 
-      let paymentUrl: string | null = null;
       let depositId: string | null = null;
+      let depositAmount: number = Number(deal.deposit_amount ?? 0);
+      let paymentInfo: SupplierPaymentInfo | null = null;
       if (depositRequired) {
         const { data: paymentResponse, error: paymentErr } = await supabase.functions.invoke("create-deposit", {
-          body: { deal_id: deal.id, user_id: session.session.user.id },
+          body: { deal_id: deal.id, user_id: session.session.user.id, interest_id: interestId ?? undefined },
         });
         if (paymentErr) {
           console.error("[create_deposit_failed]", paymentErr);
-          toast.error("התשלום נכשל, נסה שנית");
+          toast.error("יצירת הפיקדון נכשלה, נסה שנית");
           return;
         }
         if (paymentResponse?.error) {
           console.error("[create_deposit_error_response]", paymentResponse);
-          toast.error(paymentResponse.message ?? "התשלום נכשל, נסה שנית");
+          toast.error(paymentResponse.message ?? "יצירת הפיקדון נכשלה");
           return;
         }
-        paymentUrl = typeof paymentResponse?.payment_url === "string" ? paymentResponse.payment_url : null;
         depositId = typeof paymentResponse?.deposit_id === "string" ? paymentResponse.deposit_id : null;
-
-        // Async Make scenario: poll for provider_payment_url for up to ~30s.
-        if (!paymentUrl && depositId) {
-          toast.loading("ממתינים לקישור התשלום מהספק...", { id: "wait-payment-url" });
-          const started = Date.now();
-          while (Date.now() - started < 30000) {
-            await new Promise((r) => setTimeout(r, 1500));
-            const { data: depRow } = await supabase
-              .from("deposits")
-              .select("provider_payment_url,status")
-              .eq("id", depositId)
-              .maybeSingle();
-            if (depRow?.provider_payment_url) {
-              paymentUrl = depRow.provider_payment_url;
-              break;
-            }
-            if (depRow?.status === "failed" || depRow?.status === "cancelled") break;
-          }
-          toast.dismiss("wait-payment-url");
-        }
-
-        if (!paymentUrl) {
-          console.error("[create_deposit_missing_url] full response:", paymentResponse);
-          toast.error("שגיאה בחיבור לספק התשלום — פנה לתמיכה");
+        if (typeof paymentResponse?.amount === "number") depositAmount = paymentResponse.amount;
+        paymentInfo = (paymentResponse?.supplier_payment_info ?? null) as SupplierPaymentInfo | null;
+        if (!depositId) {
+          toast.error("שגיאה ביצירת הפיקדון — פנה לתמיכה");
           return;
         }
       }
@@ -406,11 +428,11 @@ export default function DealDetail() {
         setInterested(true);
         setInterestStatus("pending_deposit");
         setInterestDepositStatus("pending");
-        setPendingPaymentUrl(paymentUrl);
+        setPendingPaymentUrl(null);
         setShowJoinModal(false);
-        toast.success("פרטי הבקשה נשמרו — ההצטרפות תושלם רק אחרי תשלום הפיקדון");
-        if (paymentUrl) {
-          navigate(`/payment/checkout?url=${encodeURIComponent(paymentUrl)}&deal_id=${encodeURIComponent(deal.id)}`);
+        toast.success("פרטי הבקשה נשמרו — סיים את ההעברה לספק להשלמת ההצטרפות");
+        if (depositId) {
+          openPaymentInstructions(depositId, depositAmount, paymentInfo);
           return;
         }
       } else {
@@ -1284,6 +1306,29 @@ export default function DealDetail() {
               );
             })}
           </ol>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== Payment instructions (manual Bit / bank transfer) ===== */}
+      <Dialog open={showPaymentInstructions} onOpenChange={setShowPaymentInstructions}>
+        <DialogContent className="max-w-sm rounded-3xl p-5" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-right text-[17px] font-black text-[#1F2937]">השלמת הפיקדון</DialogTitle>
+            <DialogDescription className="text-right text-[12px] text-muted-foreground">
+              העבר/י לספק בביט או בהעברה בנקאית, ואז סמן/י שביצעת.
+            </DialogDescription>
+          </DialogHeader>
+          {pendingDepositId && (
+            <PaymentInstructionsCard
+              depositId={pendingDepositId}
+              amount={pendingDepositAmount}
+              supplierPaymentInfo={supplierPaymentInfo}
+              onDeclared={() => {
+                setShowPaymentInstructions(false);
+                setInterestDepositStatus("awaiting_confirmation");
+              }}
+            />
+          )}
         </DialogContent>
       </Dialog>
 
