@@ -693,6 +693,14 @@ export default function DealDetail() {
     nextDisplay?.discountPercent != null && activeDisplay?.discountPercent != null
       ? Math.max(0, nextDisplay.discountPercent - activeDisplay.discountPercent)
       : null;
+  // Total group savings — relative to the FIRST tier's price (entry-point price),
+  // so we don't show fake savings just because someone joined the lowest tier.
+  const firstTier = sortedTiers[0];
+  const firstTierDisplay = firstTier ? describeTier(offerType, firstTier) : null;
+  const groupSavings =
+    firstTierDisplay?.effectivePrice != null && currentEffectivePrice != null
+      ? Math.max(0, firstTierDisplay.effectivePrice - currentEffectivePrice) * participantCount
+      : 0;
   // Total max savings possible — from the reference (no-group) price all the way to the best tier
   const maxPossibleSavings =
     display.referencePrice != null && bestDisplay?.effectivePrice != null
@@ -984,25 +992,25 @@ export default function DealDetail() {
                 }
                 if (state === "active") {
                   return (
-                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#E8EBEF]")}>
-                      <Users className="w-4 h-4 text-[#6B7280] mb-1" />
-                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">{range} מצטרפים</div>
-                      <div className="text-[18px] font-black text-[#1F2937] gb-num leading-none">{tierPrice}</div>
-                      <div className="text-[9px] font-medium text-[#6B7280] mt-1">המחיר הנוכחי</div>
+                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#0E6B5A] shadow-[0_4px_14px_-4px_rgba(14,107,90,0.35)]")}>
+                      <Users className="w-4 h-4 text-[#0E6B5A] mb-1" />
+                      <div className="text-[10px] font-bold text-[#0E6B5A] mb-0.5 gb-num">{range} מצטרפים</div>
+                      <div className="text-[18px] font-black text-[#0E6B5A] gb-num leading-none">{tierPrice}</div>
+                      <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">המחיר הנוכחי</div>
                     </div>
                   );
                 }
                 // future
                 return (
-                  <div key={idx} className={cn(baseCard, isNextTarget ? "bg-white border-2 border-[#0E6B5A] shadow-[0_4px_14px_-4px_rgba(14,107,90,0.35)]" : "bg-white border border-[#E8EBEF]")}>
+                  <div key={idx} className={cn(baseCard, "bg-white border border-[#E8EBEF]")}>
                     {isNextTarget && (
                       <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-[#F5C547] text-[#5C3F00] text-[9px] px-2 py-0.5 rounded-full font-black shadow-sm whitespace-nowrap">
                         יעד הבא!
                       </div>
                     )}
-                    <Users className={cn("w-4 h-4 mb-1", isNextTarget ? "text-[#0E6B5A]" : "text-[#6B7280]")} />
-                    <div className={cn("text-[10px] font-bold mb-0.5 gb-num", isNextTarget ? "text-[#0E6B5A]" : "text-[#6B7280]")}>{range} מצטרפים</div>
-                    <div className={cn("text-[18px] font-black gb-num leading-none", isNextTarget ? "text-[#0E6B5A]" : "text-[#1F2937]")}>{tierPrice}</div>
+                    <Users className="w-4 h-4 text-[#6B7280] mb-1" />
+                    <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">{range} מצטרפים</div>
+                    <div className="text-[18px] font-black text-[#1F2937] gb-num leading-none">{tierPrice}</div>
                     {isNextTarget && savingsToNext && savingsToNext > 0 ? (
                       <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">חיסכון של {ils(savingsToNext)} לאדם</div>
                     ) : isNextTarget && extraDiscountToNext && extraDiscountToNext > 0 ? (
@@ -1064,15 +1072,13 @@ export default function DealDetail() {
                   </div>
                 </div>
 
-                {/* left — building savings */}
-                {maxPossibleSavings && (
+                {/* left — group savings (only when there's actual savings) */}
+                {groupSavings > 0 && (
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="text-left">
                       <div className="text-[10px] font-bold text-[#6B7280] leading-tight">הקבוצה חסכה יחד</div>
                       <div className="text-[16px] font-black text-[#0E6B5A] gb-num leading-tight mt-0.5">
-                        {ils((display.referencePrice ?? 0) - (currentEffectivePrice ?? 0) > 0
-                          ? ((display.referencePrice ?? 0) - (currentEffectivePrice ?? 0)) * participantCount
-                          : 0)}
+                        {ils(groupSavings)}
                       </div>
                       <div className="text-[9px] font-medium text-[#6B7280] leading-tight">בזכות הצטרפות שכנים</div>
                     </div>
@@ -1169,7 +1175,7 @@ export default function DealDetail() {
 
 
       {/* ===== SECTION 3 — OFFER DETAILS ===== */}
-      {(deal.description || deal.offer_terms || deal.restrictions || (deal.service_areas && deal.service_areas.length > 0) || deal.join_deadline || deal.redemption_deadline || deal.appointment_required) && (
+      {(deal.description || (deal as { product_details?: string | null }).product_details || deal.offer_terms || deal.restrictions || (deal.service_areas && deal.service_areas.length > 0) || deal.join_deadline || deal.redemption_deadline || deal.appointment_required) && (
         <div className="px-4 mt-6">
           <SectionTitle>פרטי ההצעה</SectionTitle>
           <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] space-y-4">
@@ -1177,6 +1183,12 @@ export default function DealDetail() {
               <div>
                 <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">תיאור</div>
                 <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{deal.description}</p>
+              </div>
+            )}
+            {(deal as { product_details?: string | null }).product_details && (
+              <div>
+                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">פירוט מוצר</div>
+                <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{(deal as { product_details?: string | null }).product_details}</p>
               </div>
             )}
             {deal.offer_terms && (

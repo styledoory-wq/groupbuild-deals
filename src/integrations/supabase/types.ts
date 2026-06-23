@@ -504,6 +504,7 @@ export type Database = {
           offer_terms: string | null
           offer_type: string
           original_price: number
+          product_details: string | null
           project_id: string | null
           redemption_deadline: string | null
           restrictions: string | null
@@ -544,6 +545,7 @@ export type Database = {
           offer_terms?: string | null
           offer_type?: string
           original_price?: number
+          product_details?: string | null
           project_id?: string | null
           redemption_deadline?: string | null
           restrictions?: string | null
@@ -584,6 +586,7 @@ export type Database = {
           offer_terms?: string | null
           offer_type?: string
           original_price?: number
+          product_details?: string | null
           project_id?: string | null
           redemption_deadline?: string | null
           restrictions?: string | null

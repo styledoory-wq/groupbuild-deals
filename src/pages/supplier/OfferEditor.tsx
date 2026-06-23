@@ -86,6 +86,7 @@ export default function OfferEditor() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [productDetails, setProductDetails] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [depositRequired, setDepositRequired] = useState<boolean>(false);
   const [depositAmount, setDepositAmount] = useState<string>("1000");
@@ -214,6 +215,7 @@ export default function OfferEditor() {
             if (deal && !cancelled) {
               setTitle(deal.title ?? "");
               setDescription(deal.description ?? "");
+              setProductDetails((deal as { product_details?: string | null }).product_details ?? "");
               if (deal.category_id) setCategoryId(deal.category_id);
               setDepositRequired(!!deal.deposit_required);
               if (deal.deposit_amount != null) setDepositAmount(String(deal.deposit_amount));
@@ -409,6 +411,7 @@ export default function OfferEditor() {
       supplier_id: supplier.id,
       title: title.trim(),
       description: description.trim() || null,
+      product_details: productDetails.trim() || null,
       category_id: categoryId,
       offer_type: offerType,
       deposit_required: depositRequired,
@@ -627,6 +630,14 @@ export default function OfferEditor() {
               <Field label="תיאור קצר">
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="תארו את ההצעה במשפט-שניים..." className="rounded-xl min-h-[70px]" />
               </Field>
+              <Field label="פירוט מוצר (אופציונלי)">
+                <Textarea
+                  value={productDetails}
+                  onChange={(e) => setProductDetails(e.target.value)}
+                  placeholder="מה כלול, מפרט טכני, גודל/כמות, מותג, אחריות..."
+                  className="rounded-xl min-h-[90px]"
+                />
+              </Field>
             </div>
 
             <div className="gb-card p-4">
@@ -751,7 +762,7 @@ export default function OfferEditor() {
                     {Number(t.minParticipants) === 1 && (
                       <div className="flex items-start gap-1.5 rounded-lg bg-[#FFF8E1] border border-[#F5C547]/40 px-2 py-1.5 text-[10px] text-[#8A6A1E] font-medium leading-snug">
                         <span>⚠️</span>
-                        <span>משתתף אחד אינו קבוצת רכישה. מומלץ להתחיל מ-2 ומעלה.</span>
+                        <span>שים לב: 1 משתתף אינו קבוצת רכישה — הנחה זו תינתן גם לרוכש בודד. השאר 1 אם זו כוונתך (מבצע פתיחה), או התחל מ-2 ומעלה לקבוצת רכישה אמיתית.</span>
                       </div>
                     )}
                   </div>
