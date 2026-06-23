@@ -41,6 +41,7 @@ export default function SiteLanding() {
             <a href="#how" className="hover:text-[#0E6B5A] transition">איך זה עובד</a>
             <a href="#why" className="hover:text-[#0E6B5A] transition">למה אנחנו</a>
             <a href="#audience" className="hover:text-[#0E6B5A] transition">למי זה מתאים</a>
+            <a href="#faq" className="hover:text-[#0E6B5A] transition">שאלות נפוצות</a>
           </nav>
           <div className="flex items-center gap-2">
             <button
