@@ -66,44 +66,59 @@ export default function SiteLanding() {
         <div className="pointer-events-none absolute -top-32 -right-32 h-[420px] w-[420px] rounded-full bg-[#34A88E]/15 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-40 -left-20 h-[380px] w-[380px] rounded-full bg-[#0E6B5A]/10 blur-3xl" />
 
-        <div className="relative max-w-7xl mx-auto px-5 lg:px-10 pt-16 lg:pt-24 pb-16 lg:pb-28 text-center">
-          <span className="inline-flex items-center gap-1.5 px-3 h-7 rounded-full bg-white border border-[#0E6B5A]/15 text-[#0E6B5A] text-[11.5px] font-bold tracking-tight shadow-sm">
-            <Sparkles className="h-3.5 w-3.5" />
-            פלטפורמת הרכש הקבוצתי הראשונה לדיירי בנייה חדשה
-          </span>
+        <div className="relative max-w-7xl mx-auto px-5 lg:px-10 pt-12 lg:pt-20 pb-12 lg:pb-20 grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-16 items-center">
+          {/* Text side */}
+          <div className="text-center lg:text-right order-2 lg:order-1">
+            <span className="inline-flex items-center gap-1.5 px-3 h-7 rounded-full bg-white border border-[#0E6B5A]/15 text-[#0E6B5A] text-[11.5px] font-bold tracking-tight shadow-sm">
+              <Sparkles className="h-3.5 w-3.5" />
+              פלטפורמת הרכש הקבוצתי הראשונה לדיירי בנייה חדשה
+            </span>
 
-          <h1 className="mt-6 text-[clamp(2rem,5vw,3.75rem)] leading-[1.05] font-black tracking-tight text-[#0B1220] max-w-4xl mx-auto">
-            קונים <span className="text-[#0E6B5A]">ביחד</span>.
-            <br className="hidden sm:block" />
-            חוסכים יותר. נהנים משקט.
-          </h1>
+            <h1 className="mt-6 text-[clamp(2rem,5vw,3.75rem)] leading-[1.05] font-black tracking-tight text-[#0B1220]">
+              קונים <span className="text-[#0E6B5A]">ביחד</span>.
+              <br />
+              חוסכים יותר. נהנים משקט.
+            </h1>
 
-          <p className="mt-6 text-[15.5px] lg:text-[17.5px] leading-relaxed text-[#4B5563] max-w-2xl mx-auto">
-            GroupBuild מחבר בין דיירים בפרויקטים חדשים לספקים מובילים — מטבחים, ארונות, מזגנים, ריצוף ועוד.
-            ככל שיותר שכנים מצטרפים, המחיר יורד. הכל שקוף, מאומת ופשוט.
-          </p>
+            <p className="mt-6 text-[15.5px] lg:text-[17.5px] leading-relaxed text-[#4B5563] max-w-xl mx-auto lg:mx-0">
+              GroupBuild מחבר בין דיירים בפרויקטים חדשים לספקים מובילים — מטבחים, ארונות, מזגנים, ריצוף ועוד.
+              ככל שיותר שכנים מצטרפים, המחיר יורד. הכל שקוף, מאומת ופשוט.
+            </p>
 
-          <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              onClick={goApp}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-14 px-8 rounded-full text-[15px] font-bold text-white bg-gradient-to-l from-[#0E6B5A] to-[#34A88E] shadow-[0_12px_28px_-12px_rgba(14,107,90,0.6)] hover:scale-[1.02] active:scale-[0.98] transition"
-            >
-              התחילו לחסוך עכשיו
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => navigate("/browse")}
-              className="w-full sm:w-auto inline-flex items-center justify-center h-14 px-8 rounded-full text-[14.5px] font-bold text-[#0B1220] bg-white border border-black/10 hover:border-[#0E6B5A]/40 hover:text-[#0E6B5A] transition"
-            >
-              צפייה בעסקאות פעילות
-            </button>
+            <div className="mt-9 flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-3">
+              <button
+                onClick={goApp}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-14 px-8 rounded-full text-[15px] font-bold text-white bg-gradient-to-l from-[#0E6B5A] to-[#34A88E] shadow-[0_12px_28px_-12px_rgba(14,107,90,0.6)] hover:scale-[1.02] active:scale-[0.98] transition"
+              >
+                התחילו לחסוך עכשיו
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => navigate("/browse")}
+                className="w-full sm:w-auto inline-flex items-center justify-center h-14 px-8 rounded-full text-[14.5px] font-bold text-[#0B1220] bg-white border border-black/10 hover:border-[#0E6B5A]/40 hover:text-[#0E6B5A] transition"
+              >
+                צפייה בעסקאות פעילות
+              </button>
+            </div>
+
+            {/* trust strip */}
+            <div className="mt-10 flex flex-wrap items-center lg:justify-start justify-center gap-x-6 gap-y-3 text-[12.5px] font-semibold text-[#6B7280]">
+              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-[#0E6B5A]" /> ספקים מאומתים</span>
+              <span className="inline-flex items-center gap-1.5"><Eye className="h-4 w-4 text-[#0E6B5A]" /> שקיפות מחירים מלאה</span>
+              <span className="inline-flex items-center gap-1.5"><Handshake className="h-4 w-4 text-[#0E6B5A]" /> ללא עמלות נסתרות</span>
+            </div>
           </div>
 
-          {/* trust strip */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[12.5px] font-semibold text-[#6B7280]">
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-[#0E6B5A]" /> ספקים מאומתים</span>
-            <span className="inline-flex items-center gap-1.5"><Eye className="h-4 w-4 text-[#0E6B5A]" /> שקיפות מחירים מלאה</span>
-            <span className="inline-flex items-center gap-1.5"><Handshake className="h-4 w-4 text-[#0E6B5A]" /> ללא עמלות נסתרות</span>
+          {/* Phone mockup side */}
+          <div className="relative order-1 lg:order-2 flex justify-center">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-[#0E6B5A]/15 via-transparent to-[#34A88E]/20 blur-2xl rounded-full" />
+            <img
+              src={mockupDeal.url}
+              alt="אפליקציית GroupBuild — עסקה קבוצתית"
+              width={1024}
+              height={1536}
+              className="relative w-[260px] sm:w-[320px] lg:w-[420px] h-auto drop-shadow-[0_30px_50px_rgba(11,18,32,0.18)]"
+            />
           </div>
         </div>
       </section>
