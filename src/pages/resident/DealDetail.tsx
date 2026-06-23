@@ -654,13 +654,11 @@ export default function DealDetail() {
   const tierWindow: WindowItem[] = (() => {
     if (sortedTiers.length === 0) return [];
     if (!hasAnyJoiners) {
-      // No joiners yet — first tier IS the current state. Highlight it as active.
-      const visible = sortedTiers.slice(0, 3);
-      return visible.map((t, idx) => ({
-        kind: "tier" as const,
-        tier: t,
-        state: (idx === 0 ? "active" : "future") as "past" | "active" | "future",
-      }));
+      const visible = sortedTiers.slice(0, 2);
+      return [
+        { kind: "starter", state: "active" } as const,
+        ...visible.map((t) => ({ kind: "tier" as const, tier: t, state: "future" as const })),
+      ];
     }
     if (sortedTiers.length <= 3) {
       return sortedTiers.map((t, idx) => ({
@@ -966,15 +964,15 @@ export default function DealDetail() {
                   // or a neutral label for percentage offers without a base price.
                   const refPrice = display.referencePrice;
                   return (
-                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#E8EBEF]")}>
-                      <UserIcon className="w-4 h-4 text-[#6B7280] mb-1" strokeWidth={2.4} />
-                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">0 מצטרפים</div>
+                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#0E6B5A] shadow-[0_4px_14px_-4px_rgba(14,107,90,0.35)]")}>
+                      <UserIcon className="w-4 h-4 text-[#0E6B5A] mb-1" strokeWidth={2.4} />
+                      <div className="text-[10px] font-bold text-[#0E6B5A] mb-0.5 gb-num">0 מצטרפים</div>
                       {refPrice != null ? (
-                        <div className="text-[18px] font-black text-[#1F2937] gb-num leading-none">{ils(refPrice)}</div>
+                        <div className="text-[18px] font-black text-[#0E6B5A] gb-num leading-none">{ils(refPrice)}</div>
                       ) : (
-                        <div className="text-[13px] font-black text-[#1F2937] leading-tight">מחיר רגיל</div>
+                        <div className="text-[13px] font-black text-[#0E6B5A] leading-tight">מחיר רגיל</div>
                       )}
-                      <div className="text-[9px] font-medium text-[#6B7280] mt-1">המצב כרגע</div>
+                      <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">המצב כרגע</div>
                     </div>
                   );
                 }
