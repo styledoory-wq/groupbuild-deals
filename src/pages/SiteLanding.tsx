@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import {
   ArrowLeft,
   ShieldCheck,
@@ -12,8 +13,11 @@ import {
   Clock,
   Eye,
   Handshake,
+  ChevronDown,
 } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import mockupDeal from "@/assets/mockup-deal.jpg.asset.json";
+import mockupDashboard from "@/assets/mockup-dashboard.jpg.asset.json";
 
 /**
  * Public marketing landing page — desktop-first responsive, RTL Hebrew.
