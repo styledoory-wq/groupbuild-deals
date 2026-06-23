@@ -469,6 +469,53 @@ export default function SupplierProfileEdit() {
           </div>
         </section>
 
+        {/* Payment details (manual: Bit / bank transfer) */}
+        <section className="gb-card p-4 space-y-3">
+          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Wallet className="h-3.5 w-3.5 text-[#0E6B5A]" /> פרטי תשלום (ביט / העברה בנקאית)
+          </h3>
+          <p className="text-fs-xs text-muted-foreground">
+            הפרטים האלה יוצגו לדיירים כדי שיוכלו להעביר אליך את הפיקדון ישירות.
+          </p>
+
+          <Field label="טלפון לביט" icon={Smartphone}>
+            <Input dir="ltr" value={bitPhone} onChange={(e) => setBitPhone(e.target.value)} maxLength={20} placeholder="050-0000000" className="h-11 rounded-xl" />
+          </Field>
+
+          <div className="pt-2 border-t border-border space-y-3">
+            <Label className="text-xs font-bold flex items-center gap-1.5">
+              <Building2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> חשבון בנק
+            </Label>
+            <Field label="שם בעל החשבון" icon={UserIcon}>
+              <Input value={bankAccountHolder} onChange={(e) => setBankAccountHolder(e.target.value)} maxLength={80} className="h-11 rounded-xl" />
+            </Field>
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="בנק" icon={Building2}>
+                <Input value={bankName} onChange={(e) => setBankName(e.target.value)} maxLength={40} className="h-11 rounded-xl" />
+              </Field>
+              <Field label="סניף" icon={Building2}>
+                <Input dir="ltr" value={bankBranch} onChange={(e) => setBankBranch(e.target.value)} maxLength={10} className="h-11 rounded-xl" />
+              </Field>
+            </div>
+            <Field label="מספר חשבון" icon={Building2}>
+              <Input dir="ltr" value={bankAccountNumber} onChange={(e) => setBankAccountNumber(e.target.value)} maxLength={20} className="h-11 rounded-xl" />
+            </Field>
+          </div>
+
+          <Field label="הערות תשלום לדייר (אופציונלי)" icon={FileText}>
+            <Textarea
+              value={paymentInstructionsNote}
+              onChange={(e) => setPaymentInstructionsNote(e.target.value)}
+              maxLength={400}
+              rows={3}
+              className="rounded-xl"
+              placeholder="לדוגמה: נא לציין בהעברה את שם הפרויקט"
+            />
+          </Field>
+        </section>
+
+
+
         <section className="gb-card p-4 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
             <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> קטגוריות שירות
