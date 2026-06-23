@@ -91,7 +91,22 @@ export default function Favorites() {
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {deals.map((d) => (
-              <RealDealCard key={d.id} deal={d} joinersCount={counts[d.id] ?? 0} isFavorite={favIds.has(d.id)} />
+              <RealDealCard
+                key={d.id}
+                deal={d}
+                joinersCount={counts[d.id] ?? 0}
+                isFavorite={favIds.has(d.id)}
+                onFavoriteChange={(isFavorite) => {
+                  if (!isFavorite) {
+                    setDeals((current) => current.filter((deal) => deal.id !== d.id));
+                    setFavIds((current) => {
+                      const next = new Set(current);
+                      next.delete(d.id);
+                      return next;
+                    });
+                  }
+                }}
+              />
             ))}
           </div>
         )}

@@ -50,12 +50,14 @@ function RealDealCardImpl({
   isFavorite = false,
   to,
   hideFavorite = false,
+  onFavoriteChange,
 }: {
   deal: RealDealCardData;
   joinersCount?: number;
   isFavorite?: boolean;
   to?: string;
   hideFavorite?: boolean;
+  onFavoriteChange?: (isFavorite: boolean) => void;
 }) {
   const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
   const tiers = Array.isArray(deal.tiers) ? deal.tiers : [];
@@ -127,7 +129,7 @@ function RealDealCardImpl({
 
           {/* Favorite */}
           {!hideFavorite && (
-            <FavoriteButton dealId={deal.id} initial={isFavorite} className="absolute top-2 left-2 h-8 w-8" />
+            <FavoriteButton dealId={deal.id} initial={isFavorite} onChange={onFavoriteChange} className="absolute top-2 left-2 h-8 w-8" />
           )}
 
           {galleryCount > 0 && (
