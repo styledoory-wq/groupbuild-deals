@@ -992,25 +992,25 @@ export default function DealDetail() {
                 }
                 if (state === "active") {
                   return (
-                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#E8EBEF]")}>
-                      <Users className="w-4 h-4 text-[#6B7280] mb-1" />
-                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">{range} מצטרפים</div>
-                      <div className="text-[18px] font-black text-[#1F2937] gb-num leading-none">{tierPrice}</div>
-                      <div className="text-[9px] font-medium text-[#6B7280] mt-1">המחיר הנוכחי</div>
+                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#0E6B5A] shadow-[0_4px_14px_-4px_rgba(14,107,90,0.35)]")}>
+                      <Users className="w-4 h-4 text-[#0E6B5A] mb-1" />
+                      <div className="text-[10px] font-bold text-[#0E6B5A] mb-0.5 gb-num">{range} מצטרפים</div>
+                      <div className="text-[18px] font-black text-[#0E6B5A] gb-num leading-none">{tierPrice}</div>
+                      <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">המחיר הנוכחי</div>
                     </div>
                   );
                 }
                 // future
                 return (
-                  <div key={idx} className={cn(baseCard, isNextTarget ? "bg-white border-2 border-[#0E6B5A] shadow-[0_4px_14px_-4px_rgba(14,107,90,0.35)]" : "bg-white border border-[#E8EBEF]")}>
+                  <div key={idx} className={cn(baseCard, "bg-white border border-[#E8EBEF]")}>
                     {isNextTarget && (
                       <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-[#F5C547] text-[#5C3F00] text-[9px] px-2 py-0.5 rounded-full font-black shadow-sm whitespace-nowrap">
                         יעד הבא!
                       </div>
                     )}
-                    <Users className={cn("w-4 h-4 mb-1", isNextTarget ? "text-[#0E6B5A]" : "text-[#6B7280]")} />
-                    <div className={cn("text-[10px] font-bold mb-0.5 gb-num", isNextTarget ? "text-[#0E6B5A]" : "text-[#6B7280]")}>{range} מצטרפים</div>
-                    <div className={cn("text-[18px] font-black gb-num leading-none", isNextTarget ? "text-[#0E6B5A]" : "text-[#1F2937]")}>{tierPrice}</div>
+                    <Users className="w-4 h-4 text-[#6B7280] mb-1" />
+                    <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">{range} מצטרפים</div>
+                    <div className="text-[18px] font-black text-[#1F2937] gb-num leading-none">{tierPrice}</div>
                     {isNextTarget && savingsToNext && savingsToNext > 0 ? (
                       <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">חיסכון של {ils(savingsToNext)} לאדם</div>
                     ) : isNextTarget && extraDiscountToNext && extraDiscountToNext > 0 ? (
