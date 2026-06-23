@@ -680,7 +680,12 @@ export default function DealDetail() {
   })();
 
   // Current effective price — what the user actually pays right now.
-  const currentEffectivePrice = activeDisplay?.effectivePrice ?? display.effectivePrice ?? null;
+  // When nobody has joined yet, show the BASE price (reference) so the user
+  // understands the group discount hasn't kicked in. Falls back to the first
+  // tier / display price only if no reference price is configured.
+  const currentEffectivePrice = hasAnyJoiners
+    ? (activeDisplay?.effectivePrice ?? display.effectivePrice ?? null)
+    : (display.referencePrice ?? display.effectivePrice ?? null);
 
   // Savings per person if we advance to the NEXT tier (immediate motivation)
   const nextDisplay = nextTier ? describeTier(offerType, nextTier) : null;
@@ -862,13 +867,17 @@ export default function DealDetail() {
             <div className="flex items-stretch gap-3 mt-2">
               {/* right side — current price card */}
               <div className="bg-white rounded-2xl px-3 py-3 flex-1 min-w-0 text-center shadow-sm">
-                <div className="text-[10px] font-bold text-[#6B7280] mb-1">המחיר שלך כרגע</div>
+                <div className="text-[10px] font-bold text-[#6B7280] mb-1">
+                  {hasAnyJoiners ? "המחיר שלך כרגע" : "מחיר בסיס"}
+                </div>
                 {currentEffectivePrice != null ? (
                   <div className="text-[26px] font-black text-[#1F2937] gb-num leading-none">{ils(currentEffectivePrice)}</div>
                 ) : (
                   <div className="text-[16px] font-black text-[#1F2937]">{display.headline}</div>
                 )}
-                <div className="text-[9px] font-medium text-[#6B7280] mt-1.5">ללא רכישה קבוצתית</div>
+                <div className="text-[9px] font-medium text-[#6B7280] mt-1.5">
+                  {hasAnyJoiners ? "ללא רכישה קבוצתית" : "לפני הנחת הקבוצה"}
+                </div>
               </div>
               {/* left side — community message */}
               <div className="flex-1 min-w-0 text-white flex flex-col justify-center text-right">
