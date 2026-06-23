@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { PaymentInstructionsCard, type SupplierPaymentInfo } from "@/components/deals/PaymentInstructionsCard";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
