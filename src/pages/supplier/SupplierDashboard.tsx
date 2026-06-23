@@ -566,13 +566,19 @@ export default function SupplierDashboard() {
           </section>
         )}
 
-        {/* ===== New offer CTA ===== */}
-        <div className="px-5 mt-6">
+        {/* ===== Actions ===== */}
+        <div className="px-5 mt-6 space-y-2">
           <button
             onClick={() => navigate("/supplier/offers/new")}
             className="w-full h-12 rounded-2xl bg-[#0F172A] text-white font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition"
           >
             <Plus className="h-4 w-4" strokeWidth={2.6} /> צור הצעה חדשה
+          </button>
+          <button
+            onClick={() => navigate("/supplier/deposits")}
+            className="w-full h-11 rounded-2xl bg-white border border-[#EEF0F3] text-[#0F172A] font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition"
+          >
+            <Wallet className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2.4} /> פיקדונות לאישור
           </button>
         </div>
       </div>
