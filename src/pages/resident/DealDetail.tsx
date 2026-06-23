@@ -654,13 +654,11 @@ export default function DealDetail() {
   const tierWindow: WindowItem[] = (() => {
     if (sortedTiers.length === 0) return [];
     if (!hasAnyJoiners) {
-      // No joiners yet — first tier IS the current state. Highlight it as active.
-      const visible = sortedTiers.slice(0, 3);
-      return visible.map((t, idx) => ({
-        kind: "tier" as const,
-        tier: t,
-        state: (idx === 0 ? "active" : "future") as "past" | "active" | "future",
-      }));
+      const visible = sortedTiers.slice(0, 2);
+      return [
+        { kind: "starter", state: "active" } as const,
+        ...visible.map((t) => ({ kind: "tier" as const, tier: t, state: "future" as const })),
+      ];
     }
     if (sortedTiers.length <= 3) {
       return sortedTiers.map((t, idx) => ({
