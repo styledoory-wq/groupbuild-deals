@@ -26,6 +26,7 @@ import mockupDashboard from "@/assets/mockup-dashboard.jpg.asset.json";
  */
 export default function SiteLanding() {
   const navigate = useNavigate();
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const goApp = () => navigate("/auth?mode=signup");
   const goLogin = () => navigate("/auth");
