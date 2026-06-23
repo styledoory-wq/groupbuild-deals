@@ -309,6 +309,114 @@ export default function SiteLanding() {
         </div>
       </section>
 
+      {/* ===== Showcase with mockup ===== */}
+      <section className="bg-gradient-to-b from-[#F7F5F0] to-white">
+        <div className="max-w-7xl mx-auto px-5 lg:px-10 py-20 lg:py-28 grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-16 items-center">
+          <div className="relative flex justify-center order-2 lg:order-1">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-bl from-[#34A88E]/15 via-transparent to-[#0E6B5A]/15 blur-2xl rounded-full" />
+            <img
+              src={mockupDashboard.url}
+              alt="לוח בקרה בתוך אפליקציית GroupBuild"
+              width={1024}
+              height={1536}
+              loading="lazy"
+              className="relative w-[260px] sm:w-[320px] lg:w-[400px] h-auto drop-shadow-[0_30px_50px_rgba(11,18,32,0.18)]"
+            />
+          </div>
+
+          <div className="text-center lg:text-right order-1 lg:order-2">
+            <span className="text-[11.5px] font-bold tracking-[0.18em] text-[#0E6B5A] uppercase">הכל באפליקציה אחת</span>
+            <h2 className="mt-3 text-[clamp(1.6rem,3.5vw,2.5rem)] font-black tracking-tight">
+              ניהול הבית החדש — בכף היד
+            </h2>
+            <p className="mt-4 text-[14.5px] lg:text-[16px] text-[#6B7280] leading-relaxed max-w-xl mx-auto lg:mx-0">
+              קטגוריות מסודרות, עסקאות פעילות בפרויקט שלכם, התראות בזמן אמת על מחירים שיורדים, וצ׳אט ישיר עם הספק.
+              הכל במקום אחד — מהבית, ובלי טלפונים מיותרים.
+            </p>
+
+            <ul className="mt-7 space-y-3 max-w-md mx-auto lg:mx-0 text-right">
+              {[
+                "התראה כשנפתחת עסקה חדשה בפרויקט שלך",
+                "מעקב חי אחרי מספר המצטרפים והמחיר העדכני",
+                "השוואת ספקים לפי דירוג, מחיר ואחריות",
+                "תיעוד מלא של כל ההזמנות והאישורים",
+              ].map((t) => (
+                <li key={t} className="flex items-start gap-2.5 text-[14px] font-semibold text-[#0B1220]">
+                  <CheckCircle2 className="h-5 w-5 text-[#0E6B5A] shrink-0 mt-0.5" />
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== FAQ ===== */}
+      <section id="faq" className="bg-white border-y border-black/5">
+        <div className="max-w-3xl mx-auto px-5 lg:px-10 py-20 lg:py-28">
+          <div className="text-center mb-12">
+            <span className="text-[11.5px] font-bold tracking-[0.18em] text-[#0E6B5A] uppercase">שאלות נפוצות</span>
+            <h2 className="mt-3 text-[clamp(1.6rem,3.5vw,2.5rem)] font-black tracking-tight">
+              כל מה שרציתם לדעת
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              {
+                q: "כמה עולה להשתמש ב-GroupBuild?",
+                a: "השימוש לדיירים חינמי לחלוטין — ללא דמי הצטרפות, ללא עמלות, וללא הפתעות. אתם משלמים רק על המוצר עצמו, ישירות לספק.",
+              },
+              {
+                q: "איך בדיוק המחיר יורד?",
+                a: "כל עסקה כוללת מדרגות מחיר — לדוגמה: 5 שכנים → ₪25,900, 10 שכנים → ₪24,900, 15 שכנים → ₪24,500. ככל שיותר שכנים מצטרפים, המחיר לכולם יורד אוטומטית.",
+              },
+              {
+                q: "מי הספקים? איך אני יודע שהם אמינים?",
+                a: "כל ספק עובר תהליך אימות מסודר — בדיקת רישיון עסק, ביקורות, ניסיון בפרויקטים דומים והתאמה לסטנדרטים שלנו. רק ספקים שעברו את הסינון מופיעים בפלטפורמה.",
+              },
+              {
+                q: "האם אני מתחייב כשאני מצטרף לעסקה?",
+                a: "ההצטרפות הראשונית היא רק הצהרת עניין — בלי כסף ובלי התחייבות. רק כשהעסקה סגורה ומאושרת, אתם מאשרים את ההזמנה ומעבירים את התשלום ישירות לספק (העברה בנקאית או ביט).",
+              },
+              {
+                q: "איך מתבצע התשלום?",
+                a: "התשלום מתבצע ישירות לספק — בהעברה בנקאית או ביט, לפי ההנחיות שמופיעות בעמוד העסקה. אנחנו לא לוקחים שום עמלת תיווך. הספק מאשר באפליקציה ברגע שקיבל.",
+              },
+              {
+                q: "מתי אקבל את המוצר?",
+                a: "כל ספק מציין בעסקה את זמן האספקה הצפוי (לרוב 30-60 ימים מהאישור). מעקב מלא על סטטוס ההזמנה שלכם נמצא תמיד באפליקציה.",
+              },
+            ].map((item, i) => {
+              const isOpen = openFaq === i;
+              return (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-black/8 bg-[#F7F5F0]/50 overflow-hidden transition-all"
+                >
+                  <button
+                    onClick={() => setOpenFaq(isOpen ? null : i)}
+                    className="w-full flex items-center justify-between gap-4 p-5 text-right hover:bg-[#F7F5F0] transition"
+                  >
+                    <span className="text-[15px] font-bold text-[#0B1220] tracking-tight">{item.q}</span>
+                    <ChevronDown
+                      className={`h-5 w-5 text-[#0E6B5A] shrink-0 transition-transform duration-200 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5 -mt-1 text-[13.5px] leading-relaxed text-[#4B5563]">
+                      {item.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* ===== Final CTA ===== */}
       <section className="max-w-7xl mx-auto px-5 lg:px-10 py-20 lg:py-28">
         <div className="relative overflow-hidden rounded-[28px] p-10 lg:p-16 text-center bg-gradient-to-br from-[#0E6B5A] to-[#0B1220] text-white shadow-[0_30px_60px_-30px_rgba(14,107,90,0.6)]">
