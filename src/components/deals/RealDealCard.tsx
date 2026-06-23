@@ -74,6 +74,7 @@ function RealDealCardImpl({
   );
 
   let bestSavings: number | null = null;
+  let bestDiscountPct: number | null = null;
   if (offerType === "price_comparison" && tiers.length > 0) {
     const list = tiers
       .map((t) => (t.original_price && t.discounted_price ? Number(t.original_price) - Number(t.discounted_price) : 0))
@@ -81,6 +82,13 @@ function RealDealCardImpl({
     if (list.length) bestSavings = Math.max(...list);
   } else if (offerType === "price_comparison" && deal.original_price && deal.discounted_price) {
     bestSavings = Number(deal.original_price) - Number(deal.discounted_price);
+  } else if (offerType === "percentage") {
+    const tierPcts = tiers
+      .map((t) => (t.discount_percent != null ? Number(t.discount_percent) : 0))
+      .filter((p) => p > 0);
+    const base = deal.discount_percentage ? Number(deal.discount_percentage) : 0;
+    const all = [...tierPcts, base].filter((p) => p > 0);
+    if (all.length) bestDiscountPct = Math.max(...all);
   }
 
   const left = timeLeft(deal.ends_at);
