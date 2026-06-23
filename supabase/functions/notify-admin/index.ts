@@ -27,19 +27,6 @@ Deno.serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const auth = req.headers.get("Authorization") ?? "";
-    if (!auth.startsWith("Bearer ")) {
-      return json({ error: "unauthorized" }, 401);
-    }
-
-    const userClient = createClient(SUPABASE_URL, ANON, {
-      global: { headers: { Authorization: auth } },
-    });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userData.user) {
-      return json({ error: "unauthorized" }, 401);
-    }
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
@@ -50,6 +37,7 @@ Deno.serve(async (req) => {
     if (!["new_resident", "new_supplier", "deal_interest", "waitlist_lead"].includes(body.event)) {
       return json({ error: "invalid_event" }, 400);
     }
+
 
     // Read current admin settings
     const { data: settings } = await admin
