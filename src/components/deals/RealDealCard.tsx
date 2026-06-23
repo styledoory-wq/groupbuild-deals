@@ -84,7 +84,7 @@ function RealDealCardImpl({
     bestSavings = Number(deal.original_price) - Number(deal.discounted_price);
   } else if (offerType === "percentage") {
     const tierPcts = tiers
-      .map((t) => (t.discount_percent != null ? Number(t.discount_percent) : 0))
+      .map((t) => (t.discount_percentage != null ? Number(t.discount_percentage) : 0))
       .filter((p) => p > 0);
     const base = deal.discount_percentage ? Number(deal.discount_percentage) : 0;
     const all = [...tierPcts, base].filter((p) => p > 0);
