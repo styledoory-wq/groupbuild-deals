@@ -1175,7 +1175,7 @@ export default function DealDetail() {
 
 
       {/* ===== SECTION 3 — OFFER DETAILS ===== */}
-      {(deal.description || deal.offer_terms || deal.restrictions || (deal.service_areas && deal.service_areas.length > 0) || deal.join_deadline || deal.redemption_deadline || deal.appointment_required) && (
+      {(deal.description || (deal as { product_details?: string | null }).product_details || deal.offer_terms || deal.restrictions || (deal.service_areas && deal.service_areas.length > 0) || deal.join_deadline || deal.redemption_deadline || deal.appointment_required) && (
         <div className="px-4 mt-6">
           <SectionTitle>פרטי ההצעה</SectionTitle>
           <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] space-y-4">
@@ -1183,6 +1183,12 @@ export default function DealDetail() {
               <div>
                 <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">תיאור</div>
                 <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{deal.description}</p>
+              </div>
+            )}
+            {(deal as { product_details?: string | null }).product_details && (
+              <div>
+                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">פירוט מוצר</div>
+                <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{(deal as { product_details?: string | null }).product_details}</p>
               </div>
             )}
             {deal.offer_terms && (
