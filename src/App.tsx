@@ -89,10 +89,7 @@ const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications")
 const CommitteeDashboard = lazy(() => import("./pages/committee/CommitteeDashboard"));
 const CommitteeRequest = lazy(() => import("./pages/committee/CommitteeRequest"));
 const CommitteeQuoteRequest = lazy(() => import("./pages/committee/CommitteeQuoteRequest"));
-const PaymentCheckout = lazy(() => import("./pages/payment/PaymentCheckout"));
-const CheckoutSummary = lazy(() => import("./pages/payment/CheckoutSummary"));
-const PaymentSuccess = lazy(() => import("./pages/payment/PaymentSuccess"));
-const PaymentCancel = lazy(() => import("./pages/payment/PaymentCancel"));
+const SupplierDeposits = lazy(() => import("./pages/supplier/SupplierDeposits"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 
 const queryClient = new QueryClient({
@@ -294,10 +291,7 @@ const App = () => (
                   <Route path="/committee" element={<CommitteeDashboard />} />
                   <Route path="/committee/request" element={<CommitteeRequest />} />
                   <Route path="/committee/quote-request" element={<CommitteeQuoteRequest />} />
-                  <Route path="/payment/checkout" element={<PaymentCheckout />} />
-                  <Route path="/checkout/:dealId" element={<CheckoutSummary />} />
-                  <Route path="/payment/success" element={<PaymentSuccess />} />
-                  <Route path="/payment/cancel" element={<PaymentCancel />} />
+                  <Route path="/supplier/deposits" element={<SupplierDeposits />} />
 <Route path="/design-system" element={adminRoute(<DesignSystem />)} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
