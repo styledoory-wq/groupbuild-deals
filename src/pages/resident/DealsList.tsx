@@ -225,7 +225,20 @@ export default function DealsList() {
             )}
 
             {!loading && !error && filtered.map((d) => (
-              <RealDealCard key={d.id} deal={d} joinersCount={counts[d.id] ?? 0} />
+              <RealDealCard
+                key={d.id}
+                deal={d}
+                joinersCount={counts[d.id] ?? 0}
+                isFavorite={favIds.has(d.id)}
+                onFavoriteChange={(isFavorite) => {
+                  setFavIds((current) => {
+                    const next = new Set(current);
+                    if (isFavorite) next.add(d.id);
+                    else next.delete(d.id);
+                    return next;
+                  });
+                }}
+              />
             ))}
           </div>
         </div>
