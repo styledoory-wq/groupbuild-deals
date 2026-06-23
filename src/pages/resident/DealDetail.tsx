@@ -1258,11 +1258,13 @@ export default function DealDetail() {
         </div>
       )}
 
-      {/* ===== SECTION 4 — HOW IT WORKS ===== */}
-      <div className="px-4 mt-6">
-        <SectionTitle>איך זה עובד</SectionTitle>
-        <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
-          <ol className="relative">
+      {/* ===== SECTION 4 — HOW IT WORKS (modal, triggered by floating button) ===== */}
+      <Dialog open={howOpen} onOpenChange={setHowOpen}>
+        <DialogContent className="max-w-sm rounded-3xl p-5" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-right text-[17px] font-black text-[#1F2937]">איך זה עובד</DialogTitle>
+          </DialogHeader>
+          <ol className="relative mt-2">
             {timeline.map((step, idx) => {
               const last = idx === timeline.length - 1;
               return (
@@ -1282,8 +1284,9 @@ export default function DealDetail() {
               );
             })}
           </ol>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
+
 
       {/* ===== SECTION 5 — SUPPLIER CARD ===== */}
       {supplier && (
