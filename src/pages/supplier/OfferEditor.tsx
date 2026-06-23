@@ -411,6 +411,7 @@ export default function OfferEditor() {
       supplier_id: supplier.id,
       title: title.trim(),
       description: description.trim() || null,
+      product_details: productDetails.trim() || null,
       category_id: categoryId,
       offer_type: offerType,
       deposit_required: depositRequired,
