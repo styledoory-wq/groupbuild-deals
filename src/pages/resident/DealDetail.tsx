@@ -94,11 +94,52 @@ export default function DealDetail() {
   const [isGuest, setIsGuest] = useState<boolean>(false);
   const [pendingPaymentUrl, setPendingPaymentUrl] = useState<string | null>(null);
   const [resumingPayment, setResumingPayment] = useState(false);
+  const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
+  const [pendingDepositId, setPendingDepositId] = useState<string | null>(null);
+  const [pendingDepositAmount, setPendingDepositAmount] = useState<number>(0);
+  const [supplierPaymentInfo, setSupplierPaymentInfo] = useState<SupplierPaymentInfo | null>(null);
+
+  const openPaymentInstructions = (
+    depositId: string,
+    amount: number,
+    info: SupplierPaymentInfo | null,
+  ) => {
+    setPendingDepositId(depositId);
+    setPendingDepositAmount(amount);
+    setSupplierPaymentInfo(info);
+    setShowPaymentInstructions(true);
+  };
 
   const handleResumePayment = async () => {
     if (!deal) return;
-    // Direct-to-supplier flow: route back to checkout to show the supplier payment link and "I paid" button.
-    navigate(`/checkout/${deal.id}`);
+    setResumingPayment(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const uid = session.session?.user?.id;
+      if (!uid) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: dep } = await (supabase.from("deposits") as any)
+        .select("id,amount,status")
+        .eq("user_id", uid)
+        .eq("deal_id", deal.id)
+        .eq("is_deleted", false)
+        .in("status", ["pending", "awaiting_confirmation"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const { data: sup } = await supabase
+        .from("suppliers")
+        .select("business_name,bit_phone,bank_account_holder,bank_name,bank_branch,bank_account_number,payment_instructions_note")
+        .eq("id", deal.supplier_id)
+        .maybeSingle();
+      if (dep) {
+        openPaymentInstructions(dep.id as string, Number(dep.amount ?? deal.deposit_amount ?? 0), (sup ?? null) as SupplierPaymentInfo | null);
+      } else {
+        toast.error("לא נמצא פיקדון פעיל");
+      }
+    } finally {
+      setResumingPayment(false);
+    }
   };
 
   // Join modal state
