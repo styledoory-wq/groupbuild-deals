@@ -16,6 +16,7 @@ import { getPreviewRole } from "./lib/previewMode";
 
 const Welcome = lazy(() => import("./pages/Welcome"));
 const Landing = lazy(() => import("./pages/Landing"));
+const SiteLanding = lazy(() => import("./pages/SiteLanding"));
 const Auth = lazy(() => import("./pages/Auth"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
