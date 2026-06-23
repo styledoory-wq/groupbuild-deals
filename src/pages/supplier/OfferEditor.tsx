@@ -215,6 +215,7 @@ export default function OfferEditor() {
             if (deal && !cancelled) {
               setTitle(deal.title ?? "");
               setDescription(deal.description ?? "");
+              setProductDetails((deal as { product_details?: string | null }).product_details ?? "");
               if (deal.category_id) setCategoryId(deal.category_id);
               setDepositRequired(!!deal.deposit_required);
               if (deal.deposit_amount != null) setDepositAmount(String(deal.deposit_amount));
