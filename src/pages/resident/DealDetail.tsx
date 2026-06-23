@@ -1412,6 +1412,20 @@ export default function DealDetail() {
         </div>
       )}
 
+      {/* Floating "How it works" button — fixed above the sticky CTA */}
+      <button
+        type="button"
+        onClick={() => setHowOpen(true)}
+        aria-label="איך זה עובד"
+        className="fixed z-50 left-3 h-10 px-3.5 rounded-full bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-8px_rgba(10,31,61,0.25)] flex items-center gap-1.5 text-[12px] font-extrabold text-[#1F2937] active:scale-[0.96] transition-transform"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 84px)" }}
+      >
+        <span className="w-5 h-5 rounded-full bg-[#1A8870] text-white text-[11px] font-black flex items-center justify-center">?</span>
+        איך זה עובד
+      </button>
+
+
+
 
 
 
