@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { isAdminEmail, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import type { Role } from "@/types";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
@@ -133,6 +134,25 @@ export default function Auth() {
       const raw = err instanceof Error ? err.message : "התחברות נכשלה";
       toast.error(translateAuthError(raw));
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error(translateAuthError(result.error.message ?? "ההתחברות עם Google נכשלה"));
+        setLoading(false);
+        return;
+      }
+      if (result.redirected) return;
+      // Session set — onAuthStateChange will route
+    } catch (err) {
+      toast.error(err instanceof Error ? translateAuthError(err.message) : "ההתחברות עם Google נכשלה");
       setLoading(false);
     }
   };
@@ -511,6 +531,28 @@ export default function Auth() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
           )}
+
+          {/* Divider + Google sign-in */}
+          <div className="flex items-center gap-3" aria-hidden>
+            <div className="h-px flex-1 bg-[#D8DDE3]" />
+            <span className="text-xs text-[#6B7280]">או</span>
+            <div className="h-px flex-1 bg-[#D8DDE3]" />
+          </div>
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="w-full h-[56px] rounded-[14px] bg-white text-[#1F2937] text-[15px] font-semibold flex items-center justify-center gap-3 border border-[#E0E4E8] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.12)] hover:shadow-[0_4px_14px_-4px_rgba(10,31,61,0.18)] transition-all active:scale-[0.99] disabled:opacity-60"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 48 48" aria-hidden>
+              <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/>
+              <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+              <path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.4l-6.5-5.5c-2 1.5-4.6 2.4-7.5 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+              <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.5 5.5c-.5.4 7-5.1 7-15.1 0-1.3-.1-2.4-.4-3.5z"/>
+            </svg>
+            התחבר עם Google
+          </button>
+
 
 
           {/* Register prompt — clearly separated below CTA */}
