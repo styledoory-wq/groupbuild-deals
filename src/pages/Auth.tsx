@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { isAdminEmail, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+
 import { toast } from "sonner";
 import type { Role } from "@/types";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
@@ -141,16 +141,18 @@ export default function Auth() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin,
+        },
       });
-      if (result.error) {
-        toast.error(translateAuthError(result.error.message ?? "ההתחברות עם Google נכשלה"));
+      if (error) {
+        toast.error(translateAuthError(error.message ?? "ההתחברות עם Google נכשלה"));
         setLoading(false);
         return;
       }
-      if (result.redirected) return;
-      // Session set — onAuthStateChange will route
+      // Browser will redirect to Google
     } catch (err) {
       toast.error(err instanceof Error ? translateAuthError(err.message) : "ההתחברות עם Google נכשלה");
       setLoading(false);
