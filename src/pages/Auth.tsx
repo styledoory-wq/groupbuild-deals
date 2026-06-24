@@ -138,6 +138,25 @@ export default function Auth() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error(translateAuthError(result.error.message ?? "ההתחברות עם Google נכשלה"));
+        setLoading(false);
+        return;
+      }
+      if (result.redirected) return;
+      // Session set — onAuthStateChange will route
+    } catch (err) {
+      toast.error(err instanceof Error ? translateAuthError(err.message) : "ההתחברות עם Google נכשלה");
+      setLoading(false);
+    }
+  };
+
   const getSiteOrigin = () => {
     const host = window.location.hostname;
     // Always send confirmation links to the production custom domain,
