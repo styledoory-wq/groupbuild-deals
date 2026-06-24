@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { isAdminEmail, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+
 import { toast } from "sonner";
 import type { Role } from "@/types";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
