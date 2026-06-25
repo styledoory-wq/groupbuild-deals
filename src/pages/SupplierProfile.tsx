@@ -96,7 +96,7 @@ export default function SupplierProfile() {
       try {
         setLoadError(null);
         const [{ data: s }, { data: g }, { data: sregs }, { data: scits }, { data: dealsData }, { data: revData }] = await Promise.all([
-          withTimeout(supabase.from("suppliers").select("*").eq("id", supplierId).maybeSingle(), "טעינת ספק"),
+          withTimeout(supabase.from("suppliers").select("id,user_id,business_name,contact_name,phone,email,description,short_description,categories,serves_all_country,is_active,approval_status,logo_url,website_url,whatsapp_url,instagram_url,facebook_url,catalog_url,service_areas,supplier_kind,offers_services,offers_products").eq("id", supplierId).maybeSingle(), "טעינת ספק"),
           withTimeout(supabase.from("supplier_gallery").select("id,image_url,caption").eq("supplier_id", supplierId).order("display_order"), "טעינת גלריה"),
           withTimeout(supabase.from("supplier_regions").select("region_id, regions(name_he)").eq("supplier_id", supplierId), "טעינת אזורי שירות"),
           withTimeout(supabase.from("supplier_cities").select("city_id, cities(name_he)").eq("supplier_id", supplierId), "טעינת ערי שירות"),
