@@ -99,6 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const hydratingUserRef = useRef<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [projects, setProjects] = useState<Project[]>(() => projectsCache?.data ?? []);
   const [categories, setCategories] = useState<Category[]>(() => categoriesCache?.data ?? []);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
