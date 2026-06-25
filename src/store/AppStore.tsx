@@ -137,6 +137,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         else if (profile?.user_type === "supplier") resolvedRole = "supplier";
         else if (supplierRow?.id) resolvedRole = "supplier";
 
+        const isAdmin = resolvedRole === "admin";
+        const onboarding =
+          !isAdmin &&
+          profile?.onboarding_completed === false &&
+          roles.length === 0 &&
+          !supplierRow?.id;
+
         if (cancelled) return;
         setUser({
           id: uid,
@@ -146,6 +153,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           email: profile?.email ?? email,
           projectId: profile?.project_id ?? undefined,
         });
+        setNeedsOnboarding(onboarding);
         if (resolvedRole === "admin") setAdminSession(true);
       } catch (err) {
         console.error("[AppStore] hydrate failed", err);
