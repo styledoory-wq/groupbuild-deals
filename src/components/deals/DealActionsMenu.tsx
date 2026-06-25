@@ -81,7 +81,10 @@ export function DealActionsMenu({ dealId, status, onChanged, editPath, marketing
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-background z-50">
-          <DropdownMenuItem onClick={() => navigate(`/supplier/offers/${dealId}/marketing-tools`)}>
+          <DropdownMenuItem onClick={() => navigate(editPath ?? `/supplier/offers/${dealId}/edit`)}>
+            <Pencil className="h-4 w-4 ml-2" /> ערוך הצעה
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate(marketingPath ?? `/supplier/offers/${dealId}/marketing-tools`)}>
             <Sparkles className="h-4 w-4 ml-2" /> כלי שיווק
           </DropdownMenuItem>
           {isInactive ? (
