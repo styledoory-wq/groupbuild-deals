@@ -128,11 +128,9 @@ export default function DealDetail() {
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      const { data: sup } = await supabase
-        .from("suppliers")
-        .select("business_name,bit_phone,bank_account_holder,bank_name,bank_branch,bank_account_number,payment_instructions_note")
-        .eq("id", deal.supplier_id)
-        .maybeSingle();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: supRows } = await (supabase as any).rpc("get_deal_supplier_payment_info", { _deal_id: deal.id });
+      const sup = Array.isArray(supRows) && supRows.length > 0 ? supRows[0] : null;
       if (dep) {
         openPaymentInstructions(dep.id as string, Number(dep.amount ?? deal.deposit_amount ?? 0), (sup ?? null) as SupplierPaymentInfo | null);
       } else {
