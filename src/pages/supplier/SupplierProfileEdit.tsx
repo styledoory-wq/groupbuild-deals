@@ -109,13 +109,14 @@ export default function SupplierProfileEdit() {
         setFacebookUrl(existing.facebook_url ?? "");
         setCatalogUrl(existing.catalog_url ?? null);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const exAny = existing as any;
-        setBitPhone(exAny.bit_phone ?? "");
-        setBankAccountHolder(exAny.bank_account_holder ?? "");
-        setBankName(exAny.bank_name ?? "");
-        setBankBranch(exAny.bank_branch ?? "");
-        setBankAccountNumber(exAny.bank_account_number ?? "");
-        setPaymentInstructionsNote(exAny.payment_instructions_note ?? "");
+        const { data: payRows } = await (supabase as any).rpc("get_own_supplier_payment_info");
+        const pay = Array.isArray(payRows) && payRows.length > 0 ? payRows[0] : null;
+        setBitPhone(pay?.bit_phone ?? "");
+        setBankAccountHolder(pay?.bank_account_holder ?? "");
+        setBankName(pay?.bank_name ?? "");
+        setBankBranch(pay?.bank_branch ?? "");
+        setBankAccountNumber(pay?.bank_account_number ?? "");
+        setPaymentInstructionsNote(pay?.payment_instructions_note ?? "");
 
         const [{ data: regs }, { data: cits }, { data: gal }] = await Promise.all([
           supabase.from("supplier_regions").select("region_id").eq("supplier_id", existing.id),
