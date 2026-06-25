@@ -1157,6 +1157,7 @@ export type Database = {
           is_demo: boolean
           journey: string
           notification_prefs: Json
+          onboarding_completed: boolean
           phone: string | null
           project_id: string | null
           region: string | null
@@ -1186,6 +1187,7 @@ export type Database = {
           is_demo?: boolean
           journey?: string
           notification_prefs?: Json
+          onboarding_completed?: boolean
           phone?: string | null
           project_id?: string | null
           region?: string | null
@@ -1215,6 +1217,7 @@ export type Database = {
           is_demo?: boolean
           journey?: string
           notification_prefs?: Json
+          onboarding_completed?: boolean
           phone?: string | null
           project_id?: string | null
           region?: string | null
