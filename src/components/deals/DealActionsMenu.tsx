@@ -25,9 +25,11 @@ type Props = {
   dealId: string;
   status: string;
   onChanged?: () => void;
+  editPath?: string;
+  marketingPath?: string;
 };
 
-export function DealActionsMenu({ dealId, status, onChanged }: Props) {
+export function DealActionsMenu({ dealId, status, onChanged, editPath, marketingPath }: Props) {
   const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDeactivate, setConfirmDeactivate] = useState(false);
