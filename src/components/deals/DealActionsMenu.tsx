@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreVertical, Power, Trash2, PowerOff, Sparkles } from "lucide-react";
+import { MoreVertical, Power, Trash2, PowerOff, Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
