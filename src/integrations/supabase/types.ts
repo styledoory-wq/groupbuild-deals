@@ -1157,6 +1157,7 @@ export type Database = {
           is_demo: boolean
           journey: string
           notification_prefs: Json
+          onboarding_completed: boolean
           phone: string | null
           project_id: string | null
           region: string | null
@@ -1186,6 +1187,7 @@ export type Database = {
           is_demo?: boolean
           journey?: string
           notification_prefs?: Json
+          onboarding_completed?: boolean
           phone?: string | null
           project_id?: string | null
           region?: string | null
@@ -1215,6 +1217,7 @@ export type Database = {
           is_demo?: boolean
           journey?: string
           notification_prefs?: Json
+          onboarding_completed?: boolean
           phone?: string | null
           project_id?: string | null
           region?: string | null
@@ -2011,6 +2014,15 @@ export type Database = {
       auto_leave_expired_reapprovals: { Args: never; Returns: number }
       claim_supplier_profile_by_email: { Args: never; Returns: string }
       close_expired_deals: { Args: never; Returns: number }
+      complete_onboarding: {
+        Args: {
+          _business_name: string
+          _city: string
+          _full_name: string
+          _role: string
+        }
+        Returns: undefined
+      }
       confirm_deposit_received: {
         Args: { _deposit_id: string }
         Returns: undefined

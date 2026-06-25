@@ -18,6 +18,7 @@ const Welcome = lazy(() => import("./pages/Welcome"));
 const Landing = lazy(() => import("./pages/Landing"));
 const SiteLanding = lazy(() => import("./pages/SiteLanding"));
 const Auth = lazy(() => import("./pages/Auth"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
@@ -209,6 +210,7 @@ const App = () => (
                   <Route path="/landing" element={<SiteLanding />} />
                   <Route path="/index" element={<Navigate to="/" replace />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/thank-you" element={<ThankYou />} />
                   <Route path="/unsubscribe" element={<Unsubscribe />} />

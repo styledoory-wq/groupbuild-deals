@@ -14,9 +14,9 @@ const notificationsCache: Record<string, { data: AppNotification[]; at: number }
 interface AppState {
   user: User | null;
   setUser: (u: User | null) => void;
-  
   logout: () => Promise<void>;
   authReady: boolean;
+  needsOnboarding: boolean;
 
   projects: Project[];
   setProjects: (p: Project[]) => void;
@@ -99,6 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const hydratingUserRef = useRef<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [projects, setProjects] = useState<Project[]>(() => projectsCache?.data ?? []);
   const [categories, setCategories] = useState<Category[]>(() => categoriesCache?.data ?? []);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -121,12 +122,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       hydratingUserRef.current = uid;
       try {
         const [profileRes, rolesRes, supplierRes] = await Promise.all([
-          withTimeout(supabase.from("profiles").select("id,full_name,business_name,phone,email,project_id,user_type").eq("id", uid).maybeSingle(), "טעינת פרופיל", 8000),
+          withTimeout(supabase.from("profiles").select("id,full_name,business_name,phone,email,project_id,user_type,onboarding_completed").eq("id", uid).maybeSingle(), "טעינת פרופיל", 8000),
           withTimeout(supabase.from("user_roles").select("role").eq("user_id", uid), "טעינת הרשאות", 8000),
           withTimeout(supabase.from("suppliers").select("id").eq("user_id", uid).maybeSingle(), "טעינת ספק", 8000),
         ]);
 
-        const profile = profileRes.data as { full_name?: string | null; business_name?: string | null; phone?: string | null; email?: string | null; project_id?: string | null; user_type?: string | null } | null;
+        const profile = profileRes.data as { full_name?: string | null; business_name?: string | null; phone?: string | null; email?: string | null; project_id?: string | null; user_type?: string | null; onboarding_completed?: boolean | null } | null;
         const roles = (rolesRes.data ?? []) as { role: string }[];
         const supplierRow = supplierRes.data as { id?: string } | null;
 
@@ -135,6 +136,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         else if (roles.some((r) => r.role === "supplier")) resolvedRole = "supplier";
         else if (profile?.user_type === "supplier") resolvedRole = "supplier";
         else if (supplierRow?.id) resolvedRole = "supplier";
+
+        const isAdmin = resolvedRole === "admin";
+        const onboarding =
+          !isAdmin &&
+          profile?.onboarding_completed === false &&
+          roles.length === 0 &&
+          !supplierRow?.id;
 
         if (cancelled) return;
         setUser({
@@ -145,6 +153,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           email: profile?.email ?? email,
           projectId: profile?.project_id ?? undefined,
         });
+        setNeedsOnboarding(onboarding);
         if (resolvedRole === "admin") setAdminSession(true);
       } catch (err) {
         console.error("[AppStore] hydrate failed", err);
@@ -289,12 +298,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AppState>(
     () => ({
-      user, setUser, logout, authReady,
+      user, setUser, logout, authReady, needsOnboarding,
       projects, setProjects,
       categories, setCategories,
       notifications, unreadCount, refreshNotifications, markNotificationsRead,
     }),
-    [user, authReady, projects, categories, notifications, unreadCount]
+    [user, authReady, needsOnboarding, projects, categories, notifications, unreadCount]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
