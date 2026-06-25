@@ -197,7 +197,10 @@ export default function AdminDeals() {
         title="ניהול הצעות"
         description={`${deals.length} הצעות`}
         actions={
-          <button className="h-9 px-3 rounded-[10px] bg-[#0E6B5A] text-white text-[12px] font-bold flex items-center gap-1.5 hover:bg-[#0a574a] transition-colors">
+          <button
+            onClick={() => { setPickerSupplierId(""); setPickerQuery(""); setPickerOpen(true); }}
+            className="h-9 px-3 rounded-[10px] bg-[#0E6B5A] text-white text-[12px] font-bold flex items-center gap-1.5 hover:bg-[#0a574a] transition-colors"
+          >
             <Plus className="h-4 w-4" /> הצעה חדשה
           </button>
         }
