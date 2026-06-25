@@ -14,9 +14,9 @@ const notificationsCache: Record<string, { data: AppNotification[]; at: number }
 interface AppState {
   user: User | null;
   setUser: (u: User | null) => void;
-  
   logout: () => Promise<void>;
   authReady: boolean;
+  needsOnboarding: boolean;
 
   projects: Project[];
   setProjects: (p: Project[]) => void;
