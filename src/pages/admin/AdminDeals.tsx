@@ -62,9 +62,11 @@ const statusMeta: Record<string, { label: string; bg: string; text: string }> = 
 const PAGE_SIZE = 12;
 
 export default function AdminDeals() {
+  const navigate = useNavigate();
   const { categories, projects } = useApp();
   const [deals, setDeals] = useState<DbDeal[]>([]);
   const [suppliers, setSuppliers] = useState<Record<string, string>>({});
+  const [allSuppliers, setAllSuppliers] = useState<{ id: string; business_name: string }[]>([]);
   const [counts, setCounts] = useState<Record<string, DealCounts>>({});
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -73,6 +75,21 @@ export default function AdminDeals() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerSupplierId, setPickerSupplierId] = useState<string>("");
+  const [pickerQuery, setPickerQuery] = useState("");
+
+  useEffect(() => {
+    supabase
+      .from("suppliers")
+      .select("id,business_name,approval_status")
+      .eq("is_active", true)
+      .order("business_name", { ascending: true })
+      .then(({ data }) => {
+        const rows = (data ?? []) as { id: string; business_name: string; approval_status: string }[];
+        setAllSuppliers(rows.filter((s) => s.approval_status === "approved" || s.approval_status === "active"));
+      });
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
