@@ -114,6 +114,17 @@ export default function Auth() {
       return;
     }
     setAdminSession(false);
+
+    // New OAuth users (no explicit role chosen) → onboarding picker.
+    const needsOnboarding =
+      (profile as { onboarding_completed?: boolean } | null)?.onboarding_completed === false &&
+      roleNames.length === 0 &&
+      !supplierRow?.id;
+    if (needsOnboarding) {
+      navigate("/onboarding");
+      return;
+    }
+
     const redirect = searchParams.get("redirect") ?? searchParams.get("return");
     if (redirect) { navigate(redirect); return; }
     if (resolvedRole === "supplier") navigate("/supplier");
