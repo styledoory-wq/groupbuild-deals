@@ -122,12 +122,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       hydratingUserRef.current = uid;
       try {
         const [profileRes, rolesRes, supplierRes] = await Promise.all([
-          withTimeout(supabase.from("profiles").select("id,full_name,business_name,phone,email,project_id,user_type").eq("id", uid).maybeSingle(), "טעינת פרופיל", 8000),
+          withTimeout(supabase.from("profiles").select("id,full_name,business_name,phone,email,project_id,user_type,onboarding_completed").eq("id", uid).maybeSingle(), "טעינת פרופיל", 8000),
           withTimeout(supabase.from("user_roles").select("role").eq("user_id", uid), "טעינת הרשאות", 8000),
           withTimeout(supabase.from("suppliers").select("id").eq("user_id", uid).maybeSingle(), "טעינת ספק", 8000),
         ]);
 
-        const profile = profileRes.data as { full_name?: string | null; business_name?: string | null; phone?: string | null; email?: string | null; project_id?: string | null; user_type?: string | null } | null;
+        const profile = profileRes.data as { full_name?: string | null; business_name?: string | null; phone?: string | null; email?: string | null; project_id?: string | null; user_type?: string | null; onboarding_completed?: boolean | null } | null;
         const roles = (rolesRes.data ?? []) as { role: string }[];
         const supplierRow = supplierRes.data as { id?: string } | null;
 
