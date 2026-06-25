@@ -386,6 +386,57 @@ export default function AdminDeals() {
           </div>
         )}
       </div>
+      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+        <DialogContent dir="rtl" className="bg-white max-w-md">
+          <DialogHeader>
+            <DialogTitle>הצעה חדשה — בחירת ספק</DialogTitle>
+            <DialogDescription>בחר את הספק שעבורו תיווצר ההצעה.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Input
+              autoFocus
+              value={pickerQuery}
+              onChange={(e) => setPickerQuery(e.target.value)}
+              placeholder="חיפוש ספק…"
+              className="h-9 text-[13px]"
+            />
+            <div className="max-h-[320px] overflow-y-auto border border-[#ECEEF2] rounded-[10px] divide-y divide-[#F1F3F7]">
+              {allSuppliers.length === 0 ? (
+                <div className="px-3 py-6 text-center text-[12px] text-[#6B7280]">טוען ספקים…</div>
+              ) : (
+                allSuppliers
+                  .filter((s) => !pickerQuery.trim() || s.business_name.toLowerCase().includes(pickerQuery.trim().toLowerCase()))
+                  .slice(0, 100)
+                  .map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => setPickerSupplierId(s.id)}
+                      className={cn(
+                        "w-full text-right px-3 py-2 text-[13px] hover:bg-[#F4F6FA] transition-colors",
+                        pickerSupplierId === s.id && "bg-[#E8F4F1] font-bold text-[#0E6B5A]",
+                      )}
+                    >
+                      {s.business_name}
+                    </button>
+                  ))
+              )}
+            </div>
+          </div>
+          <DialogFooter className="flex-row-reverse gap-2 sm:flex-row-reverse">
+            <Button
+              disabled={!pickerSupplierId}
+              onClick={() => {
+                setPickerOpen(false);
+                navigate(`/admin/offers/new?supplierId=${pickerSupplierId}`);
+              }}
+              className="bg-[#0E6B5A] hover:bg-[#0a574a] text-white"
+            >
+              המשך ליצירת הצעה
+            </Button>
+            <Button variant="outline" onClick={() => setPickerOpen(false)}>ביטול</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <BottomNav role="admin" />
     </MobileShell>
   );
