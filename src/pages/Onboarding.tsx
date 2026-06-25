@@ -60,25 +60,20 @@ export default function Onboarding() {
 
     setLoading(true);
     try {
-      const { error: pErr } = await supabase
-        .from("profiles")
-        .update({
-          full_name: fullName.trim(),
-          user_type: role,
-          city: role === "resident" ? city.trim() : null,
-          business_name: role === "supplier" ? businessName.trim() : null,
-          onboarding_completed: true,
-          terms_accepted: true,
-          terms_accepted_at: new Date().toISOString(),
-          terms_version: CURRENT_TERMS_VERSION,
-        } as never)
-        .eq("id", userId);
-      if (pErr) throw pErr;
+      const { error: rpcErr } = await supabase.rpc("complete_onboarding" as never, {
+        _role: role,
+        _full_name: fullName.trim(),
+        _city: city.trim(),
+        _business_name: businessName.trim(),
+      } as never);
+      if (rpcErr) throw rpcErr;
 
-      const { error: rErr } = await supabase
-        .from("user_roles")
-        .insert({ user_id: userId, role } as never);
-      if (rErr && !/duplicate/i.test(rErr.message)) throw rErr;
+      // Best-effort: record terms acceptance on the profile.
+      supabase.from("profiles").update({
+        terms_accepted: true,
+        terms_accepted_at: new Date().toISOString(),
+        terms_version: CURRENT_TERMS_VERSION,
+      } as never).eq("id", userId).then(() => { /* ignore */ });
 
       // Best-effort: notify admin about new signup.
       supabase.functions.invoke("notify-admin", {
