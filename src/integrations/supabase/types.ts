@@ -2044,6 +2044,18 @@ export type Database = {
           rating: number
         }[]
       }
+      get_deal_supplier_payment_info: {
+        Args: { _deal_id: string }
+        Returns: {
+          bank_account_holder: string
+          bank_account_number: string
+          bank_branch: string
+          bank_name: string
+          bit_phone: string
+          business_name: string
+          payment_instructions_note: string
+        }[]
+      }
       get_landing_stats: {
         Args: never
         Returns: {
@@ -2059,6 +2071,17 @@ export type Database = {
         Returns: {
           deal_id: string
           match_priority: number
+        }[]
+      }
+      get_own_supplier_payment_info: {
+        Args: never
+        Returns: {
+          bank_account_holder: string
+          bank_account_number: string
+          bank_branch: string
+          bank_name: string
+          bit_phone: string
+          payment_instructions_note: string
         }[]
       }
       get_supplier_rating: {
