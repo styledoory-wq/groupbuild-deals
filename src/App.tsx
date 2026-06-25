@@ -210,6 +210,7 @@ const App = () => (
                   <Route path="/landing" element={<SiteLanding />} />
                   <Route path="/index" element={<Navigate to="/" replace />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/thank-you" element={<ThankYou />} />
                   <Route path="/unsubscribe" element={<Unsubscribe />} />
