@@ -138,24 +138,31 @@ export default function ResidentDashboard() {
         const joinedIds = Array.from(new Set([...paidDealIds, ...freeDealIds]));
         const joined = joinedIds.length;
 
-        const [supCountRes, dealsRes, joinedDealsRes] = await Promise.all([
+        const [supCountRes, dealsRes, vouchersRes] = await Promise.all([
           supplierIds.size
             ? supabase.from("suppliers").select("id", { count: "exact", head: true })
                 .in("id", Array.from(supplierIds)).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"])
             : Promise.resolve({ count: 0 }),
           dealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url,discount_percentage,deposit_required,deposit_amount,created_at,original_price,discounted_price").in("id", dealIds).eq("is_deleted", false) : Promise.resolve({ data: [] }),
-          joinedIds.length
-            ? supabase.from("deals").select("original_price,discounted_price").in("id", joinedIds)
-            : Promise.resolve({ data: [] }),
+          supabase.from("vouchers").select("deal_id").eq("user_id", uid).in("status", ["issued", "active", "redeemed"]),
         ]);
 
-        const savings = ((joinedDealsRes.data ?? []) as { discounted_price: number | null; original_price: number | null }[])
-          .reduce((sum, d) => {
-            const before = Number(d.original_price ?? 0);
-            const after = Number(d.discounted_price ?? 0);
-            const diff = before > after ? before - after : 0;
-            return sum + diff;
-          }, 0);
+        // Savings count only deals that actually closed (voucher was issued to the resident).
+        const voucherDealIds = Array.from(new Set(((vouchersRes.data ?? []) as { deal_id: string }[]).map((v) => v.deal_id)));
+        let savings = 0;
+        if (voucherDealIds.length) {
+          const { data: completedDeals } = await supabase
+            .from("deals")
+            .select("original_price,discounted_price")
+            .in("id", voucherDealIds);
+          savings = ((completedDeals ?? []) as { discounted_price: number | null; original_price: number | null }[])
+            .reduce((sum, d) => {
+              const before = Number(d.original_price ?? 0);
+              const after = Number(d.discounted_price ?? 0);
+              const diff = before > after ? before - after : 0;
+              return sum + diff;
+            }, 0);
+        }
 
         const deals = (dealsRes.data ?? []) as { id: string; title: string; supplier_id: string; cover_image_url: string | null; discount_percentage: number | null; deposit_required: boolean | null; deposit_amount: number | null; created_at: string }[];
         let nextDeals: MiniDeal[] = [];
