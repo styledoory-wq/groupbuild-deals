@@ -307,7 +307,7 @@ export default function AdminDeals() {
                         </span>
                       </div>
                       <div className="flex justify-end">
-                        <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
+                        <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} editPath={`/admin/offers/${d.id}/edit`} />
                       </div>
                     </div>
 
@@ -334,7 +334,7 @@ export default function AdminDeals() {
                             {supplierName} <span className="text-[#D1D5DB]">·</span> {projectName}
                           </div>
                         </div>
-                        <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} />
+                        <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} editPath={`/admin/offers/${d.id}/edit`} />
                       </div>
                       <div className="flex items-center gap-2 mt-1.5 pr-[44px]">
                         <div className="flex-1 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
