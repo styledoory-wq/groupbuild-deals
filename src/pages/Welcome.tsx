@@ -9,7 +9,7 @@ import { isAdminEmail } from "@/lib/auth";
  */
 export default function Welcome() {
   const navigate = useNavigate();
-  const { user, authReady } = useApp();
+  const { user, authReady, needsOnboarding } = useApp();
 
   useEffect(() => {
     if (!authReady) return;
@@ -21,8 +21,12 @@ export default function Welcome() {
       navigate("/admin", { replace: true });
       return;
     }
+    if (needsOnboarding) {
+      navigate("/onboarding", { replace: true });
+      return;
+    }
     navigate(user.role === "supplier" ? "/supplier" : "/resident", { replace: true });
-  }, [authReady, user, navigate]);
+  }, [authReady, user, needsOnboarding, navigate]);
 
   // Splash overlay handles the visual; render nothing underneath.
   return <div style={{ minHeight: "100dvh", background: "#071C3B" }} aria-hidden />;
