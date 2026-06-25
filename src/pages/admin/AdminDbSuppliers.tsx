@@ -738,7 +738,7 @@ export default function AdminDbSuppliers() {
                   <Pencil className="h-3.5 w-3.5" /> עריכה
                 </button>
                 <button
-                  onClick={() => navigate(`/supplier/offers/new?supplierId=${r.id}`)}
+                  onClick={() => navigate(`/admin/offers/new?supplierId=${r.id}`)}
                   className="h-9 rounded-xl bg-[#0E6B5A] text-white text-fs-sm font-bold flex items-center justify-center gap-1 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
                 >
                   <Plus className="h-3.5 w-3.5" /> צור הצעה
