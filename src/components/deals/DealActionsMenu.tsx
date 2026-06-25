@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreVertical, Power, Trash2, PowerOff, Sparkles } from "lucide-react";
+import { MoreVertical, Power, Trash2, PowerOff, Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,9 +25,11 @@ type Props = {
   dealId: string;
   status: string;
   onChanged?: () => void;
+  editPath?: string;
+  marketingPath?: string;
 };
 
-export function DealActionsMenu({ dealId, status, onChanged }: Props) {
+export function DealActionsMenu({ dealId, status, onChanged, editPath, marketingPath }: Props) {
   const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDeactivate, setConfirmDeactivate] = useState(false);
@@ -79,7 +81,10 @@ export function DealActionsMenu({ dealId, status, onChanged }: Props) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-background z-50">
-          <DropdownMenuItem onClick={() => navigate(`/supplier/offers/${dealId}/marketing-tools`)}>
+          <DropdownMenuItem onClick={() => navigate(editPath ?? `/supplier/offers/${dealId}/edit`)}>
+            <Pencil className="h-4 w-4 ml-2" /> ערוך הצעה
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate(marketingPath ?? `/supplier/offers/${dealId}/marketing-tools`)}>
             <Sparkles className="h-4 w-4 ml-2" /> כלי שיווק
           </DropdownMenuItem>
           {isInactive ? (
