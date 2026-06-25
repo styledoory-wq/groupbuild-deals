@@ -12,3 +12,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /supplier/
+Disallow: /resident/
+Disallow: /reset-password
+Disallow: /unsubscribe
+
+Sitemap: https://groupbuild.co.il/sitemap.xml
