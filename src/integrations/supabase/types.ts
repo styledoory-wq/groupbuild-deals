@@ -500,6 +500,7 @@ export type Database = {
           is_deleted: boolean
           is_demo: boolean
           join_deadline: string | null
+          listing_type: string
           max_redemptions: number | null
           offer_terms: string | null
           offer_type: string
@@ -541,6 +542,7 @@ export type Database = {
           is_deleted?: boolean
           is_demo?: boolean
           join_deadline?: string | null
+          listing_type?: string
           max_redemptions?: number | null
           offer_terms?: string | null
           offer_type?: string
@@ -582,6 +584,7 @@ export type Database = {
           is_deleted?: boolean
           is_demo?: boolean
           join_deadline?: string | null
+          listing_type?: string
           max_redemptions?: number | null
           offer_terms?: string | null
           offer_type?: string
@@ -998,6 +1001,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      group_buy_requests: {
+        Row: {
+          created_at: string
+          deal_id: string
+          full_name: string
+          id: string
+          message: string | null
+          phone: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          full_name: string
+          id?: string
+          message?: string | null
+          phone: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          full_name?: string
+          id?: string
+          message?: string | null
+          phone?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_buy_requests_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_settings: {
         Row: {
@@ -2178,6 +2219,15 @@ export type Database = {
       }
       request_committee_role: {
         Args: { _notes?: string; _project_id: string }
+        Returns: string
+      }
+      request_group_buy: {
+        Args: {
+          _deal_id: string
+          _full_name: string
+          _message?: string
+          _phone: string
+        }
         Returns: string
       }
       resident_mark_deposit_paid: {

@@ -102,7 +102,7 @@ export default function SupplierProfile() {
           withTimeout(supabase.from("supplier_cities").select("city_id, cities(name_he)").eq("supplier_id", supplierId), "טעינת ערי שירות"),
           withTimeout(supabase
             .from("deals")
-            .select("id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images")
+            .select("id,title,status,category_id,supplier_id,offer_type,listing_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images")
             .eq("supplier_id", supplierId)
             .eq("status", "active")
             .order("created_at", { ascending: false }), "טעינת הצעות"),
@@ -142,7 +142,9 @@ export default function SupplierProfile() {
           base_price: (r.base_price as number | null) ?? null,
           tiers: (Array.isArray(r.tiers) ? (r.tiers as OfferTier[]) : []) as OfferTier[],
           ends_at: (r.ends_at as string | null) ?? null,
+          listing_type: (r.listing_type as string | null) ?? "group_buy",
         })),
+
       );
 
       const revRows = (revData ?? []) as ReviewItem[];

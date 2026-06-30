@@ -27,7 +27,9 @@ export interface RealDealCardData {
   join_deadline?: string | null;
   redemption_deadline?: string | null;
   auto_closed_at?: string | null;
+  listing_type?: string | null;
 }
+
 
 function timeLeft(endsAt: string | null): string | null {
   if (!endsAt) return null;
@@ -101,6 +103,8 @@ function RealDealCardImpl({
     offerType === "percentage" && deal.discount_percentage
       ? `${Math.round(Number(deal.discount_percentage))}%`
       : null;
+  const isRegular = (deal.listing_type ?? "group_buy") === "regular";
+
 
   return (
     <Link to={to ?? `/resident/deals/${deal.id}`} className="block group">
@@ -123,6 +127,13 @@ function RealDealCardImpl({
 
           {/* Badges row */}
           <div className="absolute top-2 right-2 flex flex-wrap items-center gap-1.5 max-w-[calc(100%-56px)]">
+            <span
+              className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-[0_2px_6px_-2px_rgba(10,31,61,0.35)] ${
+                isRegular ? "bg-white text-[#1F2937] border border-[#ECEEF2]" : "bg-[#FFF8E1] text-[#8A6A1E] border border-[#F5C547]/50"
+              }`}
+            >
+              {isRegular ? "הצעה רגילה" : "קבוצת רכישה"}
+            </span>
             {isHot && (
               <span className="inline-flex items-center gap-0.5 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#FFF1E4] text-[#E8742C]">
                 <Flame className="h-2.5 w-2.5" strokeWidth={2.5} /> HOT
@@ -134,6 +145,7 @@ function RealDealCardImpl({
               </span>
             )}
           </div>
+
 
           {/* Favorite */}
           {!hideFavorite && (

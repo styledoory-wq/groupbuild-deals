@@ -63,6 +63,9 @@ interface DealRow {
   join_deadline: string | null;
   redemption_deadline: string | null;
   appointment_required: boolean | null;
+  product_details: string | null;
+  listing_type: "group_buy" | "regular" | null;
+
 }
 
 interface SupplierRow {
@@ -144,6 +147,10 @@ export default function DealDetail() {
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [howOpen, setHowOpen] = useState(false);
+  const [showRequestGroupBuy, setShowRequestGroupBuy] = useState(false);
+  const [submittingGroupBuyRequest, setSubmittingGroupBuyRequest] = useState(false);
+  const [groupBuyRequested, setGroupBuyRequested] = useState(false);
+
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [joinCondition, setJoinCondition] = useState<"flexible" | "conditional">("flexible");
   const [joinForm, setJoinForm] = useState({
@@ -177,7 +184,8 @@ export default function DealDetail() {
         const { data: dealData, error: dErr } = await supabase
           .from("deals")
           .select(
-            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images,offer_terms,restrictions,service_areas,join_deadline,redemption_deadline,appointment_required",
+            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images,offer_terms,restrictions,service_areas,join_deadline,redemption_deadline,appointment_required,product_details,listing_type",
+
           )
           .eq("id", dealId)
           .eq("is_deleted", false)
@@ -572,7 +580,9 @@ export default function DealDetail() {
   }
 
   const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
-  const tiers = Array.isArray(deal.tiers) ? deal.tiers : [];
+  const isRegularListing = (deal.listing_type ?? "group_buy") === "regular";
+  const tiers = isRegularListing ? [] : (Array.isArray(deal.tiers) ? deal.tiers : []);
+
   const display = describeOffer(
     {
       offer_type: offerType,
@@ -1367,13 +1377,14 @@ export default function DealDetail() {
 
 
       {/* ===== SECTION 7 — STICKY CTA (residents only) ===== */}
-      {!isSupplierPreview && (
+      {!isSupplierPreview && !isRegularListing && (
       <div
         className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
       >
         <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0]/95 to-transparent">
           {interested ? (
+
             <div className="flex items-center gap-2.5 bg-[#0E6B5A] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
               <div className="w-10 h-10 bg-gradient-to-l from-[#1A8870] to-[#34A88E] rounded-full flex items-center justify-center shrink-0">
                 {hasCompletedJoin ? (

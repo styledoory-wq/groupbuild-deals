@@ -34,7 +34,7 @@ export default function Browse() {
         const { data: dRows } = await supabase
           .from("deals")
           .select(
-            "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images,visibility_type,target_participants,join_deadline,redemption_deadline,auto_closed_at,suppliers!inner(business_name,logo_url,is_active,approval_status)",
+            "id,title,status,category_id,supplier_id,offer_type,listing_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images,visibility_type,target_participants,join_deadline,redemption_deadline,auto_closed_at,suppliers!inner(business_name,logo_url,is_active,approval_status)",
           )
           .eq("status", "active")
           .order("created_at", { ascending: false })
@@ -70,7 +70,9 @@ export default function Browse() {
               join_deadline: (r.join_deadline as string | null) ?? null,
               redemption_deadline: (r.redemption_deadline as string | null) ?? null,
               auto_closed_at: (r.auto_closed_at as string | null) ?? null,
+              listing_type: (r.listing_type as string | null) ?? "group_buy",
             };
+
           });
 
         // Suppliers

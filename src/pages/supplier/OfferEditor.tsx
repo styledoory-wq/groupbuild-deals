@@ -95,6 +95,10 @@ export default function OfferEditor() {
   const [depositLimits, setDepositLimits] = useState<DepositLimits>({ min: null, max: null });
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [listingType, setListingType] = useState<"group_buy" | "regular">(
+    (searchParams.get("type") as "group_buy" | "regular") === "regular" ? "regular" : "group_buy",
+  );
+
 
   const [offerType, setOfferType] = useState<OfferType>("percentage");
   const [tiers, setTiers] = useState<TierRow[]>(defaultPercentageTiers());
@@ -216,6 +220,9 @@ export default function OfferEditor() {
               setTitle(deal.title ?? "");
               setDescription(deal.description ?? "");
               setProductDetails((deal as { product_details?: string | null }).product_details ?? "");
+              const lt = ((deal as { listing_type?: string | null }).listing_type ?? "group_buy") as "group_buy" | "regular";
+              setListingType(lt);
+
               if (deal.category_id) setCategoryId(deal.category_id);
               setDepositRequired(!!deal.deposit_required);
               if (deal.deposit_amount != null) setDepositAmount(String(deal.deposit_amount));
@@ -297,10 +304,11 @@ export default function OfferEditor() {
       toast.error("יש לבחור קטגוריה");
       return;
     }
-    if (!tiers.length) {
+    if (listingType === "group_buy" && !tiers.length) {
       toast.error("יש להוסיף לפחות מדרגה אחת");
       return;
     }
+
     if (!commitmentAccepted) {
       setCommitmentError(true);
       commitmentRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -335,7 +343,13 @@ export default function OfferEditor() {
     // Validate & build tier payload
     const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
     let unitPriceVal: number | null = null;
-    if (offerType === "price_comparison") {
+    if (listingType === "regular") {
+      unitPriceVal = num(unitPrice);
+      if (!Number.isFinite(unitPriceVal) || (unitPriceVal as number) <= 0) {
+        toast.error("יש להזין מחיר תקין להצעה");
+        return;
+      }
+    } else if (offerType === "price_comparison") {
       unitPriceVal = num(unitPrice);
       if (!Number.isFinite(unitPriceVal) || (unitPriceVal as number) <= 0) {
         toast.error("יש להזין מחיר יחידה תקין (לפני ההנחה)");
@@ -343,64 +357,69 @@ export default function OfferEditor() {
       }
     }
     const cleanTiers: OfferTier[] = [];
-    for (let i = 0; i < tiers.length; i++) {
-      const t = tiers[i];
-      const min = num(t.minParticipants);
-      if (!Number.isFinite(min) || min < 1) {
-        toast.error(`מדרגה ${i + 1}: מינימום מצטרפים חייב להיות 1 ומעלה`);
-        return;
-      }
-      let max: number | null = null;
-      if (t.maxParticipants.trim() !== "") {
-        const m = num(t.maxParticipants);
-        if (!Number.isFinite(m) || m < min) {
-          toast.error(`מדרגה ${i + 1}: מקסימום מצטרפים חייב להיות גדול או שווה למינימום`);
+    if (listingType === "group_buy") {
+      for (let i = 0; i < tiers.length; i++) {
+        const t = tiers[i];
+        const min = num(t.minParticipants);
+        if (!Number.isFinite(min) || min < 1) {
+          toast.error(`מדרגה ${i + 1}: מינימום מצטרפים חייב להיות 1 ומעלה`);
           return;
         }
-        max = m;
-      }
+        let max: number | null = null;
+        if (t.maxParticipants.trim() !== "") {
+          const m = num(t.maxParticipants);
+          if (!Number.isFinite(m) || m < min) {
+            toast.error(`מדרגה ${i + 1}: מקסימום מצטרפים חייב להיות גדול או שווה למינימום`);
+            return;
+          }
+          max = m;
+        }
 
-      if (offerType === "percentage") {
-        const pct = num(t.discount_percentage);
-        if (!Number.isFinite(pct) || pct < 1 || pct > 100) {
-          toast.error(`מדרגה ${i + 1}: אחוז הנחה חייב להיות בין 1 ל-100`);
-          return;
+        if (offerType === "percentage") {
+          const pct = num(t.discount_percentage);
+          if (!Number.isFinite(pct) || pct < 1 || pct > 100) {
+            toast.error(`מדרגה ${i + 1}: אחוז הנחה חייב להיות בין 1 ל-100`);
+            return;
+          }
+          cleanTiers.push({
+            minParticipants: min,
+            maxParticipants: max,
+            discount_percentage: pct,
+            label: t.label.trim() || null,
+          });
+        } else {
+          const before = unitPriceVal as number;
+          const after = num(t.discounted_price);
+          if (!Number.isFinite(after) || after <= 0) {
+            toast.error(`מדרגה ${i + 1}: מחיר אחרי חייב להיות מספר חיובי`);
+            return;
+          }
+          if (after >= before) {
+            toast.error(`מדרגה ${i + 1}: המחיר אחרי חייב להיות קטן ממחיר היחידה`);
+            return;
+          }
+          cleanTiers.push({
+            minParticipants: min,
+            maxParticipants: max,
+            original_price: before,
+            discounted_price: after,
+            label: t.label.trim() || null,
+          });
         }
-        cleanTiers.push({
-          minParticipants: min,
-          maxParticipants: max,
-          discount_percentage: pct,
-          label: t.label.trim() || null,
-        });
-      } else {
-        const before = unitPriceVal as number;
-        const after = num(t.discounted_price);
-        if (!Number.isFinite(after) || after <= 0) {
-          toast.error(`מדרגה ${i + 1}: מחיר אחרי חייב להיות מספר חיובי`);
-          return;
-        }
-        if (after >= before) {
-          toast.error(`מדרגה ${i + 1}: המחיר אחרי חייב להיות קטן ממחיר היחידה`);
-          return;
-        }
-        cleanTiers.push({
-          minParticipants: min,
-          maxParticipants: max,
-          original_price: before,
-          discounted_price: after,
-          label: t.label.trim() || null,
-        });
       }
     }
+
 
     // Sort by min, ensure at least the lowest is for new offers
     cleanTiers.sort((a, b) => a.minParticipants - b.minParticipants);
     const firstTier = cleanTiers[0];
+    const isRegular = listingType === "regular";
 
     if (visibilityType === "project_only" && !visibilityProjectId) {
       toast.error("בחר פרויקט שאליו ההצעה מיועדת");
       return;
     }
+
 
     type Json = import("@/integrations/supabase/types").Json;
     const serviceAreas = serviceAreasInput
@@ -413,11 +432,13 @@ export default function OfferEditor() {
       description: description.trim() || null,
       product_details: productDetails.trim() || null,
       category_id: categoryId,
+      listing_type: listingType,
       offer_type: offerType,
-      deposit_required: depositRequired,
-      deposit_amount: depositRequired ? cleanDepositAmount : 0,
-      supplier_payment_link: depositRequired ? (supplierPaymentLink.trim() || null) : null,
-      supplier_payment_instructions: depositRequired ? (supplierPaymentInstructions.trim() || null) : null,
+      deposit_required: isRegular ? false : depositRequired,
+      deposit_amount: !isRegular && depositRequired ? cleanDepositAmount : 0,
+      supplier_payment_link: !isRegular && depositRequired ? (supplierPaymentLink.trim() || null) : null,
+      supplier_payment_instructions: !isRegular && depositRequired ? (supplierPaymentInstructions.trim() || null) : null,
+
       tiers: cleanTiers as unknown as Json,
       highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as Json,
       status: "active",
@@ -439,7 +460,12 @@ export default function OfferEditor() {
 
 
     // Mirror first-tier values into top-level fields for backward compatibility & sorting.
-    if (offerType === "percentage") {
+    if (isRegular) {
+      payload.original_price = unitPriceVal ?? 0;
+      payload.discounted_price = null;
+      payload.discount_percentage = null;
+      payload.base_price = null;
+    } else if (offerType === "percentage") {
       payload.discount_percentage = firstTier.discount_percentage ?? null;
       payload.base_price = null;
       payload.original_price = 0;
@@ -453,6 +479,8 @@ export default function OfferEditor() {
           : null;
       payload.base_price = null;
     }
+
+
 
     setSaving(true);
     try {
@@ -559,16 +587,22 @@ export default function OfferEditor() {
       return;
     }
     if (step === 2) {
-      if (offerType === "price_comparison") {
+      if (listingType === "regular") {
         const up = Number(unitPrice);
-        if (!Number.isFinite(up) || up <= 0) { toast.error("יש להזין מחיר יחידה תקין"); return; }
+        if (!Number.isFinite(up) || up <= 0) { toast.error("יש להזין מחיר תקין להצעה"); return; }
+      } else {
+        if (offerType === "price_comparison") {
+          const up = Number(unitPrice);
+          if (!Number.isFinite(up) || up <= 0) { toast.error("יש להזין מחיר יחידה תקין"); return; }
+        }
+        if (!tiers.length) { toast.error("יש להוסיף לפחות מדרגה אחת"); return; }
       }
-      if (!tiers.length) { toast.error("יש להוסיף לפחות מדרגה אחת"); return; }
       if (visibilityType === "project_only" && !visibilityProjectId) { toast.error("בחר פרויקט שאליו ההצעה מיועדת"); return; }
       setStep(3);
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
+
   };
   const goBack = () => {
     if (step === 1) return;
@@ -618,7 +652,34 @@ export default function OfferEditor() {
         {/* ───── STEP 1: Basics ───── */}
         {step === 1 && (
           <>
+            <div className="gb-card p-4 space-y-2">
+              <h3 className="font-bold text-sm">סוג ההצעה</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setListingType("group_buy")}
+                  className={`p-3 rounded-xl border-2 text-right transition-smooth ${
+                    listingType === "group_buy" ? "border-[#0E6B5A] bg-[#0E6B5A]/5" : "border-[#ECEEF2] bg-white"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-[#1F2937]">קבוצת רכישה</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">המחיר יורד לפי מספר המצטרפים</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setListingType("regular")}
+                  className={`p-3 rounded-xl border-2 text-right transition-smooth ${
+                    listingType === "regular" ? "border-[#0E6B5A] bg-[#0E6B5A]/5" : "border-[#ECEEF2] bg-white"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-[#1F2937]">הצעה רגילה</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">מבצע / שירות במחיר קבוע</div>
+                </button>
+              </div>
+            </div>
+
             <div className="gb-card p-4 space-y-3">
+
               <Field label="שם ההצעה">
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="לדוגמה: שדרוג מטבח פרימיום" className="h-11 rounded-xl" />
               </Field>
@@ -660,45 +721,68 @@ export default function OfferEditor() {
         {/* ───── STEP 2: Pricing ───── */}
         {step === 2 && (
           <>
-            <div className="gb-card p-4 space-y-3">
-              <h3 className="font-bold text-sm">סוג הצעה</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => switchOfferType("percentage")}
-                  className={`h-11 rounded-xl border-2 text-sm font-bold transition-smooth ${
-                    offerType === "percentage" ? "border-[#1F2937] bg-[#F4F6FA] text-[#1F2937]" : "border-[#ECEEF2] bg-white text-[#6B7280]"
-                  }`}
-                >
-                  אחוז הנחה
-                </button>
-                <button
-                  type="button"
-                  onClick={() => switchOfferType("price_comparison")}
-                  className={`h-11 rounded-xl border-2 text-sm font-bold transition-smooth ${
-                    offerType === "price_comparison" ? "border-[#1F2937] bg-[#F4F6FA] text-[#1F2937]" : "border-[#ECEEF2] bg-white text-[#6B7280]"
-                  }`}
-                >
-                  מחיר לפני ואחרי
-                </button>
-              </div>
-
-              {offerType === "price_comparison" && (
-                <Field label="מחיר רגיל (לפני הנחה, ₪)">
+            {listingType === "regular" ? (
+              <div className="gb-card p-4 space-y-3">
+                <h3 className="font-bold text-sm">מחיר ההצעה</h3>
+                <Field label="מחיר (₪)">
                   <Input
                     type="number"
                     min={1}
                     value={unitPrice}
                     onChange={(e) => setUnitPrice(e.target.value)}
                     className="h-11 rounded-xl"
-                    placeholder="לדוגמה: 5000"
+                    placeholder="לדוגמה: 350"
                   />
                 </Field>
-              )}
-            </div>
+                <p className="text-fs-xs text-muted-foreground leading-relaxed">
+                  בהצעה רגילה אין מנגנון של ירידת מחיר. דיירים יוכלו לבקש לפתוח קבוצת רכישה עבור ההצעה.
+                </p>
+              </div>
+            ) : (
+              <div className="gb-card p-4 space-y-3">
+                <h3 className="font-bold text-sm">סוג הצעה</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => switchOfferType("percentage")}
+                    className={`h-11 rounded-xl border-2 text-sm font-bold transition-smooth ${
+                      offerType === "percentage" ? "border-[#1F2937] bg-[#F4F6FA] text-[#1F2937]" : "border-[#ECEEF2] bg-white text-[#6B7280]"
+                    }`}
+                  >
+                    אחוז הנחה
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => switchOfferType("price_comparison")}
+                    className={`h-11 rounded-xl border-2 text-sm font-bold transition-smooth ${
+                      offerType === "price_comparison" ? "border-[#1F2937] bg-[#F4F6FA] text-[#1F2937]" : "border-[#ECEEF2] bg-white text-[#6B7280]"
+                    }`}
+                  >
+                    מחיר לפני ואחרי
+                  </button>
+                </div>
 
-            {/* Tiers — compact table */}
+                {offerType === "price_comparison" && (
+                  <Field label="מחיר רגיל (לפני הנחה, ₪)">
+                    <Input
+                      type="number"
+                      min={1}
+                      value={unitPrice}
+                      onChange={(e) => setUnitPrice(e.target.value)}
+                      className="h-11 rounded-xl"
+                      placeholder="לדוגמה: 5000"
+                    />
+                  </Field>
+                )}
+              </div>
+            )}
+
+
+
+            {/* Tiers — compact table (only for group buys) */}
+            {listingType === "group_buy" && (
             <div className="gb-card p-4 space-y-3">
+
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-sm">מדרגות הנחה</h3>
                 <span className="text-fs-xs text-muted-foreground">{tiers.length} מדרגות</span>
@@ -779,6 +863,9 @@ export default function OfferEditor() {
                 הוסף מדרגה
               </Button>
             </div>
+            )}
+
+
 
             {/* Visibility */}
             <div className="gb-card p-4 space-y-2">
@@ -861,8 +948,10 @@ export default function OfferEditor() {
               </label>
             </div>
 
-            {/* Deposit */}
+            {/* Deposit — not relevant for regular listings */}
+            {listingType === "group_buy" && (
             <div className="gb-card p-4 space-y-2">
+
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -905,6 +994,9 @@ export default function OfferEditor() {
                 </div>
               )}
             </div>
+            )}
+
+
 
             {/* Commitment */}
             <div
