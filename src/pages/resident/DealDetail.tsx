@@ -1546,8 +1546,46 @@ export default function DealDetail() {
 
 
 
+      {/* Request Group Buy modal (for regular listings) */}
+      <Dialog open={showRequestGroupBuy} onOpenChange={setShowRequestGroupBuy}>
+        <DialogContent dir="rtl" className="text-right">
+          <DialogHeader>
+            <DialogTitle>פתיחת קבוצת רכישה</DialogTitle>
+            <DialogDescription className="text-right leading-relaxed">
+              <span className="block font-bold text-foreground">{deal.title}</span>
+              <span className="block mt-2 text-[13px] text-muted-foreground">
+                זוהי הצעה רגילה. אם יהיו מספיק מתעניינים, ניתן להפוך אותה לקבוצת רכישה ולקבל מחיר טוב יותר.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="rounded-xl bg-[#F7F5F0] p-3 text-[12px] leading-relaxed text-[#1F2937]">
+              <div className="flex items-start gap-2">
+                <Users className="h-4 w-4 mt-0.5 text-[#0E6B5A] shrink-0" />
+                <div>
+                  בלחיצה על שליחת הבקשה, הספק יקבל התראה שיש ביקוש לפתיחת קבוצת רכישה. ככל שיותר שכנים יבקשו —
+                  כך גדל הסיכוי שייפתח מבצע קבוצתי.
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={submitRequestGroupBuy}
+                disabled={submittingGroupBuyRequest || groupBuyRequested}
+                className="h-12 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold"
+              >
+                {submittingGroupBuyRequest ? <Loader2 className="h-4 w-4 animate-spin" /> : groupBuyRequested ? "הבקשה כבר נשלחה ✓" : "שלח בקשה"}
+              </Button>
+              <div className="text-[12px] font-bold text-[#1F2937]/70 text-center mt-1">שתף עם שכנים כדי להגדיל את הסיכוי</div>
+              <ShareButton deal={deal} />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Join modal */}
-      <Dialog open={showJoinModal && !isSupplierPreview} onOpenChange={setShowJoinModal}>
+      <Dialog open={showJoinModal && !isSupplierPreview && !isRegularListing} onOpenChange={setShowJoinModal}>
+
         <DialogContent dir="rtl" className="text-right max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>הצטרפות להצעה</DialogTitle>
