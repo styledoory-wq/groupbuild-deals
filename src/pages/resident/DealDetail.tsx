@@ -338,6 +338,38 @@ export default function DealDetail() {
     setShowJoinModal(true);
   };
 
+  const handleRequestGroupBuy = async () => {
+    if (!deal) return;
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      window.location.href = `/auth?redirect=/deal/${deal.id}`;
+      return;
+    }
+    setShowRequestGroupBuy(true);
+  };
+
+  const submitRequestGroupBuy = async () => {
+    if (!deal) return;
+    const { guardPreview } = await import("@/lib/previewMode");
+    if (guardPreview(toast)) return;
+    setSubmittingGroupBuyRequest(true);
+    try {
+      const { error } = await (supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ error: { message: string } | null }>)("request_group_buy", { p_deal_id: deal.id });
+      if (error) throw new Error(error.message);
+      setGroupBuyRequested(true);
+      toast.success("הבקשה נשלחה! הספק יקבל התראה על הביקוש");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "אירעה שגיאה";
+      toast.error(msg);
+    } finally {
+      setSubmittingGroupBuyRequest(false);
+    }
+  };
+
+
   const submitJoin = async () => {
     if (!deal) return;
     const { guardPreview } = await import("@/lib/previewMode");
