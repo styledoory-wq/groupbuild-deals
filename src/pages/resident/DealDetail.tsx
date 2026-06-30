@@ -63,6 +63,9 @@ interface DealRow {
   join_deadline: string | null;
   redemption_deadline: string | null;
   appointment_required: boolean | null;
+  product_details: string | null;
+  listing_type: "group_buy" | "regular" | null;
+
 }
 
 interface SupplierRow {
@@ -144,6 +147,10 @@ export default function DealDetail() {
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [howOpen, setHowOpen] = useState(false);
+  const [showRequestGroupBuy, setShowRequestGroupBuy] = useState(false);
+  const [submittingGroupBuyRequest, setSubmittingGroupBuyRequest] = useState(false);
+  const [groupBuyRequested, setGroupBuyRequested] = useState(false);
+
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [joinCondition, setJoinCondition] = useState<"flexible" | "conditional">("flexible");
   const [joinForm, setJoinForm] = useState({
@@ -177,7 +184,8 @@ export default function DealDetail() {
         const { data: dealData, error: dErr } = await supabase
           .from("deals")
           .select(
-            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images,offer_terms,restrictions,service_areas,join_deadline,redemption_deadline,appointment_required",
+            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images,offer_terms,restrictions,service_areas,join_deadline,redemption_deadline,appointment_required,product_details,listing_type",
+
           )
           .eq("id", dealId)
           .eq("is_deleted", false)
@@ -329,6 +337,38 @@ export default function DealDetail() {
     }
     setShowJoinModal(true);
   };
+
+  const handleRequestGroupBuy = async () => {
+    if (!deal) return;
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      window.location.href = `/auth?redirect=/deal/${deal.id}`;
+      return;
+    }
+    setShowRequestGroupBuy(true);
+  };
+
+  const submitRequestGroupBuy = async () => {
+    if (!deal) return;
+    const { guardPreview } = await import("@/lib/previewMode");
+    if (guardPreview(toast)) return;
+    setSubmittingGroupBuyRequest(true);
+    try {
+      const { error } = await (supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ error: { message: string } | null }>)("request_group_buy", { p_deal_id: deal.id });
+      if (error) throw new Error(error.message);
+      setGroupBuyRequested(true);
+      toast.success("הבקשה נשלחה! הספק יקבל התראה על הביקוש");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "אירעה שגיאה";
+      toast.error(msg);
+    } finally {
+      setSubmittingGroupBuyRequest(false);
+    }
+  };
+
 
   const submitJoin = async () => {
     if (!deal) return;
@@ -572,7 +612,9 @@ export default function DealDetail() {
   }
 
   const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
-  const tiers = Array.isArray(deal.tiers) ? deal.tiers : [];
+  const isRegularListing = (deal.listing_type ?? "group_buy") === "regular";
+  const tiers = isRegularListing ? [] : (Array.isArray(deal.tiers) ? deal.tiers : []);
+
   const display = describeOffer(
     {
       offer_type: offerType,
@@ -1367,13 +1409,14 @@ export default function DealDetail() {
 
 
       {/* ===== SECTION 7 — STICKY CTA (residents only) ===== */}
-      {!isSupplierPreview && (
+      {!isSupplierPreview && !isRegularListing && (
       <div
         className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
       >
         <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0]/95 to-transparent">
           {interested ? (
+
             <div className="flex items-center gap-2.5 bg-[#0E6B5A] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
               <div className="w-10 h-10 bg-gradient-to-l from-[#1A8870] to-[#34A88E] rounded-full flex items-center justify-center shrink-0">
                 {hasCompletedJoin ? (
@@ -1429,7 +1472,38 @@ export default function DealDetail() {
       </div>
       )}
 
+      {/* ===== SECTION 7C — REGULAR LISTING CTA ===== */}
+      {!isSupplierPreview && isRegularListing && (
+        <div
+          className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
+        >
+          <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0]/95 to-transparent">
+            <div className="flex items-stretch gap-2">
+              <Button
+                onClick={handleRequestGroupBuy}
+                disabled={groupBuyRequested}
+                className="flex-1 h-14 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#0E6B5A]/40"
+              >
+                <Users className="h-4 w-4 ml-1.5" />
+                {groupBuyRequested ? "הבקשה נשלחה ✓" : "בקש קבוצת רכישה"}
+              </Button>
+              <ShareButton deal={deal} />
+            </div>
+            {supplier?.phone && (
+              <a
+                href={`tel:${supplier.phone}`}
+                className="mt-2 flex items-center justify-center h-11 rounded-2xl bg-white border-2 border-[#0E6B5A]/25 text-[#0E6B5A] font-extrabold text-[13px]"
+              >
+                צור קשר עם הספק
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ===== SECTION 7B — SUPPLIER PREVIEW STICKY (edit shortcut) ===== */}
+
       {isSupplierPreview && (
         <div
           className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
@@ -1472,8 +1546,46 @@ export default function DealDetail() {
 
 
 
+      {/* Request Group Buy modal (for regular listings) */}
+      <Dialog open={showRequestGroupBuy} onOpenChange={setShowRequestGroupBuy}>
+        <DialogContent dir="rtl" className="text-right">
+          <DialogHeader>
+            <DialogTitle>פתיחת קבוצת רכישה</DialogTitle>
+            <DialogDescription className="text-right leading-relaxed">
+              <span className="block font-bold text-foreground">{deal.title}</span>
+              <span className="block mt-2 text-[13px] text-muted-foreground">
+                זוהי הצעה רגילה. אם יהיו מספיק מתעניינים, ניתן להפוך אותה לקבוצת רכישה ולקבל מחיר טוב יותר.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="rounded-xl bg-[#F7F5F0] p-3 text-[12px] leading-relaxed text-[#1F2937]">
+              <div className="flex items-start gap-2">
+                <Users className="h-4 w-4 mt-0.5 text-[#0E6B5A] shrink-0" />
+                <div>
+                  בלחיצה על שליחת הבקשה, הספק יקבל התראה שיש ביקוש לפתיחת קבוצת רכישה. ככל שיותר שכנים יבקשו —
+                  כך גדל הסיכוי שייפתח מבצע קבוצתי.
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={submitRequestGroupBuy}
+                disabled={submittingGroupBuyRequest || groupBuyRequested}
+                className="h-12 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold"
+              >
+                {submittingGroupBuyRequest ? <Loader2 className="h-4 w-4 animate-spin" /> : groupBuyRequested ? "הבקשה כבר נשלחה ✓" : "שלח בקשה"}
+              </Button>
+              <div className="text-[12px] font-bold text-[#1F2937]/70 text-center mt-1">שתף עם שכנים כדי להגדיל את הסיכוי</div>
+              <ShareButton deal={deal} />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Join modal */}
-      <Dialog open={showJoinModal && !isSupplierPreview} onOpenChange={setShowJoinModal}>
+      <Dialog open={showJoinModal && !isSupplierPreview && !isRegularListing} onOpenChange={setShowJoinModal}>
+
         <DialogContent dir="rtl" className="text-right max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>הצטרפות להצעה</DialogTitle>
