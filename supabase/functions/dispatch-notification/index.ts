@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
     supabase
       .from("notification_settings")
       .select(
-        "email_notifications_enabled,push_notifications_enabled,new_offer_email_enabled,new_offer_push_enabled",
+        "email_notifications_enabled,push_notifications_enabled,demand_invitation_email_enabled,demand_invitation_push_enabled",
       )
       .eq("user_id", n.user_id)
       .maybeSingle(),
@@ -142,11 +142,11 @@ Deno.serve(async (req) => {
   ]);
   const s = prefs as Settings;
 
-  // Default to enabled when settings row missing
+  // Default to enabled when settings row or field missing
   const pushGlobal = s?.push_notifications_enabled ?? true;
-  const pushType = s?.new_offer_push_enabled ?? true;
+  const pushType = s?.demand_invitation_push_enabled ?? true;
   const emailGlobal = s?.email_notifications_enabled ?? true;
-  const emailType = s?.new_offer_email_enabled ?? true;
+  const emailType = s?.demand_invitation_email_enabled ?? true;
 
   const link = n.link || "/supplier/demand-inbox";
   const url = link.startsWith("http")
