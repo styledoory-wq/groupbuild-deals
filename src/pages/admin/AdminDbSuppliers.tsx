@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { supabase } from "@/integrations/supabase/client";
+import { resizeToPreset } from "@/lib/imageResize";
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
