@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { HelpButton } from "@/components/OnboardingFlow";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 type DbSupplier = {
   id: string;
@@ -443,7 +444,7 @@ export default function SupplierDashboard() {
             <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm overflow-hidden">
               <div className="relative h-[160px] bg-gradient-to-br from-[#1F2937] to-[#0F172A]">
                 {topImage ? (
-                  <img src={topImage} alt={topDeal.title} className="absolute inset-0 w-full h-full object-cover" />
+                  <SmartImg src={topImage} size="card" alt={topDeal.title} className="absolute inset-0 w-full h-full object-cover" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Tag className="h-10 w-10 text-white/40" />

@@ -5,6 +5,7 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState, ErrorState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { SmartImg } from "@/components/ui/SmartImg";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
@@ -456,7 +457,7 @@ export default function SupplierProfile() {
                   onClick={() => setLightbox(g.image_url)}
                   className="aspect-square rounded-[16px] overflow-hidden shadow-[0_2px_10px_-4px_rgba(10,31,61,0.10)] transition-transform active:scale-[0.98]"
                 >
-                  <img src={g.image_url} alt={g.caption ?? "עבודה"} className="h-full w-full object-cover" loading="lazy" />
+                  <SmartImg src={g.image_url} size="card" alt={g.caption ?? "עבודה"} className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>
@@ -519,7 +520,7 @@ export default function SupplierProfile() {
           onClick={() => setLightbox(null)}
           className="fixed inset-0 z-50 bg-[#0E6B5A]/80 flex items-center justify-center p-4"
         >
-          <img src={lightbox} alt="" className="max-h-[90vh] max-w-full rounded-[20px]" />
+          <SmartImg src={lightbox} size="detail" alt="" priority eager className="max-h-[90vh] max-w-full rounded-[20px]" />
         </div>
       )}
     </MobileShell>
