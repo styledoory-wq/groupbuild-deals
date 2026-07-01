@@ -309,12 +309,16 @@ export default function AdminDbSuppliers() {
   ) => {
     setBusy(true);
     try {
-      const ext = file.name.split(".").pop() ?? "bin";
+      const isImage = bucket === "supplier-logos";
+      const processed = isImage ? await resizeToPreset(file, "logo") : file;
+      const ext = isImage
+        ? (processed.type === "image/webp" ? "webp" : "jpg")
+        : (file.name.split(".").pop() ?? "bin");
       const path = `admin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from(bucket).upload(path, file, {
-        cacheControl: "3600",
+      const { error } = await supabase.storage.from(bucket).upload(path, processed, {
+        cacheControl: "31536000",
         upsert: false,
-        contentType: file.type || undefined,
+        contentType: processed.type || undefined,
       });
       if (error) throw error;
       const { data } = supabase.storage.from(bucket).getPublicUrl(path);
