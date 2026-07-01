@@ -120,6 +120,9 @@ export default function NotificationSettings() {
       setBrowserSupported(isWebPushSupported());
       setBrowserPermission(currentPermission());
       setBrowserPushOn(await hasActiveWebPush());
+      const nat = await isNativePlatform();
+      setNativeAvailable(nat);
+      if (nat) setNativeStatus(await getNativePushStatus());
       setLoading(false);
     })();
   }, [navigate]);
