@@ -1177,6 +1177,68 @@ export type Database = {
           },
         ]
       }
+      notification_dispatch_log: {
+        Row: {
+          attempts: number
+          created_at: string
+          dispatch_error: string | null
+          dispatch_status: string
+          email_error: string | null
+          email_sent_at: string | null
+          email_status: string | null
+          id: string
+          notification_id: string
+          notification_type: string
+          push_error: string | null
+          push_sent_at: string | null
+          push_status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          dispatch_error?: string | null
+          dispatch_status?: string
+          email_error?: string | null
+          email_sent_at?: string | null
+          email_status?: string | null
+          id?: string
+          notification_id: string
+          notification_type: string
+          push_error?: string | null
+          push_sent_at?: string | null
+          push_status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          dispatch_error?: string | null
+          dispatch_status?: string
+          email_error?: string | null
+          email_sent_at?: string | null
+          email_status?: string | null
+          id?: string
+          notification_id?: string
+          notification_type?: string
+          push_error?: string | null
+          push_sent_at?: string | null
+          push_status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_dispatch_log_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: true
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           approval_email_enabled: boolean
