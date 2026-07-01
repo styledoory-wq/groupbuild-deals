@@ -113,10 +113,10 @@ function RealDealCardImpl({
         {/* Square image top half */}
         <div className="relative aspect-square w-full overflow-hidden bg-[#F4F6FA]">
           {cover ? (
-            <img
+            <SmartImg
               src={cover}
+              size="card"
               alt={deal.title}
-              loading="lazy"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
