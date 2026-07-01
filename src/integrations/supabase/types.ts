@@ -616,6 +616,143 @@ export type Database = {
           },
         ]
       }
+      demand_invitations: {
+        Row: {
+          created_at: string
+          demand_id: string
+          id: string
+          invited_at: string
+          offer_deal_id: string | null
+          responded_at: string | null
+          status: string
+          supplier_id: string
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          demand_id: string
+          id?: string
+          invited_at?: string
+          offer_deal_id?: string | null
+          responded_at?: string | null
+          status?: string
+          supplier_id: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          demand_id?: string
+          id?: string
+          invited_at?: string
+          offer_deal_id?: string | null
+          responded_at?: string | null
+          status?: string
+          supplier_id?: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demand_invitations_demand_id_fkey"
+            columns: ["demand_id"]
+            isOneToOne: false
+            referencedRelation: "demand_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demand_invitations_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demand_requests: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          category_id: string | null
+          city_id: string | null
+          created_at: string
+          deadline: string | null
+          description: string
+          id: string
+          matched_count: number
+          project_id: string | null
+          region_id: string | null
+          resident_user_id: string
+          status: string
+          target_qty: number | null
+          updated_at: string
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          category_id?: string | null
+          city_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          description: string
+          id?: string
+          matched_count?: number
+          project_id?: string | null
+          region_id?: string | null
+          resident_user_id: string
+          status?: string
+          target_qty?: number | null
+          updated_at?: string
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          category_id?: string | null
+          city_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          id?: string
+          matched_count?: number
+          project_id?: string | null
+          region_id?: string | null
+          resident_user_id?: string
+          status?: string
+          target_qty?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demand_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demand_requests_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demand_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demand_requests_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deposit_attempt_logs: {
         Row: {
           attempted_amount: number | null
@@ -2174,6 +2311,10 @@ export type Database = {
       }
       issue_vouchers_for_deal: { Args: { _deal_id: string }; Returns: number }
       lookup_voucher_for_supplier: { Args: { _code: string }; Returns: Json }
+      match_suppliers_for_demand: {
+        Args: { _demand_id: string }
+        Returns: number
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
