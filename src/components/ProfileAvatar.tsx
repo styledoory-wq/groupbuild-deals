@@ -66,12 +66,17 @@ export function ProfileAvatar({
 
   const handleFile = async (file: File) => {
     if (!user?.id) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("הקובץ גדול מ-5MB"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("הקובץ גדול מ-10MB"); return; }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
+      const resized = await resizeToPreset(file, "avatar");
+      const ext = resized.type === "image/webp" ? "webp" : "jpg";
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, cacheControl: "3600" });
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, resized, {
+        upsert: true,
+        cacheControl: "31536000",
+        contentType: resized.type,
+      });
       if (upErr) throw upErr;
       await supabase.from("profiles").update({ avatar_url: path }).eq("id", user.id);
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 7);
