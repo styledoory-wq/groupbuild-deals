@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ShieldCheck, Tag as TagIcon, TrendingDown, Flame, Users, Clock, Image as ImageIcon } from "lucide-react";
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { FavoriteButton } from "@/components/deals/FavoriteButton";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 export interface RealDealCardData {
   id: string;
