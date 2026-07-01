@@ -167,13 +167,15 @@ export default function NotificationSettings() {
       if (res.ok) {
         setNativeStatus("granted");
         toast.success("התראות באייפון הופעלו");
-      } else if (res.reason === "denied") {
-        setNativeStatus("denied");
-        toast.error("התראות חסומות בהגדרות האייפון. פתח/י הגדרות → GroupBuild → Notifications");
-      } else if (res.reason === "unsupported") {
-        toast.error("זמין רק באפליקציה הנייטיב");
       } else {
-        toast.error("ההפעלה נכשלה, נסה/י שוב");
+        if (res.reason === "denied") {
+          setNativeStatus("denied");
+          toast.error("התראות חסומות בהגדרות האייפון. פתח/י הגדרות → GroupBuild → Notifications");
+        } else if (res.reason === "unsupported") {
+          toast.error("זמין רק באפליקציה הנייטיב");
+        } else {
+          toast.error("ההפעלה נכשלה, נסה/י שוב");
+        }
       }
       setNativeStatus(await getNativePushStatus());
     } finally {
