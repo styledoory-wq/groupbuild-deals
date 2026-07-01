@@ -27,8 +27,8 @@ type Notification = {
 type Settings = {
   email_notifications_enabled?: boolean | null;
   push_notifications_enabled?: boolean | null;
-  new_offer_email_enabled?: boolean | null;
-  new_offer_push_enabled?: boolean | null;
+  demand_invitation_email_enabled?: boolean | null;
+  demand_invitation_push_enabled?: boolean | null;
 } | null;
 
 async function invokeFn(name: string, payload: unknown) {
