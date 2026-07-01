@@ -96,6 +96,10 @@ export default function NotificationSettings() {
   const [browserPermission, setBrowserPermission] =
     useState<NotificationPermission | "unsupported">("default");
 
+  const [nativeAvailable, setNativeAvailable] = useState(false);
+  const [nativeStatus, setNativeStatus] = useState<NativePushStatus>("unsupported");
+  const [nativeBusy, setNativeBusy] = useState(false);
+
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
