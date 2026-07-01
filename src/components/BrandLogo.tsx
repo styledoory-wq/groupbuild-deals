@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
-import groupBuildMarkExact from "@/assets/groupbuild-mark-exact.png.asset.json";
+// Bundled locally in /public so it works in Capacitor native (capacitor://localhost)
+// where the /__l5e/assets-v1 CDN paths don't resolve.
+const groupBuildMarkExact = { url: "/brand/groupbuild-mark.png" };
 
 interface Props {
   variant?: "dark" | "light";
