@@ -830,10 +830,13 @@ export default function DealDetail() {
             <div className="absolute inset-0">
               <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-full">
                 {heroImages.map((url, i) => (
-                  <img
+                  <SmartImg
                     key={url + i}
                     src={url}
+                    size="detail"
                     alt={`${deal.title} ${i + 1}`}
+                    priority={i === 0}
+                    eager={i === 0}
                     className="w-full h-full object-cover shrink-0 snap-start"
                     style={{ flex: "0 0 100%" }}
                   />
