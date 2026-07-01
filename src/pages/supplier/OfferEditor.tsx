@@ -274,6 +274,32 @@ export default function OfferEditor() {
     return () => { cancelled = true; };
   }, [categories, adminTargetSupplierId, dealId]);
 
+  // Prefill from a Demand Request (when opened from the Demand Inbox)
+  useEffect(() => {
+    if (isEditing) return;
+    const demandId = searchParams.get("demand_id");
+    const catParam = searchParams.get("category_id");
+    const descParam = searchParams.get("description");
+    if (!demandId && !catParam && !descParam) return;
+    if (catParam && categories.find((c) => c.id === catParam)) setCategoryId(catParam);
+    if (descParam && !description) setDescription(descParam);
+    if (!demandId) return;
+    (async () => {
+      const { data } = await supabase
+        .from("demand_requests")
+        .select("category_id,description,target_qty")
+        .eq("id", demandId)
+        .maybeSingle();
+      if (!data) return;
+      if (data.category_id && categories.find((c) => c.id === data.category_id)) {
+        setCategoryId(data.category_id);
+      }
+      setDescription((prev) => (prev ? prev : data.description ?? ""));
+      if (data.target_qty && !targetParticipants) setTargetParticipants(String(data.target_qty));
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories, isEditing]);
+
   const updateTier = (i: number, patch: Partial<TierRow>) => {
     setTiers((prev) => prev.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
   };
