@@ -118,6 +118,10 @@ export default function SiteLanding() {
               alt="אפליקציית GroupBuild — עסקה קבוצתית"
               width={1024}
               height={1536}
+              loading="eager"
+              decoding="async"
+              // @ts-expect-error fetchpriority
+              fetchpriority="high"
               className="relative w-[260px] sm:w-[320px] lg:w-[420px] h-auto drop-shadow-[0_30px_50px_rgba(11,18,32,0.18)]"
             />
           </div>
