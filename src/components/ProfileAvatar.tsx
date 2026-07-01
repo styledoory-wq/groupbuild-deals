@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { Camera, LogOut, Settings, Bell, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
+import { resizeToPreset } from "@/lib/imageResize";
 
 /**
  * Premium circular avatar (top-right). Tap → menu (Profile/Settings/Notifications/Logout).
