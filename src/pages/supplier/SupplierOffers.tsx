@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getCurrentSupplier } from "@/lib/supplierAuth";
 import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 type DealRow = {
   id: string;
@@ -396,7 +397,7 @@ function FeaturedDealCard({
       <div className="flex gap-3 p-3">
         {/* Image */}
         <div className="relative w-[44%] shrink-0 rounded-[16px] overflow-hidden bg-[#F1F3F7] self-stretch">
-          <img src={cover} alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
+          <SmartImg src={cover} size="card" alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/55 to-transparent" />
           <div className="absolute top-2.5 right-2.5">
             <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-1 rounded-full bg-white/95 backdrop-blur text-orange-600 shadow-sm">
@@ -553,7 +554,7 @@ function CompactDealCard({
     >
       {/* Image */}
       <div className="relative w-[110px] shrink-0 aspect-square rounded-[14px] overflow-hidden bg-[#F1F3F7]">
-        <img src={cover} alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
+        <SmartImg src={cover} size="card" alt={d.title} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute top-1.5 right-1.5">
           <StatusPill status={d.status} />
         </div>

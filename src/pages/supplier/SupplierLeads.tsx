@@ -28,6 +28,7 @@ import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 import { isAdminEmail } from "@/lib/auth";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 type DealLite = { id: string; title: string; cover_image_url?: string | null; gallery_images?: string[] | null };
 type InterestRow = {
