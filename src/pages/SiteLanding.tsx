@@ -325,6 +325,7 @@ export default function SiteLanding() {
               width={1024}
               height={1536}
               loading="lazy"
+              decoding="async"
               className="relative w-[260px] sm:w-[320px] lg:w-[400px] h-auto drop-shadow-[0_30px_50px_rgba(11,18,32,0.18)]"
             />
           </div>
