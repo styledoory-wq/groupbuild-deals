@@ -71,6 +71,7 @@ export const SmartImg = forwardRef<HTMLImageElement, SmartImgProps>(function Sma
 
   return (
     <img
+      {...rest}
       ref={(node) => {
         imgRef.current = node;
         if (typeof ref === "function") ref(node);
@@ -87,7 +88,6 @@ export const SmartImg = forwardRef<HTMLImageElement, SmartImgProps>(function Sma
       className={className}
       style={{
         ...bgStyle,
-        // Fade the real pixels in over the blurred background.
         opacity: blur ? (loaded ? 1 : 0) : 1,
         transition: blur ? "opacity 240ms ease-out" : undefined,
         ...style,
@@ -97,15 +97,12 @@ export const SmartImg = forwardRef<HTMLImageElement, SmartImgProps>(function Sma
         rest.onLoad?.(e);
       }}
       onError={(e) => {
-        // If the render endpoint failed (project without transform enabled),
-        // fall back to the original URL once. Prevents infinite loop.
         if (!failed && src && finalSrc !== src) {
           setFailed(true);
         }
-        setLoaded(true); // reveal fallback even if blur was hiding it
+        setLoaded(true);
         rest.onError?.(e);
       }}
-      {...rest}
     />
   );
 });
