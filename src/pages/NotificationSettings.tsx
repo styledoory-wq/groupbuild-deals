@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { Bell, Save, Mail, Smartphone, Globe, Check, X } from "lucide-react";
+import { Bell, Save, Mail, Smartphone, Globe, Check, X, Apple } from "lucide-react";
+import {
+  getNativePushStatus,
+  enableNativePush,
+  isNativePlatform,
+  type NativePushStatus,
+} from "@/lib/nativePush";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
