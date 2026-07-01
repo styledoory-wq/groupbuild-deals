@@ -201,7 +201,7 @@ export default function SupplierDemandInbox() {
         {loading ? (
           <LoadingState />
         ) : error ? (
-          <ErrorState message={error} onRetry={() => { setLoading(true); void load(); }} />
+          <ErrorState description={error} onRetry={() => { setLoading(true); void load(); }} />
         ) : rows.length === 0 ? (
           <EmptyState
             icon={<Inbox className="h-8 w-8 text-[#9CA3AF]" />}
