@@ -1248,6 +1248,8 @@ export type Database = {
           deal_status_email_enabled: boolean
           deal_status_push_enabled: boolean
           deal_status_sms_enabled: boolean
+          demand_invitation_email_enabled: boolean
+          demand_invitation_push_enabled: boolean
           deposit_email_enabled: boolean
           deposit_push_enabled: boolean
           deposit_sms_enabled: boolean
@@ -1278,6 +1280,8 @@ export type Database = {
           deal_status_email_enabled?: boolean
           deal_status_push_enabled?: boolean
           deal_status_sms_enabled?: boolean
+          demand_invitation_email_enabled?: boolean
+          demand_invitation_push_enabled?: boolean
           deposit_email_enabled?: boolean
           deposit_push_enabled?: boolean
           deposit_sms_enabled?: boolean
@@ -1308,6 +1312,8 @@ export type Database = {
           deal_status_email_enabled?: boolean
           deal_status_push_enabled?: boolean
           deal_status_sms_enabled?: boolean
+          demand_invitation_email_enabled?: boolean
+          demand_invitation_push_enabled?: boolean
           deposit_email_enabled?: boolean
           deposit_push_enabled?: boolean
           deposit_sms_enabled?: boolean

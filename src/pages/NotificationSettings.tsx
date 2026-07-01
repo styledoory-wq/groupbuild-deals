@@ -35,6 +35,8 @@ type Settings = {
   new_offer_push_enabled: boolean;
   voucher_push_enabled: boolean;
   deal_status_push_enabled: boolean;
+  demand_invitation_email_enabled: boolean;
+  demand_invitation_push_enabled: boolean;
 };
 
 const DEFAULTS: Settings = {
@@ -55,6 +57,8 @@ const DEFAULTS: Settings = {
   new_offer_push_enabled: true,
   voucher_push_enabled: true,
   deal_status_push_enabled: true,
+  demand_invitation_email_enabled: true,
+  demand_invitation_push_enabled: true,
 };
 
 const EVENTS: Array<{
@@ -66,6 +70,7 @@ const EVENTS: Array<{
   { label: "אישור חשבון", desc: "כשהאדמין מאשר את החשבון שלך.", emailKey: "approval_email_enabled", pushKey: "approval_push_enabled" },
   { label: "אישור פיקדון", desc: "כשתשלום או פיקדון מתקבל.", emailKey: "deposit_email_enabled", pushKey: "deposit_push_enabled" },
   { label: "ליד חדש (ספקים)", desc: "כשדייר מתעניין בהצעה שלך.", emailKey: "new_lead_email_enabled", pushKey: "new_lead_push_enabled" },
+  { label: "ביקושים חדשים באזור שלי", desc: "כשדייר מבקש שירות בקטגוריה ובאזור שלך.", emailKey: "demand_invitation_email_enabled", pushKey: "demand_invitation_push_enabled" },
   { label: "הצעה חדשה", desc: "כשספק מפרסם הצעה רלוונטית.", emailKey: "new_offer_email_enabled", pushKey: "new_offer_push_enabled" },
   { label: "שובר חדש", desc: "כששובר חדש מופק לחשבונך.", emailKey: "voucher_email_enabled", pushKey: "voucher_push_enabled" },
   { label: "עדכון סטטוס עסקה", desc: "כשסטטוס עסקה משתנה.", emailKey: "deal_status_email_enabled", pushKey: "deal_status_push_enabled" },
