@@ -284,6 +284,61 @@ export default function NotificationSettings() {
           </div>
         </div>
 
+        {/* Native iOS/Android push */}
+        {nativeAvailable && (
+          <div className="rounded-[20px] bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] p-4">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-[12px] bg-[#0E6B5A]/10 flex items-center justify-center shrink-0">
+                <Apple className="h-5 w-5 text-[#0E6B5A]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-bold text-sm text-[#1F2937]">התראות באפליקציה (אייפון)</h3>
+                  {nativeStatus === "granted" ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
+                      <Check className="h-3 w-3" /> פעיל
+                    </span>
+                  ) : nativeStatus === "denied" ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                      <X className="h-3 w-3" /> חסום בהגדרות
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#6B7280] bg-[#F3F4F6] px-2 py-0.5 rounded-full">
+                      לא הופעל
+                    </span>
+                  )}
+                </div>
+                <p className="text-fs-xs text-[#6B7280] leading-relaxed mt-1">
+                  {nativeStatus === "granted"
+                    ? "התראות פוש פעילות במכשיר זה. תקבל/י עדכונים גם כשהאפליקציה סגורה."
+                    : nativeStatus === "denied"
+                    ? "ההרשאה נדחתה. יש לפתוח: הגדרות → GroupBuild → Notifications ולהפעיל."
+                    : "אפשר/י התראות כדי לקבל עדכונים על ביקושים, לידים ושוברים ישירות למכשיר."}
+                </p>
+                <Button
+                  onClick={handleEnableNative}
+                  disabled={nativeBusy || nativeStatus === "granted" || nativeStatus === "denied"}
+                  className={
+                    "mt-3 h-10 px-4 rounded-[12px] font-bold text-sm " +
+                    (nativeStatus === "granted"
+                      ? "bg-white border border-[#ECEEF2] text-[#1F2937]"
+                      : "bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white")
+                  }
+                >
+                  {nativeBusy
+                    ? "רגע…"
+                    : nativeStatus === "granted"
+                    ? "התראות מופעלות"
+                    : nativeStatus === "denied"
+                    ? "חסום בהגדרות האייפון"
+                    : "אפשר התראות באייפון"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
         <div className="rounded-[20px] bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] p-4 space-y-2">
           <h3 className="font-bold text-sm mb-2 text-[#1F2937]">סוגי אירועים</h3>
           <div className="flex items-center gap-1 text-fs-xs text-[#6B7280] pb-2 border-b border-[#ECEEF2]">
