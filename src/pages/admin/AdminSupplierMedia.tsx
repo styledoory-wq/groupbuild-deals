@@ -13,6 +13,7 @@ import { uploadSupplierLogo, uploadSupplierGalleryImage } from "@/lib/supplierUp
 import { SupplierCatalogsManager } from "@/components/suppliers/SupplierCatalogsManager";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 export default function AdminSupplierMedia() {
   const { supplierId } = useParams<{ supplierId: string }>();
@@ -175,7 +176,7 @@ export default function AdminSupplierMedia() {
             <div className="grid grid-cols-3 gap-2 mt-2">
               {gallery.map((g, idx) => (
                 <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-border group">
-                  <img src={g.image_url} alt="" className="h-full w-full object-cover" />
+                  <SmartImg src={g.image_url} size="card" alt="" className="h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => setGallery((arr) => arr.filter((_, i) => i !== idx))}

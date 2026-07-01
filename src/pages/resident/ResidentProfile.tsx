@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { resizeToPreset } from "@/lib/imageResize";
 
 export default function ResidentProfile() {
   const navigate = useNavigate();
@@ -59,9 +60,14 @@ export default function ResidentProfile() {
     if (!file || !user?.id) return;
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
+      const resized = await resizeToPreset(file, "avatar");
+      const ext = resized.type === "image/webp" ? "webp" : "jpg";
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, resized, {
+        upsert: true,
+        cacheControl: "31536000",
+        contentType: resized.type,
+      });
       if (upErr) throw upErr;
       await supabase.from("profiles").update({ avatar_url: path }).eq("id", user.id);
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 3600);

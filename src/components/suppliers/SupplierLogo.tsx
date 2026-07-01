@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 interface SupplierLogoProps {
   name?: string | null;
@@ -22,6 +23,8 @@ function getInitials(name?: string | null) {
 
 export function SupplierLogo({ name, logoUrl, size = "md", className }: SupplierLogoProps) {
   const initials = getInitials(name);
+  // Small (sm/md) → thumb preset (96px). Large (lg/xl) → logo preset (200px).
+  const preset = size === "sm" || size === "md" ? "thumb" : "logo";
   return (
     <div
       className={cn(
@@ -33,10 +36,11 @@ export function SupplierLogo({ name, logoUrl, size = "md", className }: Supplier
       aria-label={name ?? "ספק"}
     >
       {logoUrl ? (
-        <img src={logoUrl} alt={name ?? "לוגו ספק"} className="h-full w-full object-cover" loading="lazy" />
+        <SmartImg src={logoUrl} size={preset} alt={name ?? "לוגו ספק"} className="h-full w-full object-cover" />
       ) : (
         <span className="text-[#0A5446]">{initials}</span>
       )}
     </div>
   );
 }
+

@@ -80,3 +80,57 @@ self.addEventListener("notificationclick", (event) => {
 self.addEventListener("pushsubscriptionchange", (event) => {
   event.waitUntil(Promise.resolve());
 });
+
+// ---- Image cache (stale-while-revalidate) ----
+// Aggressively cache Supabase Storage images (public objects + render/image
+// transforms) so returning users get an instant paint on cards, logos and
+// gallery views. Cache is capped to avoid growing without bound.
+const IMG_CACHE = "gb-img-v1";
+const IMG_CACHE_MAX = 300;
+
+function isCacheableImage(url) {
+  try {
+    const u = new URL(url);
+    if (!/^https?:$/.test(u.protocol)) return false;
+    // Supabase storage public + render/image endpoints
+    if (u.pathname.includes("/storage/v1/object/public/")) return true;
+    if (u.pathname.includes("/storage/v1/render/image/")) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+async function trimCache(cacheName, maxItems) {
+  try {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    if (keys.length <= maxItems) return;
+    const excess = keys.length - maxItems;
+    for (let i = 0; i < excess; i++) await cache.delete(keys[i]);
+  } catch {}
+}
+
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+  if (req.method !== "GET") return;
+  if (!isCacheableImage(req.url)) return;
+
+  event.respondWith(
+    (async () => {
+      const cache = await caches.open(IMG_CACHE);
+      const cached = await cache.match(req);
+      const networkPromise = fetch(req)
+        .then((resp) => {
+          // Only cache OK, opaque responses can't be inspected but are fine to cache
+          if (resp && (resp.ok || resp.type === "opaque")) {
+            cache.put(req, resp.clone()).then(() => trimCache(IMG_CACHE, IMG_CACHE_MAX));
+          }
+          return resp;
+        })
+        .catch(() => cached);
+      return cached || networkPromise;
+    })(),
+  );
+});
+

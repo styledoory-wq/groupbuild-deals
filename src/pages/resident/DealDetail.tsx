@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, TrendingDown, MessageCircle, Phone, CheckCircle2, CreditCard, Clock, Share2, Percent, PiggyBank, CalendarDays, MapPin, Layers, Store, Handshake, Target, PhoneCall, Wrench, BadgeCheck, Award, ChevronLeft, Building2, PartyPopper, Heart, Link2, Rocket, User as UserIcon, Pencil } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
+import { SmartImg } from "@/components/ui/SmartImg";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BackHeader, LoadingState, ErrorState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -829,10 +830,13 @@ export default function DealDetail() {
             <div className="absolute inset-0">
               <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-full">
                 {heroImages.map((url, i) => (
-                  <img
+                  <SmartImg
                     key={url + i}
                     src={url}
+                    size="detail"
                     alt={`${deal.title} ${i + 1}`}
+                    priority={i === 0}
+                    eager={i === 0}
                     className="w-full h-full object-cover shrink-0 snap-start"
                     style={{ flex: "0 0 100%" }}
                   />

@@ -3,6 +3,7 @@ import { ImagePlus, Loader2, Star, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadDealImage } from "@/lib/dealUploads";
 import { toast } from "sonner";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 type Props = {
   cover: string | null;
@@ -80,7 +81,7 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
         </div>
         {cover ? (
           <div className="relative rounded-2xl overflow-hidden border border-gold/30 group">
-            <img src={cover} alt="cover" className="w-full h-44 object-cover" />
+            <SmartImg src={cover} size="card" alt="cover" className="w-full h-44 object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             <span className="absolute top-2 right-2 inline-flex items-center gap-1 text-fs-xs font-bold px-2 py-1 rounded-full bg-gold text-primary shadow">
               <Star className="h-3 w-3" /> שער ראשי
@@ -134,7 +135,7 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
         <div className="grid grid-cols-3 gap-2">
           {gallery.map((url, i) => (
             <div key={url + i} className="relative group rounded-xl overflow-hidden border border-border aspect-square">
-              <img src={url} alt={`g-${i}`} className="w-full h-full object-cover" />
+              <SmartImg src={url} size="thumb" alt={`g-${i}`} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
               <button
                 type="button"

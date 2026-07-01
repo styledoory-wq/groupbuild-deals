@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 type DbDeal = {
   id: string;
@@ -276,7 +277,7 @@ export default function AdminDeals() {
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="w-9 h-9 rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0">
                           {d.cover_image_url ? (
-                            <img src={d.cover_image_url} alt="" className="w-full h-full object-cover" />
+                            <SmartImg src={d.cover_image_url} size="thumb" alt="" className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <ImageIcon className="h-3.5 w-3.5 text-[#9CA3AF]" />
@@ -316,7 +317,7 @@ export default function AdminDeals() {
                       <div className="flex items-center gap-2 min-w-0">
                         <div className="w-9 h-9 rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0">
                           {d.cover_image_url ? (
-                            <img src={d.cover_image_url} alt="" className="w-full h-full object-cover" />
+                            <SmartImg src={d.cover_image_url} size="thumb" alt="" className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <ImageIcon className="h-3.5 w-3.5 text-[#9CA3AF]" />

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 interface SharedDealRow {
   id: string;
@@ -136,7 +137,7 @@ export default function SharedDeal() {
 
             {deal.cover_image_url && (
               <div className="mt-5 overflow-hidden rounded-[20px] shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
-                <img src={deal.cover_image_url} alt={deal.title} className="w-full h-56 object-cover" />
+                <SmartImg src={deal.cover_image_url} size="detail" alt={deal.title} priority eager className="w-full h-56 object-cover" />
               </div>
             )}
 

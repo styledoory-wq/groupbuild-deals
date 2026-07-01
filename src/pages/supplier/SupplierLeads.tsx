@@ -28,6 +28,7 @@ import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 import { isAdminEmail } from "@/lib/auth";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 type DealLite = { id: string; title: string; cover_image_url?: string | null; gallery_images?: string[] | null };
 type InterestRow = {
@@ -441,7 +442,7 @@ export default function SupplierLeads() {
           {/* Row 1: cover + name/deal/meta + star */}
           <div className="flex items-start gap-2.5">
             {cover ? (
-              <img src={cover} alt="" loading="lazy"
+              <SmartImg src={cover} size="thumb" alt=""
                 className="h-14 w-14 rounded-xl object-cover shrink-0 border border-[#EEF0F3]" />
             ) : (
               <div className="h-14 w-14 rounded-xl flex items-center justify-center text-[#0E6B5A] font-extrabold text-[15px] shrink-0"

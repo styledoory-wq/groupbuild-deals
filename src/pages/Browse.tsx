@@ -8,6 +8,7 @@ import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import type { OfferTier } from "@/lib/offerPricing";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 type SupplierRow = {
   id: string;
@@ -220,7 +221,7 @@ export default function Browse() {
               >
                 <div className="flex items-center gap-3">
                   {s.logo_url ? (
-                    <img src={s.logo_url} alt={s.business_name} className="h-14 w-14 rounded-xl object-cover border border-[#ECEEF2]" />
+                    <SmartImg src={s.logo_url} size="logo" alt={s.business_name} className="h-14 w-14 rounded-xl object-cover border border-[#ECEEF2]" />
                   ) : (
                     <div className="h-14 w-14 rounded-xl bg-[#F4F6FA] flex items-center justify-center">
                       <ShieldCheck className="h-6 w-6 text-[#0E6B5A]" />

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Tag, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BudgetResult, ILS } from "@/lib/budgetPricing";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 type Deal = {
   id: string;
@@ -81,7 +82,7 @@ export function MatchingDeals({ result }: { result: BudgetResult }) {
               className="flex items-center gap-3 p-3 rounded-2xl bg-[#F7F5F0] border border-[#E5E7EB] hover:bg-white transition"
             >
               {d.image_url && (
-                <img src={d.image_url} alt={d.title} className="h-12 w-12 rounded-xl object-cover" />
+                <SmartImg src={d.image_url} size="thumb" alt={d.title} className="h-12 w-12 rounded-xl object-cover" />
               )}
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-[13px] text-[#1F2937] truncate">{d.title}</div>

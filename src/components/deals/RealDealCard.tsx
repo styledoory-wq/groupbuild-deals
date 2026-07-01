@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ShieldCheck, Tag as TagIcon, TrendingDown, Flame, Users, Clock, Image as ImageIcon } from "lucide-react";
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { FavoriteButton } from "@/components/deals/FavoriteButton";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 export interface RealDealCardData {
   id: string;
@@ -112,10 +113,10 @@ function RealDealCardImpl({
         {/* Square image top half */}
         <div className="relative aspect-square w-full overflow-hidden bg-[#F4F6FA]">
           {cover ? (
-            <img
+            <SmartImg
               src={cover}
+              size="card"
               alt={deal.title}
-              loading="lazy"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (

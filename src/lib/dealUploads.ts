@@ -1,27 +1,31 @@
 import { supabase } from "@/integrations/supabase/client";
-import { resizeImage } from "@/lib/imageResize";
+import { resizeToPreset } from "@/lib/imageResize";
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_BYTES = 10 * 1024 * 1024; // Accept up to 10MB from user, we compress before upload
+
+// 1 year, immutable — filenames are timestamped so they never collide.
+const CACHE_CONTROL = "31536000";
 
 function safeName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
 /**
- * Upload an image to the public `deal-images` bucket under {uid}/{filename}.
- * Resizes to max 800px (longest side) and compresses to JPEG 0.82 before upload.
+ * Upload a deal image (used for cover + gallery).
+ * Resized to "gallery" preset (1200px WebP) — same file drives both card
+ * (via CDN transform to 480px) and detail (via 960px). One asset, many sizes.
  */
 export async function uploadDealImage(file: File): Promise<string> {
   if (!IMAGE_TYPES.includes(file.type)) throw new Error("רק JPG / PNG / WEBP");
-  if (file.size > MAX_BYTES) throw new Error("התמונה גדולה מדי (מקסימום 5MB)");
-  const resized = await resizeImage(file, 800, 0.82);
+  if (file.size > MAX_BYTES) throw new Error("התמונה גדולה מדי (מקסימום 10MB)");
+  const resized = await resizeToPreset(file, "gallery");
   const { data: session } = await supabase.auth.getSession();
   const uid = session.session?.user?.id;
   if (!uid) throw new Error("יש להתחבר כדי להעלות תמונה");
   const path = `${uid}/${Date.now()}_${safeName(resized.name)}`;
   const { error } = await supabase.storage.from("deal-images").upload(path, resized, {
-    cacheControl: "3600",
+    cacheControl: CACHE_CONTROL,
     upsert: false,
     contentType: resized.type,
   });

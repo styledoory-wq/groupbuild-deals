@@ -16,6 +16,7 @@ import { type StageId } from "@/lib/designSystem";
 import { getJourney, type JourneyId, VALID_JOURNEY_IDS } from "@/lib/journeys";
 import { QuoteRequestSheet } from "@/components/committee/QuoteRequestSheet";
 import { HelpButton } from "@/components/OnboardingFlow";
+import { SmartImg } from "@/components/ui/SmartImg";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
   { id: "planning",     title: "תכנון ועיצוב",       description: "אדריכלות ועיצוב פנים",            icon: PencilRuler, dbStage: "planning" },
@@ -561,7 +562,7 @@ function DealFeedCard({ deal, onClick }: { deal: MiniDeal; onClick: () => void }
     >
       <div className="relative h-44 bg-[#F7F5F0] overflow-hidden">
         {deal.cover_image_url ? (
-          <img src={deal.cover_image_url} alt={deal.title} className="w-full h-full object-cover" loading="lazy" />
+          <SmartImg src={deal.cover_image_url} size="card" alt={deal.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Sparkles className="h-10 w-10 text-[#D1D1D6]" />
