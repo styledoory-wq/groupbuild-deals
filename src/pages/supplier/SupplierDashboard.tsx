@@ -575,6 +575,12 @@ export default function SupplierDashboard() {
             <Plus className="h-4 w-4" strokeWidth={2.6} /> צור הצעה חדשה
           </button>
           <button
+            onClick={() => navigate("/supplier/demand-inbox")}
+            className="w-full h-11 rounded-2xl bg-white border border-[#EEF0F3] text-[#0F172A] font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition"
+          >
+            <Bell className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2.4} /> ביקושים פתוחים באזור שלך
+          </button>
+          <button
             onClick={() => navigate("/supplier/deposits")}
             className="w-full h-11 rounded-2xl bg-white border border-[#EEF0F3] text-[#0F172A] font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition"
           >
