@@ -109,7 +109,7 @@ export function ProfileAvatar({
         aria-label="פרופיל"
       >
         {avatarUrl ? (
-          <img src={avatarUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={avatarUrl} alt="" className="absolute inset-0 w-full h-full object-cover" loading="eager" decoding="async" />
         ) : (
           <span className="absolute inset-0 flex items-center justify-center text-white font-bold" style={{ fontSize: size * 0.4 }}>
             {initials}
