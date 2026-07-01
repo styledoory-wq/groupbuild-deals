@@ -263,6 +263,7 @@ const App = () => (
                   <Route path="/marketing-mockups" element={<MarketingMockups />} />
                   <Route path="/settings/notifications" element={<NotificationSettings />} />
                   <Route path="/supplier/leads" element={supplierRoute(<SupplierLeads />)} />
+                  <Route path="/supplier/demand-inbox" element={supplierRoute(<SupplierDemandInbox />)} />
                   <Route path="/supplier/reviews" element={supplierRoute(<SupplierReviews />)} />
                   <Route path="/supplier/scan" element={supplierRoute(<SupplierScan />)} />
                   <Route path="/supplier/redemptions" element={supplierRoute(<SupplierRedemptions />)} />
