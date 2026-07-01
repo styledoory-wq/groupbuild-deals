@@ -171,7 +171,7 @@ function RealDealCardImpl({
           {deal.supplier_name && (
             <div className="flex items-center gap-1.5 text-[11px] text-[#6B7280]">
               {deal.supplier_logo_url ? (
-                <img src={deal.supplier_logo_url} alt="" className="h-5 w-5 rounded-full object-cover border border-[#ECEEF2]" />
+                <SmartImg src={deal.supplier_logo_url} size="thumb" alt="" className="h-5 w-5 rounded-full object-cover border border-[#ECEEF2]" />
               ) : (
                 <ShieldCheck className="h-3 w-3 text-[#0E6B5A]" strokeWidth={2.5} />
               )}
