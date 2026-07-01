@@ -35,9 +35,31 @@ const QUALITY: Record<ImgSize, number> = {
   hero: 82,
 };
 
+// Responsive width ladders per preset — used to build width-descriptor srcsets
+// (`... 240w, ... 480w`) so browsers pick the closest match to the actual
+// rendered size, guided by the `sizes` attribute.
+const WIDTH_LADDER: Record<ImgSize, number[]> = {
+  thumb: [64, 96, 192],
+  logo: [120, 200, 400],
+  card: [240, 480, 720, 960],
+  detail: [480, 960, 1440],
+  hero: [800, 1280, 1600, 1920],
+};
+
 // Match Supabase public storage object URLs:
 //   https://<ref>.supabase.co/storage/v1/object/public/<bucket>/<path>
 const PUBLIC_RE = /\/storage\/v1\/object\/public\/([^/?#]+)\/(.+?)(\?.*)?$/;
+
+function buildRenderUrl(url: string, width: number, quality: number): string | null {
+  if (!/^https?:\/\//i.test(url)) return null;
+  if (url.includes("/storage/v1/render/image/")) return url;
+  const m = url.match(PUBLIC_RE);
+  if (!m) return null;
+  const [, bucket, path] = m;
+  const cleanPath = path.split("?")[0];
+  const base = url.substring(0, url.indexOf("/storage/v1/"));
+  return `${base}/storage/v1/render/image/public/${bucket}/${cleanPath}?width=${width}&quality=${quality}&resize=cover`;
+}
 
 /**
  * Rewrite a Supabase public storage URL to the render/image transform URL.
@@ -46,39 +68,36 @@ const PUBLIC_RE = /\/storage\/v1\/object\/public\/([^/?#]+)\/(.+?)(\?.*)?$/;
  */
 export function imgUrl(url: string | null | undefined, size: ImgSize): string {
   if (!url) return "";
-  // Data URLs / blob URLs / non-http — never rewrite.
-  if (!/^https?:\/\//i.test(url)) return url;
-  // Already a render URL — don't double-transform.
-  if (url.includes("/storage/v1/render/image/")) return url;
-
-  const m = url.match(PUBLIC_RE);
-  if (!m) return url;
-
-  const [, bucket, path] = m;
-  // Strip existing query string; we add our own.
-  const cleanPath = path.split("?")[0];
-  const base = url.substring(0, url.indexOf("/storage/v1/"));
-  const w = WIDTH[size];
-  const q = QUALITY[size];
-  return `${base}/storage/v1/render/image/public/${bucket}/${cleanPath}?width=${w}&quality=${q}&resize=cover`;
+  const built = buildRenderUrl(url, WIDTH[size], QUALITY[size]);
+  return built ?? url;
 }
 
 /**
- * Build a srcset string for retina displays. Uses 1x/2x widths.
+ * Build a width-descriptor srcset ("url 240w, url 480w, ...") using the
+ * preset's width ladder. Pair with the `sizes` attribute on the <img> so the
+ * browser can pick the smallest sufficient variant.
+ *
+ * Falls back to a simple 1x/2x DPR srcset when width descriptors aren't
+ * appropriate (single-scale surfaces like tiny thumbs).
  */
 export function imgSrcSet(url: string | null | undefined, size: ImgSize): string | undefined {
   if (!url) return undefined;
-  const base = imgUrl(url, size);
-  if (base === url) return undefined; // not transformable
-  // Build a 2x variant by bumping width. Cap at hero width.
-  const nextSize: Record<ImgSize, ImgSize> = {
-    thumb: "logo",
-    logo: "card",
-    card: "detail",
-    detail: "hero",
-    hero: "hero",
-  };
-  const retina = imgUrl(url, nextSize[size]);
-  if (retina === base) return undefined;
-  return `${base} 1x, ${retina} 2x`;
+  const q = QUALITY[size];
+  const ladder = WIDTH_LADDER[size];
+  const parts: string[] = [];
+  for (const w of ladder) {
+    const built = buildRenderUrl(url, w, q);
+    if (!built) return undefined; // not transformable — bail
+    parts.push(`${built} ${w}w`);
+  }
+  return parts.length ? parts.join(", ") : undefined;
+}
+
+/**
+ * Tiny (24px, low quality) URL suitable for a blurred placeholder background.
+ * Returns null when the URL isn't transformable (caller should skip blur).
+ */
+export function imgBlurUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return buildRenderUrl(url, 24, 30);
 }
