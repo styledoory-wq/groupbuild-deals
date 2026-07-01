@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
       .from("device_tokens")
       .select("id", { count: "exact", head: true })
       .eq("user_id", n.user_id)
-      .eq("platform", "web");
+      .in("platform", ["web", "ios"]);
     if ((tokenCount ?? 0) > 0) {
       try {
         const r = await invokeFn("send-push", {
