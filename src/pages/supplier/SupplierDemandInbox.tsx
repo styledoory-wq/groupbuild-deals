@@ -163,10 +163,13 @@ export default function SupplierDemandInbox() {
 
   const updateStatus = async (row: Row, next: InviteStatus) => {
     setBusy(row.invitation_id);
-    const patch: Record<string, unknown> = { status: next };
-    if (next === "declined" || next === "interested" || next === "submitted_offer") {
-      patch.responded_at = new Date().toISOString();
-    }
+    const patch = {
+      status: next,
+      responded_at:
+        next === "declined" || next === "interested" || next === "submitted_offer"
+          ? new Date().toISOString()
+          : null,
+    };
     const { error: uErr } = await supabase
       .from("demand_invitations")
       .update(patch)
