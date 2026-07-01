@@ -1177,6 +1177,60 @@ export type Database = {
           },
         ]
       }
+      image_migration_log: {
+        Row: {
+          bucket: string
+          column_name: string
+          created_at: string
+          error: string | null
+          id: string
+          new_bytes: number | null
+          new_path: string | null
+          new_url: string | null
+          old_bytes: number | null
+          old_path: string
+          old_url: string
+          row_id: string
+          run_id: string
+          status: string
+          table_name: string
+        }
+        Insert: {
+          bucket: string
+          column_name: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          new_bytes?: number | null
+          new_path?: string | null
+          new_url?: string | null
+          old_bytes?: number | null
+          old_path: string
+          old_url: string
+          row_id: string
+          run_id: string
+          status: string
+          table_name: string
+        }
+        Update: {
+          bucket?: string
+          column_name?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          new_bytes?: number | null
+          new_path?: string | null
+          new_url?: string | null
+          old_bytes?: number | null
+          old_path?: string
+          old_url?: string
+          row_id?: string
+          run_id?: string
+          status?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       notification_dispatch_log: {
         Row: {
           attempts: number
