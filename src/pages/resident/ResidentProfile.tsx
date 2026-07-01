@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { useApp } from "@/store/AppStore";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { resizeToPreset } from "@/lib/imageResize";
 
 export default function ResidentProfile() {
   const navigate = useNavigate();
