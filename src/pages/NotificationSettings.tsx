@@ -164,14 +164,15 @@ export default function NotificationSettings() {
     setNativeBusy(true);
     try {
       const res = await enableNativePush(userId);
-      if (res.ok) {
+      if (res.ok === true) {
         setNativeStatus("granted");
         toast.success("התראות באייפון הופעלו");
       } else {
-        if (res.reason === "denied") {
+        const reason = res.reason;
+        if (reason === "denied") {
           setNativeStatus("denied");
           toast.error("התראות חסומות בהגדרות האייפון. פתח/י הגדרות → GroupBuild → Notifications");
-        } else if (res.reason === "unsupported") {
+        } else if (reason === "unsupported") {
           toast.error("זמין רק באפליקציה הנייטיב");
         } else {
           toast.error("ההפעלה נכשלה, נסה/י שוב");
