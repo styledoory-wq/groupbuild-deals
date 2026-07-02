@@ -6,7 +6,8 @@ import {
   Eye, Pencil, FileText, Settings2, Sparkles,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { BackHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ds";
+import { BackHeader } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -640,53 +641,70 @@ export default function OfferEditor() {
 
   return (
     <MobileShell>
-      <BackHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} />
-
-      {/* Sticky compact progress bar */}
-      <div className="sticky top-0 z-20 bg-[#F8F6F1]/95 backdrop-blur px-5 pt-2 pb-3 -mt-2">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-fs-xs font-extrabold text-[#1F2937]">
-            שלב {step} מתוך 3 · {stepTitles[step]}
-          </span>
-          <span className="text-[11px] text-[#6B7280]">{Math.round(progressPct)}%</span>
+      {/* Compact header — title + tiny progress bar together. No BackHeader chrome. */}
+      <header className="sticky top-0 z-20 bg-[#F8F6F1]/95 backdrop-blur-md">
+        <div className="flex items-center gap-3 px-5 pt-3 pb-2">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="h-8 w-8 -mr-1 flex items-center justify-center rounded-full text-[#1F2937] hover:bg-black/5 transition-colors"
+            aria-label="חזרה"
+          >
+            <ChevronRight className="h-5 w-5" strokeWidth={2.2} />
+          </button>
+          <div className="flex-1 min-w-0">
+            <div className="text-[15px] font-semibold text-[#111827] leading-tight truncate">
+              {isEditing ? "עריכת הצעה" : "הצעה חדשה"}
+            </div>
+            <div className="text-[11.5px] text-[#6B7280] leading-tight mt-0.5">
+              {stepTitles[step]} · {step}/3
+            </div>
+          </div>
         </div>
-        <div className="h-1 rounded-full bg-[#ECEEF2] overflow-hidden">
-          <div className="h-full bg-[#0E6B5A] transition-all duration-300" style={{ width: `${progressPct}%` }} />
+        <div className="h-[2px] bg-black/[0.06] mx-5 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-[#0E6B5A] transition-all duration-300 rounded-full"
+            style={{ width: `${progressPct}%` }}
+          />
         </div>
-      </div>
+      </header>
 
       <div
-        className="px-5 relative z-10 space-y-4"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 108px)" }}
+        className="px-5 pt-5 relative z-10"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 96px)" }}
       >
-        {/* ─── STEP 1: What ─── */}
+        {/* ─── STEP 1 ─── */}
         {step === 1 && (
-          <>
-            <div className="gb-card p-4 space-y-3">
-              <h3 className="font-bold text-sm text-[#1F2937]">סוג ההצעה</h3>
+          <div className="space-y-7">
+            <Section title="סוג ההצעה">
               <div className="grid grid-cols-2 gap-2">
                 <TypeCard active={listingType === "group_buy"} onClick={() => setListingType("group_buy")}
                   title="קבוצת רכישה" desc="מחיר יורד לפי כמות" />
                 <TypeCard active={listingType === "regular"} onClick={() => setListingType("regular")}
                   title="הצעה רגילה" desc="מבצע במחיר קבוע" />
               </div>
-            </div>
+            </Section>
 
-            <div className="gb-card p-4 space-y-3">
-              <Field label="שם ההצעה">
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="לדוגמה: שדרוג מטבח פרימיום" className="h-11 rounded-xl" />
-              </Field>
-              <Field label="קטגוריה">
-                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="h-11 w-full rounded-xl border border-input bg-card px-3 text-sm">
-                  {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-                </select>
-              </Field>
-              <Field label="תיאור ההצעה" hint="מה כלול, מפרט, למי זה מתאים">
-                <Textarea value={description} onChange={(e) => setDescription(e.target.value)}
-                  placeholder="ספר על ההצעה במילים שלך..."
-                  className="rounded-xl min-h-[120px]" />
-              </Field>
-            </div>
+            <Section title="פרטים">
+              <div className="space-y-4">
+                <Field label="שם ההצעה">
+                  <Input value={title} onChange={(e) => setTitle(e.target.value)}
+                    placeholder="לדוגמה: שדרוג מטבח פרימיום"
+                    className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" />
+                </Field>
+                <Field label="קטגוריה">
+                  <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}
+                    className="h-11 w-full rounded-xl bg-white ring-1 ring-black/[0.06] px-3 text-[13.5px] text-[#1F2937] focus:outline-none focus:ring-[#0E6B5A]/40">
+                    {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+                  </select>
+                </Field>
+                <Field label="תיאור" hint="מה כלול, למי זה מתאים">
+                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)}
+                    placeholder="ספר על ההצעה במילים שלך..."
+                    className="rounded-xl min-h-[100px] shadow-none ring-1 ring-black/[0.06] text-[13.5px]" />
+                </Field>
+              </div>
+            </Section>
 
             {!isEditing && (
               <AiOfferGeneratorCard
@@ -694,75 +712,86 @@ export default function OfferEditor() {
                 onDraftReady={applyAiDraft}
               />
             )}
+
             {aiFaqPreview.length > 0 && (
-              <div className="gb-card p-4 space-y-2 border border-amber-200 bg-amber-50/50">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-sm text-[#1F2937]">שאלות נפוצות שהוצעו על-ידי AI</h3>
-                  <button type="button" onClick={() => setAiFaqPreview([])} className="text-[11px] text-[#6B7280] hover:underline">נקה</button>
-                </div>
-                <p className="text-[11px] text-[#6B7280]">תצוגה מקדימה בלבד — לא נשמר עדיין להצעה.</p>
-                <div className="space-y-2 pt-1">
+              <Section
+                title="שאלות שהוצעו על-ידי AI"
+                hint="תצוגה מקדימה — לא נשמר להצעה"
+                action={
+                  <button type="button" onClick={() => setAiFaqPreview([])}
+                    className="text-[11.5px] text-[#6B7280] hover:text-[#1F2937]">נקה</button>
+                }
+              >
+                <div className="divide-y divide-black/[0.06] rounded-xl bg-white ring-1 ring-black/[0.05]">
                   {aiFaqPreview.map((f, i) => (
-                    <div key={i} className="rounded-lg bg-white p-2 text-[12px]">
-                      <div className="font-bold text-[#1F2937]">{f.q}</div>
-                      <div className="text-[#4B5563] mt-0.5">{f.a}</div>
-                    </div>
+                    <details key={i} className="group">
+                      <summary className="list-none cursor-pointer px-3 py-2.5 flex items-center justify-between gap-2">
+                        <span className="text-[12.5px] font-semibold text-[#1F2937] flex-1">{f.q}</span>
+                        <ChevronLeft className="h-3.5 w-3.5 text-[#9CA3AF] transition-transform group-open:-rotate-90 shrink-0" />
+                      </summary>
+                      <div className="px-3 pb-3 text-[12px] text-[#4B5563] leading-relaxed">{f.a}</div>
+                    </details>
                   ))}
                 </div>
-              </div>
+              </Section>
             )}
 
-            <div className="gb-card p-4">
-              <h3 className="font-bold text-sm mb-3 text-[#1F2937]">תמונות <span className="text-[11px] font-normal text-muted-foreground">(מומלץ)</span></h3>
+            <Section title="תמונות" hint="מומלץ להוסיף לפחות תמונה אחת">
               <DealImagesEditor
                 cover={coverImage}
                 gallery={galleryImages}
                 onChange={({ cover, gallery }) => { setCoverImage(cover); setGalleryImages(gallery); }}
               />
-            </div>
-          </>
+            </Section>
+          </div>
         )}
 
-        {/* ─── STEP 2: Price + Audience ─── */}
+        {/* ─── STEP 2 ─── */}
         {step === 2 && (
-          <>
+          <div className="space-y-7">
             {listingType === "regular" ? (
-              <div className="gb-card p-4 space-y-3">
-                <h3 className="font-bold text-sm text-[#1F2937]">מחיר ההצעה</h3>
+              <Section title="מחיר">
                 <Field label="מחיר (₪)">
-                  <Input type="number" inputMode="numeric" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="הזן מחיר" />
+                  <Input type="number" inputMode="numeric" min={1} value={unitPrice}
+                    onChange={(e) => setUnitPrice(e.target.value)}
+                    className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]"
+                    placeholder="הזן מחיר" />
                 </Field>
-                <p className="text-fs-xs text-muted-foreground leading-relaxed">
+                <p className="text-[11.5px] text-[#6B7280] leading-relaxed mt-2">
                   דיירים יוכלו לבקש לפתוח קבוצת רכישה עבור ההצעה.
                 </p>
-              </div>
+              </Section>
             ) : (
               <>
-                <div className="gb-card p-4 space-y-3">
-                  <h3 className="font-bold text-sm text-[#1F2937]">איך המחיר יוצג?</h3>
+                <Section title="תצוגת המחיר">
                   <div className="grid grid-cols-2 gap-2">
-                    <ToggleBtn active={offerType === "percentage"} onClick={() => switchOfferType("percentage")}>אחוז הנחה</ToggleBtn>
-                    <ToggleBtn active={offerType === "price_comparison"} onClick={() => switchOfferType("price_comparison")}>מחיר לפני / אחרי</ToggleBtn>
+                    <PillBtn active={offerType === "percentage"} onClick={() => switchOfferType("percentage")}>אחוז הנחה</PillBtn>
+                    <PillBtn active={offerType === "price_comparison"} onClick={() => switchOfferType("price_comparison")}>לפני / אחרי</PillBtn>
                   </div>
                   {offerType === "price_comparison" && (
-                    <Field label="מחיר רגיל (לפני הנחה, ₪)">
-                      <Input type="number" inputMode="numeric" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="הזן מחיר בסיס" />
-                    </Field>
+                    <div className="mt-3">
+                      <Field label="מחיר רגיל (לפני הנחה, ₪)">
+                        <Input type="number" inputMode="numeric" min={1} value={unitPrice}
+                          onChange={(e) => setUnitPrice(e.target.value)}
+                          className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]"
+                          placeholder="הזן מחיר בסיס" />
+                      </Field>
+                    </div>
                   )}
-                </div>
+                </Section>
 
-                <div className="gb-card p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-sm text-[#1F2937]">מדרגות מחיר</h3>
+                <Section
+                  title="מדרגות מחיר"
+                  action={
                     <button type="button" onClick={loadRecommendedTiers}
-                      className="text-[11px] font-bold text-[#0E6B5A] flex items-center gap-1 hover:underline">
-                      <Sparkles className="h-3 w-3" /> טען מדרגות מומלצות
+                      className="text-[11.5px] font-semibold text-[#0E6B5A] inline-flex items-center gap-1 hover:underline">
+                      <Sparkles className="h-3 w-3" /> מומלץ
                     </button>
-                  </div>
-
-                  <div className="space-y-2">
+                  }
+                >
+                  <div className="divide-y divide-black/[0.06] rounded-xl bg-white ring-1 ring-black/[0.05] overflow-hidden">
                     {tiers.map((t, i) => (
-                      <TierCard
+                      <TierRow
                         key={i}
                         idx={i}
                         tier={t}
@@ -776,62 +805,54 @@ export default function OfferEditor() {
                     ))}
                   </div>
 
-                  <Button type="button" onClick={addTier} variant="outline"
-                    className="w-full h-11 rounded-xl border-dashed border-2 text-sm font-bold">
-                    <Plus className="h-4 w-4 ml-1" /> הוסף מדרגה
-                  </Button>
-                </div>
+                  <button type="button" onClick={addTier}
+                    className="mt-2.5 w-full h-10 rounded-xl text-[12.5px] font-semibold text-[#0E6B5A] hover:bg-[#0E6B5A]/[0.06] inline-flex items-center justify-center gap-1.5 transition-colors">
+                    <Plus className="h-3.5 w-3.5" /> הוסף מדרגה
+                  </button>
+                </Section>
               </>
             )}
 
-            {/* Audience */}
-            <div className="gb-card p-4 space-y-3">
-              <h3 className="font-bold text-sm text-[#1F2937]">למי ההצעה מיועדת?</h3>
+            <Section title="קהל יעד">
               <div className="grid grid-cols-3 gap-2">
-                <ToggleBtn active={visibilityType === "public"} onClick={() => setVisibilityType("public")}>כולם</ToggleBtn>
-                <ToggleBtn active={visibilityType === "project_only"} onClick={() => setVisibilityType("project_only")}>פרויקט</ToggleBtn>
-                <ToggleBtn active={visibilityType === "region_only"} onClick={() => setVisibilityType("region_only")}>אזור</ToggleBtn>
+                <PillBtn active={visibilityType === "public"} onClick={() => setVisibilityType("public")}>כולם</PillBtn>
+                <PillBtn active={visibilityType === "project_only"} onClick={() => setVisibilityType("project_only")}>פרויקט</PillBtn>
+                <PillBtn active={visibilityType === "region_only"} onClick={() => setVisibilityType("region_only")}>אזור</PillBtn>
               </div>
               {visibilityType === "project_only" && (
-                <Field label="פרויקט">
-                  <select value={visibilityProjectId} onChange={(e) => setVisibilityProjectId(e.target.value)}
-                    className="h-11 w-full rounded-xl border border-input bg-card px-3 text-sm">
-                    <option value="">— בחר פרויקט —</option>
-                    {projects.map((p) => (<option key={p.id} value={p.id}>{p.name} · {p.city}</option>))}
-                  </select>
-                </Field>
+                <div className="mt-3">
+                  <Field label="פרויקט">
+                    <select value={visibilityProjectId} onChange={(e) => setVisibilityProjectId(e.target.value)}
+                      className="h-11 w-full rounded-xl bg-white ring-1 ring-black/[0.06] px-3 text-[13.5px]">
+                      <option value="">— בחר פרויקט —</option>
+                      {projects.map((p) => (<option key={p.id} value={p.id}>{p.name} · {p.city}</option>))}
+                    </select>
+                  </Field>
+                </div>
               )}
               {visibilityType === "region_only" && (
-                <Field label="אזורי יעד" hint="ההצעה תוצג רק לדיירים באזורים הנבחרים">
-                  <AreasCombobox
-                    value={visibilityRegions}
-                    onChange={setVisibilityRegions}
-                    placeholder="בחר אזורים..."
-                    regionsOnly
-                  />
-                </Field>
+                <div className="mt-3">
+                  <Field label="אזורי יעד" hint="ההצעה תוצג רק לדיירים באזורים הנבחרים">
+                    <AreasCombobox value={visibilityRegions} onChange={setVisibilityRegions}
+                      placeholder="בחר אזורים..." regionsOnly />
+                  </Field>
+                </div>
               )}
-            </div>
+            </Section>
 
-            {/* Work area */}
-            <div className="gb-card p-4 space-y-2">
-              <h3 className="font-bold text-sm text-[#1F2937]">אזור ביצוע</h3>
-              <p className="text-[11px] text-[#6B7280]">היכן אתם מספקים את השירות / המוצר</p>
-              <AreasCombobox
-                value={workAreas}
-                onChange={setWorkAreas}
-                placeholder="בחר אזור, עיר או יישוב..."
-              />
-            </div>
-          </>
+            <Section title="אזור ביצוע" hint="היכן אתם מספקים את השירות">
+              <AreasCombobox value={workAreas} onChange={setWorkAreas}
+                placeholder="בחר אזור, עיר או יישוב..." />
+            </Section>
+          </div>
         )}
 
-        {/* ─── STEP 3: Preview & Publish ─── */}
+        {/* ─── STEP 3 ─── */}
         {step === 3 && (
-          <>
-            <div className="rounded-2xl bg-gradient-to-br from-[#0E6B5A]/5 to-transparent border border-[#0E6B5A]/20 p-3 flex items-center gap-2">
-              <Eye className="h-4 w-4 text-[#0E6B5A]" />
-              <span className="text-fs-xs font-bold text-[#0E6B5A]">כך הדיירים יראו את ההצעה שלך</span>
+          <div className="space-y-7">
+            <div className="flex items-center gap-2 text-[12px] text-[#6B7280]">
+              <Eye className="h-3.5 w-3.5 text-[#0E6B5A]" />
+              <span>כך הדיירים יראו את ההצעה</span>
             </div>
 
             <LivePreview
@@ -857,140 +878,157 @@ export default function OfferEditor() {
               supplierName={supplier.business_name}
             />
 
-            {/* Advanced (collapsible) */}
-            <div className="gb-card overflow-hidden">
+            {/* Advanced */}
+            <div>
               <button
                 type="button"
                 onClick={() => setShowAdvanced((v) => !v)}
-                className="w-full p-4 flex items-center justify-between text-right"
+                className="w-full flex items-center justify-between py-2 text-right"
               >
                 <div className="flex items-center gap-2">
-                  <Settings2 className="h-4 w-4 text-[#0E6B5A]" />
-                  <div>
-                    <div className="text-sm font-bold text-[#1F2937]">אפשרויות מתקדמות</div>
-                    <div className="text-[11px] text-muted-foreground">פיקדון, דדליין, תנאים, הגבלות</div>
-                  </div>
+                  <Settings2 className="h-3.5 w-3.5 text-[#0E6B5A]" />
+                  <span className="text-[13px] font-semibold text-[#1F2937]">אפשרויות מתקדמות</span>
                 </div>
-                <ChevronLeft className={`h-4 w-4 text-[#6B7280] transition-transform ${showAdvanced ? "-rotate-90" : ""}`} />
+                <ChevronLeft className={`h-4 w-4 text-[#9CA3AF] transition-transform ${showAdvanced ? "-rotate-90" : ""}`} />
               </button>
 
               {showAdvanced && (
-                <div className="border-t border-[#ECEEF2] p-4 space-y-4">
+                <div className="pt-3 space-y-5">
                   {listingType === "group_buy" && (
                     <>
-                      <div className="space-y-2">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" checked={depositRequired} onChange={(e) => setDepositRequired(e.target.checked)} className="h-4 w-4 accent-primary" />
-                          <span className="text-sm font-bold text-[#1F2937]">דורש פיקדון להצטרפות</span>
-                        </label>
-                        {depositRequired && (
-                          <div className="space-y-3 pt-1">
-                            <Field label="סכום הפיקדון (₪)">
-                              <Input type="number" inputMode="numeric" min={1} step="0.01" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="h-11 rounded-xl" placeholder="הזן סכום" />
-                              <p className="text-fs-xs text-muted-foreground mt-1">
-                                {depositLimits.min !== null ? `מינימום: ${depositLimits.min}. ` : ""}
-                                {depositLimits.max !== null ? `מקסימום: ${depositLimits.max}.` : ""}
-                              </p>
-                            </Field>
-                            <Field label="קישור תשלום (Bit / PayBox / העברה) *">
-                              <Input type="url" placeholder="https://..."
-                                value={supplierPaymentLink} onChange={(e) => setSupplierPaymentLink(e.target.value)}
-                                className="h-11 rounded-xl" dir="ltr" />
-                              <p className="text-fs-xs text-muted-foreground mt-1 leading-relaxed">
-                                <b>הפיקדון משולם ישירות אליך</b> — GroupBuild לא גובה.
-                              </p>
-                            </Field>
-                            <Field label="הוראות נוספות (אופציונלי)">
-                              <Textarea placeholder='לדוגמה: "ניתן להעביר ב-Bit ל-050-1234567"'
-                                value={supplierPaymentInstructions} onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
-                                className="rounded-xl min-h-[50px]" />
-                            </Field>
-                          </div>
-                        )}
-                      </div>
+                      <label className="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" checked={depositRequired}
+                          onChange={(e) => setDepositRequired(e.target.checked)}
+                          className="h-4 w-4 accent-[#0E6B5A]" />
+                        <span className="text-[13px] font-medium text-[#1F2937]">דורש פיקדון להצטרפות</span>
+                      </label>
 
-                      <Field label="יעד משתתפים לסגירת הקבוצה (אופציונלי)">
-                        <Input type="number" inputMode="numeric" min={1} value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
-                          placeholder="למשל 20" className="h-11 rounded-xl" />
+                      {depositRequired && (
+                        <div className="space-y-3 pr-6 border-r border-black/[0.06]">
+                          <Field label="סכום הפיקדון (₪)">
+                            <Input type="number" inputMode="numeric" min={1} step="0.01"
+                              value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)}
+                              className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]"
+                              placeholder="הזן סכום" />
+                            {(depositLimits.min !== null || depositLimits.max !== null) && (
+                              <p className="text-[11px] text-[#9CA3AF] mt-1">
+                                {depositLimits.min !== null ? `מ-${depositLimits.min}` : ""}
+                                {depositLimits.min !== null && depositLimits.max !== null ? " · " : ""}
+                                {depositLimits.max !== null ? `עד ${depositLimits.max}` : ""}
+                              </p>
+                            )}
+                          </Field>
+                          <Field label="קישור תשלום *" hint="הפיקדון מועבר ישירות אליך">
+                            <Input type="url" placeholder="https://..."
+                              value={supplierPaymentLink} onChange={(e) => setSupplierPaymentLink(e.target.value)}
+                              className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" dir="ltr" />
+                          </Field>
+                          <Field label="הוראות נוספות (אופציונלי)">
+                            <Textarea placeholder='למשל: "Bit ל-050-1234567"'
+                              value={supplierPaymentInstructions}
+                              onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
+                              className="rounded-xl min-h-[60px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
+                          </Field>
+                        </div>
+                      )}
+
+                      <Field label="יעד משתתפים לסגירה (אופציונלי)">
+                        <Input type="number" inputMode="numeric" min={1}
+                          value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
+                          placeholder="למשל 20"
+                          className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" />
                       </Field>
                     </>
                   )}
 
                   <div className="grid grid-cols-2 gap-2">
                     <Field label="דדליין הצטרפות">
-                      <Input type="date" dir="ltr" min={todayISO()} value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-11 rounded-xl px-2 text-sm text-left" />
+                      <Input type="date" dir="ltr" min={todayISO()} value={joinDeadline}
+                        onChange={(e) => setJoinDeadline(e.target.value)}
+                        className="h-11 rounded-xl px-2 text-[13px] text-left shadow-none ring-1 ring-black/[0.06]" />
                     </Field>
                     <Field label="דדליין מימוש">
-                      <Input type="date" dir="ltr" min={todayISO()} value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-11 rounded-xl px-2 text-sm text-left" />
+                      <Input type="date" dir="ltr" min={todayISO()} value={redemptionDeadline}
+                        onChange={(e) => setRedemptionDeadline(e.target.value)}
+                        className="h-11 rounded-xl px-2 text-[13px] text-left shadow-none ring-1 ring-black/[0.06]" />
                     </Field>
                   </div>
 
                   <Field label="מה כלול (אופציונלי)">
-                    <Textarea value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)} placeholder="תנאים, אחריות, מה בדיוק מקבלים..." className="rounded-xl min-h-[70px]" />
+                    <Textarea value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)}
+                      placeholder="תנאים, אחריות, מפרט..."
+                      className="rounded-xl min-h-[70px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
                   </Field>
                   <Field label="מה לא כלול / חריגים (אופציונלי)">
-                    <Textarea value={restrictions} onChange={(e) => setRestrictions(e.target.value)} placeholder="חריגים..." className="rounded-xl min-h-[60px]" />
+                    <Textarea value={restrictions} onChange={(e) => setRestrictions(e.target.value)}
+                      placeholder="חריגים..."
+                      className="rounded-xl min-h-[60px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
                   </Field>
 
-                  <div className="grid grid-cols-1 gap-2">
-                    <Field label="מקסימום מימושים (אופציונלי)">
-                      <Input type="number" inputMode="numeric" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
-                    </Field>
-                    <label className="flex items-center gap-2 cursor-pointer pt-1">
-                      <input type="checkbox" checked={appointmentRequired} onChange={(e) => setAppointmentRequired(e.target.checked)} className="h-4 w-4 accent-primary" />
-                      <span className="text-sm text-[#1F2937]">נדרשת קביעת פגישה לפני מימוש</span>
-                    </label>
-                  </div>
+                  <Field label="מקסימום מימושים (אופציונלי)">
+                    <Input type="number" inputMode="numeric" min={1}
+                      value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)}
+                      placeholder="ללא הגבלה"
+                      className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" />
+                  </Field>
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input type="checkbox" checked={appointmentRequired}
+                      onChange={(e) => setAppointmentRequired(e.target.checked)}
+                      className="h-4 w-4 accent-[#0E6B5A]" />
+                    <span className="text-[13px] text-[#1F2937]">נדרשת קביעת פגישה לפני מימוש</span>
+                  </label>
                 </div>
               )}
             </div>
 
-            <div className="gb-card p-4 border border-[#0E6B5A]/30 bg-[#FFF8E1]/30">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" checked={commitmentAccepted}
-                  onChange={(e) => setCommitmentAccepted(e.target.checked)}
-                  className="h-5 w-5 mt-0.5 accent-primary shrink-0" />
-                <div className="text-sm leading-relaxed">
-                  <span className="font-bold text-[#1F2937]">התחייבות הספק <span className="text-destructive">*</span></span>
-                  <p className="text-xs text-muted-foreground mt-1">אני מתחייב לכבד את ההצעה, לעמוד בלוחות הזמנים ולמסור שירות איכותי.</p>
-                </div>
-              </label>
-            </div>
-          </>
+            <label className="flex items-start gap-2.5 cursor-pointer py-2 border-t border-black/[0.06] pt-4">
+              <input type="checkbox" checked={commitmentAccepted}
+                onChange={(e) => setCommitmentAccepted(e.target.checked)}
+                className="h-4 w-4 mt-0.5 accent-[#0E6B5A] shrink-0" />
+              <div className="text-[12.5px] leading-relaxed">
+                <span className="font-semibold text-[#1F2937]">התחייבות הספק</span>
+                <span className="text-destructive"> *</span>
+                <p className="text-[11.5px] text-[#6B7280] mt-0.5">
+                  אני מתחייב לכבד את ההצעה, לעמוד בלוחות הזמנים ולמסור שירות איכותי.
+                </p>
+              </div>
+            </label>
+          </div>
         )}
       </div>
 
-      {/* Sticky footer — sits ABOVE the mobile BottomNav; drops to bottom on desktop.
-          When the iOS keyboard is open, BottomNav is translated out and the footer
-          floats just above the keyboard using --kb-h. */}
+      {/* Slim sticky footer */}
       <div
-        className="fixed inset-x-0 z-40 bg-[#F8F6F1]/95 backdrop-blur border-t border-[#ECEEF2] px-4 py-3 bottom-[calc(env(safe-area-inset-bottom)+var(--nav-h))] [.keyboard-open_&]:bottom-[var(--kb-h,0px)] lg:!bottom-0"
+        className="fixed inset-x-0 z-40 bg-[#F8F6F1]/95 backdrop-blur border-t border-black/[0.06] px-4 py-3 bottom-[calc(env(safe-area-inset-bottom)+var(--nav-h))] [.keyboard-open_&]:bottom-[var(--kb-h,0px)] lg:!bottom-0"
       >
         {step < 3 ? (
           <div className="flex gap-2 max-w-md mx-auto">
             {step > 1 && (
-              <Button type="button" onClick={goBack} variant="outline" className="flex-1 h-12 rounded-[16px] font-bold">
-                <ChevronRight className="h-4 w-4 ml-1" /> חזור
-              </Button>
+              <button type="button" onClick={goBack}
+                className="h-11 px-4 rounded-xl bg-white ring-1 ring-black/[0.08] text-[13.5px] font-semibold text-[#1F2937] inline-flex items-center gap-1 hover:bg-black/[0.02] transition-colors">
+                <ChevronRight className="h-4 w-4" /> חזור
+              </button>
             )}
-            <Button type="button" onClick={goNext}
-              className="flex-[2] h-12 rounded-[16px] bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white font-bold">
-              המשך <ChevronLeft className="h-4 w-4 mr-1" />
-            </Button>
+            <button type="button" onClick={goNext}
+              className="flex-1 h-11 rounded-xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[13.5px] font-semibold inline-flex items-center justify-center gap-1 transition-colors">
+              המשך <ChevronLeft className="h-4 w-4" />
+            </button>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2 max-w-md mx-auto">
-            <Button type="button" onClick={goBack} variant="outline" className="h-12 rounded-[16px] font-bold">
+          <div className="flex gap-2 max-w-md mx-auto">
+            <button type="button" onClick={goBack}
+              className="h-11 w-11 rounded-xl bg-white ring-1 ring-black/[0.08] text-[#1F2937] inline-flex items-center justify-center hover:bg-black/[0.02] transition-colors"
+              aria-label="חזור">
               <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button type="button" onClick={() => persist("draft")} disabled={savingDraft || saving}
-              variant="outline" className="h-12 rounded-[16px] font-bold text-xs">
-              {savingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <><FileText className="h-3.5 w-3.5 ml-1" /> טיוטה</>}
-            </Button>
-            <Button onClick={() => persist("active")} disabled={saving || savingDraft || !commitmentAccepted}
-              className="h-12 rounded-[16px] bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] disabled:opacity-50 text-xs">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-3.5 w-3.5 ml-1" /> {isEditing ? "עדכן" : "פרסם"}</>}
-            </Button>
+            </button>
+            <button type="button" onClick={() => persist("draft")} disabled={savingDraft || saving}
+              className="h-11 px-3 rounded-xl bg-white ring-1 ring-black/[0.08] text-[12.5px] font-semibold text-[#1F2937] inline-flex items-center gap-1.5 hover:bg-black/[0.02] transition-colors disabled:opacity-50">
+              {savingDraft ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><FileText className="h-3.5 w-3.5" /> טיוטה</>}
+            </button>
+            <button type="button" onClick={() => persist("active")} disabled={saving || savingDraft || !commitmentAccepted}
+              className="flex-1 h-11 rounded-xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[13.5px] font-semibold inline-flex items-center justify-center gap-1.5 disabled:opacity-50 transition-colors">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-3.5 w-3.5" /> {isEditing ? "עדכן" : "פרסם"}</>}
+            </button>
           </div>
         )}
       </div>
@@ -1002,11 +1040,28 @@ export default function OfferEditor() {
 
 // ─────────── Sub-components ───────────
 
+function Section({
+  title, hint, action, children,
+}: { title: string; hint?: string; action?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section>
+      <div className="flex items-end justify-between mb-2.5">
+        <div>
+          <h3 className="text-[11px] font-bold tracking-[0.06em] uppercase text-[#6B7280]">{title}</h3>
+          {hint && <p className="text-[11.5px] text-[#9CA3AF] mt-0.5">{hint}</p>}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-fs-xs font-bold text-[#1F2937] mb-1 block">{label}</span>
-      {hint && <span className="text-[11px] text-muted-foreground block mb-1.5 leading-snug">{hint}</span>}
+      <span className="text-[12px] font-semibold text-[#374151] mb-1.5 block">{label}</span>
+      {hint && <span className="text-[11px] text-[#9CA3AF] block mb-1.5 leading-snug">{hint}</span>}
       {children}
     </label>
   );
@@ -1015,27 +1070,31 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 function TypeCard({ active, onClick, title, desc }: { active: boolean; onClick: () => void; title: string; desc: string }) {
   return (
     <button type="button" onClick={onClick}
-      className={`p-3 rounded-xl border-2 text-right transition-smooth ${
-        active ? "border-[#0E6B5A] bg-[#0E6B5A]/5" : "border-[#ECEEF2] bg-white"
+      className={`p-3 rounded-xl text-right transition-colors ${
+        active
+          ? "bg-[#0E6B5A]/[0.06] ring-1 ring-[#0E6B5A]/40"
+          : "bg-white ring-1 ring-black/[0.06] hover:ring-black/[0.12]"
       }`}>
-      <div className="text-sm font-bold text-[#1F2937]">{title}</div>
-      <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{desc}</div>
+      <div className={`text-[13px] font-semibold ${active ? "text-[#0E6B5A]" : "text-[#1F2937]"}`}>{title}</div>
+      <div className="text-[11px] text-[#6B7280] mt-0.5 leading-snug">{desc}</div>
     </button>
   );
 }
 
-function ToggleBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function PillBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button type="button" onClick={onClick}
-      className={`h-11 rounded-xl border-2 text-sm font-bold transition-smooth ${
-        active ? "border-[#1F2937] bg-[#F4F6FA] text-[#1F2937]" : "border-[#ECEEF2] bg-white text-[#6B7280]"
+      className={`h-10 rounded-xl text-[12.5px] font-semibold transition-colors ${
+        active
+          ? "bg-[#1F2937] text-white"
+          : "bg-white text-[#6B7280] ring-1 ring-black/[0.06] hover:text-[#1F2937]"
       }`}>
       {children}
     </button>
   );
 }
 
-function TierCard({
+function TierRow({
   idx, tier, offerType, editing, onEdit, onChange, onRemove, canRemove,
 }: {
   idx: number;
@@ -1049,57 +1108,70 @@ function TierCard({
 }) {
   const min = tier.minParticipants || "?";
   const max = tier.maxParticipants || "∞";
+  const hasValue = !!(tier.discount_percentage || tier.discounted_price);
   const value = offerType === "percentage"
-    ? (tier.discount_percentage ? `${tier.discount_percentage}% הנחה` : "לא הוגדר")
-    : (tier.discounted_price ? `₪${tier.discounted_price}` : "לא הוגדר");
+    ? (tier.discount_percentage ? `${tier.discount_percentage}%` : "—")
+    : (tier.discounted_price ? `₪${tier.discounted_price}` : "—");
 
   return (
-    <div className={`rounded-xl border transition-colors ${editing ? "border-[#0E6B5A] bg-[#0E6B5A]/5" : "border-[#ECEEF2] bg-white"}`}>
-      <div className="p-3 flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-[#F4F6FA] border border-[#ECEEF2] flex items-center justify-center text-sm font-bold text-[#0E6B5A] shrink-0">
-          {idx + 1}
-        </div>
+    <div className={`transition-colors ${editing ? "bg-[#0E6B5A]/[0.04]" : ""}`}>
+      <button
+        type="button"
+        onClick={onEdit}
+        className="w-full flex items-center gap-3 px-3 py-2.5 text-right"
+      >
+        <span className="text-[11px] font-bold text-[#9CA3AF] tabular-nums w-4 shrink-0">{idx + 1}</span>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-bold text-[#1F2937]">{min}–{max} משתתפים</div>
-          <div className={`text-fs-xs font-bold ${tier.discount_percentage || tier.discounted_price ? "text-[#0E6B5A]" : "text-muted-foreground"}`}>{value}</div>
+          <div className="text-[12.5px] font-semibold text-[#1F2937]">{min}–{max} משתתפים</div>
         </div>
-        <button type="button" onClick={onEdit} className="h-9 w-9 rounded-lg bg-[#F4F6FA] border border-[#ECEEF2] flex items-center justify-center text-[#1F2937]" aria-label="ערוך">
-          <Pencil className="h-3.5 w-3.5" />
-        </button>
-        <button type="button" onClick={onRemove} disabled={!canRemove}
-          className="h-9 w-9 rounded-lg bg-white border border-[#ECEEF2] flex items-center justify-center text-destructive disabled:opacity-30" aria-label="מחק">
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      </div>
+        <span className={`text-[13px] font-bold tabular-nums ${hasValue ? "text-[#0E6B5A]" : "text-[#9CA3AF]"}`}>
+          {value}
+        </span>
+        <Pencil className="h-3.5 w-3.5 text-[#9CA3AF] shrink-0" />
+      </button>
+
       {editing && (
-        <div className="border-t border-[#ECEEF2] p-3 space-y-2">
+        <div className="px-3 pb-3 space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <label className="block">
-              <span className="text-[11px] font-bold text-muted-foreground mb-1 block">מ- (משתתפים)</span>
-              <Input type="number" inputMode="numeric" min={1} value={tier.minParticipants} onChange={(e) => onChange({ minParticipants: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="1" />
+              <span className="text-[10.5px] font-semibold text-[#6B7280] mb-1 block">מ- משתתפים</span>
+              <Input type="number" inputMode="numeric" min={1} value={tier.minParticipants}
+                onChange={(e) => onChange({ minParticipants: e.target.value })}
+                className="h-9 rounded-lg text-[13px] shadow-none ring-1 ring-black/[0.06] bg-white" placeholder="1" />
             </label>
             <label className="block">
-              <span className="text-[11px] font-bold text-muted-foreground mb-1 block">עד (או ריק = ∞)</span>
-              <Input type="number" inputMode="numeric" value={tier.maxParticipants} onChange={(e) => onChange({ maxParticipants: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="∞" />
+              <span className="text-[10.5px] font-semibold text-[#6B7280] mb-1 block">עד (ריק = ∞)</span>
+              <Input type="number" inputMode="numeric" value={tier.maxParticipants}
+                onChange={(e) => onChange({ maxParticipants: e.target.value })}
+                className="h-9 rounded-lg text-[13px] shadow-none ring-1 ring-black/[0.06] bg-white" placeholder="∞" />
             </label>
           </div>
           {offerType === "percentage" ? (
             <label className="block">
-              <span className="text-[11px] font-bold text-muted-foreground mb-1 block">אחוז הנחה</span>
-              <Input type="number" inputMode="numeric" min={1} max={100} value={tier.discount_percentage} onChange={(e) => onChange({ discount_percentage: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="10" />
+              <span className="text-[10.5px] font-semibold text-[#6B7280] mb-1 block">אחוז הנחה</span>
+              <Input type="number" inputMode="numeric" min={1} max={100} value={tier.discount_percentage}
+                onChange={(e) => onChange({ discount_percentage: e.target.value })}
+                className="h-9 rounded-lg text-[13px] shadow-none ring-1 ring-black/[0.06] bg-white" placeholder="10" />
             </label>
           ) : (
             <label className="block">
-              <span className="text-[11px] font-bold text-muted-foreground mb-1 block">מחיר אחרי הנחה (₪)</span>
-              <Input type="number" inputMode="numeric" value={tier.discounted_price} onChange={(e) => onChange({ discounted_price: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="הזן מחיר" />
+              <span className="text-[10.5px] font-semibold text-[#6B7280] mb-1 block">מחיר אחרי הנחה (₪)</span>
+              <Input type="number" inputMode="numeric" value={tier.discounted_price}
+                onChange={(e) => onChange({ discounted_price: e.target.value })}
+                className="h-9 rounded-lg text-[13px] shadow-none ring-1 ring-black/[0.06] bg-white" placeholder="הזן מחיר" />
             </label>
           )}
           {Number(tier.minParticipants) === 1 && (
-            <div className="flex items-start gap-1.5 rounded-lg bg-[#FFF8E1] border border-[#F5C547]/40 px-2 py-1.5 text-[10px] text-[#8A6A1E] font-medium leading-snug">
-              <span>⚠️</span>
-              <span>מדרגה מ-1 תינתן גם לרוכש בודד. התחל מ-2 ומעלה לקבוצה אמיתית.</span>
-            </div>
+            <p className="text-[10.5px] text-[#8A6A1E] leading-snug pt-0.5">
+              ⚠️ מדרגה מ-1 תינתן גם לרוכש בודד. התחל מ-2 לקבוצה אמיתית.
+            </p>
           )}
+          <div className="flex justify-end pt-1">
+            <button type="button" onClick={onRemove} disabled={!canRemove}
+              className="text-[11px] font-semibold text-destructive inline-flex items-center gap-1 disabled:opacity-30">
+              <Trash2 className="h-3 w-3" /> מחק מדרגה
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -1132,7 +1204,7 @@ function LivePreview({
       : (bestTier?.discounted_price ? `החל מ-₪${Number(bestTier.discounted_price).toLocaleString()}` : "מחיר קבוצתי");
 
   return (
-    <div className="rounded-2xl overflow-hidden bg-white shadow-[0_8px_24px_-12px_rgba(10,31,61,0.15)] border border-[#ECEEF2]">
+    <div className="rounded-2xl overflow-hidden bg-white ring-1 ring-black/[0.06]">
       {coverImage ? (
         <div className="relative h-44 bg-[#F4F6FA]">
           <img src={coverImage} alt={title} className="w-full h-full object-cover" />
@@ -1143,40 +1215,40 @@ function LivePreview({
           </div>
         </div>
       ) : (
-        <div className="h-44 bg-gradient-to-br from-[#F4F6FA] to-[#ECEEF2] flex items-center justify-center">
-          <span className="text-fs-xs text-muted-foreground">אין תמונה</span>
+        <div className="h-32 bg-[#F4F6FA] flex items-center justify-center">
+          <span className="text-[11.5px] text-[#9CA3AF]">אין תמונה</span>
         </div>
       )}
       <div className="p-4 space-y-3">
         {!coverImage && (
           <div>
-            <div className="text-[11px] font-bold text-muted-foreground">{category}</div>
-            <div className="text-base font-extrabold text-[#1F2937]">{title || "שם ההצעה"}</div>
+            <div className="text-[11px] font-bold text-[#6B7280]">{category}</div>
+            <div className="text-[15px] font-extrabold text-[#1F2937]">{title || "שם ההצעה"}</div>
           </div>
         )}
-        <div className="text-fs-xs text-muted-foreground">{supplierName}</div>
+        <div className="text-[11.5px] text-[#6B7280]">{supplierName}</div>
 
-        <div className="rounded-xl bg-gradient-to-br from-[#0E6B5A]/10 to-transparent border border-[#0E6B5A]/20 p-3">
-          <div className="text-[11px] font-bold text-[#0E6B5A]">
+        <div className="rounded-xl bg-[#0E6B5A]/[0.06] p-3">
+          <div className="text-[10.5px] font-bold text-[#0E6B5A] uppercase tracking-wide">
             {listingType === "regular" ? "הצעה מיוחדת" : "קבוצת רכישה"}
           </div>
-          <div className="text-lg font-extrabold text-[#0E6B5A]">{headline}</div>
+          <div className="text-[18px] font-extrabold text-[#0E6B5A] mt-0.5">{headline}</div>
           {listingType === "group_buy" && targetParticipants && (
-            <div className="text-fs-xs text-muted-foreground mt-1">יעד: {targetParticipants} מצטרפים</div>
+            <div className="text-[11.5px] text-[#6B7280] mt-1">יעד: {targetParticipants} מצטרפים</div>
           )}
         </div>
 
         {description && (
-          <p className="text-fs-sm text-[#1F2937] leading-relaxed whitespace-pre-line line-clamp-6">{description}</p>
+          <p className="text-[12.5px] text-[#374151] leading-relaxed whitespace-pre-line line-clamp-6">{description}</p>
         )}
 
         {listingType === "group_buy" && tiers.length > 0 && (
-          <div className="space-y-1">
-            <div className="text-[11px] font-bold text-muted-foreground">מדרגות מחיר</div>
+          <div className="space-y-0.5">
+            <div className="text-[10.5px] font-bold text-[#6B7280] uppercase tracking-wide mb-1">מדרגות</div>
             {tiers.slice(0, 4).map((t, i) => (
-              <div key={i} className="flex justify-between items-center text-fs-sm py-1 border-b border-[#ECEEF2] last:border-b-0">
+              <div key={i} className="flex justify-between items-center text-[12.5px] py-1.5 border-b border-black/[0.05] last:border-b-0">
                 <span className="text-[#6B7280]">{t.minParticipants || "?"}–{t.maxParticipants || "∞"} משתתפים</span>
-                <span className="font-bold text-[#0E6B5A]">
+                <span className="font-bold text-[#0E6B5A] tabular-nums">
                   {offerType === "percentage" ? `${t.discount_percentage || 0}%` : t.discounted_price ? `₪${t.discounted_price}` : "—"}
                 </span>
               </div>
@@ -1187,17 +1259,18 @@ function LivePreview({
         {serviceAreas.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {serviceAreas.slice(0, 5).map((a, i) => (
-              <span key={i} className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#F4F6FA] text-[#6B7280] border border-[#ECEEF2]">{a}</span>
+              <span key={i} className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full bg-[#F4F6FA] text-[#6B7280]">{a}</span>
             ))}
           </div>
         )}
 
         {depositRequired && (
-          <div className="text-fs-xs bg-[#FFF8E1] border border-[#F5C547]/40 text-[#8A6A1E] rounded-lg px-2 py-1.5 font-medium">
-            נדרש פיקדון להצטרפות: ₪{depositAmount || "—"}
+          <div className="text-[11.5px] bg-[#FFF8E1] text-[#8A6A1E] rounded-lg px-2.5 py-1.5 font-medium">
+            נדרש פיקדון: ₪{depositAmount || "—"}
           </div>
         )}
       </div>
     </div>
   );
 }
+
