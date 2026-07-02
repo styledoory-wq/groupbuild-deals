@@ -1224,8 +1224,8 @@ function TierCard({
             </label>
           )}
           {Number(tier.minParticipants) === 1 && (
-            <p className="text-[10.5px] text-[#8A6A1E] leading-snug">
-              ⚠️ מדרגה מ-1 תינתן גם לרוכש בודד. התחל מ-2 לקבוצה אמיתית.
+            <p className="text-[10.5px] text-[#6B7280] leading-snug">
+              מדרגה מ-1 תינתן גם לרוכש בודד. התחל מ-2 לקבוצה אמיתית.
             </p>
           )}
           <div className="flex justify-end pt-0.5">
