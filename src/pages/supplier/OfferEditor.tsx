@@ -686,57 +686,8 @@ export default function OfferEditor() {
 
   const progressPct = (step / 3) * 100;
 
-  // Inline AI helpers — reuse the existing generate-offer-ai edge function.
-  const [descAiLoading, setDescAiLoading] = useState(false);
-  const [faqAiLoading, setFaqAiLoading] = useState(false);
+  // Inline AI FAQ helper removed — draft creation lives in the AI card on Step 1.
 
-  const runInlineAi = async (kind: "description" | "faq") => {
-    const base = [title, description].filter(Boolean).join(" — ").trim();
-    if (!base && !title.trim()) {
-      toast.error("הזן קודם שם או תיאור קצר");
-      return;
-    }
-    const setLoading = kind === "faq" ? setFaqAiLoading : setDescAiLoading;
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-offer-ai", {
-        body: {
-          prompt: base || title,
-          categories: categories.map((c) => ({ id: c.id, name: c.name })),
-        },
-      });
-      if (error) throw error;
-      const draft = (data as { draft?: AiOfferDraft; error?: string })?.draft ?? {};
-      const errCode = (data as { error?: string })?.error;
-      if (errCode === "credits_exhausted") { toast.error("נגמרו קרדיטים ל-AI"); return; }
-      if (errCode === "rate_limited") { toast.error("יותר מדי בקשות ל-AI, נסה שוב"); return; }
-      if (kind === "description") {
-        const parts: string[] = [];
-        if (draft.description) parts.push(draft.description.trim());
-        if (draft.what_included?.length) parts.push("מה כלול:\n" + draft.what_included.map((x) => `• ${x}`).join("\n"));
-        if (draft.what_not_included?.length) parts.push("מה לא כלול:\n" + draft.what_not_included.map((x) => `• ${x}`).join("\n"));
-        if (parts.length) { setDescription(parts.join("\n\n")); toast.success("התיאור עודכן"); }
-        else toast.error("לא הוחזר תיאור");
-      } else {
-        if (draft.faq?.length) { setAiFaqPreview(draft.faq); toast.success("הוצעו שאלות נפוצות"); }
-        else toast.error("לא הוצעו שאלות");
-      }
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "שגיאה בקריאה ל-AI");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-
-  const AiChip = ({ onClick, loading, label = "צור עם AI" }: { onClick: () => void; loading: boolean; label?: string }) => (
-    <button type="button" onClick={onClick} disabled={loading}
-      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0E6B5A] hover:underline disabled:opacity-50">
-      {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-      {loading ? "יוצר…" : label}
-    </button>
-  );
 
   return (
     <MobileShell>
