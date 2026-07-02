@@ -960,10 +960,11 @@ export default function OfferEditor() {
         )}
       </div>
 
-      {/* Sticky footer — respects iOS keyboard via --kb-h */}
+      {/* Sticky footer — sits ABOVE the mobile BottomNav; drops to bottom on desktop.
+          When the iOS keyboard is open, BottomNav is translated out and the footer
+          floats just above the keyboard using --kb-h. */}
       <div
-        className="fixed inset-x-0 bottom-0 z-30 bg-[#F8F6F1]/95 backdrop-blur border-t border-[#ECEEF2] px-4 py-3"
-        style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + var(--kb-h, 0px) + 12px)` }}
+        className="fixed inset-x-0 z-40 bg-[#F8F6F1]/95 backdrop-blur border-t border-[#ECEEF2] px-4 py-3 bottom-[calc(env(safe-area-inset-bottom)+var(--nav-h))] [.keyboard-open_&]:bottom-[var(--kb-h,0px)] lg:!bottom-0"
       >
         {step < 3 ? (
           <div className="flex gap-2 max-w-md mx-auto">
