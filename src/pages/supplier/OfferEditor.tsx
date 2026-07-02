@@ -410,6 +410,8 @@ export default function OfferEditor() {
       ends_at: joinDeadline ? new Date(joinDeadline).toISOString() : new Date(Date.now() + 30 * 86400000).toISOString(),
       visibility_type: visibilityType,
       visibility_project_id: visibilityType === "project_only" ? visibilityProjectId : null,
+      visibility_region_ids: visibilityType === "region_only" ? visibilityRegions.regionIds : [],
+      serves_all_country: workAreas.servesAllCountry,
       cover_image_url: coverImage,
       gallery_images: galleryImages as unknown as Json,
       target_participants: targetParticipants ? Number(targetParticipants) : null,
@@ -419,7 +421,7 @@ export default function OfferEditor() {
       restrictions: restrictions.trim() || null,
       max_redemptions: maxRedemptions ? Number(maxRedemptions) : null,
       appointment_required: appointmentRequired,
-      service_areas: serviceAreas,
+      service_areas: effectiveServiceAreas,
       supplier_commitment_accepted: true,
     };
 
