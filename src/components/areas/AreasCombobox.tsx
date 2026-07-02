@@ -1,17 +1,8 @@
 import { useMemo, useState } from "react";
-import { Check, ChevronsUpDown, MapPin, X, Globe } from "lucide-react";
+import { Check, ChevronsUpDown, MapPin, X, Globe, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command";
 import { useRegions } from "@/hooks/useRegions";
 
 export interface AreasComboboxValue {
@@ -29,12 +20,39 @@ interface Props {
 }
 
 /**
- * Combobox רב-בחירה עם חיפוש — לאזורים, ערים ו"כל הארץ".
- * נשען על טבלאות regions/cities ב-DB.
+ * Multi-select combobox with Hebrew-friendly substring search.
+ * We handle filtering manually (not cmdk's built-in scoring) so small
+ * settlements like "בר יוחאי" are actually findable.
  */
-export function AreasCombobox({ value, onChange, placeholder = "חפש או בחר אזור / עיר...", regionsOnly = false }: Props) {
+export function AreasCombobox({
+  value,
+  onChange,
+  placeholder = "חפש או בחר אזור / עיר / יישוב...",
+  regionsOnly = false,
+}: Props) {
   const { regions, cities, regionById, cityById, loading } = useRegions();
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const norm = (s: string) => s.replace(/["'׳״]/g, "").replace(/\s+/g, " ").trim();
+  const q = norm(query).toLowerCase();
+
+  const filteredRegions = useMemo(() => {
+    if (!q) return regions;
+    return regions.filter((r) => norm(r.name_he).toLowerCase().includes(q));
+  }, [regions, q]);
+
+  const filteredCities = useMemo(() => {
+    if (regionsOnly) return [];
+    if (!q) return cities.slice(0, 40); // don't dump all 600 on open
+    return cities.filter((c) => {
+      const name = norm(c.name_he).toLowerCase();
+      const region = regionById(c.region_id)?.name_he ?? "";
+      return name.includes(q) || norm(region).toLowerCase().includes(q);
+    });
+  }, [cities, q, regionById, regionsOnly]);
+
+  const showAllCountry = !regionsOnly && (!q || "כל הארץ".includes(q));
 
   const selectedChips = useMemo(() => {
     if (value.servesAllCountry) {
@@ -52,36 +70,32 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
   }, [value, regionById, cityById]);
 
   const toggleAll = () => {
-    onChange({
-      servesAllCountry: !value.servesAllCountry,
-      regionIds: [],
-      cityIds: [],
-    });
+    onChange({ servesAllCountry: !value.servesAllCountry, regionIds: [], cityIds: [] });
   };
-
   const toggleRegion = (id: string) => {
     const next = value.regionIds.includes(id)
       ? value.regionIds.filter((x) => x !== id)
       : [...value.regionIds, id];
     onChange({ ...value, servesAllCountry: false, regionIds: next });
   };
-
   const toggleCity = (id: string) => {
     const next = value.cityIds.includes(id)
       ? value.cityIds.filter((x) => x !== id)
       : [...value.cityIds, id];
     onChange({ ...value, servesAllCountry: false, cityIds: next });
   };
-
   const removeChip = (chip: { id: string; type: "all" | "region" | "city" }) => {
     if (chip.type === "all") onChange({ servesAllCountry: false, regionIds: [], cityIds: [] });
     if (chip.type === "region") toggleRegion(chip.id);
     if (chip.type === "city") toggleCity(chip.id);
   };
 
+  const noResults =
+    q.length > 0 && filteredRegions.length === 0 && filteredCities.length === 0 && !showAllCountry;
+
   return (
     <div className="space-y-2">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={(v) => { setOpen(v); if (!v) setQuery(""); }}>
         <PopoverTrigger asChild>
           <Button
             type="button"
@@ -94,84 +108,123 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
             <span className="flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-4 w-4 text-[#0E6B5A]" />
               {selectedChips.length > 0
-                ? `${selectedChips.length} אזורי שירות נבחרו`
+                ? `${selectedChips.length} ${regionsOnly ? "אזורי יעד נבחרו" : "אזורי שירות נבחרו"}`
                 : placeholder}
             </span>
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[var(--radix-popover-trigger-width)] p-0 z-50 bg-popover"
+          className="w-[var(--radix-popover-trigger-width)] p-0 z-50 bg-popover max-h-[60vh] overflow-hidden"
           align="start"
           dir="rtl"
         >
-          <Command shouldFilter={true}>
-            <CommandInput placeholder="חפש אזור או עיר..." className="text-right" />
-            <CommandList className="max-h-72">
-              <CommandEmpty>לא נמצאו תוצאות</CommandEmpty>
+          <div className="flex flex-col max-h-[60vh]">
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-[#ECEEF2] bg-white sticky top-0">
+              <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="חפש אזור, עיר או יישוב..."
+                className="flex-1 h-9 bg-transparent outline-none text-[14px] font-medium placeholder:text-[#9CA3AF]"
+                dir="rtl"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="text-muted-foreground hover:text-destructive p-1"
+                  aria-label="נקה חיפוש"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
 
-              {!regionsOnly && (
-                <>
-                  <CommandGroup heading="כיסוי כללי">
-                    <CommandItem value="כל הארץ" onSelect={toggleAll} className="cursor-pointer">
-                      <Check
-                        className={cn(
-                          "ml-2 h-4 w-4",
-                          value.servesAllCountry ? "opacity-100" : "opacity-0",
+            <div className="overflow-y-auto overscroll-contain flex-1 py-1">
+              {showAllCountry && (
+                <div className="px-1">
+                  <div className="px-2 pt-2 pb-1 text-[11px] font-bold text-[#6B7280]">כיסוי כללי</div>
+                  <button
+                    type="button"
+                    onClick={toggleAll}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-[14px] font-medium rounded-[10px] hover:bg-[#F4F6FA] text-right"
+                  >
+                    <Check className={cn("h-4 w-4", value.servesAllCountry ? "opacity-100 text-[#0E6B5A]" : "opacity-0")} />
+                    <Globe className="h-4 w-4 text-[#0E6B5A]" />
+                    כל הארץ
+                  </button>
+                </div>
+              )}
+
+              {filteredRegions.length > 0 && (
+                <div className="px-1 mt-1">
+                  <div className="px-2 pt-2 pb-1 text-[11px] font-bold text-[#6B7280]">אזורים</div>
+                  {filteredRegions.map((r) => {
+                    const active = value.regionIds.includes(r.id);
+                    return (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => toggleRegion(r.id)}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-[14px] font-medium rounded-[10px] hover:bg-[#F4F6FA] text-right"
+                      >
+                        <Check className={cn("h-4 w-4", active ? "opacity-100 text-[#0E6B5A]" : "opacity-0")} />
+                        {r.name_he}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {filteredCities.length > 0 && (
+                <div className="px-1 mt-1">
+                  <div className="px-2 pt-2 pb-1 text-[11px] font-bold text-[#6B7280]">
+                    ערים ויישובים {!q && `(מציג ${filteredCities.length} — חפש לצמצום)`}
+                  </div>
+                  {filteredCities.map((c) => {
+                    const region = regionById(c.region_id);
+                    const active = value.cityIds.includes(c.id);
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => toggleCity(c.id)}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-[14px] font-medium rounded-[10px] hover:bg-[#F4F6FA] text-right"
+                      >
+                        <Check className={cn("h-4 w-4", active ? "opacity-100 text-[#0E6B5A]" : "opacity-0")} />
+                        <span>{c.name_he}</span>
+                        {region && (
+                          <span className="mr-auto text-[11px] text-muted-foreground">{region.name_he}</span>
                         )}
-                      />
-                      <Globe className="ml-2 h-4 w-4 text-[#0E6B5A]" />
-                      כל הארץ
-                    </CommandItem>
-                  </CommandGroup>
-                  <CommandSeparator />
-                </>
+                      </button>
+                    );
+                  })}
+                </div>
               )}
 
-              <CommandGroup heading="אזורים">
-                {regions.map((r) => {
-                  const active = value.regionIds.includes(r.id);
-                  return (
-                    <CommandItem
-                      key={r.id}
-                      value={`אזור ${r.name_he}`}
-                      onSelect={() => toggleRegion(r.id)}
-                      className="cursor-pointer"
-                    >
-                      <Check className={cn("ml-2 h-4 w-4", active ? "opacity-100" : "opacity-0")} />
-                      {r.name_he}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-
-              {!regionsOnly && (
-                <>
-                  <CommandSeparator />
-                  <CommandGroup heading="ערים">
-                    {cities.map((c) => {
-                      const region = regionById(c.region_id);
-                      const active = value.cityIds.includes(c.id);
-                      return (
-                        <CommandItem
-                          key={c.id}
-                          value={`${c.name_he} ${region?.name_he ?? ""}`}
-                          onSelect={() => toggleCity(c.id)}
-                          className="cursor-pointer"
-                        >
-                          <Check className={cn("ml-2 h-4 w-4", active ? "opacity-100" : "opacity-0")} />
-                          <span>{c.name_he}</span>
-                          {region && (
-                            <span className="mr-2 text-fs-xs text-muted-foreground">· {region.name_he}</span>
-                          )}
-                        </CommandItem>
-                      );
-                    })}
-                  </CommandGroup>
-                </>
+              {noResults && (
+                <div className="px-4 py-6 text-center text-[13px] text-muted-foreground">
+                  לא נמצאו תוצאות עבור "{query}".
+                  <br />
+                  נסה שם אחר או בחר אזור רחב יותר.
+                </div>
               )}
-            </CommandList>
-          </Command>
+            </div>
+
+            {selectedChips.length > 0 && (
+              <div className="border-t border-[#ECEEF2] p-2 bg-[#FAFBFC]">
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="w-full h-9 rounded-[10px] bg-[#0E6B5A] text-white text-[13px] font-bold"
+                >
+                  סיום · {selectedChips.length} נבחרו
+                </button>
+              </div>
+            )}
+          </div>
         </PopoverContent>
       </Popover>
 
@@ -186,7 +239,7 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
                   ? "bg-[#F4F6FA] text-[#1F2937]"
                   : chip.type === "region"
                     ? "bg-[#EAF2FF] text-[#2F6BFF]"
-                    : "bg-white text-[#1F2937]",
+                    : "bg-white text-[#1F2937] border border-[#ECEEF2]",
               )}
             >
               {chip.label}
