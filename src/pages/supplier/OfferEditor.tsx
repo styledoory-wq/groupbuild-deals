@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { verifyAdminFromSession } from "@/lib/auth";
 import {
   Save, Plus, Trash2, Loader2, ChevronRight, ChevronLeft,
-  Eye, Pencil, FileText, Settings2, Sparkles,
+  Pencil, FileText, Settings2,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ds";
@@ -19,7 +19,7 @@ import type { OfferTier, OfferType } from "@/lib/offerPricing";
 import { DealImagesEditor } from "@/components/deals/DealImagesEditor";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
 import { useRegions } from "@/hooks/useRegions";
-import type { AiOfferDraft } from "@/components/supplier/AiOfferGeneratorCard";
+import { AiOfferGeneratorCard, type AiOfferDraft } from "@/components/supplier/AiOfferGeneratorCard";
 
 type SupplierLite = {
   id: string;
@@ -686,57 +686,8 @@ export default function OfferEditor() {
 
   const progressPct = (step / 3) * 100;
 
-  // Inline AI helpers — reuse the existing generate-offer-ai edge function.
-  const [descAiLoading, setDescAiLoading] = useState(false);
-  const [faqAiLoading, setFaqAiLoading] = useState(false);
+  // Inline AI FAQ helper removed — draft creation lives in the AI card on Step 1.
 
-  const runInlineAi = async (kind: "description" | "faq") => {
-    const base = [title, description].filter(Boolean).join(" — ").trim();
-    if (!base && !title.trim()) {
-      toast.error("הזן קודם שם או תיאור קצר");
-      return;
-    }
-    const setLoading = kind === "faq" ? setFaqAiLoading : setDescAiLoading;
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-offer-ai", {
-        body: {
-          prompt: base || title,
-          categories: categories.map((c) => ({ id: c.id, name: c.name })),
-        },
-      });
-      if (error) throw error;
-      const draft = (data as { draft?: AiOfferDraft; error?: string })?.draft ?? {};
-      const errCode = (data as { error?: string })?.error;
-      if (errCode === "credits_exhausted") { toast.error("נגמרו קרדיטים ל-AI"); return; }
-      if (errCode === "rate_limited") { toast.error("יותר מדי בקשות ל-AI, נסה שוב"); return; }
-      if (kind === "description") {
-        const parts: string[] = [];
-        if (draft.description) parts.push(draft.description.trim());
-        if (draft.what_included?.length) parts.push("מה כלול:\n" + draft.what_included.map((x) => `• ${x}`).join("\n"));
-        if (draft.what_not_included?.length) parts.push("מה לא כלול:\n" + draft.what_not_included.map((x) => `• ${x}`).join("\n"));
-        if (parts.length) { setDescription(parts.join("\n\n")); toast.success("התיאור עודכן"); }
-        else toast.error("לא הוחזר תיאור");
-      } else {
-        if (draft.faq?.length) { setAiFaqPreview(draft.faq); toast.success("הוצעו שאלות נפוצות"); }
-        else toast.error("לא הוצעו שאלות");
-      }
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "שגיאה בקריאה ל-AI");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-
-  const AiChip = ({ onClick, loading, label = "צור עם AI" }: { onClick: () => void; loading: boolean; label?: string }) => (
-    <button type="button" onClick={onClick} disabled={loading}
-      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0E6B5A] hover:underline disabled:opacity-50">
-      {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-      {loading ? "יוצר…" : label}
-    </button>
-  );
 
   return (
     <MobileShell>
@@ -776,65 +727,61 @@ export default function OfferEditor() {
 
         {/* ─── STEP 1 — Basics ─── */}
         {step === 1 && (
-          <div className="space-y-8">
-            <Section title="סוג ההצעה" hint="קובע איך הדיירים ירכשו">
-              <div className="grid grid-cols-2 gap-2">
-                <TypeCard active={listingType === "group_buy"} onClick={() => setListingType("group_buy")}
-                  title="קבוצת רכישה" desc="מחיר יורד לפי כמות" />
-                <TypeCard active={listingType === "regular"} onClick={() => setListingType("regular")}
-                  title="הצעה רגילה" desc="מבצע במחיר קבוע" />
-              </div>
-            </Section>
+          <div className="space-y-7">
+            <AiOfferGeneratorCard
+              categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+              onDraftReady={applyAiDraft}
+            />
 
-            <Section title="זהות ההצעה">
-              <div className="space-y-4">
-                <Field label="שם ההצעה" required
-                  error={shouldShowError("title") ? "יש להזין שם" : undefined}>
-                  <Input value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onBlur={() => markTouched("title")}
-                    placeholder="לדוגמה: שדרוג מטבח פרימיום"
-                    className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("title") ? "ring-destructive/50" : "ring-black/[0.06]"}`} />
-                </Field>
+            <div className="space-y-4">
+              <Field label="שם ההצעה" required
+                error={shouldShowError("title") ? "יש להזין שם" : undefined}>
+                <Input value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onBlur={() => markTouched("title")}
+                  placeholder="לדוגמה: שדרוג מטבח פרימיום"
+                  className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("title") ? "ring-destructive/50" : "ring-black/[0.06]"}`} />
+              </Field>
 
-                <Field label="קטגוריה" required
-                  error={shouldShowError("category") ? "יש לבחור קטגוריה" : undefined}>
-                  <select value={categoryId}
-                    onChange={(e) => { setCategoryId(e.target.value); markTouched("category"); }}
-                    onBlur={() => markTouched("category")}
-                    className={`h-11 w-full rounded-xl bg-white ring-1 px-3 text-[13.5px] text-[#1F2937] focus:outline-none focus:ring-[#0E6B5A]/40 ${shouldShowError("category") ? "ring-destructive/50" : "ring-black/[0.06]"}`}>
-                    <option value="">— בחר —</option>
-                    {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-                  </select>
-                </Field>
+              <Field label="קטגוריה" required
+                error={shouldShowError("category") ? "יש לבחור קטגוריה" : undefined}>
+                <select value={categoryId}
+                  onChange={(e) => { setCategoryId(e.target.value); markTouched("category"); }}
+                  onBlur={() => markTouched("category")}
+                  className={`h-11 w-full rounded-xl bg-white ring-1 px-3 text-[13.5px] text-[#1F2937] focus:outline-none focus:ring-[#0E6B5A]/40 ${shouldShowError("category") ? "ring-destructive/50" : "ring-black/[0.06]"}`}>
+                  <option value="">— בחר —</option>
+                  {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+                </select>
+              </Field>
 
-                <Field
-                  label="תיאור"
-                  hint="מה כלול, למי זה מתאים"
-                  action={<AiChip onClick={() => runInlineAi("description")} loading={descAiLoading}
-                    label={description.trim() ? "שפר עם AI" : "צור עם AI"} />}
-                >
-                  <Textarea value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="ספר על ההצעה במילים שלך…"
-                    className="rounded-xl min-h-[110px] shadow-none ring-1 ring-black/[0.06] text-[13.5px]" />
-                </Field>
-              </div>
-            </Section>
+              <Field label="תיאור" hint="מה כלול, למי זה מתאים">
+                <Textarea value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="ספר על ההצעה במילים שלך…"
+                  className="rounded-xl min-h-[110px] shadow-none ring-1 ring-black/[0.06] text-[13.5px]" />
+              </Field>
 
-            <Section title="תמונה ראשית" hint="תמונה טובה מגדילה משמעותית את שיעור ההצטרפות">
-              <DealImagesEditor
-                cover={coverImage}
-                gallery={galleryImages}
-                onChange={({ cover, gallery }) => { setCoverImage(cover); setGalleryImages(gallery); }}
-              />
-            </Section>
+              <Field label="תמונות" hint="תמונה טובה מגדילה את שיעור ההצטרפות">
+                <DealImagesEditor
+                  cover={coverImage}
+                  gallery={galleryImages}
+                  onChange={({ cover, gallery }) => { setCoverImage(cover); setGalleryImages(gallery); }}
+                />
+              </Field>
+            </div>
           </div>
         )}
 
-        {/* ─── STEP 2 — Pricing & Participation ─── */}
+        {/* ─── STEP 2 — Pricing & Audience ─── */}
         {step === 2 && (
-          <div className="space-y-8">
+          <div className="space-y-7">
+            <Section title="סוג ההצעה">
+              <div className="grid grid-cols-2 gap-2">
+                <PillBtn active={listingType === "regular"} onClick={() => setListingType("regular")}>מחיר רגיל</PillBtn>
+                <PillBtn active={listingType === "group_buy"} onClick={() => setListingType("group_buy")}>קבוצת רכישה</PillBtn>
+              </div>
+            </Section>
+
             {listingType === "regular" ? (
               <Section title="מחיר">
                 <Field label="מחיר (₪)" required
@@ -875,8 +822,8 @@ export default function OfferEditor() {
                   hint="ככל שיותר מצטרפים — כך המחיר טוב יותר"
                   action={
                     <button type="button" onClick={loadRecommendedTiers}
-                      className="text-[11.5px] font-semibold text-[#0E6B5A] inline-flex items-center gap-1 hover:underline">
-                      <Sparkles className="h-3 w-3" /> מומלץ
+                      className="text-[11.5px] font-semibold text-[#0E6B5A] hover:underline">
+                      מומלץ
                     </button>
                   }
                 >
@@ -905,57 +852,13 @@ export default function OfferEditor() {
                     <p className="text-[11px] text-destructive mt-2">מלא לפחות מדרגה אחת</p>
                   )}
                 </Section>
-
-                <Section title="פיקדון (אופציונלי)" hint="דורש מהמצטרפים להעביר סכום קטן לשריון מקום">
-                  <label className="flex items-center gap-2.5 cursor-pointer py-1">
-                    <input type="checkbox" checked={depositRequired}
-                      onChange={(e) => setDepositRequired(e.target.checked)}
-                      className="h-4 w-4 accent-[#0E6B5A]" />
-                    <span className="text-[13px] font-medium text-[#1F2937]">דורש פיקדון להצטרפות</span>
-                  </label>
-                  {depositRequired && (
-                    <div className="space-y-3 mt-3 pr-4 border-r border-black/[0.06]">
-                      <Field label="סכום הפיקדון (₪)" required
-                        error={shouldShowError("depositAmount") ? "הזן סכום" : undefined}
-                        hint={
-                          (depositLimits.min !== null || depositLimits.max !== null)
-                            ? `${depositLimits.min !== null ? `מ-${depositLimits.min}` : ""}${depositLimits.min !== null && depositLimits.max !== null ? " · " : ""}${depositLimits.max !== null ? `עד ${depositLimits.max}` : ""}`
-                            : undefined
-                        }>
-                        <Input type="number" inputMode="numeric" min={1} step="0.01"
-                          value={depositAmount}
-                          onChange={(e) => setDepositAmount(e.target.value)}
-                          onBlur={() => markTouched("depositAmount")}
-                          className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("depositAmount") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
-                          placeholder="הזן סכום" />
-                      </Field>
-                      <Field label="קישור תשלום" required hint="Bit / PayBox / העברה — הפיקדון מועבר ישירות אליך"
-                        error={shouldShowError("paymentLink") ? "הזן קישור תקין" : undefined}>
-                        <Input type="url" placeholder="https://..."
-                          value={supplierPaymentLink}
-                          onChange={(e) => setSupplierPaymentLink(e.target.value)}
-                          onBlur={() => markTouched("paymentLink")}
-                          className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("paymentLink") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
-                          dir="ltr" />
-                      </Field>
-                      <Field label="הוראות נוספות (אופציונלי)">
-                        <Textarea placeholder='למשל: "Bit ל-050-1234567"'
-                          value={supplierPaymentInstructions}
-                          onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
-                          className="rounded-xl min-h-[60px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
-                      </Field>
-                    </div>
-                  )}
-                </Section>
-
-                <Section title="יעד משתתפים (אופציונלי)" hint="כמות המצטרפים שסוגרת את הקבוצה">
-                  <Input type="number" inputMode="numeric" min={1}
-                    value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
-                    placeholder="למשל 20"
-                    className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" />
-                </Section>
               </>
             )}
+
+            <Section title="אזור ביצוע" hint="היכן אתם מספקים את השירות">
+              <AreasCombobox value={workAreas} onChange={setWorkAreas}
+                placeholder="כל הארץ / אזורים / ערים-יישובים" />
+            </Section>
 
             <Section title="קהל היעד" hint="למי ההצעה תוצג">
               <div className="grid grid-cols-3 gap-2">
@@ -978,7 +881,7 @@ export default function OfferEditor() {
               )}
               {visibilityType === "region_only" && (
                 <div className="mt-3">
-                  <Field label="אזורי יעד" required hint="ההצעה תוצג רק לדיירים באזורים הנבחרים"
+                  <Field label="אזורי יעד" required
                     error={shouldShowError("regions") ? "בחר לפחות אזור אחד" : undefined}>
                     <AreasCombobox value={visibilityRegions}
                       onChange={(v) => { setVisibilityRegions(v); markTouched("regions"); }}
@@ -987,126 +890,135 @@ export default function OfferEditor() {
                 </div>
               )}
             </Section>
-
-            <Section title="אזור ביצוע" hint="היכן אתם מספקים את השירות">
-              <AreasCombobox value={workAreas} onChange={setWorkAreas}
-                placeholder="בחר אזור, עיר או יישוב..." />
-            </Section>
           </div>
         )}
 
-        {/* ─── STEP 3 — Terms & Publish ─── */}
+        {/* ─── STEP 3 — Review & Publish ─── */}
         {step === 3 && (
-          <div className="space-y-8">
-            <Section title="מה כלול" hint="ככל שהתיאור מדויק — פחות שאלות מדיירים">
-              <Textarea value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)}
-                placeholder="תנאים, אחריות, מפרט, זמני ביצוע..."
-                className="rounded-xl min-h-[90px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
-            </Section>
+          <div className="space-y-7">
+            {/* Preview at the top — clean, as the resident will see. */}
+            <LivePreview
+              title={title}
+              description={description}
+              coverImage={coverImage}
+              category={categories.find((c) => c.id === categoryId)?.name ?? ""}
+              listingType={listingType}
+              offerType={offerType}
+              tiers={tiers}
+              unitPrice={unitPrice}
+              targetParticipants={targetParticipants}
+              serviceAreas={
+                workAreas.servesAllCountry
+                  ? ["כל הארץ"]
+                  : [
+                      ...workAreas.regionIds.map((id) => regionById(id)?.name_he).filter(Boolean) as string[],
+                      ...workAreas.cityIds.map((id) => cityById(id)?.name_he).filter(Boolean) as string[],
+                    ]
+              }
+              depositRequired={depositRequired && listingType === "group_buy"}
+              depositAmount={depositAmount}
+              supplierName={supplier.business_name}
+            />
 
-            <Section title="מה לא כלול / חריגים">
-              <Textarea value={restrictions} onChange={(e) => setRestrictions(e.target.value)}
-                placeholder="למשל: לא כולל שכר טרחה, לא כולל חלקי חילוף..."
-                className="rounded-xl min-h-[70px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
-            </Section>
-
-            <Section title="לוחות זמנים">
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="דדליין הצטרפות">
-                  <Input type="date" dir="ltr" min={todayISO()} value={joinDeadline}
-                    onChange={(e) => setJoinDeadline(e.target.value)}
-                    className="h-11 rounded-xl px-2 text-[13px] text-left shadow-none ring-1 ring-black/[0.06]" />
-                </Field>
-                <Field label="דדליין מימוש">
-                  <Input type="date" dir="ltr" min={todayISO()} value={redemptionDeadline}
-                    onChange={(e) => setRedemptionDeadline(e.target.value)}
-                    className="h-11 rounded-xl px-2 text-[13px] text-left shadow-none ring-1 ring-black/[0.06]" />
-                </Field>
-              </div>
-            </Section>
-
-            {/* Advanced options — progressive disclosure */}
-            <div>
+            {/* Advanced options — collapsed by default */}
+            <div className="rounded-xl bg-white ring-1 ring-black/[0.06] overflow-hidden">
               <button type="button" onClick={() => setShowAdvanced((v) => !v)}
-                className="w-full flex items-center justify-between py-2 text-right">
+                className="w-full flex items-center justify-between px-3.5 py-3 text-right">
                 <div className="flex items-center gap-2">
-                  <Settings2 className="h-3.5 w-3.5 text-[#0E6B5A]" />
+                  <Settings2 className="h-3.5 w-3.5 text-[#6B7280]" />
                   <span className="text-[13px] font-semibold text-[#1F2937]">אפשרויות מתקדמות</span>
                 </div>
                 <ChevronLeft className={`h-4 w-4 text-[#9CA3AF] transition-transform ${showAdvanced ? "-rotate-90" : ""}`} />
               </button>
               {showAdvanced && (
-                <div className="pt-3 space-y-4">
-                  <Field label="מקסימום מימושים (אופציונלי)">
+                <div className="border-t border-black/[0.05] px-3.5 py-4 space-y-4 bg-[#FAFBFC]">
+                  <Field label="מה כלול">
+                    <Textarea value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)}
+                      placeholder="תנאים, אחריות, מפרט…"
+                      className="rounded-xl min-h-[80px] shadow-none ring-1 ring-black/[0.06] text-[13px] bg-white" />
+                  </Field>
+                  <Field label="מה לא כלול / חריגים">
+                    <Textarea value={restrictions} onChange={(e) => setRestrictions(e.target.value)}
+                      placeholder="למשל: לא כולל חלקי חילוף…"
+                      className="rounded-xl min-h-[70px] shadow-none ring-1 ring-black/[0.06] text-[13px] bg-white" />
+                  </Field>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field label="דדליין הצטרפות">
+                      <Input type="date" dir="ltr" min={todayISO()} value={joinDeadline}
+                        onChange={(e) => setJoinDeadline(e.target.value)}
+                        className="h-11 rounded-xl px-2 text-[13px] text-left shadow-none ring-1 ring-black/[0.06] bg-white" />
+                    </Field>
+                    <Field label="דדליין מימוש">
+                      <Input type="date" dir="ltr" min={todayISO()} value={redemptionDeadline}
+                        onChange={(e) => setRedemptionDeadline(e.target.value)}
+                        className="h-11 rounded-xl px-2 text-[13px] text-left shadow-none ring-1 ring-black/[0.06] bg-white" />
+                    </Field>
+                  </div>
+                  <Field label="מקסימום מימושים">
                     <Input type="number" inputMode="numeric" min={1}
                       value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)}
                       placeholder="ללא הגבלה"
-                      className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" />
+                      className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06] bg-white" />
                   </Field>
+                  {listingType === "group_buy" && (
+                    <Field label="יעד משתתפים">
+                      <Input type="number" inputMode="numeric" min={1}
+                        value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
+                        placeholder="למשל 20"
+                        className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06] bg-white" />
+                    </Field>
+                  )}
                   <label className="flex items-center gap-2.5 cursor-pointer py-1">
                     <input type="checkbox" checked={appointmentRequired}
                       onChange={(e) => setAppointmentRequired(e.target.checked)}
                       className="h-4 w-4 accent-[#0E6B5A]" />
                     <span className="text-[13px] text-[#1F2937]">נדרשת קביעת פגישה לפני מימוש</span>
                   </label>
+
+                  {listingType === "group_buy" && (
+                    <div className="pt-2 border-t border-black/[0.05]">
+                      <label className="flex items-center gap-2.5 cursor-pointer py-1">
+                        <input type="checkbox" checked={depositRequired}
+                          onChange={(e) => setDepositRequired(e.target.checked)}
+                          className="h-4 w-4 accent-[#0E6B5A]" />
+                        <span className="text-[13px] font-medium text-[#1F2937]">דורש פיקדון להצטרפות</span>
+                      </label>
+                      {depositRequired && (
+                        <div className="space-y-3 mt-3">
+                          <Field label="סכום הפיקדון (₪)" required
+                            error={shouldShowError("depositAmount") ? "הזן סכום" : undefined}>
+                            <Input type="number" inputMode="numeric" min={1} step="0.01"
+                              value={depositAmount}
+                              onChange={(e) => setDepositAmount(e.target.value)}
+                              onBlur={() => markTouched("depositAmount")}
+                              className={`h-11 rounded-xl shadow-none ring-1 bg-white ${shouldShowError("depositAmount") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
+                              placeholder="הזן סכום" />
+                          </Field>
+                          <Field label="קישור תשלום" required hint="Bit / PayBox / העברה"
+                            error={shouldShowError("paymentLink") ? "הזן קישור תקין" : undefined}>
+                            <Input type="url" placeholder="https://..."
+                              value={supplierPaymentLink}
+                              onChange={(e) => setSupplierPaymentLink(e.target.value)}
+                              onBlur={() => markTouched("paymentLink")}
+                              className={`h-11 rounded-xl shadow-none ring-1 bg-white ${shouldShowError("paymentLink") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
+                              dir="ltr" />
+                          </Field>
+                          <Field label="הוראות נוספות (אופציונלי)">
+                            <Textarea placeholder='למשל: "Bit ל-050-1234567"'
+                              value={supplierPaymentInstructions}
+                              onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
+                              className="rounded-xl min-h-[60px] shadow-none ring-1 ring-black/[0.06] text-[13px] bg-white" />
+                          </Field>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* FAQ with AI */}
-            <Section
-              title="שאלות נפוצות"
-              hint="תצוגה מקדימה בלבד — לא נשמר עדיין להצעה"
-              action={<AiChip onClick={() => runInlineAi("faq")} loading={faqAiLoading} label="הצע עם AI" />}
-            >
-              {aiFaqPreview.length > 0 ? (
-                <div className="divide-y divide-black/[0.06] rounded-xl bg-white ring-1 ring-black/[0.05]">
-                  {aiFaqPreview.map((f, i) => (
-                    <details key={i} className="group">
-                      <summary className="list-none cursor-pointer px-3 py-2.5 flex items-center justify-between gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#1F2937] flex-1">{f.q}</span>
-                        <ChevronLeft className="h-3.5 w-3.5 text-[#9CA3AF] transition-transform group-open:-rotate-90 shrink-0" />
-                      </summary>
-                      <div className="px-3 pb-3 text-[12px] text-[#4B5563] leading-relaxed">{f.a}</div>
-                    </details>
-                  ))}
-                  <button type="button" onClick={() => setAiFaqPreview([])}
-                    className="w-full py-2 text-[11px] text-[#6B7280] hover:text-[#1F2937]">נקה</button>
-                </div>
-              ) : (
-                <p className="text-[12px] text-[#9CA3AF] py-2">
-                  אין עדיין שאלות נפוצות. לחץ "הצע עם AI" כדי לקבל הצעות בהתבסס על התיאור.
-                </p>
-              )}
-            </Section>
-
-            {/* Preview */}
-            <Section title="תצוגה מקדימה" hint="כך הדיירים יראו את ההצעה שלך">
-              <LivePreview
-                title={title}
-                description={description}
-                coverImage={coverImage}
-                category={categories.find((c) => c.id === categoryId)?.name ?? ""}
-                listingType={listingType}
-                offerType={offerType}
-                tiers={tiers}
-                unitPrice={unitPrice}
-                targetParticipants={targetParticipants}
-                serviceAreas={
-                  workAreas.servesAllCountry
-                    ? ["כל הארץ"]
-                    : [
-                        ...workAreas.regionIds.map((id) => regionById(id)?.name_he).filter(Boolean) as string[],
-                        ...workAreas.cityIds.map((id) => cityById(id)?.name_he).filter(Boolean) as string[],
-                      ]
-                }
-                depositRequired={depositRequired && listingType === "group_buy"}
-                depositAmount={depositAmount}
-                supplierName={supplier.business_name}
-              />
-            </Section>
-
-            <label className={`flex items-start gap-2.5 cursor-pointer py-3 px-3 rounded-xl transition-colors ${shouldShowError("commitment") ? "bg-destructive/[0.04] ring-1 ring-destructive/30" : ""}`}>
+            {/* Commitment — sits right above the publish button */}
+            <label className={`flex items-start gap-2.5 cursor-pointer py-3 px-3 rounded-xl transition-colors ${shouldShowError("commitment") ? "bg-destructive/[0.04] ring-1 ring-destructive/30" : "bg-white ring-1 ring-black/[0.06]"}`}>
               <input type="checkbox" checked={commitmentAccepted}
                 onChange={(e) => { setCommitmentAccepted(e.target.checked); markTouched("commitment"); }}
                 className="h-4 w-4 mt-0.5 accent-[#0E6B5A] shrink-0" />
@@ -1134,8 +1046,8 @@ export default function OfferEditor() {
                   : `${stepMissing.length} שדות חסרים להמשך`}
               </span>
             ) : step < 3 ? (
-              <span className="text-[11px] text-[#0E6B5A] font-semibold inline-flex items-center gap-1">
-                <Eye className="h-3 w-3" /> מוכן להמשך
+              <span className="text-[11px] text-[#0E6B5A] font-semibold">
+                מוכן להמשך
               </span>
             ) : null}
           </div>
@@ -1166,11 +1078,11 @@ export default function OfferEditor() {
               </button>
               <button type="button" onClick={() => persist("draft")} disabled={savingDraft || saving}
                 className="h-12 px-3 rounded-xl bg-white ring-1 ring-black/[0.1] text-[12.5px] font-semibold text-[#1F2937] inline-flex items-center gap-1.5 hover:bg-black/[0.02] transition-colors disabled:opacity-50">
-                {savingDraft ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><FileText className="h-3.5 w-3.5" /> טיוטה</>}
+                {savingDraft ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><FileText className="h-3.5 w-3.5" /> שמור טיוטה</>}
               </button>
               <button type="button" onClick={() => persist("active")} disabled={saving || savingDraft || !commitmentAccepted}
                 className="flex-1 h-12 rounded-xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[13.5px] font-semibold inline-flex items-center justify-center gap-1.5 disabled:opacity-50 transition-colors">
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-3.5 w-3.5" /> {isEditing ? "עדכן" : "פרסם"}</>}
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-3.5 w-3.5" /> {isEditing ? "עדכן הצעה" : "פרסם הצעה"}</>}
               </button>
             </div>
           )}
@@ -1224,19 +1136,6 @@ function Field({
 }
 
 
-function TypeCard({ active, onClick, title, desc }: { active: boolean; onClick: () => void; title: string; desc: string }) {
-  return (
-    <button type="button" onClick={onClick}
-      className={`p-3 rounded-xl text-right transition-colors ${
-        active
-          ? "bg-[#0E6B5A]/[0.06] ring-1 ring-[#0E6B5A]/40"
-          : "bg-white ring-1 ring-black/[0.06] hover:ring-black/[0.12]"
-      }`}>
-      <div className={`text-[13px] font-semibold ${active ? "text-[#0E6B5A]" : "text-[#1F2937]"}`}>{title}</div>
-      <div className="text-[11px] text-[#6B7280] mt-0.5 leading-snug">{desc}</div>
-    </button>
-  );
-}
 
 function PillBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -1325,8 +1224,8 @@ function TierCard({
             </label>
           )}
           {Number(tier.minParticipants) === 1 && (
-            <p className="text-[10.5px] text-[#8A6A1E] leading-snug">
-              ⚠️ מדרגה מ-1 תינתן גם לרוכש בודד. התחל מ-2 לקבוצה אמיתית.
+            <p className="text-[10.5px] text-[#6B7280] leading-snug">
+              מדרגה מ-1 תינתן גם לרוכש בודד. התחל מ-2 לקבוצה אמיתית.
             </p>
           )}
           <div className="flex justify-end pt-0.5">
@@ -1429,9 +1328,9 @@ function LivePreview({
         )}
 
         {depositRequired && (
-          <div className="text-[11.5px] bg-[#FFF8E1] text-[#8A6A1E] rounded-lg px-2.5 py-1.5 font-medium">
-            נדרש פיקדון: ₪{depositAmount || "—"}
-          </div>
+        <div className="text-[11.5px] bg-[#F4F6FA] text-[#374151] rounded-lg px-2.5 py-1.5 font-medium">
+          נדרש פיקדון: ₪{depositAmount || "—"}
+        </div>
         )}
       </div>
     </div>
