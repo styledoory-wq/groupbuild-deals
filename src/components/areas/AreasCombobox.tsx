@@ -145,28 +145,31 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
                 })}
               </CommandGroup>
 
-              <CommandSeparator />
-
-              <CommandGroup heading="ערים">
-                {cities.map((c) => {
-                  const region = regionById(c.region_id);
-                  const active = value.cityIds.includes(c.id);
-                  return (
-                    <CommandItem
-                      key={c.id}
-                      value={`${c.name_he} ${region?.name_he ?? ""}`}
-                      onSelect={() => toggleCity(c.id)}
-                      className="cursor-pointer"
-                    >
-                      <Check className={cn("ml-2 h-4 w-4", active ? "opacity-100" : "opacity-0")} />
-                      <span>{c.name_he}</span>
-                      {region && (
-                        <span className="mr-2 text-fs-xs text-muted-foreground">· {region.name_he}</span>
-                      )}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
+              {!regionsOnly && (
+                <>
+                  <CommandSeparator />
+                  <CommandGroup heading="ערים">
+                    {cities.map((c) => {
+                      const region = regionById(c.region_id);
+                      const active = value.cityIds.includes(c.id);
+                      return (
+                        <CommandItem
+                          key={c.id}
+                          value={`${c.name_he} ${region?.name_he ?? ""}`}
+                          onSelect={() => toggleCity(c.id)}
+                          className="cursor-pointer"
+                        >
+                          <Check className={cn("ml-2 h-4 w-4", active ? "opacity-100" : "opacity-0")} />
+                          <span>{c.name_he}</span>
+                          {region && (
+                            <span className="mr-2 text-fs-xs text-muted-foreground">· {region.name_he}</span>
+                          )}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>
