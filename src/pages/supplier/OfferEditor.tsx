@@ -486,6 +486,30 @@ export default function OfferEditor() {
         }
         savedId = (data as { id: string }).id;
       }
+
+      // Sync structured work-area join tables (delete-then-insert)
+      if (savedId) {
+        try {
+          await Promise.all([
+            supabase.from("deal_regions").delete().eq("deal_id", savedId),
+            supabase.from("deal_cities").delete().eq("deal_id", savedId),
+          ]);
+          if (!workAreas.servesAllCountry) {
+            if (workAreas.regionIds.length) {
+              await supabase.from("deal_regions").insert(
+                workAreas.regionIds.map((rid) => ({ deal_id: savedId!, region_id: rid })),
+              );
+            }
+            if (workAreas.cityIds.length) {
+              await supabase.from("deal_cities").insert(
+                workAreas.cityIds.map((cid) => ({ deal_id: savedId!, city_id: cid })),
+              );
+            }
+          }
+        } catch (e) {
+          console.warn("[OfferEditor] failed to sync deal areas", e);
+        }
+      }
       toast.success(
         status === "draft"
           ? "הטיוטה נשמרה"
