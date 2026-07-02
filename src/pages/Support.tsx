@@ -32,6 +32,8 @@ export default function Support() {
   const [audience, setAudience] = useState<"supplier" | "resident">(initialAudience);
 
   const faqs = useMemo(() => (audience === "supplier" ? SUPPLIER_FAQS : RESIDENT_FAQS), [audience]);
+  const waNumber = useSupportWhatsapp();
+  const waUrl = normalizeWhatsappUrl(waNumber) ?? "https://wa.me/972526247941";
 
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground">
