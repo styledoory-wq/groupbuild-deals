@@ -2495,8 +2495,16 @@ export type Database = {
         Args: { _project_id: string; _user_id?: string }
         Returns: boolean
       }
+      is_resident_owner_of_demand: {
+        Args: { _demand_id: string }
+        Returns: boolean
+      }
       is_supplier_for_deal: {
         Args: { _deal_id: string; _user_id?: string }
+        Returns: boolean
+      }
+      is_supplier_invited_to_demand: {
+        Args: { _demand_id: string }
         Returns: boolean
       }
       is_supplier_owner: {
