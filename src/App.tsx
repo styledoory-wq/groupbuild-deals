@@ -92,6 +92,7 @@ const AdminCommitteeRequests = lazy(() => import("./pages/admin/AdminCommitteeRe
 const AdminControl = lazy(() => import("./pages/admin/AdminControl"));
 const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
+const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
 const CommitteeDashboard = lazy(() => import("./pages/committee/CommitteeDashboard"));
 const CommitteeRequest = lazy(() => import("./pages/committee/CommitteeRequest"));
 const CommitteeQuoteRequest = lazy(() => import("./pages/committee/CommitteeQuoteRequest"));
@@ -298,6 +299,7 @@ const App = () => (
                   <Route path="/admin/payments" element={adminRoute(<AdminPayments />)} />
                   <Route path="/admin/control" element={adminRoute(<AdminControl />)} />
                   <Route path="/admin/notifications" element={adminRoute(<AdminNotifications />)} />
+                  <Route path="/admin/support" element={adminRoute(<AdminSupport />)} />
                   <Route path="/admin/suppliers/:supplierId/areas" element={adminRoute(<AdminSupplierAreas />)} />
                   <Route path="/admin/suppliers/:supplierId/media" element={adminRoute(<AdminSupplierMedia />)} />
                   <Route path="/admin/db-suppliers" element={adminRoute(<AdminDbSuppliers />)} />

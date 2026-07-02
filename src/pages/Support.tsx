@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, MessageCircle, HelpCircle } from "lucide-react";
 import { useApp } from "@/store/AppStore";
+import { useSupportWhatsapp } from "@/hooks/useSupportContact";
+import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 
 type Faq = { q: string; a: string };
 
@@ -30,6 +32,8 @@ export default function Support() {
   const [audience, setAudience] = useState<"supplier" | "resident">(initialAudience);
 
   const faqs = useMemo(() => (audience === "supplier" ? SUPPLIER_FAQS : RESIDENT_FAQS), [audience]);
+  const waNumber = useSupportWhatsapp();
+  const waUrl = normalizeWhatsappUrl(waNumber) ?? "https://wa.me/972526247941";
 
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground">
@@ -59,7 +63,7 @@ export default function Support() {
             </div>
           </a>
 
-          <a href="https://wa.me/972500000000" target="_blank" rel="noopener noreferrer" className="border rounded-lg p-5 hover:bg-accent transition flex items-start gap-3">
+          <a href={waUrl} target="_blank" rel="noopener noreferrer" className="border rounded-lg p-5 hover:bg-accent transition flex items-start gap-3">
             <MessageCircle className="text-primary shrink-0 mt-1" />
             <div>
               <h3 className="font-semibold mb-1">WhatsApp</h3>

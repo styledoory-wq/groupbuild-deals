@@ -2165,6 +2165,7 @@ export type Database = {
           deposit_min_amount: number | null
           id: string
           payment_fee_absorber: string
+          support_whatsapp: string | null
           updated_at: string
         }
         Insert: {
@@ -2176,6 +2177,7 @@ export type Database = {
           deposit_min_amount?: number | null
           id?: string
           payment_fee_absorber?: string
+          support_whatsapp?: string | null
           updated_at?: string
         }
         Update: {
@@ -2187,6 +2189,7 @@ export type Database = {
           deposit_min_amount?: number | null
           id?: string
           payment_fee_absorber?: string
+          support_whatsapp?: string | null
           updated_at?: string
         }
         Relationships: []
