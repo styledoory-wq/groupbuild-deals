@@ -22,12 +22,12 @@ import { translateAuthError } from "@/lib/authErrors";
 
 type Mode = "signin" | "signup";
 
-export default function Auth() {
+export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin"> } = {}) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { setUser, projects } = useApp();
-  const [role, setRole] = useState<Exclude<Role, "admin">>("resident");
-  const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const [role, setRole] = useState<Exclude<Role, "admin">>(lockedRole ?? "resident");
+  const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : (lockedRole ? "signup" : "signin");
   const [mode, setMode] = useState<Mode>(initialMode);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -369,7 +369,8 @@ export default function Auth() {
             </form>
           ) : (
             <form onSubmit={handleSignUp} className="space-y-3.5 animate-fade-up">
-              {/* Account type selector with explicit title */}
+              {/* Account type selector with explicit title — hidden when role is locked via route */}
+              {!lockedRole && (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 px-1">
                   <span className="text-[12px] font-bold tracking-wide text-[#6B7280] uppercase">בחר סוג חשבון</span>
@@ -405,6 +406,7 @@ export default function Auth() {
                 </div>
                 <div className="h-px bg-[#ECEEF2] mt-1" />
               </div>
+              )}
 
 
               <div className={fieldWrap}>
