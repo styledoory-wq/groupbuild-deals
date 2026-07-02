@@ -47,7 +47,7 @@ export default function AdminControl() {
           supabase.from("deposit_attempt_logs").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
           supabase.from("supplier_inquiries").select("id", { count: "exact", head: true }).eq("status", "new").lte("created_at", sevenDaysAgo).eq("is_deleted", false),
           supabase.from("committee_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
-          supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).is("image_url", null),
+          supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).is("cover_image_url", null),
           supabase.from("suppliers").select("id").eq("is_deleted", false).eq("approval_status", "approved"),
           supabase.from("deals").select("supplier_id, project_id").eq("is_deleted", false).in("status", ["active", "closing-soon"]),
           supabase.from("projects").select("id").eq("is_deleted", false).eq("is_active", true),
