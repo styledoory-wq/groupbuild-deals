@@ -6,7 +6,8 @@ import {
   Eye, Pencil, FileText, Settings2, Sparkles,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { BackHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
+import { LoadingState, ErrorState, EmptyState } from "@/components/ds";
+import { BackHeader } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
