@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Sparkles, Loader2, ChevronDown } from "lucide-react";
+import { Sparkles, Loader2, X, Check } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -21,18 +20,17 @@ interface Props {
   categories: CategoryLite[];
   onDraftReady: (draft: AiOfferDraft) => void;
   disabled?: boolean;
-  /** Whether the card starts expanded. Defaults to false (collapsed). */
-  defaultOpen?: boolean;
 }
 
 /**
- * Compact AI generator card — collapsed by default so it doesn't dominate step 1.
- * Uses the same neutral tokens as the rest of the editor (no heavy gradient).
+ * Minimal AI helper. Default: single compact row. Expanded: simple input + generate.
+ * After success: collapses to a subtle success line with "פתח שוב".
  */
-export function AiOfferGeneratorCard({ categories, onDraftReady, disabled, defaultOpen = false }: Props) {
-  const [open, setOpen] = useState(defaultOpen);
+export function AiOfferGeneratorCard({ categories, onDraftReady, disabled }: Props) {
+  const [open, setOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lastGenerated, setLastGenerated] = useState<string | null>(null);
 
   const generate = async () => {
     const clean = prompt.trim();
@@ -57,7 +55,8 @@ export function AiOfferGeneratorCard({ categories, onDraftReady, disabled, defau
         return;
       }
       onDraftReady(draft);
-      toast.success("נוצרה טיוטה. השלם מחירים ופרסם.");
+      toast.success("נוצרה טיוטה");
+      setLastGenerated(draft.title || clean.slice(0, 40));
       setOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "יצירת טיוטה נכשלה");
@@ -66,58 +65,84 @@ export function AiOfferGeneratorCard({ categories, onDraftReady, disabled, defau
     }
   };
 
-  return (
-    <div className="rounded-xl border border-[#ECEEF2] bg-white overflow-hidden">
+  // Success state — subtle line with reopen
+  if (lastGenerated && !open) {
+    return (
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-3 py-2.5 text-right hover:bg-[#F8F9FB] transition-colors"
+        onClick={() => setOpen(true)}
+        className="w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl bg-[#0E6B5A]/[0.04] hover:bg-[#0E6B5A]/[0.07] transition-colors text-right"
       >
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="h-7 w-7 shrink-0 rounded-lg bg-[#0E6B5A]/10 flex items-center justify-center">
-            <Sparkles className="h-3.5 w-3.5 text-[#0E6B5A]" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-[13px] font-bold text-[#1F2937] leading-tight">יצירה מהירה עם AI</div>
-            <div className="text-[11px] text-[#6B7280] leading-tight mt-0.5 truncate">
-              תאר בכמה מילים ונבנה עבורך טיוטת הצעה
-            </div>
-          </div>
+        <div className="h-6 w-6 rounded-full bg-[#0E6B5A]/10 flex items-center justify-center shrink-0">
+          <Check className="h-3.5 w-3.5 text-[#0E6B5A]" strokeWidth={2.5} />
         </div>
-        <ChevronDown
-          className={`h-4 w-4 text-[#6B7280] shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <span className="text-[12.5px] text-[#1F2937] font-medium flex-1 truncate">
+          טיוטה נוצרה — אפשר לערוך למטה
+        </span>
+        <span className="text-[11.5px] text-[#0E6B5A] font-semibold shrink-0">פתח שוב</span>
       </button>
+    );
+  }
 
-      {open && (
-        <div className="border-t border-[#ECEEF2] p-3 space-y-2">
-          <Textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="לדוגמה: התקנת מזגן עילי 2.5 כ״ס כולל חומרים ואחריות שנתיים"
-            className="min-h-[90px] max-h-[110px] rounded-lg text-[13px] p-3"
-            disabled={loading}
-          />
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[10.5px] text-[#9CA3AF] leading-tight">
-              ה-AI לא ממלא מחירים, פיקדונות או תאריכים.
-            </p>
-            <Button
-              type="button"
-              size="sm"
-              onClick={generate}
-              disabled={loading || disabled}
-              className="h-9 rounded-lg bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white text-[12px] font-bold px-4 shrink-0"
-            >
-              {loading ? (
-                <><Loader2 className="h-3.5 w-3.5 ml-1.5 animate-spin" /> יוצר…</>
-              ) : (
-                <><Sparkles className="h-3.5 w-3.5 ml-1.5" /> צור טיוטה</>
-              )}
-            </Button>
-          </div>
+  // Default compact row
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl hover:bg-black/[0.03] transition-colors text-right"
+      >
+        <div className="h-6 w-6 rounded-full bg-[#0E6B5A]/10 flex items-center justify-center shrink-0">
+          <Sparkles className="h-3.5 w-3.5 text-[#0E6B5A]" />
         </div>
-      )}
+        <div className="flex-1 min-w-0">
+          <div className="text-[12.5px] font-semibold text-[#1F2937] leading-tight">יצירה עם AI</div>
+          <div className="text-[11px] text-[#6B7280] leading-tight mt-0.5">תאר בכמה מילים — נבנה טיוטה</div>
+        </div>
+        <span className="text-[11.5px] text-[#0E6B5A] font-semibold shrink-0">פתח</span>
+      </button>
+    );
+  }
+
+  // Expanded
+  return (
+    <div className="rounded-xl bg-white ring-1 ring-black/[0.06] p-3 space-y-2.5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-3.5 w-3.5 text-[#0E6B5A]" />
+          <span className="text-[12.5px] font-semibold text-[#1F2937]">יצירה עם AI</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="h-6 w-6 flex items-center justify-center rounded-full text-[#6B7280] hover:bg-black/5"
+          aria-label="סגור"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <Textarea
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        placeholder="לדוגמה: התקנת מזגן עילי 2.5 כ״ס כולל חומרים ואחריות שנתיים"
+        className="min-h-[84px] max-h-[110px] rounded-lg text-[13px] p-2.5 shadow-none ring-1 ring-black/[0.06]"
+        disabled={loading}
+      />
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10.5px] text-[#9CA3AF]">לא ממלא מחירים או תאריכים</p>
+        <button
+          type="button"
+          onClick={generate}
+          disabled={loading || disabled}
+          className="h-9 px-4 rounded-lg bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[12.5px] font-semibold inline-flex items-center gap-1.5 disabled:opacity-50 transition-colors"
+        >
+          {loading ? (
+            <><Loader2 className="h-3.5 w-3.5 animate-spin" /> יוצר…</>
+          ) : (
+            <>צור טיוטה</>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
