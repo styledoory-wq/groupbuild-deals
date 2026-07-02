@@ -136,6 +136,8 @@ export default function OfferEditor() {
   const [appointmentRequired, setAppointmentRequired] = useState<boolean>(false);
   const [serviceAreas, setServiceAreas] = useState<string[]>([]);
   const [commitmentAccepted, setCommitmentAccepted] = useState<boolean>(false);
+  // AI-suggested FAQ — preview only, never persisted (no dedicated column yet).
+  const [aiFaqPreview, setAiFaqPreview] = useState<{ q: string; a: string }[]>([]);
 
   const switchOfferType = (next: OfferType) => {
     if (next === offerType) return;
@@ -174,11 +176,8 @@ export default function OfferEditor() {
     }
     if (parts.length) setDescription(parts.join("\n\n"));
 
-    if (draft.faq?.length) {
-      const faqText = draft.faq.map((f) => `שאלה: ${f.q}\nתשובה: ${f.a}`).join("\n\n");
-      setOfferTerms((prev) => (prev?.trim() ? prev : faqText));
-      setShowAdvanced(true);
-    }
+    // FAQ: preview only (no dedicated column yet). Never write to offer_terms.
+    setAiFaqPreview(draft.faq?.length ? draft.faq : []);
   };
 
   useEffect(() => {
@@ -665,6 +664,23 @@ export default function OfferEditor() {
                 categories={categories.map((c) => ({ id: c.id, name: c.name }))}
                 onDraftReady={applyAiDraft}
               />
+            )}
+            {aiFaqPreview.length > 0 && (
+              <div className="gb-card p-4 space-y-2 border border-amber-200 bg-amber-50/50">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-sm text-[#1F2937]">שאלות נפוצות שהוצעו על-ידי AI</h3>
+                  <button type="button" onClick={() => setAiFaqPreview([])} className="text-[11px] text-[#6B7280] hover:underline">נקה</button>
+                </div>
+                <p className="text-[11px] text-[#6B7280]">תצוגה מקדימה בלבד — לא נשמר עדיין להצעה.</p>
+                <div className="space-y-2 pt-1">
+                  {aiFaqPreview.map((f, i) => (
+                    <div key={i} className="rounded-lg bg-white p-2 text-[12px]">
+                      <div className="font-bold text-[#1F2937]">{f.q}</div>
+                      <div className="text-[#4B5563] mt-0.5">{f.a}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
             <div className="gb-card p-4 space-y-3">
               <h3 className="font-bold text-sm text-[#1F2937]">סוג ההצעה</h3>
