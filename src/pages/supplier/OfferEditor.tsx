@@ -660,6 +660,12 @@ export default function OfferEditor() {
         {/* ─── STEP 1: What ─── */}
         {step === 1 && (
           <>
+            {!isEditing && (
+              <AiOfferGeneratorCard
+                categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+                onDraftReady={applyAiDraft}
+              />
+            )}
             <div className="gb-card p-4 space-y-3">
               <h3 className="font-bold text-sm text-[#1F2937]">סוג ההצעה</h3>
               <div className="grid grid-cols-2 gap-2">
