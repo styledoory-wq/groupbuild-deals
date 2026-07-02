@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, MessageCircle, HelpCircle } from "lucide-react";
 import { useApp } from "@/store/AppStore";
+import { useSupportWhatsapp } from "@/hooks/useSupportContact";
+import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 
 type Faq = { q: string; a: string };
 
