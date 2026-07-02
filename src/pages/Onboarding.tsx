@@ -256,13 +256,11 @@ export default function Onboarding() {
       <div className="relative z-10 w-full max-w-screen-sm flex flex-col px-6 py-8">
         <div className="text-center mb-5 animate-fade-up">
           <h1 className="text-[clamp(1.4rem,5vw,1.75rem)] font-extrabold leading-tight tracking-tight text-[#0B1220]">
-            {supplierLocked ? "רק עוד פרט קטן" : `ברוכים הבאים${defaultName ? `, ${defaultName.split(" ")[0]}` : ""} 👋`}
+            {lockedTitle}
           </h1>
           <div className="mt-3 h-[2px] w-10 rounded-full bg-[#0E6B5A] mx-auto" />
           <p className="mt-3 text-[#5B6472] text-[13px] font-medium leading-relaxed">
-            {supplierLocked
-              ? "נשלים את פתיחת חשבון הספק שלך ב-GroupBuild"
-              : "כדי להתאים לכם את החוויה — איך תרצו להשתמש ב-GroupBuild?"}
+            {lockedSubtitle}
           </p>
         </div>
 
