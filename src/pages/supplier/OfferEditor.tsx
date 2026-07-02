@@ -85,8 +85,15 @@ export default function OfferEditor() {
   const adminTargetSupplierId = searchParams.get("supplierId");
   const { categories, projects } = useApp();
 
-  const [visibilityType, setVisibilityType] = useState<"public" | "project_only">("public");
+  const { regions, cities, regionById, cityById } = useRegions();
+  const [visibilityType, setVisibilityType] = useState<"public" | "project_only" | "region_only">("public");
   const [visibilityProjectId, setVisibilityProjectId] = useState<string>("");
+  const [visibilityRegions, setVisibilityRegions] = useState<AreasComboboxValue>({
+    servesAllCountry: false, regionIds: [], cityIds: [],
+  });
+  const [workAreas, setWorkAreas] = useState<AreasComboboxValue>({
+    servesAllCountry: false, regionIds: [], cityIds: [],
+  });
 
   const [bootLoading, setBootLoading] = useState(true);
   const [bootError, setBootError] = useState<string | null>(null);
