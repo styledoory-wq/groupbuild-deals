@@ -27,10 +27,8 @@ const SUPPLIER_FAQS: Faq[] = [
 
 export default function Support() {
   const { user } = useApp();
-  const initialAudience: "supplier" | "resident" = user?.role === "supplier" ? "supplier" : "resident";
-  const [audience, setAudience] = useState<"supplier" | "resident">(initialAudience);
-
-  const faqs = useMemo(() => (audience === "supplier" ? SUPPLIER_FAQS : RESIDENT_FAQS), [audience]);
+  const audience: "supplier" | "resident" = user?.role === "supplier" ? "supplier" : "resident";
+  const faqs = audience === "supplier" ? SUPPLIER_FAQS : RESIDENT_FAQS;
   const waNumber = useSupportWhatsapp();
   const waUrl = normalizeWhatsappUrl(waNumber) ?? "https://wa.me/972526247941";
 
