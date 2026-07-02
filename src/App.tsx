@@ -209,12 +209,15 @@ const App = () => (
               <Suspense fallback={<SuspenseFallback />}>
                 <Routes>
                   <Route path="/" element={<Gateway />} />
-                  <Route path="/welcome" element={<Welcome />} />
+                  {/* Legacy marketing routes — intentionally redirected to the new Gateway (`/`).
+                      Kept as redirects (not deleted) to preserve any external links, bookmarks,
+                      email footers, and search-engine results pointing at the old paths. */}
+                  <Route path="/welcome" element={<Navigate to="/" replace />} />
+                  <Route path="/site" element={<Navigate to="/" replace />} />
+                  <Route path="/landing" element={<Navigate to="/" replace />} />
+                  <Route path="/about" element={<Navigate to="/" replace />} />
                   <Route path="/suppliers" element={<SuppliersLanding />} />
                   <Route path="/residents" element={<ResidentsLanding />} />
-                  <Route path="/about" element={<Landing />} />
-                  <Route path="/site" element={<SiteLanding />} />
-                  <Route path="/landing" element={<SiteLanding />} />
                   <Route path="/index" element={<Navigate to="/" replace />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/auth/supplier" element={<Auth lockedRole="supplier" />} />
