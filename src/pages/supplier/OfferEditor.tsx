@@ -225,8 +225,19 @@ export default function OfferEditor() {
             }
             setCoverImage(deal.cover_image_url ?? null);
             setGalleryImages((deal.gallery_images as string[] | null) ?? []);
-            setVisibilityType((deal.visibility_type as "public" | "project_only") ?? "public");
-            setVisibilityProjectId(deal.visibility_project_id ?? "");
+            const dealAny = deal as unknown as {
+              visibility_type?: string | null;
+              visibility_project_id?: string | null;
+              visibility_region_ids?: string[] | null;
+              serves_all_country?: boolean | null;
+            };
+            setVisibilityType(((dealAny.visibility_type as "public" | "project_only" | "region_only") ?? "public"));
+            setVisibilityProjectId(dealAny.visibility_project_id ?? "");
+            setVisibilityRegions({
+              servesAllCountry: false,
+              regionIds: Array.isArray(dealAny.visibility_region_ids) ? dealAny.visibility_region_ids : [],
+              cityIds: [],
+            });
             setTargetParticipants(deal.target_participants != null ? String(deal.target_participants) : "");
             setJoinDeadline(deal.join_deadline ? deal.join_deadline.split("T")[0] : "");
             setRedemptionDeadline(deal.redemption_deadline ? deal.redemption_deadline.split("T")[0] : "");
@@ -235,6 +246,16 @@ export default function OfferEditor() {
             setMaxRedemptions(deal.max_redemptions != null ? String(deal.max_redemptions) : "");
             setAppointmentRequired(!!deal.appointment_required);
             setServiceAreas(Array.isArray(deal.service_areas) ? (deal.service_areas as string[]) : []);
+            // Load structured work-area links
+            const [{ data: dRegs }, { data: dCits }] = await Promise.all([
+              supabase.from("deal_regions").select("region_id").eq("deal_id", dealId),
+              supabase.from("deal_cities").select("city_id").eq("deal_id", dealId),
+            ]);
+            setWorkAreas({
+              servesAllCountry: !!dealAny.serves_all_country,
+              regionIds: (dRegs ?? []).map((r) => (r as { region_id: string }).region_id),
+              cityIds: (dCits ?? []).map((c) => (c as { city_id: string }).city_id),
+            });
             setCommitmentAccepted(true);
           }
         }
