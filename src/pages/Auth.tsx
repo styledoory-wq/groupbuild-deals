@@ -22,12 +22,12 @@ import { translateAuthError } from "@/lib/authErrors";
 
 type Mode = "signin" | "signup";
 
-export default function Auth() {
+export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin"> } = {}) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { setUser, projects } = useApp();
-  const [role, setRole] = useState<Exclude<Role, "admin">>("resident");
-  const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const [role, setRole] = useState<Exclude<Role, "admin">>(lockedRole ?? "resident");
+  const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : (lockedRole ? "signup" : "signin");
   const [mode, setMode] = useState<Mode>(initialMode);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
