@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { verifyAdminFromSession } from "@/lib/auth";
 import {
   Save, Plus, Trash2, Loader2, ChevronRight, ChevronLeft,
-  Eye, Pencil, FileText, Settings2, Sparkles,
+  Pencil, FileText, Settings2,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ds";
@@ -19,7 +19,7 @@ import type { OfferTier, OfferType } from "@/lib/offerPricing";
 import { DealImagesEditor } from "@/components/deals/DealImagesEditor";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
 import { useRegions } from "@/hooks/useRegions";
-import type { AiOfferDraft } from "@/components/supplier/AiOfferGeneratorCard";
+import { AiOfferGeneratorCard, type AiOfferDraft } from "@/components/supplier/AiOfferGeneratorCard";
 
 type SupplierLite = {
   id: string;
