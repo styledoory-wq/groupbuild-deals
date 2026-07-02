@@ -634,7 +634,7 @@ export default function OfferEditor() {
               <div className="gb-card p-4 space-y-3">
                 <h3 className="font-bold text-sm text-[#1F2937]">מחיר ההצעה</h3>
                 <Field label="מחיר (₪)">
-                  <Input type="number" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="350" />
+                  <Input type="number" inputMode="numeric" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="350" />
                 </Field>
                 <p className="text-fs-xs text-muted-foreground leading-relaxed">
                   אין מנגנון של ירידת מחיר. דיירים יוכלו לבקש לפתוח קבוצת רכישה עבור ההצעה.
@@ -650,7 +650,7 @@ export default function OfferEditor() {
                   </div>
                   {offerType === "price_comparison" && (
                     <Field label="מחיר רגיל (לפני הנחה, ₪)">
-                      <Input type="number" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="5000" />
+                      <Input type="number" inputMode="numeric" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="5000" />
                     </Field>
                   )}
                 </div>
@@ -693,7 +693,7 @@ export default function OfferEditor() {
                   {depositRequired && (
                     <div className="space-y-3 pt-1">
                       <Field label="סכום הפיקדון (₪)">
-                        <Input type="number" min={1} step="0.01" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="h-11 rounded-xl" />
+                        <Input type="number" inputMode="numeric" min={1} step="0.01" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="h-11 rounded-xl" />
                         <p className="text-fs-xs text-muted-foreground mt-1">
                           {depositLimits.min !== null ? `מינימום: ${depositLimits.min}. ` : ""}
                           {depositLimits.max !== null ? `מקסימום: ${depositLimits.max}.` : ""}
@@ -742,7 +742,7 @@ export default function OfferEditor() {
             {listingType === "group_buy" && (
               <div className="gb-card p-4">
                 <Field label="יעד משתתפים לסגירת הקבוצה" hint="לא חובה — עוזר לדיירים להבין מתי הקבוצה נסגרת">
-                  <Input type="number" min={1} value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
+                  <Input type="number" inputMode="numeric" min={1} value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
                     placeholder="20" className="h-11 rounded-xl" />
                 </Field>
               </div>
@@ -791,7 +791,7 @@ export default function OfferEditor() {
                 </Field>
               </div>
               <Field label="מקסימום מימושים (אופציונלי)">
-                <Input type="number" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
+                <Input type="number" inputMode="numeric" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
               </Field>
               <label className="flex items-center gap-2 cursor-pointer pt-1">
                 <input type="checkbox" checked={appointmentRequired} onChange={(e) => setAppointmentRequired(e.target.checked)} className="h-4 w-4 accent-primary" />
@@ -949,22 +949,22 @@ function TierCard({
           <div className="grid grid-cols-2 gap-2">
             <label className="block">
               <span className="text-[11px] font-bold text-muted-foreground mb-1 block">מ- (משתתפים)</span>
-              <Input type="number" min={1} value={tier.minParticipants} onChange={(e) => onChange({ minParticipants: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="1" />
+              <Input type="number" inputMode="numeric" min={1} value={tier.minParticipants} onChange={(e) => onChange({ minParticipants: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="1" />
             </label>
             <label className="block">
               <span className="text-[11px] font-bold text-muted-foreground mb-1 block">עד (או ריק = ∞)</span>
-              <Input type="number" value={tier.maxParticipants} onChange={(e) => onChange({ maxParticipants: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="∞" />
+              <Input type="number" inputMode="numeric" value={tier.maxParticipants} onChange={(e) => onChange({ maxParticipants: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="∞" />
             </label>
           </div>
           {offerType === "percentage" ? (
             <label className="block">
               <span className="text-[11px] font-bold text-muted-foreground mb-1 block">אחוז הנחה</span>
-              <Input type="number" min={1} max={100} value={tier.discount_percentage} onChange={(e) => onChange({ discount_percentage: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="10" />
+              <Input type="number" inputMode="numeric" min={1} max={100} value={tier.discount_percentage} onChange={(e) => onChange({ discount_percentage: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="10" />
             </label>
           ) : (
             <label className="block">
               <span className="text-[11px] font-bold text-muted-foreground mb-1 block">מחיר אחרי הנחה (₪)</span>
-              <Input type="number" value={tier.discounted_price} onChange={(e) => onChange({ discounted_price: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="4500" />
+              <Input type="number" inputMode="numeric" value={tier.discounted_price} onChange={(e) => onChange({ discounted_price: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="4500" />
             </label>
           )}
           {Number(tier.minParticipants) === 1 && (
