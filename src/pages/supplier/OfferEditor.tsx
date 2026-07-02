@@ -19,7 +19,7 @@ import type { OfferTier, OfferType } from "@/lib/offerPricing";
 import { DealImagesEditor } from "@/components/deals/DealImagesEditor";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
 import { useRegions } from "@/hooks/useRegions";
-import { AiOfferGeneratorCard, type AiOfferDraft } from "@/components/supplier/AiOfferGeneratorCard";
+import type { AiOfferDraft } from "@/components/supplier/AiOfferGeneratorCard";
 
 type SupplierLite = {
   id: string;
