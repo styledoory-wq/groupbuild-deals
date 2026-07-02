@@ -794,9 +794,10 @@ export default function OfferEditor() {
           <>
             <div className="gb-card p-4 space-y-3">
               <h3 className="font-bold text-sm text-[#1F2937]">למי ההצעה מיועדת?</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <ToggleBtn active={visibilityType === "public"} onClick={() => setVisibilityType("public")}>לכל הדיירים</ToggleBtn>
-                <ToggleBtn active={visibilityType === "project_only"} onClick={() => setVisibilityType("project_only")}>לפרויקט מסוים</ToggleBtn>
+              <div className="grid grid-cols-3 gap-2">
+                <ToggleBtn active={visibilityType === "public"} onClick={() => setVisibilityType("public")}>כל המשתמשים</ToggleBtn>
+                <ToggleBtn active={visibilityType === "project_only"} onClick={() => setVisibilityType("project_only")}>פרויקט</ToggleBtn>
+                <ToggleBtn active={visibilityType === "region_only"} onClick={() => setVisibilityType("region_only")}>אזור</ToggleBtn>
               </div>
               {visibilityType === "project_only" && (
                 <Field label="פרויקט">
@@ -805,6 +806,16 @@ export default function OfferEditor() {
                     <option value="">— בחר פרויקט —</option>
                     {projects.map((p) => (<option key={p.id} value={p.id}>{p.name} · {p.city}</option>))}
                   </select>
+                </Field>
+              )}
+              {visibilityType === "region_only" && (
+                <Field label="אזורי יעד" hint="ההצעה תוצג רק לדיירים באזורים הנבחרים">
+                  <AreasCombobox
+                    value={visibilityRegions}
+                    onChange={setVisibilityRegions}
+                    placeholder="בחר אזורים..."
+                    regionsOnly
+                  />
                 </Field>
               )}
             </div>
