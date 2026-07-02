@@ -17,6 +17,7 @@ import { getPreviewRole } from "./lib/previewMode";
 const Welcome = lazy(() => import("./pages/Welcome"));
 const Gateway = lazy(() => import("./pages/marketing/Gateway"));
 const SuppliersLanding = lazy(() => import("./pages/marketing/SuppliersLanding"));
+const ResidentsLanding = lazy(() => import("./pages/marketing/ResidentsLanding"));
 const Landing = lazy(() => import("./pages/Landing"));
 const SiteLanding = lazy(() => import("./pages/SiteLanding"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -210,12 +211,14 @@ const App = () => (
                   <Route path="/" element={<Gateway />} />
                   <Route path="/welcome" element={<Welcome />} />
                   <Route path="/suppliers" element={<SuppliersLanding />} />
+                  <Route path="/residents" element={<ResidentsLanding />} />
                   <Route path="/about" element={<Landing />} />
                   <Route path="/site" element={<SiteLanding />} />
                   <Route path="/landing" element={<SiteLanding />} />
                   <Route path="/index" element={<Navigate to="/" replace />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/auth/supplier" element={<Auth lockedRole="supplier" />} />
+                  <Route path="/auth/resident" element={<Auth lockedRole="resident" />} />
                   <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/thank-you" element={<ThankYou />} />

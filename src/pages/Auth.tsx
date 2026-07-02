@@ -129,8 +129,11 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       return;
     }
 
-    // Supplier intent + already a supplier → go straight to supplier area, clear intent.
-    if (intent === "supplier" && resolvedRole === "supplier") {
+    // Intent matches resolved role → clear stale intent.
+    if (
+      (intent === "supplier" && resolvedRole === "supplier") ||
+      (intent === "resident" && resolvedRole === "resident")
+    ) {
       try { sessionStorage.removeItem("gb_intent"); } catch { /* ignore */ }
     }
 
@@ -171,9 +174,9 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      // Persist supplier intent so onboarding after OAuth callback stays supplier-locked.
-      if (lockedRole === "supplier") {
-        try { sessionStorage.setItem("gb_intent", "supplier"); } catch { /* ignore */ }
+      // Persist role intent so onboarding after OAuth callback stays role-locked.
+      if (lockedRole === "supplier" || lockedRole === "resident") {
+        try { sessionStorage.setItem("gb_intent", lockedRole); } catch { /* ignore */ }
       }
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",

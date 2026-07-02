@@ -64,7 +64,7 @@ export default function Gateway() {
 
         <div className="flex-1 flex flex-col justify-center py-10 gap-4 animate-fade-up">
           <GatewayCard
-            to="/auth"
+            to="/residents"
             title="אני דייר / ועד בית"
             desc="הצטרפו לעסקאות קבוצתיות, חסכו בשיפוץ ובבנייה ונהלו ועד בית פשוט וחכם."
             icon={Building2}
