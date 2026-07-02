@@ -24,13 +24,15 @@ interface Props {
   value: AreasComboboxValue;
   onChange: (v: AreasComboboxValue) => void;
   placeholder?: string;
+  /** When true, hides "All country" and cities — regions only (used for audience targeting). */
+  regionsOnly?: boolean;
 }
 
 /**
  * Combobox רב-בחירה עם חיפוש — לאזורים, ערים ו"כל הארץ".
  * נשען על טבלאות regions/cities ב-DB.
  */
-export function AreasCombobox({ value, onChange, placeholder = "חפש או בחר אזור / עיר..." }: Props) {
+export function AreasCombobox({ value, onChange, placeholder = "חפש או בחר אזור / עיר...", regionsOnly = false }: Props) {
   const { regions, cities, regionById, cityById, loading } = useRegions();
   const [open, setOpen] = useState(false);
 
