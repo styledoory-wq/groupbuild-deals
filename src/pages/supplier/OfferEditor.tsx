@@ -1148,15 +1148,27 @@ function Section({
   );
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({
+  label, hint, error, action, required, children,
+}: {
+  label: string; hint?: string; error?: string; action?: React.ReactNode;
+  required?: boolean; children: React.ReactNode;
+}) {
   return (
-    <label className="block">
-      <span className="text-[12px] font-semibold text-[#374151] mb-1.5 block">{label}</span>
-      {hint && <span className="text-[11px] text-[#9CA3AF] block mb-1.5 leading-snug">{hint}</span>}
+    <div className="block">
+      <div className="flex items-center justify-between mb-1.5 gap-2">
+        <span className="text-[12px] font-semibold text-[#374151]">
+          {label}{required && <span className="text-destructive"> *</span>}
+        </span>
+        {action}
+      </div>
+      {hint && !error && <span className="text-[11px] text-[#9CA3AF] block mb-1.5 leading-snug">{hint}</span>}
       {children}
-    </label>
+      {error && <p className="text-[11px] text-destructive mt-1 leading-snug">{error}</p>}
+    </div>
   );
 }
+
 
 function TypeCard({ active, onClick, title, desc }: { active: boolean; onClick: () => void; title: string; desc: string }) {
   return (
