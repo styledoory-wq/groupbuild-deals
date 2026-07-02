@@ -30,7 +30,10 @@ export default function SuppliersLanding() {
   return (
     <div dir="rtl" className="min-h-[100dvh] w-full text-[#0B1220]" style={{ background: "#F7F5F0" }}>
       {/* Top bar */}
-      <header className="sticky top-0 z-30 backdrop-blur bg-[#F7F5F0]/85 border-b border-[#E8E3D8]">
+      <header
+        className="sticky top-0 z-30 backdrop-blur bg-[#F7F5F0]/85 border-b border-[#E8E3D8]"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
         <div className="max-w-screen-md mx-auto flex items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-center gap-2">
             <BrandMark className="h-9 w-auto" />
