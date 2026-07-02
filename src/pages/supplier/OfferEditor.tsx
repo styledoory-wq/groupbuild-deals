@@ -1251,8 +1251,8 @@ function PillBtn({ active, onClick, children }: { active: boolean; onClick: () =
   );
 }
 
-function TierRow({
-  idx, tier, offerType, editing, onEdit, onChange, onRemove, canRemove,
+function TierCard({
+  idx, tier, offerType, editing, onEdit, onChange, onRemove, canRemove, highlight,
 }: {
   idx: number;
   tier: TierRow;
@@ -1262,33 +1262,39 @@ function TierRow({
   onChange: (patch: Partial<TierRow>) => void;
   onRemove: () => void;
   canRemove: boolean;
+  highlight?: boolean;
 }) {
   const min = tier.minParticipants || "?";
   const max = tier.maxParticipants || "∞";
   const hasValue = !!(tier.discount_percentage || tier.discounted_price);
   const value = offerType === "percentage"
     ? (tier.discount_percentage ? `${tier.discount_percentage}%` : "—")
-    : (tier.discounted_price ? `₪${tier.discounted_price}` : "—");
+    : (tier.discounted_price ? `₪${Number(tier.discounted_price).toLocaleString()}` : "—");
+  const isBest = idx === 0 && hasValue; // first tier surfaced as headline
 
   return (
-    <div className={`transition-colors ${editing ? "bg-[#0E6B5A]/[0.04]" : ""}`}>
-      <button
-        type="button"
-        onClick={onEdit}
-        className="w-full flex items-center gap-3 px-3 py-2.5 text-right"
-      >
-        <span className="text-[11px] font-bold text-[#9CA3AF] tabular-nums w-4 shrink-0">{idx + 1}</span>
+    <div className={`rounded-xl bg-white transition-colors overflow-hidden ring-1 ${
+      editing ? "ring-[#0E6B5A]/40" : highlight ? "ring-destructive/40" : "ring-black/[0.06]"
+    }`}>
+      <button type="button" onClick={onEdit}
+        className="w-full flex items-center gap-3 px-3.5 py-3 text-right">
+        <span className="h-6 w-6 shrink-0 rounded-full bg-[#F4F6FA] text-[11px] font-bold text-[#6B7280] inline-flex items-center justify-center">
+          {idx + 1}
+        </span>
         <div className="flex-1 min-w-0">
-          <div className="text-[12.5px] font-semibold text-[#1F2937]">{min}–{max} משתתפים</div>
+          <div className="text-[13px] font-semibold text-[#1F2937]">{min}–{max} משתתפים</div>
+          {isBest && (
+            <div className="text-[10.5px] text-[#9CA3AF] mt-0.5">מדרגת בסיס</div>
+          )}
         </div>
-        <span className={`text-[13px] font-bold tabular-nums ${hasValue ? "text-[#0E6B5A]" : "text-[#9CA3AF]"}`}>
+        <span className={`text-[15px] font-extrabold tabular-nums ${hasValue ? "text-[#0E6B5A]" : "text-[#D1D5DB]"}`}>
           {value}
         </span>
         <Pencil className="h-3.5 w-3.5 text-[#9CA3AF] shrink-0" />
       </button>
 
       {editing && (
-        <div className="px-3 pb-3 space-y-2">
+        <div className="border-t border-black/[0.05] px-3.5 py-3 space-y-2.5 bg-[#FAFBFC]">
           <div className="grid grid-cols-2 gap-2">
             <label className="block">
               <span className="text-[10.5px] font-semibold text-[#6B7280] mb-1 block">מ- משתתפים</span>
@@ -1319,11 +1325,11 @@ function TierRow({
             </label>
           )}
           {Number(tier.minParticipants) === 1 && (
-            <p className="text-[10.5px] text-[#8A6A1E] leading-snug pt-0.5">
+            <p className="text-[10.5px] text-[#8A6A1E] leading-snug">
               ⚠️ מדרגה מ-1 תינתן גם לרוכש בודד. התחל מ-2 לקבוצה אמיתית.
             </p>
           )}
-          <div className="flex justify-end pt-1">
+          <div className="flex justify-end pt-0.5">
             <button type="button" onClick={onRemove} disabled={!canRemove}
               className="text-[11px] font-semibold text-destructive inline-flex items-center gap-1 disabled:opacity-30">
               <Trash2 className="h-3 w-3" /> מחק מדרגה
@@ -1334,6 +1340,7 @@ function TierRow({
     </div>
   );
 }
+
 
 function LivePreview({
   title, description, coverImage, category, listingType, offerType, tiers, unitPrice,
