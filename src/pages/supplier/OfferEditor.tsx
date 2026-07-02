@@ -553,6 +553,51 @@ export default function OfferEditor() {
     }
   };
 
+  // Track "touched" fields so we only show inline errors after the user leaves them.
+  // NOTE: hooks must be declared before any early returns below.
+  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const markTouched = (name: string) => setTouched((s) => (s.has(name) ? s : new Set(s).add(name)));
+
+  const missingForStep = (n: StepNum): { key: string; label: string }[] => {
+    const miss: { key: string; label: string }[] = [];
+    if (n === 1) {
+      if (!title.trim()) miss.push({ key: "title", label: "שם ההצעה" });
+      if (!categoryId) miss.push({ key: "category", label: "קטגוריה" });
+    }
+    if (n === 2) {
+      if (listingType === "regular") {
+        const up = Number(unitPrice);
+        if (!Number.isFinite(up) || up <= 0) miss.push({ key: "unitPrice", label: "מחיר" });
+      } else {
+        if (offerType === "price_comparison") {
+          const up = Number(unitPrice);
+          if (!Number.isFinite(up) || up <= 0) miss.push({ key: "unitPrice", label: "מחיר בסיס" });
+        }
+        const t0 = tiers[0];
+        if (!t0 || !t0.minParticipants || (offerType === "percentage" ? !t0.discount_percentage : !t0.discounted_price)) {
+          miss.push({ key: "tier0", label: "מדרגת מחיר ראשונה" });
+        }
+        if (depositRequired) {
+          if (!depositAmount.trim()) miss.push({ key: "depositAmount", label: "סכום הפיקדון" });
+          if (!supplierPaymentLink.trim()) miss.push({ key: "paymentLink", label: "קישור תשלום" });
+        }
+      }
+      if (visibilityType === "project_only" && !visibilityProjectId) miss.push({ key: "project", label: "פרויקט יעד" });
+      if (visibilityType === "region_only" && visibilityRegions.regionIds.length === 0) {
+        miss.push({ key: "regions", label: "אזורי יעד" });
+      }
+    }
+    if (n === 3) {
+      if (!commitmentAccepted) miss.push({ key: "commitment", label: "אישור התחייבות ספק" });
+    }
+    return miss;
+  };
+
+  const stepMissing = useMemo(() => missingForStep(step), // eslint-disable-line react-hooks/exhaustive-deps
+    [step, title, categoryId, listingType, unitPrice, offerType, tiers, depositRequired, depositAmount,
+      supplierPaymentLink, visibilityType, visibilityProjectId, visibilityRegions, commitmentAccepted]);
+  const missingKeys = useMemo(() => new Set(stepMissing.map((m) => m.key)), [stepMissing]);
+
   if (bootLoading) {
     return (
       <MobileShell>
@@ -606,52 +651,8 @@ export default function OfferEditor() {
     3: "מה כלול, סקירה ופרסום",
   };
 
-  // Track "touched" fields so we only show inline errors after the user leaves them.
-  const [touched, setTouched] = useState<Set<string>>(new Set());
-  const markTouched = (name: string) => setTouched((s) => (s.has(name) ? s : new Set(s).add(name)));
-
-  // Which required fields are still missing per step — powers the footer indicator
-  // and lets us show inline errors near the specific field.
-  const missingForStep = (n: StepNum): { key: string; label: string }[] => {
-    const miss: { key: string; label: string }[] = [];
-    if (n === 1) {
-      if (!title.trim()) miss.push({ key: "title", label: "שם ההצעה" });
-      if (!categoryId) miss.push({ key: "category", label: "קטגוריה" });
-    }
-    if (n === 2) {
-      if (listingType === "regular") {
-        const up = Number(unitPrice);
-        if (!Number.isFinite(up) || up <= 0) miss.push({ key: "unitPrice", label: "מחיר" });
-      } else {
-        if (offerType === "price_comparison") {
-          const up = Number(unitPrice);
-          if (!Number.isFinite(up) || up <= 0) miss.push({ key: "unitPrice", label: "מחיר בסיס" });
-        }
-        const t0 = tiers[0];
-        if (!t0 || !t0.minParticipants || (offerType === "percentage" ? !t0.discount_percentage : !t0.discounted_price)) {
-          miss.push({ key: "tier0", label: "מדרגת מחיר ראשונה" });
-        }
-        if (depositRequired) {
-          if (!depositAmount.trim()) miss.push({ key: "depositAmount", label: "סכום הפיקדון" });
-          if (!supplierPaymentLink.trim()) miss.push({ key: "paymentLink", label: "קישור תשלום" });
-        }
-      }
-      if (visibilityType === "project_only" && !visibilityProjectId) miss.push({ key: "project", label: "פרויקט יעד" });
-      if (visibilityType === "region_only" && visibilityRegions.regionIds.length === 0) {
-        miss.push({ key: "regions", label: "אזורי יעד" });
-      }
-    }
-    if (n === 3) {
-      if (!commitmentAccepted) miss.push({ key: "commitment", label: "אישור התחייבות ספק" });
-    }
-    return miss;
-  };
-
-  const stepMissing = useMemo(() => missingForStep(step), // eslint-disable-line react-hooks/exhaustive-deps
-    [step, title, categoryId, listingType, unitPrice, offerType, tiers, depositRequired, depositAmount,
-      supplierPaymentLink, visibilityType, visibilityProjectId, visibilityRegions, commitmentAccepted]);
-  const missingKeys = useMemo(() => new Set(stepMissing.map((m) => m.key)), [stepMissing]);
   const shouldShowError = (key: string) => touched.has(key) && missingKeys.has(key);
+
 
   const validateStep = (n: number): boolean => {
     const miss = missingForStep(n as StepNum);
