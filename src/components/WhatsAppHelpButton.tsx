@@ -1,7 +1,8 @@
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
+import { DEFAULT_SUPPORT_WHATSAPP, useSupportWhatsapp } from "@/hooks/useSupportContact";
 
-/** Support number used for the floating help button across the app. */
-export const SUPPORT_WHATSAPP = "052-624-7941";
+/** Support number used for the floating help button across the app (fallback only). */
+export const SUPPORT_WHATSAPP = DEFAULT_SUPPORT_WHATSAPP;
 
 interface Props {
   /** Override default position offset from the bottom edge (px). */
@@ -20,7 +21,8 @@ export function WhatsAppHelpButton({
   message = "היי, אני צריך/ה עזרה ב-GroupBuild",
   className = "",
 }: Props) {
-  const url = normalizeWhatsappUrl(SUPPORT_WHATSAPP);
+  const number = useSupportWhatsapp();
+  const url = normalizeWhatsappUrl(number);
   if (!url) return null;
   const href = `${url}?text=${encodeURIComponent(message)}`;
 
