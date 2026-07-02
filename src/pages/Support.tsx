@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, MessageCircle, HelpCircle } from "lucide-react";
 import { useApp } from "@/store/AppStore";
@@ -28,10 +27,8 @@ const SUPPLIER_FAQS: Faq[] = [
 
 export default function Support() {
   const { user } = useApp();
-  const initialAudience: "supplier" | "resident" = user?.role === "supplier" ? "supplier" : "resident";
-  const [audience, setAudience] = useState<"supplier" | "resident">(initialAudience);
-
-  const faqs = useMemo(() => (audience === "supplier" ? SUPPLIER_FAQS : RESIDENT_FAQS), [audience]);
+  const audience: "supplier" | "resident" = user?.role === "supplier" ? "supplier" : "resident";
+  const faqs = audience === "supplier" ? SUPPLIER_FAQS : RESIDENT_FAQS;
   const waNumber = useSupportWhatsapp();
   const waUrl = normalizeWhatsappUrl(waNumber) ?? "https://wa.me/972526247941";
 
@@ -74,37 +71,12 @@ export default function Support() {
         </section>
 
         <section className="space-y-4">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <h2 className="text-2xl font-semibold flex items-center gap-2">
-              <HelpCircle className="text-primary" /> שאלות נפוצות
-            </h2>
-            <div className="inline-flex rounded-full border p-1 bg-muted/40" role="tablist" aria-label="סוג משתמש">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={audience === "resident"}
-                onClick={() => setAudience("resident")}
-                className={
-                  "px-4 py-1.5 text-sm font-semibold rounded-full transition " +
-                  (audience === "resident" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")
-                }
-              >
-                לדיירים
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={audience === "supplier"}
-                onClick={() => setAudience("supplier")}
-                className={
-                  "px-4 py-1.5 text-sm font-semibold rounded-full transition " +
-                  (audience === "supplier" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")
-                }
-              >
-                לספקים
-              </button>
-            </div>
-          </div>
+          <h2 className="text-2xl font-semibold flex items-center gap-2">
+            <HelpCircle className="text-primary" /> שאלות נפוצות
+            <span className="text-xs font-medium text-muted-foreground mr-1">
+              ({audience === "supplier" ? "לספקים" : "לדיירים"})
+            </span>
+          </h2>
 
           <div className="space-y-4">
             {faqs.map((f) => (
