@@ -71,7 +71,7 @@ export function AiOfferGeneratorCard({ categories, onDraftReady, disabled }: Pro
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl bg-[#0E6B5A]/[0.04] hover:bg-[#0E6B5A]/[0.07] transition-colors text-right"
+        className="w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl bg-white ring-1 ring-[#0E6B5A]/25 hover:ring-[#0E6B5A]/40 transition-colors text-right"
       >
         <div className="h-6 w-6 rounded-full bg-[#0E6B5A]/10 flex items-center justify-center shrink-0">
           <Check className="h-3.5 w-3.5 text-[#0E6B5A]" strokeWidth={2.5} />
@@ -79,7 +79,7 @@ export function AiOfferGeneratorCard({ categories, onDraftReady, disabled }: Pro
         <span className="text-[12.5px] text-[#1F2937] font-medium flex-1 truncate">
           טיוטה נוצרה — אפשר לערוך למטה
         </span>
-        <span className="text-[11.5px] text-[#0E6B5A] font-semibold shrink-0">פתח שוב</span>
+        <span className="text-[11.5px] text-[#0E6B5A] font-semibold shrink-0">צור מחדש</span>
       </button>
     );
   }
