@@ -595,35 +595,82 @@ export default function OfferEditor() {
   }
 
   const stepTitles: Record<StepNum, string> = {
-    1: "מה ההצעה",
-    2: "מחיר ואזור",
-    3: "פרסום",
+    1: "פרטי ההצעה",
+    2: "מחיר וקהל",
+    3: "תנאים ופרסום",
   };
 
-  const validateStep = (n: number): boolean => {
+  const stepSubtitles: Record<StepNum, string> = {
+    1: "הזהות של ההצעה",
+    2: "כמה זה עולה, למי זה מיועד",
+    3: "מה כלול, סקירה ופרסום",
+  };
+
+  // Track "touched" fields so we only show inline errors after the user leaves them.
+  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const markTouched = (name: string) => setTouched((s) => (s.has(name) ? s : new Set(s).add(name)));
+
+  // Which required fields are still missing per step — powers the footer indicator
+  // and lets us show inline errors near the specific field.
+  const missingForStep = (n: StepNum): { key: string; label: string }[] => {
+    const miss: { key: string; label: string }[] = [];
     if (n === 1) {
-      if (!title.trim()) { toast.error("יש להזין שם"); return false; }
-      if (!categoryId) { toast.error("יש לבחור קטגוריה"); return false; }
+      if (!title.trim()) miss.push({ key: "title", label: "שם ההצעה" });
+      if (!categoryId) miss.push({ key: "category", label: "קטגוריה" });
     }
     if (n === 2) {
       if (listingType === "regular") {
         const up = Number(unitPrice);
-        if (!Number.isFinite(up) || up <= 0) { toast.error("יש להזין מחיר"); return false; }
+        if (!Number.isFinite(up) || up <= 0) miss.push({ key: "unitPrice", label: "מחיר" });
       } else {
         if (offerType === "price_comparison") {
           const up = Number(unitPrice);
-          if (!Number.isFinite(up) || up <= 0) { toast.error("יש להזין מחיר יחידה"); return false; }
+          if (!Number.isFinite(up) || up <= 0) miss.push({ key: "unitPrice", label: "מחיר בסיס" });
         }
-        if (!tiers.length) { toast.error("יש להוסיף לפחות מדרגה אחת"); return false; }
-        // Require at least the first tier to be filled.
         const t0 = tiers[0];
-        if (!t0.minParticipants || (offerType === "percentage" ? !t0.discount_percentage : !t0.discounted_price)) {
-          toast.error("מלא לפחות מדרגה אחת"); return false;
+        if (!t0 || !t0.minParticipants || (offerType === "percentage" ? !t0.discount_percentage : !t0.discounted_price)) {
+          miss.push({ key: "tier0", label: "מדרגת מחיר ראשונה" });
+        }
+        if (depositRequired) {
+          if (!depositAmount.trim()) miss.push({ key: "depositAmount", label: "סכום הפיקדון" });
+          if (!supplierPaymentLink.trim()) miss.push({ key: "paymentLink", label: "קישור תשלום" });
         }
       }
-      if (visibilityType === "project_only" && !visibilityProjectId) { toast.error("בחר פרויקט"); return false; }
+      if (visibilityType === "project_only" && !visibilityProjectId) miss.push({ key: "project", label: "פרויקט יעד" });
       if (visibilityType === "region_only" && visibilityRegions.regionIds.length === 0) {
-        toast.error("בחר לפחות אזור אחד לקהל היעד"); return false;
+        miss.push({ key: "regions", label: "אזורי יעד" });
+      }
+    }
+    if (n === 3) {
+      if (!commitmentAccepted) miss.push({ key: "commitment", label: "אישור התחייבות ספק" });
+    }
+    return miss;
+  };
+
+  const stepMissing = useMemo(() => missingForStep(step), // eslint-disable-line react-hooks/exhaustive-deps
+    [step, title, categoryId, listingType, unitPrice, offerType, tiers, depositRequired, depositAmount,
+      supplierPaymentLink, visibilityType, visibilityProjectId, visibilityRegions, commitmentAccepted]);
+  const missingKeys = useMemo(() => new Set(stepMissing.map((m) => m.key)), [stepMissing]);
+  const shouldShowError = (key: string) => touched.has(key) && missingKeys.has(key);
+
+  const validateStep = (n: number): boolean => {
+    const miss = missingForStep(n as StepNum);
+    if (miss.length) {
+      // Mark all missing as touched so inline errors appear.
+      setTouched((s) => {
+        const next = new Set(s);
+        miss.forEach((m) => next.add(m.key));
+        return next;
+      });
+      toast.error(miss.length === 1 ? `חסר: ${miss[0].label}` : `חסרים ${miss.length} שדות`);
+      return false;
+    }
+    if (n === 2 && listingType === "group_buy") {
+      // extra numeric sanity for tier 0
+      const t0 = tiers[0];
+      if (offerType === "percentage") {
+        const p = Number(t0.discount_percentage);
+        if (!(p >= 1 && p <= 100)) { toast.error("אחוז הנחה בין 1–100"); return false; }
       }
     }
     return true;
@@ -638,6 +685,50 @@ export default function OfferEditor() {
   };
 
   const progressPct = (step / 3) * 100;
+
+  // Inline AI helpers — reuse the existing generate-offer-ai edge function.
+  const [descAiLoading, setDescAiLoading] = useState(false);
+  const [faqAiLoading, setFaqAiLoading] = useState(false);
+
+  const runInlineAi = async (kind: "description" | "faq") => {
+    const base = [title, description].filter(Boolean).join(" — ").trim();
+    if (!base && !title.trim()) {
+      toast.error("הזן קודם שם או תיאור קצר");
+      return;
+    }
+    const setLoading = kind === "faq" ? setFaqAiLoading : setDescAiLoading;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-offer-ai", {
+        body: {
+          prompt: base || title,
+          categories: categories.map((c) => ({ id: c.id, name: c.name })),
+        },
+      });
+      if (error) throw error;
+      const draft = (data as { draft?: AiOfferDraft; error?: string })?.draft ?? {};
+      const errCode = (data as { error?: string })?.error;
+      if (errCode === "credits_exhausted") { toast.error("נגמרו קרדיטים ל-AI"); return; }
+      if (errCode === "rate_limited") { toast.error("יותר מדי בקשות ל-AI, נסה שוב"); return; }
+      if (kind === "description") {
+        const parts: string[] = [];
+        if (draft.description) parts.push(draft.description.trim());
+        if (draft.what_included?.length) parts.push("מה כלול:\n" + draft.what_included.map((x) => `• ${x}`).join("\n"));
+        if (draft.what_not_included?.length) parts.push("מה לא כלול:\n" + draft.what_not_included.map((x) => `• ${x}`).join("\n"));
+        if (parts.length) { setDescription(parts.join("\n\n")); toast.success("התיאור עודכן"); }
+        else toast.error("לא הוחזר תיאור");
+      } else {
+        if (draft.faq?.length) { setAiFaqPreview(draft.faq); toast.success("הוצעו שאלות נפוצות"); }
+        else toast.error("לא הוצעו שאלות");
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "שגיאה בקריאה ל-AI");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
 
   return (
     <MobileShell>
