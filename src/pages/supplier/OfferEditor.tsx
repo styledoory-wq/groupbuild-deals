@@ -730,17 +730,22 @@ export default function OfferEditor() {
 
 
 
+  const AiChip = ({ onClick, loading, label = "צור עם AI" }: { onClick: () => void; loading: boolean; label?: string }) => (
+    <button type="button" onClick={onClick} disabled={loading}
+      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0E6B5A] hover:underline disabled:opacity-50">
+      {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+      {loading ? "יוצר…" : label}
+    </button>
+  );
+
   return (
     <MobileShell>
-      {/* Compact header — title + tiny progress bar together. No BackHeader chrome. */}
+      {/* Compact header — title + tiny progress bar. */}
       <header className="sticky top-0 z-20 bg-[#F8F6F1]/95 backdrop-blur-md">
         <div className="flex items-center gap-3 px-5 pt-3 pb-2">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
+          <button type="button" onClick={() => navigate(-1)}
             className="h-8 w-8 -mr-1 flex items-center justify-center rounded-full text-[#1F2937] hover:bg-black/5 transition-colors"
-            aria-label="חזרה"
-          >
+            aria-label="חזרה">
             <ChevronRight className="h-5 w-5" strokeWidth={2.2} />
           </button>
           <div className="flex-1 min-w-0">
@@ -748,26 +753,31 @@ export default function OfferEditor() {
               {isEditing ? "עריכת הצעה" : "הצעה חדשה"}
             </div>
             <div className="text-[11.5px] text-[#6B7280] leading-tight mt-0.5">
-              {stepTitles[step]} · {step}/3
+              שלב {step}/3 · {stepTitles[step]}
             </div>
           </div>
         </div>
         <div className="h-[2px] bg-black/[0.06] mx-5 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-[#0E6B5A] transition-all duration-300 rounded-full"
-            style={{ width: `${progressPct}%` }}
-          />
+          <div className="h-full bg-[#0E6B5A] transition-all duration-300 rounded-full"
+            style={{ width: `${progressPct}%` }} />
         </div>
       </header>
 
-      <div
-        className="px-5 pt-5 relative z-10"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 96px)" }}
-      >
-        {/* ─── STEP 1 ─── */}
+      <div className="px-5 pt-6 relative z-10"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 108px)" }}>
+
+        {/* Step lead — large title + subtitle */}
+        <div className="mb-6">
+          <h1 className="text-[22px] font-extrabold text-[#111827] leading-tight tracking-tight">
+            {stepTitles[step]}
+          </h1>
+          <p className="text-[13px] text-[#6B7280] mt-1 leading-relaxed">{stepSubtitles[step]}</p>
+        </div>
+
+        {/* ─── STEP 1 — Basics ─── */}
         {step === 1 && (
-          <div className="space-y-7">
-            <Section title="סוג ההצעה">
+          <div className="space-y-8">
+            <Section title="סוג ההצעה" hint="קובע איך הדיירים ירכשו">
               <div className="grid grid-cols-2 gap-2">
                 <TypeCard active={listingType === "group_buy"} onClick={() => setListingType("group_buy")}
                   title="קבוצת רכישה" desc="מחיר יורד לפי כמות" />
@@ -776,58 +786,43 @@ export default function OfferEditor() {
               </div>
             </Section>
 
-            <Section title="פרטים">
+            <Section title="זהות ההצעה">
               <div className="space-y-4">
-                <Field label="שם ההצעה">
-                  <Input value={title} onChange={(e) => setTitle(e.target.value)}
+                <Field label="שם ההצעה" required
+                  error={shouldShowError("title") ? "יש להזין שם" : undefined}>
+                  <Input value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    onBlur={() => markTouched("title")}
                     placeholder="לדוגמה: שדרוג מטבח פרימיום"
-                    className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" />
+                    className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("title") ? "ring-destructive/50" : "ring-black/[0.06]"}`} />
                 </Field>
-                <Field label="קטגוריה">
-                  <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}
-                    className="h-11 w-full rounded-xl bg-white ring-1 ring-black/[0.06] px-3 text-[13.5px] text-[#1F2937] focus:outline-none focus:ring-[#0E6B5A]/40">
+
+                <Field label="קטגוריה" required
+                  error={shouldShowError("category") ? "יש לבחור קטגוריה" : undefined}>
+                  <select value={categoryId}
+                    onChange={(e) => { setCategoryId(e.target.value); markTouched("category"); }}
+                    onBlur={() => markTouched("category")}
+                    className={`h-11 w-full rounded-xl bg-white ring-1 px-3 text-[13.5px] text-[#1F2937] focus:outline-none focus:ring-[#0E6B5A]/40 ${shouldShowError("category") ? "ring-destructive/50" : "ring-black/[0.06]"}`}>
+                    <option value="">— בחר —</option>
                     {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
                   </select>
                 </Field>
-                <Field label="תיאור" hint="מה כלול, למי זה מתאים">
-                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)}
-                    placeholder="ספר על ההצעה במילים שלך..."
-                    className="rounded-xl min-h-[100px] shadow-none ring-1 ring-black/[0.06] text-[13.5px]" />
+
+                <Field
+                  label="תיאור"
+                  hint="מה כלול, למי זה מתאים"
+                  action={<AiChip onClick={() => runInlineAi("description")} loading={descAiLoading}
+                    label={description.trim() ? "שפר עם AI" : "צור עם AI"} />}
+                >
+                  <Textarea value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="ספר על ההצעה במילים שלך…"
+                    className="rounded-xl min-h-[110px] shadow-none ring-1 ring-black/[0.06] text-[13.5px]" />
                 </Field>
               </div>
             </Section>
 
-            {!isEditing && (
-              <AiOfferGeneratorCard
-                categories={categories.map((c) => ({ id: c.id, name: c.name }))}
-                onDraftReady={applyAiDraft}
-              />
-            )}
-
-            {aiFaqPreview.length > 0 && (
-              <Section
-                title="שאלות שהוצעו על-ידי AI"
-                hint="תצוגה מקדימה — לא נשמר להצעה"
-                action={
-                  <button type="button" onClick={() => setAiFaqPreview([])}
-                    className="text-[11.5px] text-[#6B7280] hover:text-[#1F2937]">נקה</button>
-                }
-              >
-                <div className="divide-y divide-black/[0.06] rounded-xl bg-white ring-1 ring-black/[0.05]">
-                  {aiFaqPreview.map((f, i) => (
-                    <details key={i} className="group">
-                      <summary className="list-none cursor-pointer px-3 py-2.5 flex items-center justify-between gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#1F2937] flex-1">{f.q}</span>
-                        <ChevronLeft className="h-3.5 w-3.5 text-[#9CA3AF] transition-transform group-open:-rotate-90 shrink-0" />
-                      </summary>
-                      <div className="px-3 pb-3 text-[12px] text-[#4B5563] leading-relaxed">{f.a}</div>
-                    </details>
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            <Section title="תמונות" hint="מומלץ להוסיף לפחות תמונה אחת">
+            <Section title="תמונה ראשית" hint="תמונה טובה מגדילה משמעותית את שיעור ההצטרפות">
               <DealImagesEditor
                 cover={coverImage}
                 gallery={galleryImages}
@@ -837,15 +832,17 @@ export default function OfferEditor() {
           </div>
         )}
 
-        {/* ─── STEP 2 ─── */}
+        {/* ─── STEP 2 — Pricing & Participation ─── */}
         {step === 2 && (
-          <div className="space-y-7">
+          <div className="space-y-8">
             {listingType === "regular" ? (
               <Section title="מחיר">
-                <Field label="מחיר (₪)">
+                <Field label="מחיר (₪)" required
+                  error={shouldShowError("unitPrice") ? "יש להזין מחיר" : undefined}>
                   <Input type="number" inputMode="numeric" min={1} value={unitPrice}
                     onChange={(e) => setUnitPrice(e.target.value)}
-                    className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]"
+                    onBlur={() => markTouched("unitPrice")}
+                    className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("unitPrice") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
                     placeholder="הזן מחיר" />
                 </Field>
                 <p className="text-[11.5px] text-[#6B7280] leading-relaxed mt-2">
@@ -861,10 +858,12 @@ export default function OfferEditor() {
                   </div>
                   {offerType === "price_comparison" && (
                     <div className="mt-3">
-                      <Field label="מחיר רגיל (לפני הנחה, ₪)">
+                      <Field label="מחיר רגיל (לפני הנחה, ₪)" required
+                        error={shouldShowError("unitPrice") ? "יש להזין מחיר בסיס" : undefined}>
                         <Input type="number" inputMode="numeric" min={1} value={unitPrice}
                           onChange={(e) => setUnitPrice(e.target.value)}
-                          className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]"
+                          onBlur={() => markTouched("unitPrice")}
+                          className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("unitPrice") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
                           placeholder="הזן מחיר בסיס" />
                       </Field>
                     </div>
@@ -873,6 +872,7 @@ export default function OfferEditor() {
 
                 <Section
                   title="מדרגות מחיר"
+                  hint="ככל שיותר מצטרפים — כך המחיר טוב יותר"
                   action={
                     <button type="button" onClick={loadRecommendedTiers}
                       className="text-[11.5px] font-semibold text-[#0E6B5A] inline-flex items-center gap-1 hover:underline">
@@ -880,9 +880,9 @@ export default function OfferEditor() {
                     </button>
                   }
                 >
-                  <div className="divide-y divide-black/[0.06] rounded-xl bg-white ring-1 ring-black/[0.05] overflow-hidden">
+                  <div className="space-y-2">
                     {tiers.map((t, i) => (
-                      <TierRow
+                      <TierCard
                         key={i}
                         idx={i}
                         tier={t}
@@ -892,6 +892,7 @@ export default function OfferEditor() {
                         onChange={(patch) => updateTier(i, patch)}
                         onRemove={() => removeTier(i)}
                         canRemove={tiers.length > 1}
+                        highlight={i === 0 && shouldShowError("tier0")}
                       />
                     ))}
                   </div>
@@ -900,11 +901,63 @@ export default function OfferEditor() {
                     className="mt-2.5 w-full h-10 rounded-xl text-[12.5px] font-semibold text-[#0E6B5A] hover:bg-[#0E6B5A]/[0.06] inline-flex items-center justify-center gap-1.5 transition-colors">
                     <Plus className="h-3.5 w-3.5" /> הוסף מדרגה
                   </button>
+                  {shouldShowError("tier0") && (
+                    <p className="text-[11px] text-destructive mt-2">מלא לפחות מדרגה אחת</p>
+                  )}
+                </Section>
+
+                <Section title="פיקדון (אופציונלי)" hint="דורש מהמצטרפים להעביר סכום קטן לשריון מקום">
+                  <label className="flex items-center gap-2.5 cursor-pointer py-1">
+                    <input type="checkbox" checked={depositRequired}
+                      onChange={(e) => setDepositRequired(e.target.checked)}
+                      className="h-4 w-4 accent-[#0E6B5A]" />
+                    <span className="text-[13px] font-medium text-[#1F2937]">דורש פיקדון להצטרפות</span>
+                  </label>
+                  {depositRequired && (
+                    <div className="space-y-3 mt-3 pr-4 border-r border-black/[0.06]">
+                      <Field label="סכום הפיקדון (₪)" required
+                        error={shouldShowError("depositAmount") ? "הזן סכום" : undefined}
+                        hint={
+                          (depositLimits.min !== null || depositLimits.max !== null)
+                            ? `${depositLimits.min !== null ? `מ-${depositLimits.min}` : ""}${depositLimits.min !== null && depositLimits.max !== null ? " · " : ""}${depositLimits.max !== null ? `עד ${depositLimits.max}` : ""}`
+                            : undefined
+                        }>
+                        <Input type="number" inputMode="numeric" min={1} step="0.01"
+                          value={depositAmount}
+                          onChange={(e) => setDepositAmount(e.target.value)}
+                          onBlur={() => markTouched("depositAmount")}
+                          className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("depositAmount") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
+                          placeholder="הזן סכום" />
+                      </Field>
+                      <Field label="קישור תשלום" required hint="Bit / PayBox / העברה — הפיקדון מועבר ישירות אליך"
+                        error={shouldShowError("paymentLink") ? "הזן קישור תקין" : undefined}>
+                        <Input type="url" placeholder="https://..."
+                          value={supplierPaymentLink}
+                          onChange={(e) => setSupplierPaymentLink(e.target.value)}
+                          onBlur={() => markTouched("paymentLink")}
+                          className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("paymentLink") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
+                          dir="ltr" />
+                      </Field>
+                      <Field label="הוראות נוספות (אופציונלי)">
+                        <Textarea placeholder='למשל: "Bit ל-050-1234567"'
+                          value={supplierPaymentInstructions}
+                          onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
+                          className="rounded-xl min-h-[60px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
+                      </Field>
+                    </div>
+                  )}
+                </Section>
+
+                <Section title="יעד משתתפים (אופציונלי)" hint="כמות המצטרפים שסוגרת את הקבוצה">
+                  <Input type="number" inputMode="numeric" min={1}
+                    value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
+                    placeholder="למשל 20"
+                    className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" />
                 </Section>
               </>
             )}
 
-            <Section title="קהל יעד">
+            <Section title="קהל היעד" hint="למי ההצעה תוצג">
               <div className="grid grid-cols-3 gap-2">
                 <PillBtn active={visibilityType === "public"} onClick={() => setVisibilityType("public")}>כולם</PillBtn>
                 <PillBtn active={visibilityType === "project_only"} onClick={() => setVisibilityType("project_only")}>פרויקט</PillBtn>
@@ -912,9 +965,11 @@ export default function OfferEditor() {
               </div>
               {visibilityType === "project_only" && (
                 <div className="mt-3">
-                  <Field label="פרויקט">
-                    <select value={visibilityProjectId} onChange={(e) => setVisibilityProjectId(e.target.value)}
-                      className="h-11 w-full rounded-xl bg-white ring-1 ring-black/[0.06] px-3 text-[13.5px]">
+                  <Field label="פרויקט" required
+                    error={shouldShowError("project") ? "בחר פרויקט" : undefined}>
+                    <select value={visibilityProjectId}
+                      onChange={(e) => { setVisibilityProjectId(e.target.value); markTouched("project"); }}
+                      className={`h-11 w-full rounded-xl bg-white ring-1 px-3 text-[13.5px] ${shouldShowError("project") ? "ring-destructive/50" : "ring-black/[0.06]"}`}>
                       <option value="">— בחר פרויקט —</option>
                       {projects.map((p) => (<option key={p.id} value={p.id}>{p.name} · {p.city}</option>))}
                     </select>
@@ -923,8 +978,10 @@ export default function OfferEditor() {
               )}
               {visibilityType === "region_only" && (
                 <div className="mt-3">
-                  <Field label="אזורי יעד" hint="ההצעה תוצג רק לדיירים באזורים הנבחרים">
-                    <AreasCombobox value={visibilityRegions} onChange={setVisibilityRegions}
+                  <Field label="אזורי יעד" required hint="ההצעה תוצג רק לדיירים באזורים הנבחרים"
+                    error={shouldShowError("regions") ? "בחר לפחות אזור אחד" : undefined}>
+                    <AreasCombobox value={visibilityRegions}
+                      onChange={(v) => { setVisibilityRegions(v); markTouched("regions"); }}
                       placeholder="בחר אזורים..." regionsOnly />
                   </Field>
                 </div>
@@ -938,131 +995,55 @@ export default function OfferEditor() {
           </div>
         )}
 
-        {/* ─── STEP 3 ─── */}
+        {/* ─── STEP 3 — Terms & Publish ─── */}
         {step === 3 && (
-          <div className="space-y-7">
-            <div className="flex items-center gap-2 text-[12px] text-[#6B7280]">
-              <Eye className="h-3.5 w-3.5 text-[#0E6B5A]" />
-              <span>כך הדיירים יראו את ההצעה</span>
-            </div>
+          <div className="space-y-8">
+            <Section title="מה כלול" hint="ככל שהתיאור מדויק — פחות שאלות מדיירים">
+              <Textarea value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)}
+                placeholder="תנאים, אחריות, מפרט, זמני ביצוע..."
+                className="rounded-xl min-h-[90px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
+            </Section>
 
-            <LivePreview
-              title={title}
-              description={description}
-              coverImage={coverImage}
-              category={categories.find((c) => c.id === categoryId)?.name ?? ""}
-              listingType={listingType}
-              offerType={offerType}
-              tiers={tiers}
-              unitPrice={unitPrice}
-              targetParticipants={targetParticipants}
-              serviceAreas={
-                workAreas.servesAllCountry
-                  ? ["כל הארץ"]
-                  : [
-                      ...workAreas.regionIds.map((id) => regionById(id)?.name_he).filter(Boolean) as string[],
-                      ...workAreas.cityIds.map((id) => cityById(id)?.name_he).filter(Boolean) as string[],
-                    ]
-              }
-              depositRequired={depositRequired && listingType === "group_buy"}
-              depositAmount={depositAmount}
-              supplierName={supplier.business_name}
-            />
+            <Section title="מה לא כלול / חריגים">
+              <Textarea value={restrictions} onChange={(e) => setRestrictions(e.target.value)}
+                placeholder="למשל: לא כולל שכר טרחה, לא כולל חלקי חילוף..."
+                className="rounded-xl min-h-[70px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
+            </Section>
 
-            {/* Advanced */}
+            <Section title="לוחות זמנים">
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="דדליין הצטרפות">
+                  <Input type="date" dir="ltr" min={todayISO()} value={joinDeadline}
+                    onChange={(e) => setJoinDeadline(e.target.value)}
+                    className="h-11 rounded-xl px-2 text-[13px] text-left shadow-none ring-1 ring-black/[0.06]" />
+                </Field>
+                <Field label="דדליין מימוש">
+                  <Input type="date" dir="ltr" min={todayISO()} value={redemptionDeadline}
+                    onChange={(e) => setRedemptionDeadline(e.target.value)}
+                    className="h-11 rounded-xl px-2 text-[13px] text-left shadow-none ring-1 ring-black/[0.06]" />
+                </Field>
+              </div>
+            </Section>
+
+            {/* Advanced options — progressive disclosure */}
             <div>
-              <button
-                type="button"
-                onClick={() => setShowAdvanced((v) => !v)}
-                className="w-full flex items-center justify-between py-2 text-right"
-              >
+              <button type="button" onClick={() => setShowAdvanced((v) => !v)}
+                className="w-full flex items-center justify-between py-2 text-right">
                 <div className="flex items-center gap-2">
                   <Settings2 className="h-3.5 w-3.5 text-[#0E6B5A]" />
                   <span className="text-[13px] font-semibold text-[#1F2937]">אפשרויות מתקדמות</span>
                 </div>
                 <ChevronLeft className={`h-4 w-4 text-[#9CA3AF] transition-transform ${showAdvanced ? "-rotate-90" : ""}`} />
               </button>
-
               {showAdvanced && (
-                <div className="pt-3 space-y-5">
-                  {listingType === "group_buy" && (
-                    <>
-                      <label className="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" checked={depositRequired}
-                          onChange={(e) => setDepositRequired(e.target.checked)}
-                          className="h-4 w-4 accent-[#0E6B5A]" />
-                        <span className="text-[13px] font-medium text-[#1F2937]">דורש פיקדון להצטרפות</span>
-                      </label>
-
-                      {depositRequired && (
-                        <div className="space-y-3 pr-6 border-r border-black/[0.06]">
-                          <Field label="סכום הפיקדון (₪)">
-                            <Input type="number" inputMode="numeric" min={1} step="0.01"
-                              value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)}
-                              className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]"
-                              placeholder="הזן סכום" />
-                            {(depositLimits.min !== null || depositLimits.max !== null) && (
-                              <p className="text-[11px] text-[#9CA3AF] mt-1">
-                                {depositLimits.min !== null ? `מ-${depositLimits.min}` : ""}
-                                {depositLimits.min !== null && depositLimits.max !== null ? " · " : ""}
-                                {depositLimits.max !== null ? `עד ${depositLimits.max}` : ""}
-                              </p>
-                            )}
-                          </Field>
-                          <Field label="קישור תשלום *" hint="הפיקדון מועבר ישירות אליך">
-                            <Input type="url" placeholder="https://..."
-                              value={supplierPaymentLink} onChange={(e) => setSupplierPaymentLink(e.target.value)}
-                              className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" dir="ltr" />
-                          </Field>
-                          <Field label="הוראות נוספות (אופציונלי)">
-                            <Textarea placeholder='למשל: "Bit ל-050-1234567"'
-                              value={supplierPaymentInstructions}
-                              onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
-                              className="rounded-xl min-h-[60px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
-                          </Field>
-                        </div>
-                      )}
-
-                      <Field label="יעד משתתפים לסגירה (אופציונלי)">
-                        <Input type="number" inputMode="numeric" min={1}
-                          value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
-                          placeholder="למשל 20"
-                          className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" />
-                      </Field>
-                    </>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <Field label="דדליין הצטרפות">
-                      <Input type="date" dir="ltr" min={todayISO()} value={joinDeadline}
-                        onChange={(e) => setJoinDeadline(e.target.value)}
-                        className="h-11 rounded-xl px-2 text-[13px] text-left shadow-none ring-1 ring-black/[0.06]" />
-                    </Field>
-                    <Field label="דדליין מימוש">
-                      <Input type="date" dir="ltr" min={todayISO()} value={redemptionDeadline}
-                        onChange={(e) => setRedemptionDeadline(e.target.value)}
-                        className="h-11 rounded-xl px-2 text-[13px] text-left shadow-none ring-1 ring-black/[0.06]" />
-                    </Field>
-                  </div>
-
-                  <Field label="מה כלול (אופציונלי)">
-                    <Textarea value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)}
-                      placeholder="תנאים, אחריות, מפרט..."
-                      className="rounded-xl min-h-[70px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
-                  </Field>
-                  <Field label="מה לא כלול / חריגים (אופציונלי)">
-                    <Textarea value={restrictions} onChange={(e) => setRestrictions(e.target.value)}
-                      placeholder="חריגים..."
-                      className="rounded-xl min-h-[60px] shadow-none ring-1 ring-black/[0.06] text-[13px]" />
-                  </Field>
-
+                <div className="pt-3 space-y-4">
                   <Field label="מקסימום מימושים (אופציונלי)">
                     <Input type="number" inputMode="numeric" min={1}
                       value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)}
                       placeholder="ללא הגבלה"
                       className="h-11 rounded-xl shadow-none ring-1 ring-black/[0.06]" />
                   </Field>
-                  <label className="flex items-center gap-2.5 cursor-pointer">
+                  <label className="flex items-center gap-2.5 cursor-pointer py-1">
                     <input type="checkbox" checked={appointmentRequired}
                       onChange={(e) => setAppointmentRequired(e.target.checked)}
                       className="h-4 w-4 accent-[#0E6B5A]" />
@@ -1072,9 +1053,62 @@ export default function OfferEditor() {
               )}
             </div>
 
-            <label className="flex items-start gap-2.5 cursor-pointer py-2 border-t border-black/[0.06] pt-4">
+            {/* FAQ with AI */}
+            <Section
+              title="שאלות נפוצות"
+              hint="תצוגה מקדימה בלבד — לא נשמר עדיין להצעה"
+              action={<AiChip onClick={() => runInlineAi("faq")} loading={faqAiLoading} label="הצע עם AI" />}
+            >
+              {aiFaqPreview.length > 0 ? (
+                <div className="divide-y divide-black/[0.06] rounded-xl bg-white ring-1 ring-black/[0.05]">
+                  {aiFaqPreview.map((f, i) => (
+                    <details key={i} className="group">
+                      <summary className="list-none cursor-pointer px-3 py-2.5 flex items-center justify-between gap-2">
+                        <span className="text-[12.5px] font-semibold text-[#1F2937] flex-1">{f.q}</span>
+                        <ChevronLeft className="h-3.5 w-3.5 text-[#9CA3AF] transition-transform group-open:-rotate-90 shrink-0" />
+                      </summary>
+                      <div className="px-3 pb-3 text-[12px] text-[#4B5563] leading-relaxed">{f.a}</div>
+                    </details>
+                  ))}
+                  <button type="button" onClick={() => setAiFaqPreview([])}
+                    className="w-full py-2 text-[11px] text-[#6B7280] hover:text-[#1F2937]">נקה</button>
+                </div>
+              ) : (
+                <p className="text-[12px] text-[#9CA3AF] py-2">
+                  אין עדיין שאלות נפוצות. לחץ "הצע עם AI" כדי לקבל הצעות בהתבסס על התיאור.
+                </p>
+              )}
+            </Section>
+
+            {/* Preview */}
+            <Section title="תצוגה מקדימה" hint="כך הדיירים יראו את ההצעה שלך">
+              <LivePreview
+                title={title}
+                description={description}
+                coverImage={coverImage}
+                category={categories.find((c) => c.id === categoryId)?.name ?? ""}
+                listingType={listingType}
+                offerType={offerType}
+                tiers={tiers}
+                unitPrice={unitPrice}
+                targetParticipants={targetParticipants}
+                serviceAreas={
+                  workAreas.servesAllCountry
+                    ? ["כל הארץ"]
+                    : [
+                        ...workAreas.regionIds.map((id) => regionById(id)?.name_he).filter(Boolean) as string[],
+                        ...workAreas.cityIds.map((id) => cityById(id)?.name_he).filter(Boolean) as string[],
+                      ]
+                }
+                depositRequired={depositRequired && listingType === "group_buy"}
+                depositAmount={depositAmount}
+                supplierName={supplier.business_name}
+              />
+            </Section>
+
+            <label className={`flex items-start gap-2.5 cursor-pointer py-3 px-3 rounded-xl transition-colors ${shouldShowError("commitment") ? "bg-destructive/[0.04] ring-1 ring-destructive/30" : ""}`}>
               <input type="checkbox" checked={commitmentAccepted}
-                onChange={(e) => setCommitmentAccepted(e.target.checked)}
+                onChange={(e) => { setCommitmentAccepted(e.target.checked); markTouched("commitment"); }}
                 className="h-4 w-4 mt-0.5 accent-[#0E6B5A] shrink-0" />
               <div className="text-[12.5px] leading-relaxed">
                 <span className="font-semibold text-[#1F2937]">התחייבות הספק</span>
@@ -1088,46 +1122,66 @@ export default function OfferEditor() {
         )}
       </div>
 
-      {/* Slim sticky footer */}
-      <div
-        className="fixed inset-x-0 z-40 bg-[#F8F6F1]/95 backdrop-blur border-t border-black/[0.06] px-4 py-3 bottom-[calc(env(safe-area-inset-bottom)+var(--nav-h))] [.keyboard-open_&]:bottom-[var(--kb-h,0px)] lg:!bottom-0"
-      >
-        {step < 3 ? (
-          <div className="flex gap-2 max-w-md mx-auto">
-            {step > 1 && (
-              <button type="button" onClick={goBack}
-                className="h-11 px-4 rounded-xl bg-white ring-1 ring-black/[0.08] text-[13.5px] font-semibold text-[#1F2937] inline-flex items-center gap-1 hover:bg-black/[0.02] transition-colors">
-                <ChevronRight className="h-4 w-4" /> חזור
+      {/* Smart sticky footer — Back · missing indicator · Continue/Publish */}
+      <div className="fixed inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-black/[0.06] px-4 pt-2 pb-3 bottom-[calc(env(safe-area-inset-bottom)+var(--nav-h))] [.keyboard-open_&]:bottom-[var(--kb-h,0px)] lg:!bottom-0">
+        <div className="max-w-md mx-auto">
+          {/* Missing-fields indicator */}
+          <div className="h-4 mb-1.5 flex items-center justify-center">
+            {stepMissing.length > 0 ? (
+              <span className="text-[11px] text-[#9CA3AF]">
+                {stepMissing.length === 1
+                  ? `חסר: ${stepMissing[0].label}`
+                  : `${stepMissing.length} שדות חסרים להמשך`}
+              </span>
+            ) : step < 3 ? (
+              <span className="text-[11px] text-[#0E6B5A] font-semibold inline-flex items-center gap-1">
+                <Eye className="h-3 w-3" /> מוכן להמשך
+              </span>
+            ) : null}
+          </div>
+
+          {step < 3 ? (
+            <div className="flex gap-2">
+              {step > 1 && (
+                <button type="button" onClick={goBack}
+                  className="h-12 px-4 rounded-xl bg-white ring-1 ring-black/[0.1] text-[13.5px] font-semibold text-[#1F2937] inline-flex items-center gap-1 hover:bg-black/[0.02] transition-colors">
+                  <ChevronRight className="h-4 w-4" /> חזור
+                </button>
+              )}
+              <button type="button" onClick={goNext}
+                className={`flex-1 h-12 rounded-xl text-[13.5px] font-semibold inline-flex items-center justify-center gap-1 transition-colors ${
+                  stepMissing.length > 0
+                    ? "bg-[#0E6B5A]/40 text-white"
+                    : "bg-[#0E6B5A] hover:bg-[#0A5446] text-white"
+                }`}>
+                המשך <ChevronLeft className="h-4 w-4" />
               </button>
-            )}
-            <button type="button" onClick={goNext}
-              className="flex-1 h-11 rounded-xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[13.5px] font-semibold inline-flex items-center justify-center gap-1 transition-colors">
-              המשך <ChevronLeft className="h-4 w-4" />
-            </button>
-          </div>
-        ) : (
-          <div className="flex gap-2 max-w-md mx-auto">
-            <button type="button" onClick={goBack}
-              className="h-11 w-11 rounded-xl bg-white ring-1 ring-black/[0.08] text-[#1F2937] inline-flex items-center justify-center hover:bg-black/[0.02] transition-colors"
-              aria-label="חזור">
-              <ChevronRight className="h-4 w-4" />
-            </button>
-            <button type="button" onClick={() => persist("draft")} disabled={savingDraft || saving}
-              className="h-11 px-3 rounded-xl bg-white ring-1 ring-black/[0.08] text-[12.5px] font-semibold text-[#1F2937] inline-flex items-center gap-1.5 hover:bg-black/[0.02] transition-colors disabled:opacity-50">
-              {savingDraft ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><FileText className="h-3.5 w-3.5" /> טיוטה</>}
-            </button>
-            <button type="button" onClick={() => persist("active")} disabled={saving || savingDraft || !commitmentAccepted}
-              className="flex-1 h-11 rounded-xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[13.5px] font-semibold inline-flex items-center justify-center gap-1.5 disabled:opacity-50 transition-colors">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-3.5 w-3.5" /> {isEditing ? "עדכן" : "פרסם"}</>}
-            </button>
-          </div>
-        )}
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <button type="button" onClick={goBack}
+                className="h-12 w-12 rounded-xl bg-white ring-1 ring-black/[0.1] text-[#1F2937] inline-flex items-center justify-center hover:bg-black/[0.02] transition-colors"
+                aria-label="חזור">
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              <button type="button" onClick={() => persist("draft")} disabled={savingDraft || saving}
+                className="h-12 px-3 rounded-xl bg-white ring-1 ring-black/[0.1] text-[12.5px] font-semibold text-[#1F2937] inline-flex items-center gap-1.5 hover:bg-black/[0.02] transition-colors disabled:opacity-50">
+                {savingDraft ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><FileText className="h-3.5 w-3.5" /> טיוטה</>}
+              </button>
+              <button type="button" onClick={() => persist("active")} disabled={saving || savingDraft || !commitmentAccepted}
+                className="flex-1 h-12 rounded-xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[13.5px] font-semibold inline-flex items-center justify-center gap-1.5 disabled:opacity-50 transition-colors">
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-3.5 w-3.5" /> {isEditing ? "עדכן" : "פרסם"}</>}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <BottomNav role="supplier" />
     </MobileShell>
   );
 }
+
 
 // ─────────── Sub-components ───────────
 
