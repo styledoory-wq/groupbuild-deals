@@ -176,11 +176,8 @@ export default function OfferEditor() {
     }
     if (parts.length) setDescription(parts.join("\n\n"));
 
-    if (draft.faq?.length) {
-      const faqText = draft.faq.map((f) => `שאלה: ${f.q}\nתשובה: ${f.a}`).join("\n\n");
-      setOfferTerms((prev) => (prev?.trim() ? prev : faqText));
-      setShowAdvanced(true);
-    }
+    // FAQ: preview only (no dedicated column yet). Never write to offer_terms.
+    setAiFaqPreview(draft.faq?.length ? draft.faq : []);
   };
 
   useEffect(() => {
