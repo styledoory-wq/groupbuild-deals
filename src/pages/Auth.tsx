@@ -129,8 +129,11 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       return;
     }
 
-    // Supplier intent + already a supplier → go straight to supplier area, clear intent.
-    if (intent === "supplier" && resolvedRole === "supplier") {
+    // Intent matches resolved role → clear stale intent.
+    if (
+      (intent === "supplier" && resolvedRole === "supplier") ||
+      (intent === "resident" && resolvedRole === "resident")
+    ) {
       try { sessionStorage.removeItem("gb_intent"); } catch { /* ignore */ }
     }
 
