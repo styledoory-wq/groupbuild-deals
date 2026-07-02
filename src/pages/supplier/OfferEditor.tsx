@@ -1136,19 +1136,6 @@ function Field({
 }
 
 
-function TypeCard({ active, onClick, title, desc }: { active: boolean; onClick: () => void; title: string; desc: string }) {
-  return (
-    <button type="button" onClick={onClick}
-      className={`p-3 rounded-xl text-right transition-colors ${
-        active
-          ? "bg-[#0E6B5A]/[0.06] ring-1 ring-[#0E6B5A]/40"
-          : "bg-white ring-1 ring-black/[0.06] hover:ring-black/[0.12]"
-      }`}>
-      <div className={`text-[13px] font-semibold ${active ? "text-[#0E6B5A]" : "text-[#1F2937]"}`}>{title}</div>
-      <div className="text-[11px] text-[#6B7280] mt-0.5 leading-snug">{desc}</div>
-    </button>
-  );
-}
 
 function PillBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
