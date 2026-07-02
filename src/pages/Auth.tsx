@@ -171,9 +171,9 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      // Persist supplier intent so onboarding after OAuth callback stays supplier-locked.
-      if (lockedRole === "supplier") {
-        try { sessionStorage.setItem("gb_intent", "supplier"); } catch { /* ignore */ }
+      // Persist role intent so onboarding after OAuth callback stays role-locked.
+      if (lockedRole === "supplier" || lockedRole === "resident") {
+        try { sessionStorage.setItem("gb_intent", lockedRole); } catch { /* ignore */ }
       }
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
