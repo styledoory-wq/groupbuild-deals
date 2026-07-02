@@ -147,7 +147,7 @@ export default function SuppliersLanding() {
               מוכנים להתחיל לקבל לידים?
             </h3>
             <p className="mt-3 text-white/85 text-[14px] max-w-[28rem] mx-auto leading-relaxed">
-              הצטרפו עכשיו — ההרשמה חינם ואתם יכולים להתחיל תוך כמה דקות.
+              הצטרפו לספקים הראשונים של GroupBuild והבטיחו את מקומכם ברשת.
             </p>
             <Link to="/auth/supplier?mode=signup" onClick={setSupplierIntent} className="inline-block mt-6">
               <Button className="h-[54px] rounded-[14px] text-base font-bold px-8 bg-white text-[#0E6B5A] hover:bg-white/90 gap-2">
