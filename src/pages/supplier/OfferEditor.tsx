@@ -1078,11 +1078,11 @@ export default function OfferEditor() {
               </button>
               <button type="button" onClick={() => persist("draft")} disabled={savingDraft || saving}
                 className="h-12 px-3 rounded-xl bg-white ring-1 ring-black/[0.1] text-[12.5px] font-semibold text-[#1F2937] inline-flex items-center gap-1.5 hover:bg-black/[0.02] transition-colors disabled:opacity-50">
-                {savingDraft ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><FileText className="h-3.5 w-3.5" /> טיוטה</>}
+                {savingDraft ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><FileText className="h-3.5 w-3.5" /> שמור טיוטה</>}
               </button>
               <button type="button" onClick={() => persist("active")} disabled={saving || savingDraft || !commitmentAccepted}
                 className="flex-1 h-12 rounded-xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[13.5px] font-semibold inline-flex items-center justify-center gap-1.5 disabled:opacity-50 transition-colors">
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-3.5 w-3.5" /> {isEditing ? "עדכן" : "פרסם"}</>}
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-3.5 w-3.5" /> {isEditing ? "עדכן הצעה" : "פרסם הצעה"}</>}
               </button>
             </div>
           )}
