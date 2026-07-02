@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { verifyAdminFromSession } from "@/lib/auth";
 import {
-  Save, Plus, Trash2, Loader2, Check, ChevronRight, ChevronLeft,
-  Package, Tag, Users, ClipboardList, Eye, X, Pencil, FileText,
+  Save, Plus, Trash2, Loader2, ChevronRight, ChevronLeft,
+  Eye, Pencil, FileText, Settings2, Sparkles,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
@@ -59,23 +59,27 @@ const emptyTier = (overrides: Partial<TierRow> = {}): TierRow => ({
 const DEPOSIT_AMOUNT_RE = /^\d+(\.\d{1,2})?$/;
 const URL_RE = /^https?:\/\/.+/i;
 
-const defaultPercentageTiers = (): TierRow[] => [
-  emptyTier({ minParticipants: "1", maxParticipants: "4", discount_percentage: "5", label: "מדרגה ראשונה" }),
-  emptyTier({ minParticipants: "5", maxParticipants: "9", discount_percentage: "10", label: "מדרגה שנייה" }),
-  emptyTier({ minParticipants: "10", maxParticipants: "19", discount_percentage: "15", label: "מדרגה שלישית" }),
-  emptyTier({ minParticipants: "20", maxParticipants: "", discount_percentage: "20", label: "המחיר הטוב ביותר" }),
-];
+// Start with ONE empty tier — supplier fills numbers themselves.
+const initialTiers = (): TierRow[] => [emptyTier({ minParticipants: "" })];
 
-const defaultPriceTiers = (): TierRow[] => [
-  emptyTier({ minParticipants: "1", maxParticipants: "4", original_price: "5000", discounted_price: "4750", label: "מדרגה ראשונה" }),
-  emptyTier({ minParticipants: "5", maxParticipants: "9", original_price: "5000", discounted_price: "4500", label: "מדרגה שנייה" }),
-  emptyTier({ minParticipants: "10", maxParticipants: "", original_price: "5000", discounted_price: "4200", label: "המחיר הטוב ביותר" }),
+// Optional template loaded only when the supplier clicks "recommended tiers".
+const recommendedPercentageTiers = (): TierRow[] => [
+  emptyTier({ minParticipants: "2", maxParticipants: "4", discount_percentage: "5", label: "מדרגה ראשונה" }),
+  emptyTier({ minParticipants: "5", maxParticipants: "9", discount_percentage: "10", label: "מדרגה שנייה" }),
+  emptyTier({ minParticipants: "10", maxParticipants: "", discount_percentage: "15", label: "המחיר הטוב ביותר" }),
+];
+const recommendedPriceTiers = (): TierRow[] => [
+  emptyTier({ minParticipants: "2", maxParticipants: "4", label: "מדרגה ראשונה" }),
+  emptyTier({ minParticipants: "5", maxParticipants: "9", label: "מדרגה שנייה" }),
+  emptyTier({ minParticipants: "10", maxParticipants: "", label: "המחיר הטוב ביותר" }),
 ];
 
 const todayISO = () => {
   const d = new Date(); d.setHours(0, 0, 0, 0);
   return d.toISOString().split("T")[0];
 };
+
+type StepNum = 1 | 2 | 3;
 
 export default function OfferEditor() {
   const navigate = useNavigate();
@@ -85,7 +89,7 @@ export default function OfferEditor() {
   const adminTargetSupplierId = searchParams.get("supplierId");
   const { categories, projects } = useApp();
 
-  const { regions, cities, regionById, cityById } = useRegions();
+  const { regionById, cityById } = useRegions();
   const [visibilityType, setVisibilityType] = useState<"public" | "project_only" | "region_only">("public");
   const [visibilityProjectId, setVisibilityProjectId] = useState<string>("");
   const [visibilityRegions, setVisibilityRegions] = useState<AreasComboboxValue>({
@@ -100,24 +104,24 @@ export default function OfferEditor() {
   const [supplier, setSupplier] = useState<SupplierLite | null>(null);
 
   const [title, setTitle] = useState("");
-  // Unified description (merged from description + product_details)
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [depositRequired, setDepositRequired] = useState<boolean>(false);
-  const [depositAmount, setDepositAmount] = useState<string>("1000");
+  const [depositAmount, setDepositAmount] = useState<string>("");
   const [supplierPaymentLink, setSupplierPaymentLink] = useState<string>("");
   const [supplierPaymentInstructions, setSupplierPaymentInstructions] = useState<string>("");
   const [depositLimits, setDepositLimits] = useState<DepositLimits>({ min: null, max: null });
   const [saving, setSaving] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<StepNum>(1);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [listingType, setListingType] = useState<"group_buy" | "regular">(
     (searchParams.get("type") as "group_buy" | "regular") === "regular" ? "regular" : "group_buy",
   );
 
   const [offerType, setOfferType] = useState<OfferType>("percentage");
-  const [tiers, setTiers] = useState<TierRow[]>(defaultPercentageTiers());
-  const [editingTier, setEditingTier] = useState<number | null>(null);
+  const [tiers, setTiers] = useState<TierRow[]>(initialTiers());
+  const [editingTier, setEditingTier] = useState<number | null>(0);
   const [unitPrice, setUnitPrice] = useState<string>("");
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
@@ -130,14 +134,24 @@ export default function OfferEditor() {
   const [maxRedemptions, setMaxRedemptions] = useState<string>("");
   const [appointmentRequired, setAppointmentRequired] = useState<boolean>(false);
   const [serviceAreas, setServiceAreas] = useState<string[]>([]);
-  const [serviceAreaInput, setServiceAreaInput] = useState<string>("");
   const [commitmentAccepted, setCommitmentAccepted] = useState<boolean>(false);
 
   const switchOfferType = (next: OfferType) => {
     if (next === offerType) return;
     setOfferType(next);
-    setTiers(next === "percentage" ? defaultPercentageTiers() : defaultPriceTiers());
-    if (next === "price_comparison" && !unitPrice) setUnitPrice("5000");
+    // Don't autofill anything — respect supplier input.
+    setTiers((prev) => prev.map((t) => ({
+      ...t,
+      discount_percentage: next === "percentage" ? t.discount_percentage : "",
+      original_price: next === "price_comparison" ? t.original_price : "",
+      discounted_price: next === "price_comparison" ? t.discounted_price : "",
+    })));
+  };
+
+  const loadRecommendedTiers = () => {
+    setTiers(offerType === "percentage" ? recommendedPercentageTiers() : recommendedPriceTiers());
+    setEditingTier(null);
+    toast.success("נטענו מדרגות מומלצות — ערוך לפי הצורך");
   };
 
   useEffect(() => {
@@ -185,7 +199,7 @@ export default function OfferEditor() {
 
         if (cancelled) return;
         setSupplier(s);
-        if (paymentSettings?.deposit_default_amount != null) setDepositAmount(String(paymentSettings.deposit_default_amount));
+        // Do NOT prefill deposit_amount — user asked for empty defaults.
         setDepositLimits({
           min: paymentSettings?.deposit_min_amount == null ? null : Number(paymentSettings.deposit_min_amount),
           max: paymentSettings?.deposit_max_amount == null ? null : Number(paymentSettings.deposit_max_amount),
@@ -197,7 +211,6 @@ export default function OfferEditor() {
           const { data: deal } = await supabase.from("deals").select("*").eq("id", dealId).maybeSingle();
           if (deal && !cancelled) {
             setTitle(deal.title ?? "");
-            // Merge legacy product_details into description
             const legacyDetails = (deal as { product_details?: string | null }).product_details ?? "";
             const desc = deal.description ?? "";
             setDescription([desc, legacyDetails].filter(Boolean).join("\n\n"));
@@ -205,7 +218,7 @@ export default function OfferEditor() {
             setListingType(lt);
             if (deal.category_id) setCategoryId(deal.category_id);
             setDepositRequired(!!deal.deposit_required);
-            if (deal.deposit_amount != null) setDepositAmount(String(deal.deposit_amount));
+            if (deal.deposit_amount != null && Number(deal.deposit_amount) > 0) setDepositAmount(String(deal.deposit_amount));
             if (deal.supplier_payment_link) setSupplierPaymentLink(String(deal.supplier_payment_link));
             if (deal.supplier_payment_instructions) setSupplierPaymentInstructions(String(deal.supplier_payment_instructions));
             const rawType = (deal.offer_type ?? "percentage") as OfferType;
@@ -220,6 +233,7 @@ export default function OfferEditor() {
                 discounted_price: t.discounted_price != null ? String(t.discounted_price) : "",
                 label: t.label ?? "",
               })));
+              setEditingTier(null);
               const firstWithPrice = rawTiers.find((t) => t.original_price != null);
               if (firstWithPrice?.original_price != null) setUnitPrice(String(firstWithPrice.original_price));
             }
@@ -246,7 +260,6 @@ export default function OfferEditor() {
             setMaxRedemptions(deal.max_redemptions != null ? String(deal.max_redemptions) : "");
             setAppointmentRequired(!!deal.appointment_required);
             setServiceAreas(Array.isArray(deal.service_areas) ? (deal.service_areas as string[]) : []);
-            // Load structured work-area links
             const [{ data: dRegs }, { data: dCits }] = await Promise.all([
               supabase.from("deal_regions").select("region_id").eq("deal_id", dealId),
               supabase.from("deal_cities").select("city_id").eq("deal_id", dealId),
@@ -257,6 +270,10 @@ export default function OfferEditor() {
               cityIds: (dCits ?? []).map((c) => (c as { city_id: string }).city_id),
             });
             setCommitmentAccepted(true);
+            // If any advanced field is set, open the advanced panel by default.
+            if (deal.offer_terms || deal.restrictions || deal.max_redemptions || deal.appointment_required || deal.join_deadline || deal.redemption_deadline || deal.deposit_required) {
+              setShowAdvanced(true);
+            }
           }
         }
         setBootLoading(false);
@@ -267,7 +284,6 @@ export default function OfferEditor() {
     return () => { cancelled = true; };
   }, [categories, adminTargetSupplierId, dealId]);
 
-  // Demand prefill
   useEffect(() => {
     if (isEditing) return;
     const demandId = searchParams.get("demand_id");
@@ -288,14 +304,13 @@ export default function OfferEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories, isEditing]);
 
-  // ─────────── Tier operations ───────────
   const updateTier = (i: number, patch: Partial<TierRow>) => {
     setTiers((prev) => prev.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
   };
   const addTier = () => {
     const last = tiers[tiers.length - 1];
     const nextMin = last?.maxParticipants ? String(Number(last.maxParticipants) + 1) : "";
-    setTiers((prev) => [...prev, emptyTier({ minParticipants: nextMin, label: `מדרגה ${prev.length + 1}` })]);
+    setTiers((prev) => [...prev, emptyTier({ minParticipants: nextMin })]);
     setEditingTier(tiers.length);
   };
   const removeTier = (i: number) => {
@@ -303,16 +318,6 @@ export default function OfferEditor() {
     setEditingTier(null);
   };
 
-  const addServiceArea = () => {
-    const v = serviceAreaInput.trim();
-    if (!v) return;
-    if (serviceAreas.some((a) => a.toLowerCase() === v.toLowerCase())) { setServiceAreaInput(""); return; }
-    setServiceAreas([...serviceAreas, v]);
-    setServiceAreaInput("");
-  };
-  const removeArea = (i: number) => setServiceAreas((prev) => prev.filter((_, idx) => idx !== i));
-
-  // ─────────── Save (publish or draft) ───────────
   const buildAndValidate = (): Record<string, unknown> | null => {
     if (!supplier?.id) { toast.error("לא נמצא פרופיל ספק."); return null; }
     if (!title.trim()) { toast.error("יש להזין שם להצעה"); return null; }
@@ -380,14 +385,12 @@ export default function OfferEditor() {
       toast.error("בחר לפחות אזור אחד לקהל היעד"); return null;
     }
 
-    // Build back-compat service_areas text[] from structured work areas (names)
     const workAreaNames: string[] = workAreas.servesAllCountry
       ? ["כל הארץ"]
       : [
           ...workAreas.regionIds.map((id) => regionById(id)?.name_he).filter(Boolean) as string[],
           ...workAreas.cityIds.map((id) => cityById(id)?.name_he).filter(Boolean) as string[],
         ];
-    // Fallback to any legacy chips the supplier still had, if the structured picker is empty
     const effectiveServiceAreas = workAreaNames.length > 0 ? workAreaNames : serviceAreas;
 
     type Json = import("@/integrations/supabase/types").Json;
@@ -397,7 +400,7 @@ export default function OfferEditor() {
       supplier_id: supplier.id,
       title: title.trim(),
       description: description.trim() || null,
-      product_details: null, // merged into description
+      product_details: null,
       category_id: categoryId,
       listing_type: listingType,
       offer_type: offerType,
@@ -406,7 +409,7 @@ export default function OfferEditor() {
       supplier_payment_link: !isRegular && depositRequired ? (supplierPaymentLink.trim() || null) : null,
       supplier_payment_instructions: !isRegular && depositRequired ? (supplierPaymentInstructions.trim() || null) : null,
       tiers: cleanTiers as unknown as Json,
-      highlights: ["מחיר מיוחד", "אחריות מלאה"] as unknown as Json,
+      highlights: [] as unknown as Json,
       ends_at: joinDeadline ? new Date(joinDeadline).toISOString() : new Date(Date.now() + 30 * 86400000).toISOString(),
       visibility_type: visibilityType,
       visibility_project_id: visibilityType === "project_only" ? visibilityProjectId : null,
@@ -468,7 +471,6 @@ export default function OfferEditor() {
       if (isEditing) {
         const { error } = await supabase.from("deals").update(payload as never).eq("id", dealId!);
         if (error) {
-          // TODO: If 'draft' status is not allowed by DB check-constraint, a migration is needed.
           const msg = error.message?.includes("row-level")
             ? "אין הרשאה לשמור. ודא שהספק אושר."
             : `שמירה נכשלה: ${error.message}`;
@@ -487,7 +489,6 @@ export default function OfferEditor() {
         savedId = (data as { id: string }).id;
       }
 
-      // Sync structured work-area join tables (delete-then-insert)
       if (savedId) {
         try {
           await Promise.all([
@@ -525,7 +526,6 @@ export default function OfferEditor() {
     }
   };
 
-  // ─────────── Loading states ───────────
   if (bootLoading) {
     return (
       <MobileShell>
@@ -567,9 +567,11 @@ export default function OfferEditor() {
     );
   }
 
-  // ─────────── Step navigation ───────────
-  const stepTitles = ["מה אתה מציע", "מחיר", "למי זה מתאים", "תנאים", "תצוגה ופרסום"] as const;
-  const stepIcons = [Package, Tag, Users, ClipboardList, Eye];
+  const stepTitles: Record<StepNum, string> = {
+    1: "מה ההצעה",
+    2: "מחיר ואזור",
+    3: "פרסום",
+  };
 
   const validateStep = (n: number): boolean => {
     if (n === 1) {
@@ -586,86 +588,58 @@ export default function OfferEditor() {
           if (!Number.isFinite(up) || up <= 0) { toast.error("יש להזין מחיר יחידה"); return false; }
         }
         if (!tiers.length) { toast.error("יש להוסיף לפחות מדרגה אחת"); return false; }
+        // Require at least the first tier to be filled.
+        const t0 = tiers[0];
+        if (!t0.minParticipants || (offerType === "percentage" ? !t0.discount_percentage : !t0.discounted_price)) {
+          toast.error("מלא לפחות מדרגה אחת"); return false;
+        }
       }
-      if (listingType === "group_buy" && depositRequired) {
-        if (!supplierPaymentLink.trim()) { toast.error("קישור תשלום חובה"); return false; }
-        if (!URL_RE.test(supplierPaymentLink.trim())) { toast.error("קישור תשלום חייב להתחיל ב-https://"); return false; }
-      }
-    }
-    if (n === 3) {
       if (visibilityType === "project_only" && !visibilityProjectId) { toast.error("בחר פרויקט"); return false; }
       if (visibilityType === "region_only" && visibilityRegions.regionIds.length === 0) {
         toast.error("בחר לפחות אזור אחד לקהל היעד"); return false;
       }
-    }
-    if (n === 4) {
-      const today = todayISO();
-      if (joinDeadline && joinDeadline < today) { toast.error("תאריך הצטרפות בעבר"); return false; }
-      if (redemptionDeadline && redemptionDeadline < today) { toast.error("תאריך מימוש בעבר"); return false; }
     }
     return true;
   };
 
   const goNext = () => {
     if (!validateStep(step)) return;
-    if (step < 5) { setStep((step + 1) as 1 | 2 | 3 | 4 | 5); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    if (step < 3) { setStep((step + 1) as StepNum); window.scrollTo({ top: 0, behavior: "smooth" }); }
   };
   const goBack = () => {
-    if (step > 1) { setStep((step - 1) as 1 | 2 | 3 | 4 | 5); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    if (step > 1) { setStep((step - 1) as StepNum); window.scrollTo({ top: 0, behavior: "smooth" }); }
   };
 
-  const progressPct = (step / 5) * 100;
+  const progressPct = (step / 3) * 100;
 
   return (
     <MobileShell>
-      <BackHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} subtitle={`שלב ${step} מתוך 5 · ${stepTitles[step - 1]}`} />
+      <BackHeader title={isEditing ? "עריכת הצעה" : "הצעה חדשה"} />
 
-      <div className="px-5 -mt-4 relative z-10 space-y-4 pb-6">
-        {/* Stepper */}
-        <div className="gb-card p-3">
-          <div className="flex items-center justify-between gap-1 mb-2">
-            {[1, 2, 3, 4, 5].map((n) => {
-              const done = step > n;
-              const active = step === n;
-              const Icon = stepIcons[n - 1];
-              return (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => { if (n < step || validateStep(step)) setStep(n as 1 | 2 | 3 | 4 | 5); }}
-                  className={`flex-1 flex flex-col items-center gap-1 min-w-0 group`}
-                >
-                  <div
-                    className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center border-2 transition-colors ${
-                      done ? "bg-[#0E6B5A] border-[#0E6B5A] text-white"
-                        : active ? "bg-white border-[#0E6B5A] text-[#0E6B5A]"
-                        : "bg-white border-[#ECEEF2] text-[#9CA3AF]"
-                    }`}
-                  >
-                    {done ? <Check className="h-4 w-4" /> : <Icon className="h-3.5 w-3.5" />}
-                  </div>
-                  <span className={`hidden sm:block text-[10px] font-bold truncate max-w-full ${active || done ? "text-[#1F2937]" : "text-[#9CA3AF]"}`}>
-                    {stepTitles[n - 1]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="h-1 rounded-full bg-[#ECEEF2] overflow-hidden">
-            <div className="h-full bg-[#0E6B5A] transition-all duration-300" style={{ width: `${progressPct}%` }} />
-          </div>
+      {/* Sticky compact progress bar */}
+      <div className="sticky top-0 z-20 bg-[#F8F6F1]/95 backdrop-blur px-5 pt-2 pb-3 -mt-2">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-fs-xs font-extrabold text-[#1F2937]">
+            שלב {step} מתוך 3 · {stepTitles[step]}
+          </span>
+          <span className="text-[11px] text-[#6B7280]">{Math.round(progressPct)}%</span>
         </div>
+        <div className="h-1 rounded-full bg-[#ECEEF2] overflow-hidden">
+          <div className="h-full bg-[#0E6B5A] transition-all duration-300" style={{ width: `${progressPct}%` }} />
+        </div>
+      </div>
 
-        {/* ─── STEP 1: What are you offering ─── */}
+      <div className="px-5 relative z-10 space-y-4 pb-40">
+        {/* ─── STEP 1: What ─── */}
         {step === 1 && (
           <>
             <div className="gb-card p-4 space-y-3">
               <h3 className="font-bold text-sm text-[#1F2937]">סוג ההצעה</h3>
               <div className="grid grid-cols-2 gap-2">
                 <TypeCard active={listingType === "group_buy"} onClick={() => setListingType("group_buy")}
-                  title="קבוצת רכישה" desc="המחיר יורד לפי כמות המצטרפים" />
+                  title="קבוצת רכישה" desc="מחיר יורד לפי כמות" />
                 <TypeCard active={listingType === "regular"} onClick={() => setListingType("regular")}
-                  title="הצעה רגילה" desc="מבצע / שירות במחיר קבוע" />
+                  title="הצעה רגילה" desc="מבצע במחיר קבוע" />
               </div>
             </div>
 
@@ -678,38 +652,35 @@ export default function OfferEditor() {
                   {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
                 </select>
               </Field>
-              <Field label="תיאור ההצעה" hint="מה כלול, מפרט, גדלים, אחריות, מה מיוחד בהצעה">
+              <Field label="תיאור ההצעה" hint="מה כלול, מפרט, למי זה מתאים">
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)}
-                  placeholder="ספר על ההצעה במילים שלך — מה כלול, למי זה מתאים, ומה מיוחד..."
-                  className="rounded-xl min-h-[130px]" />
+                  placeholder="ספר על ההצעה במילים שלך..."
+                  className="rounded-xl min-h-[120px]" />
               </Field>
             </div>
 
             <div className="gb-card p-4">
-              <h3 className="font-bold text-sm mb-3 text-[#1F2937]">תמונות</h3>
+              <h3 className="font-bold text-sm mb-3 text-[#1F2937]">תמונות <span className="text-[11px] font-normal text-muted-foreground">(מומלץ)</span></h3>
               <DealImagesEditor
                 cover={coverImage}
                 gallery={galleryImages}
                 onChange={({ cover, gallery }) => { setCoverImage(cover); setGalleryImages(gallery); }}
               />
-              <p className="text-fs-xs text-muted-foreground mt-2 leading-relaxed">
-                הצעות עם תמונות איכותיות מגדילות משמעותית את ההצטרפויות.
-              </p>
             </div>
           </>
         )}
 
-        {/* ─── STEP 2: Price ─── */}
+        {/* ─── STEP 2: Price + Audience ─── */}
         {step === 2 && (
           <>
             {listingType === "regular" ? (
               <div className="gb-card p-4 space-y-3">
                 <h3 className="font-bold text-sm text-[#1F2937]">מחיר ההצעה</h3>
                 <Field label="מחיר (₪)">
-                  <Input type="number" inputMode="numeric" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="350" />
+                  <Input type="number" inputMode="numeric" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="הזן מחיר" />
                 </Field>
                 <p className="text-fs-xs text-muted-foreground leading-relaxed">
-                  אין מנגנון של ירידת מחיר. דיירים יוכלו לבקש לפתוח קבוצת רכישה עבור ההצעה.
+                  דיירים יוכלו לבקש לפתוח קבוצת רכישה עבור ההצעה.
                 </p>
               </div>
             ) : (
@@ -722,16 +693,18 @@ export default function OfferEditor() {
                   </div>
                   {offerType === "price_comparison" && (
                     <Field label="מחיר רגיל (לפני הנחה, ₪)">
-                      <Input type="number" inputMode="numeric" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="5000" />
+                      <Input type="number" inputMode="numeric" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="הזן מחיר בסיס" />
                     </Field>
                   )}
                 </div>
 
-                {/* Tier cards */}
                 <div className="gb-card p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-sm text-[#1F2937]">מדרגות הנחה</h3>
-                    <span className="text-fs-xs text-muted-foreground">{tiers.length} מדרגות</span>
+                    <h3 className="font-bold text-sm text-[#1F2937]">מדרגות מחיר</h3>
+                    <button type="button" onClick={loadRecommendedTiers}
+                      className="text-[11px] font-bold text-[#0E6B5A] flex items-center gap-1 hover:underline">
+                      <Sparkles className="h-3 w-3" /> טען מדרגות מומלצות
+                    </button>
                   </div>
 
                   <div className="space-y-2">
@@ -755,50 +728,14 @@ export default function OfferEditor() {
                     <Plus className="h-4 w-4 ml-1" /> הוסף מדרגה
                   </Button>
                 </div>
-
-                {/* Deposit — moved into Price step */}
-                <div className="gb-card p-4 space-y-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={depositRequired} onChange={(e) => setDepositRequired(e.target.checked)} className="h-4 w-4 accent-primary" />
-                    <span className="text-sm font-bold text-[#1F2937]">דורש פיקדון להצטרפות</span>
-                  </label>
-                  {depositRequired && (
-                    <div className="space-y-3 pt-1">
-                      <Field label="סכום הפיקדון (₪)">
-                        <Input type="number" inputMode="numeric" min={1} step="0.01" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="h-11 rounded-xl" />
-                        <p className="text-fs-xs text-muted-foreground mt-1">
-                          {depositLimits.min !== null ? `מינימום: ${depositLimits.min}. ` : ""}
-                          {depositLimits.max !== null ? `מקסימום: ${depositLimits.max}.` : ""}
-                        </p>
-                      </Field>
-                      <Field label="קישור תשלום ישיר (Bit / PayBox / העברה) *">
-                        <Input type="url" placeholder="https://payboxapp.page.link/... או https://pay.bit.co.il/..."
-                          value={supplierPaymentLink} onChange={(e) => setSupplierPaymentLink(e.target.value)}
-                          className="h-11 rounded-xl" dir="ltr" />
-                        <p className="text-fs-xs text-muted-foreground mt-1 leading-relaxed">
-                          <b>הפיקדון משולם ישירות אליך</b> — GroupBuild לא גובה.
-                        </p>
-                      </Field>
-                      <Field label="הוראות נוספות (אופציונלי)">
-                        <Textarea placeholder='לדוגמה: "ניתן להעביר ב-Bit ל-050-1234567"'
-                          value={supplierPaymentInstructions} onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
-                          className="rounded-xl min-h-[50px]" />
-                      </Field>
-                    </div>
-                  )}
-                </div>
               </>
             )}
-          </>
-        )}
 
-        {/* ─── STEP 3: Audience ─── */}
-        {step === 3 && (
-          <>
+            {/* Audience */}
             <div className="gb-card p-4 space-y-3">
               <h3 className="font-bold text-sm text-[#1F2937]">למי ההצעה מיועדת?</h3>
               <div className="grid grid-cols-3 gap-2">
-                <ToggleBtn active={visibilityType === "public"} onClick={() => setVisibilityType("public")}>כל המשתמשים</ToggleBtn>
+                <ToggleBtn active={visibilityType === "public"} onClick={() => setVisibilityType("public")}>כולם</ToggleBtn>
                 <ToggleBtn active={visibilityType === "project_only"} onClick={() => setVisibilityType("project_only")}>פרויקט</ToggleBtn>
                 <ToggleBtn active={visibilityType === "region_only"} onClick={() => setVisibilityType("region_only")}>אזור</ToggleBtn>
               </div>
@@ -822,57 +759,22 @@ export default function OfferEditor() {
                 </Field>
               )}
             </div>
-            {listingType === "group_buy" && (
-              <div className="gb-card p-4">
-                <Field label="יעד משתתפים לסגירת הקבוצה" hint="לא חובה — עוזר לדיירים להבין מתי הקבוצה נסגרת">
-                  <Input type="number" inputMode="numeric" min={1} value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
-                    placeholder="20" className="h-11 rounded-xl" />
-                </Field>
-              </div>
-            )}
-          </>
-        )}
 
-        {/* ─── STEP 4: Conditions ─── */}
-        {step === 4 && (
-          <>
-            <div className="gb-card p-4 space-y-3">
-              <h3 className="font-bold text-sm text-[#1F2937]">אזור ביצוע ההצעה</h3>
-              <p className="text-fs-xs text-[#6B7280]">היכן אתם מספקים את השירות / המוצר. ניתן לבחור "כל הארץ", אזורים או ערים ספציפיות.</p>
+            {/* Work area */}
+            <div className="gb-card p-4 space-y-2">
+              <h3 className="font-bold text-sm text-[#1F2937]">אזור ביצוע</h3>
+              <p className="text-[11px] text-[#6B7280]">היכן אתם מספקים את השירות / המוצר</p>
               <AreasCombobox
                 value={workAreas}
                 onChange={setWorkAreas}
-                placeholder="בחר אזורי ביצוע..."
+                placeholder="בחר אזור, עיר או יישוב..."
               />
-            </div>
-
-            <div className="gb-card p-4 space-y-3">
-              <Field label="מה כלול בהצעה"><Textarea value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)} placeholder="מה כלול? תנאי תשלום? אחריות?" className="rounded-xl min-h-[70px]" /></Field>
-              <Field label="מה לא כלול / חריגים"><Textarea value={restrictions} onChange={(e) => setRestrictions(e.target.value)} placeholder="מה לא נכלל?" className="rounded-xl min-h-[60px]" /></Field>
-            </div>
-
-            <div className="gb-card p-4 space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="תאריך אחרון להצטרפות">
-                  <Input type="date" dir="ltr" min={todayISO()} value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-11 rounded-xl px-2 text-sm text-left" />
-                </Field>
-                <Field label="תאריך אחרון למימוש">
-                  <Input type="date" dir="ltr" min={todayISO()} value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-11 rounded-xl px-2 text-sm text-left" />
-                </Field>
-              </div>
-              <Field label="מקסימום מימושים (אופציונלי)">
-                <Input type="number" inputMode="numeric" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
-              </Field>
-              <label className="flex items-center gap-2 cursor-pointer pt-1">
-                <input type="checkbox" checked={appointmentRequired} onChange={(e) => setAppointmentRequired(e.target.checked)} className="h-4 w-4 accent-primary" />
-                <span className="text-sm text-[#1F2937]">נדרשת קביעת פגישה לפני מימוש</span>
-              </label>
             </div>
           </>
         )}
 
-        {/* ─── STEP 5: Preview & Publish ─── */}
-        {step === 5 && (
+        {/* ─── STEP 3: Preview & Publish ─── */}
+        {step === 3 && (
           <>
             <div className="rounded-2xl bg-gradient-to-br from-[#0E6B5A]/5 to-transparent border border-[#0E6B5A]/20 p-3 flex items-center gap-2">
               <Eye className="h-4 w-4 text-[#0E6B5A]" />
@@ -889,11 +791,106 @@ export default function OfferEditor() {
               tiers={tiers}
               unitPrice={unitPrice}
               targetParticipants={targetParticipants}
-              serviceAreas={serviceAreas}
+              serviceAreas={
+                workAreas.servesAllCountry
+                  ? ["כל הארץ"]
+                  : [
+                      ...workAreas.regionIds.map((id) => regionById(id)?.name_he).filter(Boolean) as string[],
+                      ...workAreas.cityIds.map((id) => cityById(id)?.name_he).filter(Boolean) as string[],
+                    ]
+              }
               depositRequired={depositRequired && listingType === "group_buy"}
               depositAmount={depositAmount}
               supplierName={supplier.business_name}
             />
+
+            {/* Advanced (collapsible) */}
+            <div className="gb-card overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowAdvanced((v) => !v)}
+                className="w-full p-4 flex items-center justify-between text-right"
+              >
+                <div className="flex items-center gap-2">
+                  <Settings2 className="h-4 w-4 text-[#0E6B5A]" />
+                  <div>
+                    <div className="text-sm font-bold text-[#1F2937]">אפשרויות מתקדמות</div>
+                    <div className="text-[11px] text-muted-foreground">פיקדון, דדליין, תנאים, הגבלות</div>
+                  </div>
+                </div>
+                <ChevronLeft className={`h-4 w-4 text-[#6B7280] transition-transform ${showAdvanced ? "-rotate-90" : ""}`} />
+              </button>
+
+              {showAdvanced && (
+                <div className="border-t border-[#ECEEF2] p-4 space-y-4">
+                  {listingType === "group_buy" && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={depositRequired} onChange={(e) => setDepositRequired(e.target.checked)} className="h-4 w-4 accent-primary" />
+                          <span className="text-sm font-bold text-[#1F2937]">דורש פיקדון להצטרפות</span>
+                        </label>
+                        {depositRequired && (
+                          <div className="space-y-3 pt-1">
+                            <Field label="סכום הפיקדון (₪)">
+                              <Input type="number" inputMode="numeric" min={1} step="0.01" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="h-11 rounded-xl" placeholder="הזן סכום" />
+                              <p className="text-fs-xs text-muted-foreground mt-1">
+                                {depositLimits.min !== null ? `מינימום: ${depositLimits.min}. ` : ""}
+                                {depositLimits.max !== null ? `מקסימום: ${depositLimits.max}.` : ""}
+                              </p>
+                            </Field>
+                            <Field label="קישור תשלום (Bit / PayBox / העברה) *">
+                              <Input type="url" placeholder="https://..."
+                                value={supplierPaymentLink} onChange={(e) => setSupplierPaymentLink(e.target.value)}
+                                className="h-11 rounded-xl" dir="ltr" />
+                              <p className="text-fs-xs text-muted-foreground mt-1 leading-relaxed">
+                                <b>הפיקדון משולם ישירות אליך</b> — GroupBuild לא גובה.
+                              </p>
+                            </Field>
+                            <Field label="הוראות נוספות (אופציונלי)">
+                              <Textarea placeholder='לדוגמה: "ניתן להעביר ב-Bit ל-050-1234567"'
+                                value={supplierPaymentInstructions} onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
+                                className="rounded-xl min-h-[50px]" />
+                            </Field>
+                          </div>
+                        )}
+                      </div>
+
+                      <Field label="יעד משתתפים לסגירת הקבוצה (אופציונלי)">
+                        <Input type="number" inputMode="numeric" min={1} value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
+                          placeholder="למשל 20" className="h-11 rounded-xl" />
+                      </Field>
+                    </>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field label="דדליין הצטרפות">
+                      <Input type="date" dir="ltr" min={todayISO()} value={joinDeadline} onChange={(e) => setJoinDeadline(e.target.value)} className="h-11 rounded-xl px-2 text-sm text-left" />
+                    </Field>
+                    <Field label="דדליין מימוש">
+                      <Input type="date" dir="ltr" min={todayISO()} value={redemptionDeadline} onChange={(e) => setRedemptionDeadline(e.target.value)} className="h-11 rounded-xl px-2 text-sm text-left" />
+                    </Field>
+                  </div>
+
+                  <Field label="מה כלול (אופציונלי)">
+                    <Textarea value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)} placeholder="תנאים, אחריות, מה בדיוק מקבלים..." className="rounded-xl min-h-[70px]" />
+                  </Field>
+                  <Field label="מה לא כלול / חריגים (אופציונלי)">
+                    <Textarea value={restrictions} onChange={(e) => setRestrictions(e.target.value)} placeholder="חריגים..." className="rounded-xl min-h-[60px]" />
+                  </Field>
+
+                  <div className="grid grid-cols-1 gap-2">
+                    <Field label="מקסימום מימושים (אופציונלי)">
+                      <Input type="number" inputMode="numeric" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
+                    </Field>
+                    <label className="flex items-center gap-2 cursor-pointer pt-1">
+                      <input type="checkbox" checked={appointmentRequired} onChange={(e) => setAppointmentRequired(e.target.checked)} className="h-4 w-4 accent-primary" />
+                      <span className="text-sm text-[#1F2937]">נדרשת קביעת פגישה לפני מימוש</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="gb-card p-4 border border-[#0E6B5A]/30 bg-[#FFF8E1]/30">
               <label className="flex items-start gap-3 cursor-pointer">
@@ -906,25 +903,17 @@ export default function OfferEditor() {
                 </div>
               </label>
             </div>
-
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <Button type="button" onClick={() => persist("draft")} disabled={savingDraft || saving}
-                variant="outline" className="h-12 rounded-[16px] font-bold">
-                {savingDraft ? <Loader2 className="h-4 w-4 ml-2 animate-spin" /> : <FileText className="h-4 w-4 ml-2" />}
-                שמור כטיוטה
-              </Button>
-              <Button onClick={() => persist("active")} disabled={saving || savingDraft || !commitmentAccepted}
-                className="h-12 rounded-[16px] bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] disabled:opacity-50">
-                {saving ? <Loader2 className="h-4 w-4 ml-2 animate-spin" /> : <Save className="h-4 w-4 ml-2" />}
-                {isEditing ? "עדכן ופרסם" : "פרסם הצעה"}
-              </Button>
-            </div>
           </>
         )}
+      </div>
 
-        {/* Navigation buttons (steps 1-4) */}
-        {step < 5 && (
-          <div className="flex gap-2 pt-1">
+      {/* Sticky footer — respects iOS keyboard via --kb-h */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 bg-[#F8F6F1]/95 backdrop-blur border-t border-[#ECEEF2] px-4 py-3"
+        style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + var(--kb-h, 0px) + 12px)` }}
+      >
+        {step < 3 ? (
+          <div className="flex gap-2 max-w-md mx-auto">
             {step > 1 && (
               <Button type="button" onClick={goBack} variant="outline" className="flex-1 h-12 rounded-[16px] font-bold">
                 <ChevronRight className="h-4 w-4 ml-1" /> חזור
@@ -933,6 +922,20 @@ export default function OfferEditor() {
             <Button type="button" onClick={goNext}
               className="flex-[2] h-12 rounded-[16px] bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white font-bold">
               המשך <ChevronLeft className="h-4 w-4 mr-1" />
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2 max-w-md mx-auto">
+            <Button type="button" onClick={goBack} variant="outline" className="h-12 rounded-[16px] font-bold">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button type="button" onClick={() => persist("draft")} disabled={savingDraft || saving}
+              variant="outline" className="h-12 rounded-[16px] font-bold text-xs">
+              {savingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <><FileText className="h-3.5 w-3.5 ml-1" /> טיוטה</>}
+            </Button>
+            <Button onClick={() => persist("active")} disabled={saving || savingDraft || !commitmentAccepted}
+              className="h-12 rounded-[16px] bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white font-bold shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] disabled:opacity-50 text-xs">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-3.5 w-3.5 ml-1" /> {isEditing ? "עדכן" : "פרסם"}</>}
             </Button>
           </div>
         )}
@@ -993,8 +996,8 @@ function TierCard({
   const min = tier.minParticipants || "?";
   const max = tier.maxParticipants || "∞";
   const value = offerType === "percentage"
-    ? (tier.discount_percentage ? `${tier.discount_percentage}% הנחה` : "—")
-    : (tier.discounted_price ? `₪${tier.discounted_price}` : "—");
+    ? (tier.discount_percentage ? `${tier.discount_percentage}% הנחה` : "לא הוגדר")
+    : (tier.discounted_price ? `₪${tier.discounted_price}` : "לא הוגדר");
 
   return (
     <div className={`rounded-xl border transition-colors ${editing ? "border-[#0E6B5A] bg-[#0E6B5A]/5" : "border-[#ECEEF2] bg-white"}`}>
@@ -1004,7 +1007,7 @@ function TierCard({
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-bold text-[#1F2937]">{min}–{max} משתתפים</div>
-          <div className="text-fs-xs text-[#0E6B5A] font-bold">{value}</div>
+          <div className={`text-fs-xs font-bold ${tier.discount_percentage || tier.discounted_price ? "text-[#0E6B5A]" : "text-muted-foreground"}`}>{value}</div>
         </div>
         <button type="button" onClick={onEdit} className="h-9 w-9 rounded-lg bg-[#F4F6FA] border border-[#ECEEF2] flex items-center justify-center text-[#1F2937]" aria-label="ערוך">
           <Pencil className="h-3.5 w-3.5" />
@@ -1034,7 +1037,7 @@ function TierCard({
           ) : (
             <label className="block">
               <span className="text-[11px] font-bold text-muted-foreground mb-1 block">מחיר אחרי הנחה (₪)</span>
-              <Input type="number" inputMode="numeric" value={tier.discounted_price} onChange={(e) => onChange({ discounted_price: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="4500" />
+              <Input type="number" inputMode="numeric" value={tier.discounted_price} onChange={(e) => onChange({ discounted_price: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="הזן מחיר" />
             </label>
           )}
           {Number(tier.minParticipants) === 1 && (
@@ -1058,7 +1061,6 @@ function LivePreview({
   targetParticipants: string; serviceAreas: string[];
   depositRequired: boolean; depositAmount: string; supplierName: string;
 }) {
-  const firstTier = tiers[0];
   const bestTier = useMemo(() => {
     if (!tiers.length) return null;
     if (offerType === "percentage") {
@@ -1138,7 +1140,7 @@ function LivePreview({
 
         {depositRequired && (
           <div className="text-fs-xs bg-[#FFF8E1] border border-[#F5C547]/40 text-[#8A6A1E] rounded-lg px-2 py-1.5 font-medium">
-            נדרש פיקדון להצטרפות: ₪{depositAmount}
+            נדרש פיקדון להצטרפות: ₪{depositAmount || "—"}
           </div>
         )}
       </div>
