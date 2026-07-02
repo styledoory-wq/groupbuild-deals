@@ -309,8 +309,8 @@ export default function Onboarding() {
 
           {residentLocked && (
             <div className="flex items-center gap-2 px-3 py-2 rounded-[12px] bg-[#EEF4FF] border border-[#DBE6FF]">
-              <Building2 className="h-4 w-4 text-[#0E6B5A]" />
-              <span className="text-[12px] font-semibold text-[#0E6B5A]">חשבון דייר</span>
+              <Building2 className="h-4 w-4 text-[#2563EB]" />
+              <span className="text-[12px] font-semibold text-[#2563EB]">חשבון דייר</span>
             </div>
           )}
 

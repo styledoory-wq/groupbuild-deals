@@ -39,7 +39,7 @@ export default function ResidentsLanding() {
             </span>
           </Link>
           <Link
-            to="/auth/resident"
+            to="/auth/resident?mode=signin"
             onClick={setResidentIntent}
             className="text-[13px] font-semibold text-[#0E6B5A] hover:text-[#0A5446] transition-colors"
           >
@@ -74,7 +74,7 @@ export default function ResidentsLanding() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/auth/resident" onClick={setResidentIntent} className="block">
+            <Link to="/auth/resident?mode=signin" onClick={setResidentIntent} className="block">
               <Button
                 variant="outline"
                 className="w-full sm:w-auto h-[56px] rounded-[14px] text-base font-semibold px-8 border-[#0E6B5A]/25 text-[#0E6B5A] hover:bg-[#0E6B5A]/6"

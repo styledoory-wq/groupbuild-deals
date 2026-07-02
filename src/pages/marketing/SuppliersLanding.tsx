@@ -39,7 +39,7 @@ export default function SuppliersLanding() {
             </span>
           </Link>
           <Link
-            to="/auth/supplier"
+            to="/auth/supplier?mode=signin"
             onClick={setSupplierIntent}
             className="text-[13px] font-semibold text-[#0E6B5A] hover:text-[#0A5446] transition-colors"
           >
@@ -74,7 +74,7 @@ export default function SuppliersLanding() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/auth/supplier" onClick={setSupplierIntent} className="block">
+            <Link to="/auth/supplier?mode=signin" onClick={setSupplierIntent} className="block">
               <Button
                 variant="outline"
                 className="w-full sm:w-auto h-[56px] rounded-[14px] text-base font-semibold px-8 border-[#0E6B5A]/25 text-[#0E6B5A] hover:bg-[#0E6B5A]/6"
