@@ -18,6 +18,7 @@ import type { OfferTier, OfferType } from "@/lib/offerPricing";
 import { DealImagesEditor } from "@/components/deals/DealImagesEditor";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
 import { useRegions } from "@/hooks/useRegions";
+import { AiOfferGeneratorCard, type AiOfferDraft } from "@/components/supplier/AiOfferGeneratorCard";
 
 type SupplierLite = {
   id: string;
@@ -152,6 +153,32 @@ export default function OfferEditor() {
     setTiers(offerType === "percentage" ? recommendedPercentageTiers() : recommendedPriceTiers());
     setEditingTier(null);
     toast.success("נטענו מדרגות מומלצות — ערוך לפי הצורך");
+  };
+
+  const applyAiDraft = (draft: AiOfferDraft) => {
+    // Fill only fields the AI is confident about. Never touch pricing/deposit/dates.
+    if (draft.title) setTitle(draft.title);
+    if (draft.category_id && categories.find((c) => c.id === draft.category_id)) {
+      setCategoryId(draft.category_id);
+    }
+    const parts: string[] = [];
+    if (draft.description) parts.push(draft.description.trim());
+    if (draft.what_included?.length) {
+      parts.push("מה כלול:\n" + draft.what_included.map((x) => `• ${x}`).join("\n"));
+    }
+    if (draft.what_not_included?.length) {
+      parts.push("מה לא כלול:\n" + draft.what_not_included.map((x) => `• ${x}`).join("\n"));
+    }
+    if (draft.highlights?.length) {
+      parts.push("יתרונות:\n" + draft.highlights.map((x) => `• ${x}`).join("\n"));
+    }
+    if (parts.length) setDescription(parts.join("\n\n"));
+
+    if (draft.faq?.length) {
+      const faqText = draft.faq.map((f) => `שאלה: ${f.q}\nתשובה: ${f.a}`).join("\n\n");
+      setOfferTerms((prev) => (prev?.trim() ? prev : faqText));
+      setShowAdvanced(true);
+    }
   };
 
   useEffect(() => {
@@ -633,6 +660,12 @@ export default function OfferEditor() {
         {/* ─── STEP 1: What ─── */}
         {step === 1 && (
           <>
+            {!isEditing && (
+              <AiOfferGeneratorCard
+                categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+                onDraftReady={applyAiDraft}
+              />
+            )}
             <div className="gb-card p-4 space-y-3">
               <h3 className="font-bold text-sm text-[#1F2937]">סוג ההצעה</h3>
               <div className="grid grid-cols-2 gap-2">
