@@ -376,6 +376,19 @@ export default function OfferEditor() {
     }
 
     if (visibilityType === "project_only" && !visibilityProjectId) { toast.error("בחר פרויקט"); return null; }
+    if (visibilityType === "region_only" && visibilityRegions.regionIds.length === 0) {
+      toast.error("בחר לפחות אזור אחד לקהל היעד"); return null;
+    }
+
+    // Build back-compat service_areas text[] from structured work areas (names)
+    const workAreaNames: string[] = workAreas.servesAllCountry
+      ? ["כל הארץ"]
+      : [
+          ...workAreas.regionIds.map((id) => regionById(id)?.name_he).filter(Boolean) as string[],
+          ...workAreas.cityIds.map((id) => cityById(id)?.name_he).filter(Boolean) as string[],
+        ];
+    // Fallback to any legacy chips the supplier still had, if the structured picker is empty
+    const effectiveServiceAreas = workAreaNames.length > 0 ? workAreaNames : serviceAreas;
 
     type Json = import("@/integrations/supabase/types").Json;
     const isRegular = listingType === "regular";
