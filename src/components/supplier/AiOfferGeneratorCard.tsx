@@ -110,7 +110,7 @@ export function AiOfferGeneratorCard({ categories, onDraftReady, disabled }: Pro
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-3.5 w-3.5 text-[#0E6B5A]" />
-          <span className="text-[12.5px] font-semibold text-[#1F2937]">יצירה עם AI</span>
+          <span className="text-[12.5px] font-semibold text-[#1F2937]">בנה טיוטה עם AI</span>
         </div>
         <button
           type="button"
