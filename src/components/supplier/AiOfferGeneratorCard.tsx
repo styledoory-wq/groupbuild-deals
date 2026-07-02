@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, Loader2, Mic, X } from "lucide-react";
+import { Sparkles, Loader2, ChevronDown } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,10 +21,16 @@ interface Props {
   categories: CategoryLite[];
   onDraftReady: (draft: AiOfferDraft) => void;
   disabled?: boolean;
+  /** Whether the card starts expanded. Defaults to false (collapsed). */
+  defaultOpen?: boolean;
 }
 
-export function AiOfferGeneratorCard({ categories, onDraftReady, disabled }: Props) {
-  const [open, setOpen] = useState(true);
+/**
+ * Compact AI generator card — collapsed by default so it doesn't dominate step 1.
+ * Uses the same neutral tokens as the rest of the editor (no heavy gradient).
+ */
+export function AiOfferGeneratorCard({ categories, onDraftReady, disabled, defaultOpen = false }: Props) {
+  const [open, setOpen] = useState(defaultOpen);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -51,7 +57,7 @@ export function AiOfferGeneratorCard({ categories, onDraftReady, disabled }: Pro
         return;
       }
       onDraftReady(draft);
-      toast.success("יצרנו עבורך טיוטת הצעה. השלם את המחירים ופרסם.");
+      toast.success("נוצרה טיוטה. השלם מחירים ופרסם.");
       setOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "יצירת טיוטה נכשלה");
@@ -60,75 +66,58 @@ export function AiOfferGeneratorCard({ categories, onDraftReady, disabled }: Pro
     }
   };
 
-  if (!open) {
-    return (
+  return (
+    <div className="rounded-xl border border-[#ECEEF2] bg-white overflow-hidden">
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        disabled={disabled}
-        className="w-full rounded-2xl border border-dashed border-[#0E6B5A]/40 bg-[#0E6B5A]/5 px-4 py-3 flex items-center justify-center gap-2 text-sm font-bold text-[#0E6B5A] hover:bg-[#0E6B5A]/10 transition"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-3 py-2.5 text-right hover:bg-[#F8F9FB] transition-colors"
       >
-        <Sparkles className="h-4 w-4" /> צור טיוטה חדשה עם AI
-      </button>
-    );
-  }
-
-  return (
-    <div className="rounded-2xl overflow-hidden border border-[#0E6B5A]/20 bg-gradient-to-br from-[#0E6B5A] to-[#34A88E] text-white shadow-lg">
-      <div className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-white/15 flex items-center justify-center">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-base font-extrabold">צור הצעה עם AI</div>
-              <div className="text-[11px] opacity-90">חסוך זמן — קבל טיוטה מוכנה תוך שניות</div>
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="h-7 w-7 shrink-0 rounded-lg bg-[#0E6B5A]/10 flex items-center justify-center">
+            <Sparkles className="h-3.5 w-3.5 text-[#0E6B5A]" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[13px] font-bold text-[#1F2937] leading-tight">יצירה מהירה עם AI</div>
+            <div className="text-[11px] text-[#6B7280] leading-tight mt-0.5 truncate">
+              תאר בכמה מילים ונבנה עבורך טיוטת הצעה
             </div>
           </div>
-          <button type="button" onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-white/10" aria-label="סגור">
-            <X className="h-4 w-4" />
-          </button>
         </div>
+        <ChevronDown
+          className={`h-4 w-4 text-[#6B7280] shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
 
-        <p className="text-[12px] leading-relaxed opacity-95">
-          תאר בכמה מילים מה אתה מציע, ואנחנו נבנה עבורך טיוטת הצעה. תוכל לערוך הכל אחר כך.
-        </p>
-
-        <div className="relative">
+      {open && (
+        <div className="border-t border-[#ECEEF2] p-3 space-y-2">
           <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="לדוגמה: התקנת מזגן עילי 2.5 כוח סוס כולל חומרים ואחריות שנתיים…"
-            className="min-h-[110px] rounded-xl bg-white text-[#1F2937] placeholder:text-[#9CA3AF] pr-4"
+            placeholder="לדוגמה: התקנת מזגן עילי 2.5 כ״ס כולל חומרים ואחריות שנתיים"
+            className="min-h-[90px] max-h-[110px] rounded-lg text-[13px] p-3"
             disabled={loading}
           />
-          <button
-            type="button"
-            title="הכתבה קולית (בקרוב)"
-            disabled
-            className="absolute bottom-2 left-2 h-8 w-8 rounded-lg bg-[#F4F6FA] text-[#9CA3AF] flex items-center justify-center opacity-70 cursor-not-allowed"
-          >
-            <Mic className="h-4 w-4" />
-          </button>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10.5px] text-[#9CA3AF] leading-tight">
+              ה-AI לא ממלא מחירים, פיקדונות או תאריכים.
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              onClick={generate}
+              disabled={loading || disabled}
+              className="h-9 rounded-lg bg-[#0E6B5A] hover:bg-[#0E6B5A]/90 text-white text-[12px] font-bold px-4 shrink-0"
+            >
+              {loading ? (
+                <><Loader2 className="h-3.5 w-3.5 ml-1.5 animate-spin" /> יוצר…</>
+              ) : (
+                <><Sparkles className="h-3.5 w-3.5 ml-1.5" /> צור טיוטה</>
+              )}
+            </Button>
+          </div>
         </div>
-
-        <Button
-          type="button"
-          onClick={generate}
-          disabled={loading || disabled}
-          className="w-full h-11 rounded-xl bg-white text-[#0E6B5A] hover:bg-white/90 font-extrabold"
-        >
-          {loading ? (
-            <><Loader2 className="h-4 w-4 ml-2 animate-spin" /> AI בונה עבורך הצעה…</>
-          ) : (
-            <><Sparkles className="h-4 w-4 ml-2" /> בנה לי הצעה</>
-          )}
-        </Button>
-        <p className="text-[10px] opacity-80 text-center">
-          ה-AI לא ממלא מחירים, פיקדונות או תאריכים — רק תוכן. אתה משלים ומאשר.
-        </p>
-      </div>
+      )}
     </div>
   );
 }

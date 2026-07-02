@@ -655,33 +655,13 @@ export default function OfferEditor() {
         </div>
       </div>
 
-      <div className="px-5 relative z-10 space-y-4 pb-40">
+      <div
+        className="px-5 relative z-10 space-y-4"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 108px)" }}
+      >
         {/* ─── STEP 1: What ─── */}
         {step === 1 && (
           <>
-            {!isEditing && (
-              <AiOfferGeneratorCard
-                categories={categories.map((c) => ({ id: c.id, name: c.name }))}
-                onDraftReady={applyAiDraft}
-              />
-            )}
-            {aiFaqPreview.length > 0 && (
-              <div className="gb-card p-4 space-y-2 border border-amber-200 bg-amber-50/50">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-sm text-[#1F2937]">שאלות נפוצות שהוצעו על-ידי AI</h3>
-                  <button type="button" onClick={() => setAiFaqPreview([])} className="text-[11px] text-[#6B7280] hover:underline">נקה</button>
-                </div>
-                <p className="text-[11px] text-[#6B7280]">תצוגה מקדימה בלבד — לא נשמר עדיין להצעה.</p>
-                <div className="space-y-2 pt-1">
-                  {aiFaqPreview.map((f, i) => (
-                    <div key={i} className="rounded-lg bg-white p-2 text-[12px]">
-                      <div className="font-bold text-[#1F2937]">{f.q}</div>
-                      <div className="text-[#4B5563] mt-0.5">{f.a}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
             <div className="gb-card p-4 space-y-3">
               <h3 className="font-bold text-sm text-[#1F2937]">סוג ההצעה</h3>
               <div className="grid grid-cols-2 gap-2">
@@ -707,6 +687,30 @@ export default function OfferEditor() {
                   className="rounded-xl min-h-[120px]" />
               </Field>
             </div>
+
+            {!isEditing && (
+              <AiOfferGeneratorCard
+                categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+                onDraftReady={applyAiDraft}
+              />
+            )}
+            {aiFaqPreview.length > 0 && (
+              <div className="gb-card p-4 space-y-2 border border-amber-200 bg-amber-50/50">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-sm text-[#1F2937]">שאלות נפוצות שהוצעו על-ידי AI</h3>
+                  <button type="button" onClick={() => setAiFaqPreview([])} className="text-[11px] text-[#6B7280] hover:underline">נקה</button>
+                </div>
+                <p className="text-[11px] text-[#6B7280]">תצוגה מקדימה בלבד — לא נשמר עדיין להצעה.</p>
+                <div className="space-y-2 pt-1">
+                  {aiFaqPreview.map((f, i) => (
+                    <div key={i} className="rounded-lg bg-white p-2 text-[12px]">
+                      <div className="font-bold text-[#1F2937]">{f.q}</div>
+                      <div className="text-[#4B5563] mt-0.5">{f.a}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="gb-card p-4">
               <h3 className="font-bold text-sm mb-3 text-[#1F2937]">תמונות <span className="text-[11px] font-normal text-muted-foreground">(מומלץ)</span></h3>
@@ -956,10 +960,11 @@ export default function OfferEditor() {
         )}
       </div>
 
-      {/* Sticky footer — respects iOS keyboard via --kb-h */}
+      {/* Sticky footer — sits ABOVE the mobile BottomNav; drops to bottom on desktop.
+          When the iOS keyboard is open, BottomNav is translated out and the footer
+          floats just above the keyboard using --kb-h. */}
       <div
-        className="fixed inset-x-0 bottom-0 z-30 bg-[#F8F6F1]/95 backdrop-blur border-t border-[#ECEEF2] px-4 py-3"
-        style={{ paddingBottom: `calc(env(safe-area-inset-bottom) + var(--kb-h, 0px) + 12px)` }}
+        className="fixed inset-x-0 z-40 bg-[#F8F6F1]/95 backdrop-blur border-t border-[#ECEEF2] px-4 py-3 bottom-[calc(env(safe-area-inset-bottom)+var(--nav-h))] [.keyboard-open_&]:bottom-[var(--kb-h,0px)] lg:!bottom-0"
       >
         {step < 3 ? (
           <div className="flex gap-2 max-w-md mx-auto">
