@@ -183,7 +183,65 @@ export default function Onboarding() {
     );
   }
 
+  // Symmetric conflict: supplier profile arriving via /auth/resident.
+  if (conflict === "supplier-vs-resident") {
+    return (
+      <div
+        dir="rtl"
+        className="min-h-[100dvh] w-full flex justify-center items-center text-[#1F2937] relative overflow-hidden px-6"
+        style={{ background: "linear-gradient(170deg, #F7F5F0 0%, #EFEAE0 100%)" }}
+      >
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <BrandMark className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(60vw,420px)] opacity-[0.06] select-none" />
+        </div>
+        <div className="relative z-10 w-full max-w-[420px] bg-white rounded-[20px] p-6 shadow-[0_10px_30px_-10px_rgba(10,31,61,0.15)] text-center">
+          <div className="mx-auto h-12 w-12 rounded-full bg-[#FEF3C7] flex items-center justify-center mb-4">
+            <AlertCircle className="h-6 w-6 text-[#B45309]" />
+          </div>
+          <h1 className="text-lg font-extrabold text-[#0B1220] leading-tight">
+            מצאנו שיש לך חשבון ספק
+          </h1>
+          <p className="mt-2 text-[13px] text-[#5B6472] leading-relaxed">
+            החשבון {email ? <span className="font-semibold">{email}</span> : null} כבר רשום כספק ב-GroupBuild.
+            <br />רוצה לעבור לאזור הספקים?
+          </p>
+          <div className="mt-5 space-y-2.5">
+            <Button
+              onClick={() => { clearIntent(); navigate("/supplier"); }}
+              className="w-full h-[52px] rounded-[14px] text-[15px] font-bold bg-[#0E6B5A] hover:bg-[#0a5447] text-white"
+            >
+              כן, קח אותי לאזור הספקים
+            </Button>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                clearIntent();
+                await supabase.auth.signOut();
+                navigate("/auth/resident");
+              }}
+              className="w-full h-[52px] rounded-[14px] text-[14px] font-semibold border-[#E0E4E8]"
+            >
+              התנתק ופתח חשבון דייר נפרד
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const supplierLocked = lockedRole === "supplier";
+  const residentLocked = lockedRole === "resident";
+
+  const lockedTitle = supplierLocked
+    ? "רק עוד פרט קטן ונפתח לך אזור ספק"
+    : residentLocked
+      ? "רק עוד רגע ותוכל למצוא הצעות משתלמות"
+      : `ברוכים הבאים${defaultName ? `, ${defaultName.split(" ")[0]}` : ""} 👋`;
+  const lockedSubtitle = supplierLocked
+    ? "נשלים את פרטי העסק הבסיסיים כדי שתוכל להתחיל לקבל פניות."
+    : residentLocked
+      ? "נשלים פרטים בסיסיים כדי להתאים לך הצעות לפי אזור ופרויקט."
+      : "כדי להתאים לכם את החוויה — איך תרצו להשתמש ב-GroupBuild?";
 
   return (
     <div
@@ -198,13 +256,11 @@ export default function Onboarding() {
       <div className="relative z-10 w-full max-w-screen-sm flex flex-col px-6 py-8">
         <div className="text-center mb-5 animate-fade-up">
           <h1 className="text-[clamp(1.4rem,5vw,1.75rem)] font-extrabold leading-tight tracking-tight text-[#0B1220]">
-            {supplierLocked ? "רק עוד פרט קטן" : `ברוכים הבאים${defaultName ? `, ${defaultName.split(" ")[0]}` : ""} 👋`}
+            {lockedTitle}
           </h1>
           <div className="mt-3 h-[2px] w-10 rounded-full bg-[#0E6B5A] mx-auto" />
           <p className="mt-3 text-[#5B6472] text-[13px] font-medium leading-relaxed">
-            {supplierLocked
-              ? "נשלים את פתיחת חשבון הספק שלך ב-GroupBuild"
-              : "כדי להתאים לכם את החוויה — איך תרצו להשתמש ב-GroupBuild?"}
+            {lockedSubtitle}
           </p>
         </div>
 
@@ -248,6 +304,13 @@ export default function Onboarding() {
             <div className="flex items-center gap-2 px-3 py-2 rounded-[12px] bg-[#E8F5F1] border border-[#B7DED2]">
               <Briefcase className="h-4 w-4 text-[#0E6B5A]" />
               <span className="text-[12px] font-semibold text-[#0E6B5A]">חשבון ספק</span>
+            </div>
+          )}
+
+          {residentLocked && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-[12px] bg-[#EEF4FF] border border-[#DBE6FF]">
+              <Building2 className="h-4 w-4 text-[#0E6B5A]" />
+              <span className="text-[12px] font-semibold text-[#0E6B5A]">חשבון דייר</span>
             </div>
           )}
 

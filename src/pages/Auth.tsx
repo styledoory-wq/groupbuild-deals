@@ -129,6 +129,16 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       return;
     }
 
+    // Symmetric conflict: chose resident flow but already has a completed supplier account.
+    if (
+      intent === "resident" &&
+      resolvedRole === "supplier" &&
+      (profile as { onboarding_completed?: boolean } | null)?.onboarding_completed
+    ) {
+      navigate("/onboarding?conflict=supplier-vs-resident");
+      return;
+    }
+
     // Intent matches resolved role → clear stale intent.
     if (
       (intent === "supplier" && resolvedRole === "supplier") ||
