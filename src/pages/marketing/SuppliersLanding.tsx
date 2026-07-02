@@ -85,9 +85,9 @@ export default function SuppliersLanding() {
           </div>
 
           <div className="mt-6 flex items-center justify-center gap-4 text-[12px] text-[#6B7280] font-medium">
-            <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> הרשמה חינם</span>
-            <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> ללא מחויבות</span>
-            <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> תשלום רק על עסקאות</span>
+            <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> ההרשמה פתוחה כעת</span>
+            <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> רשת ספקים נבחרת</span>
+            <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> הבטיחו את מקומכם</span>
           </div>
         </section>
 
