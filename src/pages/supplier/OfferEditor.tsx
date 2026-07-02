@@ -1046,8 +1046,8 @@ export default function OfferEditor() {
                   : `${stepMissing.length} שדות חסרים להמשך`}
               </span>
             ) : step < 3 ? (
-              <span className="text-[11px] text-[#0E6B5A] font-semibold inline-flex items-center gap-1">
-                <Eye className="h-3 w-3" /> מוכן להמשך
+              <span className="text-[11px] text-[#0E6B5A] font-semibold">
+                מוכן להמשך
               </span>
             ) : null}
           </div>
