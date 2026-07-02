@@ -115,7 +115,26 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
     }
     setAdminSession(false);
 
-    // New OAuth users (no explicit role chosen) → onboarding picker.
+    // Read intent (may have been set by /suppliers landing or /auth/supplier).
+    let intent: string | null = null;
+    try { intent = sessionStorage.getItem("gb_intent"); } catch { /* ignore */ }
+
+    // Conflict: user chose supplier flow but already has a completed resident account.
+    if (
+      intent === "supplier" &&
+      resolvedRole === "resident" &&
+      (profile as { onboarding_completed?: boolean } | null)?.onboarding_completed
+    ) {
+      navigate("/onboarding?conflict=resident-vs-supplier");
+      return;
+    }
+
+    // Supplier intent + already a supplier → go straight to supplier area, clear intent.
+    if (intent === "supplier" && resolvedRole === "supplier") {
+      try { sessionStorage.removeItem("gb_intent"); } catch { /* ignore */ }
+    }
+
+    // New OAuth users (no explicit role chosen) → onboarding picker (intent-aware).
     const needsOnboarding =
       (profile as { onboarding_completed?: boolean } | null)?.onboarding_completed === false &&
       roleNames.length === 0 &&
