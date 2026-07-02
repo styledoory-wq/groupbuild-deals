@@ -77,7 +77,7 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
       <div>
         <div className="flex items-center justify-between mb-2">
           <h4 className="text-fs-sm font-bold text-foreground">תמונת שער (Cover)</h4>
-          <span className="text-fs-xs text-muted-foreground">JPG / PNG · עד 5MB</span>
+          <span className="text-fs-xs text-muted-foreground">JPG / PNG · עד 10MB</span>
         </div>
         {cover ? (
           <div className="relative rounded-2xl overflow-hidden border border-gold/30 group">
