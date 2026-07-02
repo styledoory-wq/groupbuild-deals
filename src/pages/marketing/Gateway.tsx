@@ -126,9 +126,9 @@ function GatewayCard({
             isDark ? "bg-white/15" : "bg-[#F0F5F3]",
           )}
         >
-          <Icon className={cn("h-6 w-6", isDark ? "text-white" : "")} style={!isDark ? { color: accent } : undefined} />
+          <Icon className={cn("h-6 w-6", isDark ? "text-white" : "")} />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0" style={!isDark ? { color: accent } as React.CSSProperties : undefined}>
           <div className="flex items-center justify-between gap-2">
             <h2 className={cn("text-[17px] font-extrabold leading-tight", isDark ? "text-white" : "text-[#0B1220]")}>
               {title}
