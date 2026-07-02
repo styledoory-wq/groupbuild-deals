@@ -200,15 +200,42 @@ export default function DealDetail() {
           return;
         }
         const d = dealData as unknown as DealRow;
-        if (!cancelled) setDeal(d);
 
         const { data: supData } = await supabase
           .from("suppliers")
           .select("id,business_name,logo_url,approval_status,service_areas,phone,whatsapp_url,user_id")
           .eq("id", d.supplier_id)
           .maybeSingle();
+        const sup = (supData as (SupplierRow & { user_id?: string | null }) | null) ?? null;
+
+        // Status gating: only active/closed are publicly viewable.
+        // Drafts (and other non-public statuses) are accessible only to the owning supplier or admins.
+        const publicStatuses = ["active", "closed"];
+        if (!publicStatuses.includes(String(d.status))) {
+          const { data: session } = await supabase.auth.getSession();
+          const uid = session.session?.user.id;
+          const isOwner = !!uid && !!sup?.user_id && sup.user_id === uid;
+          let isAdmin = false;
+          if (uid && !isOwner) {
+            const { data: roleRow } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", uid)
+              .eq("role", "admin")
+              .maybeSingle();
+            isAdmin = !!roleRow;
+          }
+          if (!isOwner && !isAdmin) {
+            if (!cancelled) {
+              setError("העסקה לא נמצאה");
+              setLoading(false);
+            }
+            return;
+          }
+        }
+
         if (!cancelled) {
-          const sup = (supData as (SupplierRow & { user_id?: string | null }) | null) ?? null;
+          setDeal(d);
           setSupplier(sup);
           setSupplierUserId(sup?.user_id ?? null);
         }
