@@ -1328,9 +1328,9 @@ function LivePreview({
         )}
 
         {depositRequired && (
-          <div className="text-[11.5px] bg-[#FFF8E1] text-[#8A6A1E] rounded-lg px-2.5 py-1.5 font-medium">
-            נדרש פיקדון: ₪{depositAmount || "—"}
-          </div>
+        <div className="text-[11.5px] bg-[#F4F6FA] text-[#374151] rounded-lg px-2.5 py-1.5 font-medium">
+          נדרש פיקדון: ₪{depositAmount || "—"}
+        </div>
         )}
       </div>
     </div>
