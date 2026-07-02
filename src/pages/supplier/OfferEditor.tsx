@@ -16,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { OfferTier, OfferType } from "@/lib/offerPricing";
 import { DealImagesEditor } from "@/components/deals/DealImagesEditor";
+import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
+import { useRegions } from "@/hooks/useRegions";
 
 type SupplierLite = {
   id: string;
@@ -83,8 +85,15 @@ export default function OfferEditor() {
   const adminTargetSupplierId = searchParams.get("supplierId");
   const { categories, projects } = useApp();
 
-  const [visibilityType, setVisibilityType] = useState<"public" | "project_only">("public");
+  const { regions, cities, regionById, cityById } = useRegions();
+  const [visibilityType, setVisibilityType] = useState<"public" | "project_only" | "region_only">("public");
   const [visibilityProjectId, setVisibilityProjectId] = useState<string>("");
+  const [visibilityRegions, setVisibilityRegions] = useState<AreasComboboxValue>({
+    servesAllCountry: false, regionIds: [], cityIds: [],
+  });
+  const [workAreas, setWorkAreas] = useState<AreasComboboxValue>({
+    servesAllCountry: false, regionIds: [], cityIds: [],
+  });
 
   const [bootLoading, setBootLoading] = useState(true);
   const [bootError, setBootError] = useState<string | null>(null);
@@ -216,8 +225,19 @@ export default function OfferEditor() {
             }
             setCoverImage(deal.cover_image_url ?? null);
             setGalleryImages((deal.gallery_images as string[] | null) ?? []);
-            setVisibilityType((deal.visibility_type as "public" | "project_only") ?? "public");
-            setVisibilityProjectId(deal.visibility_project_id ?? "");
+            const dealAny = deal as unknown as {
+              visibility_type?: string | null;
+              visibility_project_id?: string | null;
+              visibility_region_ids?: string[] | null;
+              serves_all_country?: boolean | null;
+            };
+            setVisibilityType(((dealAny.visibility_type as "public" | "project_only" | "region_only") ?? "public"));
+            setVisibilityProjectId(dealAny.visibility_project_id ?? "");
+            setVisibilityRegions({
+              servesAllCountry: false,
+              regionIds: Array.isArray(dealAny.visibility_region_ids) ? dealAny.visibility_region_ids : [],
+              cityIds: [],
+            });
             setTargetParticipants(deal.target_participants != null ? String(deal.target_participants) : "");
             setJoinDeadline(deal.join_deadline ? deal.join_deadline.split("T")[0] : "");
             setRedemptionDeadline(deal.redemption_deadline ? deal.redemption_deadline.split("T")[0] : "");
@@ -226,6 +246,16 @@ export default function OfferEditor() {
             setMaxRedemptions(deal.max_redemptions != null ? String(deal.max_redemptions) : "");
             setAppointmentRequired(!!deal.appointment_required);
             setServiceAreas(Array.isArray(deal.service_areas) ? (deal.service_areas as string[]) : []);
+            // Load structured work-area links
+            const [{ data: dRegs }, { data: dCits }] = await Promise.all([
+              supabase.from("deal_regions").select("region_id").eq("deal_id", dealId),
+              supabase.from("deal_cities").select("city_id").eq("deal_id", dealId),
+            ]);
+            setWorkAreas({
+              servesAllCountry: !!dealAny.serves_all_country,
+              regionIds: (dRegs ?? []).map((r) => (r as { region_id: string }).region_id),
+              cityIds: (dCits ?? []).map((c) => (c as { city_id: string }).city_id),
+            });
             setCommitmentAccepted(true);
           }
         }
@@ -346,6 +376,19 @@ export default function OfferEditor() {
     }
 
     if (visibilityType === "project_only" && !visibilityProjectId) { toast.error("בחר פרויקט"); return null; }
+    if (visibilityType === "region_only" && visibilityRegions.regionIds.length === 0) {
+      toast.error("בחר לפחות אזור אחד לקהל היעד"); return null;
+    }
+
+    // Build back-compat service_areas text[] from structured work areas (names)
+    const workAreaNames: string[] = workAreas.servesAllCountry
+      ? ["כל הארץ"]
+      : [
+          ...workAreas.regionIds.map((id) => regionById(id)?.name_he).filter(Boolean) as string[],
+          ...workAreas.cityIds.map((id) => cityById(id)?.name_he).filter(Boolean) as string[],
+        ];
+    // Fallback to any legacy chips the supplier still had, if the structured picker is empty
+    const effectiveServiceAreas = workAreaNames.length > 0 ? workAreaNames : serviceAreas;
 
     type Json = import("@/integrations/supabase/types").Json;
     const isRegular = listingType === "regular";
@@ -367,6 +410,8 @@ export default function OfferEditor() {
       ends_at: joinDeadline ? new Date(joinDeadline).toISOString() : new Date(Date.now() + 30 * 86400000).toISOString(),
       visibility_type: visibilityType,
       visibility_project_id: visibilityType === "project_only" ? visibilityProjectId : null,
+      visibility_region_ids: visibilityType === "region_only" ? visibilityRegions.regionIds : [],
+      serves_all_country: workAreas.servesAllCountry,
       cover_image_url: coverImage,
       gallery_images: galleryImages as unknown as Json,
       target_participants: targetParticipants ? Number(targetParticipants) : null,
@@ -376,7 +421,7 @@ export default function OfferEditor() {
       restrictions: restrictions.trim() || null,
       max_redemptions: maxRedemptions ? Number(maxRedemptions) : null,
       appointment_required: appointmentRequired,
-      service_areas: serviceAreas,
+      service_areas: effectiveServiceAreas,
       supplier_commitment_accepted: true,
     };
 
@@ -440,6 +485,30 @@ export default function OfferEditor() {
           return;
         }
         savedId = (data as { id: string }).id;
+      }
+
+      // Sync structured work-area join tables (delete-then-insert)
+      if (savedId) {
+        try {
+          await Promise.all([
+            supabase.from("deal_regions").delete().eq("deal_id", savedId),
+            supabase.from("deal_cities").delete().eq("deal_id", savedId),
+          ]);
+          if (!workAreas.servesAllCountry) {
+            if (workAreas.regionIds.length) {
+              await supabase.from("deal_regions").insert(
+                workAreas.regionIds.map((rid) => ({ deal_id: savedId!, region_id: rid })),
+              );
+            }
+            if (workAreas.cityIds.length) {
+              await supabase.from("deal_cities").insert(
+                workAreas.cityIds.map((cid) => ({ deal_id: savedId!, city_id: cid })),
+              );
+            }
+          }
+        } catch (e) {
+          console.warn("[OfferEditor] failed to sync deal areas", e);
+        }
       }
       toast.success(
         status === "draft"
@@ -525,6 +594,9 @@ export default function OfferEditor() {
     }
     if (n === 3) {
       if (visibilityType === "project_only" && !visibilityProjectId) { toast.error("בחר פרויקט"); return false; }
+      if (visibilityType === "region_only" && visibilityRegions.regionIds.length === 0) {
+        toast.error("בחר לפחות אזור אחד לקהל היעד"); return false;
+      }
     }
     if (n === 4) {
       const today = todayISO();
@@ -572,7 +644,7 @@ export default function OfferEditor() {
                   >
                     {done ? <Check className="h-4 w-4" /> : <Icon className="h-3.5 w-3.5" />}
                   </div>
-                  <span className={`text-[10px] font-bold truncate max-w-full ${active || done ? "text-[#1F2937]" : "text-[#9CA3AF]"}`}>
+                  <span className={`hidden sm:block text-[10px] font-bold truncate max-w-full ${active || done ? "text-[#1F2937]" : "text-[#9CA3AF]"}`}>
                     {stepTitles[n - 1]}
                   </span>
                 </button>
@@ -634,7 +706,7 @@ export default function OfferEditor() {
               <div className="gb-card p-4 space-y-3">
                 <h3 className="font-bold text-sm text-[#1F2937]">מחיר ההצעה</h3>
                 <Field label="מחיר (₪)">
-                  <Input type="number" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="350" />
+                  <Input type="number" inputMode="numeric" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="350" />
                 </Field>
                 <p className="text-fs-xs text-muted-foreground leading-relaxed">
                   אין מנגנון של ירידת מחיר. דיירים יוכלו לבקש לפתוח קבוצת רכישה עבור ההצעה.
@@ -650,7 +722,7 @@ export default function OfferEditor() {
                   </div>
                   {offerType === "price_comparison" && (
                     <Field label="מחיר רגיל (לפני הנחה, ₪)">
-                      <Input type="number" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="5000" />
+                      <Input type="number" inputMode="numeric" min={1} value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className="h-11 rounded-xl" placeholder="5000" />
                     </Field>
                   )}
                 </div>
@@ -693,7 +765,7 @@ export default function OfferEditor() {
                   {depositRequired && (
                     <div className="space-y-3 pt-1">
                       <Field label="סכום הפיקדון (₪)">
-                        <Input type="number" min={1} step="0.01" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="h-11 rounded-xl" />
+                        <Input type="number" inputMode="numeric" min={1} step="0.01" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="h-11 rounded-xl" />
                         <p className="text-fs-xs text-muted-foreground mt-1">
                           {depositLimits.min !== null ? `מינימום: ${depositLimits.min}. ` : ""}
                           {depositLimits.max !== null ? `מקסימום: ${depositLimits.max}.` : ""}
@@ -725,9 +797,10 @@ export default function OfferEditor() {
           <>
             <div className="gb-card p-4 space-y-3">
               <h3 className="font-bold text-sm text-[#1F2937]">למי ההצעה מיועדת?</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <ToggleBtn active={visibilityType === "public"} onClick={() => setVisibilityType("public")}>לכל הדיירים</ToggleBtn>
-                <ToggleBtn active={visibilityType === "project_only"} onClick={() => setVisibilityType("project_only")}>לפרויקט מסוים</ToggleBtn>
+              <div className="grid grid-cols-3 gap-2">
+                <ToggleBtn active={visibilityType === "public"} onClick={() => setVisibilityType("public")}>כל המשתמשים</ToggleBtn>
+                <ToggleBtn active={visibilityType === "project_only"} onClick={() => setVisibilityType("project_only")}>פרויקט</ToggleBtn>
+                <ToggleBtn active={visibilityType === "region_only"} onClick={() => setVisibilityType("region_only")}>אזור</ToggleBtn>
               </div>
               {visibilityType === "project_only" && (
                 <Field label="פרויקט">
@@ -738,11 +811,21 @@ export default function OfferEditor() {
                   </select>
                 </Field>
               )}
+              {visibilityType === "region_only" && (
+                <Field label="אזורי יעד" hint="ההצעה תוצג רק לדיירים באזורים הנבחרים">
+                  <AreasCombobox
+                    value={visibilityRegions}
+                    onChange={setVisibilityRegions}
+                    placeholder="בחר אזורים..."
+                    regionsOnly
+                  />
+                </Field>
+              )}
             </div>
             {listingType === "group_buy" && (
               <div className="gb-card p-4">
                 <Field label="יעד משתתפים לסגירת הקבוצה" hint="לא חובה — עוזר לדיירים להבין מתי הקבוצה נסגרת">
-                  <Input type="number" min={1} value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
+                  <Input type="number" inputMode="numeric" min={1} value={targetParticipants} onChange={(e) => setTargetParticipants(e.target.value)}
                     placeholder="20" className="h-11 rounded-xl" />
                 </Field>
               </div>
@@ -754,26 +837,13 @@ export default function OfferEditor() {
         {step === 4 && (
           <>
             <div className="gb-card p-4 space-y-3">
-              <h3 className="font-bold text-sm text-[#1F2937]">אזורי שירות</h3>
-              <div className="flex gap-2">
-                <Input value={serviceAreaInput}
-                  onChange={(e) => setServiceAreaInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addServiceArea(); } }}
-                  placeholder="לדוגמה: תל אביב" className="h-11 rounded-xl flex-1" />
-                <Button type="button" onClick={addServiceArea} variant="outline" className="h-11 rounded-xl px-3"><Plus className="h-4 w-4" /></Button>
-              </div>
-              {serviceAreas.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {serviceAreas.map((a, i) => (
-                    <span key={i} className="inline-flex items-center gap-1.5 text-fs-sm font-bold px-3 py-1.5 rounded-full bg-[#F4F6FA] text-[#1F2937] border border-[#ECEEF2]">
-                      {a}
-                      <button type="button" onClick={() => removeArea(i)} className="h-4 w-4 rounded-full bg-white border border-[#ECEEF2] hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center">
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
+              <h3 className="font-bold text-sm text-[#1F2937]">אזור ביצוע ההצעה</h3>
+              <p className="text-fs-xs text-[#6B7280]">היכן אתם מספקים את השירות / המוצר. ניתן לבחור "כל הארץ", אזורים או ערים ספציפיות.</p>
+              <AreasCombobox
+                value={workAreas}
+                onChange={setWorkAreas}
+                placeholder="בחר אזורי ביצוע..."
+              />
             </div>
 
             <div className="gb-card p-4 space-y-3">
@@ -791,7 +861,7 @@ export default function OfferEditor() {
                 </Field>
               </div>
               <Field label="מקסימום מימושים (אופציונלי)">
-                <Input type="number" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
+                <Input type="number" inputMode="numeric" min={1} value={maxRedemptions} onChange={(e) => setMaxRedemptions(e.target.value)} placeholder="ללא הגבלה" className="h-11 rounded-xl" />
               </Field>
               <label className="flex items-center gap-2 cursor-pointer pt-1">
                 <input type="checkbox" checked={appointmentRequired} onChange={(e) => setAppointmentRequired(e.target.checked)} className="h-4 w-4 accent-primary" />
@@ -949,22 +1019,22 @@ function TierCard({
           <div className="grid grid-cols-2 gap-2">
             <label className="block">
               <span className="text-[11px] font-bold text-muted-foreground mb-1 block">מ- (משתתפים)</span>
-              <Input type="number" min={1} value={tier.minParticipants} onChange={(e) => onChange({ minParticipants: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="1" />
+              <Input type="number" inputMode="numeric" min={1} value={tier.minParticipants} onChange={(e) => onChange({ minParticipants: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="1" />
             </label>
             <label className="block">
               <span className="text-[11px] font-bold text-muted-foreground mb-1 block">עד (או ריק = ∞)</span>
-              <Input type="number" value={tier.maxParticipants} onChange={(e) => onChange({ maxParticipants: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="∞" />
+              <Input type="number" inputMode="numeric" value={tier.maxParticipants} onChange={(e) => onChange({ maxParticipants: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="∞" />
             </label>
           </div>
           {offerType === "percentage" ? (
             <label className="block">
               <span className="text-[11px] font-bold text-muted-foreground mb-1 block">אחוז הנחה</span>
-              <Input type="number" min={1} max={100} value={tier.discount_percentage} onChange={(e) => onChange({ discount_percentage: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="10" />
+              <Input type="number" inputMode="numeric" min={1} max={100} value={tier.discount_percentage} onChange={(e) => onChange({ discount_percentage: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="10" />
             </label>
           ) : (
             <label className="block">
               <span className="text-[11px] font-bold text-muted-foreground mb-1 block">מחיר אחרי הנחה (₪)</span>
-              <Input type="number" value={tier.discounted_price} onChange={(e) => onChange({ discounted_price: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="4500" />
+              <Input type="number" inputMode="numeric" value={tier.discounted_price} onChange={(e) => onChange({ discounted_price: e.target.value })} className="h-10 rounded-lg text-sm" placeholder="4500" />
             </label>
           )}
           {Number(tier.minParticipants) === 1 && (

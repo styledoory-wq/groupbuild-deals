@@ -24,13 +24,15 @@ interface Props {
   value: AreasComboboxValue;
   onChange: (v: AreasComboboxValue) => void;
   placeholder?: string;
+  /** When true, hides "All country" and cities — regions only (used for audience targeting). */
+  regionsOnly?: boolean;
 }
 
 /**
  * Combobox רב-בחירה עם חיפוש — לאזורים, ערים ו"כל הארץ".
  * נשען על טבלאות regions/cities ב-DB.
  */
-export function AreasCombobox({ value, onChange, placeholder = "חפש או בחר אזור / עיר..." }: Props) {
+export function AreasCombobox({ value, onChange, placeholder = "חפש או בחר אזור / עיר...", regionsOnly = false }: Props) {
   const { regions, cities, regionById, cityById, loading } = useRegions();
   const [open, setOpen] = useState(false);
 
@@ -108,20 +110,23 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
             <CommandList className="max-h-72">
               <CommandEmpty>לא נמצאו תוצאות</CommandEmpty>
 
-              <CommandGroup heading="כיסוי כללי">
-                <CommandItem value="כל הארץ" onSelect={toggleAll} className="cursor-pointer">
-                  <Check
-                    className={cn(
-                      "ml-2 h-4 w-4",
-                      value.servesAllCountry ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                  <Globe className="ml-2 h-4 w-4 text-[#0E6B5A]" />
-                  כל הארץ
-                </CommandItem>
-              </CommandGroup>
-
-              <CommandSeparator />
+              {!regionsOnly && (
+                <>
+                  <CommandGroup heading="כיסוי כללי">
+                    <CommandItem value="כל הארץ" onSelect={toggleAll} className="cursor-pointer">
+                      <Check
+                        className={cn(
+                          "ml-2 h-4 w-4",
+                          value.servesAllCountry ? "opacity-100" : "opacity-0",
+                        )}
+                      />
+                      <Globe className="ml-2 h-4 w-4 text-[#0E6B5A]" />
+                      כל הארץ
+                    </CommandItem>
+                  </CommandGroup>
+                  <CommandSeparator />
+                </>
+              )}
 
               <CommandGroup heading="אזורים">
                 {regions.map((r) => {
@@ -140,28 +145,31 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
                 })}
               </CommandGroup>
 
-              <CommandSeparator />
-
-              <CommandGroup heading="ערים">
-                {cities.map((c) => {
-                  const region = regionById(c.region_id);
-                  const active = value.cityIds.includes(c.id);
-                  return (
-                    <CommandItem
-                      key={c.id}
-                      value={`${c.name_he} ${region?.name_he ?? ""}`}
-                      onSelect={() => toggleCity(c.id)}
-                      className="cursor-pointer"
-                    >
-                      <Check className={cn("ml-2 h-4 w-4", active ? "opacity-100" : "opacity-0")} />
-                      <span>{c.name_he}</span>
-                      {region && (
-                        <span className="mr-2 text-fs-xs text-muted-foreground">· {region.name_he}</span>
-                      )}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
+              {!regionsOnly && (
+                <>
+                  <CommandSeparator />
+                  <CommandGroup heading="ערים">
+                    {cities.map((c) => {
+                      const region = regionById(c.region_id);
+                      const active = value.cityIds.includes(c.id);
+                      return (
+                        <CommandItem
+                          key={c.id}
+                          value={`${c.name_he} ${region?.name_he ?? ""}`}
+                          onSelect={() => toggleCity(c.id)}
+                          className="cursor-pointer"
+                        >
+                          <Check className={cn("ml-2 h-4 w-4", active ? "opacity-100" : "opacity-0")} />
+                          <span>{c.name_he}</span>
+                          {region && (
+                            <span className="mr-2 text-fs-xs text-muted-foreground">· {region.name_he}</span>
+                          )}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>

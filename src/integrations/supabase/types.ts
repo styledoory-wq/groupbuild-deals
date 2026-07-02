@@ -300,6 +300,39 @@ export type Database = {
         }
         Relationships: []
       }
+      deal_cities: {
+        Row: {
+          city_id: string
+          created_at: string
+          deal_id: string
+        }
+        Insert: {
+          city_id: string
+          created_at?: string
+          deal_id: string
+        }
+        Update: {
+          city_id?: string
+          created_at?: string
+          deal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_cities_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_cities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_interests: {
         Row: {
           city: string | null
@@ -452,6 +485,39 @@ export type Database = {
           },
         ]
       }
+      deal_regions: {
+        Row: {
+          created_at: string
+          deal_id: string
+          region_id: string
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          region_id: string
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          region_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_regions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_regions_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_reminder_log: {
         Row: {
           deadline_date: string
@@ -509,6 +575,7 @@ export type Database = {
           project_id: string | null
           redemption_deadline: string | null
           restrictions: string | null
+          serves_all_country: boolean
           service_areas: string[]
           status: string
           supplier_commitment_accepted: boolean
@@ -520,6 +587,7 @@ export type Database = {
           title: string
           updated_at: string
           visibility_project_id: string | null
+          visibility_region_ids: string[]
           visibility_type: string
         }
         Insert: {
@@ -551,6 +619,7 @@ export type Database = {
           project_id?: string | null
           redemption_deadline?: string | null
           restrictions?: string | null
+          serves_all_country?: boolean
           service_areas?: string[]
           status?: string
           supplier_commitment_accepted?: boolean
@@ -562,6 +631,7 @@ export type Database = {
           title: string
           updated_at?: string
           visibility_project_id?: string | null
+          visibility_region_ids?: string[]
           visibility_type?: string
         }
         Update: {
@@ -593,6 +663,7 @@ export type Database = {
           project_id?: string | null
           redemption_deadline?: string | null
           restrictions?: string | null
+          serves_all_country?: boolean
           service_areas?: string[]
           status?: string
           supplier_commitment_accepted?: boolean
@@ -604,6 +675,7 @@ export type Database = {
           title?: string
           updated_at?: string
           visibility_project_id?: string | null
+          visibility_region_ids?: string[]
           visibility_type?: string
         }
         Relationships: [
