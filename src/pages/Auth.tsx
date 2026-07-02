@@ -406,6 +406,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                 </div>
                 <div className="h-px bg-[#ECEEF2] mt-1" />
               </div>
+              )}
 
 
               <div className={fieldWrap}>
