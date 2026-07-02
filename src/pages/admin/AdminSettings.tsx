@@ -35,6 +35,7 @@ const SECTIONS: { title: string; items: Item[] }[] = [
     title: "מערכת",
     items: [
       { to: "/admin/notifications", icon: Bell, title: "התראות מערכת", desc: "מיילים ויעדי התראה" },
+      { to: "/admin/support", icon: LifeBuoy, title: "תמיכה", desc: "מספר וואטסאפ ופרטי יצירת קשר" },
       { to: "/admin/stats", icon: BarChart3, title: "סטטיסטיקות", desc: "מבט-על מפורט" },
     ],
   },
