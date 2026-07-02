@@ -155,6 +155,32 @@ export default function OfferEditor() {
     toast.success("נטענו מדרגות מומלצות — ערוך לפי הצורך");
   };
 
+  const applyAiDraft = (draft: AiOfferDraft) => {
+    // Fill only fields the AI is confident about. Never touch pricing/deposit/dates.
+    if (draft.title) setTitle(draft.title);
+    if (draft.category_id && categories.find((c) => c.id === draft.category_id)) {
+      setCategoryId(draft.category_id);
+    }
+    const parts: string[] = [];
+    if (draft.description) parts.push(draft.description.trim());
+    if (draft.what_included?.length) {
+      parts.push("מה כלול:\n" + draft.what_included.map((x) => `• ${x}`).join("\n"));
+    }
+    if (draft.what_not_included?.length) {
+      parts.push("מה לא כלול:\n" + draft.what_not_included.map((x) => `• ${x}`).join("\n"));
+    }
+    if (draft.highlights?.length) {
+      parts.push("יתרונות:\n" + draft.highlights.map((x) => `• ${x}`).join("\n"));
+    }
+    if (parts.length) setDescription(parts.join("\n\n"));
+
+    if (draft.faq?.length) {
+      const faqText = draft.faq.map((f) => `שאלה: ${f.q}\nתשובה: ${f.a}`).join("\n\n");
+      setOfferTerms((prev) => (prev?.trim() ? prev : faqText));
+      setShowAdvanced(true);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
