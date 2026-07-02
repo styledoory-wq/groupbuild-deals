@@ -27,7 +27,11 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
   const [searchParams] = useSearchParams();
   const { setUser, projects } = useApp();
   const [role, setRole] = useState<Exclude<Role, "admin">>(lockedRole ?? "resident");
-  const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : (lockedRole ? "signup" : "signin");
+  const modeParam = searchParams.get("mode");
+  const initialMode: Mode =
+    modeParam === "signin" ? "signin"
+    : modeParam === "signup" ? "signup"
+    : (lockedRole ? "signup" : "signin");
   const [mode, setMode] = useState<Mode>(initialMode);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -336,14 +340,37 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
             className="h-28 w-auto select-none object-contain"
             draggable={false}
           />
-          <h1 className="mt-8 text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight text-[#0B1220]">
-            {mode === "signin" ? "מתחברים לעסקאות טובות יותר" : "בואו נצא לדרך"}
+          {lockedRole === "supplier" && (
+            <div className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-[#0E6B5A]/10 px-3 py-1 text-[11px] font-bold text-[#0E6B5A] ring-1 ring-[#0E6B5A]/20">
+              <Briefcase className="h-3 w-3" />
+              חשבון ספק
+            </div>
+          )}
+          {lockedRole === "resident" && (
+            <div className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-[#2563EB]/10 px-3 py-1 text-[11px] font-bold text-[#2563EB] ring-1 ring-[#2563EB]/20">
+              <Building2 className="h-3 w-3" />
+              חשבון דייר
+            </div>
+          )}
+          <h1 className={cn(
+            "text-[clamp(1.55rem,5.6vw,1.95rem)] font-extrabold leading-tight tracking-tight text-[#0B1220]",
+            lockedRole ? "mt-3" : "mt-8",
+          )}>
+            {lockedRole === "supplier"
+              ? (mode === "signin" ? "התחברות לחשבון ספק" : "פותחים חשבון ספק")
+              : lockedRole === "resident"
+                ? (mode === "signin" ? "התחברות לחשבון דייר" : "פותחים חשבון דייר")
+                : (mode === "signin" ? "מתחברים לעסקאות טובות יותר" : "בואו נצא לדרך")}
           </h1>
           <div className="mt-3 h-[2px] w-10 rounded-full bg-[#0E6B5A]" />
           <p className="mt-3 text-[#5B6472] text-[13px] font-medium leading-relaxed max-w-[22rem]">
-            {mode === "signin"
-              ? "דיירים וספקים מתחברים לפלטפורמה אחת ויוצרים כוח קנייה שחוסך כסף לכולם"
-              : "פתחו חשבון בדקות ספורות והצטרפו לכוח הקנייה של הפרויקט שלכם"}
+            {lockedRole === "supplier"
+              ? "הצטרף ל-GroupBuild וקבל פניות מפרויקטים ודיירים שמחפשים ספקים אמינים"
+              : lockedRole === "resident"
+                ? "מצא הצעות משתלמות וחסוך יחד עם דיירים נוספים"
+                : (mode === "signin"
+                    ? "דיירים וספקים מתחברים לפלטפורמה אחת ויוצרים כוח קנייה שחוסך כסף לכולם"
+                    : "פתחו חשבון בדקות ספורות והצטרפו לכוח הקנייה של הפרויקט שלכם")}
           </p>
         </div>
 
