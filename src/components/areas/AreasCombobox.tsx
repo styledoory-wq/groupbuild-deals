@@ -110,20 +110,23 @@ export function AreasCombobox({ value, onChange, placeholder = "חפש או בח
             <CommandList className="max-h-72">
               <CommandEmpty>לא נמצאו תוצאות</CommandEmpty>
 
-              <CommandGroup heading="כיסוי כללי">
-                <CommandItem value="כל הארץ" onSelect={toggleAll} className="cursor-pointer">
-                  <Check
-                    className={cn(
-                      "ml-2 h-4 w-4",
-                      value.servesAllCountry ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                  <Globe className="ml-2 h-4 w-4 text-[#0E6B5A]" />
-                  כל הארץ
-                </CommandItem>
-              </CommandGroup>
-
-              <CommandSeparator />
+              {!regionsOnly && (
+                <>
+                  <CommandGroup heading="כיסוי כללי">
+                    <CommandItem value="כל הארץ" onSelect={toggleAll} className="cursor-pointer">
+                      <Check
+                        className={cn(
+                          "ml-2 h-4 w-4",
+                          value.servesAllCountry ? "opacity-100" : "opacity-0",
+                        )}
+                      />
+                      <Globe className="ml-2 h-4 w-4 text-[#0E6B5A]" />
+                      כל הארץ
+                    </CommandItem>
+                  </CommandGroup>
+                  <CommandSeparator />
+                </>
+              )}
 
               <CommandGroup heading="אזורים">
                 {regions.map((r) => {
