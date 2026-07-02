@@ -594,6 +594,9 @@ export default function OfferEditor() {
     }
     if (n === 3) {
       if (visibilityType === "project_only" && !visibilityProjectId) { toast.error("בחר פרויקט"); return false; }
+      if (visibilityType === "region_only" && visibilityRegions.regionIds.length === 0) {
+        toast.error("בחר לפחות אזור אחד לקהל היעד"); return false;
+      }
     }
     if (n === 4) {
       const today = todayISO();
