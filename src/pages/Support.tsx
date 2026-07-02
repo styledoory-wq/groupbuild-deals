@@ -1,7 +1,36 @@
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, MessageCircle, HelpCircle } from "lucide-react";
+import { useApp } from "@/store/AppStore";
+
+type Faq = { q: string; a: string };
+
+const RESIDENT_FAQS: Faq[] = [
+  { q: "מה זה GroupBuild?", a: "פלטפורמה לרכישות קבוצתיות לדיירים בפרויקטים חדשים — חיסכון משמעותי על מוצרים ושירותים לבית." },
+  { q: "איך מצטרפים לעסקה?", a: "נכנסים לאפליקציה, בוחרים פרויקט וקטגוריה, מעיינים בעסקאות זמינות ולוחצים \"הצטרף\". חלק מהעסקאות דורשות פיקדון מוחזר." },
+  { q: "האם הפיקדון מוחזר?", a: "כן. הפיקדון משמש להבטחת מחויבות ומוחזר במלואו לאחר השלמת העסקה או אם העסקה אינה יוצאת לפועל." },
+  { q: "איך מבטלים חשבון?", a: "אפשר למחוק חשבון ישירות מהמסך \"החשבון שלי\", או לשלוח בקשה ל-support@groupbuild.co.il." },
+  { q: "האם השירות בתשלום?", a: "השימוש באפליקציה חינמי לדיירים. עסקאות מסוימות דורשות פיקדון מוחזר בלבד." },
+];
+
+const SUPPLIER_FAQS: Faq[] = [
+  { q: "איך מפרסמים הצעה חדשה?", a: "מהמסך \"ההצעות שלי\" לוחצים על \"הצעה חדשה\", בוחרים סוג הצעה, ממלאים את הפרטים בשלושה שלבים ומפרסמים." },
+  { q: "איך מקבלים לידים מדיירים?", a: "לידים רלוונטיים מגיעים ל\"תיבת הביקושים\" שלך על פי הקטגוריות ואזורי השירות שהגדרת בפרופיל הספק." },
+  { q: "מה זו רכישה קבוצתית ואיך זה עובד?", a: "הצעה מסוג רכישה קבוצתית מציגה מדרגות מחיר לפי כמות מצטרפים. ככל שיותר דיירים מצטרפים, כך המחיר יורד לכולם." },
+  { q: "איך עורכים או משביתים הצעה קיימת?", a: "במסך \"ההצעות שלי\" לוחצים על ההצעה, ומשם ניתן לערוך תוכן, מחיר ואזורי שירות, או להעביר להצעה למצב לא-פעיל." },
+  { q: "איך מקבלים אישור ספק?", a: "לאחר השלמת פרטי העסק והעלאת מסמכים, הצוות שלנו בודק את הפרטים ומאשר את החשבון בדרך כלל תוך 1–2 ימי עסקים." },
+  { q: "איך מקבלים תשלום על עסקאות שנסגרו?", a: "התשלומים מרוכזים במסך \"הכנסות\", כולל פירוט עמלות הפלטפורמה ומועדי העברה." },
+  { q: "מה קורה עם פיקדונות הדיירים?", a: "הפיקדונות מוחזקים בנאמנות עד להשלמת העסקה. עם הביצוע הפיקדון מקוזז מהתשלום, ובמקרה של ביטול מוחזר לדייר." },
+  { q: "איך מקבלים תמיכה טכנית?", a: "אפשר לפנות בוואטסאפ או במייל support@groupbuild.co.il — צוות התמיכה מגיב בימי עסקים תוך 24 שעות." },
+];
 
 export default function Support() {
+  const { user } = useApp();
+  const initialAudience: "supplier" | "resident" = user?.role === "supplier" ? "supplier" : "resident";
+  const [audience, setAudience] = useState<"supplier" | "resident">(initialAudience);
+
+  const faqs = useMemo(() => (audience === "supplier" ? SUPPLIER_FAQS : RESIDENT_FAQS), [audience]);
+
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground">
       <header className="border-b">
@@ -41,35 +70,45 @@ export default function Support() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold flex items-center gap-2">
-            <HelpCircle className="text-primary" /> שאלות נפוצות
-          </h2>
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h2 className="text-2xl font-semibold flex items-center gap-2">
+              <HelpCircle className="text-primary" /> שאלות נפוצות
+            </h2>
+            <div className="inline-flex rounded-full border p-1 bg-muted/40" role="tablist" aria-label="סוג משתמש">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={audience === "resident"}
+                onClick={() => setAudience("resident")}
+                className={
+                  "px-4 py-1.5 text-sm font-semibold rounded-full transition " +
+                  (audience === "resident" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")
+                }
+              >
+                לדיירים
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={audience === "supplier"}
+                onClick={() => setAudience("supplier")}
+                className={
+                  "px-4 py-1.5 text-sm font-semibold rounded-full transition " +
+                  (audience === "supplier" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")
+                }
+              >
+                לספקים
+              </button>
+            </div>
+          </div>
 
           <div className="space-y-4">
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-1">מה זה GroupBuild?</h3>
-              <p className="text-sm text-muted-foreground">פלטפורמה לרכישות קבוצתיות לדיירים בפרויקטים חדשים — חיסכון משמעותי על מוצרים ושירותים לבית.</p>
-            </div>
-
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-1">איך מצטרפים לעסקה?</h3>
-              <p className="text-sm text-muted-foreground">נכנסים לאפליקציה, בוחרים פרויקט וקטגוריה, מעיינים בעסקאות זמינות ולוחצים "הצטרף". חלק מהעסקאות דורשות פיקדון מוחזר.</p>
-            </div>
-
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-1">האם הפיקדון מוחזר?</h3>
-              <p className="text-sm text-muted-foreground">כן. הפיקדון משמש להבטחת מחויבות ומוחזר במלואו לאחר השלמת העסקה או אם העסקה אינה יוצאת לפועל.</p>
-            </div>
-
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-1">איך מבטלים חשבון?</h3>
-              <p className="text-sm text-muted-foreground">שלחו אימייל ל-support@groupbuild.co.il עם בקשת מחיקה. נטפל בבקשה תוך 7 ימי עסקים.</p>
-            </div>
-
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-1">האם השירות בתשלום?</h3>
-              <p className="text-sm text-muted-foreground">השימוש באפליקציה חינמי לדיירים. עסקאות מסוימות דורשות פיקדון מוחזר בלבד.</p>
-            </div>
+            {faqs.map((f) => (
+              <div key={f.q} className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-1">{f.q}</h3>
+                <p className="text-sm text-muted-foreground">{f.a}</p>
+              </div>
+            ))}
           </div>
         </section>
 
