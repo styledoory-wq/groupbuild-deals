@@ -299,6 +299,7 @@ const App = () => (
                   <Route path="/admin/payments" element={adminRoute(<AdminPayments />)} />
                   <Route path="/admin/control" element={adminRoute(<AdminControl />)} />
                   <Route path="/admin/notifications" element={adminRoute(<AdminNotifications />)} />
+                  <Route path="/admin/support" element={adminRoute(<AdminSupport />)} />
                   <Route path="/admin/suppliers/:supplierId/areas" element={adminRoute(<AdminSupplierAreas />)} />
                   <Route path="/admin/suppliers/:supplierId/media" element={adminRoute(<AdminSupplierMedia />)} />
                   <Route path="/admin/db-suppliers" element={adminRoute(<AdminDbSuppliers />)} />
