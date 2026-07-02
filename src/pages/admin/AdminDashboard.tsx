@@ -81,7 +81,7 @@ export default function AdminDashboard() {
           supabase.from("deal_interests").select("id, status", { count: "exact" }).eq("is_deleted", false),
           supabase.from("deposit_attempt_logs").select("id", { count: "exact", head: true }).gte("created_at", weekAgo),
           supabase.from("supplier_inquiries").select("id", { count: "exact", head: true }).eq("status", "new").lte("created_at", weekAgo).eq("is_deleted", false),
-          supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).or("image_url.is.null,image_url.eq."),
+          supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).or("cover_image_url.is.null,cover_image_url.eq."),
           supabase.from("deal_interests").select("id, created_at, full_name").eq("is_deleted", false).order("created_at", { ascending: false }).limit(4),
           supabase.from("suppliers").select("id, created_at, business_name").eq("is_deleted", false).order("created_at", { ascending: false }).limit(3),
           supabase.from("deposits").select("id, created_at, gross_deposit_amount").eq("status", "paid").eq("is_deleted", false).order("created_at", { ascending: false }).limit(3),
