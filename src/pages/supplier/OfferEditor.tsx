@@ -572,7 +572,7 @@ export default function OfferEditor() {
                   >
                     {done ? <Check className="h-4 w-4" /> : <Icon className="h-3.5 w-3.5" />}
                   </div>
-                  <span className={`text-[10px] font-bold truncate max-w-full ${active || done ? "text-[#1F2937]" : "text-[#9CA3AF]"}`}>
+                  <span className={`hidden xs:block text-[10px] font-bold truncate max-w-full ${active || done ? "text-[#1F2937]" : "text-[#9CA3AF]"}`}>
                     {stepTitles[n - 1]}
                   </span>
                 </button>
