@@ -63,7 +63,7 @@ export default function Support() {
             </div>
           </a>
 
-          <a href="https://wa.me/972500000000" target="_blank" rel="noopener noreferrer" className="border rounded-lg p-5 hover:bg-accent transition flex items-start gap-3">
+          <a href={waUrl} target="_blank" rel="noopener noreferrer" className="border rounded-lg p-5 hover:bg-accent transition flex items-start gap-3">
             <MessageCircle className="text-primary shrink-0 mt-1" />
             <div>
               <h3 className="font-semibold mb-1">WhatsApp</h3>
