@@ -139,7 +139,7 @@ export function AiOfferGeneratorCard({ categories, onDraftReady, disabled }: Pro
           {loading ? (
             <><Loader2 className="h-3.5 w-3.5 animate-spin" /> יוצר…</>
           ) : (
-            <>צור טיוטה</>
+            <>בנה טיוטה</>
           )}
         </button>
       </div>
