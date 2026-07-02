@@ -834,26 +834,13 @@ export default function OfferEditor() {
         {step === 4 && (
           <>
             <div className="gb-card p-4 space-y-3">
-              <h3 className="font-bold text-sm text-[#1F2937]">אזורי שירות</h3>
-              <div className="flex gap-2">
-                <Input value={serviceAreaInput}
-                  onChange={(e) => setServiceAreaInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addServiceArea(); } }}
-                  placeholder="לדוגמה: תל אביב" className="h-11 rounded-xl flex-1" />
-                <Button type="button" onClick={addServiceArea} variant="outline" className="h-11 rounded-xl px-3"><Plus className="h-4 w-4" /></Button>
-              </div>
-              {serviceAreas.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {serviceAreas.map((a, i) => (
-                    <span key={i} className="inline-flex items-center gap-1.5 text-fs-sm font-bold px-3 py-1.5 rounded-full bg-[#F4F6FA] text-[#1F2937] border border-[#ECEEF2]">
-                      {a}
-                      <button type="button" onClick={() => removeArea(i)} className="h-4 w-4 rounded-full bg-white border border-[#ECEEF2] hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center">
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
+              <h3 className="font-bold text-sm text-[#1F2937]">אזור ביצוע ההצעה</h3>
+              <p className="text-fs-xs text-[#6B7280]">היכן אתם מספקים את השירות / המוצר. ניתן לבחור "כל הארץ", אזורים או ערים ספציפיות.</p>
+              <AreasCombobox
+                value={workAreas}
+                onChange={setWorkAreas}
+                placeholder="בחר אזורי ביצוע..."
+              />
             </div>
 
             <div className="gb-card p-4 space-y-3">
