@@ -136,6 +136,8 @@ export default function OfferEditor() {
   const [appointmentRequired, setAppointmentRequired] = useState<boolean>(false);
   const [serviceAreas, setServiceAreas] = useState<string[]>([]);
   const [commitmentAccepted, setCommitmentAccepted] = useState<boolean>(false);
+  // AI-suggested FAQ — preview only, never persisted (no dedicated column yet).
+  const [aiFaqPreview, setAiFaqPreview] = useState<{ q: string; a: string }[]>([]);
 
   const switchOfferType = (next: OfferType) => {
     if (next === offerType) return;
