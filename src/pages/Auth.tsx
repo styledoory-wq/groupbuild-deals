@@ -192,10 +192,21 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       if (lockedRole === "supplier" || lockedRole === "resident") {
         try { sessionStorage.setItem("gb_intent", lockedRole); } catch { /* ignore */ }
       }
+      // If a session already exists, sign out first so Google shows the account chooser
+      // instead of silently re-using the current identity.
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData.session) {
+          await supabase.auth.signOut();
+        }
+      } catch { /* ignore */ }
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: window.location.origin,
+          queryParams: {
+            prompt: "select_account",
+          },
         },
       });
       if (error) {
