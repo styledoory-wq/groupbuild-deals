@@ -310,12 +310,6 @@ export default function ProjectManagement() {
             ניהול הפרויקט
           </h1>
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => navigate("/resident/budget-planner")}
-              className="flex items-center gap-1 text-[11px] font-bold text-[#1A1A1A] bg-white border border-gray-200 px-2.5 py-1.5 rounded-full active:scale-95"
-            >
-              תכנון תקציב
-            </button>
             <button className="flex items-center gap-1 text-[11px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2.5 py-1.5 rounded-full active:scale-95">
               <Share2 className="h-3.5 w-3.5" />
               שיתוף
