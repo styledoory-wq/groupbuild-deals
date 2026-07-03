@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, Search, X, Briefcase, Check } from "lucide-react";
+import { ChevronLeft, Search, X, Check } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
