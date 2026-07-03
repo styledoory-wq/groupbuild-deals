@@ -46,7 +46,7 @@ export default function ResidentsLanding() {
             onClick={setResidentIntent}
             className="text-[13px] font-semibold text-[#0E6B5A] hover:text-[#0A5446] transition-colors"
           >
-            כבר רשום? התחבר
+            הרשמה / התחברות
           </Link>
         </div>
       </header>
