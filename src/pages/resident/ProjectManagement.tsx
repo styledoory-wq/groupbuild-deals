@@ -1342,16 +1342,22 @@ function EditInfoModal({
         </>
       )}
 
-      {confirmReset && (
+      {confirmReset && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+          className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center overflow-y-auto"
           dir="rtl"
-          style={{ fontFamily: EPILOGUE }}
+          style={{
+            fontFamily: EPILOGUE,
+            paddingTop: "max(16px, env(safe-area-inset-top))",
+            paddingBottom: "calc(max(16px, env(safe-area-inset-bottom)) + 16px)",
+            paddingLeft: 16,
+            paddingRight: 16,
+          }}
           onClick={() => setConfirmReset(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full sm:max-w-sm bg-white rounded-3xl p-5 shadow-2xl"
+            className="w-full sm:max-w-sm bg-white rounded-3xl p-5 shadow-2xl my-auto max-h-full overflow-y-auto"
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[22px]" aria-hidden>🔄</span>
@@ -1362,7 +1368,7 @@ function EditInfoModal({
             <p className="text-[12.5px] text-gray-600 leading-relaxed">
               האם אתה בטוח שברצונך לאפס את נתוני הפרויקט? פעולה זו תאפס את פרטי הפרויקט, אומדן ה-AI, שלבי הפרויקט ונתוני ניהול התקציב.
             </p>
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-4 sticky bottom-0 bg-white pt-2">
               <button
                 onClick={() => setConfirmReset(false)}
                 className="flex-1 py-2.5 rounded-2xl text-[13.5px] font-bold text-gray-700 bg-gray-100 active:scale-[0.98]"
@@ -1378,8 +1384,10 @@ function EditInfoModal({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
+
     </ModalShell>
   );
 }
