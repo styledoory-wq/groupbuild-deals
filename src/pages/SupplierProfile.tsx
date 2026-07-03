@@ -81,6 +81,7 @@ export default function SupplierProfile() {
   const [deals, setDeals] = useState<RealDealCardData[]>([]);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showFullDesc, setShowFullDesc] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const dealsRef = useRef<HTMLDivElement>(null);
 
