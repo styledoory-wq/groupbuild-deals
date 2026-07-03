@@ -323,19 +323,51 @@ export default function SupplierProfile() {
         <SupplierCatalogsList supplierId={supplier.id} legacyUrl={supplier.catalog_url} />
 
         {/* Description */}
-        {(supplier.description || true) && (
+        {(supplier.description || true) && (() => {
+          const desc = supplier.description ?? "";
+          const isLong = desc.length > 220;
+          const shown = !isLong || showFullDesc ? desc : desc.slice(0, 220).trimEnd() + "…";
+          return (
+            <section className="gb-card p-4">
+              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">על העסק</h2>
+              <EditableField
+                table="suppliers"
+                id={supplier.id}
+                field="description"
+                value={desc}
+                type="textarea"
+                as="p"
+                className="text-sm text-foreground whitespace-pre-line leading-relaxed block"
+                placeholder="—"
+                render={() => shown || "—"}
+              />
+              {isLong && (
+                <button
+                  onClick={() => setShowFullDesc((v) => !v)}
+                  className="mt-2 text-xs font-bold text-[#0E6B5A] active:opacity-70 transition-opacity"
+                >
+                  {showFullDesc ? "הצג פחות" : "הצג עוד"}
+                </button>
+              )}
+            </section>
+          );
+        })()}
+
+        {/* Gallery — below business details */}
+        {gallery.length > 0 && (
           <section className="gb-card p-4">
-            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">על העסק</h2>
-            <EditableField
-              table="suppliers"
-              id={supplier.id}
-              field="description"
-              value={supplier.description ?? ""}
-              type="textarea"
-              as="p"
-              className="text-sm text-foreground whitespace-pre-line leading-relaxed block"
-              placeholder="—"
-            />
+            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">גלריית עבודות</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {gallery.slice(0, 6).map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => setLightbox(g.image_url)}
+                  className="aspect-square rounded-[14px] overflow-hidden shadow-[0_2px_10px_-4px_rgba(10,31,61,0.10)] transition-transform active:scale-[0.98]"
+                >
+                  <SmartImg src={g.image_url} size="card" alt={g.caption ?? "עבודה"} className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
           </section>
         )}
 
