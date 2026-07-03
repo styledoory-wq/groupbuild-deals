@@ -1317,19 +1317,21 @@ function EditInfoModal({
 /* ===================== Schedule Modal ===================== */
 
 function ScheduleModal({
-  schedule, onClose, onSave,
+  schedule, stages, onClose, onSave,
 }: {
   schedule: Record<string, ScheduleItem>;
+  stages: Stage[];
   onClose: () => void;
   onSave: (s: Record<string, ScheduleItem>) => void;
 }) {
   const [form, setForm] = useState<Record<string, ScheduleItem>>(() => {
     const next: Record<string, ScheduleItem> = {};
-    STAGES.forEach((s) => {
+    stages.forEach((s) => {
       next[s.key] = schedule[s.key] || { start: "", end: "" };
     });
     return next;
   });
+
   const set = (key: string, field: keyof ScheduleItem, v: string) =>
     setForm((p) => ({ ...p, [key]: { ...p[key], [field]: v } }));
 
