@@ -135,7 +135,7 @@ export default function ResidentsLanding() {
           <h2 className="text-[22px] md:text-[26px] font-extrabold text-center tracking-tight">איך זה עובד?</h2>
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
             <StepCard n={1} title="מוצאים הצעה" desc="גולשים בהצעות שרלוונטיות לבניין או לשכונה שלכם — או פותחים ביקוש חדש." />
-            <StepCard n={2} title="מצטרפים יחד" desc="ככל שיותר שכנים מצטרפים, המחיר יורד. אתם רואים בזמן אמת כמה חוסכים." />
+            <StepCard n={2} title="מצטרפים יחד" desc="ככל שיותר שכנים מצטרפים, יש פוטנציאל למחיר טוב יותר. אתם רואים את מצב הקבוצה בזמן אמת." />
             <StepCard n={3} title="מבצעים בפועל" desc="הספק המאומת מבצע את העבודה. הכל מנוהל דרך GroupBuild — פשוט ובטוח." />
           </div>
         </section>
