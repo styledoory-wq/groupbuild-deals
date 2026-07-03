@@ -477,26 +477,8 @@ export default function SupplierProfile() {
             </>
           )}
         </section>
-
-
-        {/* Gallery */}
-        {gallery.length > 0 && (
-          <section className="gb-card p-4">
-            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">גלריית עבודות</h2>
-            <div className="grid grid-cols-3 gap-2">
-              {gallery.map((g) => (
-                <button
-                  key={g.id}
-                  onClick={() => setLightbox(g.image_url)}
-                  className="aspect-square rounded-[16px] overflow-hidden shadow-[0_2px_10px_-4px_rgba(10,31,61,0.10)] transition-transform active:scale-[0.98]"
-                >
-                  <SmartImg src={g.image_url} size="card" alt={g.caption ?? "עבודה"} className="h-full w-full object-cover" />
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
       </div>
+
 
       {/* Dual CTA */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
