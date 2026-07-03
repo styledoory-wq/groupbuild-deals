@@ -15,12 +15,32 @@ const EPILOGUE = "'Epilogue', system-ui, sans-serif";
 const BRAND = "#0E6B5A";
 const BRAND_DARK = "#0A5447";
 
+export type ProjectType =
+  | "new_build"
+  | "renovation"
+  | "extension"
+  | "mamad"
+  | "committee"
+  | "point_service";
+
 type ProjectInfo = {
   name: string;
   subtitle: string;
   manager: string;
   targetDate: string; // YYYY-MM-DD
   groupSavings: number;
+  projectType?: ProjectType;
+  // Type-specific fields (only relevant ones are used per type)
+  area?: number;          // מ"ר — new_build / renovation / extension / mamad
+  rooms?: number;         // חדרים
+  floors?: number;        // קומות — new_build / extension
+  standard?: "basic" | "standard" | "luxury"; // רמת גמר
+  scope?: string[];       // renovation scope: kitchen/bath/floor/electric...
+  mamadType?: "new" | "upgrade"; // ממ״ד חדש / שדרוג קיים
+  units?: number;         // ועד בית — יח״ד בבניין
+  committeeService?: string; // סוג שירות משותף
+  serviceCategory?: string;  // שירות נקודתי
+  serviceDetails?: string;
 };
 
 type ScheduleItem = { start: string; end: string };
@@ -38,6 +58,34 @@ const DEFAULT_INFO: ProjectInfo = {
   targetDate: "",
   groupSavings: 0,
 };
+
+const PROJECT_TYPES: { key: ProjectType; label: string; emoji: string; desc: string }[] = [
+  { key: "new_build",     label: "בנייה חדשה",           emoji: "🏗️", desc: "וילה / בית פרטי מהיסוד" },
+  { key: "renovation",    label: "שיפוץ",                emoji: "🔨", desc: "שיפוץ דירה / בית קיים" },
+  { key: "extension",     label: "תוספת בנייה",          emoji: "➕", desc: "חדר, קומה או הרחבה" },
+  { key: "mamad",         label: "ממ״ד",                 emoji: "🛡️", desc: "בנייה או שדרוג ממ״ד" },
+  { key: "committee",     label: "ועד בית / בניין משותף", emoji: "🏢", desc: "רכישות ושירותים לבניין" },
+  { key: "point_service", label: "שירות נקודתי",         emoji: "🧰", desc: "שירות/מוצר בודד" },
+];
+
+const RENOVATION_SCOPE_OPTS = [
+  { id: "kitchen",  label: "מטבח" },
+  { id: "bath",     label: "אמבטיה" },
+  { id: "flooring", label: "ריצוף" },
+  { id: "electric", label: "חשמל" },
+  { id: "plumbing", label: "אינסטלציה" },
+  { id: "paint",    label: "צבע" },
+  { id: "windows",  label: "חלונות ודלתות" },
+];
+
+const STANDARD_OPTS: { id: NonNullable<ProjectInfo["standard"]>; label: string }[] = [
+  { id: "basic", label: "בסיסי" },
+  { id: "standard", label: "סטנדרטי" },
+  { id: "luxury", label: "יוקרתי" },
+];
+
+const COMMITTEE_SERVICES = ["ניקיון", "גינון", "מעלית", "חשמל משותף", "צביעה", "אחר"];
+const POINT_SERVICE_CATS = ["מיזוג", "דלתות", "ריצוף", "צבע", "אינסטלציה", "חשמל", "מטבח", "אחר"];
 
 function formatDateShort(iso: string) {
   if (!iso) return "—";
