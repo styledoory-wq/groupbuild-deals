@@ -419,17 +419,20 @@ export default function SupplierProfile() {
         <section ref={dealsRef} className="gb-card p-4 scroll-mt-20">
           <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
             <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> ההצעות הפעילות
+            {deals.length > 0 && <span className="text-[#6B7280] font-medium">· {deals.length}</span>}
           </h2>
           {deals.length === 0 ? (
             <p className="text-sm text-muted-foreground">אין עדיין הצעות פעילות מהספק הזה.</p>
           ) : (
-            <div className="space-y-3">
-              {deals.map((d) => (
-                <RealDealCard key={d.id} deal={d} />
-              ))}
+            <div className="grid grid-cols-2 gap-2.5">
+              {deals.map((d) => {
+                const cat = categories.find((c) => c.id === d.category_id);
+                return <CompactDealCard key={d.id} deal={d} categoryIcon={cat?.icon ?? null} categoryName={cat?.name ?? null} />;
+              })}
             </div>
           )}
         </section>
+
 
         {/* Reviews */}
         <section className="gb-card p-4">
