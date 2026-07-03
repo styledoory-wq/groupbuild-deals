@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Search, X, Briefcase } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
@@ -279,22 +279,8 @@ export default function CategoryStages() {
         )}
       </div>
 
-      {/* Sticky CTA */}
-      {!q && (
-        <div
-          className="fixed left-1/2 -translate-x-1/2 z-30 w-[92%] max-w-[var(--app-max-w)]"
-          style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 12px)" }}
-        >
-          <button
-            onClick={() => navigate("/resident/project-management")}
-            className="w-full flex items-center justify-center gap-2 text-white font-extrabold py-4 rounded-2xl shadow-2xl shadow-[#0E6B5A]/30 active:scale-[0.98] transition-transform"
-            style={{ background: BRAND, fontFamily: URBANIST }}
-          >
-            <Briefcase className="h-5 w-5" />
-            מעבר לניהול הפרויקט שלי
-          </button>
-        </div>
-      )}
+
+
 
       <BottomNav role="resident" />
     </div>
