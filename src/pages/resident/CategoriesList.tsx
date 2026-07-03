@@ -362,21 +362,8 @@ export default function CategoriesList() {
         )}
       </div>
 
-      {/* Floating CTA button */}
-      {!q && (
-        <button
-          onClick={() => navigate("/resident/project-management")}
-          className="fixed left-1/2 -translate-x-1/2 z-30 w-[92%] max-w-[var(--app-max-w)] flex items-center justify-center gap-2 text-white font-extrabold py-2.5 rounded-2xl active:scale-[0.98] transition-transform text-[13px]"
-          style={{ 
-            bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)",
-            background: BRAND_DARK, 
-            fontFamily: URBANIST 
-          }}
-        >
-          <Briefcase className="h-4 w-4" />
-          ניהול הפרויקט שלי
-        </button>
-      )}
+
+
 
       <BottomNav role="resident" />
     </div>
