@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ShieldCheck, ArrowRight, Tag, MessageSquare, Loader2 } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ArrowRight, Tag, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState, ErrorState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,8 @@ import { toast } from "sonner";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
-import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
-import type { OfferTier } from "@/lib/offerPricing";
+import type { RealDealCardData } from "@/components/deals/RealDealCard";
+import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
 
@@ -81,6 +81,7 @@ export default function SupplierProfile() {
   const [deals, setDeals] = useState<RealDealCardData[]>([]);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showFullDesc, setShowFullDesc] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const dealsRef = useRef<HTMLDivElement>(null);
 
@@ -144,6 +145,8 @@ export default function SupplierProfile() {
           tiers: (Array.isArray(r.tiers) ? (r.tiers as OfferTier[]) : []) as OfferTier[],
           ends_at: (r.ends_at as string | null) ?? null,
           listing_type: (r.listing_type as string | null) ?? "group_buy",
+          cover_image_url: (r.cover_image_url as string | null) ?? null,
+          gallery_images: (Array.isArray(r.gallery_images) ? (r.gallery_images as string[]) : null),
         })),
 
       );
@@ -256,49 +259,44 @@ export default function SupplierProfile() {
       {/* Hero */}
       <div className="px-5 pt-4 pb-4 relative">
         <BackHeader title={supplier.business_name} subtitle="פרופיל ספק" />
-        <div className="gb-card p-4 flex items-end gap-4">
+        <div className="gb-card p-4 flex items-center gap-4">
           <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" className="shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]" />
-          <div className="flex-1 min-w-0 pb-1">
-            <div className="flex items-center gap-1.5 mb-1">
-              <EditableField
-                table="suppliers"
-                id={supplier.id}
-                field="business_name"
-                value={supplier.business_name}
-                as="h1"
-                className="text-[20px] font-extrabold truncate text-[#1F2937] tracking-tight"
-              />
-              {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-[#0E6B5A] shrink-0" />}
-            </div>
-            <div className="mb-1 flex items-center gap-1.5 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <EditableField
+              table="suppliers"
+              id={supplier.id}
+              field="business_name"
+              value={supplier.business_name}
+              as="h1"
+              className="block text-[20px] font-extrabold text-[#1F2937] tracking-tight leading-tight mb-1.5 line-clamp-2"
+            />
+            <div className="flex items-center gap-1.5 flex-wrap">
               <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-[#6B7280] [&>b]:text-[#1F2937] [&>span]:text-[#6B7280]" />
               {(() => {
                 const isSvc = Boolean(supplier.offers_services) || supplier.supplier_kind === "service";
                 const isProd = Boolean(supplier.offers_products) || supplier.supplier_kind === "product";
                 if (isSvc && isProd) return (
-                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-white text-[#1F2937] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
+                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#F4F6FA] text-[#1F2937]">
                     שירות + מוצרים
                   </span>
                 );
                 if (isSvc) return (
-                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#EAF2FF] text-[#2F6BFF] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
+                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#EAF2FF] text-[#2F6BFF]">
                     בעל מקצוע
                   </span>
                 );
                 if (isProd) return (
-                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#E8F7EC] text-[#2EA85A] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
+                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#E8F7EC] text-[#2EA85A]">
                     ספק מוצרים
                   </span>
                 );
                 return null;
               })()}
             </div>
-            {supplier.short_description && (
-              <p className="text-[#6B7280] text-xs font-medium leading-relaxed line-clamp-2">{supplier.short_description}</p>
-            )}
           </div>
         </div>
       </div>
+
 
       <div className="px-5 relative z-10 space-y-4 pb-32">
         {/* Quick links */}
@@ -325,19 +323,51 @@ export default function SupplierProfile() {
         <SupplierCatalogsList supplierId={supplier.id} legacyUrl={supplier.catalog_url} />
 
         {/* Description */}
-        {(supplier.description || true) && (
+        {(supplier.description || true) && (() => {
+          const desc = supplier.description ?? "";
+          const isLong = desc.length > 220;
+          const shown = !isLong || showFullDesc ? desc : desc.slice(0, 220).trimEnd() + "…";
+          return (
+            <section className="gb-card p-4">
+              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">על העסק</h2>
+              <EditableField
+                table="suppliers"
+                id={supplier.id}
+                field="description"
+                value={desc}
+                type="textarea"
+                as="p"
+                className="text-sm text-foreground whitespace-pre-line leading-relaxed block"
+                placeholder="—"
+                render={() => shown || "—"}
+              />
+              {isLong && (
+                <button
+                  onClick={() => setShowFullDesc((v) => !v)}
+                  className="mt-2 text-xs font-bold text-[#0E6B5A] active:opacity-70 transition-opacity"
+                >
+                  {showFullDesc ? "הצג פחות" : "הצג עוד"}
+                </button>
+              )}
+            </section>
+          );
+        })()}
+
+        {/* Gallery — below business details */}
+        {gallery.length > 0 && (
           <section className="gb-card p-4">
-            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">על העסק</h2>
-            <EditableField
-              table="suppliers"
-              id={supplier.id}
-              field="description"
-              value={supplier.description ?? ""}
-              type="textarea"
-              as="p"
-              className="text-sm text-foreground whitespace-pre-line leading-relaxed block"
-              placeholder="—"
-            />
+            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">גלריית עבודות</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {gallery.slice(0, 6).map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => setLightbox(g.image_url)}
+                  className="aspect-square rounded-[14px] overflow-hidden shadow-[0_2px_10px_-4px_rgba(10,31,61,0.10)] transition-transform active:scale-[0.98]"
+                >
+                  <SmartImg src={g.image_url} size="card" alt={g.caption ?? "עבודה"} className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
           </section>
         )}
 
@@ -389,17 +419,20 @@ export default function SupplierProfile() {
         <section ref={dealsRef} className="gb-card p-4 scroll-mt-20">
           <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
             <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> ההצעות הפעילות
+            {deals.length > 0 && <span className="text-[#6B7280] font-medium">· {deals.length}</span>}
           </h2>
           {deals.length === 0 ? (
             <p className="text-sm text-muted-foreground">אין עדיין הצעות פעילות מהספק הזה.</p>
           ) : (
-            <div className="space-y-3">
-              {deals.map((d) => (
-                <RealDealCard key={d.id} deal={d} />
-              ))}
+            <div className="grid grid-cols-2 gap-2.5">
+              {deals.map((d) => {
+                const cat = categories.find((c) => c.id === d.category_id);
+                return <CompactDealCard key={d.id} deal={d} categoryIcon={cat?.icon ?? null} categoryName={cat?.name ?? null} />;
+              })}
             </div>
           )}
         </section>
+
 
         {/* Reviews */}
         <section className="gb-card p-4">
@@ -444,26 +477,8 @@ export default function SupplierProfile() {
             </>
           )}
         </section>
-
-
-        {/* Gallery */}
-        {gallery.length > 0 && (
-          <section className="gb-card p-4">
-            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">גלריית עבודות</h2>
-            <div className="grid grid-cols-3 gap-2">
-              {gallery.map((g) => (
-                <button
-                  key={g.id}
-                  onClick={() => setLightbox(g.image_url)}
-                  className="aspect-square rounded-[16px] overflow-hidden shadow-[0_2px_10px_-4px_rgba(10,31,61,0.10)] transition-transform active:scale-[0.98]"
-                >
-                  <SmartImg src={g.image_url} size="card" alt={g.caption ?? "עבודה"} className="h-full w-full object-cover" />
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
       </div>
+
 
       {/* Dual CTA */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
@@ -601,3 +616,71 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
     </section>
   );
 }
+
+function CompactDealCard({
+  deal,
+  categoryIcon,
+  categoryName,
+}: {
+  deal: RealDealCardData;
+  categoryIcon: string | null;
+  categoryName: string | null;
+}) {
+  const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
+  const tiers = Array.isArray(deal.tiers) ? (deal.tiers as OfferTier[]) : [];
+  const display = describeOffer(
+    {
+      offer_type: offerType,
+      original_price: deal.original_price,
+      discounted_price: deal.discounted_price,
+      discount_percentage: deal.discount_percentage,
+      base_price: deal.base_price,
+      tiers,
+    },
+    0,
+  );
+  const cover = deal.cover_image_url ?? null;
+  const discountPct =
+    offerType === "percentage" && deal.discount_percentage
+      ? `${Math.round(Number(deal.discount_percentage))}%`
+      : null;
+
+  return (
+    <Link
+      to={`/resident/deals/${deal.id}`}
+      className="group block bg-white rounded-[16px] overflow-hidden border border-[#ECEEF2] shadow-[0_1px_2px_rgba(17,24,39,0.04)] hover:shadow-[0_6px_16px_-8px_rgba(17,24,39,0.15)] transition-all"
+    >
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-[#F4F6FA] to-[#EAF2FF]">
+        {cover ? (
+          <SmartImg
+            src={cover}
+            size="card"
+            alt={deal.title}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-[#0E6B5A]/70">
+            <span className="text-3xl leading-none">{categoryIcon ?? "🏷️"}</span>
+            {categoryName && (
+              <span className="text-[10px] font-bold text-[#0E6B5A]/80">{categoryName}</span>
+            )}
+          </div>
+        )}
+        {discountPct && (
+          <span className="absolute top-1.5 right-1.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#0E6B5A] text-white shadow-[0_2px_6px_-2px_rgba(14,107,90,0.5)]">
+            {discountPct}
+          </span>
+        )}
+      </div>
+      <div className="p-2.5">
+        <h3 className="text-[12px] font-semibold text-[#1F2937] leading-snug line-clamp-2 min-h-[2.4em] mb-1">
+          {deal.title}
+        </h3>
+        <div className="text-[13px] font-extrabold text-[#0E6B5A] leading-tight truncate">
+          {display.headline}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
