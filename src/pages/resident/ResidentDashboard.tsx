@@ -462,7 +462,7 @@ export default function ResidentDashboard() {
         {/* === Quick actions === */}
         <SectionHeader title="פעולות מהירות" />
         <section className="px-5 mt-3 grid grid-cols-3 gap-3">
-          <QuickAction icon={Calculator} label="תכנון תקציב" onClick={() => navigate("/resident/budget-planner")} />
+          <QuickAction icon={ClipboardList} label="ניהול פרויקט" onClick={() => navigate("/resident/project-management")} />
           <QuickAction icon={Heart} label="המועדפים שלי" onClick={() => navigate("/resident/favorites")} />
           <QuickAction icon={Ticket} label="השוברים שלי" onClick={() => navigate("/resident/my-vouchers")} />
         </section>
