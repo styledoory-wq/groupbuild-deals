@@ -622,7 +622,7 @@ export default function ProjectManagement() {
           <div className="flex items-center gap-1.5">
             <TrendingUp className="h-4 w-4" />
             <span className="text-[12.5px] font-extrabold" style={{ fontFamily: URBANIST }}>
-              בניית תקציב
+              💰 ניהול תקציב
             </span>
             <Pencil className="h-3 w-3 text-white/70" />
           </div>
