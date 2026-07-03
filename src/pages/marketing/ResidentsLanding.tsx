@@ -115,7 +115,7 @@ export default function ResidentsLanding() {
             <ValueCard
               icon={Building}
               title="פרויקטים חדשים"
-              desc="בנייה חדשה או שכונה שרק מתאכלסת? מרכזים הזמנות של עשרות דיירים למחיר אחד משתלם."
+              desc="יוצרים קבוצות רכישה לפי פרויקט, בניין או יישוב."
             />
             <ValueCard
               icon={ShieldCheck}
