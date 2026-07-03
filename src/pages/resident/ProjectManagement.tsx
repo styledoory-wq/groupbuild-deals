@@ -441,7 +441,25 @@ export default function ProjectManagement() {
 
         {/* AI Cost Estimation — planning phase tool */}
         <button
-          onClick={() => navigate("/resident/budget-planner")}
+          onClick={() =>
+            navigate("/resident/budget-planner", {
+              state: {
+                fromProject: true,
+                projectType: info.projectType,
+                area: info.area,
+                rooms: info.rooms,
+                floors: info.floors,
+                standard: info.standard,
+                scope: info.scope,
+                mamadType: info.mamadType,
+                units: info.units,
+                committeeService: info.committeeService,
+                serviceCategory: info.serviceCategory,
+                serviceDetails: info.serviceDetails,
+                projectName: info.name,
+              },
+            })
+          }
           className="mt-4 w-full bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-right active:scale-[0.99] transition-transform flex items-center gap-3"
         >
           <div
@@ -457,11 +475,13 @@ export default function ProjectManagement() {
                 אומדן עלות AI
               </h3>
               <span className="text-[9.5px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-1.5 py-0.5 rounded-full">
-                שלב תכנון
+                {info.projectType ? "מותאם אישית" : "שלב תכנון"}
               </span>
             </div>
             <p className="text-[11.5px] text-gray-500 mt-1 leading-snug">
-              הערכה חכמה של עלות הפרויקט לפני שמתחילים — לפי סוג בנייה, שטח, אזור ורמת גמר.
+              {info.projectType
+                ? "אומדן חכם לפי סוג הפרויקט והנתונים שהזנת בפרטי הפרויקט."
+                : "מלא/י תחילה את פרטי הפרויקט לקבלת אומדן מדויק ואישי."}
             </p>
           </div>
           <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" />
