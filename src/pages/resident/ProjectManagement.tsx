@@ -985,8 +985,24 @@ export default function ProjectManagement() {
           info={info}
           onClose={() => setEditInfoOpen(false)}
           onSave={(next) => { setInfo(next); setEditInfoOpen(false); }}
+          onReset={() => {
+            try {
+              localStorage.removeItem(PROJECT_INFO_KEY);
+              localStorage.removeItem(SCHEDULE_KEY);
+              localStorage.removeItem(BUDGET_KEY);
+              localStorage.removeItem(CURRENT_IDX_KEY);
+              localStorage.removeItem("gb:pm:tasks");
+            } catch {}
+            setInfo(DEFAULT_INFO);
+            setSchedule({});
+            setBudget([]);
+            setCompleted({});
+            setManualIdx(null);
+            setEditInfoOpen(false);
+          }}
         />
       )}
+
 
       {scheduleOpen && (
         <ScheduleModal
