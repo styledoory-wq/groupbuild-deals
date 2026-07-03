@@ -1,14 +1,18 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { ScanLine } from "lucide-react";
+import { useApp } from "@/store/AppStore";
 
 /**
- * Floating action button for QR scanning - shown across supplier screens.
+ * Floating action button for QR scanning - shown only to authenticated suppliers.
  * Sits above the BottomNav (mobile) and bottom-left on desktop.
  */
 export function ScanFAB() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { role, loading } = useApp();
 
+  if (loading) return null;
+  if (role !== "supplier") return null;
   if (!pathname.startsWith("/supplier")) return null;
   if (pathname.startsWith("/supplier/scan")) return null;
   // Hide on offer-editor / marketing flows to avoid covering form actions
