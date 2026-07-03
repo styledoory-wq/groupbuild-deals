@@ -144,6 +144,8 @@ export default function SupplierProfile() {
           tiers: (Array.isArray(r.tiers) ? (r.tiers as OfferTier[]) : []) as OfferTier[],
           ends_at: (r.ends_at as string | null) ?? null,
           listing_type: (r.listing_type as string | null) ?? "group_buy",
+          cover_image_url: (r.cover_image_url as string | null) ?? null,
+          gallery_images: (Array.isArray(r.gallery_images) ? (r.gallery_images as string[]) : null),
         })),
 
       );
