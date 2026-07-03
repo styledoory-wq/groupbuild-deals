@@ -326,33 +326,8 @@ export default function ResidentDashboard() {
           <Kpi label="ספקים" value={areaSuppliersCount.toString()} />
         </section>
 
-        {/* === HERO: Project Management — main control center === */}
-        <section className="px-5 mt-5">
-          <button
-            onClick={() => navigate("/resident/project-management")}
-            className="w-full text-right rounded-3xl p-5 bg-white border border-[#E5E5EA] shadow-sm active:scale-[0.99] transition relative overflow-hidden"
-          >
-            <div className="absolute -top-16 -left-16 w-52 h-52 rounded-full bg-[#0E6B5A]/8 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-14 -right-10 w-44 h-44 rounded-full bg-[#34A88E]/10 blur-3xl pointer-events-none" />
-            <div className="relative z-10 flex items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl bg-[#0E6B5A] flex items-center justify-center shadow-[0_10px_24px_-10px_rgba(14,107,90,0.55)] shrink-0">
-                <ClipboardList className="h-6 w-6 text-white" strokeWidth={2.2} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0E6B5A] mb-1">
-                  <Sparkles className="h-3 w-3" strokeWidth={2.6} /> מרכז הבקרה שלך
-                </div>
-                <div className="text-[19px] font-bold text-[#1C1C1E] tracking-[-0.02em] leading-tight">
-                  ניהול הפרויקט שלי
-                </div>
-                <div className="text-[12.5px] text-[#8E8E93] mt-1 leading-snug">
-                  שלבים, משימות, לוחות זמנים, תקציב וספקים — במקום אחד
-                </div>
-              </div>
-              <ChevronLeft className="h-5 w-5 text-[#0E6B5A] shrink-0" strokeWidth={2.4} />
-            </div>
-          </button>
-        </section>
+        {/* (Project management is now the main quick-action tile below) */}
+
 
         {/* === Committee management — only for approved committee reps === */}
         {isCommittee && (
