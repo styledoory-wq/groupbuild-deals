@@ -991,6 +991,7 @@ export default function ProjectManagement() {
       {scheduleOpen && (
         <ScheduleModal
           schedule={schedule}
+          stages={stages}
           onClose={() => setScheduleOpen(false)}
           onSave={(next) => { setSchedule(next); setScheduleOpen(false); }}
         />
