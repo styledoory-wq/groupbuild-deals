@@ -985,8 +985,24 @@ export default function ProjectManagement() {
           info={info}
           onClose={() => setEditInfoOpen(false)}
           onSave={(next) => { setInfo(next); setEditInfoOpen(false); }}
+          onReset={() => {
+            try {
+              localStorage.removeItem(PROJECT_INFO_KEY);
+              localStorage.removeItem(SCHEDULE_KEY);
+              localStorage.removeItem(BUDGET_KEY);
+              localStorage.removeItem(CURRENT_IDX_KEY);
+              localStorage.removeItem("gb:pm:tasks");
+            } catch {}
+            setInfo(DEFAULT_INFO);
+            setSchedule({});
+            setBudget([]);
+            setCompleted({});
+            setManualIdx(null);
+            setEditInfoOpen(false);
+          }}
         />
       )}
+
 
       {scheduleOpen && (
         <ScheduleModal
@@ -1038,10 +1054,12 @@ function InfoChip({
 /* ===================== Edit Info Modal ===================== */
 
 function EditInfoModal({
-  info, onClose, onSave,
-}: { info: ProjectInfo; onClose: () => void; onSave: (info: ProjectInfo) => void }) {
+  info, onClose, onSave, onReset,
+}: { info: ProjectInfo; onClose: () => void; onSave: (info: ProjectInfo) => void; onReset: () => void }) {
   const [form, setForm] = useState<ProjectInfo>({ ...info });
   const [step, setStep] = useState<1 | 2>(info.projectType ? 2 : 1);
+  const [confirmReset, setConfirmReset] = useState(false);
+
 
   const set = <K extends keyof ProjectInfo>(k: K, v: ProjectInfo[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
@@ -1310,10 +1328,61 @@ function EditInfoModal({
           )}
         </div>
       )}
-      {step === 2 && <ModalActions onCancel={onClose} onSave={handleSave} />}
+      {step === 2 && (
+        <>
+          <ModalActions onCancel={onClose} onSave={handleSave} />
+          <button
+            onClick={() => setConfirmReset(true)}
+            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-[13px] font-bold text-red-600 bg-red-50 border border-red-100 active:scale-[0.98]"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            🔄 איפוס פרויקט
+          </button>
+        </>
+      )}
+
+      {confirmReset && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+          dir="rtl"
+          style={{ fontFamily: EPILOGUE }}
+          onClick={() => setConfirmReset(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full sm:max-w-sm bg-white rounded-3xl p-5 shadow-2xl"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[22px]" aria-hidden>🔄</span>
+              <h4 className="text-[15px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
+                איפוס פרויקט
+              </h4>
+            </div>
+            <p className="text-[12.5px] text-gray-600 leading-relaxed">
+              האם אתה בטוח שברצונך לאפס את נתוני הפרויקט? פעולה זו תאפס את פרטי הפרויקט, אומדן ה-AI, שלבי הפרויקט ונתוני ניהול התקציב.
+            </p>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setConfirmReset(false)}
+                className="flex-1 py-2.5 rounded-2xl text-[13.5px] font-bold text-gray-700 bg-gray-100 active:scale-[0.98]"
+              >
+                ביטול
+              </button>
+              <button
+                onClick={() => { setConfirmReset(false); onReset(); }}
+                className="flex-1 py-2.5 rounded-2xl text-[13.5px] font-extrabold text-white bg-red-600 active:scale-[0.98]"
+                style={{ fontFamily: URBANIST }}
+              >
+                אפס פרויקט
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ModalShell>
   );
 }
+
 
 /* ===================== Schedule Modal ===================== */
 
