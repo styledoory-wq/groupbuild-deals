@@ -1054,10 +1054,12 @@ function InfoChip({
 /* ===================== Edit Info Modal ===================== */
 
 function EditInfoModal({
-  info, onClose, onSave,
-}: { info: ProjectInfo; onClose: () => void; onSave: (info: ProjectInfo) => void }) {
+  info, onClose, onSave, onReset,
+}: { info: ProjectInfo; onClose: () => void; onSave: (info: ProjectInfo) => void; onReset: () => void }) {
   const [form, setForm] = useState<ProjectInfo>({ ...info });
   const [step, setStep] = useState<1 | 2>(info.projectType ? 2 : 1);
+  const [confirmReset, setConfirmReset] = useState(false);
+
 
   const set = <K extends keyof ProjectInfo>(k: K, v: ProjectInfo[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
