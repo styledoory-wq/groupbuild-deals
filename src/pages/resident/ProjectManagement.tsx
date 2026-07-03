@@ -448,6 +448,21 @@ export default function ProjectManagement() {
   const navigate = useNavigate();
   const { categories } = useApp();
 
+  // Editable project info — read first so stages can depend on projectType
+  const [info, setInfo] = useState<ProjectInfo>(() => {
+    try {
+      const raw = localStorage.getItem(PROJECT_INFO_KEY);
+      if (raw) return { ...DEFAULT_INFO, ...JSON.parse(raw) };
+    } catch {}
+    return DEFAULT_INFO;
+  });
+  useEffect(() => {
+    try { localStorage.setItem(PROJECT_INFO_KEY, JSON.stringify(info)); } catch {}
+  }, [info]);
+
+  // Dynamic stages based on project type
+  const stages = useMemo(() => getStagesFor(info.projectType), [info.projectType]);
+
   // Task completion local state
   const [completed, setCompleted] = useState<Record<string, boolean>>(() => {
     try { return JSON.parse(localStorage.getItem("gb:pm:tasks") || "{}"); } catch { return {}; }
@@ -460,14 +475,14 @@ export default function ProjectManagement() {
 
   // Auto-advance stage: derive first incomplete stage; allow manual override.
   const autoIdx = useMemo(() => {
-    for (let i = 0; i < STAGES.length; i++) {
-      const s = STAGES[i];
+    for (let i = 0; i < stages.length; i++) {
+      const s = stages[i];
       if (s.tasks.length === 0) continue;
       const allDone = s.tasks.every((t) => completed[`${s.key}::${t}`]);
       if (!allDone) return i;
     }
-    return STAGES.length - 1;
-  }, [completed]);
+    return stages.length - 1;
+  }, [completed, stages]);
 
   const [manualIdx, setManualIdx] = useState<number | null>(() => {
     try {
@@ -482,9 +497,17 @@ export default function ProjectManagement() {
       try { localStorage.removeItem(CURRENT_IDX_KEY); } catch {}
     }
   }, [manualIdx, autoIdx]);
+  // Clamp manual index if project type changed and it's now out of range
+  useEffect(() => {
+    if (manualIdx !== null && manualIdx >= stages.length) {
+      setManualIdx(null);
+      try { localStorage.removeItem(CURRENT_IDX_KEY); } catch {}
+    }
+  }, [stages.length, manualIdx]);
 
-  const currentIdx = manualIdx ?? autoIdx;
-  const current = STAGES[currentIdx];
+  const rawIdx = manualIdx ?? autoIdx;
+  const currentIdx = Math.min(Math.max(0, rawIdx), stages.length - 1);
+  const current = stages[currentIdx];
 
   const setStage = (i: number) => {
     setManualIdx(i);
@@ -522,26 +545,15 @@ export default function ProjectManagement() {
   const doneTasks = stageTaskKeys.filter((k) => completed[k]).length;
 
   // Overall progress
-  const overallDone = STAGES.reduce(
+  const overallDone = stages.reduce(
     (sum, s) => sum + s.tasks.filter((t) => completed[`${s.key}::${t}`]).length, 0
   );
-  const overallTotal = STAGES.reduce((sum, s) => sum + s.tasks.length, 0);
-  const overallPct = Math.round((overallDone / overallTotal) * 100);
-  const stagesDone = STAGES.filter((s) =>
+  const overallTotal = stages.reduce((sum, s) => sum + s.tasks.length, 0);
+  const overallPct = overallTotal > 0 ? Math.round((overallDone / overallTotal) * 100) : 0;
+  const stagesDone = stages.filter((s) =>
     s.tasks.length > 0 && s.tasks.every((t) => completed[`${s.key}::${t}`])
   ).length;
 
-  // Editable project info (name / subtitle / manager / targetDate / groupSavings)
-  const [info, setInfo] = useState<ProjectInfo>(() => {
-    try {
-      const raw = localStorage.getItem(PROJECT_INFO_KEY);
-      if (raw) return { ...DEFAULT_INFO, ...JSON.parse(raw) };
-    } catch {}
-    return DEFAULT_INFO;
-  });
-  useEffect(() => {
-    try { localStorage.setItem(PROJECT_INFO_KEY, JSON.stringify(info)); } catch {}
-  }, [info]);
 
   // Schedule per stage
   const [schedule, setSchedule] = useState<Record<string, ScheduleItem>>(() => {
