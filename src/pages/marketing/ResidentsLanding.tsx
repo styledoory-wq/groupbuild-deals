@@ -100,7 +100,7 @@ export default function ResidentsLanding() {
             <ValueCard
               icon={PiggyBank}
               title="חיסכון אמיתי"
-              desc="ככל שיותר שכנים מצטרפים — המחיר יורד. חיסכון של 15% עד 40% על עבודות בפועל."
+              desc="אפשרות לחיסכון משמעותי באמצעות רכישה קבוצתית — בהתאם לגודל הקבוצה ולפרויקט."
             />
             <ValueCard
               icon={Users}
