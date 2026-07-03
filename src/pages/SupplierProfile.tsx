@@ -259,48 +259,44 @@ export default function SupplierProfile() {
       {/* Hero */}
       <div className="px-5 pt-4 pb-4 relative">
         <BackHeader title={supplier.business_name} subtitle="פרופיל ספק" />
-        <div className="gb-card p-4 flex items-end gap-4">
+        <div className="gb-card p-4 flex items-center gap-4">
           <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" className="shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]" />
-          <div className="flex-1 min-w-0 pb-1">
-            <div className="flex items-center gap-1.5 mb-1">
-              <EditableField
-                table="suppliers"
-                id={supplier.id}
-                field="business_name"
-                value={supplier.business_name}
-                as="h1"
-                className="text-[20px] font-extrabold truncate text-[#1F2937] tracking-tight"
-              />
-              {supplier.approval_status === "approved" && <ShieldCheck className="h-4 w-4 text-[#0E6B5A] shrink-0" />}
-            </div>
-            <div className="mb-1 flex items-center gap-1.5 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <EditableField
+              table="suppliers"
+              id={supplier.id}
+              field="business_name"
+              value={supplier.business_name}
+              as="h1"
+              className="block text-[20px] font-extrabold text-[#1F2937] tracking-tight leading-tight mb-1.5 line-clamp-2"
+            />
+            <div className="flex items-center gap-1.5 flex-wrap">
               <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-[#6B7280] [&>b]:text-[#1F2937] [&>span]:text-[#6B7280]" />
               {(() => {
                 const isSvc = Boolean(supplier.offers_services) || supplier.supplier_kind === "service";
                 const isProd = Boolean(supplier.offers_products) || supplier.supplier_kind === "product";
                 if (isSvc && isProd) return (
-                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-white text-[#1F2937] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
+                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#F4F6FA] text-[#1F2937]">
                     שירות + מוצרים
                   </span>
                 );
                 if (isSvc) return (
-                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#EAF2FF] text-[#2F6BFF] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
+                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#EAF2FF] text-[#2F6BFF]">
                     בעל מקצוע
                   </span>
                 );
                 if (isProd) return (
-                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#E8F7EC] text-[#2EA85A] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
+                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#E8F7EC] text-[#2EA85A]">
                     ספק מוצרים
                   </span>
                 );
                 return null;
               })()}
             </div>
-            {supplier.short_description && (
-              <p className="text-[#6B7280] text-xs font-medium leading-relaxed line-clamp-2">{supplier.short_description}</p>
-            )}
           </div>
         </div>
+      </div>
+
       </div>
 
       <div className="px-5 relative z-10 space-y-4 pb-32">
