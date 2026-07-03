@@ -105,7 +105,7 @@ type Stage = {
   recommendations: { title: string; subtitle: string; emoji: string }[];
 };
 
-const STAGES: Stage[] = [
+const NEW_BUILD_STAGES: Stage[] = [
   { key: "planning", num: 1, title: "תכנון והיתרים", short: "תכנון", emoji: "📐",
     catIds: ["architect", "interior-designer", "consultant"],
     tasks: ["מדידות ראשוניות", "תכנון אדריכלי", "הגשת היתר בנייה", "אישור ועדה מקומית"],
@@ -179,6 +179,249 @@ const STAGES: Stage[] = [
     ],
   },
 ];
+
+const RENOVATION_STAGES: Stage[] = [
+  { key: "reno-plan", num: 1, title: "תכנון ואפיון", short: "תכנון", emoji: "📐",
+    catIds: ["interior-designer", "architect"],
+    tasks: ["הגדרת היקף השיפוץ", "תכנון פנים", "הכנת כתב כמויות", "בחירת ספקים"],
+    recommendations: [
+      { title: "מעצב פנים", subtitle: "תכנון חכם לחלל", emoji: "🎨" },
+      { title: "יועץ תאורה", subtitle: "אווירה ותפקוד", emoji: "💡" },
+      { title: "מנהל שיפוץ", subtitle: "ליווי צמוד", emoji: "📋" },
+    ],
+  },
+  { key: "reno-demo", num: 2, title: "פירוקים והכנות", short: "פירוקים", emoji: "🔨",
+    catIds: ["contractor"],
+    tasks: ["פינוי תכולה", "פירוק ריצוף וקירות", "פינוי פסולת", "הכנת השטח"],
+    recommendations: [
+      { title: "פינוי פסולת", subtitle: "מכולה + פינוי", emoji: "🚛" },
+      { title: "אחסון תכולה", subtitle: "פתרון זמני", emoji: "📦" },
+      { title: "הגנה על רהיטים", subtitle: "כיסויים ויריעות", emoji: "🛡️" },
+    ],
+  },
+  { key: "reno-systems", num: 3, title: "מערכות ותשתיות", short: "מערכות", emoji: "⚡",
+    catIds: ["electric", "plumbing", "ac"],
+    tasks: ["החלפת חשמל", "החלפת אינסטלציה", "התקנת מיזוג", "בדיקות תקינות"],
+    recommendations: [
+      { title: "חשמלאי מוסמך", subtitle: "החלפת לוח וקווים", emoji: "⚡" },
+      { title: "אינסטלטור מומחה", subtitle: "צנרת חדשה", emoji: "🔧" },
+      { title: "מיזוג מיני-מרכזי", subtitle: "התקנה מקצועית", emoji: "❄️" },
+    ],
+  },
+  { key: "reno-kitchen-bath", num: 4, title: "מטבח ואמבטיה", short: "מטבח", emoji: "🚿",
+    catIds: ["kitchen", "bath"],
+    tasks: ["התקנת מטבח", "חיפוי אמבטיה", "התקנת כלים סניטריים", "חיבור מים וחשמל"],
+    recommendations: [
+      { title: "יצרן מטבחים", subtitle: "התאמה אישית", emoji: "🍳" },
+      { title: "כלים סניטריים", subtitle: "מבחר איכותי", emoji: "🚿" },
+      { title: "אריחים ופסיפס", subtitle: "עיצוב יוקרתי", emoji: "🟦" },
+    ],
+  },
+  { key: "reno-floor-paint", num: 5, title: "ריצוף וצבע", short: "גמרים", emoji: "🎨",
+    catIds: ["flooring", "painting", "carpentry"],
+    tasks: ["ריצוף וחיפוי", "צביעה וגבס", "התקנת דלתות פנים", "נגרות פנים"],
+    recommendations: [
+      { title: "צבעים איכותיים", subtitle: "גימור מושלם", emoji: "🎨" },
+      { title: "ריצוף פורצלן", subtitle: "עמידות ויופי", emoji: "🟫" },
+      { title: "נגר פנים", subtitle: "ארונות בהתאמה", emoji: "🪵" },
+    ],
+  },
+  { key: "reno-handoff", num: 6, title: "סיום ומסירה", short: "מסירה", emoji: "✨",
+    catIds: [],
+    tasks: ["ניקיון פוסט-שיפוץ", "בדיקת ליקויים", "תיקונים אחרונים", "החזרת תכולה"],
+    recommendations: [
+      { title: "ניקיון יסודי", subtitle: "פוסט-שיפוץ", emoji: "🧽" },
+      { title: "בדק ליקויים", subtitle: "דו״ח מקצועי", emoji: "📋" },
+      { title: "הובלה פנימית", subtitle: "החזרת רהיטים", emoji: "📦" },
+    ],
+  },
+];
+
+const EXTENSION_STAGES: Stage[] = [
+  { key: "ext-plan", num: 1, title: "תכנון והיתרים", short: "תכנון", emoji: "📐",
+    catIds: ["architect", "consultant"],
+    tasks: ["תכנון תוספת", "בדיקת התכנות", "הגשת היתר", "אישור שכנים"],
+    recommendations: [
+      { title: "אדריכל תוספות", subtitle: "התמחות בהרחבות", emoji: "📐" },
+      { title: "יועץ קרקע", subtitle: "בדיקות מקדימות", emoji: "🌍" },
+      { title: "עורך דין מקרקעין", subtitle: "אישור שכנים", emoji: "⚖️" },
+    ],
+  },
+  { key: "ext-structure", num: 2, title: "שלד וחיזוקים", short: "שלד", emoji: "🏗️",
+    catIds: ["contractor", "skeleton"],
+    tasks: ["חיזוק שלד קיים", "יציקת יסודות תוספת", "בניית שלד חדש", "חיבור למבנה"],
+    recommendations: [
+      { title: "קבלן שלד מנוסה", subtitle: "עבודות תוספת", emoji: "🏗️" },
+      { title: "חיזוק קונסטרוקטיבי", subtitle: "עבודות ברזל", emoji: "🔩" },
+      { title: "ביטוח עבודות", subtitle: "כיסוי מלא", emoji: "🛡️" },
+    ],
+  },
+  { key: "ext-envelope", num: 3, title: "מעטפת ואיטום", short: "מעטפת", emoji: "🧱",
+    catIds: ["cladding", "windows"],
+    tasks: ["איטום גג ותפרים", "התקנת חלונות", "חיפוי חיצוני", "התאמה לחזית"],
+    recommendations: [
+      { title: "איטום מקצועי", subtitle: "תפרי חיבור", emoji: "💧" },
+      { title: "חלונות מבודדים", subtitle: "בידוד תרמי", emoji: "🪟" },
+      { title: "חיפוי תואם", subtitle: "התאמה למבנה קיים", emoji: "🧱" },
+    ],
+  },
+  { key: "ext-systems", num: 4, title: "מערכות וגמרים", short: "גמרים", emoji: "🎨",
+    catIds: ["electric", "plumbing", "flooring", "painting"],
+    tasks: ["הרחבת חשמל", "הרחבת אינסטלציה", "ריצוף וצבע", "התאמה לחלל הקיים"],
+    recommendations: [
+      { title: "חשמלאי", subtitle: "הרחבת לוח", emoji: "⚡" },
+      { title: "ריצוף מותאם", subtitle: "המשכיות עיצובית", emoji: "🟫" },
+      { title: "צבע וגמרים", subtitle: "התאמה למבנה", emoji: "🎨" },
+    ],
+  },
+  { key: "ext-handoff", num: 5, title: "מסירה ואיכלוס", short: "מסירה", emoji: "🎉",
+    catIds: [],
+    tasks: ["בדיקת ליקויים", "ניקיון סופי", "קבלת טופס 4", "איכלוס"],
+    recommendations: [
+      { title: "בדק בית", subtitle: "אינדקס ליקויים", emoji: "📋" },
+      { title: "ניקיון פוסט-בנייה", subtitle: "מקצועי", emoji: "🧽" },
+      { title: "ריהוט תוספת", subtitle: "התאמה אישית", emoji: "🛋️" },
+    ],
+  },
+];
+
+const MAMAD_STAGES: Stage[] = [
+  { key: "mamad-plan", num: 1, title: "תכנון ואישורים", short: "תכנון", emoji: "📐",
+    catIds: ["architect", "consultant"],
+    tasks: ["תכנון לפי תקן פיקוד העורף", "הגשת בקשה להיתר", "אישור מהנדס", "אישור פיקוד העורף"],
+    recommendations: [
+      { title: "מהנדס מומחה ממ״ד", subtitle: "תקני פיקוד העורף", emoji: "🛡️" },
+      { title: "אדריכל ממ״ד", subtitle: "שילוב בדירה", emoji: "📐" },
+      { title: "יועץ בטיחות", subtitle: "אישורים ותקנים", emoji: "✅" },
+    ],
+  },
+  { key: "mamad-structure", num: 2, title: "בנייה ויציקה", short: "יציקה", emoji: "🏗️",
+    catIds: ["contractor", "skeleton"],
+    tasks: ["חפירה וביסוס", "יציקת רצפה מזוינת", "יציקת קירות בטון", "יציקת תקרה"],
+    recommendations: [
+      { title: "קבלן ממ״ד מוסמך", subtitle: "ניסיון מוכח", emoji: "🏗️" },
+      { title: "ברזל בנייה", subtitle: "אספקה לאתר", emoji: "🔩" },
+      { title: "בטון מזוין", subtitle: "משאבות בטון", emoji: "🧱" },
+    ],
+  },
+  { key: "mamad-door", num: 3, title: "דלת וחלון ממ״ד", short: "דלת", emoji: "🚪",
+    catIds: ["windows"],
+    tasks: ["התקנת דלת ממ״ד תקנית", "התקנת חלון אטום", "מערכת סינון אוויר", "בדיקת אטימות"],
+    recommendations: [
+      { title: "יבואן דלתות ממ״ד", subtitle: "תקן ישראלי", emoji: "🚪" },
+      { title: "חלון ממ״ד", subtitle: "אטום ומזוין", emoji: "🪟" },
+      { title: "מערכת סינון", subtitle: "NBC filter", emoji: "🌬️" },
+    ],
+  },
+  { key: "mamad-finish", num: 4, title: "גמרים ואישור", short: "אישור", emoji: "✅",
+    catIds: ["electric", "painting", "flooring"],
+    tasks: ["חשמל ותאורה", "ריצוף וצבע", "בדיקת פיקוד העורף", "קבלת אישור סופי"],
+    recommendations: [
+      { title: "חשמלאי מוסמך", subtitle: "תקן ממ״ד", emoji: "⚡" },
+      { title: "ריצוף וצבע", subtitle: "גימור פנים", emoji: "🎨" },
+      { title: "בדיקת קבלה", subtitle: "אישור רשמי", emoji: "📋" },
+    ],
+  },
+];
+
+const COMMITTEE_STAGES: Stage[] = [
+  { key: "com-needs", num: 1, title: "אפיון צרכים", short: "אפיון", emoji: "📋",
+    catIds: [],
+    tasks: ["איסוף פניות דיירים", "קביעת סדרי עדיפויות", "אישור אסיפת דיירים", "הגדרת תקציב"],
+    recommendations: [
+      { title: "יועץ ועד בית", subtitle: "ליווי מקצועי", emoji: "🏢" },
+      { title: "עורך דין ועדים", subtitle: "החלטות חוקיות", emoji: "⚖️" },
+      { title: "מערכת ניהול", subtitle: "דיגיטלית לוועד", emoji: "📱" },
+    ],
+  },
+  { key: "com-quotes", num: 2, title: "בקשת הצעות", short: "הצעות", emoji: "💼",
+    catIds: [],
+    tasks: ["פנייה לספקים", "השוואת הצעות", "בדיקת המלצות", "הצגה לדיירים"],
+    recommendations: [
+      { title: "השוואת מחירים", subtitle: "רכישה קבוצתית", emoji: "💰" },
+      { title: "בדיקת ספקים", subtitle: "ביקורות ואמינות", emoji: "⭐" },
+      { title: "מכרז דיגיטלי", subtitle: "פלטפורמה שקופה", emoji: "📊" },
+    ],
+  },
+  { key: "com-select", num: 3, title: "בחירת ספק וחוזה", short: "חוזה", emoji: "✍️",
+    catIds: [],
+    tasks: ["הצבעת דיירים", "משא ומתן על תנאים", "חתימה על הסכם", "גיבוש לוח זמנים"],
+    recommendations: [
+      { title: "הסכם משפטי", subtitle: "בדיקת עו״ד", emoji: "📄" },
+      { title: "ביטוח עבודות", subtitle: "כיסוי לרכוש המשותף", emoji: "🛡️" },
+      { title: "גובה תשלומים", subtitle: "מערכת גבייה", emoji: "💳" },
+    ],
+  },
+  { key: "com-exec", num: 4, title: "ביצוע ופיקוח", short: "ביצוע", emoji: "🔧",
+    catIds: [],
+    tasks: ["התחלת עבודות", "פיקוח שוטף", "עדכון דיירים", "אישור אבני דרך"],
+    recommendations: [
+      { title: "מפקח בנייה", subtitle: "פיקוח שוטף", emoji: "👷" },
+      { title: "עדכוני דיירים", subtitle: "וואטסאפ ועד", emoji: "📱" },
+      { title: "תיעוד עבודות", subtitle: "תמונות ודוחות", emoji: "📸" },
+    ],
+  },
+  { key: "com-handoff", num: 5, title: "מסירה וסיכום", short: "סיכום", emoji: "✅",
+    catIds: [],
+    tasks: ["בדיקת עבודות", "אישור סיום", "תשלום סופי", "הפצת דו״ח לדיירים"],
+    recommendations: [
+      { title: "בדק סופי", subtitle: "בדיקת ליקויים", emoji: "📋" },
+      { title: "אחריות ספק", subtitle: "מסמך אחריות", emoji: "🛡️" },
+      { title: "דו״ח סיכום", subtitle: "שקיפות מלאה", emoji: "📊" },
+    ],
+  },
+];
+
+const POINT_SERVICE_STAGES: Stage[] = [
+  { key: "ps-request", num: 1, title: "הגדרת השירות", short: "הגדרה", emoji: "📝",
+    catIds: [],
+    tasks: ["פירוט הצורך", "בחירת קטגוריה", "הגדרת לוח זמנים", "קביעת תקציב"],
+    recommendations: [
+      { title: "יועץ מקצועי", subtitle: "התאמת השירות", emoji: "💡" },
+      { title: "בדיקת דחיפות", subtitle: "שירותי חירום", emoji: "⏰" },
+      { title: "מחירון שוק", subtitle: "טווח מחירים", emoji: "💰" },
+    ],
+  },
+  { key: "ps-quotes", num: 2, title: "הצעות מחיר", short: "הצעות", emoji: "💼",
+    catIds: [],
+    tasks: ["פנייה ל-3 ספקים", "השוואת הצעות", "בדיקת ביקורות", "בחירת ספק"],
+    recommendations: [
+      { title: "השוואת ספקים", subtitle: "מחיר וזמינות", emoji: "📊" },
+      { title: "ביקורות אמת", subtitle: "לקוחות אחרונים", emoji: "⭐" },
+      { title: "אחריות בכתב", subtitle: "הגנה משפטית", emoji: "📄" },
+    ],
+  },
+  { key: "ps-exec", num: 3, title: "ביצוע השירות", short: "ביצוע", emoji: "🔧",
+    catIds: [],
+    tasks: ["תיאום מועד", "ביצוע העבודה", "בדיקה בזמן אמת", "אישור השלמה"],
+    recommendations: [
+      { title: "תיעוד לפני/אחרי", subtitle: "תמונות ובידקה", emoji: "📸" },
+      { title: "בדיקת איכות", subtitle: "לפני התשלום", emoji: "✅" },
+      { title: "אחריות שירות", subtitle: "מסמך רשמי", emoji: "🛡️" },
+    ],
+  },
+  { key: "ps-done", num: 4, title: "תשלום וסיום", short: "סיום", emoji: "✅",
+    catIds: [],
+    tasks: ["קבלת חשבונית", "ביצוע תשלום", "כתיבת ביקורת", "שמירת מסמכים"],
+    recommendations: [
+      { title: "תשלום מאובטח", subtitle: "אמצעי דיגיטלי", emoji: "💳" },
+      { title: "ביקורת ללקוחות", subtitle: "עזרה לקהילה", emoji: "⭐" },
+      { title: "ארכיון דיגיטלי", subtitle: "שמירת חשבוניות", emoji: "📁" },
+    ],
+  },
+];
+
+const STAGES_BY_TYPE: Record<ProjectType, Stage[]> = {
+  new_build: NEW_BUILD_STAGES,
+  renovation: RENOVATION_STAGES,
+  extension: EXTENSION_STAGES,
+  mamad: MAMAD_STAGES,
+  committee: COMMITTEE_STAGES,
+  point_service: POINT_SERVICE_STAGES,
+};
+
+const getStagesFor = (t: ProjectType | undefined): Stage[] =>
+  STAGES_BY_TYPE[t ?? "new_build"] ?? NEW_BUILD_STAGES;
 
 // Default budget items derived from stage categories (used for auto-sync)
 const BUDGET_TEMPLATE: Array<{ label: string; planned: number; catId: string }> = [
