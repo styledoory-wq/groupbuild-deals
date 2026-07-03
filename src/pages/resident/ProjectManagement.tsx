@@ -310,12 +310,6 @@ export default function ProjectManagement() {
             ניהול הפרויקט
           </h1>
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => navigate("/resident/budget-planner")}
-              className="flex items-center gap-1 text-[11px] font-bold text-[#1A1A1A] bg-white border border-gray-200 px-2.5 py-1.5 rounded-full active:scale-95"
-            >
-              תכנון תקציב
-            </button>
             <button className="flex items-center gap-1 text-[11px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2.5 py-1.5 rounded-full active:scale-95">
               <Share2 className="h-3.5 w-3.5" />
               שיתוף
@@ -396,6 +390,34 @@ export default function ProjectManagement() {
             </div>
           </div>
         )}
+
+        {/* AI Cost Estimation — planning phase tool */}
+        <button
+          onClick={() => navigate("/resident/budget-planner")}
+          className="mt-4 w-full bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-right active:scale-[0.99] transition-transform flex items-center gap-3"
+        >
+          <div
+            className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center text-[28px]"
+            style={{ background: "linear-gradient(135deg,#EEF4FF 0%,#F5F3FF 100%)" }}
+            aria-hidden
+          >
+            🤖
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-[14.5px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
+                אומדן עלות AI
+              </h3>
+              <span className="text-[9.5px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-1.5 py-0.5 rounded-full">
+                שלב תכנון
+              </span>
+            </div>
+            <p className="text-[11.5px] text-gray-500 mt-1 leading-snug">
+              הערכה חכמה של עלות הפרויקט לפני שמתחילים — לפי סוג בנייה, שטח, אזור ורמת גמר.
+            </p>
+          </div>
+          <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" />
+        </button>
 
         {/* Timeline */}
         <div className="mt-6 mb-2 flex items-center justify-between">
@@ -600,7 +622,7 @@ export default function ProjectManagement() {
           <div className="flex items-center gap-1.5">
             <TrendingUp className="h-4 w-4" />
             <span className="text-[12.5px] font-extrabold" style={{ fontFamily: URBANIST }}>
-              בניית תקציב
+              💰 ניהול תקציב
             </span>
             <Pencil className="h-3 w-3 text-white/70" />
           </div>
