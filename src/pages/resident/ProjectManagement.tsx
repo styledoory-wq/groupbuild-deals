@@ -748,12 +748,12 @@ export default function ProjectManagement() {
             שלבי הפרויקט
           </h3>
           <span className="text-[11px] font-bold text-gray-400 tabular-nums">
-            {stagesDone}/{STAGES.length}
+            {stagesDone}/{stages.length}
           </span>
         </div>
         <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-1 min-w-max relative">
-            {STAGES.map((s, i) => {
+            {stages.map((s, i) => {
               const isCurrent = i === currentIdx;
               const isDone = i < autoIdx;
               return (
@@ -788,7 +788,7 @@ export default function ProjectManagement() {
             <span className="text-[18px]" aria-hidden>🎉</span>
             <div className="leading-tight">
               <div className="text-[12.5px] font-extrabold text-[#0A5447]" style={{ fontFamily: URBANIST }}>
-                {stagesDone} מתוך {STAGES.length} שלבים הושלמו
+                {stagesDone} מתוך {stages.length} שלבים הושלמו
               </div>
               <div className="text-[10.5px] text-gray-500">הפרויקט מתקדם כמתוכנן</div>
             </div>
@@ -1336,7 +1336,7 @@ function ScheduleModal({
   return (
     <ModalShell title="לוח זמנים — שלבי הפרויקט" onClose={onClose}>
       <div className="space-y-3">
-        {STAGES.map((s) => (
+        {stages.map((s) => (
           <div key={s.key} className="bg-[#FAFAF7] rounded-2xl p-3 border border-gray-100">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[16px]" aria-hidden>{s.emoji}</span>
