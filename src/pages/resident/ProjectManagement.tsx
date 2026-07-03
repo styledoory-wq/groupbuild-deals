@@ -1398,7 +1398,7 @@ function BudgetModal({
     try {
       const completed = JSON.parse(localStorage.getItem("gb:pm:tasks") || "{}");
       const completedCats = new Set<string>();
-      STAGES.forEach((s) => {
+      Object.values(STAGES_BY_TYPE).flat().forEach((s) => {
         const allDone = s.tasks.length > 0 && s.tasks.every((t) => completed[`${s.key}::${t}`]);
         if (allDone) s.catIds.forEach((c) => completedCats.add(c));
       });
