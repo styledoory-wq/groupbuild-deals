@@ -46,7 +46,7 @@ export default function ResidentsLanding() {
             onClick={setResidentIntent}
             className="text-[13px] font-semibold text-[#0E6B5A] hover:text-[#0A5446] transition-colors"
           >
-            כבר רשום? התחבר
+            הרשמה / התחברות
           </Link>
         </div>
       </header>
@@ -100,7 +100,7 @@ export default function ResidentsLanding() {
             <ValueCard
               icon={PiggyBank}
               title="חיסכון אמיתי"
-              desc="ככל שיותר שכנים מצטרפים — המחיר יורד. חיסכון של 15% עד 40% על עבודות בפועל."
+              desc="אפשרות לחיסכון משמעותי באמצעות רכישה קבוצתית — בהתאם לגודל הקבוצה ולפרויקט."
             />
             <ValueCard
               icon={Users}
@@ -115,7 +115,7 @@ export default function ResidentsLanding() {
             <ValueCard
               icon={Building}
               title="פרויקטים חדשים"
-              desc="בנייה חדשה או שכונה שרק מתאכלסת? מרכזים הזמנות של עשרות דיירים למחיר אחד משתלם."
+              desc="יוצרים קבוצות רכישה לפי פרויקט, בניין או יישוב."
             />
             <ValueCard
               icon={ShieldCheck}
@@ -135,7 +135,7 @@ export default function ResidentsLanding() {
           <h2 className="text-[22px] md:text-[26px] font-extrabold text-center tracking-tight">איך זה עובד?</h2>
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
             <StepCard n={1} title="מוצאים הצעה" desc="גולשים בהצעות שרלוונטיות לבניין או לשכונה שלכם — או פותחים ביקוש חדש." />
-            <StepCard n={2} title="מצטרפים יחד" desc="ככל שיותר שכנים מצטרפים, המחיר יורד. אתם רואים בזמן אמת כמה חוסכים." />
+            <StepCard n={2} title="מצטרפים יחד" desc="ככל שיותר שכנים מצטרפים, יש פוטנציאל למחיר טוב יותר. אתם רואים את מצב הקבוצה בזמן אמת." />
             <StepCard n={3} title="מבצעים בפועל" desc="הספק המאומת מבצע את העבודה. הכל מנוהל דרך GroupBuild — פשוט ובטוח." />
           </div>
         </section>
@@ -152,7 +152,7 @@ export default function ResidentsLanding() {
                   שקיפות מלאה. תשלום רק כשמבצעים.
                 </h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-[#5B6472]">
-                  לא משלמים כלום עד שבוחרים להצטרף להצעה. כל התהליך מתועד, וכל הכספים מנוהלים דרך הפלטפורמה עם קבלות ושקיפות מלאה לוועד ולדיירים.
+                  ניהול מסודר של הצעות, ספקים ומסמכים במקום אחד — עם שקיפות מלאה לוועד ולדיירים.
                 </p>
               </div>
             </div>
