@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ShieldCheck, ArrowRight, Tag, MessageSquare, Loader2 } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ArrowRight, Tag, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState, ErrorState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,8 @@ import { toast } from "sonner";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
-import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
-import type { OfferTier } from "@/lib/offerPricing";
+import type { RealDealCardData } from "@/components/deals/RealDealCard";
+import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
 
