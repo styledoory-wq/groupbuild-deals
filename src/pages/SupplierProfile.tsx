@@ -616,3 +616,71 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
     </section>
   );
 }
+
+function CompactDealCard({
+  deal,
+  categoryIcon,
+  categoryName,
+}: {
+  deal: RealDealCardData;
+  categoryIcon: string | null;
+  categoryName: string | null;
+}) {
+  const offerType = ((deal.offer_type as OfferType | null) ?? "percentage") as OfferType;
+  const tiers = Array.isArray(deal.tiers) ? (deal.tiers as OfferTier[]) : [];
+  const display = describeOffer(
+    {
+      offer_type: offerType,
+      original_price: deal.original_price,
+      discounted_price: deal.discounted_price,
+      discount_percentage: deal.discount_percentage,
+      base_price: deal.base_price,
+      tiers,
+    },
+    0,
+  );
+  const cover = deal.cover_image_url ?? null;
+  const discountPct =
+    offerType === "percentage" && deal.discount_percentage
+      ? `${Math.round(Number(deal.discount_percentage))}%`
+      : null;
+
+  return (
+    <Link
+      to={`/resident/deals/${deal.id}`}
+      className="group block bg-white rounded-[16px] overflow-hidden border border-[#ECEEF2] shadow-[0_1px_2px_rgba(17,24,39,0.04)] hover:shadow-[0_6px_16px_-8px_rgba(17,24,39,0.15)] transition-all"
+    >
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-[#F4F6FA] to-[#EAF2FF]">
+        {cover ? (
+          <SmartImg
+            src={cover}
+            size="card"
+            alt={deal.title}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-[#0E6B5A]/70">
+            <span className="text-3xl leading-none">{categoryIcon ?? "🏷️"}</span>
+            {categoryName && (
+              <span className="text-[10px] font-bold text-[#0E6B5A]/80">{categoryName}</span>
+            )}
+          </div>
+        )}
+        {discountPct && (
+          <span className="absolute top-1.5 right-1.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#0E6B5A] text-white shadow-[0_2px_6px_-2px_rgba(14,107,90,0.5)]">
+            {discountPct}
+          </span>
+        )}
+      </div>
+      <div className="p-2.5">
+        <h3 className="text-[12px] font-semibold text-[#1F2937] leading-snug line-clamp-2 min-h-[2.4em] mb-1">
+          {deal.title}
+        </h3>
+        <div className="text-[13px] font-extrabold text-[#0E6B5A] leading-tight truncate">
+          {display.headline}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
