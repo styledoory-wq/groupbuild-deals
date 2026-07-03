@@ -9,10 +9,10 @@ import { useApp } from "@/store/AppStore";
 export function ScanFAB() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { role, loading } = useApp();
+  const { user, authReady } = useApp();
 
-  if (loading) return null;
-  if (role !== "supplier") return null;
+  if (!authReady) return null;
+  if (user?.role !== "supplier") return null;
   if (!pathname.startsWith("/supplier")) return null;
   if (pathname.startsWith("/supplier/scan")) return null;
   // Hide on offer-editor / marketing flows to avoid covering form actions
