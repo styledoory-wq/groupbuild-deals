@@ -297,7 +297,6 @@ export default function SupplierProfile() {
         </div>
       </div>
 
-      </div>
 
       <div className="px-5 relative z-10 space-y-4 pb-32">
         {/* Quick links */}
