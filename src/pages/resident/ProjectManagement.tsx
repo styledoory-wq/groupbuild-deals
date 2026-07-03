@@ -784,45 +784,277 @@ function InfoChip({
 function EditInfoModal({
   info, onClose, onSave,
 }: { info: ProjectInfo; onClose: () => void; onSave: (info: ProjectInfo) => void }) {
-  const [form, setForm] = useState({
-    name: info.name,
-    subtitle: info.subtitle,
-    manager: info.manager,
-    targetDate: info.targetDate,
-  });
-  const set = (k: keyof typeof form, v: string) => setForm((p) => ({ ...p, [k]: v }));
+  const [form, setForm] = useState<ProjectInfo>({ ...info });
+  const [step, setStep] = useState<1 | 2>(info.projectType ? 2 : 1);
+
+  const set = <K extends keyof ProjectInfo>(k: K, v: ProjectInfo[K]) =>
+    setForm((p) => ({ ...p, [k]: v }));
+
+  const toggleScope = (id: string) => {
+    const arr = form.scope ?? [];
+    set("scope", arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id]);
+  };
+
+  const pickType = (t: ProjectType) => {
+    set("projectType", t);
+    setStep(2);
+  };
+
   const handleSave = () => {
     onSave({
-      ...info,
-      name: form.name.trim() || info.name,
-      subtitle: form.subtitle.trim(),
-      manager: form.manager.trim(),
-      targetDate: form.targetDate,
+      ...form,
+      name: (form.name || "").trim() || info.name,
+      subtitle: (form.subtitle || "").trim(),
+      manager: (form.manager || "").trim(),
     });
   };
 
+  const t = form.projectType;
+  const needsArea = t === "new_build" || t === "renovation" || t === "extension" || t === "mamad";
+  const needsRooms = t === "new_build" || t === "renovation" || t === "extension";
+  const needsFloors = t === "new_build" || t === "extension";
+  const needsStandard = t === "new_build" || t === "renovation" || t === "extension";
+  const needsScope = t === "renovation";
+  const needsMamadType = t === "mamad";
+  const needsUnits = t === "committee";
+  const needsCommitteeService = t === "committee";
+  const needsPointService = t === "point_service";
+
+  const title = step === 1 ? "בחירת סוג הפרויקט" : "פרטי הפרויקט";
+
   return (
-    <ModalShell title="עריכת פרטי הפרויקט" onClose={onClose}>
-      <div className="space-y-3">
-        <Field label="שם הפרויקט">
-          <TextInput value={form.name} onChange={(v) => set("name", v)} />
-        </Field>
-        <Field label="תיאור (שטח / קומות)">
-          <TextInput value={form.subtitle} onChange={(v) => set("subtitle", v)} />
-        </Field>
-        <Field label="מנהל הפרויקט">
-          <TextInput value={form.manager} onChange={(v) => set("manager", v)} />
-        </Field>
-        <Field label="תאריך יעד">
-          <input
-            type="date"
-            value={form.targetDate}
-            onChange={(e) => set("targetDate", e.target.value)}
-            className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
-          />
-        </Field>
-      </div>
-      <ModalActions onCancel={onClose} onSave={handleSave} />
+    <ModalShell title={title} onClose={onClose}>
+      {step === 1 ? (
+        <div className="space-y-2">
+          <p className="text-[12.5px] text-gray-500 leading-snug mb-2">
+            בחר/י את סוג הפרויקט כדי שנציג רק את השדות הרלוונטיים ואומדן ה-AI יהיה מדויק לתחום שלך.
+          </p>
+          {PROJECT_TYPES.map((pt) => {
+            const sel = form.projectType === pt.key;
+            return (
+              <button
+                key={pt.key}
+                onClick={() => pickType(pt.key)}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl border-2 text-right active:scale-[0.99] transition"
+                style={{
+                  background: sel ? "#F0F9F6" : "#FFFFFF",
+                  borderColor: sel ? BRAND : "#E5E7EB",
+                }}
+              >
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-[22px] shrink-0"
+                  style={{ background: sel ? "#FFFFFF" : "#FAFAF7" }}
+                  aria-hidden
+                >
+                  {pt.emoji}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13.5px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
+                    {pt.label}
+                  </div>
+                  <div className="text-[11px] text-gray-500 mt-0.5 leading-snug">{pt.desc}</div>
+                </div>
+                {sel && (
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0" style={{ background: BRAND }}>
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {/* Selected type header + change */}
+          <div className="flex items-center justify-between bg-[#F0F9F6] border border-[#0E6B5A]/15 rounded-2xl p-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[18px]" aria-hidden>
+                {PROJECT_TYPES.find((p) => p.key === t)?.emoji}
+              </span>
+              <div className="text-[13px] font-extrabold text-[#0A5447] truncate" style={{ fontFamily: URBANIST }}>
+                {PROJECT_TYPES.find((p) => p.key === t)?.label}
+              </div>
+            </div>
+            <button
+              onClick={() => setStep(1)}
+              className="text-[11px] font-bold text-[#0E6B5A] bg-white border border-[#0E6B5A]/20 px-2.5 py-1 rounded-full active:scale-95"
+            >
+              שינוי
+            </button>
+          </div>
+
+          {/* Common fields */}
+          <Field label="שם הפרויקט">
+            <TextInput value={form.name} onChange={(v) => set("name", v)} />
+          </Field>
+          <Field label="תיאור קצר (רשות)">
+            <TextInput value={form.subtitle} onChange={(v) => set("subtitle", v)} />
+          </Field>
+          <Field label="מנהל הפרויקט">
+            <TextInput value={form.manager} onChange={(v) => set("manager", v)} />
+          </Field>
+          <Field label="תאריך יעד">
+            <input
+              type="date"
+              value={form.targetDate}
+              onChange={(e) => set("targetDate", e.target.value)}
+              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+            />
+          </Field>
+
+          {/* Type-specific fields */}
+          {needsArea && (
+            <Field label={t === "mamad" ? 'גודל ממ״ד (מ״ר)' : 'שטח (מ״ר)'}>
+              <input
+                type="number" inputMode="numeric" min={1}
+                value={form.area ?? ""}
+                onChange={(e) => set("area", e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+              />
+            </Field>
+          )}
+
+          {needsRooms && (
+            <Field label="מספר חדרים">
+              <input
+                type="number" inputMode="numeric" min={1}
+                value={form.rooms ?? ""}
+                onChange={(e) => set("rooms", e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+              />
+            </Field>
+          )}
+
+          {needsFloors && (
+            <Field label="מספר קומות">
+              <input
+                type="number" inputMode="numeric" min={1}
+                value={form.floors ?? ""}
+                onChange={(e) => set("floors", e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+              />
+            </Field>
+          )}
+
+          {needsStandard && (
+            <Field label="רמת גמר">
+              <div className="grid grid-cols-3 gap-2">
+                {STANDARD_OPTS.map((o) => {
+                  const sel = form.standard === o.id;
+                  return (
+                    <button
+                      key={o.id}
+                      onClick={() => set("standard", o.id)}
+                      className="py-2 rounded-xl text-[12.5px] font-bold border-2 transition"
+                      style={{
+                        background: sel ? "#F0F9F6" : "#FFFFFF",
+                        borderColor: sel ? BRAND : "#E5E7EB",
+                        color: sel ? BRAND_DARK : "#374151",
+                      }}
+                    >
+                      {o.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+          )}
+
+          {needsScope && (
+            <Field label="היקף השיפוץ (ניתן לבחור כמה)">
+              <div className="flex flex-wrap gap-2">
+                {RENOVATION_SCOPE_OPTS.map((o) => {
+                  const sel = (form.scope ?? []).includes(o.id);
+                  return (
+                    <button
+                      key={o.id}
+                      onClick={() => toggleScope(o.id)}
+                      className="px-3 py-1.5 rounded-full text-[12px] font-bold border transition"
+                      style={{
+                        background: sel ? BRAND : "#FFFFFF",
+                        borderColor: sel ? BRAND : "#E5E7EB",
+                        color: sel ? "#FFFFFF" : "#374151",
+                      }}
+                    >
+                      {o.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+          )}
+
+          {needsMamadType && (
+            <Field label="סוג העבודה">
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: "new" as const, label: 'בניית ממ״ד חדש' },
+                  { id: "upgrade" as const, label: "שדרוג קיים" },
+                ].map((o) => {
+                  const sel = form.mamadType === o.id;
+                  return (
+                    <button
+                      key={o.id}
+                      onClick={() => set("mamadType", o.id)}
+                      className="py-2 rounded-xl text-[12.5px] font-bold border-2 transition"
+                      style={{
+                        background: sel ? "#F0F9F6" : "#FFFFFF",
+                        borderColor: sel ? BRAND : "#E5E7EB",
+                        color: sel ? BRAND_DARK : "#374151",
+                      }}
+                    >
+                      {o.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+          )}
+
+          {needsUnits && (
+            <Field label="מס׳ יחידות דיור בבניין">
+              <input
+                type="number" inputMode="numeric" min={1}
+                value={form.units ?? ""}
+                onChange={(e) => set("units", e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+              />
+            </Field>
+          )}
+
+          {needsCommitteeService && (
+            <Field label="סוג השירות המבוקש">
+              <select
+                value={form.committeeService ?? ""}
+                onChange={(e) => set("committeeService", e.target.value || undefined)}
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+              >
+                <option value="">בחר/י…</option>
+                {COMMITTEE_SERVICES.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </Field>
+          )}
+
+          {needsPointService && (
+            <>
+              <Field label="קטגוריית שירות">
+                <select
+                  value={form.serviceCategory ?? ""}
+                  onChange={(e) => set("serviceCategory", e.target.value || undefined)}
+                  className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+                >
+                  <option value="">בחר/י…</option>
+                  {POINT_SERVICE_CATS.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </Field>
+              <Field label="פירוט קצר">
+                <TextInput value={form.serviceDetails ?? ""} onChange={(v) => set("serviceDetails", v)} />
+              </Field>
+            </>
+          )}
+        </div>
+      )}
+      {step === 2 && <ModalActions onCancel={onClose} onSave={handleSave} />}
     </ModalShell>
   );
 }
