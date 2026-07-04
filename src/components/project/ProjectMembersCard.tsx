@@ -140,6 +140,19 @@ function MembersSheet({
         </div>
 
         <div className="p-5 max-h-[70vh] overflow-y-auto space-y-4">
+          {!projectId && (
+            <div className="text-center text-[12.5px] text-gray-500 py-4 bg-gray-50 rounded-2xl">
+              מגדיר את הפרויקט המשותף... נסה שוב בעוד רגע.
+            </div>
+          )}
+          {projectId && loading && members.length === 0 && (
+            <div className="text-center text-[12.5px] text-gray-500 py-4">טוען חברים...</div>
+          )}
+          {projectId && !loading && members.length === 0 && (
+            <div className="text-center text-[12.5px] text-gray-500 py-3">
+              אתה החבר היחיד בפרויקט. הזמן שותף כדי לשתף את הנתונים.
+            </div>
+          )}
           {/* members */}
           <ul className="space-y-2">
             {members.map((m) => {
