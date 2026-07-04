@@ -35,6 +35,7 @@ const ProjectsList = lazy(() => import("./pages/resident/ProjectsList"));
 const CategoriesList = lazy(() => import("./pages/resident/CategoriesList"));
 const CategoryStages = lazy(() => import("./pages/resident/CategoryStages"));
 const ProjectManagement = lazy(() => import("./pages/resident/ProjectManagement"));
+const ProjectJoin = lazy(() => import("./pages/resident/ProjectJoin"));
 const ResidentDashboard = lazy(() => import("./pages/resident/ResidentDashboard"));
 const DealsList = lazy(() => import("./pages/resident/DealsList"));
 const CategorySuppliers = lazy(() => import("./pages/resident/CategorySuppliers"));
