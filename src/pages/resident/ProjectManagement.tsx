@@ -21,7 +21,7 @@ import {
   writeProjectProgress,
   notifyProjectChanged,
 } from "@/lib/projectStore";
-import { useProjectCloudSync, getActiveProjectId } from "@/lib/projectClient";
+import { useProjectCloudSync, getActiveProjectId, useMyProject } from "@/lib/projectClient";
 import { ProjectMembersCard } from "@/components/project/ProjectMembersCard";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
