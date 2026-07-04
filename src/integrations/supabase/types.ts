@@ -2656,6 +2656,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      ensure_user_project: { Args: never; Returns: string }
       evaluate_conditional_joiners: {
         Args: { _deal_id: string }
         Returns: undefined
