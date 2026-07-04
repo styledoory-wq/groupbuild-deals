@@ -482,6 +482,7 @@ export default function ProjectManagement() {
   });
   useEffect(() => {
     try { localStorage.setItem(TASKS_KEY, JSON.stringify(completed)); } catch {}
+    notifyProjectChanged();
   }, [completed]);
 
   const toggleTask = (key: string) => setCompleted((p) => ({ ...p, [key]: !p[key] }));
