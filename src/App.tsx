@@ -237,6 +237,7 @@ const App = () => (
                   <Route path="/resident/categories" element={<CategoriesList />} />
                   <Route path="/resident/categories/stages" element={<CategoryStages />} />
                   <Route path="/resident/project-management" element={residentRoute(<ProjectManagement />)} />
+                  <Route path="/project/join/:token" element={<ProjectJoin />} />
                   <Route path="/resident/categories/:categoryId" element={<CategorySuppliers />} />
                   <Route path="/resident/deals" element={<DealsList />} />
                   <Route path="/resident/deals/:dealId" element={<DealDetail />} />
