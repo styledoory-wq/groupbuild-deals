@@ -214,7 +214,7 @@ function MembersSheet({
           </ul>
 
           {/* invite */}
-          {canInvite ? (
+          {projectId && canInvite ? (
             <div className="p-4 rounded-2xl border border-dashed border-[#0E6B5A]/30 bg-[#F4FBF8] space-y-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-[#0E6B5A] text-white flex items-center justify-center">
