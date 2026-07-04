@@ -108,14 +108,19 @@ export default function ResidentDashboard() {
         const stage: StageId = chosen;
         const stageFilter: string | null = journeyStageIds.length ? stage : null;
 
+        const { resolveMyProjectId } = await import("@/lib/projectClient");
+        const pid = await resolveMyProjectId(uid);
+        const paidDepositsQ = supabase.from("deposits").select("deal_id").eq("status", "paid").eq("is_deleted", false);
+        const freeInterestsQ = supabase.from("deal_interests").select("deal_id").eq("is_deleted", false).in("status", ["interested", "approved", "committed", "joined"]);
+
         const [matchesResult, citySupResult, councilSupResult, regionSupResult, nationwideResult, paidDepositsResult, freeInterestsResult] = await Promise.all([
           supabase.rpc("get_matching_deals_for_user", stageFilter ? { _stage_filter: stageFilter, _limit: 8 } : { _limit: 8 }),
           prof?.city_id ? supabase.from("supplier_cities").select("supplier_id").eq("city_id", prof.city_id) : Promise.resolve({ data: [] }),
           councilId ? supabase.from("supplier_councils").select("supplier_id").eq("council_id", councilId) : Promise.resolve({ data: [] }),
           regionId ? supabase.from("supplier_regions").select("supplier_id").eq("region_id", regionId) : Promise.resolve({ data: [] }),
           supabase.from("suppliers").select("id").eq("serves_all_country", true).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]),
-          supabase.from("deposits").select("deal_id").eq("user_id", uid).eq("status", "paid").eq("is_deleted", false),
-          supabase.from("deal_interests").select("deal_id").eq("user_id", uid).eq("is_deleted", false).in("status", ["interested", "approved", "committed", "joined"]),
+          pid ? paidDepositsQ.eq("project_id", pid) : paidDepositsQ.eq("user_id", uid),
+          pid ? freeInterestsQ.eq("project_id", pid) : freeInterestsQ.eq("user_id", uid),
         ]);
 
         const dealIds = ((matchesResult.data ?? []) as { deal_id: string }[]).map((m) => m.deal_id);
