@@ -464,16 +464,7 @@ export default function ProjectManagement() {
   const navigate = useNavigate();
   const { categories, user } = useApp();
   useProjectCloudSync(user?.id);
-  const { isViewer } = useMyProject(user?.id);
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(() => getActiveProjectId());
-  useEffect(() => {
-    if (activeProjectId) return;
-    const t = window.setInterval(() => {
-      const id = getActiveProjectId();
-      if (id) { setActiveProjectId(id); window.clearInterval(t); }
-    }, 500);
-    return () => window.clearInterval(t);
-  }, [activeProjectId]);
+  const { projectId: activeProjectId, isViewer } = useMyProject(user?.id);
 
   // Editable project info — read first so stages can depend on projectType
   const [info, setInfo] = useState<ProjectInfo>(() => {
