@@ -1007,6 +1007,7 @@ export default function ProjectManagement() {
               localStorage.removeItem(BUDGET_KEY);
               localStorage.removeItem(CURRENT_IDX_KEY);
               localStorage.removeItem(TASKS_KEY);
+              localStorage.removeItem("gb:pm:progress");
             } catch {}
             setInfo(DEFAULT_INFO);
             setSchedule({});
