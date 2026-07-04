@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
 import type { OfferTier } from "@/lib/offerPricing";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
+import { resolveMyProjectId } from "@/lib/projectClient";
 
 export default function Favorites() {
   const [loading, setLoading] = useState(true);
