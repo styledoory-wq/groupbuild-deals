@@ -464,7 +464,13 @@ export default function ProjectManagement() {
   const navigate = useNavigate();
   const { categories, user } = useApp();
   useProjectCloudSync(user?.id);
-  const { projectId: activeProjectId, isViewer } = useMyProject(user?.id);
+  const {
+    projectId: activeProjectId,
+    isViewer,
+    loading: projectLoading,
+    error: projectError,
+    retry: retryProjectLoad,
+  } = useMyProject(user?.id);
 
   // Editable project info — read first so stages can depend on projectType
   const [info, setInfo] = useState<ProjectInfo>(() => {
@@ -776,7 +782,12 @@ export default function ProjectManagement() {
         </button>
 
         {/* Project members — shared with partners in realtime */}
-        <ProjectMembersCard projectId={activeProjectId} />
+        <ProjectMembersCard
+          projectId={activeProjectId}
+          projectLoading={projectLoading}
+          projectError={projectError}
+          onRetryProject={retryProjectLoad}
+        />
 
         {/* AI Cost Estimation — hidden by default, admin-controlled feature flag */}
         {aiEstimateEnabled && (
