@@ -88,13 +88,16 @@ function MembersSheet({
   const [copied, setCopied] = useState(false);
 
   const handleCreate = async () => {
-    if (!projectId) { alert("הפרויקט עדיין בהגדרה, נסה שוב בעוד רגע"); return; }
+    if (!projectId) {
+      toast.info("הפרויקט עדיין נטען, ננסה שוב בעוד רגע...");
+      return;
+    }
     setCreating(true);
     try {
       const inv = await createInvitation(projectId, inviteRole);
       setLink(inviteLinkFor(inv.token));
     } catch (e) {
-      alert("שגיאה ביצירת הזמנה");
+      toast.error("שגיאה ביצירת ההזמנה, נסה שוב");
     } finally {
       setCreating(false);
     }
@@ -102,7 +105,14 @@ function MembersSheet({
 
   const handleCopy = async () => {
     if (!link) return;
-    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      toast.success("הקישור הועתק");
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("לא הצלחנו להעתיק את הקישור");
+    }
   };
 
   const shareWhatsApp = () => {
