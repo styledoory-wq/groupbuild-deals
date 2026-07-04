@@ -608,7 +608,15 @@ export default function ProjectManagement() {
     notifyProjectChanged();
   }, [budget]);
 
-  const budgetTotal = budget.reduce((s, b) => s + (b.planned || 0), 0);
+  // Total budget (single top-level number set by the resident)
+  const [budgetTotal, setBudgetTotal] = useState<number>(() => {
+    try { return Number(localStorage.getItem(BUDGET_TOTAL_KEY) || 0); } catch { return 0; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(BUDGET_TOTAL_KEY, String(budgetTotal || 0)); } catch {}
+    notifyProjectChanged();
+  }, [budgetTotal]);
+
   const budgetUsed = budget.reduce((s, b) => s + (b.actual || 0), 0);
   const groupSavings = info.groupSavings;
   const overPct = budgetUsed > budgetTotal && budgetTotal > 0
