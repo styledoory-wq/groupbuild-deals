@@ -775,6 +775,9 @@ export default function ProjectManagement() {
           <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" />
         </button>
 
+        {/* Project members — shared with partners in realtime */}
+        <ProjectMembersCard projectId={activeProjectId} />
+
         {/* AI Cost Estimation — hidden by default, admin-controlled feature flag */}
         {aiEstimateEnabled && (
           <button
