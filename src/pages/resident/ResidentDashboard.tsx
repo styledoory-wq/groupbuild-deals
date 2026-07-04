@@ -119,8 +119,8 @@ export default function ResidentDashboard() {
           councilId ? supabase.from("supplier_councils").select("supplier_id").eq("council_id", councilId) : Promise.resolve({ data: [] }),
           regionId ? supabase.from("supplier_regions").select("supplier_id").eq("region_id", regionId) : Promise.resolve({ data: [] }),
           supabase.from("suppliers").select("id").eq("serves_all_country", true).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]),
-          pid ? paidDepositsQ.eq("project_id", pid) : paidDepositsQ.eq("user_id", uid),
-          pid ? freeInterestsQ.eq("project_id", pid) : freeInterestsQ.eq("user_id", uid),
+          sharedPid ? paidDepositsQ.eq("project_id", sharedPid) : paidDepositsQ.eq("user_id", uid),
+          sharedPid ? freeInterestsQ.eq("project_id", sharedPid) : freeInterestsQ.eq("user_id", uid),
         ]);
 
         const dealIds = ((matchesResult.data ?? []) as { deal_id: string }[]).map((m) => m.deal_id);
