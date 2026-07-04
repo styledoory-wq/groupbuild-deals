@@ -152,12 +152,22 @@ function MembersSheet({
 
         <div className="p-5 max-h-[70vh] overflow-y-auto space-y-4">
           {!projectId && (
-            <div className="text-center text-[12.5px] text-gray-500 py-4 bg-gray-50 rounded-2xl">
-              מגדיר את הפרויקט המשותף... נסה שוב בעוד רגע.
+            <div className="flex flex-col items-center text-center py-8 gap-3">
+              <div className="h-9 w-9 rounded-full border-2 border-[#0E6B5A] border-t-transparent animate-spin" />
+              <p className="text-[13px] font-medium text-gray-600">אנחנו מכינים את הפרויקט שלך...</p>
+              <div className="w-full space-y-2 pt-2">
+                {[0, 1].map((i) => (
+                  <div key={i} className="h-14 rounded-2xl bg-gray-100 animate-pulse" />
+                ))}
+              </div>
             </div>
           )}
           {projectId && loading && members.length === 0 && (
-            <div className="text-center text-[12.5px] text-gray-500 py-4">טוען חברים...</div>
+            <div className="space-y-2">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-14 rounded-2xl bg-gray-100 animate-pulse" />
+              ))}
+            </div>
           )}
           {projectId && !loading && members.length === 0 && (
             <div className="text-center text-[12.5px] text-gray-500 py-3">
