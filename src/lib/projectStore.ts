@@ -52,6 +52,9 @@ export type ProjectSummary = {
   tasksTotal: number;
   progressPct: number;
   groupSavings: number;
+  stageIdx: number;
+  stagesCount: number;
+  currentStageTitle: string;
 };
 
 function safeParse<T>(raw: string | null, fallback: T): T {
