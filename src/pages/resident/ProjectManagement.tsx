@@ -1044,11 +1044,11 @@ export default function ProjectManagement() {
       {budgetOpen && (
         <BudgetModal
           budget={budget}
-          groupSavings={info.groupSavings}
+          budgetTotal={budgetTotal}
           onClose={() => setBudgetOpen(false)}
-          onSave={(items, savings) => {
+          onSave={(items, total) => {
             setBudget(items);
-            setInfo((p) => ({ ...p, groupSavings: savings }));
+            setBudgetTotal(total);
             setBudgetOpen(false);
           }}
         />
