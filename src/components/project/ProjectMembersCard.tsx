@@ -17,18 +17,25 @@ const ROLE_META: Record<MemberRole, { label: string; icon: JSX.Element; tone: st
 
 export function ProjectMembersCard({ projectId }: { projectId: string | null }) {
   const { user } = useApp();
-  const { members } = useProjectMembers(projectId);
+  const { members, loading } = useProjectMembers(projectId);
   const myRole = useMyProjectRole(projectId, user?.id);
   const [open, setOpen] = useState(false);
-  const canInvite = myRole === "owner" || myRole === "partner";
+  const canInvite = !myRole || myRole === "owner" || myRole === "partner";
 
   const memberCount = members.length;
+  const subtitle = !projectId
+    ? "מגדיר פרויקט..."
+    : loading
+      ? "טוען חברים..."
+      : memberCount === 0
+        ? "עדיין אין חברים משותפים — הזמן שותף"
+        : `${memberCount} ${memberCount === 1 ? "חבר" : "חברים"} משתפים את הפרויקט`;
 
   return (
     <>
       <button
         onClick={() => setOpen(true)}
-        className="mt-3 w-full bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-right active:scale-[0.99] transition-transform flex items-center gap-3"
+        className="mt-3 w-full bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-right active:scale-[0.99] hover:shadow-[0_10px_28px_-12px_rgba(14,107,90,0.28)] transition-all flex items-center gap-3"
       >
         <div
           className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center text-white"
@@ -41,16 +48,14 @@ export function ProjectMembersCard({ projectId }: { projectId: string | null }) 
           <h3 className="text-[14.5px] font-extrabold text-[#1A1A1A]">
             👥 חברי הפרויקט
           </h3>
-          <p className="text-[11.5px] text-gray-500 mt-1 leading-snug">
-            {memberCount === 0 ? "בקרוב" : `${memberCount} ${memberCount === 1 ? "חבר" : "חברים"} משתפים את הפרויקט`}
-          </p>
+          <p className="text-[11.5px] text-gray-500 mt-1 leading-snug truncate">{subtitle}</p>
         </div>
-        <span className="text-[11px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-1 rounded-full">
-          נהל
+        <span className="text-[11px] font-bold text-white bg-[#0E6B5A] px-2.5 py-1 rounded-full shrink-0">
+          נהל חברים והרשאות
         </span>
       </button>
 
-      {open && projectId && (
+      {open && (
         <MembersSheet
           projectId={projectId}
           myUserId={user?.id ?? null}
@@ -58,6 +63,7 @@ export function ProjectMembersCard({ projectId }: { projectId: string | null }) 
           canInvite={canInvite}
           onClose={() => setOpen(false)}
           members={members}
+          loading={loading}
         />
       )}
     </>
@@ -65,14 +71,15 @@ export function ProjectMembersCard({ projectId }: { projectId: string | null }) 
 }
 
 function MembersSheet({
-  projectId, myUserId, myRole, canInvite, onClose, members,
+  projectId, myUserId, myRole, canInvite, onClose, members, loading,
 }: {
-  projectId: string;
+  projectId: string | null;
   myUserId: string | null;
   myRole: MemberRole | null;
   canInvite: boolean;
   onClose: () => void;
   members: ReturnType<typeof useProjectMembers>["members"];
+  loading: boolean;
 }) {
   const [inviteRole, setInviteRole] = useState<MemberRole>("partner");
   const [creating, setCreating] = useState(false);
@@ -80,6 +87,7 @@ function MembersSheet({
   const [copied, setCopied] = useState(false);
 
   const handleCreate = async () => {
+    if (!projectId) { alert("הפרויקט עדיין בהגדרה, נסה שוב בעוד רגע"); return; }
     setCreating(true);
     try {
       const inv = await createInvitation(projectId, inviteRole);
@@ -132,6 +140,19 @@ function MembersSheet({
         </div>
 
         <div className="p-5 max-h-[70vh] overflow-y-auto space-y-4">
+          {!projectId && (
+            <div className="text-center text-[12.5px] text-gray-500 py-4 bg-gray-50 rounded-2xl">
+              מגדיר את הפרויקט המשותף... נסה שוב בעוד רגע.
+            </div>
+          )}
+          {projectId && loading && members.length === 0 && (
+            <div className="text-center text-[12.5px] text-gray-500 py-4">טוען חברים...</div>
+          )}
+          {projectId && !loading && members.length === 0 && (
+            <div className="text-center text-[12.5px] text-gray-500 py-3">
+              אתה החבר היחיד בפרויקט. הזמן שותף כדי לשתף את הנתונים.
+            </div>
+          )}
           {/* members */}
           <ul className="space-y-2">
             {members.map((m) => {
