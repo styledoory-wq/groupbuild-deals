@@ -74,7 +74,9 @@ export function readProjectSummary(): ProjectSummary {
   const info = safeParse<LocalProjectInfo>(localStorage.getItem(PROJECT_INFO_KEY), {});
   const budget = safeParse<LocalBudgetItem[]>(localStorage.getItem(BUDGET_KEY), []);
   const progress = safeParse<ProjectProgress | null>(localStorage.getItem(PROGRESS_KEY), null);
-  const budgetTotal = budget.reduce((s, b) => s + (b.planned || 0), 0);
+  const totalPlanned = budget.reduce((s, b) => s + (b.planned || 0), 0);
+  const explicitTotal = Number(localStorage.getItem(BUDGET_TOTAL_KEY) || 0);
+  const budgetTotal = explicitTotal > 0 ? explicitTotal : totalPlanned;
   const budgetUsed = budget.reduce((s, b) => s + (b.actual || 0), 0);
   const budgetOverPct = budgetUsed > budgetTotal && budgetTotal > 0
     ? Math.round(((budgetUsed - budgetTotal) / budgetTotal) * 100) : 0;
