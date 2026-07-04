@@ -16,8 +16,6 @@ const ROLE_META: Record<MemberRole, { label: string; icon: JSX.Element; tone: st
   viewer:  { label: "צופה",   icon: <Eye className="h-3.5 w-3.5" />,    tone: "bg-slate-100 text-slate-600" },
 };
 
-export function ProjectMembersCard({ projectId }: { projectId: string | null }) {
-  const { user } = useApp();
 export function ProjectMembersCard({
   projectId,
   projectLoading = false,
