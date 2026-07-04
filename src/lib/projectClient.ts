@@ -148,7 +148,15 @@ export async function ensureMyProjectId(userId: string | null | undefined): Prom
   const promise = (async () => {
     const resolved = await resolveMyProjectId(userId);
     if (resolved) return resolved;
-    const created = await findOrCreateProjectForUser(userId);
+    const { data, error } = await supabase.rpc("ensure_user_project");
+    if (error) {
+      console.warn("[ProjectMembers] ensure_user_project rpc error", { currentUserId: userId, error: error.message });
+      const createdFallback = await findOrCreateProjectForUser(userId);
+      console.info("[ProjectMembers] ensureMyProjectId fallback", { projectId: createdFallback, currentUserId: userId });
+      return createdFallback;
+    }
+    const created = (data as string | null) ?? null;
+    if (created) setActiveProjectId(created);
     console.info("[ProjectMembers] ensureMyProjectId", { projectId: created, currentUserId: userId });
     return created;
   })().finally(() => ensureProjectPromises.delete(userId));
