@@ -67,6 +67,7 @@ export function readProjectSummary(): ProjectSummary {
     return {
       hasProject: false, info: {}, budgetTotal: 0, budgetUsed: 0, budgetOverPct: 0,
       tasksDone: 0, tasksTotal: 0, progressPct: 0, groupSavings: 0,
+      stageIdx: 0, stagesCount: 0, currentStageTitle: "",
     };
   }
   const info = safeParse<LocalProjectInfo>(localStorage.getItem(PROJECT_INFO_KEY), {});
