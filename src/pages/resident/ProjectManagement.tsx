@@ -21,7 +21,7 @@ import {
   writeProjectProgress,
   notifyProjectChanged,
 } from "@/lib/projectStore";
-import { useProjectCloudSync, getActiveProjectId } from "@/lib/projectClient";
+import { useProjectCloudSync, getActiveProjectId, useMyProject } from "@/lib/projectClient";
 import { ProjectMembersCard } from "@/components/project/ProjectMembersCard";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
@@ -464,6 +464,7 @@ export default function ProjectManagement() {
   const navigate = useNavigate();
   const { categories, user } = useApp();
   useProjectCloudSync(user?.id);
+  const { isViewer } = useMyProject(user?.id);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(() => getActiveProjectId());
   useEffect(() => {
     if (activeProjectId) return;
@@ -671,6 +672,14 @@ export default function ProjectManagement() {
             </button>
           </div>
         </div>
+
+        {isViewer && (
+          <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] font-semibold text-amber-900 flex items-center gap-2">
+            <span className="text-lg">👁️</span>
+            <span>מצב צפייה בלבד — כחבר Viewer בפרויקט תוכל לראות אך לא לערוך.</span>
+          </div>
+        )}
+
 
         {/* Project card / empty state */}
         {!info.name && !info.manager && !info.targetDate ? (

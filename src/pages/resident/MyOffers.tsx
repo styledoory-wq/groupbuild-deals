@@ -127,17 +127,20 @@ export default function MyOffers() {
         return;
       }
       const uid = session.session.user.id;
+      const { resolveMyProjectId } = await import("@/lib/projectClient");
+      const pid = await resolveMyProjectId(uid);
+
+      const intsQ = supabase
+        .from("deal_interests")
+        .select("id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at")
+        .order("created_at", { ascending: false });
+      const depsQ = supabase
+        .from("deposits")
+        .select("id,deal_id,status,amount,is_hidden");
 
       const [{ data: ints, error: iErr }, { data: deps }] = await Promise.all([
-        supabase
-          .from("deal_interests")
-          .select("id,deal_id,status,deposit_required,deposit_amount,deposit_status,created_at")
-          .eq("user_id", uid)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("deposits")
-          .select("id,deal_id,status,amount,is_hidden")
-          .eq("user_id", uid),
+        pid ? intsQ.eq("project_id", pid) : intsQ.eq("user_id", uid),
+        pid ? depsQ.eq("project_id", pid) : depsQ.eq("user_id", uid),
       ]);
       if (iErr) throw iErr;
 

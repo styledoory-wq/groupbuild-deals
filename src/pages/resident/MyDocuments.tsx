@@ -53,12 +53,14 @@ export default function MyDocuments() {
     const { data: session } = await supabase.auth.getSession();
     const uid = session.session?.user?.id;
     if (!uid) return;
-    const { data, error } = await supabase
+    const { resolveMyProjectId } = await import("@/lib/projectClient");
+    const pid = await resolveMyProjectId(uid);
+    const q = supabase
       .from("documents")
       .select("*")
-      .eq("user_id", uid)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
+    const { data, error } = await (pid ? q.eq("project_id", pid) : q.eq("user_id", uid));
     if (error) {
       console.error(error);
       toast.error("שגיאה בטעינת מסמכים");

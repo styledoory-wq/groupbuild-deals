@@ -244,13 +244,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setNotifications(cached.data);
         return;
       }
-      const { data, error } = await withTimeout(supabase
+      const { resolveMyProjectId } = await import("@/lib/projectClient");
+      const pid = await resolveMyProjectId(uid);
+      const notifQ = supabase
         .from("notifications")
         .select("id,title,body,type,is_read,created_at")
-        .eq("user_id", uid)
         .eq("is_deleted", false)
         .order("created_at", { ascending: false })
-        .limit(50), "טעינת התראות");
+        .limit(50);
+      const { data, error } = await withTimeout(
+        pid ? notifQ.eq("project_id", pid) : notifQ.eq("user_id", uid),
+        "טעינת התראות"
+      );
       if (error) {
         console.error("[AppStore] notifications load failed", error);
         return;
@@ -279,11 +284,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { data: sessionData } = await supabase.auth.getSession();
     const uid = sessionData.session?.user?.id;
     if (!uid) return;
-    const { error } = await supabase
+    const { resolveMyProjectId } = await import("@/lib/projectClient");
+    const pid = await resolveMyProjectId(uid);
+    const updQ = supabase
       .from("notifications")
       .update({ is_read: true })
-      .eq("user_id", uid)
       .eq("is_read", false);
+    const { error } = await (pid ? updQ.eq("project_id", pid) : updQ.eq("user_id", uid));
     if (error) {
       console.error("[AppStore] mark read failed", error);
       return;

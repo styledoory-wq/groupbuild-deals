@@ -355,6 +355,7 @@ export type Database = {
           min_tier_locked: number | null
           notes: string | null
           phone: string | null
+          project_id: string | null
           project_name: string | null
           reapproval_deadline_at: string | null
           resident_marked_paid_at: string | null
@@ -389,6 +390,7 @@ export type Database = {
           min_tier_locked?: number | null
           notes?: string | null
           phone?: string | null
+          project_id?: string | null
           project_name?: string | null
           reapproval_deadline_at?: string | null
           resident_marked_paid_at?: string | null
@@ -423,6 +425,7 @@ export type Database = {
           min_tier_locked?: number | null
           notes?: string | null
           phone?: string | null
+          project_id?: string | null
           project_name?: string | null
           reapproval_deadline_at?: string | null
           resident_marked_paid_at?: string | null
@@ -436,7 +439,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "deal_interests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       deal_marketing_ai: {
         Row: {
@@ -906,6 +917,7 @@ export type Database = {
           payment_processing_fee_amount: number | null
           payment_processing_fee_status: string
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
+          project_id: string | null
           provider_payment_url: string | null
           provider_transaction_id: string | null
           refunded_at: string | null
@@ -938,6 +950,7 @@ export type Database = {
           payment_processing_fee_amount?: number | null
           payment_processing_fee_status?: string
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
+          project_id?: string | null
           provider_payment_url?: string | null
           provider_transaction_id?: string | null
           refunded_at?: string | null
@@ -970,6 +983,7 @@ export type Database = {
           payment_processing_fee_amount?: number | null
           payment_processing_fee_status?: string
           payment_provider?: Database["public"]["Enums"]["payment_provider_enum"]
+          project_id?: string | null
           provider_payment_url?: string | null
           provider_transaction_id?: string | null
           refunded_at?: string | null
@@ -980,6 +994,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "deposits_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deposits_supplier_id_fkey"
             columns: ["supplier_id"]
@@ -1032,6 +1053,7 @@ export type Database = {
           file_url: string
           id: string
           is_deleted: boolean
+          project_id: string | null
           updated_at: string
           user_id: string
         }
@@ -1044,6 +1066,7 @@ export type Database = {
           file_url: string
           id?: string
           is_deleted?: boolean
+          project_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1056,10 +1079,19 @@ export type Database = {
           file_url?: string
           id?: string
           is_deleted?: boolean
+          project_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_outbox: {
         Row: {
@@ -1195,21 +1227,32 @@ export type Database = {
           created_at: string
           deal_id: string
           id: string
+          project_id: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           deal_id: string
           id?: string
+          project_id?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           deal_id?: string
           id?: string
+          project_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "favorites_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       group_buy_requests: {
         Row: {
@@ -1474,6 +1517,7 @@ export type Database = {
           is_read: boolean
           link: string | null
           metadata: Json
+          project_id: string | null
           title: string
           type: string
           updated_at: string
@@ -1488,6 +1532,7 @@ export type Database = {
           is_read?: boolean
           link?: string | null
           metadata?: Json
+          project_id?: string | null
           title: string
           type?: string
           updated_at?: string
@@ -1502,12 +1547,21 @@ export type Database = {
           is_read?: boolean
           link?: string | null
           metadata?: Json
+          project_id?: string | null
           title?: string
           type?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -1906,6 +1960,7 @@ export type Database = {
           is_deleted: boolean
           message: string | null
           phone: string | null
+          project_id: string | null
           project_name: string | null
           source: string
           status: string
@@ -1926,6 +1981,7 @@ export type Database = {
           is_deleted?: boolean
           message?: string | null
           phone?: string | null
+          project_id?: string | null
           project_name?: string | null
           source?: string
           status?: string
@@ -1946,6 +2002,7 @@ export type Database = {
           is_deleted?: boolean
           message?: string | null
           phone?: string | null
+          project_id?: string | null
           project_name?: string | null
           source?: string
           status?: string
@@ -1955,7 +2012,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "supplier_inquiries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supplier_regions: {
         Row: {
@@ -2413,6 +2478,7 @@ export type Database = {
           id: string
           issued_at: string
           metadata: Json
+          project_id: string | null
           redeemed_at: string | null
           redeemed_by_supplier_id: string | null
           reference_number: string
@@ -2430,6 +2496,7 @@ export type Database = {
           id?: string
           issued_at?: string
           metadata?: Json
+          project_id?: string | null
           redeemed_at?: string | null
           redeemed_by_supplier_id?: string | null
           reference_number: string
@@ -2447,6 +2514,7 @@ export type Database = {
           id?: string
           issued_at?: string
           metadata?: Json
+          project_id?: string | null
           redeemed_at?: string | null
           redeemed_by_supplier_id?: string | null
           reference_number?: string
@@ -2456,7 +2524,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vouchers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       waitlist_leads: {
         Row: {
@@ -2547,6 +2623,10 @@ export type Database = {
         Returns: undefined
       }
       auto_leave_expired_reapprovals: { Args: never; Returns: number }
+      can_edit_user_project: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
       claim_supplier_profile_by_email: { Args: never; Returns: string }
       close_expired_deals: { Args: never; Returns: number }
       complete_onboarding: {
@@ -2789,10 +2869,12 @@ export type Database = {
         Args: { _deal_id: string; _user_id?: string }
         Returns: boolean
       }
+      user_primary_project_id: { Args: { _user_id: string }; Returns: string }
       user_project_role_of: {
         Args: { _project_id: string; _user_id: string }
         Returns: Database["public"]["Enums"]["user_project_role"]
       }
+      viewer_insert_allowed: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "resident" | "supplier" | "committee"

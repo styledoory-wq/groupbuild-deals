@@ -90,6 +90,47 @@ function setActiveProjectId(id: string) {
   try { localStorage.setItem(ACTIVE_PROJECT_KEY, id); } catch {}
 }
 
+/**
+ * Resolve the caller's primary project id (cached in localStorage; falls back
+ * to a DB lookup by first membership). Used to scope reader queries across
+ * all project members so partners see the same data.
+ */
+export async function resolveMyProjectId(userId: string | null | undefined): Promise<string | null> {
+  if (!userId) return null;
+  const cached = getActiveProjectId();
+  if (cached) return cached;
+  const { data } = await supabase
+    .from("user_project_members")
+    .select("project_id, joined_at")
+    .eq("user_id", userId)
+    .order("joined_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  const pid = (data?.project_id as string | undefined) ?? null;
+  if (pid) setActiveProjectId(pid);
+  return pid;
+}
+
+/** Hook: caller's primary project id + role (owner/partner/viewer). */
+export function useMyProject(userId: string | null | undefined) {
+  const [projectId, setProjectId] = useState<string | null>(null);
+  useEffect(() => {
+    let c = false;
+    (async () => {
+      const pid = await resolveMyProjectId(userId);
+      if (!c) setProjectId(pid);
+    })();
+    return () => { c = true; };
+  }, [userId]);
+  const role = useMyProjectRole(projectId, userId ?? null);
+  return {
+    projectId,
+    role,
+    isViewer: role === "viewer",
+    canEdit: role === "owner" || role === "partner",
+  };
+}
+
 /** Get user's projects (via membership) — pick first as active if none set. */
 async function findOrCreateProjectForUser(userId: string): Promise<string | null> {
   // 1) Existing membership?
