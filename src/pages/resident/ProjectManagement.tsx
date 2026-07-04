@@ -10,6 +10,16 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
+import { useFeatureFlag } from "@/lib/featureFlags";
+import {
+  PROJECT_INFO_KEY as PM_INFO_KEY,
+  SCHEDULE_KEY as PM_SCHEDULE_KEY,
+  BUDGET_KEY as PM_BUDGET_KEY,
+  CURRENT_IDX_KEY as PM_CURRENT_IDX_KEY,
+  TASKS_KEY as PM_TASKS_KEY,
+  writeProjectProgress,
+  notifyProjectChanged,
+} from "@/lib/projectStore";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
@@ -47,10 +57,11 @@ type ProjectInfo = {
 type ScheduleItem = { start: string; end: string };
 type BudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string };
 
-const PROJECT_INFO_KEY = "gb:pm:info";
-const SCHEDULE_KEY = "gb:pm:schedule";
-const BUDGET_KEY = "gb:pm:budget";
-const CURRENT_IDX_KEY = "gb:pm:currentIdx";
+const PROJECT_INFO_KEY = PM_INFO_KEY;
+const SCHEDULE_KEY = PM_SCHEDULE_KEY;
+const BUDGET_KEY = PM_BUDGET_KEY;
+const CURRENT_IDX_KEY = PM_CURRENT_IDX_KEY;
+const TASKS_KEY = PM_TASKS_KEY;
 
 const DEFAULT_INFO: ProjectInfo = {
   name: "",
@@ -459,6 +470,7 @@ export default function ProjectManagement() {
   });
   useEffect(() => {
     try { localStorage.setItem(PROJECT_INFO_KEY, JSON.stringify(info)); } catch {}
+    notifyProjectChanged();
   }, [info]);
 
   // Dynamic stages based on project type
@@ -466,10 +478,11 @@ export default function ProjectManagement() {
 
   // Task completion local state
   const [completed, setCompleted] = useState<Record<string, boolean>>(() => {
-    try { return JSON.parse(localStorage.getItem("gb:pm:tasks") || "{}"); } catch { return {}; }
+    try { return JSON.parse(localStorage.getItem(TASKS_KEY) || "{}"); } catch { return {}; }
   });
   useEffect(() => {
-    try { localStorage.setItem("gb:pm:tasks", JSON.stringify(completed)); } catch {}
+    try { localStorage.setItem(TASKS_KEY, JSON.stringify(completed)); } catch {}
+    notifyProjectChanged();
   }, [completed]);
 
   const toggleTask = (key: string) => setCompleted((p) => ({ ...p, [key]: !p[key] }));
@@ -555,6 +568,18 @@ export default function ProjectManagement() {
     s.tasks.length > 0 && s.tasks.every((t) => completed[`${s.key}::${t}`])
   ).length;
 
+  // Persist a compact progress snapshot so other screens (dashboard) stay in sync.
+  useEffect(() => {
+    writeProjectProgress({
+      tasksDone: overallDone,
+      tasksTotal: overallTotal,
+      stageIdx: currentIdx,
+      stagesCount: stages.length,
+      currentStageTitle: current?.title ?? "",
+      updatedAt: Date.now(),
+    });
+  }, [overallDone, overallTotal, currentIdx, stages.length, current?.title]);
+
 
   // Schedule per stage
   const [schedule, setSchedule] = useState<Record<string, ScheduleItem>>(() => {
@@ -578,6 +603,7 @@ export default function ProjectManagement() {
   });
   useEffect(() => {
     try { localStorage.setItem(BUDGET_KEY, JSON.stringify(budget)); } catch {}
+    notifyProjectChanged();
   }, [budget]);
 
   const budgetTotal = budget.reduce((s, b) => s + (b.planned || 0), 0);
@@ -591,6 +617,9 @@ export default function ProjectManagement() {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [budgetOpen, setBudgetOpen] = useState(false);
 
+  // Feature flag — AI cost estimate is admin-controlled and hidden by default.
+  const aiEstimateEnabled = useFeatureFlag("aiCostEstimate");
+
   return (
     <div
       dir="rtl"
@@ -599,7 +628,7 @@ export default function ProjectManagement() {
     >
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] px-5 pt-[calc(env(safe-area-inset-top)+18px)]"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 120px)" }}
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
         {/* Top bar */}
         <div className="flex items-center justify-between mb-4">
@@ -695,53 +724,84 @@ export default function ProjectManagement() {
           </div>
         )}
 
-        {/* AI Cost Estimation — planning phase tool */}
+        {/* Budget management — persistent primary action */}
         <button
-          onClick={() =>
-            navigate("/resident/budget-planner", {
-              state: {
-                fromProject: true,
-                projectType: info.projectType,
-                area: info.area,
-                rooms: info.rooms,
-                floors: info.floors,
-                standard: info.standard,
-                scope: info.scope,
-                mamadType: info.mamadType,
-                units: info.units,
-                committeeService: info.committeeService,
-                serviceCategory: info.serviceCategory,
-                serviceDetails: info.serviceDetails,
-                projectName: info.name,
-              },
-            })
-          }
+          onClick={() => setBudgetOpen(true)}
           className="mt-4 w-full bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-right active:scale-[0.99] transition-transform flex items-center gap-3"
         >
           <div
-            className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center text-[28px]"
-            style={{ background: "linear-gradient(135deg,#EEF4FF 0%,#F5F3FF 100%)" }}
+            className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center text-white"
+            style={{ background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)` }}
             aria-hidden
           >
-            🤖
+            <TrendingUp className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <h3 className="text-[14.5px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
-                אומדן עלות AI
+                💰 ניהול תקציב
               </h3>
               <span className="text-[9.5px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-1.5 py-0.5 rounded-full">
-                {info.projectType ? "מותאם אישית" : "שלב תכנון"}
+                {overPct === 0 ? "בתקציב" : `${overPct}% חריגה`}
               </span>
             </div>
-            <p className="text-[11.5px] text-gray-500 mt-1 leading-snug">
-              {info.projectType
-                ? "אומדן חכם לפי סוג הפרויקט והנתונים שהזנת בפרטי הפרויקט."
-                : "מלא/י תחילה את פרטי הפרויקט לקבלת אומדן מדויק ואישי."}
+            <p className="text-[11.5px] text-gray-500 mt-1 leading-snug tabular-nums">
+              ₪{budgetUsed.toLocaleString()} מתוך ₪{budgetTotal.toLocaleString()}
+              {groupSavings > 0 && <> · חיסכון ₪{groupSavings.toLocaleString()}</>}
             </p>
           </div>
           <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" />
         </button>
+
+        {/* AI Cost Estimation — hidden by default, admin-controlled feature flag */}
+        {aiEstimateEnabled && (
+          <button
+            onClick={() =>
+              navigate("/resident/budget-planner", {
+                state: {
+                  fromProject: true,
+                  projectType: info.projectType,
+                  area: info.area,
+                  rooms: info.rooms,
+                  floors: info.floors,
+                  standard: info.standard,
+                  scope: info.scope,
+                  mamadType: info.mamadType,
+                  units: info.units,
+                  committeeService: info.committeeService,
+                  serviceCategory: info.serviceCategory,
+                  serviceDetails: info.serviceDetails,
+                  projectName: info.name,
+                },
+              })
+            }
+            className="mt-3 w-full bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-right active:scale-[0.99] transition-transform flex items-center gap-3"
+          >
+            <div
+              className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center text-[28px]"
+              style={{ background: "linear-gradient(135deg,#EEF4FF 0%,#F5F3FF 100%)" }}
+              aria-hidden
+            >
+              🤖
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-[14.5px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
+                  אומדן עלות AI
+                </h3>
+                <span className="text-[9.5px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-1.5 py-0.5 rounded-full">
+                  {info.projectType ? "מותאם אישית" : "שלב תכנון"}
+                </span>
+              </div>
+              <p className="text-[11.5px] text-gray-500 mt-1 leading-snug">
+                {info.projectType
+                  ? "אומדן חכם לפי סוג הפרויקט והנתונים שהזנת בפרטי הפרויקט."
+                  : "מלא/י תחילה את פרטי הפרויקט לקבלת אומדן מדויק ואישי."}
+              </p>
+            </div>
+            <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" />
+          </button>
+        )}
 
         {/* Timeline */}
         <div className="mt-6 mb-2 flex items-center justify-between">
@@ -933,53 +993,7 @@ export default function ProjectManagement() {
         </div>
       </div>
 
-      {/* Sticky budget card */}
-      <button
-        onClick={() => setBudgetOpen(true)}
-        className="fixed left-1/2 -translate-x-1/2 z-30 w-[92%] max-w-[var(--app-max-w)] rounded-2xl p-3.5 shadow-2xl shadow-black/30 text-white text-right active:scale-[0.99] transition-transform"
-        style={{
-          bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 10px)",
-          background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
-        }}
-      >
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-1.5">
-            <TrendingUp className="h-4 w-4" />
-            <span className="text-[12.5px] font-extrabold" style={{ fontFamily: URBANIST }}>
-              💰 ניהול תקציב
-            </span>
-            <Pencil className="h-3 w-3 text-white/70" />
-          </div>
-          <span className="text-[10px] font-bold bg-white/15 px-2 py-0.5 rounded-full">
-            {overPct === 0 ? "בתקציב" : `${overPct}% חריגה`}
-          </span>
-        </div>
-        <div className="flex items-end justify-between gap-2">
-          <div className="leading-tight">
-            <div className="text-[18px] font-extrabold tabular-nums" style={{ fontFamily: URBANIST }}>
-              ₪{budgetUsed.toLocaleString()}
-            </div>
-            <div className="text-[10.5px] text-white/70 tabular-nums">
-              מתוך ₪{budgetTotal.toLocaleString()} נוצל
-            </div>
-          </div>
-          <div className="text-left leading-tight">
-            <div className="flex items-center gap-1 text-[10.5px] text-white/70 justify-end">
-              <Zap className="h-3 w-3" />
-              חיסכון קבוצתי
-            </div>
-            <div className="text-[14px] font-extrabold text-[#FFD66B] tabular-nums" style={{ fontFamily: URBANIST }}>
-              ₪{groupSavings.toLocaleString()}
-            </div>
-          </div>
-        </div>
-        <div className="mt-2 h-1.5 w-full bg-white/15 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-white/80 rounded-full"
-            style={{ width: budgetTotal > 0 ? `${Math.min(100, Math.round((budgetUsed / budgetTotal) * 100))}%` : "0%" }}
-          />
-        </div>
-      </button>
+      {/* Sticky budget card removed — budget is now an inline action button above */}
 
       {editInfoOpen && (
         <EditInfoModal
@@ -992,7 +1006,8 @@ export default function ProjectManagement() {
               localStorage.removeItem(SCHEDULE_KEY);
               localStorage.removeItem(BUDGET_KEY);
               localStorage.removeItem(CURRENT_IDX_KEY);
-              localStorage.removeItem("gb:pm:tasks");
+              localStorage.removeItem(TASKS_KEY);
+              localStorage.removeItem("gb:pm:progress");
             } catch {}
             setInfo(DEFAULT_INFO);
             setSchedule({});
@@ -1474,7 +1489,7 @@ function BudgetModal({
   // Auto-sync from resident task completions (mark related budget items as fully spent)
   const syncFromSelections = () => {
     try {
-      const completed = JSON.parse(localStorage.getItem("gb:pm:tasks") || "{}");
+      const completed = JSON.parse(localStorage.getItem(TASKS_KEY) || "{}");
       const completedCats = new Set<string>();
       Object.values(STAGES_BY_TYPE).flat().forEach((s) => {
         const allDone = s.tasks.length > 0 && s.tasks.every((t) => completed[`${s.key}::${t}`]);

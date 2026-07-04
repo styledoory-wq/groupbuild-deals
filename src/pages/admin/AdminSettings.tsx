@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, LayoutGrid, MapPin, Users, MessageSquare, UserCheck, ShieldCheck, Building2, BarChart3, ArrowLeft, LifeBuoy, type LucideIcon } from "lucide-react";
+import { Bell, LayoutGrid, MapPin, Users, MessageSquare, UserCheck, ShieldCheck, Building2, BarChart3, ArrowLeft, LifeBuoy, FlaskConical, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Switch } from "@/components/ui/switch";
+import { FEATURE_FLAG_META, setFlag, useFeatureFlag } from "@/lib/featureFlags";
 
 type Item = { to: string; icon: LucideIcon; title: string; desc: string };
 
@@ -74,9 +76,40 @@ export default function AdminSettings() {
             </div>
           </section>
         ))}
+
+        <section>
+          <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-[#6B7280] mb-2 px-1 flex items-center gap-1.5">
+            <FlaskConical className="h-3.5 w-3.5" />
+            פיצ׳רים בטא
+          </h2>
+          <div className="bg-white border border-[#ECEEF2] rounded-[14px] divide-y divide-[#F1F3F7]">
+            {FEATURE_FLAG_META.map((f) => (
+              <FeatureFlagRow key={f.key} flagKey={f.key} label={f.label} description={f.description} />
+            ))}
+          </div>
+          <p className="text-[11px] text-[#8E8E93] mt-2 px-1">
+            הגדרות אלה נשמרות בדפדפן הנוכחי ומאפשרות להסתיר או להפעיל פיצ׳רים ניסיוניים.
+          </p>
+        </section>
       </div>
 
       <BottomNav role="admin" />
     </MobileShell>
+  );
+}
+
+function FeatureFlagRow({ flagKey, label, description }: { flagKey: Parameters<typeof setFlag>[0]; label: string; description: string }) {
+  const enabled = useFeatureFlag(flagKey);
+  return (
+    <div className="w-full flex items-center gap-3 px-4 py-3.5 text-right first:rounded-t-[14px] last:rounded-b-[14px]">
+      <span className="h-9 w-9 rounded-[10px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
+        <FlaskConical className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2.2} />
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-extrabold text-[13.5px] text-[#0F172A] truncate">{label}</div>
+        <div className="text-[12px] text-[#6B7280] mt-0.5">{description}</div>
+      </div>
+      <Switch checked={enabled} onCheckedChange={(v) => setFlag(flagKey, v)} />
+    </div>
   );
 }
