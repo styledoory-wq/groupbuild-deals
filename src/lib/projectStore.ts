@@ -11,6 +11,24 @@ export const SCHEDULE_KEY = "gb:pm:schedule";
 export const BUDGET_KEY = "gb:pm:budget";
 export const CURRENT_IDX_KEY = "gb:pm:currentIdx";
 export const TASKS_KEY = "gb:pm:tasks";
+export const PROGRESS_KEY = "gb:pm:progress";
+
+export type ProjectProgress = {
+  tasksDone: number;
+  tasksTotal: number;
+  stageIdx: number;
+  stagesCount: number;
+  currentStageTitle: string;
+  updatedAt: number;
+};
+
+export function writeProjectProgress(p: ProjectProgress) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
+    window.dispatchEvent(new Event(PROJECT_CHANGED_EVT));
+  } catch {}
+}
 
 export const PROJECT_CHANGED_EVT = "gb:pm:change";
 
