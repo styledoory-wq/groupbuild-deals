@@ -516,6 +516,74 @@ export default function ResidentDashboard() {
 
 /* ============ Sub-components ============ */
 
+function MyProjectCard({ onOpen }: { onOpen: () => void }) {
+  const p = useProjectSummary();
+  if (!p.hasProject) return null;
+  const title = p.info.name || "הפרויקט שלי";
+  const stageLabel = p.currentStageTitle || (p.info.projectType ? "פרויקט פעיל" : "בהגדרה");
+  const target = p.info.targetDate
+    ? (() => {
+        const [y, m, d] = p.info.targetDate!.split("-");
+        return y && m && d ? `${d}.${m}.${y.slice(2)}` : p.info.targetDate!;
+      })()
+    : "—";
+  const budgetPct = p.budgetTotal > 0 ? Math.min(100, Math.round((p.budgetUsed / p.budgetTotal) * 100)) : 0;
+  return (
+    <div className="px-5 mt-6">
+      <SectionHeader
+        title="הפרויקט שלי"
+        subtitle={`${p.progressPct}% הושלם`}
+        action={<button onClick={onOpen} className="text-[14px] font-medium text-[#0E6B5A]">ניהול</button>}
+      />
+      <button
+        onClick={onOpen}
+        className="mt-3 w-full text-right bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-4 active:scale-[0.99] transition"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[16px] font-bold text-[#1C1C1E] tracking-tight leading-tight truncate">{title}</div>
+            <div className="text-[12px] text-[#8E8E93] mt-1 truncate">שלב נוכחי: {stageLabel}</div>
+          </div>
+          <span className="shrink-0 text-[10px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-1 rounded-full">
+            {p.stagesCount > 0 ? `שלב ${p.stageIdx + 1}/${p.stagesCount}` : "פעיל"}
+          </span>
+        </div>
+        <div className="mt-3 h-1.5 w-full bg-[#F1EFEA] rounded-full overflow-hidden">
+          <div className="h-full bg-[#0E6B5A] rounded-full" style={{ width: `${p.progressPct}%` }} />
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <MiniInfo label="יעד" value={target} />
+          <MiniInfo
+            label="תקציב"
+            value={p.budgetTotal > 0 ? `${budgetPct}%` : "—"}
+            hint={p.budgetTotal > 0 ? `₪${p.budgetUsed.toLocaleString()} / ₪${p.budgetTotal.toLocaleString()}` : undefined}
+          />
+          <MiniInfo
+            label="חיסכון"
+            value={p.groupSavings > 0 ? `₪${p.groupSavings.toLocaleString()}` : "—"}
+          />
+        </div>
+        {p.tasksTotal > 0 && (
+          <div className="mt-2 text-[11px] text-[#8E8E93] text-right">
+            משימות: {p.tasksDone}/{p.tasksTotal}
+          </div>
+        )}
+      </button>
+    </div>
+  );
+}
+
+function MiniInfo({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="bg-[#FAFAF7] rounded-xl p-2.5 text-center border border-[#F1EFEA]">
+      <div className="text-[10px] text-[#8E8E93] mb-0.5 font-medium">{label}</div>
+      <div className="text-[13px] font-bold text-[#1C1C1E] tabular-nums truncate">{value}</div>
+      {hint && <div className="text-[9.5px] text-[#8E8E93] mt-0.5 tabular-nums truncate">{hint}</div>}
+    </div>
+  );
+}
+
+
 function Kpi({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className="rounded-2xl p-4 border bg-white border-[#E5E5EA] shadow-sm">
