@@ -71,14 +71,15 @@ export function ProjectMembersCard({ projectId }: { projectId: string | null }) 
 }
 
 function MembersSheet({
-  projectId, myUserId, myRole, canInvite, onClose, members,
+  projectId, myUserId, myRole, canInvite, onClose, members, loading,
 }: {
-  projectId: string;
+  projectId: string | null;
   myUserId: string | null;
   myRole: MemberRole | null;
   canInvite: boolean;
   onClose: () => void;
   members: ReturnType<typeof useProjectMembers>["members"];
+  loading: boolean;
 }) {
   const [inviteRole, setInviteRole] = useState<MemberRole>("partner");
   const [creating, setCreating] = useState(false);
@@ -86,6 +87,7 @@ function MembersSheet({
   const [copied, setCopied] = useState(false);
 
   const handleCreate = async () => {
+    if (!projectId) { alert("הפרויקט עדיין בהגדרה, נסה שוב בעוד רגע"); return; }
     setCreating(true);
     try {
       const inv = await createInvitation(projectId, inviteRole);
