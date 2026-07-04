@@ -39,12 +39,14 @@ export default function MyDeposits() {
   const touchStartX = useRef<number>(0);
 
   const loadDeposits = useCallback(async (uid: string) => {
-    const { data, error } = await supabase
+    const { resolveMyProjectId } = await import("@/lib/projectClient");
+    const pid = await resolveMyProjectId(uid);
+    const q = supabase
       .from("deposits")
       .select("id,deal_id,amount,status,created_at,paid_at,refunded_at,is_hidden")
-      .eq("user_id", uid)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
+    const { data, error } = await (pid ? q.eq("project_id", pid) : q.eq("user_id", uid));
     if (error) { setDepositsLoading(false); return; }
     const list = (data ?? []) as DbDeposit[];
     setMyDeposits(list);
