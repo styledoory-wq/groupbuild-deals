@@ -68,15 +68,13 @@ export function readProjectSummary(): ProjectSummary {
   }
   const info = safeParse<LocalProjectInfo>(localStorage.getItem(PROJECT_INFO_KEY), {});
   const budget = safeParse<LocalBudgetItem[]>(localStorage.getItem(BUDGET_KEY), []);
-  const completed = safeParse<Record<string, boolean>>(localStorage.getItem(TASKS_KEY), {});
+  const progress = safeParse<ProjectProgress | null>(localStorage.getItem(PROGRESS_KEY), null);
   const budgetTotal = budget.reduce((s, b) => s + (b.planned || 0), 0);
   const budgetUsed = budget.reduce((s, b) => s + (b.actual || 0), 0);
   const budgetOverPct = budgetUsed > budgetTotal && budgetTotal > 0
     ? Math.round(((budgetUsed - budgetTotal) / budgetTotal) * 100) : 0;
-  const doneKeys = Object.keys(completed).filter((k) => completed[k]);
-  const tasksDone = doneKeys.length;
-  // We don't know total tasks from here alone — dashboard progress uses budget/stages fallback.
-  const tasksTotal = Math.max(tasksDone, tasksDone); // placeholder — overridden by caller if desired
+  const tasksDone = progress?.tasksDone ?? 0;
+  const tasksTotal = progress?.tasksTotal ?? 0;
   const progressPct = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0;
   const groupSavings = Number(info.groupSavings || 0);
   return {
@@ -89,7 +87,10 @@ export function readProjectSummary(): ProjectSummary {
     tasksTotal,
     progressPct,
     groupSavings,
-  };
+    stageIdx: progress?.stageIdx ?? 0,
+    stagesCount: progress?.stagesCount ?? 0,
+    currentStageTitle: progress?.currentStageTitle ?? "",
+  } as ProjectSummary;
 }
 
 export function notifyProjectChanged() {
