@@ -2194,6 +2194,162 @@ export type Database = {
         }
         Relationships: []
       }
+      user_project_data: {
+        Row: {
+          budget: Json
+          budget_total: number
+          current_idx: number
+          info: Json
+          progress: Json
+          project_id: string
+          schedule: Json
+          tasks: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          budget?: Json
+          budget_total?: number
+          current_idx?: number
+          info?: Json
+          progress?: Json
+          project_id: string
+          schedule?: Json
+          tasks?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          budget?: Json
+          budget_total?: number
+          current_idx?: number
+          info?: Json
+          progress?: Json
+          project_id?: string
+          schedule?: Json
+          tasks?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_project_data_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_project_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          invited_by: string
+          invited_email: string | null
+          invited_phone: string | null
+          project_id: string
+          role: Database["public"]["Enums"]["user_project_role"]
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          invited_email?: string | null
+          invited_phone?: string | null
+          project_id: string
+          role?: Database["public"]["Enums"]["user_project_role"]
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string | null
+          invited_phone?: string | null
+          project_id?: string
+          role?: Database["public"]["Enums"]["user_project_role"]
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_project_invitations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_project_members: {
+        Row: {
+          id: string
+          joined_at: string
+          project_id: string
+          role: Database["public"]["Enums"]["user_project_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          project_id: string
+          role?: Database["public"]["Enums"]["user_project_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          project_id?: string
+          role?: Database["public"]["Enums"]["user_project_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_projects: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          project_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name?: string
+          project_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          project_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2355,6 +2511,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_user_project_invitation: {
+        Args: { _token: string }
+        Returns: string
+      }
       admin_decide_committee_request: {
         Args: { _approve: boolean; _id: string; _notes?: string }
         Returns: undefined
@@ -2514,6 +2674,10 @@ export type Database = {
         Args: { _supplier_id: string; _user_id?: string }
         Returns: boolean
       }
+      is_user_project_member: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
       issue_vouchers_for_deal: { Args: { _deal_id: string }; Returns: number }
       lookup_voucher_for_supplier: { Args: { _code: string }; Returns: Json }
       match_suppliers_for_demand: {
@@ -2613,6 +2777,10 @@ export type Database = {
         Args: { _interest_id: string; _notes?: string; _starred?: boolean }
         Returns: undefined
       }
+      transfer_user_project_ownership: {
+        Args: { _project_id: string; _to_user: string }
+        Returns: undefined
+      }
       user_can_review: {
         Args: { _deal_id: string; _user_id: string }
         Returns: boolean
@@ -2620,6 +2788,10 @@ export type Database = {
       user_participates_in_deal: {
         Args: { _deal_id: string; _user_id?: string }
         Returns: boolean
+      }
+      user_project_role_of: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["user_project_role"]
       }
     }
     Enums: {
@@ -2638,6 +2810,7 @@ export type Database = {
         | "stripe"
         | "direct_to_supplier"
         | "manual"
+      user_project_role: "owner" | "partner" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2782,6 +2955,7 @@ export const Constants = {
         "direct_to_supplier",
         "manual",
       ],
+      user_project_role: ["owner", "partner", "viewer"],
     },
   },
 } as const

@@ -21,6 +21,8 @@ import {
   writeProjectProgress,
   notifyProjectChanged,
 } from "@/lib/projectStore";
+import { useProjectCloudSync, getActiveProjectId } from "@/lib/projectClient";
+import { ProjectMembersCard } from "@/components/project/ProjectMembersCard";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
@@ -460,7 +462,17 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 
 export default function ProjectManagement() {
   const navigate = useNavigate();
-  const { categories } = useApp();
+  const { categories, user } = useApp();
+  useProjectCloudSync(user?.id);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(() => getActiveProjectId());
+  useEffect(() => {
+    if (activeProjectId) return;
+    const t = window.setInterval(() => {
+      const id = getActiveProjectId();
+      if (id) { setActiveProjectId(id); window.clearInterval(t); }
+    }, 500);
+    return () => window.clearInterval(t);
+  }, [activeProjectId]);
 
   // Editable project info — read first so stages can depend on projectType
   const [info, setInfo] = useState<ProjectInfo>(() => {
@@ -762,6 +774,9 @@ export default function ProjectManagement() {
           </div>
           <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" />
         </button>
+
+        {/* Project members — shared with partners in realtime */}
+        <ProjectMembersCard projectId={activeProjectId} />
 
         {/* AI Cost Estimation — hidden by default, admin-controlled feature flag */}
         {aiEstimateEnabled && (
