@@ -10,6 +10,16 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
+import { useFeatureFlag } from "@/lib/featureFlags";
+import {
+  PROJECT_INFO_KEY as PM_INFO_KEY,
+  SCHEDULE_KEY as PM_SCHEDULE_KEY,
+  BUDGET_KEY as PM_BUDGET_KEY,
+  CURRENT_IDX_KEY as PM_CURRENT_IDX_KEY,
+  TASKS_KEY as PM_TASKS_KEY,
+  writeProjectProgress,
+  notifyProjectChanged,
+} from "@/lib/projectStore";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
