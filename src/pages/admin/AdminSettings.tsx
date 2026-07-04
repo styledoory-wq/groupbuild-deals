@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, LayoutGrid, MapPin, Users, MessageSquare, UserCheck, ShieldCheck, Building2, BarChart3, ArrowLeft, LifeBuoy, type LucideIcon } from "lucide-react";
+import { Bell, LayoutGrid, MapPin, Users, MessageSquare, UserCheck, ShieldCheck, Building2, BarChart3, ArrowLeft, LifeBuoy, FlaskConical, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Switch } from "@/components/ui/switch";
+import { FEATURE_FLAG_META, setFlag, useFeatureFlag } from "@/lib/featureFlags";
 
 type Item = { to: string; icon: LucideIcon; title: string; desc: string };
 
