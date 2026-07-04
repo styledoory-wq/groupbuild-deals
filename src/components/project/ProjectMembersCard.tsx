@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { toast } from "sonner";
 import { Users, Plus, Copy, Check, X, Trash2, MessageCircle, Mail, Crown, Eye, Shield } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import {
@@ -87,13 +88,16 @@ function MembersSheet({
   const [copied, setCopied] = useState(false);
 
   const handleCreate = async () => {
-    if (!projectId) { alert("הפרויקט עדיין בהגדרה, נסה שוב בעוד רגע"); return; }
+    if (!projectId) {
+      toast.info("הפרויקט עדיין נטען, ננסה שוב בעוד רגע...");
+      return;
+    }
     setCreating(true);
     try {
       const inv = await createInvitation(projectId, inviteRole);
       setLink(inviteLinkFor(inv.token));
     } catch (e) {
-      alert("שגיאה ביצירת הזמנה");
+      toast.error("שגיאה ביצירת ההזמנה, נסה שוב");
     } finally {
       setCreating(false);
     }
@@ -101,7 +105,14 @@ function MembersSheet({
 
   const handleCopy = async () => {
     if (!link) return;
-    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      toast.success("הקישור הועתק");
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("לא הצלחנו להעתיק את הקישור");
+    }
   };
 
   const shareWhatsApp = () => {
@@ -141,12 +152,22 @@ function MembersSheet({
 
         <div className="p-5 max-h-[70vh] overflow-y-auto space-y-4">
           {!projectId && (
-            <div className="text-center text-[12.5px] text-gray-500 py-4 bg-gray-50 rounded-2xl">
-              מגדיר את הפרויקט המשותף... נסה שוב בעוד רגע.
+            <div className="flex flex-col items-center text-center py-8 gap-3">
+              <div className="h-9 w-9 rounded-full border-2 border-[#0E6B5A] border-t-transparent animate-spin" />
+              <p className="text-[13px] font-medium text-gray-600">אנחנו מכינים את הפרויקט שלך...</p>
+              <div className="w-full space-y-2 pt-2">
+                {[0, 1].map((i) => (
+                  <div key={i} className="h-14 rounded-2xl bg-gray-100 animate-pulse" />
+                ))}
+              </div>
             </div>
           )}
           {projectId && loading && members.length === 0 && (
-            <div className="text-center text-[12.5px] text-gray-500 py-4">טוען חברים...</div>
+            <div className="space-y-2">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-14 rounded-2xl bg-gray-100 animate-pulse" />
+              ))}
+            </div>
           )}
           {projectId && !loading && members.length === 0 && (
             <div className="text-center text-[12.5px] text-gray-500 py-3">
@@ -193,7 +214,7 @@ function MembersSheet({
           </ul>
 
           {/* invite */}
-          {canInvite ? (
+          {projectId && canInvite ? (
             <div className="p-4 rounded-2xl border border-dashed border-[#0E6B5A]/30 bg-[#F4FBF8] space-y-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-[#0E6B5A] text-white flex items-center justify-center">
