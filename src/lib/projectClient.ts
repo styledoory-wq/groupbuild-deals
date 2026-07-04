@@ -43,6 +43,7 @@ export type ProjectInvitation = {
 };
 
 const ACTIVE_PROJECT_KEY = "gb:pm:activeProjectId";
+const ensureProjectPromises = new Map<string, Promise<string | null>>();
 
 function readJSON<T>(key: string, fallback: T): T {
   try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback; } catch { return fallback; }
@@ -89,6 +90,23 @@ export function getActiveProjectId(): string | null {
 function setActiveProjectId(id: string) {
   try { localStorage.setItem(ACTIVE_PROJECT_KEY, id); } catch {}
 }
+function clearActiveProjectId() {
+  try { localStorage.removeItem(ACTIVE_PROJECT_KEY); } catch {}
+}
+
+async function isCachedProjectValid(projectId: string, userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("user_project_members")
+    .select("id")
+    .eq("project_id", projectId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) {
+    console.warn("[ProjectMembers] cached project validation error", { projectId, currentUserId: userId, error: error.message });
+    return false;
+  }
+  return Boolean(data?.id);
+}
 
 /**
  * Resolve the caller's primary project id (cached in localStorage; falls back
@@ -98,34 +116,91 @@ function setActiveProjectId(id: string) {
 export async function resolveMyProjectId(userId: string | null | undefined): Promise<string | null> {
   if (!userId) return null;
   const cached = getActiveProjectId();
-  if (cached) return cached;
-  const { data } = await supabase
+  if (cached) {
+    const valid = await isCachedProjectValid(cached, userId);
+    console.info("[ProjectMembers] resolve cached project", { projectId: cached, currentUserId: userId, valid });
+    if (valid) return cached;
+    clearActiveProjectId();
+  }
+  const { data, error } = await supabase
     .from("user_project_members")
     .select("project_id, joined_at")
     .eq("user_id", userId)
     .order("joined_at", { ascending: true })
     .limit(1)
     .maybeSingle();
+  if (error) {
+    console.warn("[ProjectMembers] resolve membership error", { currentUserId: userId, error: error.message });
+    return null;
+  }
   const pid = (data?.project_id as string | undefined) ?? null;
   if (pid) setActiveProjectId(pid);
+  console.info("[ProjectMembers] resolveMyProjectId", { projectId: pid, currentUserId: userId });
   return pid;
+}
+
+/** Resolve or create the caller's shared project. Safe to call from UI actions. */
+export async function ensureMyProjectId(userId: string | null | undefined): Promise<string | null> {
+  if (!userId) return null;
+  const existing = ensureProjectPromises.get(userId);
+  if (existing) return existing;
+
+  const promise = (async () => {
+    const resolved = await resolveMyProjectId(userId);
+    if (resolved) return resolved;
+    const created = await findOrCreateProjectForUser(userId);
+    console.info("[ProjectMembers] ensureMyProjectId", { projectId: created, currentUserId: userId });
+    return created;
+  })().finally(() => ensureProjectPromises.delete(userId));
+
+  ensureProjectPromises.set(userId, promise);
+  return promise;
 }
 
 /** Hook: caller's primary project id + role (owner/partner/viewer). */
 export function useMyProject(userId: string | null | undefined) {
   const [projectId, setProjectId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(Boolean(userId));
+  const [error, setError] = useState<Error | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   useEffect(() => {
     let c = false;
     (async () => {
-      const pid = await resolveMyProjectId(userId);
-      if (!c) setProjectId(pid);
+      if (!userId) {
+        setProjectId(null);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        const pid = await ensureMyProjectId(userId);
+        if (!c) {
+          setProjectId(pid);
+          console.info("[ProjectMembers] useMyProject", { projectId: pid, currentUserId: userId });
+        }
+      } catch (e) {
+        const err = e instanceof Error ? e : new Error("project_load_failed");
+        if (!c) {
+          setError(err);
+          console.warn("[ProjectMembers] useMyProject error", { currentUserId: userId, error: err.message });
+        }
+      } finally {
+        if (!c) setLoading(false);
+      }
     })();
     return () => { c = true; };
-  }, [userId]);
+  }, [userId, retryKey]);
   const role = useMyProjectRole(projectId, userId ?? null);
+  useEffect(() => {
+    console.info("[ProjectMembers] current role", { projectId, currentUserId: userId ?? null, currentRole: role });
+  }, [projectId, role, userId]);
   return {
     projectId,
     role,
+    loading,
+    error,
+    retry: () => setRetryKey((n) => n + 1),
     isViewer: role === "viewer",
     canEdit: role === "owner" || role === "partner",
   };
@@ -151,18 +226,23 @@ async function findOrCreateProjectForUser(userId: string): Promise<string | null
   // 2) None — create one, seeded with local snapshot name if any
   const local = snapshotLocal();
   const localInfo = (local.info || {}) as { name?: string; projectType?: string };
-  const { data: created, error } = await supabase
+  const newProjectId = crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const { error } = await supabase
     .from("user_projects")
     .insert({
+      id: newProjectId,
       name: localInfo.name || "הפרויקט שלי",
       project_type: localInfo.projectType || null,
       created_by: userId,
-    })
-    .select("id")
-    .single();
-  if (error || !created) return null;
-  setActiveProjectId(created.id);
-  return created.id;
+    });
+  if (error) {
+    console.warn("[ProjectMembers] create project error", { currentUserId: userId, error: error.message });
+    const retryResolved = await resolveMyProjectId(userId);
+    return retryResolved;
+  }
+  setActiveProjectId(newProjectId);
+  console.info("[ProjectMembers] created user_project", { projectId: newProjectId, currentUserId: userId });
+  return newProjectId;
 }
 
 async function pushSnapshotToCloud(projectId: string) {
@@ -198,7 +278,7 @@ export function useProjectCloudSync(userId: string | null | undefined) {
     let projectId: string | null = null;
 
     (async () => {
-      projectId = await findOrCreateProjectForUser(userId);
+      projectId = await ensureMyProjectId(userId);
       if (!projectId || cancelled) return;
 
       // Fetch current cloud row
@@ -267,18 +347,29 @@ export function useProjectCloudSync(userId: string | null | undefined) {
 export function useProjectMembers(projectId: string | null) {
   const [members, setMembers] = useState<(ProjectMember & { email?: string; full_name?: string })[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    if (!projectId) { setMembers([]); setLoading(false); return; }
+    if (!projectId) { setMembers([]); setLoading(false); setError(null); return; }
     let cancelled = false;
 
     const load = async () => {
-      const { data } = await supabase
+      setLoading(true);
+      setError(null);
+      const { data, error: membersError } = await supabase
         .from("user_project_members")
         .select("id, project_id, user_id, role, joined_at")
         .eq("project_id", projectId)
         .order("joined_at", { ascending: true });
       if (cancelled) return;
+      if (membersError) {
+        setMembers([]);
+        setError(membersError);
+        setLoading(false);
+        console.warn("[ProjectMembers] members error", { projectId, error: membersError.message });
+        return;
+      }
       const rows = (data || []) as ProjectMember[];
       // Fetch profile names/emails
       const userIds = rows.map((r) => r.user_id);
@@ -292,6 +383,7 @@ export function useProjectMembers(projectId: string | null) {
       }
       setMembers(rows.map((r) => ({ ...r, ...(profiles[r.user_id] || {}) })));
       setLoading(false);
+      console.info("[ProjectMembers] members loaded", { projectId, count: rows.length, error: null });
     };
 
     void load();
@@ -303,9 +395,9 @@ export function useProjectMembers(projectId: string | null) {
       .subscribe();
 
     return () => { cancelled = true; supabase.removeChannel(ch); };
-  }, [projectId]);
+  }, [projectId, reloadKey]);
 
-  return { members, loading };
+  return { members, loading, error, refetch: () => setReloadKey((n) => n + 1) };
 }
 
 export async function createInvitation(projectId: string, role: MemberRole, opts?: { email?: string; phone?: string }) {
