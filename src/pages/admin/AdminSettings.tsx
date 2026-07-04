@@ -76,6 +76,21 @@ export default function AdminSettings() {
             </div>
           </section>
         ))}
+
+        <section>
+          <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-[#6B7280] mb-2 px-1 flex items-center gap-1.5">
+            <FlaskConical className="h-3.5 w-3.5" />
+            פיצ׳רים בטא
+          </h2>
+          <div className="bg-white border border-[#ECEEF2] rounded-[14px] divide-y divide-[#F1F3F7]">
+            {FEATURE_FLAG_META.map((f) => (
+              <FeatureFlagRow key={f.key} flagKey={f.key} label={f.label} description={f.description} />
+            ))}
+          </div>
+          <p className="text-[11px] text-[#8E8E93] mt-2 px-1">
+            הגדרות אלה נשמרות בדפדפן הנוכחי ומאפשרות להסתיר או להפעיל פיצ׳רים ניסיוניים.
+          </p>
+        </section>
       </div>
 
       <BottomNav role="admin" />
