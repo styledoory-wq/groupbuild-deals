@@ -77,13 +77,15 @@ export default function MyVouchers() {
       const { data: s } = await supabase.auth.getSession();
       if (!s.session) { setLoading(false); return; }
       const uid = s.session.user.id;
+      const { resolveMyProjectId } = await import("@/lib/projectClient");
+      const pid = await resolveMyProjectId(uid);
 
       // Only show vouchers for deals that have actually closed
-      const { data: vData } = await supabase
+      const vQ = supabase
         .from("vouchers")
         .select("id, code, reference_number, status, expires_at, redeemed_at, rotation_secret, deal_id, supplier_id")
-        .eq("user_id", uid)
         .order("created_at", { ascending: false });
+      const { data: vData } = await (pid ? vQ.eq("project_id", pid) : vQ.eq("user_id", uid));
       const rawVouchers = ((vData ?? []) as unknown as VoucherRow[]);
       const voucherDealIds = Array.from(new Set(rawVouchers.map((v) => v.deal_id).filter(Boolean)));
       const voucherSupplierIds = Array.from(new Set(rawVouchers.map((v) => v.supplier_id).filter(Boolean)));
