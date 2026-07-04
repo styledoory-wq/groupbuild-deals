@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 export const PROJECT_INFO_KEY = "gb:pm:info";
 export const SCHEDULE_KEY = "gb:pm:schedule";
 export const BUDGET_KEY = "gb:pm:budget";
+export const BUDGET_TOTAL_KEY = "gb:pm:budgetTotal";
 export const CURRENT_IDX_KEY = "gb:pm:currentIdx";
 export const TASKS_KEY = "gb:pm:tasks";
 export const PROGRESS_KEY = "gb:pm:progress";
