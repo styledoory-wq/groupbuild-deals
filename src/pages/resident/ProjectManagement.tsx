@@ -981,53 +981,7 @@ export default function ProjectManagement() {
         </div>
       </div>
 
-      {/* Sticky budget card */}
-      <button
-        onClick={() => setBudgetOpen(true)}
-        className="fixed left-1/2 -translate-x-1/2 z-30 w-[92%] max-w-[var(--app-max-w)] rounded-2xl p-3.5 shadow-2xl shadow-black/30 text-white text-right active:scale-[0.99] transition-transform"
-        style={{
-          bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 10px)",
-          background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
-        }}
-      >
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-1.5">
-            <TrendingUp className="h-4 w-4" />
-            <span className="text-[12.5px] font-extrabold" style={{ fontFamily: URBANIST }}>
-              💰 ניהול תקציב
-            </span>
-            <Pencil className="h-3 w-3 text-white/70" />
-          </div>
-          <span className="text-[10px] font-bold bg-white/15 px-2 py-0.5 rounded-full">
-            {overPct === 0 ? "בתקציב" : `${overPct}% חריגה`}
-          </span>
-        </div>
-        <div className="flex items-end justify-between gap-2">
-          <div className="leading-tight">
-            <div className="text-[18px] font-extrabold tabular-nums" style={{ fontFamily: URBANIST }}>
-              ₪{budgetUsed.toLocaleString()}
-            </div>
-            <div className="text-[10.5px] text-white/70 tabular-nums">
-              מתוך ₪{budgetTotal.toLocaleString()} נוצל
-            </div>
-          </div>
-          <div className="text-left leading-tight">
-            <div className="flex items-center gap-1 text-[10.5px] text-white/70 justify-end">
-              <Zap className="h-3 w-3" />
-              חיסכון קבוצתי
-            </div>
-            <div className="text-[14px] font-extrabold text-[#FFD66B] tabular-nums" style={{ fontFamily: URBANIST }}>
-              ₪{groupSavings.toLocaleString()}
-            </div>
-          </div>
-        </div>
-        <div className="mt-2 h-1.5 w-full bg-white/15 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-white/80 rounded-full"
-            style={{ width: budgetTotal > 0 ? `${Math.min(100, Math.round((budgetUsed / budgetTotal) * 100))}%` : "0%" }}
-          />
-        </div>
-      </button>
+      {/* Sticky budget card removed — budget is now an inline action button above */}
 
       {editInfoOpen && (
         <EditInfoModal
