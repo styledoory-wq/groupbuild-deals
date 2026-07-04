@@ -151,7 +151,10 @@ export default function ResidentDashboard() {
                 .in("id", Array.from(supplierIds)).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"])
             : Promise.resolve({ count: 0 }),
           dealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url,discount_percentage,deposit_required,deposit_amount,created_at,original_price,discounted_price").in("id", dealIds).eq("is_deleted", false) : Promise.resolve({ data: [] }),
-          supabase.from("vouchers").select("deal_id").eq("user_id", uid).in("status", ["issued", "active", "redeemed"]),
+          (sharedPid
+            ? supabase.from("vouchers").select("deal_id").eq("project_id", sharedPid).in("status", ["issued", "active", "redeemed"])
+            : supabase.from("vouchers").select("deal_id").eq("user_id", uid).in("status", ["issued", "active", "redeemed"])
+          ),
         ]);
 
         // Savings count only deals that actually closed (voucher was issued to the resident).
