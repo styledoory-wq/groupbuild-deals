@@ -460,6 +460,9 @@ export default function ResidentDashboard() {
           </div>
         )}
 
+        {/* === My project — synced with Project Management === */}
+        <MyProjectCard onOpen={() => navigate("/resident/project-management")} />
+
         {/* === Quick actions === */}
         <SectionHeader title="פעולות מהירות" />
         <section className="px-5 mt-3 grid grid-cols-3 gap-3">
