@@ -109,7 +109,7 @@ export default function ResidentDashboard() {
         const stageFilter: string | null = journeyStageIds.length ? stage : null;
 
         const { resolveMyProjectId } = await import("@/lib/projectClient");
-        const pid = await resolveMyProjectId(uid);
+        const sharedPid = await resolveMyProjectId(uid);
         const paidDepositsQ = supabase.from("deposits").select("deal_id").eq("status", "paid").eq("is_deleted", false);
         const freeInterestsQ = supabase.from("deal_interests").select("deal_id").eq("is_deleted", false).in("status", ["interested", "approved", "committed", "joined"]);
 
