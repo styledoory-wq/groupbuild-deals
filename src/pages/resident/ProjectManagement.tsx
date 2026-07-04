@@ -15,6 +15,7 @@ import {
   PROJECT_INFO_KEY as PM_INFO_KEY,
   SCHEDULE_KEY as PM_SCHEDULE_KEY,
   BUDGET_KEY as PM_BUDGET_KEY,
+  BUDGET_TOTAL_KEY as PM_BUDGET_TOTAL_KEY,
   CURRENT_IDX_KEY as PM_CURRENT_IDX_KEY,
   TASKS_KEY as PM_TASKS_KEY,
   writeProjectProgress,
@@ -55,11 +56,12 @@ type ProjectInfo = {
 };
 
 type ScheduleItem = { start: string; end: string };
-type BudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string };
+type BudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string; category?: string; date?: string; note?: string };
 
 const PROJECT_INFO_KEY = PM_INFO_KEY;
 const SCHEDULE_KEY = PM_SCHEDULE_KEY;
 const BUDGET_KEY = PM_BUDGET_KEY;
+const BUDGET_TOTAL_KEY = PM_BUDGET_TOTAL_KEY;
 const CURRENT_IDX_KEY = PM_CURRENT_IDX_KEY;
 const TASKS_KEY = PM_TASKS_KEY;
 
@@ -606,7 +608,15 @@ export default function ProjectManagement() {
     notifyProjectChanged();
   }, [budget]);
 
-  const budgetTotal = budget.reduce((s, b) => s + (b.planned || 0), 0);
+  // Total budget (single top-level number set by the resident)
+  const [budgetTotal, setBudgetTotal] = useState<number>(() => {
+    try { return Number(localStorage.getItem(BUDGET_TOTAL_KEY) || 0); } catch { return 0; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(BUDGET_TOTAL_KEY, String(budgetTotal || 0)); } catch {}
+    notifyProjectChanged();
+  }, [budgetTotal]);
+
   const budgetUsed = budget.reduce((s, b) => s + (b.actual || 0), 0);
   const groupSavings = info.groupSavings;
   const overPct = budgetUsed > budgetTotal && budgetTotal > 0
@@ -1005,6 +1015,7 @@ export default function ProjectManagement() {
               localStorage.removeItem(PROJECT_INFO_KEY);
               localStorage.removeItem(SCHEDULE_KEY);
               localStorage.removeItem(BUDGET_KEY);
+              localStorage.removeItem(BUDGET_TOTAL_KEY);
               localStorage.removeItem(CURRENT_IDX_KEY);
               localStorage.removeItem(TASKS_KEY);
               localStorage.removeItem("gb:pm:progress");
@@ -1012,6 +1023,7 @@ export default function ProjectManagement() {
             setInfo(DEFAULT_INFO);
             setSchedule({});
             setBudget([]);
+            setBudgetTotal(0);
             setCompleted({});
             setManualIdx(null);
             setEditInfoOpen(false);
@@ -1032,11 +1044,11 @@ export default function ProjectManagement() {
       {budgetOpen && (
         <BudgetModal
           budget={budget}
-          groupSavings={info.groupSavings}
+          budgetTotal={budgetTotal}
           onClose={() => setBudgetOpen(false)}
-          onSave={(items, savings) => {
+          onSave={(items, total) => {
             setBudget(items);
-            setInfo((p) => ({ ...p, groupSavings: savings }));
+            setBudgetTotal(total);
             setBudgetOpen(false);
           }}
         />
@@ -1466,140 +1478,285 @@ function ScheduleModal({
   );
 }
 
-/* ===================== Budget Modal ===================== */
+/* ===================== Budget Modal (Expense tracking) ===================== */
+
+const EXPENSE_CATEGORIES = [
+  "אלומיניום","חשמל","אינסטלציה","ריצוף","גבס","צבע","ריהוט","מטבח",
+  "אמבטיה","גינון","בטון/שלד","גג","דלתות וחלונות","קבלן","מהנדס/אדריכל","אחר",
+];
 
 function BudgetModal({
-  budget, groupSavings, onClose, onSave,
+  budget, budgetTotal, onClose, onSave,
 }: {
   budget: BudgetItem[];
-  groupSavings: number;
+  budgetTotal: number;
   onClose: () => void;
-  onSave: (items: BudgetItem[], savings: number) => void;
+  onSave: (items: BudgetItem[], total: number) => void;
 }) {
   const [items, setItems] = useState<BudgetItem[]>(budget);
-  const [savings, setSavings] = useState<string>(String(groupSavings ?? ""));
+  const [total, setTotal] = useState<string>(budgetTotal ? String(budgetTotal) : "");
+  const [addOpen, setAddOpen] = useState(false);
+  const [editTotal, setEditTotal] = useState(!budgetTotal);
   const onlyDigits = (v: string) => v.replace(/[^\d]/g, "");
 
-  const update = (id: string, patch: Partial<BudgetItem>) =>
-    setItems((p) => p.map((it) => (it.id === id ? { ...it, ...patch } : it)));
-  const remove = (id: string) => setItems((p) => p.filter((it) => it.id !== id));
-  const add = () =>
-    setItems((p) => [...p, { id: uid(), label: "", planned: 0, actual: 0 }]);
+  const totalNum = parseInt(total || "0", 10) || 0;
+  const used = items.reduce((s, b) => s + (b.actual || 0), 0);
+  const remaining = totalNum - used;
+  const over = used > totalNum && totalNum > 0 ? used - totalNum : 0;
 
-  // Auto-sync from resident task completions (mark related budget items as fully spent)
-  const syncFromSelections = () => {
-    try {
-      const completed = JSON.parse(localStorage.getItem(TASKS_KEY) || "{}");
-      const completedCats = new Set<string>();
-      Object.values(STAGES_BY_TYPE).flat().forEach((s) => {
-        const allDone = s.tasks.length > 0 && s.tasks.every((t) => completed[`${s.key}::${t}`]);
-        if (allDone) s.catIds.forEach((c) => completedCats.add(c));
-      });
-      setItems((p) =>
-        p.map((it) =>
-          it.catId && completedCats.has(it.catId) && (!it.actual || it.actual === 0)
-            ? { ...it, actual: it.planned }
-            : it
-        )
-      );
-    } catch {}
+  const remove = (id: string) => {
+    const next = items.filter((it) => it.id !== id);
+    setItems(next);
+    onSave(next, totalNum);
   };
 
-  const totalPlanned = items.reduce((s, b) => s + (b.planned || 0), 0);
-  const totalActual = items.reduce((s, b) => s + (b.actual || 0), 0);
-
-  const handleSave = () => {
-    const clean = items
-      .filter((it) => it.label.trim() || it.planned > 0 || it.actual > 0)
-      .map((it) => ({
-        ...it,
-        label: it.label.trim() || "ללא שם",
-        planned: Math.max(0, Math.round(it.planned || 0)),
-        actual: Math.max(0, Math.round(it.actual || 0)),
-      }));
-    onSave(clean, Math.max(0, parseInt(savings, 10) || 0));
+  const addExpense = (exp: BudgetItem) => {
+    const next = [exp, ...items];
+    setItems(next);
+    onSave(next, totalNum);
   };
+
+  const handleClose = () => {
+    onSave(items, totalNum);
+  };
+
+  const fmt = (n: number) => `₪${Math.abs(n).toLocaleString()}`;
 
   return (
-    <ModalShell title="בניית תקציב" onClose={onClose}>
-      <div className="bg-[#F0F9F6] rounded-2xl p-3 border border-[#0E6B5A]/15 mb-3">
-        <div className="flex items-center justify-between text-[12px]">
-          <div className="text-gray-600">
-            סה״כ מתוכנן: <span className="font-extrabold tabular-nums text-[#0A5447]">₪{totalPlanned.toLocaleString()}</span>
-          </div>
-          <div className="text-gray-600">
-            נוצל: <span className="font-extrabold tabular-nums text-[#0A5447]">₪{totalActual.toLocaleString()}</span>
-          </div>
-        </div>
-        <button
-          onClick={syncFromSelections}
-          className="mt-2 w-full flex items-center justify-center gap-1.5 text-[12px] font-bold text-[#0E6B5A] bg-white border border-[#0E6B5A]/20 rounded-xl py-2 active:scale-[0.98]"
-        >
-          <RefreshCw className="h-3.5 w-3.5" />
-          סנכרון אוטומטי לפי בחירות הדייר
-        </button>
-      </div>
-
-      <div className="space-y-2">
-        {items.map((it) => (
-          <div key={it.id} className="bg-[#FAFAF7] rounded-2xl p-3 border border-gray-100">
-            <div className="flex items-center gap-2 mb-2">
+    <ModalShell title="ניהול תקציב" onClose={handleClose}>
+      {/* Summary */}
+      <div
+        className="rounded-2xl p-4 mb-3 text-white"
+        style={{ background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)` }}
+      >
+        {editTotal ? (
+          <div>
+            <label className="block text-[11px] font-bold opacity-90 mb-1">תקציב כולל (₪)</label>
+            <div className="flex gap-2">
               <input
-                value={it.label}
-                onChange={(e) => update(it.id, { label: e.target.value })}
-                placeholder="שם סעיף"
-                className="flex-1 bg-white rounded-xl px-2.5 py-2 text-[13px] font-bold outline-none border border-gray-200 focus:border-[#0E6B5A]"
+                type="text" inputMode="numeric" dir="ltr" autoFocus
+                value={total}
+                onChange={(e) => setTotal(onlyDigits(e.target.value))}
+                placeholder="0"
+                className="flex-1 bg-white/95 text-[#1A1A1A] rounded-xl px-3 py-2 text-[15px] font-extrabold tabular-nums outline-none text-right"
               />
               <button
+                onClick={() => setEditTotal(false)}
+                className="px-4 rounded-xl bg-white text-[#0E6B5A] text-[13px] font-extrabold active:scale-95"
+              >
+                שמור
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] opacity-90">תקציב כולל</span>
+              <button
+                onClick={() => setEditTotal(true)}
+                className="text-[11px] font-bold bg-white/15 px-2 py-0.5 rounded-full active:scale-95"
+              >
+                עריכה
+              </button>
+            </div>
+            <div className="text-[24px] font-extrabold tabular-nums leading-tight" style={{ fontFamily: URBANIST }}>
+              {fmt(totalNum)}
+            </div>
+            <div className="grid grid-cols-3 gap-2 mt-3">
+              <SummaryChip label="הוצאות" value={fmt(used)} />
+              <SummaryChip label={remaining >= 0 ? "יתרה" : "חריגה"} value={fmt(remaining)} tone={remaining < 0 ? "warn" : "ok"} />
+              <SummaryChip label="פריטים" value={String(items.length)} />
+            </div>
+            {over > 0 && (
+              <div className="mt-2 text-[11.5px] bg-white/15 rounded-lg px-2 py-1.5 text-center">
+                חריגה של {fmt(over)} מהתקציב
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Add expense button */}
+      <button
+        onClick={() => setAddOpen(true)}
+        className="w-full flex items-center justify-center gap-2 text-[14px] font-extrabold text-white rounded-2xl py-3 mb-3 active:scale-[0.98]"
+        style={{ background: BRAND, fontFamily: URBANIST }}
+      >
+        <Plus className="h-4 w-4" />
+        הוסף הוצאה
+      </button>
+
+      {/* Expenses list */}
+      {items.length === 0 ? (
+        <div className="text-center py-8 text-[13px] text-gray-500">
+          עדיין לא נוספו הוצאות.
+          <br />לחצו על "הוסף הוצאה" כדי להתחיל.
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          {items.map((it) => (
+            <div key={it.id} className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-gray-100">
+              <div className="flex-1 min-w-0">
+                <div className="text-[13.5px] font-extrabold text-[#1A1A1A] truncate" style={{ fontFamily: URBANIST }}>
+                  {it.label}
+                </div>
+                <div className="text-[11px] text-gray-500 truncate">
+                  {[it.category, it.date ? formatDateShort(it.date) : null].filter(Boolean).join(" · ") || "—"}
+                </div>
+              </div>
+              <div className="text-[14px] font-extrabold tabular-nums text-[#0A5447] shrink-0">
+                {fmt(it.actual || 0)}
+              </div>
+              <button
                 onClick={() => remove(it.id)}
-                className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center active:scale-95"
+                className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center active:scale-95 shrink-0"
                 aria-label="מחיקה"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Field label="מתוכנן (₪)">
-                <input
-                  type="text" inputMode="numeric" dir="ltr"
-                  value={it.planned ? String(it.planned) : ""}
-                  onChange={(e) => update(it.id, { planned: parseInt(onlyDigits(e.target.value), 10) || 0 })}
-                  className="w-full bg-white rounded-xl px-2.5 py-2 text-[13px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
-                />
-              </Field>
-              <Field label="נוצל (₪)">
-                <input
-                  type="text" inputMode="numeric" dir="ltr"
-                  value={it.actual ? String(it.actual) : ""}
-                  onChange={(e) => update(it.id, { actual: parseInt(onlyDigits(e.target.value), 10) || 0 })}
-                  className="w-full bg-white rounded-xl px-2.5 py-2 text-[13px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
-                />
-              </Field>
-            </div>
-          </div>
-        ))}
-        <button
-          onClick={add}
-          className="w-full flex items-center justify-center gap-1.5 text-[13px] font-bold text-[#0E6B5A] bg-white border-2 border-dashed border-[#0E6B5A]/30 rounded-2xl py-3 active:scale-[0.98]"
-        >
-          <Plus className="h-4 w-4" />
-          הוספת סעיף
-        </button>
+          ))}
+        </div>
+      )}
 
-        <Field label="חיסכון קבוצתי (₪)">
-          <input
-            type="text" inputMode="numeric" dir="ltr"
-            value={savings}
-            onChange={(e) => setSavings(onlyDigits(e.target.value))}
-            className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
-          />
-        </Field>
-      </div>
+      <p className="text-[11px] text-gray-400 text-center mt-4">
+        התקציב מתעדכן לפי העסקאות וההוצאות שלך
+      </p>
 
-      <ModalActions onCancel={onClose} onSave={handleSave} />
+      {addOpen && (
+        <AddExpenseSheet
+          onClose={() => setAddOpen(false)}
+          onAdd={(exp) => { addExpense(exp); setAddOpen(false); }}
+        />
+      )}
     </ModalShell>
   );
 }
+
+function SummaryChip({ label, value, tone = "ok" }: { label: string; value: string; tone?: "ok" | "warn" }) {
+  return (
+    <div className={`rounded-xl px-2 py-1.5 text-center ${tone === "warn" ? "bg-white/25" : "bg-white/15"}`}>
+      <div className="text-[10px] opacity-90">{label}</div>
+      <div className="text-[13px] font-extrabold tabular-nums leading-tight mt-0.5">{value}</div>
+    </div>
+  );
+}
+
+function AddExpenseSheet({
+  onClose, onAdd,
+}: { onClose: () => void; onAdd: (e: BudgetItem) => void }) {
+  const [label, setLabel] = useState("");
+  const [category, setCategory] = useState<string>(EXPENSE_CATEGORIES[0]);
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const [note, setNote] = useState("");
+  const onlyDigits = (v: string) => v.replace(/[^\d]/g, "");
+  const amt = parseInt(amount || "0", 10) || 0;
+  const canSave = label.trim().length > 0 && amt > 0;
+
+  return createPortal(
+    <div
+      dir="rtl"
+      className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center"
+      onClick={onClose}
+      style={{ fontFamily: EPILOGUE }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl max-h-[85dvh] flex flex-col"
+      >
+        <div className="flex items-center justify-between p-5 pb-3 shrink-0">
+          <h3 className="text-[16px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
+            הוסף הוצאה
+          </h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:scale-95"
+            aria-label="סגירה"
+          >
+            <X className="h-4 w-4 text-gray-600" />
+          </button>
+        </div>
+        <div
+          className="flex-1 overflow-y-auto min-h-0 px-5 space-y-3"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 24px)" }}
+        >
+          <Field label="שם ההוצאה">
+            <input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="לדוגמה: אלומיניום"
+              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+            />
+          </Field>
+          <Field label="קטגוריה">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+            >
+              {EXPENSE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </Field>
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="סכום (₪)">
+              <input
+                type="text" inputMode="numeric" dir="ltr"
+                value={amount}
+                onChange={(e) => setAmount(onlyDigits(e.target.value))}
+                placeholder="0"
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+              />
+            </Field>
+            <Field label="תאריך">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+              />
+            </Field>
+          </div>
+          <Field label="הערה / קבלה (לא חובה)">
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={2}
+              placeholder="מס' קבלה, פרטים נוספים…"
+              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[13px] outline-none border border-gray-200 focus:border-[#0E6B5A] resize-none"
+            />
+          </Field>
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={onClose}
+              className="flex-1 py-3 rounded-2xl text-[14px] font-bold text-gray-700 bg-gray-100 active:scale-[0.98]"
+            >
+              ביטול
+            </button>
+            <button
+              disabled={!canSave}
+              onClick={() => onAdd({
+                id: uid(),
+                label: label.trim(),
+                category,
+                planned: 0,
+                actual: amt,
+                date,
+                note: note.trim() || undefined,
+              })}
+              className="flex-1 py-3 rounded-2xl text-[14px] font-extrabold text-white active:scale-[0.98] disabled:opacity-50"
+              style={{ background: BRAND, fontFamily: URBANIST }}
+            >
+              שמור הוצאה
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 
 /* ===================== Shared bits ===================== */
 

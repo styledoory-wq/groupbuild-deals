@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 export const PROJECT_INFO_KEY = "gb:pm:info";
 export const SCHEDULE_KEY = "gb:pm:schedule";
 export const BUDGET_KEY = "gb:pm:budget";
+export const BUDGET_TOTAL_KEY = "gb:pm:budgetTotal";
 export const CURRENT_IDX_KEY = "gb:pm:currentIdx";
 export const TASKS_KEY = "gb:pm:tasks";
 export const PROGRESS_KEY = "gb:pm:progress";
@@ -40,7 +41,7 @@ export type LocalProjectInfo = {
   groupSavings?: number;
   projectType?: string;
 };
-export type LocalBudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string };
+export type LocalBudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string; category?: string; date?: string; note?: string };
 
 export type ProjectSummary = {
   hasProject: boolean;
@@ -73,7 +74,9 @@ export function readProjectSummary(): ProjectSummary {
   const info = safeParse<LocalProjectInfo>(localStorage.getItem(PROJECT_INFO_KEY), {});
   const budget = safeParse<LocalBudgetItem[]>(localStorage.getItem(BUDGET_KEY), []);
   const progress = safeParse<ProjectProgress | null>(localStorage.getItem(PROGRESS_KEY), null);
-  const budgetTotal = budget.reduce((s, b) => s + (b.planned || 0), 0);
+  const totalPlanned = budget.reduce((s, b) => s + (b.planned || 0), 0);
+  const explicitTotal = Number(localStorage.getItem(BUDGET_TOTAL_KEY) || 0);
+  const budgetTotal = explicitTotal > 0 ? explicitTotal : totalPlanned;
   const budgetUsed = budget.reduce((s, b) => s + (b.actual || 0), 0);
   const budgetOverPct = budgetUsed > budgetTotal && budgetTotal > 0
     ? Math.round(((budgetUsed - budgetTotal) / budgetTotal) * 100) : 0;
