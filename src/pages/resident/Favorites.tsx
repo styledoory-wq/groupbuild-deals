@@ -21,7 +21,9 @@ export default function Favorites() {
       const { data: session } = await supabase.auth.getSession();
       if (!session.session) { setLoading(false); return; }
       const uid = session.session.user.id;
-      const { data: favs } = await supabase.from("favorites").select("deal_id").eq("user_id", uid);
+      const pid = await resolveMyProjectId(uid);
+      const favQ = supabase.from("favorites").select("deal_id");
+      const { data: favs } = await (pid ? favQ.eq("project_id", pid) : favQ.eq("user_id", uid));
       const ids = (favs ?? []).map((r) => r.deal_id as string);
       setFavIds(new Set(ids));
       if (!ids.length) { setLoading(false); return; }
