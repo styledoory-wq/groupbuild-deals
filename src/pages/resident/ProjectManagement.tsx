@@ -591,6 +591,7 @@ export default function ProjectManagement() {
   });
   useEffect(() => {
     try { localStorage.setItem(BUDGET_KEY, JSON.stringify(budget)); } catch {}
+    notifyProjectChanged();
   }, [budget]);
 
   const budgetTotal = budget.reduce((s, b) => s + (b.planned || 0), 0);
@@ -603,6 +604,9 @@ export default function ProjectManagement() {
   const [editInfoOpen, setEditInfoOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [budgetOpen, setBudgetOpen] = useState(false);
+
+  // Feature flag — AI cost estimate is admin-controlled and hidden by default.
+  const aiEstimateEnabled = useFeatureFlag("aiCostEstimate");
 
   return (
     <div
