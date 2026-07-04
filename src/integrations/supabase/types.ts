@@ -2874,6 +2874,7 @@ export type Database = {
         Args: { _project_id: string; _user_id: string }
         Returns: Database["public"]["Enums"]["user_project_role"]
       }
+      viewer_insert_allowed: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "resident" | "supplier" | "committee"
