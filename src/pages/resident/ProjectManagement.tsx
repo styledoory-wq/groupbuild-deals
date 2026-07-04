@@ -57,10 +57,11 @@ type ProjectInfo = {
 type ScheduleItem = { start: string; end: string };
 type BudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string };
 
-const PROJECT_INFO_KEY = "gb:pm:info";
-const SCHEDULE_KEY = "gb:pm:schedule";
-const BUDGET_KEY = "gb:pm:budget";
-const CURRENT_IDX_KEY = "gb:pm:currentIdx";
+const PROJECT_INFO_KEY = PM_INFO_KEY;
+const SCHEDULE_KEY = PM_SCHEDULE_KEY;
+const BUDGET_KEY = PM_BUDGET_KEY;
+const CURRENT_IDX_KEY = PM_CURRENT_IDX_KEY;
+const TASKS_KEY = PM_TASKS_KEY;
 
 const DEFAULT_INFO: ProjectInfo = {
   name: "",
