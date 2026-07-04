@@ -484,7 +484,7 @@ function MyProjectCard({ onOpen }: { onOpen: () => void }) {
       <SectionHeader
         title="הפרויקט שלי"
         subtitle={`${p.progressPct}% הושלם`}
-        action={<button onClick={onOpen} className="text-[14px] font-medium text-[#0E6B5A]">ניהול</button>}
+        action={<button onClick={onOpen} className="text-[14px] font-medium text-[#0E6B5A]">ניהול פרויקט</button>}
       />
       <button
         onClick={onOpen}
