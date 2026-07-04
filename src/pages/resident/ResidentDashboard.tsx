@@ -10,6 +10,7 @@ import { SupportButton } from "@/components/SupportButton";
 import { DocumentsButton } from "@/components/DocumentsButton";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useApp, formatILS } from "@/store/AppStore";
+import { useProjectSummary } from "@/lib/projectStore";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import { type StageId } from "@/lib/designSystem";
