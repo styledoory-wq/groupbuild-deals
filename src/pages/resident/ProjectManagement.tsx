@@ -464,6 +464,7 @@ export default function ProjectManagement() {
   const navigate = useNavigate();
   const { categories, user } = useApp();
   useProjectCloudSync(user?.id);
+  const { isViewer } = useMyProject(user?.id);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(() => getActiveProjectId());
   useEffect(() => {
     if (activeProjectId) return;
