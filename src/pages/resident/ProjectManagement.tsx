@@ -477,10 +477,10 @@ export default function ProjectManagement() {
 
   // Task completion local state
   const [completed, setCompleted] = useState<Record<string, boolean>>(() => {
-    try { return JSON.parse(localStorage.getItem("gb:pm:tasks") || "{}"); } catch { return {}; }
+    try { return JSON.parse(localStorage.getItem(TASKS_KEY) || "{}"); } catch { return {}; }
   });
   useEffect(() => {
-    try { localStorage.setItem("gb:pm:tasks", JSON.stringify(completed)); } catch {}
+    try { localStorage.setItem(TASKS_KEY, JSON.stringify(completed)); } catch {}
   }, [completed]);
 
   const toggleTask = (key: string) => setCompleted((p) => ({ ...p, [key]: !p[key] }));
@@ -1003,7 +1003,7 @@ export default function ProjectManagement() {
               localStorage.removeItem(SCHEDULE_KEY);
               localStorage.removeItem(BUDGET_KEY);
               localStorage.removeItem(CURRENT_IDX_KEY);
-              localStorage.removeItem("gb:pm:tasks");
+              localStorage.removeItem(TASKS_KEY);
             } catch {}
             setInfo(DEFAULT_INFO);
             setSchedule({});
@@ -1485,7 +1485,7 @@ function BudgetModal({
   // Auto-sync from resident task completions (mark related budget items as fully spent)
   const syncFromSelections = () => {
     try {
-      const completed = JSON.parse(localStorage.getItem("gb:pm:tasks") || "{}");
+      const completed = JSON.parse(localStorage.getItem(TASKS_KEY) || "{}");
       const completedCats = new Set<string>();
       Object.values(STAGES_BY_TYPE).flat().forEach((s) => {
         const allDone = s.tasks.length > 0 && s.tasks.every((t) => completed[`${s.key}::${t}`]);
