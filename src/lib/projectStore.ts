@@ -41,7 +41,7 @@ export type LocalProjectInfo = {
   groupSavings?: number;
   projectType?: string;
 };
-export type LocalBudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string };
+export type LocalBudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string; category?: string; date?: string; note?: string };
 
 export type ProjectSummary = {
   hasProject: boolean;
