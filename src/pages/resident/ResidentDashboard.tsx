@@ -253,7 +253,11 @@ export default function ResidentDashboard() {
     [journeyMeta]
   );
   const currentIdx = useMemo(() => Math.max(0, journeyStages.findIndex((s) => s.id === currentStage)), [currentStage, journeyStages]);
-  const completionPct = journeyStages.length ? Math.round(((currentIdx + 1) / journeyStages.length) * 100) : 0;
+  // Single source of truth: pull real task completion from Project Management (localStorage-mirrored from cloud).
+  const projectSummary = useProjectSummary();
+  const completionPct = projectSummary.tasksTotal > 0
+    ? projectSummary.progressPct
+    : (journeyStages.length ? Math.round(((currentIdx + 1) / journeyStages.length) * 100) : 0);
 
   const feedItems = useMemo<FeedItem[]>(() => {
     const out: FeedItem[] = [];
