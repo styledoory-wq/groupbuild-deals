@@ -1015,6 +1015,7 @@ export default function ProjectManagement() {
               localStorage.removeItem(PROJECT_INFO_KEY);
               localStorage.removeItem(SCHEDULE_KEY);
               localStorage.removeItem(BUDGET_KEY);
+              localStorage.removeItem(BUDGET_TOTAL_KEY);
               localStorage.removeItem(CURRENT_IDX_KEY);
               localStorage.removeItem(TASKS_KEY);
               localStorage.removeItem("gb:pm:progress");
@@ -1022,6 +1023,7 @@ export default function ProjectManagement() {
             setInfo(DEFAULT_INFO);
             setSchedule({});
             setBudget([]);
+            setBudgetTotal(0);
             setCompleted({});
             setManualIdx(null);
             setEditInfoOpen(false);
