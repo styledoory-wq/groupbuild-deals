@@ -56,11 +56,12 @@ type ProjectInfo = {
 };
 
 type ScheduleItem = { start: string; end: string };
-type BudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string };
+type BudgetItem = { id: string; label: string; planned: number; actual: number; catId?: string; category?: string; date?: string; note?: string };
 
 const PROJECT_INFO_KEY = PM_INFO_KEY;
 const SCHEDULE_KEY = PM_SCHEDULE_KEY;
 const BUDGET_KEY = PM_BUDGET_KEY;
+const BUDGET_TOTAL_KEY = PM_BUDGET_TOTAL_KEY;
 const CURRENT_IDX_KEY = PM_CURRENT_IDX_KEY;
 const TASKS_KEY = PM_TASKS_KEY;
 
