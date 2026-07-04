@@ -616,7 +616,7 @@ export default function ProjectManagement() {
     >
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] px-5 pt-[calc(env(safe-area-inset-top)+18px)]"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 120px)" }}
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
         {/* Top bar */}
         <div className="flex items-center justify-between mb-4">
