@@ -712,53 +712,84 @@ export default function ProjectManagement() {
           </div>
         )}
 
-        {/* AI Cost Estimation — planning phase tool */}
+        {/* Budget management — persistent primary action */}
         <button
-          onClick={() =>
-            navigate("/resident/budget-planner", {
-              state: {
-                fromProject: true,
-                projectType: info.projectType,
-                area: info.area,
-                rooms: info.rooms,
-                floors: info.floors,
-                standard: info.standard,
-                scope: info.scope,
-                mamadType: info.mamadType,
-                units: info.units,
-                committeeService: info.committeeService,
-                serviceCategory: info.serviceCategory,
-                serviceDetails: info.serviceDetails,
-                projectName: info.name,
-              },
-            })
-          }
+          onClick={() => setBudgetOpen(true)}
           className="mt-4 w-full bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-right active:scale-[0.99] transition-transform flex items-center gap-3"
         >
           <div
-            className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center text-[28px]"
-            style={{ background: "linear-gradient(135deg,#EEF4FF 0%,#F5F3FF 100%)" }}
+            className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center text-white"
+            style={{ background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)` }}
             aria-hidden
           >
-            🤖
+            <TrendingUp className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <h3 className="text-[14.5px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
-                אומדן עלות AI
+                💰 ניהול תקציב
               </h3>
               <span className="text-[9.5px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-1.5 py-0.5 rounded-full">
-                {info.projectType ? "מותאם אישית" : "שלב תכנון"}
+                {overPct === 0 ? "בתקציב" : `${overPct}% חריגה`}
               </span>
             </div>
-            <p className="text-[11.5px] text-gray-500 mt-1 leading-snug">
-              {info.projectType
-                ? "אומדן חכם לפי סוג הפרויקט והנתונים שהזנת בפרטי הפרויקט."
-                : "מלא/י תחילה את פרטי הפרויקט לקבלת אומדן מדויק ואישי."}
+            <p className="text-[11.5px] text-gray-500 mt-1 leading-snug tabular-nums">
+              ₪{budgetUsed.toLocaleString()} מתוך ₪{budgetTotal.toLocaleString()}
+              {groupSavings > 0 && <> · חיסכון ₪{groupSavings.toLocaleString()}</>}
             </p>
           </div>
           <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" />
         </button>
+
+        {/* AI Cost Estimation — hidden by default, admin-controlled feature flag */}
+        {aiEstimateEnabled && (
+          <button
+            onClick={() =>
+              navigate("/resident/budget-planner", {
+                state: {
+                  fromProject: true,
+                  projectType: info.projectType,
+                  area: info.area,
+                  rooms: info.rooms,
+                  floors: info.floors,
+                  standard: info.standard,
+                  scope: info.scope,
+                  mamadType: info.mamadType,
+                  units: info.units,
+                  committeeService: info.committeeService,
+                  serviceCategory: info.serviceCategory,
+                  serviceDetails: info.serviceDetails,
+                  projectName: info.name,
+                },
+              })
+            }
+            className="mt-3 w-full bg-white rounded-3xl p-4 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-right active:scale-[0.99] transition-transform flex items-center gap-3"
+          >
+            <div
+              className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center text-[28px]"
+              style={{ background: "linear-gradient(135deg,#EEF4FF 0%,#F5F3FF 100%)" }}
+              aria-hidden
+            >
+              🤖
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-[14.5px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
+                  אומדן עלות AI
+                </h3>
+                <span className="text-[9.5px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-1.5 py-0.5 rounded-full">
+                  {info.projectType ? "מותאם אישית" : "שלב תכנון"}
+                </span>
+              </div>
+              <p className="text-[11.5px] text-gray-500 mt-1 leading-snug">
+                {info.projectType
+                  ? "אומדן חכם לפי סוג הפרויקט והנתונים שהזנת בפרטי הפרויקט."
+                  : "מלא/י תחילה את פרטי הפרויקט לקבלת אומדן מדויק ואישי."}
+              </p>
+            </div>
+            <ChevronLeft className="h-4 w-4 text-gray-400 shrink-0" />
+          </button>
+        )}
 
         {/* Timeline */}
         <div className="mt-6 mb-2 flex items-center justify-between">
