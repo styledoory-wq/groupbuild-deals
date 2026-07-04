@@ -568,6 +568,18 @@ export default function ProjectManagement() {
     s.tasks.length > 0 && s.tasks.every((t) => completed[`${s.key}::${t}`])
   ).length;
 
+  // Persist a compact progress snapshot so other screens (dashboard) stay in sync.
+  useEffect(() => {
+    writeProjectProgress({
+      tasksDone: overallDone,
+      tasksTotal: overallTotal,
+      stageIdx: currentIdx,
+      stagesCount: stages.length,
+      currentStageTitle: current?.title ?? "",
+      updatedAt: Date.now(),
+    });
+  }, [overallDone, overallTotal, currentIdx, stages.length, current?.title]);
+
 
   // Schedule per stage
   const [schedule, setSchedule] = useState<Record<string, ScheduleItem>>(() => {
