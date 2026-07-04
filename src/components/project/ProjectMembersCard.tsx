@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { Users, Plus, Copy, Check, X, Trash2, MessageCircle, Mail, Crown, Eye, Shield } from "lucide-react";
@@ -18,10 +18,32 @@ const ROLE_META: Record<MemberRole, { label: string; icon: JSX.Element; tone: st
 
 export function ProjectMembersCard({ projectId }: { projectId: string | null }) {
   const { user } = useApp();
-  const { members, loading } = useProjectMembers(projectId);
+export function ProjectMembersCard({
+  projectId,
+  projectLoading = false,
+  projectError = null,
+  onRetryProject,
+}: {
+  projectId: string | null;
+  projectLoading?: boolean;
+  projectError?: Error | null;
+  onRetryProject?: () => void;
+}) {
+  const { user } = useApp();
+  const { members, loading, error: membersError, refetch } = useProjectMembers(projectId);
   const myRole = useMyProjectRole(projectId, user?.id);
   const [open, setOpen] = useState(false);
   const canInvite = !myRole || myRole === "owner" || myRole === "partner";
+
+  useEffect(() => {
+    console.info("[ProjectMembers] card state", {
+      projectId,
+      currentUserId: user?.id ?? null,
+      currentRole: myRole,
+      membersCount: members.length,
+      membersError: membersError?.message ?? projectError?.message ?? null,
+    });
+  }, [members.length, membersError, myRole, projectError, projectId, user?.id]);
 
   const memberCount = members.length;
   const subtitle = !projectId
@@ -65,6 +87,13 @@ export function ProjectMembersCard({ projectId }: { projectId: string | null }) 
           onClose={() => setOpen(false)}
           members={members}
           loading={loading}
+          projectLoading={projectLoading}
+          projectError={projectError}
+          membersError={membersError}
+          onRetry={() => {
+            onRetryProject?.();
+            refetch();
+          }}
         />
       )}
     </>
@@ -73,6 +102,7 @@ export function ProjectMembersCard({ projectId }: { projectId: string | null }) 
 
 function MembersSheet({
   projectId, myUserId, myRole, canInvite, onClose, members, loading,
+  projectLoading, projectError, membersError, onRetry,
 }: {
   projectId: string | null;
   myUserId: string | null;
@@ -81,11 +111,38 @@ function MembersSheet({
   onClose: () => void;
   members: ReturnType<typeof useProjectMembers>["members"];
   loading: boolean;
+  projectLoading: boolean;
+  projectError: Error | null;
+  membersError: Error | null;
+  onRetry: () => void;
 }) {
   const [inviteRole, setInviteRole] = useState<MemberRole>("partner");
   const [creating, setCreating] = useState(false);
   const [link, setLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+  const waitingForProject = !projectId || projectLoading;
+  const waitingForMembers = Boolean(projectId && loading && members.length === 0);
+  const blockingError = projectError || membersError;
+
+  useEffect(() => {
+    if (!waitingForProject && !waitingForMembers) {
+      setTimedOut(false);
+      return;
+    }
+    setTimedOut(false);
+    const timer = window.setTimeout(() => setTimedOut(true), 5000);
+    return () => window.clearTimeout(timer);
+  }, [waitingForMembers, waitingForProject, projectId]);
+
+  useEffect(() => {
+    if (blockingError) toast.error("לא הצלחנו לטעון את חברי הפרויקט");
+  }, [blockingError]);
+
+  const handleRetry = () => {
+    setTimedOut(false);
+    onRetry();
+  };
 
   const handleCreate = async () => {
     if (!projectId) {
@@ -151,7 +208,24 @@ function MembersSheet({
         </div>
 
         <div className="p-5 max-h-[70vh] overflow-y-auto space-y-4">
-          {!projectId && (
+          {(blockingError || timedOut) && (
+            <div className="flex flex-col items-center text-center py-8 gap-3">
+              <div className="w-11 h-11 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-[13.5px] font-extrabold text-[#1A1A1A]">לא הצלחנו לטעון את חברי הפרויקט</p>
+                <p className="text-[12px] text-gray-500 mt-1">אפשר לנסות שוב, אנחנו נטען מחדש את הפרויקט והרשימה.</p>
+              </div>
+              <button
+                onClick={handleRetry}
+                className="px-4 py-2.5 rounded-xl bg-[#0E6B5A] text-white text-[12.5px] font-bold active:scale-[0.98] transition-transform"
+              >
+                נסה שוב
+              </button>
+            </div>
+          )}
+          {!blockingError && !timedOut && waitingForProject && (
             <div className="flex flex-col items-center text-center py-8 gap-3">
               <div className="h-9 w-9 rounded-full border-2 border-[#0E6B5A] border-t-transparent animate-spin" />
               <p className="text-[13px] font-medium text-gray-600">אנחנו מכינים את הפרויקט שלך...</p>
@@ -162,19 +236,20 @@ function MembersSheet({
               </div>
             </div>
           )}
-          {projectId && loading && members.length === 0 && (
+          {!blockingError && !timedOut && waitingForMembers && (
             <div className="space-y-2">
               {[0, 1, 2].map((i) => (
                 <div key={i} className="h-14 rounded-2xl bg-gray-100 animate-pulse" />
               ))}
             </div>
           )}
-          {projectId && !loading && members.length === 0 && (
+          {!blockingError && !timedOut && projectId && !loading && members.length === 0 && (
             <div className="text-center text-[12.5px] text-gray-500 py-3">
               אתה החבר היחיד בפרויקט. הזמן שותף כדי לשתף את הנתונים.
             </div>
           )}
           {/* members */}
+          {!blockingError && !timedOut && (
           <ul className="space-y-2">
             {members.map((m) => {
               const meta = ROLE_META[m.role];
@@ -212,9 +287,10 @@ function MembersSheet({
               );
             })}
           </ul>
+          )}
 
           {/* invite */}
-          {projectId && canInvite ? (
+          {!blockingError && !timedOut && projectId && canInvite ? (
             <div className="p-4 rounded-2xl border border-dashed border-[#0E6B5A]/30 bg-[#F4FBF8] space-y-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-[#0E6B5A] text-white flex items-center justify-center">
@@ -281,11 +357,11 @@ function MembersSheet({
                 </div>
               )}
             </div>
-          ) : (
+          ) : !blockingError && !timedOut && projectId ? (
             <div className="text-center text-[12px] text-gray-500 py-3">
               רק בעלים או שותפים יכולים להזמין חברים חדשים.
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>,
