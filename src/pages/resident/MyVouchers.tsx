@@ -115,11 +115,11 @@ export default function MyVouchers() {
       setVouchers(vs);
 
       // Pending: user joined an active deal — waiting for group close
-      const { data: ints } = await supabase
+      const intsQ = supabase
         .from("deal_interests")
         .select("id, deal_id")
-        .eq("user_id", uid)
         .eq("is_deleted", false);
+      const { data: ints } = await (pid ? intsQ.eq("project_id", pid) : intsQ.eq("user_id", uid));
       const dealIds = Array.from(new Set((ints ?? []).map((i) => i.deal_id)));
       const voucheredDealIds = new Set(vs.map((v) => v.deal_id));
       const dealsNeedingFetch = dealIds.filter((id) => !voucheredDealIds.has(id));
