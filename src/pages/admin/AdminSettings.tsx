@@ -97,3 +97,19 @@ export default function AdminSettings() {
     </MobileShell>
   );
 }
+
+function FeatureFlagRow({ flagKey, label, description }: { flagKey: Parameters<typeof setFlag>[0]; label: string; description: string }) {
+  const enabled = useFeatureFlag(flagKey);
+  return (
+    <div className="w-full flex items-center gap-3 px-4 py-3.5 text-right first:rounded-t-[14px] last:rounded-b-[14px]">
+      <span className="h-9 w-9 rounded-[10px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
+        <FlaskConical className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2.2} />
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-extrabold text-[13.5px] text-[#0F172A] truncate">{label}</div>
+        <div className="text-[12px] text-[#6B7280] mt-0.5">{description}</div>
+      </div>
+      <Switch checked={enabled} onCheckedChange={(v) => setFlag(flagKey, v)} />
+    </div>
+  );
+}
