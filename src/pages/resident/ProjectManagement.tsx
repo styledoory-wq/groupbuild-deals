@@ -470,6 +470,7 @@ export default function ProjectManagement() {
   });
   useEffect(() => {
     try { localStorage.setItem(PROJECT_INFO_KEY, JSON.stringify(info)); } catch {}
+    notifyProjectChanged();
   }, [info]);
 
   // Dynamic stages based on project type
