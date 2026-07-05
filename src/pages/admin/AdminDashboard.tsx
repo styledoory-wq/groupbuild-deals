@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { setPreviewRole } from "@/lib/previewMode";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { computeCompleteness } from "@/lib/supplierCompleteness";
 
 type Stats = {
   totalRevenue: number;
