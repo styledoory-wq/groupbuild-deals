@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Share2, Pencil, Calendar, Clock, User, Check, TrendingUp,
-  Star, ChevronLeft, Sparkles, Zap, X, Plus, Trash2, RefreshCw,
+  Star, ChevronLeft, Sparkles, Zap, X, Plus, Trash2, RefreshCw, ChevronDown, MapPin,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -44,6 +44,8 @@ type ProjectInfo = {
   targetDate: string; // YYYY-MM-DD
   groupSavings: number;
   projectType?: ProjectType;
+  city?: string;
+  address?: string;
   // Type-specific fields (only relevant ones are used per type)
   area?: number;          // מ"ר — new_build / renovation / extension / mamad
   rooms?: number;         // חדרים
@@ -1036,6 +1038,7 @@ export default function ProjectManagement() {
           info={info}
           onClose={() => setEditInfoOpen(false)}
           onSave={(next) => { setInfo(next); setEditInfoOpen(false); }}
+          onAutoSave={(next) => setInfo(next)}
           onReset={() => {
             try {
               localStorage.removeItem(PROJECT_INFO_KEY);
@@ -1108,12 +1111,39 @@ function InfoChip({
 /* ===================== Edit Info Modal ===================== */
 
 function EditInfoModal({
-  info, onClose, onSave, onReset,
-}: { info: ProjectInfo; onClose: () => void; onSave: (info: ProjectInfo) => void; onReset: () => void }) {
+  info, onClose, onSave, onAutoSave, onReset,
+}: {
+  info: ProjectInfo;
+  onClose: () => void;
+  onSave: (info: ProjectInfo) => void;
+  onAutoSave?: (info: ProjectInfo) => void;
+  onReset: () => void;
+}) {
   const [form, setForm] = useState<ProjectInfo>({ ...info });
   const [step, setStep] = useState<1 | 2>(info.projectType ? 2 : 1);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
 
+  // Auto-save: debounce 700ms, skip first render
+  const firstRun = useMemo(() => ({ v: true }), []);
+  useEffect(() => {
+    if (firstRun.v) { firstRun.v = false; return; }
+    if (!onAutoSave) return;
+    const t = setTimeout(() => {
+      onAutoSave({
+        ...form,
+        name: (form.name || "").trim(),
+        subtitle: (form.subtitle || "").trim(),
+        manager: (form.manager || "").trim(),
+        city: (form.city || "").trim(),
+        address: (form.address || "").trim(),
+      });
+      setSavedAt(Date.now());
+    }, 700);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form]);
 
   const set = <K extends keyof ProjectInfo>(k: K, v: ProjectInfo[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
@@ -1134,6 +1164,8 @@ function EditInfoModal({
       name: (form.name || "").trim() || info.name,
       subtitle: (form.subtitle || "").trim(),
       manager: (form.manager || "").trim(),
+      city: (form.city || "").trim(),
+      address: (form.address || "").trim(),
     });
   };
 
@@ -1192,193 +1224,270 @@ function EditInfoModal({
           })}
         </div>
       ) : (
-        <div className="space-y-3">
-          {/* Selected type header + change */}
-          <div className="flex items-center justify-between bg-[#F0F9F6] border border-[#0E6B5A]/15 rounded-2xl p-3">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-[18px]" aria-hidden>
-                {PROJECT_TYPES.find((p) => p.key === t)?.emoji}
-              </span>
-              <div className="text-[13px] font-extrabold text-[#0A5447] truncate" style={{ fontFamily: URBANIST }}>
-                {PROJECT_TYPES.find((p) => p.key === t)?.label}
-              </div>
+        <div className="space-y-4">
+          {/* Auto-save status */}
+          <div className="flex items-center justify-between -mt-1">
+            <div className="flex items-center gap-1.5 text-[10.5px] font-bold text-gray-400">
+              {savedAt ? (
+                <>
+                  <Check className="h-3 w-3 text-[#0E6B5A]" />
+                  <span>נשמר אוטומטית</span>
+                </>
+              ) : (
+                <span>שינויים נשמרים אוטומטית</span>
+              )}
             </div>
-            <button
-              onClick={() => setStep(1)}
-              className="text-[11px] font-bold text-[#0E6B5A] bg-white border border-[#0E6B5A]/20 px-2.5 py-1 rounded-full active:scale-95"
-            >
-              שינוי
-            </button>
           </div>
 
-          {/* Common fields */}
+          {/* Section: סוג פרויקט (chips) */}
+          <SectionTitle>סוג הפרויקט</SectionTitle>
+          <div className="flex flex-wrap gap-1.5">
+            {PROJECT_TYPES.map((pt) => {
+              const sel = form.projectType === pt.key;
+              return (
+                <button
+                  key={pt.key}
+                  onClick={() => set("projectType", pt.key)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-bold border transition active:scale-95"
+                  style={{
+                    background: sel ? BRAND : "#FFFFFF",
+                    borderColor: sel ? BRAND : "#E5E7EB",
+                    color: sel ? "#FFFFFF" : "#374151",
+                  }}
+                >
+                  <span aria-hidden>{pt.emoji}</span>
+                  <span>{pt.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Section: מידע בסיסי */}
+          <SectionTitle>מידע בסיסי</SectionTitle>
           <Field label="שם הפרויקט">
-            <TextInput value={form.name} onChange={(v) => set("name", v)} />
-          </Field>
-          <Field label="תיאור קצר (רשות)">
-            <TextInput value={form.subtitle} onChange={(v) => set("subtitle", v)} />
-          </Field>
-          <Field label="מנהל הפרויקט">
-            <TextInput value={form.manager} onChange={(v) => set("manager", v)} />
-          </Field>
-          <Field label="תאריך יעד">
-            <input
-              type="date"
-              value={form.targetDate}
-              onChange={(e) => set("targetDate", e.target.value)}
-              className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+            <TextInput
+              value={form.name}
+              onChange={(v) => set("name", v)}
+              placeholder="לדוגמה: הבית שלנו ברחוב הרצל"
             />
           </Field>
 
-          {/* Type-specific fields */}
-          {needsArea && (
-            <Field label={t === "mamad" ? 'גודל ממ״ד (מ״ר)' : 'שטח (מ״ר)'}>
-              <input
-                type="number" inputMode="numeric" min={1}
-                value={form.area ?? ""}
-                onChange={(e) => set("area", e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
-              />
-            </Field>
-          )}
+          {/* Section: מיקום */}
+          <SectionTitle>מיקום</SectionTitle>
+          <Field label="יישוב">
+            <TextInput
+              value={form.city ?? ""}
+              onChange={(v) => set("city", v)}
+              placeholder="לדוגמה: תל אביב"
+            />
+          </Field>
+          <Field label="כתובת (רשות)">
+            <TextInput
+              value={form.address ?? ""}
+              onChange={(v) => set("address", v)}
+              placeholder="לדוגמה: הרצל 25, קומה 3"
+            />
+          </Field>
 
-          {needsRooms && (
-            <Field label="מספר חדרים">
-              <input
-                type="number" inputMode="numeric" min={1}
-                value={form.rooms ?? ""}
-                onChange={(e) => set("rooms", e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
-              />
-            </Field>
-          )}
+          {/* Section: פרטים נוספים (collapsible) */}
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((s) => !s)}
+            className="w-full flex items-center justify-between mt-2 py-2 border-t border-gray-100 text-[13px] font-extrabold text-[#0A5447]"
+            style={{ fontFamily: URBANIST }}
+          >
+            <span className="flex items-center gap-1.5">
+              <span aria-hidden>⚙️</span>
+              פרטים נוספים
+            </span>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`}
+            />
+          </button>
 
-          {needsFloors && (
-            <Field label="מספר קומות">
-              <input
-                type="number" inputMode="numeric" min={1}
-                value={form.floors ?? ""}
-                onChange={(e) => set("floors", e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
-              />
-            </Field>
-          )}
-
-          {needsStandard && (
-            <Field label="רמת גמר">
-              <div className="grid grid-cols-3 gap-2">
-                {STANDARD_OPTS.map((o) => {
-                  const sel = form.standard === o.id;
-                  return (
-                    <button
-                      key={o.id}
-                      onClick={() => set("standard", o.id)}
-                      className="py-2 rounded-xl text-[12.5px] font-bold border-2 transition"
-                      style={{
-                        background: sel ? "#F0F9F6" : "#FFFFFF",
-                        borderColor: sel ? BRAND : "#E5E7EB",
-                        color: sel ? BRAND_DARK : "#374151",
-                      }}
-                    >
-                      {o.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </Field>
-          )}
-
-          {needsScope && (
-            <Field label="היקף השיפוץ (ניתן לבחור כמה)">
-              <div className="flex flex-wrap gap-2">
-                {RENOVATION_SCOPE_OPTS.map((o) => {
-                  const sel = (form.scope ?? []).includes(o.id);
-                  return (
-                    <button
-                      key={o.id}
-                      onClick={() => toggleScope(o.id)}
-                      className="px-3 py-1.5 rounded-full text-[12px] font-bold border transition"
-                      style={{
-                        background: sel ? BRAND : "#FFFFFF",
-                        borderColor: sel ? BRAND : "#E5E7EB",
-                        color: sel ? "#FFFFFF" : "#374151",
-                      }}
-                    >
-                      {o.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </Field>
-          )}
-
-          {needsMamadType && (
-            <Field label="סוג העבודה">
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { id: "new" as const, label: 'בניית ממ״ד חדש' },
-                  { id: "upgrade" as const, label: "שדרוג קיים" },
-                ].map((o) => {
-                  const sel = form.mamadType === o.id;
-                  return (
-                    <button
-                      key={o.id}
-                      onClick={() => set("mamadType", o.id)}
-                      className="py-2 rounded-xl text-[12.5px] font-bold border-2 transition"
-                      style={{
-                        background: sel ? "#F0F9F6" : "#FFFFFF",
-                        borderColor: sel ? BRAND : "#E5E7EB",
-                        color: sel ? BRAND_DARK : "#374151",
-                      }}
-                    >
-                      {o.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </Field>
-          )}
-
-          {needsUnits && (
-            <Field label="מס׳ יחידות דיור בבניין">
-              <input
-                type="number" inputMode="numeric" min={1}
-                value={form.units ?? ""}
-                onChange={(e) => set("units", e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
-              />
-            </Field>
-          )}
-
-          {needsCommitteeService && (
-            <Field label="סוג השירות המבוקש">
-              <select
-                value={form.committeeService ?? ""}
-                onChange={(e) => set("committeeService", e.target.value || undefined)}
-                className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
-              >
-                <option value="">בחר/י…</option>
-                {COMMITTEE_SERVICES.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </Field>
-          )}
-
-          {needsPointService && (
-            <>
-              <Field label="קטגוריית שירות">
-                <select
-                  value={form.serviceCategory ?? ""}
-                  onChange={(e) => set("serviceCategory", e.target.value || undefined)}
-                  className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
-                >
-                  <option value="">בחר/י…</option>
-                  {POINT_SERVICE_CATS.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
+          {showAdvanced && (
+            <div className="space-y-3 pt-1">
+              <Field label="תיאור קצר (רשות)">
+                <TextInput
+                  value={form.subtitle}
+                  onChange={(v) => set("subtitle", v)}
+                  placeholder="לדוגמה: דירת 4 חדרים עם מרפסת"
+                />
               </Field>
-              <Field label="פירוט קצר">
-                <TextInput value={form.serviceDetails ?? ""} onChange={(v) => set("serviceDetails", v)} />
+              <Field label="מנהל הפרויקט">
+                <TextInput
+                  value={form.manager}
+                  onChange={(v) => set("manager", v)}
+                  placeholder="לדוגמה: דנה כהן"
+                />
               </Field>
-            </>
+              <Field label="תאריך יעד">
+                <input
+                  type="date"
+                  value={form.targetDate}
+                  onChange={(e) => set("targetDate", e.target.value)}
+                  className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2 text-[13.5px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+                />
+              </Field>
+
+              {needsArea && (
+                <Field label={t === "mamad" ? 'גודל ממ״ד (מ״ר)' : 'שטח (מ״ר)'}>
+                  <input
+                    type="number" inputMode="numeric" min={1}
+                    value={form.area ?? ""}
+                    onChange={(e) => set("area", e.target.value ? Number(e.target.value) : undefined)}
+                    placeholder="לדוגמה: 120"
+                    className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2 text-[13.5px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+                  />
+                </Field>
+              )}
+
+              {needsRooms && (
+                <Field label="מספר חדרים">
+                  <input
+                    type="number" inputMode="numeric" min={1}
+                    value={form.rooms ?? ""}
+                    onChange={(e) => set("rooms", e.target.value ? Number(e.target.value) : undefined)}
+                    placeholder="לדוגמה: 4"
+                    className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2 text-[13.5px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+                  />
+                </Field>
+              )}
+
+              {needsFloors && (
+                <Field label="מספר קומות">
+                  <input
+                    type="number" inputMode="numeric" min={1}
+                    value={form.floors ?? ""}
+                    onChange={(e) => set("floors", e.target.value ? Number(e.target.value) : undefined)}
+                    placeholder="לדוגמה: 2"
+                    className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2 text-[13.5px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+                  />
+                </Field>
+              )}
+
+              {needsStandard && (
+                <Field label="רמת גמר">
+                  <div className="grid grid-cols-3 gap-2">
+                    {STANDARD_OPTS.map((o) => {
+                      const sel = form.standard === o.id;
+                      return (
+                        <button
+                          key={o.id}
+                          onClick={() => set("standard", o.id)}
+                          className="py-1.5 rounded-xl text-[12px] font-bold border-2 transition"
+                          style={{
+                            background: sel ? "#F0F9F6" : "#FFFFFF",
+                            borderColor: sel ? BRAND : "#E5E7EB",
+                            color: sel ? BRAND_DARK : "#374151",
+                          }}
+                        >
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Field>
+              )}
+
+              {needsScope && (
+                <Field label="היקף השיפוץ (ניתן לבחור כמה)">
+                  <div className="flex flex-wrap gap-2">
+                    {RENOVATION_SCOPE_OPTS.map((o) => {
+                      const sel = (form.scope ?? []).includes(o.id);
+                      return (
+                        <button
+                          key={o.id}
+                          onClick={() => toggleScope(o.id)}
+                          className="px-3 py-1.5 rounded-full text-[12px] font-bold border transition"
+                          style={{
+                            background: sel ? BRAND : "#FFFFFF",
+                            borderColor: sel ? BRAND : "#E5E7EB",
+                            color: sel ? "#FFFFFF" : "#374151",
+                          }}
+                        >
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Field>
+              )}
+
+              {needsMamadType && (
+                <Field label="סוג העבודה">
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: "new" as const, label: 'בניית ממ״ד חדש' },
+                      { id: "upgrade" as const, label: "שדרוג קיים" },
+                    ].map((o) => {
+                      const sel = form.mamadType === o.id;
+                      return (
+                        <button
+                          key={o.id}
+                          onClick={() => set("mamadType", o.id)}
+                          className="py-1.5 rounded-xl text-[12px] font-bold border-2 transition"
+                          style={{
+                            background: sel ? "#F0F9F6" : "#FFFFFF",
+                            borderColor: sel ? BRAND : "#E5E7EB",
+                            color: sel ? BRAND_DARK : "#374151",
+                          }}
+                        >
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Field>
+              )}
+
+              {needsUnits && (
+                <Field label="מס׳ יחידות דיור בבניין">
+                  <input
+                    type="number" inputMode="numeric" min={1}
+                    value={form.units ?? ""}
+                    onChange={(e) => set("units", e.target.value ? Number(e.target.value) : undefined)}
+                    placeholder="לדוגמה: 12"
+                    className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2 text-[13.5px] tabular-nums outline-none border border-gray-200 focus:border-[#0E6B5A] text-right"
+                  />
+                </Field>
+              )}
+
+              {needsCommitteeService && (
+                <Field label="סוג השירות המבוקש">
+                  <select
+                    value={form.committeeService ?? ""}
+                    onChange={(e) => set("committeeService", e.target.value || undefined)}
+                    className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2 text-[13.5px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+                  >
+                    <option value="">בחר/י…</option>
+                    {COMMITTEE_SERVICES.map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </Field>
+              )}
+
+              {needsPointService && (
+                <>
+                  <Field label="קטגוריית שירות">
+                    <select
+                      value={form.serviceCategory ?? ""}
+                      onChange={(e) => set("serviceCategory", e.target.value || undefined)}
+                      className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2 text-[13.5px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+                    >
+                      <option value="">בחר/י…</option>
+                      {POINT_SERVICE_CATS.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="פירוט קצר">
+                    <TextInput
+                      value={form.serviceDetails ?? ""}
+                      onChange={(v) => set("serviceDetails", v)}
+                      placeholder="לדוגמה: החלפת דוד שמש"
+                    />
+                  </Field>
+                </>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -1846,12 +1955,15 @@ function ModalActions({ onCancel, onSave }: { onCancel: () => void; onSave: () =
   );
 }
 
-function TextInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function TextInput({
+  value, onChange, placeholder,
+}: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+      placeholder={placeholder}
+      className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2 text-[13.5px] outline-none border border-gray-200 focus:border-[#0E6B5A] placeholder:text-gray-400"
     />
   );
 }
@@ -1859,8 +1971,22 @@ function TextInput({ value, onChange }: { value: string; onChange: (v: string) =
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-[12px] font-bold text-gray-600 mb-1">{label}</span>
+      <span className="block text-[11.5px] font-bold text-gray-600 mb-1">{label}</span>
       {children}
     </label>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="pt-1">
+      <div
+        className="text-[11.5px] font-extrabold text-[#0A5447] uppercase tracking-wide"
+        style={{ fontFamily: URBANIST }}
+      >
+        {children}
+      </div>
+      <div className="mt-1 h-px bg-gradient-to-l from-[#0E6B5A]/20 to-transparent" />
+    </div>
   );
 }
