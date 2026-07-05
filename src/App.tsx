@@ -96,6 +96,8 @@ const AdminControl = lazy(() => import("./pages/admin/AdminControl"));
 const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
 const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
+const AdminDemandList = lazy(() => import("./pages/admin/AdminDemandList"));
+const AdminDemandDetail = lazy(() => import("./pages/admin/AdminDemandDetail"));
 const CommitteeDashboard = lazy(() => import("./pages/committee/CommitteeDashboard"));
 const CommitteeRequest = lazy(() => import("./pages/committee/CommitteeRequest"));
 const CommitteeQuoteRequest = lazy(() => import("./pages/committee/CommitteeQuoteRequest"));
@@ -314,6 +316,8 @@ const App = () => (
                   <Route path="/admin/leads" element={adminRoute(<AdminLeads />)} />
                   <Route path="/admin/supplier-trust" element={adminRoute(<AdminSupplierTrust />)} />
                   <Route path="/admin/committee-requests" element={adminRoute(<AdminCommitteeRequests />)} />
+                  <Route path="/admin/demand" element={adminRoute(<AdminDemandList />)} />
+                  <Route path="/admin/demand/:id" element={adminRoute(<AdminDemandDetail />)} />
                   <Route path="/admin/offers/new" element={adminRoute(<OfferEditor />)} />
                   <Route path="/admin/offers/:dealId/edit" element={adminRoute(<OfferEditor />)} />
                   <Route path="/committee" element={<CommitteeDashboard />} />
