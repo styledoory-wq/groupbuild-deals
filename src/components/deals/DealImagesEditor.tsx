@@ -26,7 +26,9 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
     setUploading("cover");
     try {
       const url = await uploadDealImage(f);
+      // Smart auto-crop happens in <SmartImg size="card"> via object-cover; original stays hi-res.
       onChange({ cover: url, gallery });
+      toast.success("תמונת שער נוצרה אוטומטית");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "העלאה נכשלה");
     } finally {
