@@ -18,6 +18,9 @@ import { getJourney, type JourneyId, VALID_JOURNEY_IDS } from "@/lib/journeys";
 import { QuoteRequestSheet } from "@/components/committee/QuoteRequestSheet";
 import { HelpButton } from "@/components/OnboardingFlow";
 import { SmartImg } from "@/components/ui/SmartImg";
+import { ProjectStagesStepper } from "@/components/project/ProjectStagesStepper";
+import { getStagesLite } from "@/lib/projectStagesLite";
+import { CURRENT_IDX_KEY } from "@/lib/projectStore";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
   { id: "planning",     title: "תכנון ועיצוב",       description: "אדריכלות ועיצוב פנים",            icon: PencilRuler, dbStage: "planning" },
@@ -503,6 +506,7 @@ export default function ResidentDashboard() {
 
 function MyProjectCard({ onOpen }: { onOpen: () => void }) {
   const p = useProjectSummary();
+  const navigate = useNavigate();
   if (!p.hasProject) return null;
   const title = p.info.name || "הפרויקט שלי";
   const stageLabel = p.currentStageTitle || (p.info.projectType ? "פרויקט פעיל" : "בהגדרה");
@@ -513,6 +517,14 @@ function MyProjectCard({ onOpen }: { onOpen: () => void }) {
       })()
     : "—";
   const budgetPct = p.budgetTotal > 0 ? Math.min(100, Math.round((p.budgetUsed / p.budgetTotal) * 100)) : 0;
+  const stages = getStagesLite(p.info.projectType);
+  const currentIdx = Math.min(Math.max(0, p.stageIdx), Math.max(0, stages.length - 1));
+
+  const goToStage = (i: number) => {
+    try { localStorage.setItem(CURRENT_IDX_KEY, String(i)); } catch {}
+    navigate("/resident/project-management");
+  };
+
   return (
     <div className="px-5 mt-6">
       <SectionHeader
@@ -520,43 +532,55 @@ function MyProjectCard({ onOpen }: { onOpen: () => void }) {
         subtitle={`${p.progressPct}% הושלם`}
         action={<button onClick={onOpen} className="text-[14px] font-medium text-[#0E6B5A]">ניהול פרויקט</button>}
       />
-      <button
-        onClick={onOpen}
-        className="mt-3 w-full text-right bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-4 active:scale-[0.99] transition"
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="text-[16px] font-bold text-[#1C1C1E] tracking-tight leading-tight truncate">{title}</div>
-            <div className="text-[12px] text-[#8E8E93] mt-1 truncate">שלב נוכחי: {stageLabel}</div>
+      <div className="mt-3 w-full bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-4">
+        <button onClick={onOpen} className="w-full text-right active:scale-[0.99] transition">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-[16px] font-bold text-[#1C1C1E] tracking-tight leading-tight truncate">{title}</div>
+              <div className="text-[12px] text-[#8E8E93] mt-1 truncate">שלב נוכחי: {stageLabel}</div>
+            </div>
+            <span className="shrink-0 text-[10px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-1 rounded-full">
+              {stages.length > 0 ? `שלב ${currentIdx + 1}/${stages.length}` : "פעיל"}
+            </span>
           </div>
-          <span className="shrink-0 text-[10px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-1 rounded-full">
-            {p.stagesCount > 0 ? `שלב ${p.stageIdx + 1}/${p.stagesCount}` : "פעיל"}
-          </span>
-        </div>
-        <div className="mt-3 h-1.5 w-full bg-[#F1EFEA] rounded-full overflow-hidden">
-          <div className="h-full bg-[#0E6B5A] rounded-full" style={{ width: `${p.progressPct}%` }} />
-        </div>
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          <MiniInfo label="יעד" value={target} />
-          <MiniInfo
-            label="תקציב"
-            value={p.budgetTotal > 0 ? `${budgetPct}%` : "—"}
-            hint={p.budgetTotal > 0 ? `₪${p.budgetUsed.toLocaleString()} / ₪${p.budgetTotal.toLocaleString()}` : undefined}
-          />
-          <MiniInfo
-            label="חיסכון"
-            value={p.groupSavings > 0 ? `₪${p.groupSavings.toLocaleString()}` : "—"}
-          />
-        </div>
-        {p.tasksTotal > 0 && (
-          <div className="mt-2 text-[11px] text-[#8E8E93] text-right">
-            משימות: {p.tasksDone}/{p.tasksTotal}
+        </button>
+
+        {/* Numbered-circle stepper — same visual as ProjectManagement */}
+        {stages.length > 0 && (
+          <div className="mt-3">
+            <ProjectStagesStepper
+              stages={stages}
+              currentIdx={currentIdx}
+              onSelect={goToStage}
+              compact
+            />
           </div>
         )}
-      </button>
+
+        <button onClick={onOpen} className="w-full text-right active:scale-[0.99] transition">
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <MiniInfo label="יעד" value={target} />
+            <MiniInfo
+              label="תקציב"
+              value={p.budgetTotal > 0 ? `${budgetPct}%` : "—"}
+              hint={p.budgetTotal > 0 ? `₪${p.budgetUsed.toLocaleString()} / ₪${p.budgetTotal.toLocaleString()}` : undefined}
+            />
+            <MiniInfo
+              label="חיסכון"
+              value={p.groupSavings > 0 ? `₪${p.groupSavings.toLocaleString()}` : "—"}
+            />
+          </div>
+          {p.tasksTotal > 0 && (
+            <div className="mt-2 text-[11px] text-[#8E8E93] text-right">
+              משימות: {p.tasksDone}/{p.tasksTotal}
+            </div>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
+
 
 function MiniInfo({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
