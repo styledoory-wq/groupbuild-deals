@@ -91,6 +91,42 @@ export default function AdminDashboard() {
           supabase.from("deposits").select("id, created_at, gross_deposit_amount").eq("status", "paid").eq("is_deleted", false).order("created_at", { ascending: false }).limit(3),
         ]);
 
+        // Supplier profile-completeness KPI
+        const [{ data: supplierRows }, { data: regsRows }, { data: citsRows }] = await Promise.all([
+          supabase.from("suppliers")
+            .select("id,business_name,phone,email,categories,serves_all_country,short_description,description")
+            .eq("is_deleted", false),
+          supabase.from("supplier_regions").select("supplier_id"),
+          supabase.from("supplier_cities").select("supplier_id"),
+        ]);
+        const regCounts = new Map<string, number>();
+        (regsRows ?? []).forEach((r: { supplier_id: string }) => regCounts.set(r.supplier_id, (regCounts.get(r.supplier_id) ?? 0) + 1));
+        const cityCounts = new Map<string, number>();
+        (citsRows ?? []).forEach((c: { supplier_id: string }) => cityCounts.set(c.supplier_id, (cityCounts.get(c.supplier_id) ?? 0) + 1));
+        let profileComplete = 0;
+        let percentSum = 0;
+        (supplierRows ?? []).forEach((s: {
+          id: string; business_name: string | null; phone: string | null; email: string | null;
+          categories: string[] | null; serves_all_country: boolean | null;
+          short_description: string | null; description: string | null;
+        }) => {
+          const c = computeCompleteness({
+            business_name: s.business_name,
+            phone: s.phone,
+            email: s.email,
+            categories: s.categories,
+            serves_all_country: s.serves_all_country,
+            regionsCount: regCounts.get(s.id) ?? 0,
+            citiesCount: cityCounts.get(s.id) ?? 0,
+            short_description: s.short_description,
+            description: s.description,
+          });
+          if (c.complete) profileComplete++;
+          percentSum += c.percent;
+        });
+        const totalSup = supplierRows?.length ?? 0;
+        const avgPct = totalSup > 0 ? Math.round(percentSum / totalSup) : 0;
+
         const sum = (rows: Array<{ gross_deposit_amount: number | null }> | null) =>
           (rows ?? []).reduce((s, d) => s + Number(d.gross_deposit_amount ?? 0), 0);
 
