@@ -346,7 +346,7 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,phone,email,categories,updated_at,created_at")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,contact_name,phone,email,categories,updated_at,created_at")
       .order("business_name");
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
