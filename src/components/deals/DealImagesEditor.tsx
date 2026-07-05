@@ -151,53 +151,61 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
           <span className="text-fs-xs text-muted-foreground">JPG / PNG · עד 10MB</span>
         </div>
         {cover ? (
-          <div className="relative rounded-2xl overflow-hidden border border-gold/30 group">
-            <SmartImg src={cover} size="card" alt="cover" className="w-full h-44 object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-            <span className="absolute top-2 right-2 inline-flex items-center gap-1 text-fs-xs font-bold px-2 py-1 rounded-full bg-gold text-primary shadow">
-              <Star className="h-3 w-3" /> שער ראשי
-            </span>
+          <div className="space-y-2">
+            <div className="relative rounded-2xl overflow-hidden border border-gold/30 group">
+              <SmartImg src={cover} size="card" alt="cover" className="w-full h-44 object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+              <span className="absolute top-2 right-2 inline-flex items-center gap-1 text-fs-xs font-bold px-2 py-1 rounded-full bg-gold text-primary shadow">
+                <Star className="h-3 w-3" /> שער ראשי
+              </span>
+              <button
+                type="button"
+                onClick={() => onChange({ cover: null, gallery })}
+                disabled={enhancing}
+                className="absolute top-2 left-2 h-8 w-8 rounded-full bg-card/90 backdrop-blur border border-border flex items-center justify-center text-destructive hover:bg-destructive hover:text-destructive-foreground disabled:opacity-50"
+                aria-label="הסר תמונת שער"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+              {enhancing && (
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-white">
+                  <Loader2 className="h-6 w-6 animate-spin text-gold" />
+                  <div className="text-fs-xs font-bold">משפר את התמונה…</div>
+                </div>
+              )}
+            </div>
             <button
               type="button"
-              onClick={() => onChange({ cover: null, gallery })}
-              className="absolute top-2 left-2 h-8 w-8 rounded-full bg-card/90 backdrop-blur border border-border flex items-center justify-center text-destructive hover:bg-destructive hover:text-destructive-foreground"
-              aria-label="הסר תמונת שער"
+              onClick={enhanceCurrentCover}
+              disabled={enhancing}
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gold/40 bg-gold/10 text-fs-xs font-bold text-foreground hover:bg-gold/20 transition-smooth disabled:opacity-60"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Wand2 className="h-3.5 w-3.5 text-gold" />
+              שפר תמונה שוב (Smart Crop + איכות)
             </button>
           </div>
         ) : (
-          <div className="space-y-2">
-            <button
-              type="button"
-              onClick={() => coverInput.current?.click()}
-              disabled={uploading === "cover"}
-              className="w-full h-44 rounded-2xl border-2 border-dashed border-gold/40 bg-gradient-to-br from-gold/5 to-transparent flex flex-col items-center justify-center gap-2 hover:border-gold/70 transition-smooth disabled:opacity-60"
-            >
-              {uploading === "cover" ? (
-                <Loader2 className="h-6 w-6 animate-spin text-gold" />
-              ) : (
-                <>
-                  <div className="h-12 w-12 rounded-2xl bg-gold/15 border border-gold/30 flex items-center justify-center">
-                    <ImagePlus className="h-6 w-6 text-gold" />
-                  </div>
-                  <div className="text-fs-sm font-bold text-foreground">העלאת תמונת שער</div>
-                  <div className="text-fs-xs text-muted-foreground text-center px-4">
-                    לא חובה — נבחר עיצוב אוטומטי יוקרתי לפי הקטגוריה
-                  </div>
-                </>
-              )}
-            </button>
-            <button
-              type="button"
-              disabled
-              title="בקרוב — יצירת תמונה חכמה משם ההצעה והקטגוריה"
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-gold/30 bg-gold/5 text-fs-xs font-bold text-muted-foreground cursor-not-allowed"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-gold" />
-              צור תמונת AI (בקרוב)
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => coverInput.current?.click()}
+            disabled={uploading === "cover"}
+            className="w-full h-44 rounded-2xl border-2 border-dashed border-gold/40 bg-gradient-to-br from-gold/5 to-transparent flex flex-col items-center justify-center gap-2 hover:border-gold/70 transition-smooth disabled:opacity-60"
+          >
+            {uploading === "cover" ? (
+              <Loader2 className="h-6 w-6 animate-spin text-gold" />
+            ) : (
+              <>
+                <div className="h-12 w-12 rounded-2xl bg-gold/15 border border-gold/30 flex items-center justify-center">
+                  <ImagePlus className="h-6 w-6 text-gold" />
+                </div>
+                <div className="text-fs-sm font-bold text-foreground">העלאת תמונת שער</div>
+                <div className="text-fs-xs text-muted-foreground text-center px-4 flex items-center gap-1">
+                  <Sparkles className="h-3 w-3 text-gold" />
+                  שיפור אוטומטי לאחר העלאה — חיתוך חכם, איכות, תאורה וצבעים
+                </div>
+              </>
+            )}
+          </button>
         )}
         <input
           ref={coverInput}
