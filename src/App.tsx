@@ -306,7 +306,7 @@ const App = () => (
                   <Route path="/admin/support" element={adminRoute(<AdminSupport />)} />
                   <Route path="/admin/suppliers/:supplierId/areas" element={adminRoute(<AdminSupplierAreas />)} />
                   <Route path="/admin/suppliers/:supplierId/media" element={adminRoute(<AdminSupplierMedia />)} />
-                  <Route path="/admin/db-suppliers" element={adminRoute(<AdminDbSuppliers />)} />
+                  <Route path="/admin/db-suppliers" element={<Navigate to="/admin/suppliers" replace />} />
                   <Route path="/admin/stats" element={adminRoute(<AdminStats />)} />
                   <Route path="/admin/complaints" element={adminRoute(<AdminComplaints />)} />
                   <Route path="/admin/leads" element={adminRoute(<AdminLeads />)} />
