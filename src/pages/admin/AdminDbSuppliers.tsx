@@ -722,41 +722,137 @@ export default function AdminDbSuppliers() {
           const noCats = !r.categories || r.categories.length === 0;
           const blocked = !r.is_active;
           const pending = r.approval_status === "pending";
+          const rejected = r.approval_status === "rejected";
           const approved = r.approval_status === "approved" && r.is_active;
-          const statusDot = blocked ? "bg-red-500" : pending ? "bg-amber-400" : approved ? "bg-emerald-500" : "bg-muted-foreground";
-          const statusLabel = blocked ? "חסום" : pending ? "ממתין" : approved ? "פעיל" : "לא פעיל";
-          const areasLabel = isNational ? "כל הארץ" : `${r.regionCount ?? 0} אזורים`;
-          const updated = r.updated_at ? new Date(r.updated_at) : null;
-          const updatedLabel = updated
-            ? (() => {
-                const diff = Date.now() - updated.getTime();
-                const days = Math.floor(diff / 86_400_000);
-                if (days <= 0) return "היום";
-                if (days === 1) return "אתמול";
-                if (days < 7) return `לפני ${days} ימים`;
-                if (days < 30) return `לפני ${Math.floor(days / 7)} שב׳`;
-                return `לפני ${Math.floor(days / 30)} ח׳`;
-              })()
+          const statusBadge = rejected
+            ? { emoji: "🔴", label: "נדחה", cls: "bg-red-50 text-red-700 border-red-200" }
+            : blocked
+            ? { emoji: "⚫", label: "חסום", cls: "bg-neutral-100 text-neutral-700 border-neutral-200" }
+            : pending
+            ? { emoji: "🟡", label: "ממתין לאישור", cls: "bg-amber-50 text-amber-800 border-amber-200" }
+            : approved
+            ? { emoji: "🟢", label: "פעיל / מאומת", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" }
+            : { emoji: "⚪", label: "לא פעיל", cls: "bg-muted text-muted-foreground border-border" };
+
+          const categoryNames = (r.categories ?? [])
+            .map((cid) => categories.find((c) => c.id === cid)?.name)
+            .filter(Boolean) as string[];
+
+          const areaChips: string[] = isNational
+            ? ["כל הארץ"]
+            : (r.service_areas ?? []).slice(0, 3);
+          const extraAreas = isNational ? 0 : Math.max(0, (r.service_areas?.length ?? 0) - 3);
+
+          const created = r.created_at ? new Date(r.created_at) : null;
+          const createdLabel = created
+            ? created.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" })
             : "—";
+
+          const missing: string[] = [];
+          if (!r.contact_name) missing.push("איש קשר");
+          if (!r.phone) missing.push("טלפון");
+          if (!r.email) missing.push("אימייל");
+          if (noCats) missing.push("תחום");
+          if (!isNational && (r.service_areas?.length ?? 0) === 0) missing.push("אזור");
+          const incomplete = missing.length > 0;
 
           return (
             <div key={r.id} className="gb-card p-3">
-              <div className="flex items-center gap-2.5">
+              {/* Status badge row */}
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-fs-xs font-bold ${statusBadge.cls}`}>
+                  <span aria-hidden>{statusBadge.emoji}</span>
+                  {statusBadge.label}
+                </span>
+                <span className="text-fs-xs text-muted-foreground inline-flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  נרשם {createdLabel}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => openEdit(r.id)}
+                className="w-full flex items-center gap-2.5 text-right"
+              >
                 <SupplierLogo name={r.business_name} logoUrl={r.logo_url} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <h3 className="font-bold text-fs-sm truncate leading-tight">{r.business_name}</h3>
-                    <span className={`h-2 w-2 rounded-full shrink-0 ${statusDot}`} aria-hidden />
-                    <span className="text-fs-xs text-muted-foreground font-medium shrink-0">{statusLabel}</span>
-                  </div>
-                  <p className="text-fs-xs text-muted-foreground mt-0.5 truncate">
-                    {areasLabel} • {r.dealsCount ?? 0} הצעות • {r.leadsCount ?? 0} לידים
-                  </p>
+                  <h3 className="font-bold text-fs-sm truncate leading-tight">{r.business_name}</h3>
+                  {categoryNames.length > 0 ? (
+                    <p className="text-fs-xs text-primary font-semibold mt-0.5 truncate inline-flex items-center gap-1">
+                      <Tag className="h-3 w-3" />
+                      {categoryNames.slice(0, 3).join(" • ")}
+                      {categoryNames.length > 3 ? ` +${categoryNames.length - 3}` : ""}
+                    </p>
+                  ) : (
+                    <p className="text-fs-xs text-amber-700 font-semibold mt-0.5">ללא תחום פעילות</p>
+                  )}
                   <p className="text-fs-xs text-muted-foreground/80 mt-0.5">
-                    עודכן {updatedLabel}{noCats ? " • ללא קטגוריה" : ""}
+                    {r.dealsCount ?? 0} הצעות • {r.leadsCount ?? 0} לידים
                   </p>
                 </div>
+              </button>
+
+              {/* Contact & area details */}
+              <div className="mt-2.5 grid gap-1 text-fs-xs">
+                <div className="flex items-center gap-1.5 text-foreground/90">
+                  <UserIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="truncate">{r.contact_name || <span className="text-muted-foreground italic">חסר איש קשר</span>}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-foreground/90">
+                  <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  {r.phone ? (
+                    <a href={`tel:${r.phone}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline">{r.phone}</a>
+                  ) : (
+                    <span className="text-muted-foreground italic">חסר טלפון</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 text-foreground/90">
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  {r.email ? (
+                    <a href={`mailto:${r.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline">{r.email}</a>
+                  ) : (
+                    <span className="text-muted-foreground italic">חסר אימייל</span>
+                  )}
+                </div>
+                <div className="flex items-start gap-1.5 text-foreground/90">
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                  {areaChips.length > 0 ? (
+                    <span className="truncate">
+                      {areaChips.join(" • ")}
+                      {extraAreas > 0 ? ` +${extraAreas}` : ""}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground italic">חסר אזור פעילות</span>
+                  )}
+                </div>
               </div>
+
+              {incomplete && (
+                <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 border border-amber-200 px-2 py-1.5 text-fs-xs text-amber-800">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  <span>הרשמה לא הושלמה — חסר: {missing.join(", ")}</span>
+                </div>
+              )}
+
+              {/* Approve/Reject quick actions for pending suppliers */}
+              {pending && (
+                <div className="grid grid-cols-2 gap-1.5 mt-2.5">
+                  <button
+                    onClick={() => quickSetApproval(r.id, "approved")}
+                    className="h-9 rounded-xl bg-emerald-600 text-white text-fs-sm font-bold flex items-center justify-center gap-1 hover:bg-emerald-700"
+                  >
+                    <Check className="h-3.5 w-3.5" /> אישור
+                  </button>
+                  <button
+                    onClick={() => quickSetApproval(r.id, "rejected")}
+                    className="h-9 rounded-xl bg-red-600 text-white text-fs-sm font-bold flex items-center justify-center gap-1 hover:bg-red-700"
+                  >
+                    <X className="h-3.5 w-3.5" /> דחייה
+                  </button>
+                </div>
+              )}
+
 
               <div className="grid grid-cols-2 gap-1.5 mt-2.5">
                 <button
