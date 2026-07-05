@@ -19,7 +19,7 @@ import { QuoteRequestSheet } from "@/components/committee/QuoteRequestSheet";
 import { HelpButton } from "@/components/OnboardingFlow";
 import { SmartImg } from "@/components/ui/SmartImg";
 import { ProjectStagesStepper } from "@/components/project/ProjectStagesStepper";
-import { getStagesFor } from "@/pages/resident/ProjectManagement";
+import { getStagesLite } from "@/lib/projectStagesLite";
 import { CURRENT_IDX_KEY } from "@/lib/projectStore";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
