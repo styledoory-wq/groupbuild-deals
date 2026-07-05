@@ -134,6 +134,10 @@ export default function AdminDashboard() {
         const totalSup = supplierRows?.length ?? 0;
         const avgPct = totalSup > 0 ? Math.round(percentSum / totalSup) : 0;
 
+        // Demand KPIs
+        const { data: demandKpisRaw } = await supabase.rpc("get_admin_demand_kpis" as any);
+        const demandKpis = (demandKpisRaw as any) || {};
+
         const sum = (rows: Array<{ gross_deposit_amount: number | null }> | null) =>
           (rows ?? []).reduce((s, d) => s + Number(d.gross_deposit_amount ?? 0), 0);
 
