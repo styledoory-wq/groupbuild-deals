@@ -154,6 +154,9 @@ export default function AdminDashboard() {
           dealsNoImage: dealsNoImage.count ?? 0,
           suppliersNoDeals: 0,
           inactiveProjects: 0,
+          suppliersProfileComplete: profileComplete,
+          suppliersProfileIncomplete: totalSup - profileComplete,
+          suppliersProfileAvgPct: avgPct,
         });
 
         const acts: ActivityItem[] = [];
