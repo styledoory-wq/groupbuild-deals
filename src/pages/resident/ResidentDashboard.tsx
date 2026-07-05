@@ -436,12 +436,32 @@ export default function ResidentDashboard() {
         {/* === My project — synced with Project Management === */}
         <MyProjectCard onOpen={() => navigate("/resident/project-management")} />
 
+        {/* === Group buy CTA === */}
+        <div className="px-5 mt-6">
+          <button
+            onClick={() => navigate("/resident/demand/new")}
+            className="w-full text-right bg-gradient-to-l from-[#0E6B5A] to-[#137a68] rounded-3xl p-5 text-white active:scale-[0.99] transition shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-[12px] font-semibold opacity-90 mb-1">רכישה קבוצתית</div>
+                <div className="text-[16px] font-bold tracking-tight">פתח בקשה חדשה</div>
+                <div className="text-[12px] opacity-90 mt-1">נחפש עבורך ספקים במחירים משתלמים</div>
+              </div>
+              <div className="h-11 w-11 rounded-2xl bg-white/20 flex items-center justify-center">
+                <Plus className="h-5 w-5" strokeWidth={2.6} />
+              </div>
+            </div>
+          </button>
+        </div>
+
         {/* === Quick actions === */}
         <SectionHeader title="פעולות מהירות" />
-        <section className="px-5 mt-3 grid grid-cols-3 gap-3">
+        <section className="px-5 mt-3 grid grid-cols-4 gap-2">
           <QuickAction icon={ClipboardList} label="ניהול פרויקט" onClick={() => navigate("/resident/project-management")} />
-          <QuickAction icon={Heart} label="המועדפים שלי" onClick={() => navigate("/resident/favorites")} />
-          <QuickAction icon={Ticket} label="השוברים שלי" onClick={() => navigate("/resident/my-vouchers")} />
+          <QuickAction icon={ClipboardList} label="הבקשות שלי" onClick={() => navigate("/resident/demands")} />
+          <QuickAction icon={Heart} label="מועדפים" onClick={() => navigate("/resident/favorites")} />
+          <QuickAction icon={Ticket} label="שוברים" onClick={() => navigate("/resident/my-vouchers")} />
         </section>
 
         {/* === FEED === */}
