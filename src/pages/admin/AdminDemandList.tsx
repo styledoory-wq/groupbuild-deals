@@ -132,7 +132,7 @@ export default function AdminDemandList() {
           </div>
         )}
       </div>
-      <BottomNav />
+      <BottomNav role="admin" />
     </MobileShell>
   );
 }
