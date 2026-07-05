@@ -61,6 +61,7 @@ export default function AdminDashboard() {
     pendingSuppliers: 0, failedPayments: 0, openLeads: 0,
     dealsNoImage: 0, suppliersNoDeals: 0, inactiveProjects: 0,
     suppliersProfileComplete: 0, suppliersProfileIncomplete: 0, suppliersProfileAvgPct: 0,
+    demandNew: 0, demandOpen: 0, demandConverted: 0, demandConversionPct: 0, demandAvgHours: 0,
   });
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
