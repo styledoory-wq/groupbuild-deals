@@ -192,8 +192,15 @@ export default function AdminDbSuppliers() {
     else if (quickFilter === "no-deals") res = res.filter((r) => (r.dealsCount ?? 0) === 0);
     else if (quickFilter === "new") res = res.filter((r) => r.created_at && new Date(r.created_at).getTime() >= sevenDaysAgo);
     else if (quickFilter === "top") res = [...res].sort((a, b) => (b.leadsCount ?? 0) - (a.leadsCount ?? 0)).filter((r) => (r.leadsCount ?? 0) > 0);
+    else if (quickFilter === "profile-complete") res = res.filter((r) => r.completeness?.complete);
+    else if (quickFilter === "profile-incomplete") res = res.filter((r) => r.completeness && !r.completeness.complete);
+    else if (quickFilter === "missing-contact") res = res.filter((r) => !r.phone || !r.email);
+    else if (quickFilter === "missing-category") res = res.filter((r) => !r.categories || r.categories.length === 0);
+    else if (quickFilter === "missing-area") res = res.filter((r) => !r.serves_all_country && (!r.service_areas || r.service_areas.length === 0));
     return res;
   }, [rows, supplierSearch, quickFilter, categories]);
+
+  const incompleteCount = rows.filter((r) => r.completeness && !r.completeness.complete).length;
 
   const pendingCount = rows.filter((r) => r.approval_status === "pending").length;
 
