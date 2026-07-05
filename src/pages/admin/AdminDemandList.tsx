@@ -65,7 +65,7 @@ export default function AdminDemandList() {
 
   return (
     <MobileShell>
-      <PageHeader title="ניהול ביקושים" showBack onBack={() => navigate("/admin")} />
+      <PageHeader title="ניהול ביקושים" back />
       <div className="p-3 space-y-3 pb-24" dir="rtl">
         <div className="relative">
           <Search className="w-4 h-4 absolute right-3 top-3 text-muted-foreground" />

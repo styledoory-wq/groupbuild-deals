@@ -122,14 +122,14 @@ export default function AdminDemandDetail() {
     : suppliers;
 
   if (loading || !d) {
-    return <MobileShell><PageHeader title="ביקוש" showBack /><div className="flex justify-center py-12"><Loader2 className="animate-spin" /></div></MobileShell>;
+    return <MobileShell><PageHeader title="ביקוש" back /><div className="flex justify-center py-12"><Loader2 className="animate-spin" /></div></MobileShell>;
   }
 
   const meta = statusMeta(d.admin_status);
 
   return (
     <MobileShell>
-      <PageHeader title="ניהול ביקוש" showBack onBack={() => navigate("/admin/demand")} />
+      <PageHeader title="ניהול ביקוש" back />
       <div className="p-3 pb-32 space-y-4" dir="rtl">
         {/* Pipeline */}
         <div className="bg-card border rounded-lg p-2">
