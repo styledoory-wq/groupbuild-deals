@@ -230,6 +230,20 @@ export default function AdminSupplierDetail() {
 
   const quickApproval = async (next: "approved" | "rejected") => {
     if (!supplierId) return;
+    if (next === "approved") {
+      const missing: string[] = [];
+      if (!form.phone.trim()) missing.push("טלפון");
+      if (form.categoryIds.length === 0) missing.push("תחום פעילות");
+      if (!areas.servesAllCountry && areas.regionIds.length === 0 && areas.cityIds.length === 0) {
+        missing.push("אזור שירות");
+      }
+      if (missing.length > 0) {
+        const ok = window.confirm(
+          `⚠️ לספק חסרים פרטים חיוניים:\n\n• ${missing.join("\n• ")}\n\nהוא לא יופיע לדיירים ולא יקבל לידים עד להשלמת הפרטים.\nלאשר בכל זאת?`
+        );
+        if (!ok) return;
+      }
+    }
     try {
       const payload: { approval_status: "approved" | "rejected"; is_active?: boolean } = { approval_status: next };
       if (next === "approved") payload.is_active = true;
