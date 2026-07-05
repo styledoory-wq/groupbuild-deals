@@ -163,6 +163,11 @@ export default function AdminDashboard() {
           suppliersProfileComplete: profileComplete,
           suppliersProfileIncomplete: totalSup - profileComplete,
           suppliersProfileAvgPct: avgPct,
+          demandNew: demandKpis?.new_count ?? 0,
+          demandOpen: demandKpis?.open_count ?? 0,
+          demandConverted: demandKpis?.converted_count ?? 0,
+          demandConversionPct: Number(demandKpis?.conversion_rate ?? 0),
+          demandAvgHours: Number(demandKpis?.avg_handling_hours ?? 0),
         });
 
         const acts: ActivityItem[] = [];
