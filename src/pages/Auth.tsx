@@ -17,6 +17,7 @@ import type { Role } from "@/types";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
+import { loadSupplierCompletenessForUser } from "@/lib/supplierCompleteness";
 import { translateAuthError } from "@/lib/authErrors";
 
 
@@ -164,7 +165,19 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
 
     const redirect = searchParams.get("redirect") ?? searchParams.get("return");
     if (redirect) { navigate(redirect); return; }
-    if (resolvedRole === "supplier") navigate("/supplier");
+    if (resolvedRole === "supplier") {
+      // Gate: force onboarding until profile is complete
+      try {
+        const { completeness } = await loadSupplierCompletenessForUser(userId);
+        if (!completeness.complete) {
+          navigate("/supplier/onboarding");
+          return;
+        }
+      } catch (e) {
+        console.warn("[auth] supplier completeness check failed", e);
+      }
+      navigate("/supplier");
+    }
     else navigate("/resident");
   };
 
