@@ -4,6 +4,7 @@ import { ShieldCheck, Tag as TagIcon, TrendingDown, Flame, Users, Clock, Image a
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { FavoriteButton } from "@/components/deals/FavoriteButton";
 import { SmartImg } from "@/components/ui/SmartImg";
+import { getCategoryCover } from "@/lib/categoryCover";
 
 export interface RealDealCardData {
   id: string;
