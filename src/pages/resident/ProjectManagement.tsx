@@ -1955,12 +1955,15 @@ function ModalActions({ onCancel, onSave }: { onCancel: () => void; onSave: () =
   );
 }
 
-function TextInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function TextInput({
+  value, onChange, placeholder,
+}: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2.5 text-[14px] outline-none border border-gray-200 focus:border-[#0E6B5A]"
+      placeholder={placeholder}
+      className="w-full bg-[#FAFAF7] rounded-xl px-3 py-2 text-[13.5px] outline-none border border-gray-200 focus:border-[#0E6B5A] placeholder:text-gray-400"
     />
   );
 }
@@ -1968,8 +1971,22 @@ function TextInput({ value, onChange }: { value: string; onChange: (v: string) =
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-[12px] font-bold text-gray-600 mb-1">{label}</span>
+      <span className="block text-[11.5px] font-bold text-gray-600 mb-1">{label}</span>
       {children}
     </label>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="pt-1">
+      <div
+        className="text-[11.5px] font-extrabold text-[#0A5447] uppercase tracking-wide"
+        style={{ fontFamily: URBANIST }}
+      >
+        {children}
+      </div>
+      <div className="mt-1 h-px bg-gradient-to-l from-[#0E6B5A]/20 to-transparent" />
+    </div>
   );
 }
