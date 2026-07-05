@@ -461,17 +461,20 @@ export default function OfferEditor() {
       payload.discount_percentage = null;
       payload.base_price = null;
     } else if (offerType === "percentage") {
-      payload.discount_percentage = firstTier?.discount_percentage ?? null;
+      const pct = firstTier?.discount_percentage ?? null;
+      payload.discount_percentage = pct != null && pct >= 1 && pct <= 100 ? pct : null;
       payload.base_price = null;
       payload.original_price = 0;
       payload.discounted_price = null;
     } else {
       payload.original_price = firstTier?.original_price ?? 0;
       payload.discounted_price = firstTier?.discounted_price ?? null;
-      payload.discount_percentage =
+      const rawPct =
         firstTier?.original_price && firstTier?.discounted_price
           ? Math.round(((firstTier.original_price - firstTier.discounted_price) / firstTier.original_price) * 100)
           : null;
+      // DB check constraint requires 1-100 or NULL. Clamp/drop out-of-range values (e.g. 0% when prices are equal).
+      payload.discount_percentage = rawPct != null && rawPct >= 1 && rawPct <= 100 ? rawPct : null;
       payload.base_price = null;
     }
     return payload;
