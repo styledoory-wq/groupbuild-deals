@@ -20,6 +20,7 @@ import { DealImagesEditor } from "@/components/deals/DealImagesEditor";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
 import { useRegions } from "@/hooks/useRegions";
 import { AiOfferGeneratorCard, type AiOfferDraft } from "@/components/supplier/AiOfferGeneratorCard";
+import { loadSupplierCompletenessForUser, type SupplierCompleteness } from "@/lib/supplierCompleteness";
 
 type SupplierLite = {
   id: string;
@@ -104,6 +105,7 @@ export default function OfferEditor() {
   const [bootLoading, setBootLoading] = useState(true);
   const [bootError, setBootError] = useState<string | null>(null);
   const [supplier, setSupplier] = useState<SupplierLite | null>(null);
+  const [profileBlock, setProfileBlock] = useState<SupplierCompleteness | null>(null);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -226,6 +228,20 @@ export default function OfferEditor() {
 
         if (cancelled) return;
         setSupplier(s);
+
+        // Gate publishing: enforce profile completeness for supplier flow (skip for admin creating on behalf).
+        if (!adminTargetSupplierId) {
+          try {
+            const { completeness } = await loadSupplierCompletenessForUser(session.user.id);
+            if (!cancelled && !completeness.complete) {
+              setProfileBlock(completeness);
+              setBootLoading(false);
+              return;
+            }
+          } catch (compErr) {
+            console.warn("[offer-editor] completeness check failed", compErr);
+          }
+        }
         // Do NOT prefill deposit_amount — user asked for empty defaults.
         setDepositLimits({
           min: paymentSettings?.deposit_min_amount == null ? null : Number(paymentSettings.deposit_min_amount),
