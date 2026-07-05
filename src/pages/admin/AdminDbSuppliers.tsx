@@ -1,23 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, ImageIcon, Loader2, ExternalLink, Plus, Trash2, Search, CheckCircle2, XCircle, Pencil, MoreHorizontal, Eye, Target, Phone, Mail, User as UserIcon, Calendar, AlertTriangle, Tag, Check, X } from "lucide-react";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Loader2, Plus, Search, Phone, Calendar, MapPin, Eye } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { supabase } from "@/integrations/supabase/client";
-import { resizeToPreset } from "@/lib/imageResize";
-
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
 import { useApp } from "@/store/AppStore";
-import { useRegions } from "@/hooks/useRegions";
 
 interface Row {
   id: string;
@@ -34,20 +24,12 @@ interface Row {
   is_active: boolean;
   logo_url: string | null;
   serves_all_country: boolean;
-  short_description: string | null;
+  service_areas: string[];
   contact_name: string | null;
   phone: string | null;
   email: string | null;
   categories: string[];
-  service_areas: string[];
-  regionCount?: number;
-  cityCount?: number;
-  commission_percent?: number | null;
-  monthly_subscription?: number | null;
-  billing_status?: string | null;
-  billing_notes?: string | null;
-  updated_at?: string | null;
-  created_at?: string | null;
+  created_at: string | null;
   dealsCount?: number;
   leadsCount?: number;
 }
@@ -58,328 +40,45 @@ interface NewForm {
   phone: string;
   email: string;
   short_description: string;
-  description: string;
-  website_url: string;
-  whatsapp_url: string;
-  instagram_url: string;
-  facebook_url: string;
-  logo_url: string;
-  catalog_url: string;
+  categoryIds: string[];
   approval_status: "approved" | "pending" | "rejected";
   is_active: boolean;
-  categoryIds: string[];
-  commission_percent: string;
-  monthly_subscription: string;
-  billing_status: "none" | "active" | "trial" | "suspended";
-  billing_notes: string;
 }
 
 const emptyForm: NewForm = {
-  business_name: "",
-  contact_name: "",
-  phone: "",
-  email: "",
-  short_description: "",
-  description: "",
-  website_url: "",
-  whatsapp_url: "",
-  instagram_url: "",
-  facebook_url: "",
-  logo_url: "",
-  catalog_url: "",
-  approval_status: "approved",
-  is_active: true,
-  categoryIds: [],
-  commission_percent: "",
-  monthly_subscription: "",
-  billing_status: "none",
-  billing_notes: "",
+  business_name: "", contact_name: "", phone: "", email: "",
+  short_description: "", categoryIds: [],
+  approval_status: "pending", is_active: true,
 };
-
-interface MatchProfile {
-  id: string;
-  full_name: string | null;
-  email: string | null;
-  city: string | null;
-  region: string | null;
-  region_id: string | null;
-  city_id: string | null;
-}
 
 export default function AdminDbSuppliers() {
   const navigate = useNavigate();
   const { categories } = useApp();
-  const { regions, cities } = useRegions();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [supplierSearch, setSupplierSearch] = useState("");
   const [quickFilter, setQuickFilter] = useState<"all" | "active" | "pending" | "no-deals" | "new" | "top">("all");
+
+  // Create
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<NewForm>(emptyForm);
-  const [saving, setSaving] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [areas, setAreas] = useState<AreasComboboxValue>({
-    servesAllCountry: false,
-    regionIds: [],
-    cityIds: [],
+    servesAllCountry: false, regionIds: [], cityIds: [],
   });
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingCatalog, setUploadingCatalog] = useState(false);
-
-  // ---- Edit state ----
-  const [editOpen, setEditOpen] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<NewForm>(emptyForm);
-  const [editPrevApproval, setEditPrevApproval] = useState<string>("pending");
-  const [editAreas, setEditAreas] = useState<AreasComboboxValue>({
-    servesAllCountry: false,
-    regionIds: [],
-    cityIds: [],
-  });
-  const [editSaving, setEditSaving] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
-  const [uploadingEditLogo, setUploadingEditLogo] = useState(false);
-  const [uploadingEditCatalog, setUploadingEditCatalog] = useState(false);
-
-  const uploadEditFile = async (
-    file: File,
-    bucket: "supplier-logos" | "supplier-catalogs",
-    setBusy: (v: boolean) => void,
-    field: "logo_url" | "catalog_url",
-  ) => {
-    setBusy(true);
-    try {
-      const isImage = bucket === "supplier-logos";
-      const processed = isImage ? await resizeToPreset(file, "logo") : file;
-      const ext = isImage
-        ? (processed.type === "image/webp" ? "webp" : "jpg")
-        : (file.name.split(".").pop() ?? "bin");
-      const path = `admin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from(bucket).upload(path, processed, {
-        cacheControl: "31536000",
-        upsert: false,
-        contentType: processed.type || undefined,
-      });
-      if (error) throw error;
-      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-      setEditForm((f) => ({ ...f, [field]: data.publicUrl }));
-      toast.success("הקובץ הועלה");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const openEdit = async (supplierId: string) => {
-    setEditId(supplierId);
-    setEditOpen(true);
-    setEditLoading(true);
-    try {
-      const [{ data: s, error }, { data: sregs }, { data: scits }, { data: billing }] = await Promise.all([
-        supabase
-          .from("suppliers")
-          .select("business_name,contact_name,phone,email,short_description,description,website_url,whatsapp_url,instagram_url,facebook_url,logo_url,catalog_url,approval_status,is_active,categories,serves_all_country")
-          .eq("id", supplierId)
-          .single(),
-        supabase.from("supplier_regions").select("region_id").eq("supplier_id", supplierId),
-        supabase.from("supplier_cities").select("city_id").eq("supplier_id", supplierId),
-        supabase.rpc("admin_get_supplier_billing", { _supplier_id: supplierId }),
-      ]);
-      if (error || !s) throw error ?? new Error("לא נמצא ספק");
-      const b = (billing && billing[0]) || { commission_percent: null, monthly_subscription: null, billing_status: null, billing_notes: null };
-      setEditForm({
-        business_name: s.business_name ?? "",
-        contact_name: s.contact_name ?? "",
-        phone: s.phone ?? "",
-        email: s.email ?? "",
-        short_description: s.short_description ?? "",
-        description: s.description ?? "",
-        website_url: s.website_url ?? "",
-        whatsapp_url: s.whatsapp_url ?? "",
-        instagram_url: s.instagram_url ?? "",
-        facebook_url: s.facebook_url ?? "",
-        logo_url: s.logo_url ?? "",
-        catalog_url: s.catalog_url ?? "",
-        approval_status: (s.approval_status as NewForm["approval_status"]) ?? "pending",
-        is_active: !!s.is_active,
-        categoryIds: s.categories ?? [],
-        commission_percent: b.commission_percent != null ? String(b.commission_percent) : "",
-        monthly_subscription: b.monthly_subscription != null ? String(b.monthly_subscription) : "",
-        billing_status: ((b.billing_status as NewForm["billing_status"]) ?? "none"),
-        billing_notes: b.billing_notes ?? "",
-      });
-      setEditPrevApproval((s.approval_status as string) ?? "pending");
-      setEditAreas({
-        servesAllCountry: !!s.serves_all_country,
-        regionIds: (sregs ?? []).map((r) => r.region_id as string),
-        cityIds: (scits ?? []).map((c) => c.city_id as string),
-      });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "טעינת הספק נכשלה");
-      setEditOpen(false);
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
-  const handleEditSave = async () => {
-    if (!editId) return;
-    if (!editForm.business_name.trim()) {
-      toast.error("שם עסק הוא שדה חובה");
-      return;
-    }
-    if (editForm.categoryIds.length === 0) {
-      toast.error("יש לבחור לפחות קטגוריה אחת");
-      return;
-    }
-    if (!editAreas.servesAllCountry && editAreas.regionIds.length === 0 && editAreas.cityIds.length === 0) {
-      toast.error("יש לבחור אזורי שירות (או 'כל הארץ')");
-      return;
-    }
-    setEditSaving(true);
-    try {
-      const { error } = await supabase
-        .from("suppliers")
-        .update({
-          business_name: editForm.business_name.trim(),
-          contact_name: editForm.contact_name.trim() || null,
-          phone: editForm.phone.trim() || null,
-          email: editForm.email.trim() || null,
-          short_description: editForm.short_description.trim() || null,
-          description: editForm.description.trim() || null,
-          website_url: editForm.website_url.trim() || null,
-          whatsapp_url: editForm.whatsapp_url.trim() || null,
-          instagram_url: editForm.instagram_url.trim() || null,
-          facebook_url: editForm.facebook_url.trim() || null,
-          logo_url: editForm.logo_url.trim() || null,
-          catalog_url: editForm.catalog_url.trim() || null,
-          serves_all_country: editAreas.servesAllCountry,
-          service_areas: editAreas.servesAllCountry ? ["כל הארץ"] : [],
-          approval_status: editForm.approval_status,
-          is_active: editForm.is_active,
-          categories: editForm.categoryIds,
-          commission_percent: editForm.commission_percent.trim() === "" ? 0 : Number(editForm.commission_percent),
-          monthly_subscription: editForm.monthly_subscription.trim() === "" ? 0 : Number(editForm.monthly_subscription),
-          billing_status: editForm.billing_status,
-          billing_notes: editForm.billing_notes.trim() || null,
-        })
-        .eq("id", editId);
-      if (error) throw error;
-
-      // Replace region/city links
-      await Promise.all([
-        supabase.from("supplier_regions").delete().eq("supplier_id", editId),
-        supabase.from("supplier_cities").delete().eq("supplier_id", editId),
-      ]);
-      if (!editAreas.servesAllCountry) {
-        if (editAreas.regionIds.length > 0) {
-          await supabase.from("supplier_regions").insert(
-            editAreas.regionIds.map((region_id) => ({ supplier_id: editId, region_id })),
-          );
-        }
-        if (editAreas.cityIds.length > 0) {
-          await supabase.from("supplier_cities").insert(
-            editAreas.cityIds.map((city_id) => ({ supplier_id: editId, city_id })),
-          );
-        }
-      }
-      toast.success("הספק עודכן בהצלחה");
-      // Send approval email if status transitioned to approved
-      if (editPrevApproval !== "approved" && editForm.approval_status === "approved") {
-        supabase.functions
-          .invoke("send-email", { body: { type: "supplier_approved", supplier_id: editId } })
-          .catch((e) => console.warn("[email] supplier_approved failed", e));
-      }
-      setEditOpen(false);
-      setEditId(null);
-      await load();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "עדכון נכשל");
-    } finally {
-      setEditSaving(false);
-    }
-  };
-
-
-  const uploadFile = async (
-    file: File,
-    bucket: "supplier-logos" | "supplier-catalogs",
-    setBusy: (v: boolean) => void,
-    field: "logo_url" | "catalog_url",
-  ) => {
-    setBusy(true);
-    try {
-      const isImage = bucket === "supplier-logos";
-      const processed = isImage ? await resizeToPreset(file, "logo") : file;
-      const ext = isImage
-        ? (processed.type === "image/webp" ? "webp" : "jpg")
-        : (file.name.split(".").pop() ?? "bin");
-      const path = `admin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from(bucket).upload(path, processed, {
-        cacheControl: "31536000",
-        upsert: false,
-        contentType: processed.type || undefined,
-      });
-      if (error) throw error;
-      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-      setForm((f) => ({ ...f, [field]: data.publicUrl }));
-      toast.success("הקובץ הועלה");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  // Match-checker state
-  const [matchOpen, setMatchOpen] = useState(false);
-  const [matchSupplier, setMatchSupplier] = useState<Row | null>(null);
-  const [residents, setResidents] = useState<MatchProfile[]>([]);
-  const [residentSearch, setResidentSearch] = useState("");
-  const [selectedResident, setSelectedResident] = useState<MatchProfile | null>(null);
-  const [matchResult, setMatchResult] = useState<{
-    visible: boolean;
-    reasons: string[];
-  } | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,short_description,contact_name,phone,email,categories,updated_at,created_at")
-      .order("business_name");
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,contact_name,phone,email,categories,created_at")
+      .order("created_at", { ascending: false });
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
 
-    // Admin-only billing fields fetched via SECURITY DEFINER RPC (columns are revoked from authenticated)
-    const { data: billingRows } = await supabase.rpc("admin_list_supplier_billing");
-    const billingMap = new Map<string, { commission_percent: number | null; monthly_subscription: number | null; billing_status: string | null; billing_notes: string | null }>();
-    (billingRows ?? []).forEach((b: { id: string; commission_percent: number | null; monthly_subscription: number | null; billing_status: string | null; billing_notes: string | null }) => {
-      billingMap.set(b.id, b);
-    });
-    base.forEach((r) => {
-      const b = billingMap.get(r.id);
-      if (b) {
-        r.commission_percent = b.commission_percent;
-        r.monthly_subscription = b.monthly_subscription;
-        r.billing_status = b.billing_status;
-        r.billing_notes = b.billing_notes;
-      }
-    });
-
-    // Pull region/city/deals/leads counts in parallel
-    const [{ data: regs }, { data: cits }, { data: dls }, { data: ints }] = await Promise.all([
-      supabase.from("supplier_regions").select("supplier_id"),
-      supabase.from("supplier_cities").select("supplier_id"),
+    const [{ data: dls }, { data: ints }] = await Promise.all([
       supabase.from("deals").select("id,supplier_id,status,is_deleted"),
       supabase.from("deal_interests").select("deal_id,is_deleted"),
     ]);
-    const regCount = new Map<string, number>();
-    const cityCount = new Map<string, number>();
-    (regs ?? []).forEach((r: { supplier_id: string }) => regCount.set(r.supplier_id, (regCount.get(r.supplier_id) ?? 0) + 1));
-    (cits ?? []).forEach((r: { supplier_id: string }) => cityCount.set(r.supplier_id, (cityCount.get(r.supplier_id) ?? 0) + 1));
-
-    // Build deal -> supplier map for active, non-deleted deals
     const dealsBySupplier = new Map<string, number>();
     const dealToSupplier = new Map<string, string>();
     (dls ?? []).forEach((d: { id: string; supplier_id: string; status: string; is_deleted: boolean }) => {
@@ -398,74 +97,34 @@ export default function AdminDbSuppliers() {
 
     setRows(base.map((r) => ({
       ...r,
-      regionCount: regCount.get(r.id) ?? 0,
-      cityCount: cityCount.get(r.id) ?? 0,
       dealsCount: dealsBySupplier.get(r.id) ?? 0,
       leadsCount: leadsBySupplier.get(r.id) ?? 0,
     })));
     setLoading(false);
   };
 
-  useEffect(() => {
-    load();
-  }, []);
-
-  const quickSetApproval = async (id: string, next: "approved" | "rejected") => {
-    try {
-      const payload: { approval_status: "approved" | "rejected"; is_active?: boolean } = { approval_status: next };
-      if (next === "approved") payload.is_active = true;
-      const { error } = await supabase.from("suppliers").update(payload).eq("id", id);
-      if (error) throw error;
-      if (next === "approved") {
-        supabase.functions
-          .invoke("send-email", { body: { type: "supplier_approved", supplier_id: id } })
-          .catch((e) => console.warn("[email] supplier_approved failed", e));
-      }
-      toast.success(next === "approved" ? "הספק אושר" : "הספק נדחה");
-      await load();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "עדכון סטטוס נכשל");
-    }
-  };
+  useEffect(() => { load(); }, []);
 
   const handleCreate = async () => {
-    if (!form.business_name.trim()) {
-      toast.error("שם עסק הוא שדה חובה");
-      return;
-    }
-    if (form.categoryIds.length === 0) {
-      toast.error("יש לבחור לפחות קטגוריה אחת");
-      return;
-    }
+    if (!form.business_name.trim()) return toast.error("שם עסק הוא שדה חובה");
+    if (form.categoryIds.length === 0) return toast.error("יש לבחור לפחות קטגוריה אחת");
     if (!areas.servesAllCountry && areas.regionIds.length === 0 && areas.cityIds.length === 0) {
-      toast.error("יש לבחור אזורי שירות (או 'כל הארץ')");
-      return;
+      return toast.error("יש לבחור אזורי שירות (או 'כל הארץ')");
     }
     setSaving(true);
     try {
-      const { data, error } = await supabase
-        .from("suppliers")
-        .insert({
-          business_name: form.business_name.trim(),
-          contact_name: form.contact_name.trim() || null,
-          phone: form.phone.trim() || null,
-          email: form.email.trim() || null,
-          short_description: form.short_description.trim() || null,
-          description: form.description.trim() || null,
-          website_url: form.website_url.trim() || null,
-          whatsapp_url: form.whatsapp_url.trim() || null,
-          instagram_url: form.instagram_url.trim() || null,
-          facebook_url: form.facebook_url.trim() || null,
-          logo_url: form.logo_url.trim() || null,
-          catalog_url: form.catalog_url.trim() || null,
-          serves_all_country: areas.servesAllCountry,
-          service_areas: areas.servesAllCountry ? ["כל הארץ"] : [],
-          approval_status: form.approval_status,
-          is_active: form.is_active,
-          categories: form.categoryIds,
-        })
-        .select("id")
-        .single();
+      const { data, error } = await supabase.from("suppliers").insert({
+        business_name: form.business_name.trim(),
+        contact_name: form.contact_name.trim() || null,
+        phone: form.phone.trim() || null,
+        email: form.email.trim() || null,
+        short_description: form.short_description.trim() || null,
+        serves_all_country: areas.servesAllCountry,
+        service_areas: areas.servesAllCountry ? ["כל הארץ"] : [],
+        approval_status: form.approval_status,
+        is_active: form.is_active,
+        categories: form.categoryIds,
+      }).select("id").single();
       if (error) throw error;
       const newId = data?.id;
       if (newId && !areas.servesAllCountry) {
@@ -484,7 +143,8 @@ export default function AdminDbSuppliers() {
       setOpen(false);
       setForm(emptyForm);
       setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] });
-      await load();
+      if (newId) navigate(`/admin/suppliers/${newId}`);
+      else await load();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "יצירה נכשלה");
     } finally {
@@ -492,153 +152,22 @@ export default function AdminDbSuppliers() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!deleteId) return;
-    try {
-      // Ensure caller is authenticated before invoking — the function requires
-      // an admin JWT and will return 401 otherwise.
-      const { data: sess } = await supabase.auth.getSession();
-      if (!sess.session) {
-        toast.error("נדרשת התחברות מחדש כאדמין");
-        setDeleteId(null);
-        return;
-      }
+  const filteredRows = useMemo(() => {
+    const q = supplierSearch.trim().toLowerCase();
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    let res = !q ? rows : rows.filter((r) => {
+      const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name ?? "").join(" ") ?? "";
+      return [r.business_name, r.email, r.phone, catNames].some((v) => (v ?? "").toLowerCase().includes(q));
+    });
+    if (quickFilter === "active") res = res.filter((r) => r.is_active && r.approval_status === "approved");
+    else if (quickFilter === "pending") res = res.filter((r) => r.approval_status === "pending");
+    else if (quickFilter === "no-deals") res = res.filter((r) => (r.dealsCount ?? 0) === 0);
+    else if (quickFilter === "new") res = res.filter((r) => r.created_at && new Date(r.created_at).getTime() >= sevenDaysAgo);
+    else if (quickFilter === "top") res = [...res].sort((a, b) => (b.leadsCount ?? 0) - (a.leadsCount ?? 0)).filter((r) => (r.leadsCount ?? 0) > 0);
+    return res;
+  }, [rows, supplierSearch, quickFilter, categories]);
 
-      const { data, error } = await supabase.functions.invoke("delete-supplier", {
-        body: { supplier_id: deleteId },
-      });
-
-      // Network / FunctionsHttpError: try to read the JSON body from the response
-      if (error) {
-        let serverMessage = error.message || "מחיקה נכשלה";
-        const ctx = (error as unknown as { context?: Response }).context;
-        if (ctx && typeof ctx.text === "function") {
-          try {
-            const text = await ctx.text();
-            if (text) {
-              try {
-                const parsed = JSON.parse(text) as { error?: string };
-                if (parsed?.error) serverMessage = parsed.error;
-              } catch {
-                serverMessage = text;
-              }
-            }
-          } catch {
-            /* ignore */
-          }
-        }
-        throw new Error(serverMessage);
-      }
-
-      if (data && (data as { error?: string }).error) {
-        throw new Error((data as { error: string }).error);
-      }
-      toast.success("הספק נמחק לצמיתות");
-      await load();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "מחיקה נכשלה";
-      console.error("[delete-supplier] failed:", err);
-      toast.error(`מחיקה נכשלה: ${msg}`);
-    } finally {
-      setDeleteId(null);
-    }
-  };
-
-  // ---- Match checker ----
-  const openMatch = async (supplier: Row) => {
-    setMatchSupplier(supplier);
-    setMatchOpen(true);
-    setSelectedResident(null);
-    setMatchResult(null);
-    setResidentSearch("");
-    if (residents.length === 0) {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id,full_name,email,city,region,region_id,city_id")
-        .eq("user_type", "resident");
-      setResidents((data as MatchProfile[]) ?? []);
-    }
-  };
-
-  const runMatch = async (resident: MatchProfile) => {
-    setSelectedResident(resident);
-    if (!matchSupplier) return;
-    const reasons: string[] = [];
-    let visible = true;
-
-    if (!matchSupplier.is_active) {
-      visible = false;
-      reasons.push("❌ הספק מסומן כלא פעיל (is_active = false)");
-    }
-    if (matchSupplier.approval_status !== "approved") {
-      visible = false;
-      reasons.push(`❌ סטטוס אישור = "${matchSupplier.approval_status}" (נדרש "approved")`);
-    }
-    if (!matchSupplier.categories || matchSupplier.categories.length === 0) {
-      visible = false;
-      reasons.push("❌ הספק אינו משויך לאף קטגוריה — לא יוצג בשום קטגוריה");
-    } else {
-      const catNames = matchSupplier.categories
-        .map((cid) => categories.find((c) => c.id === cid)?.name ?? cid)
-        .join(", ");
-      reasons.push(`✅ משויך לקטגוריות: ${catNames}`);
-    }
-
-    // Area check
-    if (matchSupplier.serves_all_country) {
-      reasons.push("✅ ספק מוגדר 'כל הארץ' — יוצג לכל הדיירים");
-    } else {
-      // Resolve resident region/city ids
-      let residentRegionId = resident.region_id;
-      let residentCityId = resident.city_id;
-      if (!residentRegionId && resident.region) {
-        residentRegionId = regions.find((r) => r.slug === resident.region || r.name_he === resident.region)?.id ?? null;
-      }
-      if (!residentCityId && resident.city) {
-        residentCityId = cities.find((c) => c.name_he === resident.city)?.id ?? null;
-      }
-
-      const [{ data: sregs }, { data: scits }] = await Promise.all([
-        supabase.from("supplier_regions").select("region_id").eq("supplier_id", matchSupplier.id),
-        supabase.from("supplier_cities").select("city_id").eq("supplier_id", matchSupplier.id),
-      ]);
-      const sRegionIds = new Set((sregs ?? []).map((x) => x.region_id));
-      const sCityIds = new Set((scits ?? []).map((x) => x.city_id));
-
-      if (sRegionIds.size === 0 && sCityIds.size === 0) {
-        visible = false;
-        reasons.push("❌ לא הוגדרו לספק אזורי שירות כלל ולא 'כל הארץ' — לא יוצג לאף דייר");
-      } else {
-        if (residentRegionId && sRegionIds.has(residentRegionId)) {
-          reasons.push(`✅ אזור הדייר (${regions.find((r) => r.id === residentRegionId)?.name_he}) כלול באזורי השירות של הספק`);
-        } else if (residentCityId && sCityIds.has(residentCityId)) {
-          reasons.push(`✅ עיר הדייר (${cities.find((c) => c.id === residentCityId)?.name_he}) כלולה בערי השירות של הספק`);
-        } else if (!residentRegionId && !residentCityId) {
-          reasons.push("⚠️ לדייר אין אזור/עיר בפרופיל — הסינון 'כל האזורים' יראה אותו, אבל סינון ספציפי לא");
-          visible = false;
-        } else {
-          visible = false;
-          reasons.push(
-            `❌ הדייר באזור "${regions.find((r) => r.id === residentRegionId)?.name_he ?? "—"}" / עיר "${cities.find((c) => c.id === residentCityId)?.name_he ?? "—"}" — אך הספק לא מכסה אזור/עיר זו`
-          );
-        }
-      }
-    }
-
-    setMatchResult({ visible, reasons });
-  };
-
-  const filteredResidents = useMemo(() => {
-    const q = residentSearch.trim().toLowerCase();
-    if (!q) return residents.slice(0, 30);
-    return residents
-      .filter((r) =>
-        (r.full_name ?? "").toLowerCase().includes(q) ||
-        (r.email ?? "").toLowerCase().includes(q) ||
-        (r.city ?? "").toLowerCase().includes(q)
-      )
-      .slice(0, 30);
-  }, [residents, residentSearch]);
+  const pendingCount = rows.filter((r) => r.approval_status === "pending").length;
 
   if (loading) {
     return (
@@ -652,7 +181,7 @@ export default function AdminDbSuppliers() {
 
   return (
     <MobileShell>
-      <PageHeader title="ניהול ספקים" subtitle={`${rows.length} ספקים רשומים`} back />
+      <PageHeader title="ניהול ספקים" subtitle={`${rows.length} ספקים · ${pendingCount} ממתינים`} back />
 
       <div className="px-4 -mt-2 mb-3 space-y-2.5">
         <div className="relative">
@@ -666,9 +195,9 @@ export default function AdminDbSuppliers() {
         </div>
         <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-0.5 scrollbar-none">
           {([
-            ["all", "הכל"],
+            ["all", `הכל (${rows.length})`],
+            ["pending", `ממתינים (${pendingCount})`],
             ["active", "פעילים"],
-            ["pending", "ממתינים"],
             ["no-deals", "ללא הצעות"],
             ["new", "חדשים"],
             ["top", "מובילים"],
@@ -692,246 +221,21 @@ export default function AdminDbSuppliers() {
         </div>
       </div>
 
-      {(() => {
-        const q = supplierSearch.trim().toLowerCase();
-        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        let filteredRows = !q ? rows : rows.filter((r) => {
-          const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name ?? "").join(" ") ?? "";
-          return [r.business_name, r.email, r.phone, catNames].some((v) => (v ?? "").toLowerCase().includes(q));
-        });
-        if (quickFilter === "active") {
-          filteredRows = filteredRows.filter((r) => r.is_active && r.approval_status === "approved");
-        } else if (quickFilter === "pending") {
-          filteredRows = filteredRows.filter((r) => r.approval_status === "pending");
-        } else if (quickFilter === "no-deals") {
-          filteredRows = filteredRows.filter((r) => (r.dealsCount ?? 0) === 0);
-        } else if (quickFilter === "new") {
-          filteredRows = filteredRows.filter((r) => r.created_at && new Date(r.created_at).getTime() >= sevenDaysAgo);
-        } else if (quickFilter === "top") {
-          filteredRows = [...filteredRows].sort((a, b) => (b.leadsCount ?? 0) - (a.leadsCount ?? 0)).filter((r) => (r.leadsCount ?? 0) > 0);
-        }
-        return (
-      <div className="px-4 space-y-2 pb-32">
-        {filteredRows.length === 0 && (
+      <div className="px-4 pb-32">
+        {filteredRows.length === 0 ? (
           <div className="gb-card p-6 text-center text-sm text-muted-foreground">
             {rows.length === 0 ? "אין ספקים רשומים עדיין." : "לא נמצאו ספקים תואמים"}
           </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2.5">
+            {filteredRows.map((r) => (
+              <SupplierGridCard key={r.id} row={r} onOpen={() => navigate(`/admin/suppliers/${r.id}`)} categories={categories} />
+            ))}
+          </div>
         )}
-        {filteredRows.map((r) => {
-          const isNational = r.serves_all_country || r.service_areas?.includes("כל הארץ");
-          const noCats = !r.categories || r.categories.length === 0;
-          const blocked = !r.is_active;
-          const pending = r.approval_status === "pending";
-          const rejected = r.approval_status === "rejected";
-          const approved = r.approval_status === "approved" && r.is_active;
-          const statusBadge = rejected
-            ? { emoji: "🔴", label: "נדחה", cls: "bg-red-50 text-red-700 border-red-200" }
-            : blocked
-            ? { emoji: "⚫", label: "חסום", cls: "bg-neutral-100 text-neutral-700 border-neutral-200" }
-            : pending
-            ? { emoji: "🟡", label: "ממתין לאישור", cls: "bg-amber-50 text-amber-800 border-amber-200" }
-            : approved
-            ? { emoji: "🟢", label: "פעיל / מאומת", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" }
-            : { emoji: "⚪", label: "לא פעיל", cls: "bg-muted text-muted-foreground border-border" };
-
-          const categoryNames = (r.categories ?? [])
-            .map((cid) => categories.find((c) => c.id === cid)?.name)
-            .filter(Boolean) as string[];
-
-          const areaChips: string[] = isNational
-            ? ["כל הארץ"]
-            : (r.service_areas ?? []).slice(0, 3);
-          const extraAreas = isNational ? 0 : Math.max(0, (r.service_areas?.length ?? 0) - 3);
-
-          const created = r.created_at ? new Date(r.created_at) : null;
-          const createdLabel = created
-            ? created.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" })
-            : "—";
-
-          const missing: string[] = [];
-          if (!r.contact_name) missing.push("איש קשר");
-          if (!r.phone) missing.push("טלפון");
-          if (!r.email) missing.push("אימייל");
-          if (noCats) missing.push("תחום");
-          if (!isNational && (r.service_areas?.length ?? 0) === 0) missing.push("אזור");
-          const incomplete = missing.length > 0;
-
-          return (
-            <div key={r.id} className="gb-card p-3">
-              {/* Status badge row */}
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-fs-xs font-bold ${statusBadge.cls}`}>
-                  <span aria-hidden>{statusBadge.emoji}</span>
-                  {statusBadge.label}
-                </span>
-                <span className="text-fs-xs text-muted-foreground inline-flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  נרשם {createdLabel}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => openEdit(r.id)}
-                className="w-full flex items-center gap-2.5 text-right"
-              >
-                <SupplierLogo name={r.business_name} logoUrl={r.logo_url} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-fs-sm truncate leading-tight">{r.business_name}</h3>
-                  {categoryNames.length > 0 ? (
-                    <p className="text-fs-xs text-primary font-semibold mt-0.5 truncate inline-flex items-center gap-1">
-                      <Tag className="h-3 w-3" />
-                      {categoryNames.slice(0, 3).join(" • ")}
-                      {categoryNames.length > 3 ? ` +${categoryNames.length - 3}` : ""}
-                    </p>
-                  ) : (
-                    <p className="text-fs-xs text-amber-700 font-semibold mt-0.5">ללא תחום פעילות</p>
-                  )}
-                  <p className="text-fs-xs text-muted-foreground/80 mt-0.5">
-                    {r.dealsCount ?? 0} הצעות • {r.leadsCount ?? 0} לידים
-                  </p>
-                </div>
-              </button>
-
-              {/* Contact & area details */}
-              <div className="mt-2.5 grid gap-1 text-fs-xs">
-                <div className="flex items-center gap-1.5 text-foreground/90">
-                  <UserIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span className="truncate">{r.contact_name || <span className="text-muted-foreground italic">חסר איש קשר</span>}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-foreground/90">
-                  <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  {r.phone ? (
-                    <a href={`tel:${r.phone}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline">{r.phone}</a>
-                  ) : (
-                    <span className="text-muted-foreground italic">חסר טלפון</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1.5 text-foreground/90">
-                  <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  {r.email ? (
-                    <a href={`mailto:${r.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline">{r.email}</a>
-                  ) : (
-                    <span className="text-muted-foreground italic">חסר אימייל</span>
-                  )}
-                </div>
-                <div className="flex items-start gap-1.5 text-foreground/90">
-                  <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
-                  {areaChips.length > 0 ? (
-                    <span className="truncate">
-                      {areaChips.join(" • ")}
-                      {extraAreas > 0 ? ` +${extraAreas}` : ""}
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground italic">חסר אזור פעילות</span>
-                  )}
-                </div>
-              </div>
-
-              {incomplete && (
-                <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 border border-amber-200 px-2 py-1.5 text-fs-xs text-amber-800">
-                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                  <span>הרשמה לא הושלמה — חסר: {missing.join(", ")}</span>
-                </div>
-              )}
-
-              {/* Approve/Reject quick actions for pending suppliers */}
-              {pending && (
-                <div className="grid grid-cols-2 gap-1.5 mt-2.5">
-                  <button
-                    onClick={() => quickSetApproval(r.id, "approved")}
-                    className="h-9 rounded-xl bg-emerald-600 text-white text-fs-sm font-bold flex items-center justify-center gap-1 hover:bg-emerald-700"
-                  >
-                    <Check className="h-3.5 w-3.5" /> אישור
-                  </button>
-                  <button
-                    onClick={() => quickSetApproval(r.id, "rejected")}
-                    className="h-9 rounded-xl bg-red-600 text-white text-fs-sm font-bold flex items-center justify-center gap-1 hover:bg-red-700"
-                  >
-                    <X className="h-3.5 w-3.5" /> דחייה
-                  </button>
-                </div>
-              )}
-
-
-              <div className="grid grid-cols-2 gap-1.5 mt-2.5">
-                <button
-                  onClick={() => openEdit(r.id)}
-                  className="h-9 rounded-xl bg-primary text-primary-foreground text-fs-sm font-bold flex items-center justify-center gap-1"
-                >
-                  <Pencil className="h-3.5 w-3.5" /> עריכה
-                </button>
-                <button
-                  onClick={() => navigate(`/admin/offers/new?supplierId=${r.id}`)}
-                  className="h-9 rounded-xl bg-[#0E6B5A] text-white text-fs-sm font-bold flex items-center justify-center gap-1 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)]"
-                >
-                  <Plus className="h-3.5 w-3.5" /> צור הצעה
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between gap-1 mt-2 pt-2 border-t border-border/50">
-                <button
-                  onClick={() => navigate(`/admin/suppliers/${r.id}/media`)}
-                  className="flex-1 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted flex items-center justify-center"
-                  aria-label="מדיה" title="מדיה"
-                >
-                  <ImageIcon className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => navigate(`/admin/suppliers/${r.id}/areas`)}
-                  className="flex-1 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted flex items-center justify-center"
-                  aria-label="אזורים" title="אזורים"
-                >
-                  <MapPin className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => navigate(`/suppliers/${r.id}`)}
-                  className="flex-1 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted flex items-center justify-center"
-                  aria-label="תצוגה" title="תצוגה"
-                >
-                  <Eye className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => openMatch(r)}
-                  className="flex-1 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted flex items-center justify-center"
-                  aria-label="בדוק התאמה" title="בדוק התאמה"
-                >
-                  <Target className="h-4 w-4" />
-                </button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="flex-1 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted flex items-center justify-center"
-                      aria-label="עוד" title="עוד"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-44">
-                    <DropdownMenuItem onClick={() => navigate(`/suppliers/${r.id}`)}>
-                      <ExternalLink className="h-4 w-4 ml-2" /> פתח עמוד ציבורי
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => openMatch(r)}>
-                      <Target className="h-4 w-4 ml-2" /> בדוק התאמה
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => setDeleteId(r.id)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4 ml-2" /> מחיקת ספק
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          );
-        })}
       </div>
-        );
-      })()}
 
-      {/* Floating Action Button — add new supplier */}
+      {/* FAB */}
       <button
         onClick={() => { setForm(emptyForm); setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] }); setOpen(true); }}
         className="fixed z-40 left-5 bottom-24 h-14 w-14 rounded-full bg-[#0E6B5A] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center active:scale-95 transition-transform"
@@ -969,121 +273,19 @@ export default function AdminDbSuppliers() {
               <Label>תיאור קצר</Label>
               <Textarea rows={2} value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
             </div>
-            <div>
-              <Label>תיאור מלא</Label>
-              <Textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="תיאור מפורט שיוצג בעמוד הספק" />
-            </div>
 
-            {/* Logo upload */}
-            <div className="pt-2 border-t">
-              <Label className="text-sm font-bold">לוגו</Label>
-              <div className="flex items-center gap-3 mt-1.5">
-                {form.logo_url ? (
-                  <img src={form.logo_url} alt="לוגו" className="h-14 w-14 rounded-xl object-cover border border-border" />
-                ) : (
-                  <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center text-fs-xs text-muted-foreground">אין</div>
-                )}
-                <div className="flex-1 space-y-1.5">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) uploadFile(f, "supplier-logos", setUploadingLogo, "logo_url");
-                    }}
-                    className="text-xs"
-                    disabled={uploadingLogo}
-                  />
-                  {form.logo_url && (
-                    <button
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, logo_url: "" }))}
-                      className="text-fs-xs text-destructive underline"
-                    >
-                      הסר לוגו
-                    </button>
-                  )}
-                  {uploadingLogo && <p className="text-fs-xs text-muted-foreground">מעלה...</p>}
-                </div>
-              </div>
-            </div>
-
-            {/* Catalog upload */}
-            <div className="pt-2 border-t">
-              <Label className="text-sm font-bold">קטלוג (PDF)</Label>
-              <div className="space-y-1.5 mt-1.5">
-                <input
-                  type="file"
-                  accept="application/pdf,image/*"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) uploadFile(f, "supplier-catalogs", setUploadingCatalog, "catalog_url");
-                  }}
-                  className="text-xs"
-                  disabled={uploadingCatalog}
-                />
-                {form.catalog_url && (
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted">
-                    <a href={form.catalog_url} target="_blank" rel="noreferrer noopener" className="text-fs-xs text-primary underline truncate">
-                      צפייה בקטלוג שהועלה
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, catalog_url: "" }))}
-                      className="text-fs-xs text-destructive underline shrink-0"
-                    >
-                      הסר
-                    </button>
-                  </div>
-                )}
-                {uploadingCatalog && <p className="text-fs-xs text-muted-foreground">מעלה...</p>}
-              </div>
-            </div>
-
-            {/* Links */}
-            <div className="pt-2 border-t space-y-2">
-              <Label className="text-sm font-bold">קישורים</Label>
-              <div>
-                <Label className="text-xs">אתר אינטרנט</Label>
-                <Input dir="ltr" placeholder="https://" value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} />
-              </div>
-              <div>
-                <Label className="text-xs">וואטסאפ (קישור wa.me)</Label>
-                <Input dir="ltr" placeholder="https://wa.me/972..." value={form.whatsapp_url} onChange={(e) => setForm({ ...form, whatsapp_url: e.target.value })} />
-              </div>
-              <div>
-                <Label className="text-xs">אינסטגרם</Label>
-                <Input dir="ltr" placeholder="https://instagram.com/..." value={form.instagram_url} onChange={(e) => setForm({ ...form, instagram_url: e.target.value })} />
-              </div>
-              <div>
-                <Label className="text-xs">פייסבוק</Label>
-                <Input dir="ltr" placeholder="https://facebook.com/..." value={form.facebook_url} onChange={(e) => setForm({ ...form, facebook_url: e.target.value })} />
-              </div>
-            </div>
-
-            {/* Categories — REQUIRED */}
             <div className="pt-2 border-t">
               <Label className="text-sm font-bold">קטגוריות *</Label>
-              <p className="text-fs-xs text-muted-foreground mb-2">בחר לפחות אחת — אחרת הספק לא יוצג לדיירים</p>
-              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto mt-2">
                 {categories.map((c) => {
                   const active = form.categoryIds.includes(c.id);
                   return (
-                    <button
-                      key={c.id}
-                      type="button"
+                    <button key={c.id} type="button"
                       onClick={() => setForm((f) => ({
                         ...f,
-                        categoryIds: active
-                          ? f.categoryIds.filter((x) => x !== c.id)
-                          : [...f.categoryIds, c.id],
+                        categoryIds: active ? f.categoryIds.filter((x) => x !== c.id) : [...f.categoryIds, c.id],
                       }))}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${
-                        active
-                          ? "bg-[#0E6B5A] text-white border-[#1F2937] font-bold"
-                          : "bg-card border-border text-foreground hover:border-[#0E6B5A]/50"
-                      }`}
-                    >
+                      className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${active ? "bg-[#0E6B5A] text-white border-[#1F2937] font-bold" : "bg-card border-border text-foreground hover:border-[#0E6B5A]/50"}`}>
                       {c.icon} {c.name}
                     </button>
                   );
@@ -1093,32 +295,30 @@ export default function AdminDbSuppliers() {
 
             <div className="pt-2 border-t">
               <Label className="text-sm font-bold">אזורי שירות *</Label>
-              <p className="text-fs-xs text-muted-foreground mb-2">
-                חפש ובחר אזורים, ערים, או "כל הארץ"
-              </p>
-              <AreasCombobox value={areas} onChange={setAreas} />
+              <div className="mt-2">
+                <AreasCombobox value={areas} onChange={setAreas} />
+              </div>
             </div>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={form.is_active}
+
+            <label className="flex items-center gap-2 text-sm pt-2 border-t">
+              <input type="checkbox" checked={form.is_active}
                 onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                className="h-4 w-4 accent-primary"
-              />
+                className="h-4 w-4 accent-primary" />
               פעיל
             </label>
             <div>
               <Label>סטטוס אישור</Label>
-              <select
-                value={form.approval_status}
+              <select value={form.approval_status}
                 onChange={(e) => setForm({ ...form, approval_status: e.target.value as NewForm["approval_status"] })}
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-              >
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
                 <option value="approved">מאושר</option>
                 <option value="pending">ממתין</option>
                 <option value="rejected">נדחה</option>
               </select>
             </div>
+            <p className="text-fs-xs text-muted-foreground">
+              💡 פרטים נוספים (לוגו, קטלוג, קישורים, חיוב) — לאחר יצירה, במסך הפרטים של הספק.
+            </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>ביטול</Button>
@@ -1129,331 +329,93 @@ export default function AdminDbSuppliers() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit supplier dialog */}
-      <Dialog open={editOpen} onOpenChange={(o) => { setEditOpen(o); if (!o) setEditId(null); }}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
-          <DialogHeader>
-            <DialogTitle>עריכת ספק</DialogTitle>
-          </DialogHeader>
-          {editLoading ? (
-            <div className="py-12 flex items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div>
-                <Label>שם עסק *</Label>
-                <Input value={editForm.business_name} onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })} />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label>שם בעל העסק</Label>
-                  <Input value={editForm.contact_name} onChange={(e) => setEditForm({ ...editForm, contact_name: e.target.value })} />
-                </div>
-                <div>
-                  <Label>טלפון</Label>
-                  <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
-                </div>
-              </div>
-              <div>
-                <Label>אימייל</Label>
-                <Input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
-              </div>
-              <div>
-                <Label>תיאור קצר</Label>
-                <Textarea rows={2} value={editForm.short_description} onChange={(e) => setEditForm({ ...editForm, short_description: e.target.value })} />
-              </div>
-              <div>
-                <Label>תיאור מלא</Label>
-                <Textarea rows={4} value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
-              </div>
-
-              {/* Logo */}
-              <div className="pt-2 border-t">
-                <Label className="text-sm font-bold">לוגו</Label>
-                <div className="flex items-center gap-3 mt-1.5">
-                  {editForm.logo_url ? (
-                    <img src={editForm.logo_url} alt="לוגו" className="h-14 w-14 rounded-xl object-cover border border-border" />
-                  ) : (
-                    <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center text-fs-xs text-muted-foreground">אין</div>
-                  )}
-                  <div className="flex-1 space-y-1.5">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) uploadEditFile(f, "supplier-logos", setUploadingEditLogo, "logo_url");
-                      }}
-                      className="text-xs"
-                      disabled={uploadingEditLogo}
-                    />
-                    {editForm.logo_url && (
-                      <button type="button" onClick={() => setEditForm((f) => ({ ...f, logo_url: "" }))} className="text-fs-xs text-destructive underline">
-                        הסר לוגו
-                      </button>
-                    )}
-                    {uploadingEditLogo && <p className="text-fs-xs text-muted-foreground">מעלה...</p>}
-                  </div>
-                </div>
-              </div>
-
-              {/* Catalog */}
-              <div className="pt-2 border-t">
-                <Label className="text-sm font-bold">קטלוג (PDF)</Label>
-                <div className="space-y-1.5 mt-1.5">
-                  <input
-                    type="file"
-                    accept="application/pdf,image/*"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) uploadEditFile(f, "supplier-catalogs", setUploadingEditCatalog, "catalog_url");
-                    }}
-                    className="text-xs"
-                    disabled={uploadingEditCatalog}
-                  />
-                  {editForm.catalog_url && (
-                    <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted">
-                      <a href={editForm.catalog_url} target="_blank" rel="noreferrer noopener" className="text-fs-xs text-primary underline truncate">
-                        צפייה בקטלוג שהועלה
-                      </a>
-                      <button type="button" onClick={() => setEditForm((f) => ({ ...f, catalog_url: "" }))} className="text-fs-xs text-destructive underline shrink-0">
-                        הסר
-                      </button>
-                    </div>
-                  )}
-                  {uploadingEditCatalog && <p className="text-fs-xs text-muted-foreground">מעלה...</p>}
-                </div>
-              </div>
-
-              {/* Links */}
-              <div className="pt-2 border-t space-y-2">
-                <Label className="text-sm font-bold">קישורים</Label>
-                <div>
-                  <Label className="text-xs">אתר אינטרנט</Label>
-                  <Input dir="ltr" placeholder="https://" value={editForm.website_url} onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-xs">וואטסאפ</Label>
-                  <Input dir="ltr" placeholder="https://wa.me/972..." value={editForm.whatsapp_url} onChange={(e) => setEditForm({ ...editForm, whatsapp_url: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-xs">אינסטגרם</Label>
-                  <Input dir="ltr" placeholder="https://instagram.com/..." value={editForm.instagram_url} onChange={(e) => setEditForm({ ...editForm, instagram_url: e.target.value })} />
-                </div>
-                <div>
-                  <Label className="text-xs">פייסבוק</Label>
-                  <Input dir="ltr" placeholder="https://facebook.com/..." value={editForm.facebook_url} onChange={(e) => setEditForm({ ...editForm, facebook_url: e.target.value })} />
-                </div>
-              </div>
-
-              {/* Categories */}
-              <div className="pt-2 border-t">
-                <Label className="text-sm font-bold">קטגוריות *</Label>
-                <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto mt-2">
-                  {categories.map((c) => {
-                    const active = editForm.categoryIds.includes(c.id);
-                    return (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setEditForm((f) => ({
-                          ...f,
-                          categoryIds: active
-                            ? f.categoryIds.filter((x) => x !== c.id)
-                            : [...f.categoryIds, c.id],
-                        }))}
-                        className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${
-                          active ? "bg-[#0E6B5A] text-white border-[#1F2937] font-bold" : "bg-card border-border text-foreground hover:border-[#0E6B5A]/50"
-                        }`}
-                      >
-                        {c.icon} {c.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Areas */}
-              <div className="pt-2 border-t">
-                <Label className="text-sm font-bold">אזורי שירות *</Label>
-                <div className="mt-2">
-                  <AreasCombobox value={editAreas} onChange={setEditAreas} />
-                </div>
-              </div>
-
-              <label className="flex items-center gap-2 text-sm pt-2 border-t">
-                <input
-                  type="checkbox"
-                  checked={editForm.is_active}
-                  onChange={(e) => setEditForm({ ...editForm, is_active: e.target.checked })}
-                  className="h-4 w-4 accent-primary"
-                />
-                פעיל
-              </label>
-              <div>
-                <Label>סטטוס אישור</Label>
-                <select
-                  value={editForm.approval_status}
-                  onChange={(e) => setEditForm({ ...editForm, approval_status: e.target.value as NewForm["approval_status"] })}
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                >
-                  <option value="approved">מאושר</option>
-                  <option value="pending">ממתין</option>
-                  <option value="rejected">נדחה</option>
-                </select>
-              </div>
-
-              <div className="pt-2 border-t space-y-2">
-                <Label className="text-sm font-bold">חיוב ועמלות</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-xs">עמלה (%)</Label>
-                    <Input
-                      type="number" min="0" max="100" step="0.1"
-                      value={editForm.commission_percent}
-                      onChange={(e) => setEditForm({ ...editForm, commission_percent: e.target.value })}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">מנוי חודשי (₪)</Label>
-                    <Input
-                      type="number" min="0" step="1"
-                      value={editForm.monthly_subscription}
-                      onChange={(e) => setEditForm({ ...editForm, monthly_subscription: e.target.value })}
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-xs">סטטוס חיוב</Label>
-                  <select
-                    value={editForm.billing_status}
-                    onChange={(e) => setEditForm({ ...editForm, billing_status: e.target.value as NewForm["billing_status"] })}
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  >
-                    <option value="none">ללא</option>
-                    <option value="trial">תקופת ניסיון</option>
-                    <option value="active">פעיל</option>
-                    <option value="suspended">מושהה</option>
-                  </select>
-                </div>
-                <div>
-                  <Label className="text-xs">הערות חיוב</Label>
-                  <Textarea
-                    rows={2}
-                    value={editForm.billing_notes}
-                    onChange={(e) => setEditForm({ ...editForm, billing_notes: e.target.value })}
-                    placeholder="הערות פנימיות לאדמין"
-                  />
-                </div>
-              </div>
-
-              <p className="text-fs-xs text-muted-foreground pt-2 border-t">
-                💡 לניהול גלריית תמונות, סגרו את החלון ובחרו "מדיה" בכרטיס הספק.
-              </p>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditOpen(false)}>ביטול</Button>
-            <Button onClick={handleEditSave} disabled={editSaving || editLoading} className="bg-[#0E6B5A] text-white font-bold">
-              {editSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "שמור שינויים"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Match checker dialog */}
-      <Dialog open={matchOpen} onOpenChange={setMatchOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
-          <DialogHeader>
-            <DialogTitle>בדוק התאמה לדייר</DialogTitle>
-          </DialogHeader>
-          {matchSupplier && (
-            <div className="space-y-3">
-              <div className="gb-card p-3 bg-muted/40">
-                <p className="text-xs text-muted-foreground">בודק את הספק:</p>
-                <p className="font-bold">{matchSupplier.business_name}</p>
-              </div>
-
-              <div>
-                <Label>בחר דייר</Label>
-                <Input
-                  placeholder="חפש לפי שם / אימייל / עיר"
-                  value={residentSearch}
-                  onChange={(e) => setResidentSearch(e.target.value)}
-                />
-              </div>
-
-              <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg p-1">
-                {filteredResidents.length === 0 && (
-                  <p className="text-xs text-muted-foreground text-center py-3">לא נמצאו דיירים</p>
-                )}
-                {filteredResidents.map((r) => (
-                  <button
-                    key={r.id}
-                    onClick={() => runMatch(r)}
-                    className={`w-full text-right px-3 py-2 rounded-lg text-xs hover:bg-muted transition-smooth ${
-                      selectedResident?.id === r.id ? "bg-[#FFF8E1] border border-[#0E6B5A]/30" : ""
-                    }`}
-                  >
-                    <div className="font-bold">{r.full_name ?? r.email ?? "ללא שם"}</div>
-                    <div className="text-muted-foreground text-fs-xs">
-                      {r.city ?? "—"} · {r.region ?? "ללא אזור"}
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {matchResult && selectedResident && (
-                <div className={`gb-card p-4 space-y-2 ${matchResult.visible ? "border-green-500/40" : "border-destructive/40"}`}>
-                  <div className="flex items-center gap-2">
-                    {matchResult.visible ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-destructive" />
-                    )}
-                    <p className="font-bold text-sm">
-                      {matchResult.visible
-                        ? "הספק יוצג לדייר זה"
-                        : "הספק לא יוצג לדייר זה"}
-                    </p>
-                  </div>
-                  <ul className="text-xs space-y-1 leading-relaxed">
-                    {matchResult.reasons.map((r, i) => (
-                      <li key={i}>{r}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setMatchOpen(false)}>סגור</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
-        <AlertDialogContent dir="rtl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>מחיקה מלאה של הספק?</AlertDialogTitle>
-            <AlertDialogDescription>
-              האם אתה בטוח? פעולה זו תמחק את הספק לצמיתות — כולל החשבון, הפרופיל, הקטלוגים, הגלריה וקבצי האחסון.
-              האימייל ישוחרר ויהיה ניתן להירשם איתו מחדש. עסקאות והיסטוריית פיקדונות יישמרו לצורך audit.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>ביטול</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              מחיקה מלאה
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <BottomNav role="admin" />
     </MobileShell>
+  );
+}
+
+function SupplierGridCard({ row, onOpen, categories }: {
+  row: Row;
+  onOpen: () => void;
+  categories: { id: string; name: string; icon: string }[];
+}) {
+  const isNational = row.serves_all_country || row.service_areas?.includes("כל הארץ");
+  const rejected = row.approval_status === "rejected";
+  const blocked = !row.is_active;
+  const pending = row.approval_status === "pending";
+  const approved = row.approval_status === "approved" && row.is_active;
+  const statusBadge = rejected
+    ? { emoji: "🔴", label: "נדחה", cls: "bg-red-50 text-red-700 border-red-200" }
+    : blocked
+    ? { emoji: "⚫", label: "חסום", cls: "bg-neutral-100 text-neutral-700 border-neutral-200" }
+    : pending
+    ? { emoji: "🟡", label: "ממתין", cls: "bg-amber-50 text-amber-800 border-amber-200" }
+    : approved
+    ? { emoji: "🟢", label: "פעיל", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" }
+    : { emoji: "⚪", label: "לא פעיל", cls: "bg-muted text-muted-foreground border-border" };
+
+  const primaryCategory = row.categories?.[0]
+    ? categories.find((c) => c.id === row.categories[0])?.name ?? null
+    : null;
+  const extraCategories = Math.max(0, (row.categories?.length ?? 0) - 1);
+  const areaLabel = isNational ? "כל הארץ" : row.service_areas?.[0] ?? "—";
+
+  const created = row.created_at ? new Date(row.created_at) : null;
+  const createdLabel = created
+    ? created.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit" })
+    : "—";
+
+  return (
+    <button
+      onClick={onOpen}
+      className="gb-card p-3 text-right flex flex-col gap-2 active:scale-[0.98] transition-transform"
+    >
+      <div className="flex items-center justify-between gap-1.5">
+        <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full border text-[10px] font-bold ${statusBadge.cls}`}>
+          <span aria-hidden>{statusBadge.emoji}</span>
+          {statusBadge.label}
+        </span>
+        <span className="text-[10px] text-muted-foreground inline-flex items-center gap-0.5">
+          <Calendar className="h-2.5 w-2.5" />
+          {createdLabel}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <SupplierLogo name={row.business_name} logoUrl={row.logo_url} size="sm" />
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-fs-sm truncate leading-tight">{row.business_name}</h3>
+          <p className="text-fs-xs text-primary font-semibold truncate">
+            {primaryCategory ?? <span className="text-amber-700">ללא תחום</span>}
+            {extraCategories > 0 && ` +${extraCategories}`}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-1 text-fs-xs text-foreground/85">
+        <div className="flex items-center gap-1 truncate">
+          <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+          <span className="truncate">{areaLabel}</span>
+        </div>
+        {row.phone && (
+          <div className="flex items-center gap-1 truncate">
+            <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
+            <span className="truncate" dir="ltr">{row.phone}</span>
+          </div>
+        )}
+      </div>
+
+      <div
+        className={
+          "mt-1 h-8 rounded-lg text-fs-xs font-bold flex items-center justify-center gap-1 " +
+          (pending
+            ? "bg-amber-500 text-white"
+            : "bg-muted text-foreground")
+        }
+      >
+        <Eye className="h-3.5 w-3.5" />
+        {pending ? "בדיקה" : "פתח פרטים"}
+      </div>
+    </button>
   );
 }
