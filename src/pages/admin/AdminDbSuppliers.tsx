@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Plus, Search, Phone, Calendar, MapPin, Eye } from "lucide-react";
+import { computeCompleteness, type SupplierCompleteness } from "@/lib/supplierCompleteness";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
