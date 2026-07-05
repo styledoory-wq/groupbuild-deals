@@ -23,6 +23,7 @@ import {
 } from "@/lib/projectStore";
 import { useProjectCloudSync, useMyProject } from "@/lib/projectClient";
 import { ProjectMembersCard } from "@/components/project/ProjectMembersCard";
+import { ProjectStagesStepper } from "@/components/project/ProjectStagesStepper";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
