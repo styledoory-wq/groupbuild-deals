@@ -35,19 +35,29 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
   const coverInput = useRef<HTMLInputElement>(null);
   const galleryInput = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<"cover" | "gallery" | null>(null);
+  const [enhancing, setEnhancing] = useState(false);
 
   const pickCover = async (f: File | null) => {
     if (!f) return;
     setUploading("cover");
     try {
       const url = await uploadDealImage(f);
-      // Smart auto-crop happens in <SmartImg size="card"> via object-cover; original stays hi-res.
       onChange({ cover: url, gallery });
-      toast.success("תמונת שער נוצרה אוטומטית");
+      setUploading(null);
+      // Auto-enhance the uploaded image (does NOT replace the product).
+      setEnhancing(true);
+      const enhanced = await enhanceCover(url);
+      if (enhanced !== url) {
+        onChange({ cover: enhanced, gallery });
+        toast.success("התמונה שופרה אוטומטית ✨");
+      } else {
+        toast.success("התמונה הועלתה");
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "העלאה נכשלה");
     } finally {
       setUploading(null);
+      setEnhancing(false);
       if (coverInput.current) coverInput.current.value = "";
     }
   };
@@ -70,14 +80,26 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
         const u = await uploadDealImage(f);
         urls.push(u);
       }
-      // Smart auto-cover: if there's no cover yet, promote the first uploaded image.
-      const nextCover = cover ?? urls[0] ?? null;
-      const nextGallery = cover ? [...gallery, ...urls] : [...gallery, ...urls.slice(1)];
+      // Smart auto-cover: if there's no cover yet, promote the first uploaded image and enhance it.
+      const hadCover = !!cover;
+      const promoted = hadCover ? null : urls[0] ?? null;
+      const nextCover = cover ?? promoted;
+      const nextGallery = hadCover ? [...gallery, ...urls] : [...gallery, ...urls.slice(1)];
       onChange({ cover: nextCover, gallery: nextGallery });
+      setUploading(null);
+      if (promoted) {
+        setEnhancing(true);
+        const enhanced = await enhanceCover(promoted);
+        if (enhanced !== promoted) {
+          onChange({ cover: enhanced, gallery: nextGallery });
+          toast.success("תמונת שער שופרה אוטומטית ✨");
+        }
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "העלאה נכשלה");
     } finally {
       setUploading(null);
+      setEnhancing(false);
       if (galleryInput.current) galleryInput.current.value = "";
     }
   };
@@ -85,10 +107,37 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
   const removeGallery = (idx: number) =>
     onChange({ cover, gallery: gallery.filter((_, i) => i !== idx) });
 
-  const promoteToCover = (idx: number) => {
+  const promoteToCover = async (idx: number) => {
     const promoted = gallery[idx];
     const rest = gallery.filter((_, i) => i !== idx);
-    onChange({ cover: promoted, gallery: cover ? [cover, ...rest] : rest });
+    const newGallery = cover ? [cover, ...rest] : rest;
+    onChange({ cover: promoted, gallery: newGallery });
+    setEnhancing(true);
+    try {
+      const enhanced = await enhanceCover(promoted);
+      if (enhanced !== promoted) {
+        onChange({ cover: enhanced, gallery: newGallery });
+        toast.success("תמונת שער שופרה אוטומטית ✨");
+      }
+    } finally {
+      setEnhancing(false);
+    }
+  };
+
+  const enhanceCurrentCover = async () => {
+    if (!cover) return;
+    setEnhancing(true);
+    try {
+      const enhanced = await enhanceCover(cover);
+      if (enhanced !== cover) {
+        onChange({ cover: enhanced, gallery });
+        toast.success("התמונה שופרה ✨");
+      } else {
+        toast.info("לא ניתן היה לשפר כעת");
+      }
+    } finally {
+      setEnhancing(false);
+    }
   };
 
   return (
