@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, ImageIcon, Loader2, ExternalLink, Plus, Trash2, Search, CheckCircle2, XCircle, Pencil, MoreHorizontal, Eye, Target } from "lucide-react";
+import { MapPin, ImageIcon, Loader2, ExternalLink, Plus, Trash2, Search, CheckCircle2, XCircle, Pencil, MoreHorizontal, Eye, Target, Phone, Mail, User as UserIcon, Calendar, AlertTriangle, Tag, Check, X } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
