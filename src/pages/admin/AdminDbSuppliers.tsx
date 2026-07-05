@@ -409,6 +409,12 @@ function SupplierGridCard({ row, onOpen, categories }: {
         )}
       </div>
 
+      {missing.length > 0 && (
+        <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold self-start">
+          ⚠️ חסר: {missing.join(" · ")}
+        </div>
+      )}
+
       <div
         className={
           "mt-1 h-8 rounded-lg text-fs-xs font-bold flex items-center justify-center gap-1 " +
