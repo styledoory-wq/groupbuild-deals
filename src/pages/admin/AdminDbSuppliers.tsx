@@ -77,14 +77,16 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,contact_name,phone,email,categories,created_at")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,contact_name,phone,email,categories,short_description,description,created_at")
       .order("created_at", { ascending: false });
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
 
-    const [{ data: dls }, { data: ints }] = await Promise.all([
+    const [{ data: dls }, { data: ints }, { data: regs }, { data: cits }] = await Promise.all([
       supabase.from("deals").select("id,supplier_id,status,is_deleted"),
       supabase.from("deal_interests").select("deal_id,is_deleted"),
+      supabase.from("supplier_regions").select("supplier_id"),
+      supabase.from("supplier_cities").select("supplier_id"),
     ]);
     const dealsBySupplier = new Map<string, number>();
     const dealToSupplier = new Map<string, string>();
@@ -101,11 +103,30 @@ export default function AdminDbSuppliers() {
       if (!sid) return;
       leadsBySupplier.set(sid, (leadsBySupplier.get(sid) ?? 0) + 1);
     });
+    const regionsBySupplier = new Map<string, number>();
+    (regs ?? []).forEach((r: { supplier_id: string }) => {
+      regionsBySupplier.set(r.supplier_id, (regionsBySupplier.get(r.supplier_id) ?? 0) + 1);
+    });
+    const citiesBySupplier = new Map<string, number>();
+    (cits ?? []).forEach((c: { supplier_id: string }) => {
+      citiesBySupplier.set(c.supplier_id, (citiesBySupplier.get(c.supplier_id) ?? 0) + 1);
+    });
 
     setRows(base.map((r) => ({
       ...r,
       dealsCount: dealsBySupplier.get(r.id) ?? 0,
       leadsCount: leadsBySupplier.get(r.id) ?? 0,
+      completeness: computeCompleteness({
+        business_name: r.business_name,
+        phone: r.phone,
+        email: r.email,
+        categories: r.categories,
+        serves_all_country: r.serves_all_country,
+        regionsCount: regionsBySupplier.get(r.id) ?? 0,
+        citiesCount: citiesBySupplier.get(r.id) ?? 0,
+        short_description: r.short_description,
+        description: r.description,
+      }),
     })));
     setLoading(false);
   };
