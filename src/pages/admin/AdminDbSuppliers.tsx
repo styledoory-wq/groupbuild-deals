@@ -419,7 +419,8 @@ function SupplierGridCard({ row, onOpen, categories }: {
           <span aria-hidden>{statusBadge.emoji}</span>
           {statusBadge.label}
         </span>
-        <span className="text-[10px] text-muted-foreground inline-flex items-center gap-0.5">
+        {row.completeness && <CompletenessBadge percent={row.completeness.percent} />}
+        <span className="text-[10px] text-muted-foreground inline-flex items-center gap-0.5 ms-auto">
           <Calendar className="h-2.5 w-2.5" />
           {createdLabel}
         </span>
