@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { setPreviewRole } from "@/lib/previewMode";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { computeCompleteness } from "@/lib/supplierCompleteness";
 
 type Stats = {
   totalRevenue: number;
@@ -34,6 +35,9 @@ type Stats = {
   dealsNoImage: number;
   suppliersNoDeals: number;
   inactiveProjects: number;
+  suppliersProfileComplete: number;
+  suppliersProfileIncomplete: number;
+  suppliersProfileAvgPct: number;
 };
 
 type ActivityItem = { id: string; label: string; time: string; tone: "lead" | "supplier" | "deposit" };
@@ -51,6 +55,7 @@ export default function AdminDashboard() {
     activeDeals: 0, newDealsWeek: 0, leads: 0, conversionPct: 0,
     pendingSuppliers: 0, failedPayments: 0, openLeads: 0,
     dealsNoImage: 0, suppliersNoDeals: 0, inactiveProjects: 0,
+    suppliersProfileComplete: 0, suppliersProfileIncomplete: 0, suppliersProfileAvgPct: 0,
   });
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +92,42 @@ export default function AdminDashboard() {
           supabase.from("deposits").select("id, created_at, gross_deposit_amount").eq("status", "paid").eq("is_deleted", false).order("created_at", { ascending: false }).limit(3),
         ]);
 
+        // Supplier profile-completeness KPI
+        const [{ data: supplierRows }, { data: regsRows }, { data: citsRows }] = await Promise.all([
+          supabase.from("suppliers")
+            .select("id,business_name,phone,email,categories,serves_all_country,short_description,description")
+            .eq("is_deleted", false),
+          supabase.from("supplier_regions").select("supplier_id"),
+          supabase.from("supplier_cities").select("supplier_id"),
+        ]);
+        const regCounts = new Map<string, number>();
+        (regsRows ?? []).forEach((r: { supplier_id: string }) => regCounts.set(r.supplier_id, (regCounts.get(r.supplier_id) ?? 0) + 1));
+        const cityCounts = new Map<string, number>();
+        (citsRows ?? []).forEach((c: { supplier_id: string }) => cityCounts.set(c.supplier_id, (cityCounts.get(c.supplier_id) ?? 0) + 1));
+        let profileComplete = 0;
+        let percentSum = 0;
+        (supplierRows ?? []).forEach((s: {
+          id: string; business_name: string | null; phone: string | null; email: string | null;
+          categories: string[] | null; serves_all_country: boolean | null;
+          short_description: string | null; description: string | null;
+        }) => {
+          const c = computeCompleteness({
+            business_name: s.business_name,
+            phone: s.phone,
+            email: s.email,
+            categories: s.categories,
+            serves_all_country: s.serves_all_country,
+            regionsCount: regCounts.get(s.id) ?? 0,
+            citiesCount: cityCounts.get(s.id) ?? 0,
+            short_description: s.short_description,
+            description: s.description,
+          });
+          if (c.complete) profileComplete++;
+          percentSum += c.percent;
+        });
+        const totalSup = supplierRows?.length ?? 0;
+        const avgPct = totalSup > 0 ? Math.round(percentSum / totalSup) : 0;
+
         const sum = (rows: Array<{ gross_deposit_amount: number | null }> | null) =>
           (rows ?? []).reduce((s, d) => s + Number(d.gross_deposit_amount ?? 0), 0);
 
@@ -113,6 +154,9 @@ export default function AdminDashboard() {
           dealsNoImage: dealsNoImage.count ?? 0,
           suppliersNoDeals: 0,
           inactiveProjects: 0,
+          suppliersProfileComplete: profileComplete,
+          suppliersProfileIncomplete: totalSup - profileComplete,
+          suppliersProfileAvgPct: avgPct,
         });
 
         const acts: ActivityItem[] = [];
@@ -207,6 +251,49 @@ export default function AdminDashboard() {
             <WeekStat icon={<Wallet className="h-3.5 w-3.5" />} label="פיקדונות" value={stats.weeklyDeposits} total={stats.totalDeposits} />
           </div>
         </section>
+
+        {/* Supplier profile completeness KPI */}
+        <section className="bg-white border border-[#ECEEF2] rounded-[14px] p-3 lg:p-4">
+          <div className="flex items-center justify-between mb-2.5">
+            <h2 className="font-extrabold text-[13px] text-[#0F172A] flex items-center gap-1.5">
+              <Store className="h-3.5 w-3.5 text-[#0E6B5A]" /> השלמת פרופיל ספקים
+            </h2>
+            <button
+              onClick={() => navigate("/admin/suppliers")}
+              className="text-[11px] font-extrabold text-[#0E6B5A] hover:underline"
+            >
+              נהל ספקים ←
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-2 mb-2.5">
+            <div className="rounded-[10px] bg-[#E7F5F0] p-2.5 text-center">
+              <div className="text-[10px] text-[#0E6B5A] font-bold">הושלם</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#0E6B5A]">{stats.suppliersProfileComplete}</div>
+            </div>
+            <div className="rounded-[10px] bg-[#FEF3C7] p-2.5 text-center">
+              <div className="text-[10px] text-[#B45309] font-bold">לא הושלם</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#B45309]">{stats.suppliersProfileIncomplete}</div>
+            </div>
+            <div className="rounded-[10px] bg-[#F4F6FA] p-2.5 text-center">
+              <div className="text-[10px] text-[#6B7280] font-bold">ממוצע השלמה</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#0F172A]">{stats.suppliersProfileAvgPct}%</div>
+            </div>
+          </div>
+          <div className="h-2 rounded-full bg-[#F1F3F7] overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${stats.suppliersProfileAvgPct}%`,
+                background: stats.suppliersProfileAvgPct >= 80
+                  ? "linear-gradient(90deg,#059669,#10b981)"
+                  : stats.suppliersProfileAvgPct >= 60
+                  ? "linear-gradient(90deg,#d97706,#f59e0b)"
+                  : "linear-gradient(90deg,#dc2626,#ef4444)",
+              }}
+            />
+          </div>
+        </section>
+
 
         {/* Two columns: Tasks (priority) + Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">

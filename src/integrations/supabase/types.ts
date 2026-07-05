@@ -2086,6 +2086,7 @@ export type Database = {
           offers_services: boolean
           payment_instructions_note: string | null
           phone: string | null
+          profile_reminder_sent_at: string | null
           serves_all_country: boolean
           service_areas: string[]
           short_description: string | null
@@ -2133,6 +2134,7 @@ export type Database = {
           offers_services?: boolean
           payment_instructions_note?: string | null
           phone?: string | null
+          profile_reminder_sent_at?: string | null
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
@@ -2180,6 +2182,7 @@ export type Database = {
           offers_services?: boolean
           payment_instructions_note?: string | null
           phone?: string | null
+          profile_reminder_sent_at?: string | null
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null

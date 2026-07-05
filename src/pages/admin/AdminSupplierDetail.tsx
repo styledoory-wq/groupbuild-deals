@@ -536,6 +536,35 @@ export default function AdminSupplierDetail() {
               <div className="text-fs-xs text-muted-foreground pt-1 border-t border-border/50">
                 🔒 הספק חסום מפרסום הצעות, מקבלת לידים, והופעה לדיירים עד להשלמת הפרטים.
               </div>
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button
+                  onClick={async () => {
+                    if (!supplierId) return;
+                    const { error } = await supabase.functions.invoke("send-supplier-profile-reminders", {
+                      body: { supplier_id: supplierId },
+                    });
+                    if (error) toast.error("שליחת התזכורת נכשלה");
+                    else toast.success("נשלחה תזכורת לספק במייל");
+                  }}
+                  className="h-9 rounded-lg bg-amber-500 text-white text-fs-xs font-bold hover:bg-amber-600"
+                >
+                  ✉️ שלח תזכורת
+                </button>
+                <button
+                  onClick={async () => {
+                    const url = `${window.location.origin}/supplier/onboarding`;
+                    try {
+                      await navigator.clipboard.writeText(url);
+                      toast.success("הקישור הועתק");
+                    } catch {
+                      toast.error("העתקה נכשלה");
+                    }
+                  }}
+                  className="h-9 rounded-lg bg-muted text-foreground text-fs-xs font-bold hover:bg-muted/80"
+                >
+                  🔗 העתק קישור
+                </button>
+              </div>
             </>
           )}
         </div>

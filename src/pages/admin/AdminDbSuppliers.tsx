@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Plus, Search, Phone, Calendar, MapPin, Eye } from "lucide-react";
+import { computeCompleteness, type SupplierCompleteness } from "@/lib/supplierCompleteness";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -29,9 +30,12 @@ interface Row {
   phone: string | null;
   email: string | null;
   categories: string[];
+  short_description: string | null;
+  description: string | null;
   created_at: string | null;
   dealsCount?: number;
   leadsCount?: number;
+  completeness?: SupplierCompleteness;
 }
 
 interface NewForm {
@@ -57,7 +61,10 @@ export default function AdminDbSuppliers() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [supplierSearch, setSupplierSearch] = useState("");
-  const [quickFilter, setQuickFilter] = useState<"all" | "active" | "pending" | "no-deals" | "new" | "top">("all");
+  const [quickFilter, setQuickFilter] = useState<
+    "all" | "active" | "pending" | "no-deals" | "new" | "top"
+    | "profile-complete" | "profile-incomplete" | "missing-contact" | "missing-category" | "missing-area"
+  >("all");
 
   // Create
   const [open, setOpen] = useState(false);
@@ -70,14 +77,16 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,contact_name,phone,email,categories,created_at")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,contact_name,phone,email,categories,short_description,description,created_at")
       .order("created_at", { ascending: false });
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
 
-    const [{ data: dls }, { data: ints }] = await Promise.all([
+    const [{ data: dls }, { data: ints }, { data: regs }, { data: cits }] = await Promise.all([
       supabase.from("deals").select("id,supplier_id,status,is_deleted"),
       supabase.from("deal_interests").select("deal_id,is_deleted"),
+      supabase.from("supplier_regions").select("supplier_id"),
+      supabase.from("supplier_cities").select("supplier_id"),
     ]);
     const dealsBySupplier = new Map<string, number>();
     const dealToSupplier = new Map<string, string>();
@@ -94,11 +103,30 @@ export default function AdminDbSuppliers() {
       if (!sid) return;
       leadsBySupplier.set(sid, (leadsBySupplier.get(sid) ?? 0) + 1);
     });
+    const regionsBySupplier = new Map<string, number>();
+    (regs ?? []).forEach((r: { supplier_id: string }) => {
+      regionsBySupplier.set(r.supplier_id, (regionsBySupplier.get(r.supplier_id) ?? 0) + 1);
+    });
+    const citiesBySupplier = new Map<string, number>();
+    (cits ?? []).forEach((c: { supplier_id: string }) => {
+      citiesBySupplier.set(c.supplier_id, (citiesBySupplier.get(c.supplier_id) ?? 0) + 1);
+    });
 
     setRows(base.map((r) => ({
       ...r,
       dealsCount: dealsBySupplier.get(r.id) ?? 0,
       leadsCount: leadsBySupplier.get(r.id) ?? 0,
+      completeness: computeCompleteness({
+        business_name: r.business_name,
+        phone: r.phone,
+        email: r.email,
+        categories: r.categories,
+        serves_all_country: r.serves_all_country,
+        regionsCount: regionsBySupplier.get(r.id) ?? 0,
+        citiesCount: citiesBySupplier.get(r.id) ?? 0,
+        short_description: r.short_description,
+        description: r.description,
+      }),
     })));
     setLoading(false);
   };
@@ -164,8 +192,15 @@ export default function AdminDbSuppliers() {
     else if (quickFilter === "no-deals") res = res.filter((r) => (r.dealsCount ?? 0) === 0);
     else if (quickFilter === "new") res = res.filter((r) => r.created_at && new Date(r.created_at).getTime() >= sevenDaysAgo);
     else if (quickFilter === "top") res = [...res].sort((a, b) => (b.leadsCount ?? 0) - (a.leadsCount ?? 0)).filter((r) => (r.leadsCount ?? 0) > 0);
+    else if (quickFilter === "profile-complete") res = res.filter((r) => r.completeness?.complete);
+    else if (quickFilter === "profile-incomplete") res = res.filter((r) => r.completeness && !r.completeness.complete);
+    else if (quickFilter === "missing-contact") res = res.filter((r) => !r.phone || !r.email);
+    else if (quickFilter === "missing-category") res = res.filter((r) => !r.categories || r.categories.length === 0);
+    else if (quickFilter === "missing-area") res = res.filter((r) => !r.serves_all_country && (!r.service_areas || r.service_areas.length === 0));
     return res;
   }, [rows, supplierSearch, quickFilter, categories]);
+
+  const incompleteCount = rows.filter((r) => r.completeness && !r.completeness.complete).length;
 
   const pendingCount = rows.filter((r) => r.approval_status === "pending").length;
 
@@ -198,6 +233,11 @@ export default function AdminDbSuppliers() {
             ["all", `הכל (${rows.length})`],
             ["pending", `ממתינים (${pendingCount})`],
             ["active", "פעילים"],
+            ["profile-incomplete", `לא הושלם (${incompleteCount})`],
+            ["profile-complete", "הושלם 100%"],
+            ["missing-contact", "חסר קשר"],
+            ["missing-category", "חסר תחום"],
+            ["missing-area", "חסר אזור"],
             ["no-deals", "ללא הצעות"],
             ["new", "חדשים"],
             ["top", "מובילים"],
@@ -379,7 +419,8 @@ function SupplierGridCard({ row, onOpen, categories }: {
           <span aria-hidden>{statusBadge.emoji}</span>
           {statusBadge.label}
         </span>
-        <span className="text-[10px] text-muted-foreground inline-flex items-center gap-0.5">
+        {row.completeness && <CompletenessBadge percent={row.completeness.percent} />}
+        <span className="text-[10px] text-muted-foreground inline-flex items-center gap-0.5 ms-auto">
           <Calendar className="h-2.5 w-2.5" />
           {createdLabel}
         </span>
@@ -427,5 +468,23 @@ function SupplierGridCard({ row, onOpen, categories }: {
         {pending ? "בדיקה" : "פתח פרטים"}
       </div>
     </button>
+  );
+}
+
+function CompletenessBadge({ percent }: { percent: number }) {
+  const cls = percent >= 100
+    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+    : percent >= 60
+    ? "bg-amber-50 text-amber-800 border-amber-200"
+    : "bg-red-50 text-red-700 border-red-200";
+  const dot = percent >= 100 ? "🟢" : percent >= 60 ? "🟡" : "🔴";
+  return (
+    <span
+      className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full border text-[10px] font-bold tabular-nums ${cls}`}
+      title="השלמת פרופיל"
+    >
+      <span aria-hidden>{dot}</span>
+      {percent}%
+    </span>
   );
 }
