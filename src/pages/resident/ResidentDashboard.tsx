@@ -128,6 +128,26 @@ export default function ResidentDashboard() {
 
 
         const dealIds = ((matchesResult.data ?? []) as { deal_id: string }[]).map((m) => m.deal_id);
+        console.log("[Dashboard/ForYou] user location", { cityId: prof?.city_id, councilId, regionId, cityName });
+        console.log("[Dashboard/ForYou] matched deals from RPC:", dealIds.length, matchesResult.error ?? "");
+
+        // Fallback: if location match returns nothing, surface latest active deals so the card
+        // is never empty when active deals exist in the system.
+        let usedFallback = false;
+        let effectiveDealIds = dealIds;
+        if (effectiveDealIds.length === 0) {
+          const { data: fbDeals, error: fbErr } = await supabase
+            .from("deals")
+            .select("id")
+            .eq("status", "active")
+            .eq("is_deleted", false)
+            .order("created_at", { ascending: false })
+            .limit(8);
+          if (fbErr) console.warn("[Dashboard/ForYou] fallback error", fbErr);
+          effectiveDealIds = ((fbDeals ?? []) as { id: string }[]).map((d) => d.id);
+          usedFallback = effectiveDealIds.length > 0;
+          console.log("[Dashboard/ForYou] fallback active deals:", effectiveDealIds.length);
+        }
         const supplierIds = new Set<string>();
         (citySupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
         (councilSupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
