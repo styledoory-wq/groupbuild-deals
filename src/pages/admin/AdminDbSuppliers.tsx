@@ -35,6 +35,7 @@ interface Row {
   logo_url: string | null;
   serves_all_country: boolean;
   short_description: string | null;
+  contact_name: string | null;
   phone: string | null;
   email: string | null;
   categories: string[];
