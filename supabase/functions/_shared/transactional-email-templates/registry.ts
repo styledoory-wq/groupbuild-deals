@@ -3,6 +3,7 @@ import { template as adminNotification } from './admin-notification.tsx'
 import { template as userWelcome } from './user-welcome.tsx'
 import { template as dealUpdate } from './deal-update.tsx'
 import { template as marketingCardReady } from './marketing-card-ready.tsx'
+import { template as supplierProfileReminder } from './supplier-profile-reminder.tsx'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -17,4 +18,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'user-welcome': userWelcome,
   'deal-update': dealUpdate,
   'marketing-card-ready': marketingCardReady,
+  'supplier-profile-reminder': supplierProfileReminder,
 }
