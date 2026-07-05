@@ -30,9 +30,12 @@ interface Row {
   phone: string | null;
   email: string | null;
   categories: string[];
+  short_description: string | null;
+  description: string | null;
   created_at: string | null;
   dealsCount?: number;
   leadsCount?: number;
+  completeness?: SupplierCompleteness;
 }
 
 interface NewForm {
