@@ -1111,12 +1111,39 @@ function InfoChip({
 /* ===================== Edit Info Modal ===================== */
 
 function EditInfoModal({
-  info, onClose, onSave, onReset,
-}: { info: ProjectInfo; onClose: () => void; onSave: (info: ProjectInfo) => void; onReset: () => void }) {
+  info, onClose, onSave, onAutoSave, onReset,
+}: {
+  info: ProjectInfo;
+  onClose: () => void;
+  onSave: (info: ProjectInfo) => void;
+  onAutoSave?: (info: ProjectInfo) => void;
+  onReset: () => void;
+}) {
   const [form, setForm] = useState<ProjectInfo>({ ...info });
   const [step, setStep] = useState<1 | 2>(info.projectType ? 2 : 1);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
 
+  // Auto-save: debounce 700ms, skip first render
+  const firstRun = useMemo(() => ({ v: true }), []);
+  useEffect(() => {
+    if (firstRun.v) { firstRun.v = false; return; }
+    if (!onAutoSave) return;
+    const t = setTimeout(() => {
+      onAutoSave({
+        ...form,
+        name: (form.name || "").trim(),
+        subtitle: (form.subtitle || "").trim(),
+        manager: (form.manager || "").trim(),
+        city: (form.city || "").trim(),
+        address: (form.address || "").trim(),
+      });
+      setSavedAt(Date.now());
+    }, 700);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form]);
 
   const set = <K extends keyof ProjectInfo>(k: K, v: ProjectInfo[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
@@ -1137,6 +1164,8 @@ function EditInfoModal({
       name: (form.name || "").trim() || info.name,
       subtitle: (form.subtitle || "").trim(),
       manager: (form.manager || "").trim(),
+      city: (form.city || "").trim(),
+      address: (form.address || "").trim(),
     });
   };
 
