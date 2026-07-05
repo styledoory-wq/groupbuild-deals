@@ -219,6 +219,7 @@ export default function ResidentDashboard() {
             joiners: joinerCounts[d.id] ?? 0,
           }));
         }
+        console.log("[Dashboard/ForYou] final deals shown:", nextDeals.length, usedFallback ? "(fallback: latest active)" : "(location-matched)");
 
         const pid = (prof?.project_id as string | null) ?? null;
         if (pid) {
