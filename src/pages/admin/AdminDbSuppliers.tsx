@@ -359,6 +359,10 @@ function SupplierGridCard({ row, onOpen, categories }: {
     : null;
   const extraCategories = Math.max(0, (row.categories?.length ?? 0) - 1);
   const areaLabel = isNational ? "כל הארץ" : row.service_areas?.[0] ?? "—";
+  const missing: string[] = [];
+  if (!row.phone) missing.push("טלפון");
+  if (!row.categories || row.categories.length === 0) missing.push("תחום");
+  if (!isNational && (!row.service_areas || row.service_areas.length === 0)) missing.push("אזור");
 
   const created = row.created_at ? new Date(row.created_at) : null;
   const createdLabel = created
@@ -404,6 +408,12 @@ function SupplierGridCard({ row, onOpen, categories }: {
           </div>
         )}
       </div>
+
+      {missing.length > 0 && (
+        <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold self-start">
+          ⚠️ חסר: {missing.join(" · ")}
+        </div>
+      )}
 
       <div
         className={
