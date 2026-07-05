@@ -289,6 +289,7 @@ const App = () => (
                   <Route path="/admin" element={adminRoute(<AdminDashboard />)} />
                   <Route path="/admin/projects" element={adminRoute(<AdminProjects />)} />
                   <Route path="/admin/suppliers" element={adminRoute(<AdminDbSuppliers />)} />
+                  <Route path="/admin/suppliers/:supplierId" element={adminRoute(<AdminSupplierDetail />)} />
                   <Route path="/admin/suppliers-mock" element={<Navigate to="/admin/suppliers" replace />} />
                   <Route path="/admin/residents" element={adminRoute(<AdminResidents />)} />
                   <Route path="/admin/categories" element={adminRoute(<AdminCategories />)} />
