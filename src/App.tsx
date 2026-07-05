@@ -98,6 +98,8 @@ const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications")
 const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
 const AdminDemandList = lazy(() => import("./pages/admin/AdminDemandList"));
 const AdminDemandDetail = lazy(() => import("./pages/admin/AdminDemandDetail"));
+const CreateDemand = lazy(() => import("./pages/resident/CreateDemand"));
+const MyDemands = lazy(() => import("./pages/resident/MyDemands"));
 const CommitteeDashboard = lazy(() => import("./pages/committee/CommitteeDashboard"));
 const CommitteeRequest = lazy(() => import("./pages/committee/CommitteeRequest"));
 const CommitteeQuoteRequest = lazy(() => import("./pages/committee/CommitteeQuoteRequest"));
