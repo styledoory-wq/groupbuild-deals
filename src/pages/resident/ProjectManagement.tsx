@@ -438,7 +438,7 @@ const STAGES_BY_TYPE: Record<ProjectType, Stage[]> = {
   point_service: POINT_SERVICE_STAGES,
 };
 
-const getStagesFor = (t: ProjectType | undefined): Stage[] =>
+export const getStagesFor = (t: ProjectType | undefined): Stage[] =>
   STAGES_BY_TYPE[t ?? "new_build"] ?? NEW_BUILD_STAGES;
 
 // Default budget items derived from stage categories (used for auto-sync)
