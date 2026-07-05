@@ -470,3 +470,21 @@ function SupplierGridCard({ row, onOpen, categories }: {
     </button>
   );
 }
+
+function CompletenessBadge({ percent }: { percent: number }) {
+  const cls = percent >= 100
+    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+    : percent >= 60
+    ? "bg-amber-50 text-amber-800 border-amber-200"
+    : "bg-red-50 text-red-700 border-red-200";
+  const dot = percent >= 100 ? "🟢" : percent >= 60 ? "🟡" : "🔴";
+  return (
+    <span
+      className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full border text-[10px] font-bold tabular-nums ${cls}`}
+      title="השלמת פרופיל"
+    >
+      <span aria-hidden>{dot}</span>
+      {percent}%
+    </span>
+  );
+}
