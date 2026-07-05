@@ -410,6 +410,24 @@ export default function AdminDbSuppliers() {
     load();
   }, []);
 
+  const quickSetApproval = async (id: string, next: "approved" | "rejected") => {
+    try {
+      const payload: { approval_status: "approved" | "rejected"; is_active?: boolean } = { approval_status: next };
+      if (next === "approved") payload.is_active = true;
+      const { error } = await supabase.from("suppliers").update(payload).eq("id", id);
+      if (error) throw error;
+      if (next === "approved") {
+        supabase.functions
+          .invoke("send-email", { body: { type: "supplier_approved", supplier_id: id } })
+          .catch((e) => console.warn("[email] supplier_approved failed", e));
+      }
+      toast.success(next === "approved" ? "הספק אושר" : "הספק נדחה");
+      await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "עדכון סטטוס נכשל");
+    }
+  };
+
   const handleCreate = async () => {
     if (!form.business_name.trim()) {
       toast.error("שם עסק הוא שדה חובה");
