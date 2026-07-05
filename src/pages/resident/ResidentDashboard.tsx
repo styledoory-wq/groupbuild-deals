@@ -285,14 +285,8 @@ export default function ResidentDashboard() {
     : (journeyStages.length ? Math.round(((currentIdx + 1) / journeyStages.length) * 100) : 0);
 
   const feedItems = useMemo<FeedItem[]>(() => {
-    const out: FeedItem[] = [];
-    areaDeals.forEach((d, i) => {
-      out.push({ kind: "deal", deal: d });
-      if (i % 2 === 1 && d.joiners && d.joiners > 0) {
-        out.push({ kind: "activity", dealId: d.id, dealTitle: d.title, joiners: d.joiners });
-      }
-    });
-    return out;
+    // Keep the home feed as a quick taste — up to 5 deals only, no interleaved activity rows.
+    return areaDeals.slice(0, 5).map((d) => ({ kind: "deal", deal: d }) as FeedItem);
   }, [areaDeals]);
 
   return (
@@ -453,23 +447,38 @@ export default function ResidentDashboard() {
           subtitle="הצעות חמות באזורך"
           action={<button onClick={() => navigate("/resident/deals")} className="text-[14px] font-medium text-[#0E6B5A]">הצג הכל</button>}
         />
-        <div className="px-5 mt-3">
+        <div className="mt-3">
           {feedItems.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-7 text-center">
+            <div className="mx-5 bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-7 text-center">
               <div className="h-12 w-12 mx-auto rounded-2xl bg-[#F7F5F0] flex items-center justify-center mb-3">
                 <Sparkles className="h-5 w-5 text-[#8E8E93]" />
               </div>
               <p className="text-[13px] text-[#8E8E93] font-medium">כרגע אין הצעות פעילות. נעדכן ברגע שיפורסמו הצעות חדשות.</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div
+              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-px-5 px-5 pb-2 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              dir="rtl"
+            >
               {feedItems.map((item, idx) =>
                 item.kind === "deal" ? (
-                  <DealFeedCard key={`d-${item.deal.id}-${idx}`} deal={item.deal} onClick={() => navigate(`/resident/deals/${item.deal.id}`)} />
-                ) : (
-                  <ActivityFeedCard key={`a-${item.dealId}-${idx}`} title={item.dealTitle} joiners={item.joiners} onClick={() => navigate(`/resident/deals/${item.dealId}`)} />
-                )
+                  <DealFeedCard
+                    key={`d-${item.deal.id}-${idx}`}
+                    deal={item.deal}
+                    onClick={() => navigate(`/resident/deals/${item.deal.id}`)}
+                  />
+                ) : null,
               )}
+              <button
+                onClick={() => navigate("/resident/deals")}
+                className="snap-start shrink-0 w-[120px] rounded-3xl border border-dashed border-[#0E6B5A]/40 bg-white flex flex-col items-center justify-center gap-2 text-[#0E6B5A] active:scale-[0.98] transition"
+                style={{ minHeight: 200 }}
+              >
+                <div className="h-10 w-10 rounded-full bg-[#0E6B5A]/10 flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4" strokeWidth={2.4} />
+                </div>
+                <span className="text-[12px] font-semibold">הצג הכל</span>
+              </button>
             </div>
           )}
         </div>
@@ -609,40 +618,41 @@ function DealFeedCard({ deal, onClick }: { deal: MiniDeal; onClick: () => void }
   return (
     <button
       onClick={onClick}
-      className="w-full text-right bg-white border border-[#E5E5EA] rounded-3xl overflow-hidden shadow-sm active:scale-[0.99] transition"
+      className="snap-start shrink-0 basis-[78%] max-w-[300px] text-right bg-white border border-[#E5E5EA] rounded-2xl overflow-hidden shadow-sm active:scale-[0.99] transition flex flex-col"
+      style={{ minHeight: 200, maxHeight: 220 }}
     >
-      <div className="relative h-44 bg-[#F7F5F0] overflow-hidden">
+      <div className="relative h-[92px] bg-[#F7F5F0] overflow-hidden shrink-0">
         {deal.cover_image_url ? (
           <SmartImg src={deal.cover_image_url} size="card" alt={deal.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Sparkles className="h-10 w-10 text-[#D1D1D6]" />
+            <Sparkles className="h-7 w-7 text-[#D1D1D6]" />
           </div>
         )}
         {discount > 0 && (
-          <div className="absolute top-3 right-3 bg-[#1C1C1E] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full tabular-nums">
+          <div className="absolute top-2 right-2 bg-[#1C1C1E] text-white text-[10px] font-semibold px-2 py-0.5 rounded-full tabular-nums">
             {discount}%-
           </div>
         )}
-        {deal.joiners && deal.joiners > 0 ? (
-          <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur text-[#1C1C1E] text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm inline-flex items-center gap-1">
-            <Users className="h-3 w-3 text-[#0E6B5A]" strokeWidth={2.4} />
-            {deal.joiners} הצטרפו
-          </div>
-        ) : null}
       </div>
-      <div className="p-4">
+      <div className="p-3 flex-1 flex flex-col">
         {deal.supplier_name && (
-          <div className="text-[11px] text-[#8E8E93] font-medium mb-1 truncate">{deal.supplier_name}</div>
+          <div className="text-[10px] text-[#8E8E93] font-medium mb-0.5 truncate">{deal.supplier_name}</div>
         )}
-        <div className="text-[15px] font-semibold text-[#1C1C1E] tracking-tight leading-tight line-clamp-2">
+        <div className="text-[13px] font-semibold text-[#1C1C1E] tracking-tight leading-tight line-clamp-2">
           {deal.title}
         </div>
-        <div className="mt-3 flex items-center justify-between">
-          <span className="inline-flex items-center gap-1 text-[11px] text-[#0E6B5A] font-semibold">
-            <TrendingUp className="h-3 w-3" strokeWidth={2.4} /> פעיל עכשיו
-          </span>
-          <span className="text-[12px] font-semibold text-[#0E6B5A]">לפרטים ←</span>
+        <div className="mt-auto pt-2 flex items-center justify-between">
+          {discount > 0 ? (
+            <span className="inline-flex items-center gap-1 text-[10px] text-[#0E6B5A] font-semibold bg-[#0E6B5A]/10 px-1.5 py-0.5 rounded-full">
+              <TrendingUp className="h-2.5 w-2.5" strokeWidth={2.4} /> חיסכון {discount}%
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[10px] text-[#0E6B5A] font-semibold">
+              <TrendingUp className="h-2.5 w-2.5" strokeWidth={2.4} /> פעיל
+            </span>
+          )}
+          <span className="text-[11px] font-semibold text-[#0E6B5A]">לפרטים ←</span>
         </div>
       </div>
     </button>
