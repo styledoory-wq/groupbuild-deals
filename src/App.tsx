@@ -88,6 +88,7 @@ const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminSupplierAreas = lazy(() => import("./pages/admin/AdminSupplierAreas"));
 const AdminSupplierMedia = lazy(() => import("./pages/admin/AdminSupplierMedia"));
 const AdminDbSuppliers = lazy(() => import("./pages/admin/AdminDbSuppliers"));
+const AdminSupplierDetail = lazy(() => import("./pages/admin/AdminSupplierDetail"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
 const AdminCommitteeRequests = lazy(() => import("./pages/admin/AdminCommitteeRequests"));
 const AdminControl = lazy(() => import("./pages/admin/AdminControl"));
