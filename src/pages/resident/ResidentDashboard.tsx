@@ -459,7 +459,7 @@ export default function ResidentDashboard() {
               <div className="h-12 w-12 mx-auto rounded-2xl bg-[#F7F5F0] flex items-center justify-center mb-3">
                 <Sparkles className="h-5 w-5 text-[#8E8E93]" />
               </div>
-              <p className="text-[13px] text-[#8E8E93] font-medium">עדיין אין הצעות פעילות באזור שלך</p>
+              <p className="text-[13px] text-[#8E8E93] font-medium">כרגע אין הצעות פעילות. נעדכן ברגע שיפורסמו הצעות חדשות.</p>
             </div>
           ) : (
             <div className="space-y-3">
