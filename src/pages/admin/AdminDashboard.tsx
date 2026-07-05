@@ -38,6 +38,11 @@ type Stats = {
   suppliersProfileComplete: number;
   suppliersProfileIncomplete: number;
   suppliersProfileAvgPct: number;
+  demandNew: number;
+  demandOpen: number;
+  demandConverted: number;
+  demandConversionPct: number;
+  demandAvgHours: number;
 };
 
 type ActivityItem = { id: string; label: string; time: string; tone: "lead" | "supplier" | "deposit" };
