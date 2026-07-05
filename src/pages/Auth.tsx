@@ -252,53 +252,78 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim()) return;
-    if (role === "resident" && !city.trim()) return;
-    if (role === "supplier" && !businessName.trim()) return;
+    console.log("[signup] submit start", { role, email, hasName: !!fullName, hasCity: !!city, hasBusiness: !!businessName });
+    if (!email.trim()) { toast.error("יש להזין כתובת אימייל"); return; }
+    if (!password || password.length < 6) { toast.error("סיסמה חייבת להיות באורך של 6 תווים לפחות"); return; }
+    if (!fullName.trim()) { toast.error("יש להזין שם מלא"); return; }
+    if (role === "resident" && !city.trim()) { toast.error("יש להזין עיר"); return; }
+    if (role === "supplier" && !businessName.trim()) { toast.error("יש להזין שם עסק"); return; }
     if (!termsAccepted) {
       toast.error("יש לאשר את תנאי השימוש כדי להמשיך");
       return;
     }
     setLoading(true);
+    setAuthError(null);
     try {
       const redirectUrl = `${getSiteOrigin()}/`;
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
           emailRedirectTo: redirectUrl,
-
           data: {
-            full_name: fullName,
-            city,
+            full_name: fullName.trim(),
+            city: city.trim(),
             user_type: role,
-            business_name: businessName,
+            business_name: businessName.trim(),
             project_id: projectId || null,
           },
         },
       });
+      console.log("[signup] response", { hasUser: !!data?.user, hasSession: !!data?.session, error });
       if (error) throw error;
-      // Persist terms acceptance on profile (best-effort, after trigger creates profile)
+
+      // Supabase returns a fake user (identities === []) when email is already registered.
+      const identities = (data.user as { identities?: unknown[] } | null)?.identities;
+      if (data.user && Array.isArray(identities) && identities.length === 0) {
+        toast.error("משתמש כבר רשום במערכת. נסה להתחבר או לאפס סיסמה.");
+        setMode("signin");
+        return;
+      }
+
       const newUserId = data.user?.id;
       if (newUserId) {
         supabase.from("profiles").update({
           terms_accepted: true,
           terms_accepted_at: new Date().toISOString(),
           terms_version: CURRENT_TERMS_VERSION,
-        }).eq("id", newUserId).then(() => { /* ignore */ });
+        }).eq("id", newUserId).then(({ error: pErr }) => {
+          if (pErr) console.warn("[signup] terms update failed", pErr);
+        });
       }
-      // Notify admin about new signup (best effort)
       supabase.functions.invoke("notify-admin", {
         body: {
           event: role === "supplier" ? "new_supplier" : "new_resident",
           title: role === "supplier" ? "ספק חדש נרשם" : "דייר חדש נרשם",
           details: { full_name: fullName, email, phone: "", city, business_name: businessName, role },
         },
-      }).catch(() => { /* ignore */ });
+      }).catch((e) => console.warn("[signup] notify-admin failed", e));
+
+      // If Supabase returned a live session (auto-confirm on) → go straight in.
+      if (data.session) {
+        toast.success("נרשמת בהצלחה!");
+        navigate(role === "supplier" ? "/supplier" : "/resident");
+        return;
+      }
+
       toast.success("נרשמתם בהצלחה! שלחנו לך מייל אישור — בדוק את תיבת הדואר שלך");
     } catch (err) {
+      console.error("[signup] failed", err);
       const raw = err instanceof Error ? err.message : "הרשמה נכשלה";
-      toast.error(translateAuthError(raw));
+      const translated = translateAuthError(raw);
+      const finalMsg = translated === "אירעה שגיאה, נסה שנית" ? `הרשמה נכשלה: ${raw}` : translated;
+      setAuthError(finalMsg);
+      toast.error(finalMsg);
     } finally {
       setLoading(false);
     }
