@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
+import { loadSupplierCompletenessForUser, type SupplierCompleteness } from "@/lib/supplierCompleteness";
 import { HelpButton } from "@/components/OnboardingFlow";
 import { SmartImg } from "@/components/ui/SmartImg";
 
@@ -105,6 +106,7 @@ export default function SupplierDashboard() {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [weekStats, setWeekStats] = useState({ leads: 0, favs: 0, paid: 0, revenue: 0 });
   const [customerSavings, setCustomerSavings] = useState(0);
+  const [completeness, setCompleteness] = useState<SupplierCompleteness | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -144,6 +146,19 @@ export default function SupplierDashboard() {
         }
         if (cancelled) return;
         setDbSupplier(supplierRow);
+
+        // Load completeness. If incomplete, redirect to onboarding.
+        try {
+          const { completeness: comp } = await loadSupplierCompletenessForUser(session.user.id);
+          if (!cancelled) setCompleteness(comp);
+          if (!cancelled && !comp.complete) {
+            setLoading(false);
+            navigate("/supplier/onboarding", { replace: true });
+            return;
+          }
+        } catch (compErr) {
+          console.warn("[dashboard] completeness check failed", compErr);
+        }
 
         if (supplierRow?.id && (supplierRow.approval_status === "approved" || supplierRow.approval_status === "active")) {
           const { data: dealRows, error: dealsErr } = await supabase

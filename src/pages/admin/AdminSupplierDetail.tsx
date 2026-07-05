@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
+import { computeCompleteness } from "@/lib/supplierCompleteness";
 
 interface EditForm {
   business_name: string;
@@ -407,6 +408,18 @@ export default function AdminSupplierDetail() {
     ? new Date(createdAt).toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" })
     : "—";
 
+  const completeness = computeCompleteness({
+    business_name: form.business_name,
+    phone: form.phone,
+    email: form.email,
+    categories: form.categoryIds,
+    serves_all_country: areas.servesAllCountry,
+    regionsCount: areas.regionIds.length,
+    citiesCount: areas.cityIds.length,
+    short_description: form.short_description,
+    description: form.description,
+  });
+
   return (
     <MobileShell>
       {/* Header */}
@@ -487,7 +500,47 @@ export default function AdminSupplierDetail() {
                 href={form.email ? `mailto:${form.email}` : undefined} />
               <Row icon={<Tag className="h-4 w-4" />} value={categoryNames.join(" • ") || "ללא תחום"} />
               <Row icon={<MapPin className="h-4 w-4" />} value={areaSummary} />
+        </div>
+
+        {/* Profile completeness */}
+        <div className={`gb-card p-4 space-y-2 ${completeness.complete ? "" : "border-2 border-amber-300"}`}>
+          <div className="flex items-center justify-between">
+            <div className="font-bold text-fs-sm inline-flex items-center gap-2">
+              {completeness.complete ? "✅" : "⚠️"} השלמת פרופיל
+              {!completeness.complete && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-bold">
+                  פרופיל לא הושלם
+                </span>
+              )}
             </div>
+            <span className={`text-fs-md font-extrabold ${completeness.complete ? "text-emerald-700" : "text-amber-700"}`}>
+              {completeness.percent}%
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${completeness.percent}%`,
+                background: completeness.complete
+                  ? "linear-gradient(90deg,#059669,#10b981)"
+                  : "linear-gradient(90deg,#d97706,#f59e0b)",
+              }}
+            />
+          </div>
+          {!completeness.complete && (
+            <>
+              <div className="text-fs-xs text-muted-foreground">
+                חסר: <b className="text-amber-800">{completeness.missing.join(" · ")}</b>
+              </div>
+              <div className="text-fs-xs text-muted-foreground pt-1 border-t border-border/50">
+                🔒 הספק חסום מפרסום הצעות, מקבלת לידים, והופעה לדיירים עד להשלמת הפרטים.
+              </div>
+            </>
+          )}
+        </div>
+
+
           </div>
         )}
 
