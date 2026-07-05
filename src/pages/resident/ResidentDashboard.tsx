@@ -106,7 +106,10 @@ export default function ResidentDashboard() {
         const allowed = journeyStageIds.length ? journeyStageIds : validIds;
         const chosen = (allowed.includes(profStage) ? profStage : allowed.includes(projStage) ? projStage : (allowed[0] ?? "planning")) as StageId;
         const stage: StageId = chosen;
-        const stageFilter: string | null = journeyStageIds.length ? stage : null;
+        // NOTE: intentionally do NOT pass _stage_filter — categories.stage is not
+        // always populated, and strict stage matching hides valid deals. We surface
+        // all matching-by-location deals and let the user browse.
+        void stage;
 
         const { resolveMyProjectId } = await import("@/lib/projectClient");
         const sharedPid = await resolveMyProjectId(uid);
@@ -114,7 +117,7 @@ export default function ResidentDashboard() {
         const freeInterestsQ = supabase.from("deal_interests").select("deal_id").eq("is_deleted", false).in("status", ["interested", "approved", "committed", "joined"]);
 
         const [matchesResult, citySupResult, councilSupResult, regionSupResult, nationwideResult, paidDepositsResult, freeInterestsResult] = await Promise.all([
-          supabase.rpc("get_matching_deals_for_user", stageFilter ? { _stage_filter: stageFilter, _limit: 8 } : { _limit: 8 }),
+          supabase.rpc("get_matching_deals_for_user", { _limit: 12 }),
           prof?.city_id ? supabase.from("supplier_cities").select("supplier_id").eq("city_id", prof.city_id) : Promise.resolve({ data: [] }),
           councilId ? supabase.from("supplier_councils").select("supplier_id").eq("council_id", councilId) : Promise.resolve({ data: [] }),
           regionId ? supabase.from("supplier_regions").select("supplier_id").eq("region_id", regionId) : Promise.resolve({ data: [] }),
@@ -123,7 +126,28 @@ export default function ResidentDashboard() {
           sharedPid ? freeInterestsQ.eq("project_id", sharedPid) : freeInterestsQ.eq("user_id", uid),
         ]);
 
+
         const dealIds = ((matchesResult.data ?? []) as { deal_id: string }[]).map((m) => m.deal_id);
+        console.log("[Dashboard/ForYou] user location", { cityId: prof?.city_id, councilId, regionId, cityName });
+        console.log("[Dashboard/ForYou] matched deals from RPC:", dealIds.length, matchesResult.error ?? "");
+
+        // Fallback: if location match returns nothing, surface latest active deals so the card
+        // is never empty when active deals exist in the system.
+        let usedFallback = false;
+        let effectiveDealIds = dealIds;
+        if (effectiveDealIds.length === 0) {
+          const { data: fbDeals, error: fbErr } = await supabase
+            .from("deals")
+            .select("id")
+            .eq("status", "active")
+            .eq("is_deleted", false)
+            .order("created_at", { ascending: false })
+            .limit(8);
+          if (fbErr) console.warn("[Dashboard/ForYou] fallback error", fbErr);
+          effectiveDealIds = ((fbDeals ?? []) as { id: string }[]).map((d) => d.id);
+          usedFallback = effectiveDealIds.length > 0;
+          console.log("[Dashboard/ForYou] fallback active deals:", effectiveDealIds.length);
+        }
         const supplierIds = new Set<string>();
         (citySupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
         (councilSupResult.data ?? []).forEach((r: { supplier_id: string }) => supplierIds.add(r.supplier_id));
@@ -150,7 +174,7 @@ export default function ResidentDashboard() {
             ? supabase.from("suppliers").select("id", { count: "exact", head: true })
                 .in("id", Array.from(supplierIds)).eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"])
             : Promise.resolve({ count: 0 }),
-          dealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url,discount_percentage,deposit_required,deposit_amount,created_at,original_price,discounted_price").in("id", dealIds).eq("is_deleted", false) : Promise.resolve({ data: [] }),
+          effectiveDealIds.length ? supabase.from("deals").select("id,title,supplier_id,cover_image_url,discount_percentage,deposit_required,deposit_amount,created_at,original_price,discounted_price").in("id", effectiveDealIds).eq("is_deleted", false).eq("status", "active") : Promise.resolve({ data: [] }),
           (sharedPid
             ? supabase.from("vouchers").select("deal_id").eq("project_id", sharedPid).in("status", ["issued", "active", "redeemed"])
             : supabase.from("vouchers").select("deal_id").eq("user_id", uid).in("status", ["issued", "active", "redeemed"])
@@ -195,6 +219,7 @@ export default function ResidentDashboard() {
             joiners: joinerCounts[d.id] ?? 0,
           }));
         }
+        console.log("[Dashboard/ForYou] final deals shown:", nextDeals.length, usedFallback ? "(fallback: latest active)" : "(location-matched)");
 
         const pid = (prof?.project_id as string | null) ?? null;
         if (pid) {
@@ -434,7 +459,7 @@ export default function ResidentDashboard() {
               <div className="h-12 w-12 mx-auto rounded-2xl bg-[#F7F5F0] flex items-center justify-center mb-3">
                 <Sparkles className="h-5 w-5 text-[#8E8E93]" />
               </div>
-              <p className="text-[13px] text-[#8E8E93] font-medium">עדיין אין הצעות פעילות באזור שלך</p>
+              <p className="text-[13px] text-[#8E8E93] font-medium">כרגע אין הצעות פעילות. נעדכן ברגע שיפורסמו הצעות חדשות.</p>
             </div>
           ) : (
             <div className="space-y-3">
