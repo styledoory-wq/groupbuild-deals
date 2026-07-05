@@ -44,6 +44,8 @@ type ProjectInfo = {
   targetDate: string; // YYYY-MM-DD
   groupSavings: number;
   projectType?: ProjectType;
+  city?: string;
+  address?: string;
   // Type-specific fields (only relevant ones are used per type)
   area?: number;          // מ"ר — new_build / renovation / extension / mamad
   rooms?: number;         // חדרים
