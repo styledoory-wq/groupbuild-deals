@@ -61,7 +61,10 @@ export default function AdminDbSuppliers() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [supplierSearch, setSupplierSearch] = useState("");
-  const [quickFilter, setQuickFilter] = useState<"all" | "active" | "pending" | "no-deals" | "new" | "top">("all");
+  const [quickFilter, setQuickFilter] = useState<
+    "all" | "active" | "pending" | "no-deals" | "new" | "top"
+    | "profile-complete" | "profile-incomplete" | "missing-contact" | "missing-category" | "missing-area"
+  >("all");
 
   // Create
   const [open, setOpen] = useState(false);
