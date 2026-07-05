@@ -635,6 +635,33 @@ export default function OfferEditor() {
       </MobileShell>
     );
   }
+  if (profileBlock) {
+    return (
+      <MobileShell>
+        <BackHeader title="פרסום הצעה" />
+        <div className="px-4 py-8 space-y-4 text-center">
+          <div className="mx-auto h-14 w-14 rounded-full bg-amber-100 flex items-center justify-center text-2xl">🔒</div>
+          <h2 className="text-fs-lg font-extrabold">השלם את פרופיל העסק כדי לפרסם</h2>
+          <p className="text-fs-sm text-muted-foreground max-w-sm mx-auto">
+            כדי לפרסם הצעות ולקבל פניות מדיירים, יש להשלים את פרטי העסק. חסר: <b>{profileBlock.missing.join(", ")}</b> ({profileBlock.percent}%)
+          </p>
+          <div className="max-w-xs mx-auto h-2 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{ width: `${profileBlock.percent}%`, background: "linear-gradient(90deg,#0E6B5A,#34A88E)" }}
+            />
+          </div>
+          <Button
+            onClick={() => navigate("/supplier/onboarding")}
+            className="h-12 px-6 rounded-xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white font-extrabold"
+          >
+            השלמת פרופיל עכשיו
+          </Button>
+        </div>
+        <BottomNav role="supplier" />
+      </MobileShell>
+    );
+  }
   if (!supplier) {
     return (
       <MobileShell>
