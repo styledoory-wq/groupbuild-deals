@@ -266,6 +266,8 @@ const App = () => (
                   <Route path="/resident/my-vouchers" element={residentRoute(<MyVouchers />)} />
                   <Route path="/my-offers" element={<Navigate to="/resident/my-offers" replace />} />
                   <Route path="/my-vouchers" element={<Navigate to="/resident/my-vouchers" replace />} />
+                  <Route path="/resident/demand/new" element={residentRoute(<CreateDemand />)} />
+                  <Route path="/resident/demands" element={residentRoute(<MyDemands />)} />
                   <Route path="/resident/search" element={<SearchPage />} />
                   <Route path="/search" element={<SearchPage />} />
                   <Route path="/resident/privacy" element={residentRoute(<PrivacyPolicy />)} />
