@@ -309,6 +309,41 @@ export default function AdminDashboard() {
           </div>
         </section>
 
+        {/* Demand pipeline KPIs */}
+        <section className="bg-white border border-[#ECEEF2] rounded-[14px] p-3 lg:p-4">
+          <div className="flex items-center justify-between mb-2.5">
+            <h2 className="font-extrabold text-[13px] text-[#0F172A] flex items-center gap-1.5">
+              <Inbox className="h-3.5 w-3.5 text-[#2563EB]" /> ביקושים / Group Buy
+            </h2>
+            <button onClick={() => navigate("/admin/demand")} className="text-[11px] font-extrabold text-[#0E6B5A] hover:underline">
+              נהל ביקושים ←
+            </button>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2">
+            <div className="rounded-[10px] bg-[#EFF6FF] p-2.5 text-center">
+              <div className="text-[10px] text-[#1D4ED8] font-bold">חדשים</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#1D4ED8]">{stats.demandNew}</div>
+            </div>
+            <div className="rounded-[10px] bg-[#FEF3C7] p-2.5 text-center">
+              <div className="text-[10px] text-[#B45309] font-bold">פתוחים</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#B45309]">{stats.demandOpen}</div>
+            </div>
+            <div className="rounded-[10px] bg-[#E7F5F0] p-2.5 text-center">
+              <div className="text-[10px] text-[#0E6B5A] font-bold">הפכו להצעות</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#0E6B5A]">{stats.demandConverted}</div>
+            </div>
+            <div className="rounded-[10px] bg-[#F4F6FA] p-2.5 text-center">
+              <div className="text-[10px] text-[#6B7280] font-bold">אחוז המרה</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#0F172A]">{stats.demandConversionPct}%</div>
+            </div>
+            <div className="rounded-[10px] bg-[#F4F6FA] p-2.5 text-center col-span-2 lg:col-span-1">
+              <div className="text-[10px] text-[#6B7280] font-bold">זמן טיפול ממוצע</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#0F172A]">{stats.demandAvgHours}ש׳</div>
+            </div>
+          </div>
+        </section>
+
+
 
         {/* Two columns: Tasks (priority) + Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
