@@ -4,6 +4,7 @@ import { ShieldCheck, Tag as TagIcon, TrendingDown, Flame, Users, Clock, Image a
 import { describeOffer, ils, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { FavoriteButton } from "@/components/deals/FavoriteButton";
 import { SmartImg } from "@/components/ui/SmartImg";
+import { getCategoryCover } from "@/lib/categoryCover";
 
 export interface RealDealCardData {
   id: string;
@@ -119,12 +120,22 @@ function RealDealCardImpl({
               alt={deal.title}
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <TagIcon className="h-10 w-10 text-[#0E6B5A]/40" strokeWidth={1.5} />
-            </div>
-          )}
+          ) : (() => {
+            const fb = getCategoryCover({ categoryId: deal.category_id, seed: deal.id });
+            return (
+              <div
+                className="absolute inset-0 flex flex-col items-center justify-center text-center px-3"
+                style={{ background: fb.gradient, color: fb.ink }}
+              >
+                <div className="text-[42px] leading-none mb-1.5 drop-shadow-sm">{fb.icon}</div>
+                <div className="text-[11px] font-extrabold tracking-wide opacity-90 line-clamp-2">
+                  {deal.title}
+                </div>
+              </div>
+            );
+          })()}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+
 
           {/* Badges row */}
           <div className="absolute top-2 right-2 flex flex-wrap items-center gap-1.5 max-w-[calc(100%-56px)]">

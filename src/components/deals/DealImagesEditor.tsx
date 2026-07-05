@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ImagePlus, Loader2, Star, Trash2, X } from "lucide-react";
+import { ImagePlus, Loader2, Sparkles, Star, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadDealImage } from "@/lib/dealUploads";
 import { toast } from "sonner";
@@ -26,7 +26,9 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
     setUploading("cover");
     try {
       const url = await uploadDealImage(f);
+      // Smart auto-crop happens in <SmartImg size="card"> via object-cover; original stays hi-res.
       onChange({ cover: url, gallery });
+      toast.success("תמונת שער נוצרה אוטומטית");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "העלאה נכשלה");
     } finally {
@@ -53,7 +55,10 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
         const u = await uploadDealImage(f);
         urls.push(u);
       }
-      onChange({ cover, gallery: [...gallery, ...urls] });
+      // Smart auto-cover: if there's no cover yet, promote the first uploaded image.
+      const nextCover = cover ?? urls[0] ?? null;
+      const nextGallery = cover ? [...gallery, ...urls] : [...gallery, ...urls.slice(1)];
+      onChange({ cover: nextCover, gallery: nextGallery });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "העלאה נכשלה");
     } finally {
@@ -76,7 +81,9 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
       {/* Cover */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h4 className="text-fs-sm font-bold text-foreground">תמונת שער (Cover)</h4>
+          <h4 className="text-fs-sm font-bold text-foreground">
+            תמונת שער <span className="text-muted-foreground font-normal">(לא חובה)</span>
+          </h4>
           <span className="text-fs-xs text-muted-foreground">JPG / PNG · עד 10MB</span>
         </div>
         {cover ? (
@@ -96,24 +103,37 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
             </button>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => coverInput.current?.click()}
-            disabled={uploading === "cover"}
-            className="w-full h-44 rounded-2xl border-2 border-dashed border-gold/40 bg-gradient-to-br from-gold/5 to-transparent flex flex-col items-center justify-center gap-2 hover:border-gold/70 transition-smooth disabled:opacity-60"
-          >
-            {uploading === "cover" ? (
-              <Loader2 className="h-6 w-6 animate-spin text-gold" />
-            ) : (
-              <>
-                <div className="h-12 w-12 rounded-2xl bg-gold/15 border border-gold/30 flex items-center justify-center">
-                  <ImagePlus className="h-6 w-6 text-gold" />
-                </div>
-                <div className="text-fs-sm font-bold text-foreground">העלאת תמונת שער</div>
-                <div className="text-fs-xs text-muted-foreground">תוצג בראש ההצעה</div>
-              </>
-            )}
-          </button>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => coverInput.current?.click()}
+              disabled={uploading === "cover"}
+              className="w-full h-44 rounded-2xl border-2 border-dashed border-gold/40 bg-gradient-to-br from-gold/5 to-transparent flex flex-col items-center justify-center gap-2 hover:border-gold/70 transition-smooth disabled:opacity-60"
+            >
+              {uploading === "cover" ? (
+                <Loader2 className="h-6 w-6 animate-spin text-gold" />
+              ) : (
+                <>
+                  <div className="h-12 w-12 rounded-2xl bg-gold/15 border border-gold/30 flex items-center justify-center">
+                    <ImagePlus className="h-6 w-6 text-gold" />
+                  </div>
+                  <div className="text-fs-sm font-bold text-foreground">העלאת תמונת שער</div>
+                  <div className="text-fs-xs text-muted-foreground text-center px-4">
+                    לא חובה — נבחר עיצוב אוטומטי יוקרתי לפי הקטגוריה
+                  </div>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              disabled
+              title="בקרוב — יצירת תמונה חכמה משם ההצעה והקטגוריה"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-gold/30 bg-gold/5 text-fs-xs font-bold text-muted-foreground cursor-not-allowed"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-gold" />
+              צור תמונת AI (בקרוב)
+            </button>
+          </div>
         )}
         <input
           ref={coverInput}
@@ -123,6 +143,7 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
           onChange={(e) => pickCover(e.target.files?.[0] ?? null)}
         />
       </div>
+
 
       {/* Gallery */}
       <div>
