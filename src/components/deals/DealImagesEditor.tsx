@@ -1,9 +1,24 @@
 import { useRef, useState } from "react";
-import { ImagePlus, Loader2, Sparkles, Star, Trash2, X } from "lucide-react";
+import { ImagePlus, Loader2, Sparkles, Star, Trash2, Wand2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadDealImage } from "@/lib/dealUploads";
 import { toast } from "sonner";
 import { SmartImg } from "@/components/ui/SmartImg";
+import { supabase } from "@/integrations/supabase/client";
+
+async function enhanceCover(sourceUrl: string): Promise<string> {
+  try {
+    const { data, error } = await supabase.functions.invoke("enhance-uploaded-image", {
+      body: { sourceUrl },
+    });
+    if (error) throw error;
+    const url = (data as { url?: string } | null)?.url;
+    return url ?? sourceUrl;
+  } catch (e) {
+    console.warn("[enhanceCover] falling back to original", e);
+    return sourceUrl;
+  }
+}
 
 type Props = {
   cover: string | null;
