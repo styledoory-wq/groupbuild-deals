@@ -1038,6 +1038,7 @@ export default function ProjectManagement() {
           info={info}
           onClose={() => setEditInfoOpen(false)}
           onSave={(next) => { setInfo(next); setEditInfoOpen(false); }}
+          onAutoSave={(next) => setInfo(next)}
           onReset={() => {
             try {
               localStorage.removeItem(PROJECT_INFO_KEY);
