@@ -316,6 +316,8 @@ const App = () => (
                   <Route path="/admin/leads" element={adminRoute(<AdminLeads />)} />
                   <Route path="/admin/supplier-trust" element={adminRoute(<AdminSupplierTrust />)} />
                   <Route path="/admin/committee-requests" element={adminRoute(<AdminCommitteeRequests />)} />
+                  <Route path="/admin/demand" element={adminRoute(<AdminDemandList />)} />
+                  <Route path="/admin/demand/:id" element={adminRoute(<AdminDemandDetail />)} />
                   <Route path="/admin/offers/new" element={adminRoute(<OfferEditor />)} />
                   <Route path="/admin/offers/:dealId/edit" element={adminRoute(<OfferEditor />)} />
                   <Route path="/committee" element={<CommitteeDashboard />} />
