@@ -851,36 +851,13 @@ export default function ProjectManagement() {
             {stagesDone}/{stages.length}
           </span>
         </div>
-        <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1 min-w-max relative">
-            {stages.map((s, i) => {
-              const isCurrent = i === currentIdx;
-              const isDone = i < autoIdx;
-              return (
-                <button
-                  key={s.key}
-                  onClick={() => setStage(i)}
-                  className="flex flex-col items-center gap-1 px-2 py-1 shrink-0"
-                >
-                  <div
-                    className={`flex items-center justify-center rounded-full font-extrabold transition-all ${
-                      isCurrent ? "w-10 h-10 text-[14px] ring-4 ring-[#0E6B5A]/15" : "w-8 h-8 text-[12px]"
-                    } ${isDone ? "text-white" : isCurrent ? "text-white" : "text-gray-400 bg-gray-100"}`}
-                    style={{
-                      background: isDone || isCurrent ? BRAND : undefined,
-                      fontFamily: URBANIST,
-                    }}
-                  >
-                    {isDone ? <Check className="h-4 w-4" /> : s.num}
-                  </div>
-                  <div className={`text-[10.5px] font-bold whitespace-nowrap ${isCurrent ? "text-[#0E6B5A]" : "text-gray-500"}`}>
-                    {s.short}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <ProjectStagesStepper
+          stages={stages}
+          currentIdx={currentIdx}
+          doneBeforeIdx={autoIdx}
+          onSelect={(i) => setStage(i)}
+        />
+
 
         {/* Progress banner */}
         <div className="mt-3 bg-[#F0F9F6] border border-[#0E6B5A]/15 rounded-2xl p-3 flex items-center justify-between">
