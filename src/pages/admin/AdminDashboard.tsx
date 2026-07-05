@@ -252,6 +252,49 @@ export default function AdminDashboard() {
           </div>
         </section>
 
+        {/* Supplier profile completeness KPI */}
+        <section className="bg-white border border-[#ECEEF2] rounded-[14px] p-3 lg:p-4">
+          <div className="flex items-center justify-between mb-2.5">
+            <h2 className="font-extrabold text-[13px] text-[#0F172A] flex items-center gap-1.5">
+              <Store className="h-3.5 w-3.5 text-[#0E6B5A]" /> השלמת פרופיל ספקים
+            </h2>
+            <button
+              onClick={() => navigate("/admin/suppliers")}
+              className="text-[11px] font-extrabold text-[#0E6B5A] hover:underline"
+            >
+              נהל ספקים ←
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-2 mb-2.5">
+            <div className="rounded-[10px] bg-[#E7F5F0] p-2.5 text-center">
+              <div className="text-[10px] text-[#0E6B5A] font-bold">הושלם</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#0E6B5A]">{stats.suppliersProfileComplete}</div>
+            </div>
+            <div className="rounded-[10px] bg-[#FEF3C7] p-2.5 text-center">
+              <div className="text-[10px] text-[#B45309] font-bold">לא הושלם</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#B45309]">{stats.suppliersProfileIncomplete}</div>
+            </div>
+            <div className="rounded-[10px] bg-[#F4F6FA] p-2.5 text-center">
+              <div className="text-[10px] text-[#6B7280] font-bold">ממוצע השלמה</div>
+              <div className="text-[20px] font-extrabold tabular-nums text-[#0F172A]">{stats.suppliersProfileAvgPct}%</div>
+            </div>
+          </div>
+          <div className="h-2 rounded-full bg-[#F1F3F7] overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${stats.suppliersProfileAvgPct}%`,
+                background: stats.suppliersProfileAvgPct >= 80
+                  ? "linear-gradient(90deg,#059669,#10b981)"
+                  : stats.suppliersProfileAvgPct >= 60
+                  ? "linear-gradient(90deg,#d97706,#f59e0b)"
+                  : "linear-gradient(90deg,#dc2626,#ef4444)",
+              }}
+            />
+          </div>
+        </section>
+
+
         {/* Two columns: Tasks (priority) + Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
           {/* Tasks - takes priority */}
