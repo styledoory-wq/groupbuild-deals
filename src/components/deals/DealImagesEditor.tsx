@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ImagePlus, Loader2, Star, Trash2, X } from "lucide-react";
+import { ImagePlus, Loader2, Sparkles, Star, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadDealImage } from "@/lib/dealUploads";
 import { toast } from "sonner";
