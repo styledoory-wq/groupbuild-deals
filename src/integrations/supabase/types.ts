@@ -699,6 +699,41 @@ export type Database = {
           },
         ]
       }
+      demand_activity_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          demand_id: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          demand_id: string
+          id?: string
+          payload?: Json
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          demand_id?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demand_activity_log_demand_id_fkey"
+            columns: ["demand_id"]
+            isOneToOne: false
+            referencedRelation: "demand_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demand_invitations: {
         Row: {
           created_at: string
@@ -753,18 +788,98 @@ export type Database = {
           },
         ]
       }
+      demand_messages: {
+        Row: {
+          admin_id: string | null
+          body: string
+          demand_id: string
+          id: string
+          recipients_count: number
+          sent_at: string
+          subject: string
+        }
+        Insert: {
+          admin_id?: string | null
+          body: string
+          demand_id: string
+          id?: string
+          recipients_count?: number
+          sent_at?: string
+          subject: string
+        }
+        Update: {
+          admin_id?: string | null
+          body?: string
+          demand_id?: string
+          id?: string
+          recipients_count?: number
+          sent_at?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demand_messages_demand_id_fkey"
+            columns: ["demand_id"]
+            isOneToOne: false
+            referencedRelation: "demand_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demand_participants: {
+        Row: {
+          demand_id: string
+          full_name: string
+          id: string
+          joined_at: string
+          phone: string | null
+          user_id: string | null
+        }
+        Insert: {
+          demand_id: string
+          full_name: string
+          id?: string
+          joined_at?: string
+          phone?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          demand_id?: string
+          full_name?: string
+          id?: string
+          joined_at?: string
+          phone?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demand_participants_demand_id_fkey"
+            columns: ["demand_id"]
+            isOneToOne: false
+            referencedRelation: "demand_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demand_requests: {
         Row: {
+          admin_notes: string | null
+          admin_status: string
           budget_max: number | null
           budget_min: number | null
           category_id: string | null
           city_id: string | null
+          closed_at: string | null
           created_at: string
           deadline: string | null
+          deal_id: string | null
           description: string
+          first_reviewed_at: string | null
           id: string
           matched_count: number
+          participants_count: number
           project_id: string | null
+          project_type: string | null
           region_id: string | null
           resident_user_id: string
           status: string
@@ -772,16 +887,23 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
+          admin_status?: string
           budget_max?: number | null
           budget_min?: number | null
           category_id?: string | null
           city_id?: string | null
+          closed_at?: string | null
           created_at?: string
           deadline?: string | null
+          deal_id?: string | null
           description: string
+          first_reviewed_at?: string | null
           id?: string
           matched_count?: number
+          participants_count?: number
           project_id?: string | null
+          project_type?: string | null
           region_id?: string | null
           resident_user_id: string
           status?: string
@@ -789,16 +911,23 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
+          admin_status?: string
           budget_max?: number | null
           budget_min?: number | null
           category_id?: string | null
           city_id?: string | null
+          closed_at?: string | null
           created_at?: string
           deadline?: string | null
+          deal_id?: string | null
           description?: string
+          first_reviewed_at?: string | null
           id?: string
           matched_count?: number
+          participants_count?: number
           project_id?: string | null
+          project_type?: string | null
           region_id?: string | null
           resident_user_id?: string
           status?: string
@@ -818,6 +947,13 @@ export type Database = {
             columns: ["city_id"]
             isOneToOne: false
             referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demand_requests_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
             referencedColumns: ["id"]
           },
           {
@@ -2594,6 +2730,18 @@ export type Database = {
         Args: { _token: string }
         Returns: string
       }
+      admin_change_demand_status: {
+        Args: { _demand_id: string; _new_status: string; _note?: string }
+        Returns: undefined
+      }
+      admin_close_demand: {
+        Args: { _demand_id: string; _reason?: string }
+        Returns: undefined
+      }
+      admin_convert_demand_to_deal: {
+        Args: { _demand_id: string; _supplier_id: string; _title: string }
+        Returns: string
+      }
       admin_decide_committee_request: {
         Args: { _approve: boolean; _id: string; _notes?: string }
         Returns: undefined
@@ -2607,6 +2755,10 @@ export type Database = {
           monthly_subscription: number
         }[]
       }
+      admin_invite_suppliers_to_demand: {
+        Args: { _demand_id: string; _supplier_ids: string[] }
+        Returns: number
+      }
       admin_list_supplier_billing: {
         Args: never
         Returns: {
@@ -2616,6 +2768,10 @@ export type Database = {
           id: string
           monthly_subscription: number
         }[]
+      }
+      admin_message_demand_participants: {
+        Args: { _body: string; _demand_id: string; _subject: string }
+        Returns: number
       }
       admin_revoke_committee_role: {
         Args: { _project_id?: string; _reason?: string; _user_id: string }
@@ -2664,6 +2820,7 @@ export type Database = {
         Args: { _deal_id: string }
         Returns: undefined
       }
+      get_admin_demand_kpis: { Args: never; Returns: Json }
       get_committee_dashboard: { Args: { _project_id?: string }; Returns: Json }
       get_deal_interest_count: { Args: { _deal_id: string }; Returns: number }
       get_deal_paid_count: { Args: { _deal_id: string }; Returns: number }
