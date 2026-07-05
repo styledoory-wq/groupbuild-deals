@@ -285,14 +285,8 @@ export default function ResidentDashboard() {
     : (journeyStages.length ? Math.round(((currentIdx + 1) / journeyStages.length) * 100) : 0);
 
   const feedItems = useMemo<FeedItem[]>(() => {
-    const out: FeedItem[] = [];
-    areaDeals.forEach((d, i) => {
-      out.push({ kind: "deal", deal: d });
-      if (i % 2 === 1 && d.joiners && d.joiners > 0) {
-        out.push({ kind: "activity", dealId: d.id, dealTitle: d.title, joiners: d.joiners });
-      }
-    });
-    return out;
+    // Keep the home feed as a quick taste — up to 5 deals only, no interleaved activity rows.
+    return areaDeals.slice(0, 5).map((d) => ({ kind: "deal", deal: d }) as FeedItem);
   }, [areaDeals]);
 
   return (
