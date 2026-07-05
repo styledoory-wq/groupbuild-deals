@@ -447,23 +447,38 @@ export default function ResidentDashboard() {
           subtitle="הצעות חמות באזורך"
           action={<button onClick={() => navigate("/resident/deals")} className="text-[14px] font-medium text-[#0E6B5A]">הצג הכל</button>}
         />
-        <div className="px-5 mt-3">
+        <div className="mt-3">
           {feedItems.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-7 text-center">
+            <div className="mx-5 bg-white rounded-3xl border border-[#E5E5EA] shadow-sm p-7 text-center">
               <div className="h-12 w-12 mx-auto rounded-2xl bg-[#F7F5F0] flex items-center justify-center mb-3">
                 <Sparkles className="h-5 w-5 text-[#8E8E93]" />
               </div>
               <p className="text-[13px] text-[#8E8E93] font-medium">כרגע אין הצעות פעילות. נעדכן ברגע שיפורסמו הצעות חדשות.</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div
+              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-px-5 px-5 pb-2 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              dir="rtl"
+            >
               {feedItems.map((item, idx) =>
                 item.kind === "deal" ? (
-                  <DealFeedCard key={`d-${item.deal.id}-${idx}`} deal={item.deal} onClick={() => navigate(`/resident/deals/${item.deal.id}`)} />
-                ) : (
-                  <ActivityFeedCard key={`a-${item.dealId}-${idx}`} title={item.dealTitle} joiners={item.joiners} onClick={() => navigate(`/resident/deals/${item.dealId}`)} />
-                )
+                  <DealFeedCard
+                    key={`d-${item.deal.id}-${idx}`}
+                    deal={item.deal}
+                    onClick={() => navigate(`/resident/deals/${item.deal.id}`)}
+                  />
+                ) : null,
               )}
+              <button
+                onClick={() => navigate("/resident/deals")}
+                className="snap-start shrink-0 w-[120px] rounded-3xl border border-dashed border-[#0E6B5A]/40 bg-white flex flex-col items-center justify-center gap-2 text-[#0E6B5A] active:scale-[0.98] transition"
+                style={{ minHeight: 200 }}
+              >
+                <div className="h-10 w-10 rounded-full bg-[#0E6B5A]/10 flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4" strokeWidth={2.4} />
+                </div>
+                <span className="text-[12px] font-semibold">הצג הכל</span>
+              </button>
             </div>
           )}
         </div>
