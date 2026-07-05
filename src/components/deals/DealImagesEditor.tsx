@@ -55,7 +55,10 @@ export function DealImagesEditor({ cover, gallery, onChange, maxGallery = 6 }: P
         const u = await uploadDealImage(f);
         urls.push(u);
       }
-      onChange({ cover, gallery: [...gallery, ...urls] });
+      // Smart auto-cover: if there's no cover yet, promote the first uploaded image.
+      const nextCover = cover ?? urls[0] ?? null;
+      const nextGallery = cover ? [...gallery, ...urls] : [...gallery, ...urls.slice(1)];
+      onChange({ cover: nextCover, gallery: nextGallery });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "העלאה נכשלה");
     } finally {
