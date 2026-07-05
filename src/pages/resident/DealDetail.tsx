@@ -852,8 +852,21 @@ export default function DealDetail() {
 
       {/* ===== SECTION 1 — HERO IMAGE ===== */}
       <div className="px-4 mt-2">
-        <div className="relative rounded-[28px] overflow-hidden h-[260px] bg-gradient-to-br from-[#EAF2FF] to-[#FFF8E1]">
-          {heroImages.length > 0 && (
+        <div
+          className="relative rounded-[28px] overflow-hidden h-[260px]"
+          style={{
+            background:
+              heroImages.length > 0
+                ? undefined
+                : getCategoryCover({
+                    categoryId: deal.category_id,
+                    categoryName: category?.name,
+                    categoryIcon: category?.icon,
+                    seed: deal.id,
+                  }).gradient,
+          }}
+        >
+          {heroImages.length > 0 ? (
             <div className="absolute inset-0">
               <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-full">
                 {heroImages.map((url, i) => (
@@ -877,8 +890,18 @@ export default function DealDetail() {
                 </div>
               )}
             </div>
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+              <div className="text-[72px] leading-none mb-2 drop-shadow-md">
+                {category?.icon || "✨"}
+              </div>
+              <div className="text-white/95 text-[15px] font-extrabold drop-shadow">
+                {category?.name || deal.title}
+              </div>
+            </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#F7F5F0] via-transparent to-black/20 pointer-events-none" />
+
 
           <span
             className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[11px] font-extrabold px-2.5 py-1 rounded-2xl bg-white/95 backdrop-blur-md shadow-[0_2px_6px_rgba(10,31,61,0.18)] border border-white text-[#0E6B5A]"
