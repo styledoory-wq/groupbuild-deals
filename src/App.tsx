@@ -88,6 +88,7 @@ const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminSupplierAreas = lazy(() => import("./pages/admin/AdminSupplierAreas"));
 const AdminSupplierMedia = lazy(() => import("./pages/admin/AdminSupplierMedia"));
 const AdminDbSuppliers = lazy(() => import("./pages/admin/AdminDbSuppliers"));
+const AdminSupplierDetail = lazy(() => import("./pages/admin/AdminSupplierDetail"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
 const AdminCommitteeRequests = lazy(() => import("./pages/admin/AdminCommitteeRequests"));
 const AdminControl = lazy(() => import("./pages/admin/AdminControl"));
@@ -288,6 +289,7 @@ const App = () => (
                   <Route path="/admin" element={adminRoute(<AdminDashboard />)} />
                   <Route path="/admin/projects" element={adminRoute(<AdminProjects />)} />
                   <Route path="/admin/suppliers" element={adminRoute(<AdminDbSuppliers />)} />
+                  <Route path="/admin/suppliers/:supplierId" element={adminRoute(<AdminSupplierDetail />)} />
                   <Route path="/admin/suppliers-mock" element={<Navigate to="/admin/suppliers" replace />} />
                   <Route path="/admin/residents" element={adminRoute(<AdminResidents />)} />
                   <Route path="/admin/categories" element={adminRoute(<AdminCategories />)} />
@@ -304,7 +306,7 @@ const App = () => (
                   <Route path="/admin/support" element={adminRoute(<AdminSupport />)} />
                   <Route path="/admin/suppliers/:supplierId/areas" element={adminRoute(<AdminSupplierAreas />)} />
                   <Route path="/admin/suppliers/:supplierId/media" element={adminRoute(<AdminSupplierMedia />)} />
-                  <Route path="/admin/db-suppliers" element={adminRoute(<AdminDbSuppliers />)} />
+                  <Route path="/admin/db-suppliers" element={<Navigate to="/admin/suppliers" replace />} />
                   <Route path="/admin/stats" element={adminRoute(<AdminStats />)} />
                   <Route path="/admin/complaints" element={adminRoute(<AdminComplaints />)} />
                   <Route path="/admin/leads" element={adminRoute(<AdminLeads />)} />
