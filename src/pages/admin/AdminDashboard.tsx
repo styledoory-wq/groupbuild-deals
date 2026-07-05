@@ -34,6 +34,9 @@ type Stats = {
   dealsNoImage: number;
   suppliersNoDeals: number;
   inactiveProjects: number;
+  suppliersProfileComplete: number;
+  suppliersProfileIncomplete: number;
+  suppliersProfileAvgPct: number;
 };
 
 type ActivityItem = { id: string; label: string; time: string; tone: "lead" | "supplier" | "deposit" };
