@@ -44,6 +44,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
   const [fullName, setFullName] = useState("");
   const [city, setCity] = useState("");
   const [businessName, setBusinessName] = useState("");
+  const [phone, setPhone] = useState("");
   const [projectId, setProjectId] = useState<string>("");
   const [termsAccepted, setTermsAccepted] = useState(false);
 
@@ -258,6 +259,10 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
     if (!fullName.trim()) { toast.error("יש להזין שם מלא"); return; }
     if (role === "resident" && !city.trim()) { toast.error("יש להזין עיר"); return; }
     if (role === "supplier" && !businessName.trim()) { toast.error("יש להזין שם עסק"); return; }
+    if (role === "supplier") {
+      const digits = phone.replace(/\D/g, "");
+      if (digits.length < 9) { toast.error("יש להזין מספר טלפון תקין (לפחות 9 ספרות)"); return; }
+    }
     if (!termsAccepted) {
       toast.error("יש לאשר את תנאי השימוש כדי להמשיך");
       return;
@@ -276,6 +281,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
             city: city.trim(),
             user_type: role,
             business_name: businessName.trim(),
+            phone: phone.trim(),
             project_id: projectId || null,
           },
         },
@@ -553,17 +559,33 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
               )}
 
               {role === "supplier" && (
-                <div className={fieldWrap}>
-                  <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
-                  <Input
-                    value={businessName}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="שם העסק"
-                    required
-                    maxLength={80}
-                    className={fieldInput}
-                  />
-                </div>
+                <>
+                  <div className={fieldWrap}>
+                    <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
+                    <Input
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      placeholder="שם העסק"
+                      required
+                      maxLength={80}
+                      className={fieldInput}
+                    />
+                  </div>
+                  <div className={fieldWrap}>
+                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none opacity-0" />
+                    <Input
+                      type="tel"
+                      inputMode="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="טלפון ליצירת קשר"
+                      required
+                      dir="ltr"
+                      maxLength={20}
+                      className={fieldInput}
+                    />
+                  </div>
+                </>
               )}
 
               <div className={fieldWrap}>
