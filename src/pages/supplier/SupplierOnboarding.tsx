@@ -16,9 +16,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { uploadSupplierLogo } from "@/lib/supplierUploads";
 import { computeCompleteness } from "@/lib/supplierCompleteness";
+import {
+  clearSupplierDraft,
+  draftHasContent,
+  loadSupplierDraft,
+  saveSupplierDraft,
+  type SupplierOnboardingStep,
+} from "@/lib/supplierOnboardingDraft";
 import { toast } from "sonner";
 
-type StepKey = "business" | "contact" | "category" | "area" | "description" | "logo";
+
+type StepKey = SupplierOnboardingStep;
 
 export default function SupplierOnboarding() {
   const navigate = useNavigate();
