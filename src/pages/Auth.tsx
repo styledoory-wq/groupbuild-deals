@@ -259,7 +259,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       if (error) throw error;
       toast.success("שלחנו אליכם קישור לאיפוס סיסמה במייל");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "שליחת מייל איפוס נכשלה");
+      toast.error(translateAuthError(err));
     } finally {
       setLoading(false);
     }
