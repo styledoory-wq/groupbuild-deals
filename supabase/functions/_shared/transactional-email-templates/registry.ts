@@ -4,6 +4,12 @@ import { template as userWelcome } from './user-welcome.tsx'
 import { template as dealUpdate } from './deal-update.tsx'
 import { template as marketingCardReady } from './marketing-card-ready.tsx'
 import { template as supplierProfileReminder } from './supplier-profile-reminder.tsx'
+import { template as supplierApproved } from './supplier-approved.tsx'
+import { template as residentApproved } from './resident-approved.tsx'
+import { template as depositConfirmation } from './deposit-confirmation.tsx'
+import { template as newLead } from './new-lead.tsx'
+import { template as newOffer } from './new-offer.tsx'
+import { template as voucherCreated } from './voucher-created.tsx'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -19,4 +25,10 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'deal-update': dealUpdate,
   'marketing-card-ready': marketingCardReady,
   'supplier-profile-reminder': supplierProfileReminder,
+  'supplier-approved': supplierApproved,
+  'resident-approved': residentApproved,
+  'deposit-confirmation': depositConfirmation,
+  'new-lead': newLead,
+  'new-offer': newOffer,
+  'voucher-created': voucherCreated,
 }

@@ -1,60 +1,32 @@
 /// <reference types="npm:@types/react@18.3.1" />
-
 import * as React from 'npm:react@18.3.1'
+import { EmailLayout, H1, P, Muted, Divider } from '../transactional-email-templates/layout.tsx'
 
-import {
-  Body,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Preview,
-  Text,
-} from 'npm:@react-email/components@0.0.22'
+interface Props { token: string }
 
-interface ReauthenticationEmailProps {
-  token: string
-}
-
-export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
-  <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>Your verification code</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>Confirm reauthentication</Heading>
-        <Text style={text}>Use the code below to confirm your identity:</Text>
-        <Text style={codeStyle}>{token}</Text>
-        <Text style={footer}>
-          This code will expire shortly. If you didn't request this, you can
-          safely ignore this email.
-        </Text>
-      </Container>
-    </Body>
-  </Html>
+export const ReauthenticationEmail = ({ token }: Props) => (
+  <EmailLayout preview="קוד אימות ל-GroupBuild">
+    <H1>קוד אימות</H1>
+    <P>יש להזין את הקוד הבא לאישור הזהות שלך:</P>
+    <P>
+      <span style={{
+        display: 'inline-block',
+        fontSize: 32,
+        fontWeight: 700,
+        letterSpacing: '0.4em',
+        color: '#0E6B5A',
+        background: '#F8FAFC',
+        border: '1px solid #E5E7EB',
+        borderRadius: 12,
+        padding: '16px 28px',
+        fontFamily: 'monospace',
+      }}>
+        {token}
+      </span>
+    </P>
+    <Divider />
+    <Muted>הקוד תקף למספר דקות בלבד. אם לא ביקשת אותו — אפשר להתעלם מההודעה.</Muted>
+  </EmailLayout>
 )
 
 export default ReauthenticationEmail
-
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const codeStyle = {
-  fontFamily: 'Courier, monospace',
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 30px',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
