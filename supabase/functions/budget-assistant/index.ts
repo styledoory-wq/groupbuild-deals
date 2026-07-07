@@ -11,8 +11,12 @@ type Budget = {
 };
 type Msg = { role: "user" | "assistant"; content: string };
 
+import { requireAuthUser } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const auth = await requireAuthUser(req);
+  if (!auth.ok) return auth.response;
   try {
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "AI not configured" }), {

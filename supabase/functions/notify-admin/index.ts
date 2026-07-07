@@ -2,6 +2,7 @@
 // Currently logs the event to console + waitlist log; in the future
 // we will hook this up to actual email delivery.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireAuthUser } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +24,10 @@ interface Payload {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Any authenticated user may notify — anonymous callers rejected.
+  const auth = await requireAuthUser(req);
+  if (!auth.ok) return auth.response;
 
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -90,11 +95,11 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Do NOT return the recipient address — it leaks the admin inbox.
     return json({
       success: true,
       delivered,
       logged: true,
-      recipient,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "error";

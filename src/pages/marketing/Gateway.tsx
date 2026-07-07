@@ -5,6 +5,7 @@ import { useApp } from "@/store/AppStore";
 import { isAdminEmail } from "@/lib/auth";
 import { BrandMark } from "@/components/BrandLogo";
 import { cn } from "@/lib/utils";
+import { Seo } from "@/components/seo/Seo";
 
 /**
  * Public entry gateway at "/".
@@ -33,6 +34,7 @@ export default function Gateway() {
       className="min-h-[100dvh] w-full flex justify-center text-[#0B1220] relative overflow-hidden"
       style={{ background: "linear-gradient(170deg, #F7F5F0 0%, #EFEAE0 100%)" }}
     >
+      <Seo title={"GroupBuild — כוח קנייה קבוצתי לדיירי פרויקטים חדשים"} description={"מצטרפים לשכנים בפרויקט, מקבלים כוח קנייה קבוצתי וחוסכים אלפי שקלים בספקים לבית החדש. הרשמה חינם."} path="/" />
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           className="absolute -top-32 -right-24 h-[420px] w-[420px] rounded-full blur-3xl opacity-[0.24]"

@@ -93,9 +93,13 @@ function normalize(data: Record<string, unknown>, categories: CategoryLite[]): D
   return draft;
 }
 
+import { requireAuthUser } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return new Response("method_not_allowed", { status: 405, headers: corsHeaders });
+  const auth = await requireAuthUser(req);
+  if (!auth.ok) return auth.response;
 
   try {
     if (!LOVABLE_API_KEY) throw new Error("missing_LOVABLE_API_KEY");

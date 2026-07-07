@@ -15,8 +15,12 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const MAX_PER_RUN = 100;
 
+import { requireServiceRole } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const svc = requireServiceRole(req);
+  if (!svc.ok) return svc.response;
 
   const json = (p: unknown, s = 200) =>
     new Response(JSON.stringify(p), {

@@ -115,8 +115,12 @@ Remove the original background. Place the product on a clean, modern, premium gr
   return out;
 }
 
+import { requireAuthUser } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const auth = await requireAuthUser(req);
+  if (!auth.ok) return auth.response;
   try {
     const { dealId, force } = await req.json();
     if (!dealId) {

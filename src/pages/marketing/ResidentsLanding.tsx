@@ -5,6 +5,7 @@ import { useApp } from "@/store/AppStore";
 import { BrandMark } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Seo } from "@/components/seo/Seo";
 
 /**
  * Public resident landing page at "/residents".
@@ -29,6 +30,7 @@ export default function ResidentsLanding() {
 
   return (
     <div dir="rtl" className="min-h-[100dvh] w-full text-[#0B1220]" style={{ background: "#F7F5F0" }}>
+      <Seo title={"לדיירים | GroupBuild — חיסכון קבוצתי לבית החדש"} description={"הצטרפו לרכישות קבוצתיות עם השכנים בפרויקט וחסכו אלפי שקלים על מוצרים ושירותים לדירה החדשה."} path="/residents" />
       {/* Top bar */}
       <header
         className="sticky top-0 z-30 backdrop-blur bg-[#F7F5F0]/85 border-b border-[#E8E3D8]"

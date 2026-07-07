@@ -19,6 +19,7 @@ import { CURRENT_TERMS_VERSION } from "@/lib/terms";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { loadSupplierCompletenessForUser } from "@/lib/supplierCompleteness";
 import { translateAuthError } from "@/lib/authErrors";
+import { Seo } from "@/components/seo/Seo";
 
 
 type Mode = "signin" | "signup";
@@ -365,6 +366,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       className="auth-screen min-h-[100dvh] w-full flex justify-center text-[#1F2937] relative overflow-hidden"
       style={{ background: "linear-gradient(170deg, #F7F5F0 0%, #EFEAE0 100%)" }}
     >
+      <Seo title={"התחברות והרשמה | GroupBuild"} description={"כניסה או הרשמה מהירה לפלטפורמת GroupBuild — לדיירים ולספקים."} path="/auth" noindex />
       {/* Brand-tinted background — emerald glows + faint logo watermark */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
