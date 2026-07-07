@@ -235,9 +235,23 @@ export default function SupplierOnboarding() {
   };
 
   const save = async (opts: { silent?: boolean } = {}) => {
-    if (!userId) return;
+    if (!userId) {
+      toast.error("החיבור למערכת אבד — התחבר מחדש כדי לשמור");
+      return;
+    }
+    if (!businessName.trim() || businessName.trim().length < 2) {
+      toast.error("חסר שם עסק — נא למלא לפני שמירה");
+      return;
+    }
     setSaving(true);
     try {
+      // Re-verify session right before writing. Prevents RLS 401s from
+      // silently wiping data if the token expired in the background.
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session) {
+        throw new Error("החיבור פג — יש להתחבר מחדש. הנתונים נשמרו כטיוטה מקומית.");
+      }
+
       const payload = {
         user_id: userId,
         business_name: businessName.trim(),
@@ -254,35 +268,47 @@ export default function SupplierOnboarding() {
       let sid = supplierId;
       if (sid) {
         const { error } = await supabase.from("suppliers").update(payload).eq("id", sid);
-        if (error) throw error;
+        if (error) throw new Error(`שמירת פרטי העסק נכשלה: ${error.message}`);
       } else {
-        const { data: ins, error } = await supabase.from("suppliers")
-          .insert(payload).select("id").single();
-        if (error) throw error;
+        const { data: ins, error } = await supabase
+          .from("suppliers")
+          .insert(payload)
+          .select("id")
+          .single();
+        if (error) throw new Error(`יצירת פרופיל הספק נכשלה: ${error.message}`);
         sid = ins.id;
         setSupplierId(sid);
       }
 
       // Replace areas
-      await Promise.all([
+      const [regDel, cityDel] = await Promise.all([
         supabase.from("supplier_regions").delete().eq("supplier_id", sid),
         supabase.from("supplier_cities").delete().eq("supplier_id", sid),
       ]);
+      if (regDel.error) throw new Error(`ניקוי אזורי שירות נכשל: ${regDel.error.message}`);
+      if (cityDel.error) throw new Error(`ניקוי ערי שירות נכשל: ${cityDel.error.message}`);
+
       if (!areas.servesAllCountry) {
         if (areas.regionIds.length) {
-          await supabase.from("supplier_regions").insert(
+          const { error: regErr } = await supabase.from("supplier_regions").insert(
             areas.regionIds.map((rid) => ({ supplier_id: sid!, region_id: rid })),
           );
+          if (regErr) throw new Error(`שמירת אזורים נכשלה: ${regErr.message}`);
         }
         if (areas.cityIds.length) {
-          await supabase.from("supplier_cities").insert(
+          const { error: cityErr } = await supabase.from("supplier_cities").insert(
             areas.cityIds.map((cid) => ({ supplier_id: sid!, city_id: cid })),
           );
+          if (cityErr) throw new Error(`שמירת ערים נכשלה: ${cityErr.message}`);
         }
       }
       if (!opts.silent) toast.success("נשמר בהצלחה");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
+      const msg = err instanceof Error ? err.message : "שמירה נכשלה";
+      console.error("[onboarding] save failed:", err);
+      toast.error(msg, {
+        description: "הפרטים שמילאת נשמרו כטיוטה — לא תאבד אותם גם אם תרענן",
+      });
       throw err;
     } finally {
       setSaving(false);
@@ -296,10 +322,14 @@ export default function SupplierOnboarding() {
     }
     try {
       await save({ silent: true });
+      if (userId) clearSupplierDraft(userId);
       toast.success("הפרופיל הושלם! ההרשמה בבדיקת אדמין");
       navigate("/supplier");
-    } catch { /* toast handled */ }
+    } catch {
+      /* toast handled in save() */
+    }
   };
+
 
   if (loading) {
     return (
