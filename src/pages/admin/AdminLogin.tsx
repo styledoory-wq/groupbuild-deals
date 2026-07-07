@@ -56,7 +56,7 @@ export default function AdminLogin() {
       const from = (location.state as { from?: string } | null)?.from;
       navigate(from && from.startsWith("/admin") ? from : "/admin", { replace: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "ההתחברות נכשלה");
+      toast.error(translateAuthError(err));
     } finally {
       setLoading(false);
     }
