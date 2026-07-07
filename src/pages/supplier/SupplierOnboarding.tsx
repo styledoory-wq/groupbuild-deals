@@ -54,46 +54,145 @@ export default function SupplierOnboarding() {
   const [openStep, setOpenStep] = useState<StepKey>("business");
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const { data: session } = await supabase.auth.getSession();
-      const uid = session.session?.user?.id;
-      const sessionEmail = session.session?.user?.email ?? "";
-      if (!uid) { navigate("/auth", { replace: true }); return; }
-      setUserId(uid);
-      setEmail(sessionEmail);
+      try {
+        const { data: session, error: sessErr } = await supabase.auth.getSession();
+        if (sessErr) throw sessErr;
+        const uid = session.session?.user?.id;
+        const sessionEmail = session.session?.user?.email ?? "";
+        if (!uid) {
+          navigate("/auth", { replace: true });
+          return;
+        }
+        if (cancelled) return;
+        setUserId(uid);
+        setEmail(sessionEmail);
 
-      const [{ data: profile }, { data: existing }] = await Promise.all([
-        supabase.from("profiles").select("full_name,phone,business_name").eq("id", uid).maybeSingle(),
-        supabase.from("suppliers").select("*").eq("user_id", uid)
-          .order("updated_at", { ascending: false }).limit(1).maybeSingle(),
-      ]);
-
-      if (existing) {
-        setSupplierId(existing.id);
-        setBusinessName(existing.business_name ?? profile?.business_name ?? "");
-        setContactName(existing.contact_name ?? profile?.full_name ?? "");
-        setPhone(existing.phone ?? profile?.phone ?? "");
-        setEmail(existing.email ?? sessionEmail);
-        setSelectedCategories(existing.categories ?? []);
-        setShortDescription(existing.short_description ?? "");
-        setLogoUrl(existing.logo_url ?? null);
-        const [{ data: regs }, { data: cits }] = await Promise.all([
-          supabase.from("supplier_regions").select("region_id").eq("supplier_id", existing.id),
-          supabase.from("supplier_cities").select("city_id").eq("supplier_id", existing.id),
+        // Load DB state + local draft in parallel. Draft is our safety net
+        // against network failures and lets the user resume mid-flow.
+        const [{ data: profile, error: profErr }, { data: existing, error: supErr }] = await Promise.all([
+          supabase.from("profiles").select("full_name,phone,business_name").eq("id", uid).maybeSingle(),
+          supabase
+            .from("suppliers")
+            .select("*")
+            .eq("user_id", uid)
+            .order("updated_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
         ]);
-        setAreas({
-          servesAllCountry: !!existing.serves_all_country,
-          regionIds: (regs ?? []).map((r) => r.region_id as string),
-          cityIds: (cits ?? []).map((c) => c.city_id as string),
+        if (profErr) console.warn("[onboarding] profile fetch failed:", profErr.message);
+        if (supErr) console.warn("[onboarding] supplier fetch failed:", supErr.message);
+
+        const draft = loadSupplierDraft(uid);
+
+        // Base values from DB (or empty for brand-new supplier).
+        let baseBusinessName = existing?.business_name ?? profile?.business_name ?? "";
+        let baseContactName = existing?.contact_name ?? profile?.full_name ?? "";
+        let basePhone = existing?.phone ?? profile?.phone ?? "";
+        let baseEmail = existing?.email ?? sessionEmail;
+        let baseCategories: string[] = existing?.categories ?? [];
+        let baseShort = existing?.short_description ?? "";
+        let baseLogo: string | null = existing?.logo_url ?? null;
+        let baseAreas = {
+          servesAllCountry: false,
+          regionIds: [] as string[],
+          cityIds: [] as string[],
+        };
+
+        if (existing) {
+          setSupplierId(existing.id);
+          const [{ data: regs }, { data: cits }] = await Promise.all([
+            supabase.from("supplier_regions").select("region_id").eq("supplier_id", existing.id),
+            supabase.from("supplier_cities").select("city_id").eq("supplier_id", existing.id),
+          ]);
+          baseAreas = {
+            servesAllCountry: !!existing.serves_all_country,
+            regionIds: (regs ?? []).map((r) => r.region_id as string),
+            cityIds: (cits ?? []).map((c) => c.city_id as string),
+          };
+        }
+
+        // Draft overrides base for any field the user changed locally.
+        // (Restored ONLY when draft actually has content — prevents wiping
+        // a completed profile with an empty draft blob.)
+        const useDraft = draftHasContent(draft);
+        if (useDraft && draft) {
+          baseBusinessName = draft.businessName || baseBusinessName;
+          baseContactName = draft.contactName || baseContactName;
+          basePhone = draft.phone || basePhone;
+          baseEmail = draft.email || baseEmail;
+          baseCategories = draft.selectedCategories.length ? draft.selectedCategories : baseCategories;
+          baseShort = draft.shortDescription || baseShort;
+          baseLogo = draft.logoUrl ?? baseLogo;
+          if (
+            draft.areas.servesAllCountry ||
+            draft.areas.regionIds.length ||
+            draft.areas.cityIds.length
+          ) {
+            baseAreas = draft.areas;
+          }
+        }
+
+        if (cancelled) return;
+        setBusinessName(baseBusinessName);
+        setContactName(baseContactName);
+        setPhone(basePhone);
+        setEmail(baseEmail);
+        setSelectedCategories(baseCategories);
+        setShortDescription(baseShort);
+        setLogoUrl(baseLogo);
+        setAreas(baseAreas);
+        if (useDraft && draft?.openStep) setOpenStep(draft.openStep);
+        if (useDraft) {
+          toast.info("שחזרנו את הטיוטה שלך — תוכל להמשיך מהמקום שבו עצרת");
+        }
+      } catch (err) {
+        console.error("[onboarding] init failed:", err);
+        toast.error("טעינת ההרשמה נכשלה", {
+          description: err instanceof Error ? err.message : "נסה לרענן את הדף",
         });
-      } else {
-        setBusinessName(profile?.business_name ?? "");
-        setContactName(profile?.full_name ?? "");
-        setPhone(profile?.phone ?? "");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
+
+  // Auto-save draft on every field change (debounced) so nothing is lost
+  // on refresh, tab close, or network failure.
+  useEffect(() => {
+    if (!userId || loading) return;
+    const handle = window.setTimeout(() => {
+      saveSupplierDraft(userId, {
+        businessName,
+        contactName,
+        phone,
+        email,
+        selectedCategories,
+        areas,
+        shortDescription,
+        logoUrl,
+        openStep,
+      });
+    }, 350);
+    return () => window.clearTimeout(handle);
+  }, [
+    userId,
+    loading,
+    businessName,
+    contactName,
+    phone,
+    email,
+    selectedCategories,
+    areas,
+    shortDescription,
+    logoUrl,
+    openStep,
+  ]);
+
 
   const completeness = useMemo(() =>
     computeCompleteness({
