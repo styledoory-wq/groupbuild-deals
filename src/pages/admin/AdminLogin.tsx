@@ -7,6 +7,7 @@ import { useApp } from "@/store/AppStore";
 import { ADMIN_EMAIL, hasAdminRole, isAdminEmail, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { translateAuthError } from "@/lib/authErrors";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
