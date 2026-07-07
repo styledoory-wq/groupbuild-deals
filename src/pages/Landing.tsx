@@ -3,6 +3,7 @@ import { ArrowLeft, Home, Building2, Users, ShieldCheck, Clock, Eye, ArrowRight 
 import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { WhatsAppHelpButton } from "@/components/WhatsAppHelpButton";
+import { Seo } from "@/components/seo/Seo";
 
 /**
  * "How it works" page — aligned to the global Categories-based design system.
@@ -13,6 +14,7 @@ export default function Landing() {
 
   return (
     <div dir="rtl" className="min-h-[100dvh] w-full" style={{ backgroundColor: "#F7F5F0" }}>
+      <Seo title={"איך זה עובד | GroupBuild"} description={"מדריך קצר: איך רכישה קבוצתית עובדת ב-GroupBuild — מהצטרפות לפרויקט ועד קבלת המחיר הקבוצתי."} path="/landing" />
       <div
         className="relative z-10 w-full max-w-[var(--app-max-w,640px)] mx-auto flex flex-col"
         style={{

@@ -1,6 +1,7 @@
 // Sends transactional emails via Resend.
 // Single endpoint, server-side recipient resolution (clients pass IDs, not emails).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { isServiceRoleRequest } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -93,17 +94,33 @@ Deno.serve(async (req) => {
     const auth = req.headers.get("Authorization") ?? "";
     if (!auth) return json({ success: false, error: "unauthorized" }, 200);
 
-    const userClient = createClient(SUPABASE_URL, ANON, { global: { headers: { Authorization: auth } } });
-    const { data: u } = await userClient.auth.getUser();
-    if (!u.user) return json({ success: false, error: "unauthorized" }, 200);
-
     const admin = createClient(SUPABASE_URL, SERVICE);
     const body = (await req.json()) as Payload;
 
-    const isAdmin = await admin
-      .from("user_roles").select("role")
-      .eq("user_id", u.user.id).eq("role", "admin")
-      .maybeSingle().then((r) => !!r.data);
+    // Service-role callers (other edge functions / cron) bypass user auth.
+    const isService = isServiceRoleRequest(req);
+    let callerUserId: string | null = null;
+    let isAdmin = false;
+
+    if (isService) {
+      isAdmin = true;
+    } else {
+      const userClient = createClient(SUPABASE_URL, ANON, { global: { headers: { Authorization: auth } } });
+      const { data: u } = await userClient.auth.getUser();
+      if (!u.user) return json({ success: false, error: "unauthorized" }, 200);
+      callerUserId = u.user.id;
+      isAdmin = await admin
+        .from("user_roles").select("role")
+        .eq("user_id", u.user.id).eq("role", "admin")
+        .maybeSingle().then((r) => !!r.data);
+    }
+
+    // Types that fan-out to arbitrary users are admin/service-only.
+    const privilegedTypes = new Set(["new_offer", "deal_status_changed", "welcome", "tier_unlocked"]);
+    if (privilegedTypes.has(body.type) && !isAdmin) {
+      return json({ success: false, error: "forbidden" }, 200);
+    }
+
 
     type PrefKind = "approval" | "lead" | "deposit" | "new_offer" | "voucher" | "deal_status" | "system" | "welcome";
     const PREF_COL: Record<PrefKind, string> = {
@@ -180,8 +197,8 @@ Deno.serve(async (req) => {
         .select("email, business_name, user_id").eq("id", deal.supplier_id).maybeSingle();
       if (!sup?.email) return json({ success: false, error: "לספק אין כתובת מייל" }, 200);
 
-      const callerOwnsLead = interest.user_id === u.user.id;
-      const callerOwnsSupplier = sup.user_id === u.user.id;
+      const callerOwnsLead = interest.user_id === callerUserId;
+      const callerOwnsSupplier = sup.user_id === callerUserId;
       if (!isAdmin && !callerOwnsLead && !callerOwnsSupplier) {
         return json({ success: false, error: "forbidden" }, 200);
       }
@@ -212,7 +229,7 @@ Deno.serve(async (req) => {
     }
 
     if (body.type === "deposit_confirmed") {
-      if (!isAdmin && body.user_id !== u.user.id) return json({ success: false, error: "forbidden" });
+      if (!isAdmin && body.user_id !== callerUserId) return json({ success: false, error: "forbidden" });
       const { email, name } = await getUserEmail(body.user_id);
       if (!email) return json({ success: false, error: "no_email" });
       if (!(await prefAllows(body.user_id, "deposit"))) return json({ success: true, skipped: "user_pref" });
@@ -238,7 +255,7 @@ Deno.serve(async (req) => {
     }
 
     if (body.type === "voucher_created") {
-      if (!isAdmin && body.user_id !== u.user.id) return json({ success: false, error: "forbidden" });
+      if (!isAdmin && body.user_id !== callerUserId) return json({ success: false, error: "forbidden" });
       const { email, name } = await getUserEmail(body.user_id);
       if (!email) return json({ success: false, error: "no_email" });
       if (!(await prefAllows(body.user_id, "voucher"))) return json({ success: true, skipped: "user_pref" });
@@ -284,7 +301,7 @@ Deno.serve(async (req) => {
     }
 
     if (body.type === "deal_joined") {
-      if (body.user_id !== u.user.id && !isAdmin) return json({ success: false, error: "forbidden" }, 200);
+      if (body.user_id !== callerUserId && !isAdmin) return json({ success: false, error: "forbidden" }, 200);
       const { email, name } = await getUserEmail(body.user_id);
       if (!email) return json({ success: false, error: "no_email" }, 200);
       if (!(await prefAllows(body.user_id, "new_offer"))) return json({ success: true, skipped: "user_pref" });

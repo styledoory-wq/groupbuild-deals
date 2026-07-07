@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -208,7 +209,8 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner position="top-center" dir="rtl" />
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <HelmetProvider>
+        <BrowserRouter>
           <AppSplash />
           <PreviewModeBanner />
           <PreloadImportantRoutes />
@@ -335,6 +337,7 @@ const App = () => (
             </RouteTransition>
           </TermsAcceptanceGate>
         </BrowserRouter>
+        </HelmetProvider>
       </TooltipProvider>
     </AppProvider>
   </QueryClientProvider>

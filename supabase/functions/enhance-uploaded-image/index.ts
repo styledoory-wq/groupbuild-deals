@@ -107,6 +107,26 @@ Deno.serve(async (req) => {
       });
     }
 
+    // SSRF guard — only allow public Supabase Storage URLs from this project.
+    // Prevents fetching cloud metadata IPs or internal services.
+    const allowedPrefix = `${SUPABASE_URL}/storage/v1/object/public/`;
+    let parsed: URL;
+    try {
+      parsed = new URL(sourceUrl);
+    } catch {
+      return new Response(JSON.stringify({ error: "invalid_source_url" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (parsed.protocol !== "https:" || !sourceUrl.startsWith(allowedPrefix)) {
+      return new Response(JSON.stringify({ error: "source_url_not_allowed" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+
     const enhanced = await enhance(sourceUrl);
     if (!enhanced) {
       // Fallback: return the original so the flow never blocks.

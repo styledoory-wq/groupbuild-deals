@@ -368,8 +368,12 @@ async function renderPng(tree: unknown, fmt: Format, fonts: { rHe: ArrayBuffer; 
   return resvg.render().asPng();
 }
 
+import { requireAuthUser } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const auth = await requireAuthUser(req);
+  if (!auth.ok) return auth.response;
   try {
     const body = await req.json();
     const dealId: string = body.dealId;

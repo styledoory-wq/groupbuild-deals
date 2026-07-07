@@ -47,8 +47,13 @@ async function invokeFn(name: string, payload: unknown) {
   return { ok: res.ok, status: res.status, body };
 }
 
+import { requireAdmin } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  // Admin or service-role: allows both cron and admin dashboard dispatch.
+  const auth = await requireAdmin(req);
+  if (!auth.ok) return auth.response;
 
   const json = (p: unknown, s = 200) =>
     new Response(JSON.stringify(p), {

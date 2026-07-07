@@ -18,6 +18,7 @@ import {
 import { BrandLogo } from "@/components/BrandLogo";
 import mockupDeal from "@/assets/mockup-deal.jpg.asset.json";
 import mockupDashboard from "@/assets/mockup-dashboard.jpg.asset.json";
+import { Seo } from "@/components/seo/Seo";
 
 /**
  * Public marketing landing page — desktop-first responsive, RTL Hebrew.
@@ -33,6 +34,7 @@ export default function SiteLanding() {
 
   return (
     <div dir="rtl" className="min-h-screen w-full bg-[#F7F5F0] text-[#0B1220] font-[Heebo,system-ui]">
+      <Seo title={"GroupBuild — פלטפורמת רכישה קבוצתית לפרויקטים חדשים"} description={"מצטרפים לשכנים בפרויקט, מקבלים כוח קנייה קבוצתי וחוסכים על ריהוט, מיזוג, שיפוצים ושירותים."} path="/site" />
       {/* ===== Top Nav ===== */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-[#F7F5F0]/80 border-b border-black/5">
         <div className="max-w-7xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">

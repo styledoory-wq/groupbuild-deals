@@ -196,8 +196,12 @@ async function processOne(bucket: string, t: Target, runId: string): Promise<{ o
   return { ok: true, oldBytes, newBytes, newUrl, newPath };
 }
 
+import { requireAdmin } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const auth = await requireAdmin(req);
+  if (!auth.ok) return auth.response;
   try {
     const body = await req.json().catch(() => ({}));
     const bucket: string = body.bucket;

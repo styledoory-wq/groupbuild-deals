@@ -5,6 +5,7 @@ import { useApp } from "@/store/AppStore";
 import { BrandMark } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Seo } from "@/components/seo/Seo";
 
 /**
  * Public supplier landing page at "/suppliers".
@@ -29,6 +30,7 @@ export default function SuppliersLanding() {
 
   return (
     <div dir="rtl" className="min-h-[100dvh] w-full text-[#0B1220]" style={{ background: "#F7F5F0" }}>
+      <Seo title={"לספקים | GroupBuild — לידים חמים מדיירים בפרויקטים"} description={"קבלו לידים איכותיים ממאות דיירים בפרויקטים חדשים, פרסמו הצעות רכישה קבוצתית ותגדילו את המכירות."} path="/suppliers" />
       {/* Top bar */}
       <header
         className="sticky top-0 z-30 backdrop-blur bg-[#F7F5F0]/85 border-b border-[#E8E3D8]"

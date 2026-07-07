@@ -11,8 +11,12 @@ const corsHeaders = {
 const REMINDER_KIND = "deadline_3d";
 const WINDOW_DAYS = 3;
 
+import { requireServiceRole } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const svc = requireServiceRole(req);
+  if (!svc.ok) return svc.response;
 
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;

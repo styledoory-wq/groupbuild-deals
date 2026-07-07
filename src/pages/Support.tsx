@@ -3,6 +3,7 @@ import { Mail, MessageCircle, HelpCircle } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import { useSupportWhatsapp } from "@/hooks/useSupportContact";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
+import { Seo } from "@/components/seo/Seo";
 
 type Faq = { q: string; a: string };
 
@@ -34,6 +35,7 @@ export default function Support() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground">
+      <Seo title={"תמיכה ועזרה | GroupBuild"} description={"שאלות נפוצות, פרטי יצירת קשר וערוצי תמיכה עבור דיירים וספקים בפלטפורמת GroupBuild."} path="/support" />
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="font-bold text-lg">GroupBuild</Link>

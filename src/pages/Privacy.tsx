@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/seo/Seo";
 
 interface Section {
   title: string;
@@ -146,6 +147,7 @@ const SECTIONS: Section[] = [
 export default function Privacy() {
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground">
+      <Seo title={"מדיניות פרטיות | GroupBuild"} description={"כיצד GroupBuild אוסף, משתמש ומגן על המידע האישי שלך — מדיניות פרטיות מלאה בעברית."} path="/privacy" />
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="font-bold text-lg">GroupBuild</Link>
