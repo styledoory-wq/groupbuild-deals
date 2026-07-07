@@ -339,11 +339,9 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       toast.success("נרשמתם בהצלחה! שלחנו לך מייל אישור — בדוק את תיבת הדואר שלך");
     } catch (err) {
       console.error("[signup] failed", err);
-      const raw = err instanceof Error ? err.message : "הרשמה נכשלה";
-      const translated = translateAuthError(raw);
-      const finalMsg = translated === "אירעה שגיאה, נסה שנית" ? `הרשמה נכשלה: ${raw}` : translated;
-      setAuthError(finalMsg);
-      toast.error(finalMsg);
+      const translated = translateAuthError(err);
+      setAuthError(translated);
+      toast.error(translated);
     } finally {
       setLoading(false);
     }
