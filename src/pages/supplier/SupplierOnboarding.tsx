@@ -16,9 +16,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { uploadSupplierLogo } from "@/lib/supplierUploads";
 import { computeCompleteness } from "@/lib/supplierCompleteness";
+import {
+  clearSupplierDraft,
+  draftHasContent,
+  loadSupplierDraft,
+  saveSupplierDraft,
+  type SupplierOnboardingStep,
+} from "@/lib/supplierOnboardingDraft";
 import { toast } from "sonner";
 
-type StepKey = "business" | "contact" | "category" | "area" | "description" | "logo";
+
+type StepKey = SupplierOnboardingStep;
 
 export default function SupplierOnboarding() {
   const navigate = useNavigate();
@@ -46,46 +54,145 @@ export default function SupplierOnboarding() {
   const [openStep, setOpenStep] = useState<StepKey>("business");
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const { data: session } = await supabase.auth.getSession();
-      const uid = session.session?.user?.id;
-      const sessionEmail = session.session?.user?.email ?? "";
-      if (!uid) { navigate("/auth", { replace: true }); return; }
-      setUserId(uid);
-      setEmail(sessionEmail);
+      try {
+        const { data: session, error: sessErr } = await supabase.auth.getSession();
+        if (sessErr) throw sessErr;
+        const uid = session.session?.user?.id;
+        const sessionEmail = session.session?.user?.email ?? "";
+        if (!uid) {
+          navigate("/auth", { replace: true });
+          return;
+        }
+        if (cancelled) return;
+        setUserId(uid);
+        setEmail(sessionEmail);
 
-      const [{ data: profile }, { data: existing }] = await Promise.all([
-        supabase.from("profiles").select("full_name,phone,business_name").eq("id", uid).maybeSingle(),
-        supabase.from("suppliers").select("*").eq("user_id", uid)
-          .order("updated_at", { ascending: false }).limit(1).maybeSingle(),
-      ]);
-
-      if (existing) {
-        setSupplierId(existing.id);
-        setBusinessName(existing.business_name ?? profile?.business_name ?? "");
-        setContactName(existing.contact_name ?? profile?.full_name ?? "");
-        setPhone(existing.phone ?? profile?.phone ?? "");
-        setEmail(existing.email ?? sessionEmail);
-        setSelectedCategories(existing.categories ?? []);
-        setShortDescription(existing.short_description ?? "");
-        setLogoUrl(existing.logo_url ?? null);
-        const [{ data: regs }, { data: cits }] = await Promise.all([
-          supabase.from("supplier_regions").select("region_id").eq("supplier_id", existing.id),
-          supabase.from("supplier_cities").select("city_id").eq("supplier_id", existing.id),
+        // Load DB state + local draft in parallel. Draft is our safety net
+        // against network failures and lets the user resume mid-flow.
+        const [{ data: profile, error: profErr }, { data: existing, error: supErr }] = await Promise.all([
+          supabase.from("profiles").select("full_name,phone,business_name").eq("id", uid).maybeSingle(),
+          supabase
+            .from("suppliers")
+            .select("*")
+            .eq("user_id", uid)
+            .order("updated_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
         ]);
-        setAreas({
-          servesAllCountry: !!existing.serves_all_country,
-          regionIds: (regs ?? []).map((r) => r.region_id as string),
-          cityIds: (cits ?? []).map((c) => c.city_id as string),
+        if (profErr) console.warn("[onboarding] profile fetch failed:", profErr.message);
+        if (supErr) console.warn("[onboarding] supplier fetch failed:", supErr.message);
+
+        const draft = loadSupplierDraft(uid);
+
+        // Base values from DB (or empty for brand-new supplier).
+        let baseBusinessName = existing?.business_name ?? profile?.business_name ?? "";
+        let baseContactName = existing?.contact_name ?? profile?.full_name ?? "";
+        let basePhone = existing?.phone ?? profile?.phone ?? "";
+        let baseEmail = existing?.email ?? sessionEmail;
+        let baseCategories: string[] = existing?.categories ?? [];
+        let baseShort = existing?.short_description ?? "";
+        let baseLogo: string | null = existing?.logo_url ?? null;
+        let baseAreas = {
+          servesAllCountry: false,
+          regionIds: [] as string[],
+          cityIds: [] as string[],
+        };
+
+        if (existing) {
+          setSupplierId(existing.id);
+          const [{ data: regs }, { data: cits }] = await Promise.all([
+            supabase.from("supplier_regions").select("region_id").eq("supplier_id", existing.id),
+            supabase.from("supplier_cities").select("city_id").eq("supplier_id", existing.id),
+          ]);
+          baseAreas = {
+            servesAllCountry: !!existing.serves_all_country,
+            regionIds: (regs ?? []).map((r) => r.region_id as string),
+            cityIds: (cits ?? []).map((c) => c.city_id as string),
+          };
+        }
+
+        // Draft overrides base for any field the user changed locally.
+        // (Restored ONLY when draft actually has content — prevents wiping
+        // a completed profile with an empty draft blob.)
+        const useDraft = draftHasContent(draft);
+        if (useDraft && draft) {
+          baseBusinessName = draft.businessName || baseBusinessName;
+          baseContactName = draft.contactName || baseContactName;
+          basePhone = draft.phone || basePhone;
+          baseEmail = draft.email || baseEmail;
+          baseCategories = draft.selectedCategories.length ? draft.selectedCategories : baseCategories;
+          baseShort = draft.shortDescription || baseShort;
+          baseLogo = draft.logoUrl ?? baseLogo;
+          if (
+            draft.areas.servesAllCountry ||
+            draft.areas.regionIds.length ||
+            draft.areas.cityIds.length
+          ) {
+            baseAreas = draft.areas;
+          }
+        }
+
+        if (cancelled) return;
+        setBusinessName(baseBusinessName);
+        setContactName(baseContactName);
+        setPhone(basePhone);
+        setEmail(baseEmail);
+        setSelectedCategories(baseCategories);
+        setShortDescription(baseShort);
+        setLogoUrl(baseLogo);
+        setAreas(baseAreas);
+        if (useDraft && draft?.openStep) setOpenStep(draft.openStep);
+        if (useDraft) {
+          toast.info("שחזרנו את הטיוטה שלך — תוכל להמשיך מהמקום שבו עצרת");
+        }
+      } catch (err) {
+        console.error("[onboarding] init failed:", err);
+        toast.error("טעינת ההרשמה נכשלה", {
+          description: err instanceof Error ? err.message : "נסה לרענן את הדף",
         });
-      } else {
-        setBusinessName(profile?.business_name ?? "");
-        setContactName(profile?.full_name ?? "");
-        setPhone(profile?.phone ?? "");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
+
+  // Auto-save draft on every field change (debounced) so nothing is lost
+  // on refresh, tab close, or network failure.
+  useEffect(() => {
+    if (!userId || loading) return;
+    const handle = window.setTimeout(() => {
+      saveSupplierDraft(userId, {
+        businessName,
+        contactName,
+        phone,
+        email,
+        selectedCategories,
+        areas,
+        shortDescription,
+        logoUrl,
+        openStep,
+      });
+    }, 350);
+    return () => window.clearTimeout(handle);
+  }, [
+    userId,
+    loading,
+    businessName,
+    contactName,
+    phone,
+    email,
+    selectedCategories,
+    areas,
+    shortDescription,
+    logoUrl,
+    openStep,
+  ]);
+
 
   const completeness = useMemo(() =>
     computeCompleteness({
@@ -128,9 +235,23 @@ export default function SupplierOnboarding() {
   };
 
   const save = async (opts: { silent?: boolean } = {}) => {
-    if (!userId) return;
+    if (!userId) {
+      toast.error("החיבור למערכת אבד — התחבר מחדש כדי לשמור");
+      return;
+    }
+    if (!businessName.trim() || businessName.trim().length < 2) {
+      toast.error("חסר שם עסק — נא למלא לפני שמירה");
+      return;
+    }
     setSaving(true);
     try {
+      // Re-verify session right before writing. Prevents RLS 401s from
+      // silently wiping data if the token expired in the background.
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session) {
+        throw new Error("החיבור פג — יש להתחבר מחדש. הנתונים נשמרו כטיוטה מקומית.");
+      }
+
       const payload = {
         user_id: userId,
         business_name: businessName.trim(),
@@ -147,35 +268,47 @@ export default function SupplierOnboarding() {
       let sid = supplierId;
       if (sid) {
         const { error } = await supabase.from("suppliers").update(payload).eq("id", sid);
-        if (error) throw error;
+        if (error) throw new Error(`שמירת פרטי העסק נכשלה: ${error.message}`);
       } else {
-        const { data: ins, error } = await supabase.from("suppliers")
-          .insert(payload).select("id").single();
-        if (error) throw error;
+        const { data: ins, error } = await supabase
+          .from("suppliers")
+          .insert(payload)
+          .select("id")
+          .single();
+        if (error) throw new Error(`יצירת פרופיל הספק נכשלה: ${error.message}`);
         sid = ins.id;
         setSupplierId(sid);
       }
 
       // Replace areas
-      await Promise.all([
+      const [regDel, cityDel] = await Promise.all([
         supabase.from("supplier_regions").delete().eq("supplier_id", sid),
         supabase.from("supplier_cities").delete().eq("supplier_id", sid),
       ]);
+      if (regDel.error) throw new Error(`ניקוי אזורי שירות נכשל: ${regDel.error.message}`);
+      if (cityDel.error) throw new Error(`ניקוי ערי שירות נכשל: ${cityDel.error.message}`);
+
       if (!areas.servesAllCountry) {
         if (areas.regionIds.length) {
-          await supabase.from("supplier_regions").insert(
+          const { error: regErr } = await supabase.from("supplier_regions").insert(
             areas.regionIds.map((rid) => ({ supplier_id: sid!, region_id: rid })),
           );
+          if (regErr) throw new Error(`שמירת אזורים נכשלה: ${regErr.message}`);
         }
         if (areas.cityIds.length) {
-          await supabase.from("supplier_cities").insert(
+          const { error: cityErr } = await supabase.from("supplier_cities").insert(
             areas.cityIds.map((cid) => ({ supplier_id: sid!, city_id: cid })),
           );
+          if (cityErr) throw new Error(`שמירת ערים נכשלה: ${cityErr.message}`);
         }
       }
       if (!opts.silent) toast.success("נשמר בהצלחה");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
+      const msg = err instanceof Error ? err.message : "שמירה נכשלה";
+      console.error("[onboarding] save failed:", err);
+      toast.error(msg, {
+        description: "הפרטים שמילאת נשמרו כטיוטה — לא תאבד אותם גם אם תרענן",
+      });
       throw err;
     } finally {
       setSaving(false);
@@ -189,10 +322,14 @@ export default function SupplierOnboarding() {
     }
     try {
       await save({ silent: true });
+      if (userId) clearSupplierDraft(userId);
       toast.success("הפרופיל הושלם! ההרשמה בבדיקת אדמין");
       navigate("/supplier");
-    } catch { /* toast handled */ }
+    } catch {
+      /* toast handled in save() */
+    }
   };
+
 
   if (loading) {
     return (
