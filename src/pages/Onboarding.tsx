@@ -115,10 +115,15 @@ export default function Onboarding() {
       toast.success("הפרטים נשמרו");
       navigate(role === "supplier" ? "/supplier" : "/resident");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
+      console.error("[complete_onboarding] failed:", err);
+      const msg = err instanceof Error ? err.message : "שמירה נכשלה";
+      toast.error("לא הצלחנו לסיים את ההרשמה", {
+        description: msg,
+      });
     } finally {
       setLoading(false);
     }
+
   };
 
   if (checking) {
