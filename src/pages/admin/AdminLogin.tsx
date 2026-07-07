@@ -7,6 +7,7 @@ import { useApp } from "@/store/AppStore";
 import { ADMIN_EMAIL, hasAdminRole, isAdminEmail, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { translateAuthError } from "@/lib/authErrors";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ export default function AdminLogin() {
       const from = (location.state as { from?: string } | null)?.from;
       navigate(from && from.startsWith("/admin") ? from : "/admin", { replace: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "ההתחברות נכשלה");
+      toast.error(translateAuthError(err));
     } finally {
       setLoading(false);
     }
