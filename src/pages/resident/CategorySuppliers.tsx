@@ -27,6 +27,40 @@ interface DbSupplier {
 
 type SupplierCategoryRow = { supplier_id: string; category_id: string };
 
+const CATEGORY_ID_ALIASES: Record<string, string> = {
+  architect: "sc-arch",
+  "interior-designer": "sc-interior",
+  consultant: "sc-consultants",
+  "construction-supervisor": "sc-supervision",
+  contractor: "sc-contractors",
+  "turnkey-contractor": "s-cont-turnkey",
+  skeleton: "sc-skeleton",
+  cladding: "sc-cladding",
+  windows: "sc-windows",
+  doors: "sc-doors",
+  "security-door": "s-door-security",
+  electric: "sc-elec",
+  lighting: "sc-lighting",
+  plumbing: "sc-plumb",
+  ac: "sc-climate",
+  "smart-home": "sc-smart",
+  painting: "sc-paint",
+  flooring: "sc-floor",
+  gypsum: "sc-gypsum",
+  carpentry: "sc-carpentry",
+  closets: "sc-closets",
+  kitchen: "sc-kitchen",
+  bath: "sc-bath",
+  sanitary: "s-bath-sanitary",
+  showers: "s-bath-showers",
+  garden: "sc-garden",
+  pergola: "s-hard-pergola",
+  cleaning: "sc-cleaning",
+  intercom: "sc-security",
+  elevators: "s-mnt-elevator",
+  c_1778448823740: "sc-solar",
+};
+
 const NATIONAL_AREA = "כל הארץ";
 
 export default function CategorySuppliers() {
@@ -35,7 +69,7 @@ export default function CategorySuppliers() {
   const { categories } = useApp();
   const { regions, cities } = useRegions();
 
-  const [activeCategoryId, setActiveCategoryId] = useState<string>(categoryId ?? "all");
+  const [activeCategoryId, setActiveCategoryId] = useState<string>(CATEGORY_ID_ALIASES[categoryId ?? ""] ?? categoryId ?? "all");
 
   const [suppliers, setSuppliers] = useState<DbSupplier[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,7 +106,7 @@ export default function CategorySuppliers() {
   }, [activeCategoryId, categories]);
 
   useEffect(() => {
-    setActiveCategoryId(categoryId ?? "all");
+    setActiveCategoryId(CATEGORY_ID_ALIASES[categoryId ?? ""] ?? categoryId ?? "all");
   }, [categoryId]);
 
   useEffect(() => {
