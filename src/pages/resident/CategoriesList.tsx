@@ -93,7 +93,6 @@ export default function CategoriesList() {
     try { return localStorage.getItem(`gb:stage:${type}`) || meta.stages[0].key; }
     catch { return meta.stages[0].key; }
   });
-  const stage = meta.stages.find((s) => s.key === stageKey) ?? meta.stages[0];
   const [stageMap, setStageMap] = useState<Record<string, string[]> | null>(null);
 
   useEffect(() => {
