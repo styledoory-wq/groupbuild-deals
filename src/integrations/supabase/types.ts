@@ -50,6 +50,7 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           display_order: number
+          execution_order: number | null
           icon: string
           id: string
           is_active: boolean
@@ -65,6 +66,7 @@ export type Database = {
           search_keywords: string[]
           slug: string | null
           stage: string | null
+          stage_key: string | null
           updated_at: string
         }
         Insert: {
@@ -72,6 +74,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           display_order?: number
+          execution_order?: number | null
           icon?: string
           id: string
           is_active?: boolean
@@ -87,6 +90,7 @@ export type Database = {
           search_keywords?: string[]
           slug?: string | null
           stage?: string | null
+          stage_key?: string | null
           updated_at?: string
         }
         Update: {
@@ -94,6 +98,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           display_order?: number
+          execution_order?: number | null
           icon?: string
           id?: string
           is_active?: boolean
@@ -109,6 +114,7 @@ export type Database = {
           search_keywords?: string[]
           slug?: string | null
           stage?: string | null
+          stage_key?: string | null
           updated_at?: string
         }
         Relationships: [

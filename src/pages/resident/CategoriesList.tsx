@@ -6,13 +6,16 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
+import {
+  PROJECT_TYPE_META,
+  stageMeta,
+  type ProjectType,
+} from "@/lib/stageCatalog";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
 const BRAND = "#0E6B5A";
 const BRAND_DARK = "#0A4F43";
-
-type ProjectType = "new" | "reno" | "building";
 
 type StageEntry = {
   key: string;
@@ -22,52 +25,10 @@ type StageEntry = {
 };
 
 const TYPES: { id: ProjectType; emoji: string; title: string }[] = [
-  { id: "building", emoji: "🏢", title: "בניין משותף" },
-  { id: "new", emoji: "🏡", title: "בנייה חדשה" },
-  { id: "reno", emoji: "🧰", title: "שיפוץ" },
+  { id: "building", emoji: PROJECT_TYPE_META.building.emoji, title: PROJECT_TYPE_META.building.label },
+  { id: "new",      emoji: PROJECT_TYPE_META.new.emoji,      title: PROJECT_TYPE_META.new.label },
+  { id: "reno",     emoji: PROJECT_TYPE_META.reno.emoji,     title: PROJECT_TYPE_META.reno.label },
 ];
-
-const TYPE_META: Record<ProjectType, { label: string; sectionTitle: string; stages: StageEntry[] }> = {
-  new: {
-    label: "בנייה חדשה",
-    sectionTitle: "שלבי הבנייה",
-    stages: [
-      { key: "planning", title: "תכנון והיתרים", emoji: "📐", catIds: ["sc-arch", "sc-interior", "sc-consultants", "sc-supervision"] },
-      { key: "structure", title: "שלד וביסוס", emoji: "🏗️", catIds: ["sc-contractors", "sc-skeleton", "s-cont-turnkey"] },
-      { key: "envelope", title: "מעטפת", emoji: "🏠", catIds: ["sc-cladding", "sc-windows", "sc-doors"] },
-      { key: "systems", title: "מערכות", emoji: "⚡", catIds: ["sc-elec", "sc-plumb", "sc-climate", "sc-smart"] },
-      { key: "finishes", title: "גמרים", emoji: "🛋️", catIds: ["sc-paint", "sc-floor", "sc-gypsum", "sc-carpentry", "sc-closets", "sc-lighting", "sc-kitchen", "sc-bath"] },
-      { key: "outdoor", title: "חוץ ופיתוח", emoji: "🌳", catIds: ["sc-garden", "sc-hardscape"] },
-    ],
-  },
-  reno: {
-    label: "שיפוץ",
-    sectionTitle: "תחומי השיפוץ",
-    stages: [
-      { key: "kitchen-bath", title: "מטבח ואמבטיה", emoji: "🚿", catIds: ["sc-kitchen", "sc-bath", "s-bath-sanitary", "s-bath-showers"] },
-      { key: "paint-gypsum", title: "צבע וגבס", emoji: "🎨", catIds: ["sc-paint", "sc-gypsum"] },
-      { key: "electric", title: "חשמל", emoji: "⚡", catIds: ["sc-elec", "sc-lighting", "sc-smart"] },
-      { key: "plumbing", title: "אינסטלציה", emoji: "🔧", catIds: ["sc-plumb"] },
-      { key: "ac", title: "מיזוג", emoji: "❄️", catIds: ["sc-climate"] },
-      { key: "flooring", title: "ריצוף", emoji: "🟫", catIds: ["sc-floor", "sc-cladding"] },
-      { key: "doors-windows", title: "דלתות וחלונות", emoji: "🚪", catIds: ["sc-doors", "sc-windows", "s-door-security"] },
-    ],
-  },
-  building: {
-    label: "בניין משותף",
-    sectionTitle: "תחומי הבניין",
-    stages: [
-      { key: "elevators", title: "מעליות", emoji: "🛗", catIds: ["s-mnt-elevator"] },
-      { key: "cleaning", title: "ניקיון", emoji: "🧽", catIds: ["sc-cleaning"] },
-      { key: "garden", title: "גינון", emoji: "🌿", catIds: ["sc-garden"] },
-      { key: "cctv", title: "מצלמות", emoji: "📹", catIds: ["sc-security"] },
-      { key: "entrance", title: "דלתות כניסה", emoji: "🚪", catIds: ["s-door-security", "s-door-interior"] },
-      { key: "shared-electric", title: "חשמל משותף", emoji: "💡", catIds: ["sc-elec", "sc-lighting"] },
-      { key: "facade", title: "שיפוץ חזית", emoji: "🧱", catIds: ["sc-cladding", "sc-paint"] },
-      { key: "solar", title: "סולארי", emoji: "☀️", catIds: ["sc-solar"] },
-    ],
-  },
-};
 
 interface SupplierLite {
   id: string; business_name: string; short_description: string | null;
@@ -88,21 +49,17 @@ export default function CategoriesList() {
   const [type, setType] = useState<ProjectType>(() => {
     try { return (localStorage.getItem("gb:projectType") as ProjectType) || "new"; } catch { return "new"; }
   });
-  const meta = TYPE_META[type];
-  const [stageKey, setStageKey] = useState<string>(() => {
-    try { return localStorage.getItem(`gb:stage:${type}`) || meta.stages[0].key; }
-    catch { return meta.stages[0].key; }
-  });
-  const [stageMap, setStageMap] = useState<Record<string, string[]> | null>(null);
+  const typeMeta = PROJECT_TYPE_META[type] ?? PROJECT_TYPE_META.new;
+  const [stageKey, setStageKey] = useState<string>("");
+  // stages come entirely from DB, in execution order (display_order)
+  const [dbStages, setDbStages] = useState<StageEntry[] | null>(null);
 
   useEffect(() => {
     try { localStorage.setItem("gb:projectType", type); } catch {}
-    const stored = (() => { try { return localStorage.getItem(`gb:stage:${type}`); } catch { return null; } })();
-    setStageKey(stored || TYPE_META[type].stages[0].key);
   }, [type]);
 
   useEffect(() => {
-    try { localStorage.setItem(`gb:stage:${type}`, stageKey); } catch {}
+    try { if (stageKey) localStorage.setItem(`gb:stage:${type}`, stageKey); } catch {}
   }, [type, stageKey]);
 
   useEffect(() => {
@@ -114,23 +71,34 @@ export default function CategoriesList() {
         .eq("project_type", type)
         .order("display_order", { ascending: true });
       if (cancelled) return;
-      const next: Record<string, string[]> = {};
+      // Preserve stage_key insertion order = execution order
+      const orderedKeys: string[] = [];
+      const byStage: Record<string, string[]> = {};
       (data ?? []).forEach((row: { stage_key: string; category_id: string }) => {
-        (next[row.stage_key] ||= []).push(row.category_id);
+        if (!(row.stage_key in byStage)) {
+          byStage[row.stage_key] = [];
+          orderedKeys.push(row.stage_key);
+        }
+        byStage[row.stage_key].push(row.category_id);
       });
-      setStageMap(next);
+      const stages: StageEntry[] = orderedKeys.map((k) => {
+        const m = stageMeta(type, k);
+        return { key: k, title: m.title, emoji: m.emoji, catIds: byStage[k] };
+      });
+      setDbStages(stages);
+      // pick initial stage
+      const stored = (() => { try { return localStorage.getItem(`gb:stage:${type}`); } catch { return null; } })();
+      const nextKey = stored && stages.some((s) => s.key === stored) ? stored : stages[0]?.key ?? "";
+      setStageKey(nextKey);
     })();
     return () => { cancelled = true; };
   }, [type]);
 
   const [search, setSearch] = useState("");
-  const effectiveMeta = useMemo(() => {
-    if (!stageMap) return meta;
-    return {
-      ...meta,
-      stages: meta.stages.map((s) => ({ ...s, catIds: stageMap[s.key] ?? s.catIds })),
-    };
-  }, [meta, stageMap]);
+  const effectiveMeta = useMemo(
+    () => ({ ...typeMeta, stages: dbStages ?? [] }),
+    [typeMeta, dbStages]
+  );
   const effectiveStage = effectiveMeta.stages.find((s) => s.key === stageKey) ?? effectiveMeta.stages[0];
 
   const cached = getCachedValue<SupplierLite[]>("categories:suppliers:v2", 5 * 60_000);
@@ -190,6 +158,7 @@ export default function CategoriesList() {
 
   // Cards shown for the selected stage — map to categories table for names
   const stageCards = useMemo(() => {
+    if (!effectiveStage) return [];
     return effectiveStage.catIds.flatMap((id) => {
       const c = categories.find((cc) => cc.id === id);
       if (!c) return [];
