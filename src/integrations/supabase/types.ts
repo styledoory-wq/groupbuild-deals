@@ -121,6 +121,47 @@ export type Database = {
           },
         ]
       }
+      category_migration_map: {
+        Row: {
+          created_at: string
+          id: string
+          mapping_confidence: string
+          needs_manual_review: boolean
+          new_category_id: string | null
+          notes: string | null
+          old_category_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mapping_confidence?: string
+          needs_manual_review?: boolean
+          new_category_id?: string | null
+          notes?: string | null
+          old_category_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mapping_confidence?: string
+          needs_manual_review?: boolean
+          new_category_id?: string | null
+          notes?: string | null
+          old_category_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_migration_map_new_category_id_fkey"
+            columns: ["new_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       category_project_stages: {
         Row: {
           category_id: string
@@ -2977,6 +3018,7 @@ export type Database = {
         Args: { _project_id: string; _user_id: string }
         Returns: boolean
       }
+      category_migration_report: { Args: never; Returns: Json }
       claim_supplier_profile_by_email: { Args: never; Returns: string }
       close_expired_deals: { Args: never; Returns: number }
       complete_onboarding: {
@@ -3116,6 +3158,7 @@ export type Database = {
         Args: { _demand_id: string }
         Returns: number
       }
+      migrate_supplier_categories_from_legacy: { Args: never; Returns: Json }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -3177,6 +3220,7 @@ export type Database = {
         Args: { _interest_id: string }
         Returns: undefined
       }
+      rollback_supplier_categories_migration: { Args: never; Returns: number }
       set_deposit_hidden: {
         Args: { _deposit_id: string; _hidden: boolean }
         Returns: undefined
