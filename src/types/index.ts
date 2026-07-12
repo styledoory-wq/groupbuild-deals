@@ -26,6 +26,9 @@ export interface Category {
   id: string;
   name: string;
   icon: string; // emoji fallback
+  parentId?: string | null;
+  level?: number | null;
+  description?: string | null;
 }
 
 export interface Supplier {

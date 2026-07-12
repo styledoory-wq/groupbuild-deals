@@ -35,6 +35,9 @@ type DbCategoryRow = {
   id: string;
   name: string;
   icon: string | null;
+  parent_id: string | null;
+  level: number | null;
+  description: string | null;
 };
 
 type DbNotificationRow = {
@@ -78,7 +81,7 @@ const loadCategoriesOnce = async () => {
   categoriesInflight = (async () => {
     const { data, error } = await withTimeout(supabase
       .from("categories")
-      .select("id,name,icon")
+      .select("id,name,icon,parent_id,level,description")
       .eq("is_active", true)
       .eq("is_deleted", false)
       .order("display_order", { ascending: true }), "טעינת תחומים");
@@ -87,6 +90,9 @@ const loadCategoriesOnce = async () => {
       id: c.id,
       name: c.name,
       icon: c.icon ?? "📦",
+      parentId: c.parent_id,
+      level: c.level,
+      description: c.description,
     }));
     categoriesCache = { data: mapped, at: Date.now() };
     categoriesInflight = null;
