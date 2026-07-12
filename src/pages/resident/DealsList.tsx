@@ -16,11 +16,11 @@ type DealWithSupplier = RealDealCardData;
 type TabKey = "active" | "favorites" | "archive";
 
 const STAGE_CATEGORY_IDS: Record<string, string[]> = {
-  planning: ["architect", "interior-designer", "consultant"],
-  structure: ["contractor", "skeleton", "gypsum"],
-  systems: ["electric", "plumbing", "ac", "smart-home"],
-  finishes: ["windows", "doors", "security-door", "flooring", "cladding", "painting", "kitchen", "bath", "showers", "sanitary", "carpentry", "closets", "lighting"],
-  outdoor: ["garden", "pergola", "cleaning"],
+  planning: ["sc-arch", "sc-interior", "sc-consultants", "architect", "interior-designer", "consultant"],
+  structure: ["sc-contractors", "sc-skeleton", "sc-gypsum", "contractor", "skeleton", "gypsum"],
+  systems: ["sc-elec", "sc-plumb", "sc-climate", "sc-smart", "electric", "plumbing", "ac", "smart-home"],
+  finishes: ["sc-windows", "sc-doors", "s-door-security", "sc-floor", "sc-cladding", "sc-paint", "sc-kitchen", "sc-bath", "s-bath-showers", "s-bath-sanitary", "sc-carpentry", "sc-closets", "sc-lighting", "windows", "doors", "security-door", "flooring", "cladding", "painting", "kitchen", "bath", "showers", "sanitary", "carpentry", "closets", "lighting"],
+  outdoor: ["sc-garden", "s-hard-pergola", "sc-cleaning", "garden", "pergola", "cleaning"],
 };
 const STAGE_TITLES: Record<string, string> = {
   planning: "תכנון ועיצוב", structure: "שלד ובנייה", systems: "מערכות הבית", finishes: "גמרים", outdoor: "חוץ ופיתוח",

@@ -25,39 +25,39 @@ const TYPE_META: Record<ProjectType, { label: string; emoji: string; stages: Sta
     label: "בנייה חדשה",
     emoji: "🏗️",
     stages: [
-      { key: "planning", title: "תכנון והיתרים", emoji: "📐", catIds: ["architect", "interior-designer", "consultant", "construction-supervisor"] },
-      { key: "structure", title: "שלד וביסוס", emoji: "🏗️", catIds: ["contractor", "skeleton"] },
-      { key: "envelope", title: "מעטפת", emoji: "🧱", catIds: ["cladding", "windows", "doors"] },
-      { key: "systems", title: "מערכות", emoji: "⚡", catIds: ["electric", "plumbing", "ac", "smart-home"] },
-      { key: "finishes", title: "גמרים", emoji: "🎨", catIds: ["painting", "flooring", "gypsum", "carpentry", "closets", "lighting", "kitchen", "bath"] },
-      { key: "outdoor", title: "פיתוח חוץ", emoji: "🌳", catIds: ["garden", "pergola"] },
+      { key: "planning", title: "תכנון והיתרים", emoji: "📐", catIds: ["sc-arch", "sc-interior", "sc-consultants", "sc-supervision"] },
+      { key: "structure", title: "שלד וביסוס", emoji: "🏗️", catIds: ["sc-contractors", "sc-skeleton"] },
+      { key: "envelope", title: "מעטפת", emoji: "🧱", catIds: ["sc-cladding", "sc-windows", "sc-doors"] },
+      { key: "systems", title: "מערכות", emoji: "⚡", catIds: ["sc-elec", "sc-plumb", "sc-climate", "sc-smart"] },
+      { key: "finishes", title: "גמרים", emoji: "🎨", catIds: ["sc-paint", "sc-floor", "sc-gypsum", "sc-carpentry", "sc-closets", "sc-lighting", "sc-kitchen", "sc-bath"] },
+      { key: "outdoor", title: "פיתוח חוץ", emoji: "🌳", catIds: ["sc-garden", "sc-hardscape"] },
     ],
   },
   reno: {
     label: "שיפוץ",
     emoji: "🔨",
     stages: [
-      { key: "kitchen-bath", title: "מטבח ואמבטיה", emoji: "🚿", catIds: ["kitchen", "bath", "sanitary", "showers"] },
-      { key: "paint-gypsum", title: "צבע וגבס", emoji: "🎨", catIds: ["painting", "gypsum"] },
-      { key: "electric", title: "חשמל", emoji: "⚡", catIds: ["electric"] },
-      { key: "plumbing", title: "אינסטלציה", emoji: "🔧", catIds: ["plumbing"] },
-      { key: "ac", title: "מיזוג", emoji: "❄️", catIds: ["ac"] },
-      { key: "flooring", title: "ריצוף", emoji: "🟫", catIds: ["flooring"] },
-      { key: "doors-windows", title: "דלתות וחלונות", emoji: "🚪", catIds: ["doors", "windows", "security-door"] },
+      { key: "kitchen-bath", title: "מטבח ואמבטיה", emoji: "🚿", catIds: ["sc-kitchen", "sc-bath", "s-bath-sanitary", "s-bath-showers"] },
+      { key: "paint-gypsum", title: "צבע וגבס", emoji: "🎨", catIds: ["sc-paint", "sc-gypsum"] },
+      { key: "electric", title: "חשמל", emoji: "⚡", catIds: ["sc-elec", "sc-lighting", "sc-smart"] },
+      { key: "plumbing", title: "אינסטלציה", emoji: "🔧", catIds: ["sc-plumb"] },
+      { key: "ac", title: "מיזוג", emoji: "❄️", catIds: ["sc-climate"] },
+      { key: "flooring", title: "ריצוף", emoji: "🟫", catIds: ["sc-floor", "sc-cladding"] },
+      { key: "doors-windows", title: "דלתות וחלונות", emoji: "🚪", catIds: ["sc-doors", "sc-windows", "s-door-security"] },
     ],
   },
   building: {
     label: "בניין משותף",
     emoji: "🏢",
     stages: [
-      { key: "elevators", title: "מעליות", emoji: "🛗", catIds: [] },
-      { key: "cleaning", title: "ניקיון", emoji: "🧽", catIds: ["cleaning"] },
-      { key: "garden", title: "גינון", emoji: "🌿", catIds: ["garden"] },
-      { key: "cctv", title: "מצלמות ואינטרקום", emoji: "📹", catIds: [] },
-      { key: "entrance", title: "דלתות כניסה", emoji: "🚪", catIds: ["security-door", "doors"] },
-      { key: "shared-electric", title: "חשמל משותף", emoji: "💡", catIds: ["electric", "lighting"] },
-      { key: "facade", title: "שיפוץ חזית", emoji: "🧱", catIds: ["cladding", "painting"] },
-      { key: "solar", title: "סולארי", emoji: "☀️", catIds: ["c_1778448823740"] },
+      { key: "elevators", title: "מעליות", emoji: "🛗", catIds: ["s-mnt-elevator"] },
+      { key: "cleaning", title: "ניקיון", emoji: "🧽", catIds: ["sc-cleaning"] },
+      { key: "garden", title: "גינון", emoji: "🌿", catIds: ["sc-garden"] },
+      { key: "cctv", title: "מצלמות ואינטרקום", emoji: "📹", catIds: ["sc-security"] },
+      { key: "entrance", title: "דלתות כניסה", emoji: "🚪", catIds: ["s-door-security", "s-door-interior"] },
+      { key: "shared-electric", title: "חשמל משותף", emoji: "💡", catIds: ["sc-elec", "sc-lighting"] },
+      { key: "facade", title: "שיפוץ חזית", emoji: "🧱", catIds: ["sc-cladding", "sc-paint"] },
+      { key: "solar", title: "סולארי", emoji: "☀️", catIds: ["sc-solar"] },
     ],
   },
 };
@@ -67,6 +67,12 @@ interface SupplierLite {
   logo_url: string | null; categories: string[]; service_areas: string[];
 }
 
+type SupplierRow = Omit<SupplierLite, "categories" | "service_areas"> & {
+  categories: string[] | null;
+  service_areas: string[] | null;
+};
+type SupplierCategoryRow = { supplier_id: string; category_id: string };
+
 export default function CategoryStages() {
   const { categories } = useApp();
   const navigate = useNavigate();
@@ -74,7 +80,7 @@ export default function CategoryStages() {
   const type = (params.get("type") as ProjectType) || "new";
   const baseMeta = TYPE_META[type] ?? TYPE_META.new;
 
-  const cached = getCachedValue<SupplierLite[]>("categories:suppliers", 5 * 60_000);
+  const cached = getCachedValue<SupplierLite[]>("categories:suppliers:v2", 5 * 60_000);
   const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
   const [search, setSearch] = useState("");
   const [stageMap, setStageMap] = useState<Record<string, string[]> | null>(null);
@@ -82,14 +88,30 @@ export default function CategoryStages() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const data = await cachedQuery<SupplierLite[]>("categories:suppliers", async () => {
+      const data = await cachedQuery<SupplierLite[]>("categories:suppliers:v2", async () => {
         const { data } = await supabase
           .from("suppliers")
           .select("id,business_name,short_description,logo_url,categories,service_areas")
           .eq("is_active", true).eq("is_deleted", false)
           .in("approval_status", ["approved", "active"])
           .order("business_name");
-        return (data as SupplierLite[]) ?? [];
+        const supplierRows = ((data ?? []) as SupplierRow[]).map((s) => ({
+          ...s,
+          categories: s.categories ?? [],
+          service_areas: s.service_areas ?? [],
+        }));
+        const supplierIds = supplierRows.map((s) => s.id);
+        const { data: joins } = supplierIds.length
+          ? await supabase.from("supplier_categories").select("supplier_id,category_id").in("supplier_id", supplierIds)
+          : { data: [] };
+        const bySupplier: Record<string, string[]> = {};
+        ((joins ?? []) as SupplierCategoryRow[]).forEach((row) => {
+          (bySupplier[row.supplier_id] ||= []).push(row.category_id);
+        });
+        return supplierRows.map((s) => ({
+          ...s,
+          categories: bySupplier[s.id]?.length ? bySupplier[s.id] : s.categories,
+        }));
       }, 5 * 60_000);
       if (!cancelled) setSuppliers(data);
     })();

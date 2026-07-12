@@ -32,39 +32,39 @@ const TYPE_META: Record<ProjectType, { label: string; sectionTitle: string; stag
     label: "בנייה חדשה",
     sectionTitle: "שלבי הבנייה",
     stages: [
-      { key: "planning", title: "תכנון והיתרים", emoji: "📐", catIds: ["architect", "interior-designer", "consultant", "construction-supervisor"] },
-      { key: "structure", title: "שלד וביסוס", emoji: "🏗️", catIds: ["contractor", "skeleton"] },
-      { key: "envelope", title: "מעטפת", emoji: "🏠", catIds: ["cladding", "windows", "doors"] },
-      { key: "systems", title: "מערכות", emoji: "⚡", catIds: ["electric", "plumbing", "ac", "smart-home"] },
-      { key: "finishes", title: "גמרים", emoji: "🛋️", catIds: ["painting", "flooring", "gypsum", "carpentry", "closets", "lighting", "kitchen", "bath"] },
-      { key: "outdoor", title: "חוץ ופיתוח", emoji: "🌳", catIds: ["garden", "pergola"] },
+      { key: "planning", title: "תכנון והיתרים", emoji: "📐", catIds: ["sc-arch", "sc-interior", "sc-consultants", "sc-supervision"] },
+      { key: "structure", title: "שלד וביסוס", emoji: "🏗️", catIds: ["sc-contractors", "sc-skeleton", "s-cont-turnkey"] },
+      { key: "envelope", title: "מעטפת", emoji: "🏠", catIds: ["sc-cladding", "sc-windows", "sc-doors"] },
+      { key: "systems", title: "מערכות", emoji: "⚡", catIds: ["sc-elec", "sc-plumb", "sc-climate", "sc-smart"] },
+      { key: "finishes", title: "גמרים", emoji: "🛋️", catIds: ["sc-paint", "sc-floor", "sc-gypsum", "sc-carpentry", "sc-closets", "sc-lighting", "sc-kitchen", "sc-bath"] },
+      { key: "outdoor", title: "חוץ ופיתוח", emoji: "🌳", catIds: ["sc-garden", "sc-hardscape"] },
     ],
   },
   reno: {
     label: "שיפוץ",
     sectionTitle: "תחומי השיפוץ",
     stages: [
-      { key: "kitchen-bath", title: "מטבח ואמבטיה", emoji: "🚿", catIds: ["kitchen", "bath", "sanitary", "showers"] },
-      { key: "paint-gypsum", title: "צבע וגבס", emoji: "🎨", catIds: ["painting", "gypsum"] },
-      { key: "electric", title: "חשמל", emoji: "⚡", catIds: ["electric"] },
-      { key: "plumbing", title: "אינסטלציה", emoji: "🔧", catIds: ["plumbing"] },
-      { key: "ac", title: "מיזוג", emoji: "❄️", catIds: ["ac"] },
-      { key: "flooring", title: "ריצוף", emoji: "🟫", catIds: ["flooring"] },
-      { key: "doors-windows", title: "דלתות וחלונות", emoji: "🚪", catIds: ["doors", "windows", "security-door"] },
+      { key: "kitchen-bath", title: "מטבח ואמבטיה", emoji: "🚿", catIds: ["sc-kitchen", "sc-bath", "s-bath-sanitary", "s-bath-showers"] },
+      { key: "paint-gypsum", title: "צבע וגבס", emoji: "🎨", catIds: ["sc-paint", "sc-gypsum"] },
+      { key: "electric", title: "חשמל", emoji: "⚡", catIds: ["sc-elec", "sc-lighting", "sc-smart"] },
+      { key: "plumbing", title: "אינסטלציה", emoji: "🔧", catIds: ["sc-plumb"] },
+      { key: "ac", title: "מיזוג", emoji: "❄️", catIds: ["sc-climate"] },
+      { key: "flooring", title: "ריצוף", emoji: "🟫", catIds: ["sc-floor", "sc-cladding"] },
+      { key: "doors-windows", title: "דלתות וחלונות", emoji: "🚪", catIds: ["sc-doors", "sc-windows", "s-door-security"] },
     ],
   },
   building: {
     label: "בניין משותף",
     sectionTitle: "תחומי הבניין",
     stages: [
-      { key: "elevators", title: "מעליות", emoji: "🛗", catIds: [] },
-      { key: "cleaning", title: "ניקיון", emoji: "🧽", catIds: ["cleaning"] },
-      { key: "garden", title: "גינון", emoji: "🌿", catIds: ["garden"] },
-      { key: "cctv", title: "מצלמות", emoji: "📹", catIds: [] },
-      { key: "entrance", title: "דלתות כניסה", emoji: "🚪", catIds: ["security-door", "doors"] },
-      { key: "shared-electric", title: "חשמל משותף", emoji: "💡", catIds: ["electric", "lighting"] },
-      { key: "facade", title: "שיפוץ חזית", emoji: "🧱", catIds: ["cladding", "painting"] },
-      { key: "solar", title: "סולארי", emoji: "☀️", catIds: ["c_1778448823740"] },
+      { key: "elevators", title: "מעליות", emoji: "🛗", catIds: ["s-mnt-elevator"] },
+      { key: "cleaning", title: "ניקיון", emoji: "🧽", catIds: ["sc-cleaning"] },
+      { key: "garden", title: "גינון", emoji: "🌿", catIds: ["sc-garden"] },
+      { key: "cctv", title: "מצלמות", emoji: "📹", catIds: ["sc-security"] },
+      { key: "entrance", title: "דלתות כניסה", emoji: "🚪", catIds: ["s-door-security", "s-door-interior"] },
+      { key: "shared-electric", title: "חשמל משותף", emoji: "💡", catIds: ["sc-elec", "sc-lighting"] },
+      { key: "facade", title: "שיפוץ חזית", emoji: "🧱", catIds: ["sc-cladding", "sc-paint"] },
+      { key: "solar", title: "סולארי", emoji: "☀️", catIds: ["sc-solar"] },
     ],
   },
 };
@@ -73,6 +73,13 @@ interface SupplierLite {
   id: string; business_name: string; short_description: string | null;
   logo_url: string | null; categories: string[]; service_areas: string[];
 }
+
+type SupplierRow = Omit<SupplierLite, "categories" | "service_areas"> & {
+  categories: string[] | null;
+  service_areas: string[] | null;
+};
+
+type SupplierCategoryRow = { supplier_id: string; category_id: string };
 
 export default function CategoriesList() {
   const navigate = useNavigate();
@@ -86,7 +93,7 @@ export default function CategoriesList() {
     try { return localStorage.getItem(`gb:stage:${type}`) || meta.stages[0].key; }
     catch { return meta.stages[0].key; }
   });
-  const stage = meta.stages.find((s) => s.key === stageKey) ?? meta.stages[0];
+  const [stageMap, setStageMap] = useState<Record<string, string[]> | null>(null);
 
   useEffect(() => {
     try { localStorage.setItem("gb:projectType", type); } catch {}
@@ -98,21 +105,64 @@ export default function CategoriesList() {
     try { localStorage.setItem(`gb:stage:${type}`, stageKey); } catch {}
   }, [type, stageKey]);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("category_project_stages")
+        .select("stage_key,category_id,display_order")
+        .eq("project_type", type)
+        .order("display_order", { ascending: true });
+      if (cancelled) return;
+      const next: Record<string, string[]> = {};
+      (data ?? []).forEach((row: { stage_key: string; category_id: string }) => {
+        (next[row.stage_key] ||= []).push(row.category_id);
+      });
+      setStageMap(next);
+    })();
+    return () => { cancelled = true; };
+  }, [type]);
+
   const [search, setSearch] = useState("");
-  const cached = getCachedValue<SupplierLite[]>("categories:suppliers", 5 * 60_000);
+  const effectiveMeta = useMemo(() => {
+    if (!stageMap) return meta;
+    return {
+      ...meta,
+      stages: meta.stages.map((s) => ({ ...s, catIds: stageMap[s.key] ?? s.catIds })),
+    };
+  }, [meta, stageMap]);
+  const effectiveStage = effectiveMeta.stages.find((s) => s.key === stageKey) ?? effectiveMeta.stages[0];
+
+  const cached = getCachedValue<SupplierLite[]>("categories:suppliers:v2", 5 * 60_000);
   const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const data = await cachedQuery<SupplierLite[]>("categories:suppliers", async () => {
+      const data = await cachedQuery<SupplierLite[]>("categories:suppliers:v2", async () => {
         const { data } = await supabase
           .from("suppliers")
           .select("id,business_name,short_description,logo_url,categories,service_areas")
           .eq("is_active", true).eq("is_deleted", false)
           .in("approval_status", ["approved", "active"])
           .order("business_name");
-        return (data as SupplierLite[]) ?? [];
+        const supplierRows = ((data ?? []) as SupplierRow[]).map((s) => ({
+          ...s,
+          categories: s.categories ?? [],
+          service_areas: s.service_areas ?? [],
+        }));
+        const supplierIds = supplierRows.map((s) => s.id);
+        const { data: joins } = supplierIds.length
+          ? await supabase.from("supplier_categories").select("supplier_id,category_id").in("supplier_id", supplierIds)
+          : { data: [] };
+        const bySupplier: Record<string, string[]> = {};
+        ((joins ?? []) as SupplierCategoryRow[]).forEach((row) => {
+          (bySupplier[row.supplier_id] ||= []).push(row.category_id);
+        });
+        return supplierRows.map((s) => ({
+          ...s,
+          categories: bySupplier[s.id]?.length ? bySupplier[s.id] : s.categories,
+        }));
       }, 5 * 60_000);
       if (!cancelled) setSuppliers(data);
     })();
@@ -140,21 +190,22 @@ export default function CategoriesList() {
 
   // Cards shown for the selected stage — map to categories table for names
   const stageCards = useMemo(() => {
-    return stage.catIds.map((id) => {
+    return effectiveStage.catIds.flatMap((id) => {
       const c = categories.find((cc) => cc.id === id);
+      if (!c) return [];
       return {
         id,
-        name: c?.name ?? id,
-        description: (c as any)?.description ?? "",
-        emoji: c?.icon ?? stage.emoji,
+        name: c.name,
+        description: c.description ?? "",
+        emoji: c.icon ?? effectiveStage.emoji,
         count: counts[id] ?? 0,
       };
     });
-  }, [stage, categories, counts]);
+  }, [effectiveStage, categories, counts]);
 
   // Stage progress (visual only, persisted)
-  const totalStages = meta.stages.length;
-  const stageIdx = meta.stages.findIndex((s) => s.key === stageKey);
+  const totalStages = effectiveMeta.stages.length;
+  const stageIdx = effectiveMeta.stages.findIndex((s) => s.key === stageKey);
   const completedStages = Math.max(0, Math.min(totalStages, stageIdx));
 
   // Scroll active stage into view
@@ -278,7 +329,7 @@ export default function CategoriesList() {
                 className="text-[20px] font-extrabold text-[#1A1A1A] leading-tight"
                 style={{ fontFamily: URBANIST }}
               >
-                {meta.sectionTitle}
+                {effectiveMeta.sectionTitle}
               </h2>
               <p className="text-[12.5px] text-gray-500 mt-0.5">
                 בחר קטגוריה כדי לראות ספקים
@@ -291,7 +342,7 @@ export default function CategoriesList() {
               className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-5 px-5"
               style={{ scrollbarWidth: "none" }}
             >
-              {meta.stages.map((s) => {
+              {effectiveMeta.stages.map((s) => {
                 const active = s.key === stageKey;
                 return (
                   <button

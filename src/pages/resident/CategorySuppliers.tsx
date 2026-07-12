@@ -25,6 +25,42 @@ interface DbSupplier {
   offers_products: boolean | null;
 }
 
+type SupplierCategoryRow = { supplier_id: string; category_id: string };
+
+const CATEGORY_ID_ALIASES: Record<string, string> = {
+  architect: "sc-arch",
+  "interior-designer": "sc-interior",
+  consultant: "sc-consultants",
+  "construction-supervisor": "sc-supervision",
+  contractor: "sc-contractors",
+  "turnkey-contractor": "s-cont-turnkey",
+  skeleton: "sc-skeleton",
+  cladding: "sc-cladding",
+  windows: "sc-windows",
+  doors: "sc-doors",
+  "security-door": "s-door-security",
+  electric: "sc-elec",
+  lighting: "sc-lighting",
+  plumbing: "sc-plumb",
+  ac: "sc-climate",
+  "smart-home": "sc-smart",
+  painting: "sc-paint",
+  flooring: "sc-floor",
+  gypsum: "sc-gypsum",
+  carpentry: "sc-carpentry",
+  closets: "sc-closets",
+  kitchen: "sc-kitchen",
+  bath: "sc-bath",
+  sanitary: "s-bath-sanitary",
+  showers: "s-bath-showers",
+  garden: "sc-garden",
+  pergola: "s-hard-pergola",
+  cleaning: "sc-cleaning",
+  intercom: "sc-security",
+  elevators: "s-mnt-elevator",
+  c_1778448823740: "sc-solar",
+};
+
 const NATIONAL_AREA = "כל הארץ";
 
 export default function CategorySuppliers() {
@@ -33,7 +69,7 @@ export default function CategorySuppliers() {
   const { categories } = useApp();
   const { regions, cities } = useRegions();
 
-  const [activeCategoryId, setActiveCategoryId] = useState<string>(categoryId ?? "all");
+  const [activeCategoryId, setActiveCategoryId] = useState<string>(CATEGORY_ID_ALIASES[categoryId ?? ""] ?? categoryId ?? "all");
 
   const [suppliers, setSuppliers] = useState<DbSupplier[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,9 +85,28 @@ export default function CategorySuppliers() {
   const [supplierCouncilIds, setSupplierCouncilIds] = useState<Record<string, string[]>>({});
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
+  const relevantCategoryIds = useMemo(() => {
+    if (activeCategoryId === "all") return [];
+    const ids = new Set([activeCategoryId]);
+    categories.forEach((c) => {
+      if (c.parentId === activeCategoryId) ids.add(c.id);
+      if (c.id === activeCategoryId && c.parentId) ids.add(c.parentId);
+    });
+    let changed = true;
+    while (changed) {
+      changed = false;
+      categories.forEach((c) => {
+        if (c.parentId && ids.has(c.parentId) && !ids.has(c.id)) {
+          ids.add(c.id);
+          changed = true;
+        }
+      });
+    }
+    return Array.from(ids);
+  }, [activeCategoryId, categories]);
 
   useEffect(() => {
-    setActiveCategoryId(categoryId ?? "all");
+    setActiveCategoryId(CATEGORY_ID_ALIASES[categoryId ?? ""] ?? categoryId ?? "all");
   }, [categoryId]);
 
   useEffect(() => {
@@ -102,7 +157,19 @@ export default function CategorySuppliers() {
           categories: s.categories ?? [],
           service_areas: s.service_areas ?? [],
         }));
-        setSuppliers(list);
+        const supplierIds = list.map((s) => s.id);
+        const { data: categoryJoins } = supplierIds.length
+          ? await supabase.from("supplier_categories").select("supplier_id,category_id").in("supplier_id", supplierIds)
+          : { data: [] };
+        const categoriesBySupplier: Record<string, string[]> = {};
+        ((categoryJoins ?? []) as SupplierCategoryRow[]).forEach((row) => {
+          (categoriesBySupplier[row.supplier_id] ||= []).push(row.category_id);
+        });
+        const withNewCategories = list.map((s) => ({
+          ...s,
+          categories: categoriesBySupplier[s.id]?.length ? categoriesBySupplier[s.id] : s.categories,
+        }));
+        setSuppliers(withNewCategories);
         setLoading(false);
 
         const [regionsResult, citiesResult, councilsResult] = await Promise.all([
@@ -183,7 +250,7 @@ export default function CategorySuppliers() {
   const filteredSuppliers = useMemo(() => {
     const byCategory = activeCategoryId === "all"
       ? suppliers
-      : suppliers.filter((s) => (s.categories ?? []).includes(activeCategoryId));
+      : suppliers.filter((s) => (s.categories ?? []).some((id) => relevantCategoryIds.includes(id)));
 
     const supplierOffers = (s: DbSupplier) => ({
       service: Boolean(s.offers_services) || s.supplier_kind === "service",
@@ -196,7 +263,7 @@ export default function CategorySuppliers() {
     const byArea = byKind.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
     return byKind.filter(isNationalSupplier);
-  }, [suppliers, activeCategoryId, regionId, cityId, kindFilter, supplierRegionIds, supplierCityIds, supplierCouncilIds, regions, cities]);
+  }, [suppliers, activeCategoryId, relevantCategoryIds, regionId, cityId, kindFilter, supplierRegionIds, supplierCityIds, supplierCouncilIds, regions, cities]);
 
   const areaLabel =
     cityId !== "all"

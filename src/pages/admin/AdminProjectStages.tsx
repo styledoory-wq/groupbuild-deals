@@ -83,7 +83,7 @@ export default function AdminProjectStages() {
     return m;
   }, [rows]);
 
-  const catName = (id: string) => categories.find((c) => c.id === id)?.name ?? id;
+  const catName = (id: string) => categories.find((c) => c.id === id)?.name ?? "קטגוריה לא פעילה";
   const catIcon = (id: string) => categories.find((c) => c.id === id)?.icon ?? "🏷️";
 
   const remove = async (stageKey: string, catId: string) => {

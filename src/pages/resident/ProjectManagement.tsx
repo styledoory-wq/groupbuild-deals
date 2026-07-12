@@ -439,27 +439,68 @@ const STAGES_BY_TYPE: Record<ProjectType, Stage[]> = {
   point_service: POINT_SERVICE_STAGES,
 };
 
+const CATEGORY_ID_ALIASES: Record<string, string> = {
+  architect: "sc-arch",
+  "interior-designer": "sc-interior",
+  consultant: "sc-consultants",
+  "construction-supervisor": "sc-supervision",
+  contractor: "sc-contractors",
+  "turnkey-contractor": "s-cont-turnkey",
+  skeleton: "sc-skeleton",
+  cladding: "sc-cladding",
+  windows: "sc-windows",
+  doors: "sc-doors",
+  "security-door": "s-door-security",
+  electric: "sc-elec",
+  lighting: "sc-lighting",
+  plumbing: "sc-plumb",
+  ac: "sc-climate",
+  "smart-home": "sc-smart",
+  painting: "sc-paint",
+  flooring: "sc-floor",
+  gypsum: "sc-gypsum",
+  carpentry: "sc-carpentry",
+  closets: "sc-closets",
+  kitchen: "sc-kitchen",
+  bath: "sc-bath",
+  sanitary: "s-bath-sanitary",
+  showers: "s-bath-showers",
+  garden: "sc-garden",
+  pergola: "s-hard-pergola",
+  cleaning: "sc-cleaning",
+  intercom: "sc-security",
+  elevators: "s-mnt-elevator",
+  c_1778448823740: "sc-solar",
+};
+
+const normalizeStageCategoryIds = (stage: Stage): Stage => ({
+  ...stage,
+  catIds: Array.from(new Set(stage.catIds.map((id) => CATEGORY_ID_ALIASES[id] ?? id))),
+});
+
 export const getStagesFor = (t: ProjectType | undefined): Stage[] =>
-  STAGES_BY_TYPE[t ?? "new_build"] ?? NEW_BUILD_STAGES;
+  (STAGES_BY_TYPE[t ?? "new_build"] ?? NEW_BUILD_STAGES).map(normalizeStageCategoryIds);
 
 // Default budget items derived from stage categories (used for auto-sync)
 const BUDGET_TEMPLATE: Array<{ label: string; planned: number; catId: string }> = [
-  { label: "תכנון אדריכלי וייעוץ", planned: 35000, catId: "architect" },
-  { label: "קבלן שלד וביסוס", planned: 180000, catId: "contractor" },
-  { label: "חלונות וחיפוי חוץ", planned: 60000, catId: "windows" },
-  { label: "חשמל ותאורה", planned: 45000, catId: "electric" },
-  { label: "אינסטלציה", planned: 32000, catId: "plumbing" },
-  { label: "מיזוג אוויר", planned: 28000, catId: "ac" },
-  { label: "ריצוף וחיפוי", planned: 55000, catId: "flooring" },
-  { label: "מטבח", planned: 75000, catId: "kitchen" },
-  { label: "צבע ונגרות", planned: 38000, catId: "painting" },
-  { label: "פיתוח חוץ וגינון", planned: 42000, catId: "garden" },
+  { label: "תכנון אדריכלי וייעוץ", planned: 35000, catId: "sc-arch" },
+  { label: "קבלן שלד וביסוס", planned: 180000, catId: "sc-contractors" },
+  { label: "חלונות וחיפוי חוץ", planned: 60000, catId: "sc-windows" },
+  { label: "חשמל ותאורה", planned: 45000, catId: "sc-elec" },
+  { label: "אינסטלציה", planned: 32000, catId: "sc-plumb" },
+  { label: "מיזוג אוויר", planned: 28000, catId: "sc-climate" },
+  { label: "ריצוף וחיפוי", planned: 55000, catId: "sc-floor" },
+  { label: "מטבח", planned: 75000, catId: "sc-kitchen" },
+  { label: "צבע ונגרות", planned: 38000, catId: "sc-paint" },
+  { label: "פיתוח חוץ וגינון", planned: 42000, catId: "sc-garden" },
 ];
 
 interface SupplierLite {
   id: string; business_name: string; short_description: string | null;
   logo_url: string | null; categories: string[];
 }
+
+type SupplierCategoryRow = { supplier_id: string; category_id: string };
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -544,19 +585,31 @@ export default function ProjectManagement() {
   };
 
   // Suppliers
-  const cached = getCachedValue<SupplierLite[]>("categories:suppliers", 5 * 60_000);
+  const cached = getCachedValue<SupplierLite[]>("categories:suppliers:v2", 5 * 60_000);
   const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const data = await cachedQuery<SupplierLite[]>("categories:suppliers", async () => {
+      const data = await cachedQuery<SupplierLite[]>("categories:suppliers:v2", async () => {
         const { data } = await supabase
           .from("suppliers")
           .select("id,business_name,short_description,logo_url,categories")
           .eq("is_active", true).eq("is_deleted", false)
           .in("approval_status", ["approved", "active"])
           .order("business_name");
-        return (data as SupplierLite[]) ?? [];
+        const supplierRows = ((data ?? []) as SupplierLite[]).map((s) => ({ ...s, categories: s.categories ?? [] }));
+        const supplierIds = supplierRows.map((s) => s.id);
+        const { data: joins } = supplierIds.length
+          ? await supabase.from("supplier_categories").select("supplier_id,category_id").in("supplier_id", supplierIds)
+          : { data: [] };
+        const bySupplier: Record<string, string[]> = {};
+        ((joins ?? []) as SupplierCategoryRow[]).forEach((row) => {
+          (bySupplier[row.supplier_id] ||= []).push(row.category_id);
+        });
+        return supplierRows.map((s) => ({
+          ...s,
+          categories: bySupplier[s.id]?.length ? bySupplier[s.id] : s.categories.map((id) => CATEGORY_ID_ALIASES[id] ?? id),
+        }));
       }, 5 * 60_000);
       if (!cancelled) setSuppliers(data);
     })();
