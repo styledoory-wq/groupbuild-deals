@@ -6,61 +6,13 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
+import { PROJECT_TYPE_META, stageMeta, type ProjectType } from "@/lib/stageCatalog";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
 const BRAND = "#0E6B5A";
 
-type ProjectType = "new" | "reno" | "building";
-
-type StageEntry = {
-  key: string;
-  title: string;
-  emoji: string;
-  catIds: string[]; // mapped to existing categories table
-};
-
-const TYPE_META: Record<ProjectType, { label: string; emoji: string; stages: StageEntry[] }> = {
-  new: {
-    label: "בנייה חדשה",
-    emoji: "🏗️",
-    stages: [
-      { key: "planning", title: "תכנון והיתרים", emoji: "📐", catIds: ["sc-arch", "sc-interior", "sc-consultants", "sc-supervision"] },
-      { key: "structure", title: "שלד וביסוס", emoji: "🏗️", catIds: ["sc-contractors", "sc-skeleton"] },
-      { key: "envelope", title: "מעטפת", emoji: "🧱", catIds: ["sc-cladding", "sc-windows", "sc-doors"] },
-      { key: "systems", title: "מערכות", emoji: "⚡", catIds: ["sc-elec", "sc-plumb", "sc-climate", "sc-smart"] },
-      { key: "finishes", title: "גמרים", emoji: "🎨", catIds: ["sc-paint", "sc-floor", "sc-gypsum", "sc-carpentry", "sc-closets", "sc-lighting", "sc-kitchen", "sc-bath"] },
-      { key: "outdoor", title: "פיתוח חוץ", emoji: "🌳", catIds: ["sc-garden", "sc-hardscape"] },
-    ],
-  },
-  reno: {
-    label: "שיפוץ",
-    emoji: "🔨",
-    stages: [
-      { key: "kitchen-bath", title: "מטבח ואמבטיה", emoji: "🚿", catIds: ["sc-kitchen", "sc-bath", "s-bath-sanitary", "s-bath-showers"] },
-      { key: "paint-gypsum", title: "צבע וגבס", emoji: "🎨", catIds: ["sc-paint", "sc-gypsum"] },
-      { key: "electric", title: "חשמל", emoji: "⚡", catIds: ["sc-elec", "sc-lighting", "sc-smart"] },
-      { key: "plumbing", title: "אינסטלציה", emoji: "🔧", catIds: ["sc-plumb"] },
-      { key: "ac", title: "מיזוג", emoji: "❄️", catIds: ["sc-climate"] },
-      { key: "flooring", title: "ריצוף", emoji: "🟫", catIds: ["sc-floor", "sc-cladding"] },
-      { key: "doors-windows", title: "דלתות וחלונות", emoji: "🚪", catIds: ["sc-doors", "sc-windows", "s-door-security"] },
-    ],
-  },
-  building: {
-    label: "בניין משותף",
-    emoji: "🏢",
-    stages: [
-      { key: "elevators", title: "מעליות", emoji: "🛗", catIds: ["s-mnt-elevator"] },
-      { key: "cleaning", title: "ניקיון", emoji: "🧽", catIds: ["sc-cleaning"] },
-      { key: "garden", title: "גינון", emoji: "🌿", catIds: ["sc-garden"] },
-      { key: "cctv", title: "מצלמות ואינטרקום", emoji: "📹", catIds: ["sc-security"] },
-      { key: "entrance", title: "דלתות כניסה", emoji: "🚪", catIds: ["s-door-security", "s-door-interior"] },
-      { key: "shared-electric", title: "חשמל משותף", emoji: "💡", catIds: ["sc-elec", "sc-lighting"] },
-      { key: "facade", title: "שיפוץ חזית", emoji: "🧱", catIds: ["sc-cladding", "sc-paint"] },
-      { key: "solar", title: "סולארי", emoji: "☀️", catIds: ["sc-solar"] },
-    ],
-  },
-};
+type StageEntry = { key: string; title: string; emoji: string; catIds: string[] };
 
 interface SupplierLite {
   id: string; business_name: string; short_description: string | null;
@@ -77,13 +29,13 @@ export default function CategoryStages() {
   const { categories } = useApp();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const type = (params.get("type") as ProjectType) || "new";
-  const baseMeta = TYPE_META[type] ?? TYPE_META.new;
+  const type = ((params.get("type") as ProjectType) || "new") as ProjectType;
+  const typeMeta = PROJECT_TYPE_META[type] ?? PROJECT_TYPE_META.new;
 
   const cached = getCachedValue<SupplierLite[]>("categories:suppliers:v2", 5 * 60_000);
   const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
   const [search, setSearch] = useState("");
-  const [stageMap, setStageMap] = useState<Record<string, string[]> | null>(null);
+  const [stages, setStages] = useState<StageEntry[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,22 +79,21 @@ export default function CategoryStages() {
         .eq("project_type", type)
         .order("display_order", { ascending: true });
       if (cancelled) return;
-      const map: Record<string, string[]> = {};
+      const orderedKeys: string[] = [];
+      const byStage: Record<string, string[]> = {};
       (data ?? []).forEach((r: { stage_key: string; category_id: string }) => {
-        (map[r.stage_key] ||= []).push(r.category_id);
+        if (!(r.stage_key in byStage)) { byStage[r.stage_key] = []; orderedKeys.push(r.stage_key); }
+        byStage[r.stage_key].push(r.category_id);
       });
-      setStageMap(map);
+      setStages(orderedKeys.map((k) => {
+        const m = stageMeta(type, k);
+        return { key: k, title: m.title, emoji: m.emoji, catIds: byStage[k] };
+      }));
     })();
     return () => { cancelled = true; };
   }, [type]);
 
-  const meta = useMemo(() => {
-    if (!stageMap) return baseMeta;
-    return {
-      ...baseMeta,
-      stages: baseMeta.stages.map((s) => ({ ...s, catIds: stageMap[s.key] ?? s.catIds })),
-    };
-  }, [baseMeta, stageMap]);
+  const meta = { label: typeMeta.label, emoji: typeMeta.emoji, stages };
 
   const counts = useMemo(() => {
     const map: Record<string, number> = {};
