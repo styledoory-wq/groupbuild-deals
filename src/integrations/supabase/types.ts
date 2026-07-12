@@ -48,40 +48,78 @@ export type Database = {
         Row: {
           created_at: string
           deleted_at: string | null
+          description: string | null
           display_order: number
           icon: string
           id: string
           is_active: boolean
           is_deleted: boolean
+          is_featured: boolean
+          is_new: boolean
+          is_popular: boolean
+          level: number
           name: string
+          name_en: string | null
+          parent_id: string | null
+          path: string | null
+          search_keywords: string[]
+          slug: string | null
           stage: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           deleted_at?: string | null
+          description?: string | null
           display_order?: number
           icon?: string
           id: string
           is_active?: boolean
           is_deleted?: boolean
+          is_featured?: boolean
+          is_new?: boolean
+          is_popular?: boolean
+          level?: number
           name: string
+          name_en?: string | null
+          parent_id?: string | null
+          path?: string | null
+          search_keywords?: string[]
+          slug?: string | null
           stage?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           deleted_at?: string | null
+          description?: string | null
           display_order?: number
           icon?: string
           id?: string
           is_active?: boolean
           is_deleted?: boolean
+          is_featured?: boolean
+          is_new?: boolean
+          is_popular?: boolean
+          level?: number
           name?: string
+          name_en?: string | null
+          parent_id?: string | null
+          path?: string | null
+          search_keywords?: string[]
+          slug?: string | null
           stage?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       category_project_stages: {
         Row: {
@@ -1997,6 +2035,48 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_categories: {
+        Row: {
+          assigned_by: string | null
+          category_id: string
+          created_at: string
+          id: string
+          is_primary: boolean
+          supplier_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          category_id: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          supplier_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          category_id?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_categories_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_cities: {
         Row: {
           city_id: string
@@ -2064,6 +2144,7 @@ export type Database = {
           display_order: number
           id: string
           image_url: string
+          media_type: string
           supplier_id: string
         }
         Insert: {
@@ -2072,6 +2153,7 @@ export type Database = {
           display_order?: number
           id?: string
           image_url: string
+          media_type?: string
           supplier_id: string
         }
         Update: {
@@ -2080,6 +2162,7 @@ export type Database = {
           display_order?: number
           id?: string
           image_url?: string
+          media_type?: string
           supplier_id?: string
         }
         Relationships: []
@@ -2188,9 +2271,88 @@ export type Database = {
           },
         ]
       }
+      supplier_tag_assignments: {
+        Row: {
+          assigned_by: string | null
+          auto_assigned: boolean
+          created_at: string
+          id: string
+          supplier_id: string
+          tag_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          auto_assigned?: boolean
+          created_at?: string
+          id?: string
+          supplier_id: string
+          tag_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          auto_assigned?: boolean
+          created_at?: string
+          id?: string
+          supplier_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_tag_assignments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_tag_assignments_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          is_active: boolean
+          name_en: string | null
+          name_he: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id: string
+          is_active?: boolean
+          name_en?: string | null
+          name_he: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name_en?: string | null
+          name_he?: string
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           approval_status: string
+          avg_response_time_hours: number | null
           bank_account_holder: string | null
           bank_account_number: string | null
           bank_branch: string | null
@@ -2198,6 +2360,7 @@ export type Database = {
           billing_notes: string | null
           billing_status: string
           bit_phone: string | null
+          business_hours: Json
           business_name: string
           catalog_url: string | null
           categories: string[]
@@ -2208,6 +2371,8 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           email: string | null
+          emergency_service: boolean
+          employees_count: number | null
           facebook_url: string | null
           id: string
           instagram_url: string | null
@@ -2215,12 +2380,15 @@ export type Database = {
           is_deleted: boolean
           is_demo: boolean
           is_suspended: boolean
+          languages: string[]
           lead_fee: number
+          licenses: Json
           logo_url: string | null
           monthly_subscription: number
           offers_products: boolean
           offers_services: boolean
           payment_instructions_note: string | null
+          payment_methods: string[]
           phone: string | null
           profile_reminder_sent_at: string | null
           serves_all_country: boolean
@@ -2234,11 +2402,15 @@ export type Database = {
           updated_at: string
           user_id: string | null
           verified_supplier: boolean
+          warranty_offered: boolean
           website_url: string | null
+          weekend_service: boolean
           whatsapp_url: string | null
+          years_experience: number | null
         }
         Insert: {
           approval_status?: string
+          avg_response_time_hours?: number | null
           bank_account_holder?: string | null
           bank_account_number?: string | null
           bank_branch?: string | null
@@ -2246,6 +2418,7 @@ export type Database = {
           billing_notes?: string | null
           billing_status?: string
           bit_phone?: string | null
+          business_hours?: Json
           business_name: string
           catalog_url?: string | null
           categories?: string[]
@@ -2256,6 +2429,8 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           email?: string | null
+          emergency_service?: boolean
+          employees_count?: number | null
           facebook_url?: string | null
           id?: string
           instagram_url?: string | null
@@ -2263,12 +2438,15 @@ export type Database = {
           is_deleted?: boolean
           is_demo?: boolean
           is_suspended?: boolean
+          languages?: string[]
           lead_fee?: number
+          licenses?: Json
           logo_url?: string | null
           monthly_subscription?: number
           offers_products?: boolean
           offers_services?: boolean
           payment_instructions_note?: string | null
+          payment_methods?: string[]
           phone?: string | null
           profile_reminder_sent_at?: string | null
           serves_all_country?: boolean
@@ -2282,11 +2460,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           verified_supplier?: boolean
+          warranty_offered?: boolean
           website_url?: string | null
+          weekend_service?: boolean
           whatsapp_url?: string | null
+          years_experience?: number | null
         }
         Update: {
           approval_status?: string
+          avg_response_time_hours?: number | null
           bank_account_holder?: string | null
           bank_account_number?: string | null
           bank_branch?: string | null
@@ -2294,6 +2476,7 @@ export type Database = {
           billing_notes?: string | null
           billing_status?: string
           bit_phone?: string | null
+          business_hours?: Json
           business_name?: string
           catalog_url?: string | null
           categories?: string[]
@@ -2304,6 +2487,8 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           email?: string | null
+          emergency_service?: boolean
+          employees_count?: number | null
           facebook_url?: string | null
           id?: string
           instagram_url?: string | null
@@ -2311,12 +2496,15 @@ export type Database = {
           is_deleted?: boolean
           is_demo?: boolean
           is_suspended?: boolean
+          languages?: string[]
           lead_fee?: number
+          licenses?: Json
           logo_url?: string | null
           monthly_subscription?: number
           offers_products?: boolean
           offers_services?: boolean
           payment_instructions_note?: string | null
+          payment_methods?: string[]
           phone?: string | null
           profile_reminder_sent_at?: string | null
           serves_all_country?: boolean
@@ -2330,8 +2518,11 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           verified_supplier?: boolean
+          warranty_offered?: boolean
           website_url?: string | null
+          weekend_service?: boolean
           whatsapp_url?: string | null
+          years_experience?: number | null
         }
         Relationships: []
       }

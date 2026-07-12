@@ -1,81 +1,147 @@
 
-# Plan: Security Hardening + SEO Overhaul
+# Audit וארגון מחדש של מערכת הקטגוריות
 
-Two sequential phases. Phase 1 must be green before Phase 2 starts.
+מטרה: להפוך את GroupBuild לפלטפורמה המקיפה בישראל לבנייה, שיפוצים, תחזוקה וניהול מבנים — עם מבנה היררכי סקיילבילי שיחזיק 100,000+ ספקים בלי שינוי ארכיטקטוני נוסף.
 
----
-
-## Phase 1 — Critical Security Fixes
-
-### 1A. Edge function auth (critical/error level)
-Add auth guards to unauthenticated edge functions. All checks: parse `Authorization`, call `supabase.auth.getUser()`, verify role via `user_roles`.
-
-- **`migrate-storage-image`** (ERROR): admin-only guard.
-- **`notify-admin`** (ERROR): admin-only guard; remove `recipient` from response body.
-- **`ai-enhance-deal`, `generate-marketing-card`, `generate-offer-ai`, `budget-assistant`, `budget-planner`**: require authenticated user (prevents AI credit abuse).
-- **`send-deal-reminders`, `send-supplier-profile-reminders`, `dispatch-fallback`**: require service-role JWT (cron-only).
-- **`dispatch-notification`**: require admin or service-role.
-- **`send-email`** unguarded types (`new_offer`, `deal_status_changed`, `welcome`, `tier_unlocked`): restrict to admin/service-role.
-- **`enhance-uploaded-image`** SSRF: validate `sourceUrl` starts with Supabase storage public URL; reject private IPs / non-https.
-
-### 1B. Database / RLS (migrations)
-- **`suppliers` bank/payment columns** (ERROR): revoke public `SELECT` on `bank_account_number`, `bank_branch`, `bank_name`, `bank_account_holder`, `bit_phone`, `payment_instructions_note`. Keep visible to supplier owner + admin via existing policies.
-- **`system_settings`**: restrict `SELECT` to authenticated; expose only client-needed fields via a view/RPC if needed.
-- **`avatars` bucket**: replace blanket public-read with owner-scoped policy (folder path = `auth.uid()`); or accept as public if intentional (I'll enforce owner-scoped).
-- **Function `search_path` mutable warnings**: add `SET search_path = public` to affected `SECURITY DEFINER` functions.
-
-### 1C. Dependencies
-- Upgrade `react-router-dom` to a patched version.
-- Upgrade `recharts` to a version pulling patched lodash (or patch lodash directly).
-
-Verification: re-run `security--run_security_scan`; mark findings fixed.
+זו עבודה גדולה. אני מציע לחלק ל־3 שלבים שאאשר איתך כל אחד לפני שממשיכים לבא אחריו.
 
 ---
 
-## Phase 2 — SEO Overhaul
+## שלב 1 — תשתית נתונים (מבנה היררכי + תגיות + מאפייני ספק)
 
-### 2A. Infrastructure
-- Install `react-helmet-async`; add `<HelmetProvider>` in `src/main.tsx`.
-- Create `<Seo>` helper component (title, description, canonical, og:*, twitter:*, optional JSON-LD).
-- Remove per-route canonical from `index.html` (Helmet owns it), keep sitewide og:* fallback.
-- Add sitewide `Organization` + `WebSite` JSON-LD to `index.html`.
+### 1.1 מבנה קטגוריות היררכי
+במקום `categories` שטוח, מבנה 4 רמות:
 
-### 2B. Per-page metadata (public routes)
-Add `<Seo>` to: `Landing`, `SiteLanding`, `ResidentsLanding`, `SuppliersLanding`, `Gateway`, `Browse`, `CategoriesList`, `DealsList`, `DealDetail` (dynamic), `SharedDeal`, `Search`, `Support`, `Privacy`, `TermsResidents`, `TermsSuppliers`, `Auth`, `NotFound`.
+```text
+domain (תחום ראשי)
+  └─ category (קטגוריה)
+      └─ subcategory (תת־קטגוריה)
+          └─ service (שירות ספציפי)
+```
 
-Each page: unique title <60ch, description <160ch, canonical, og:title/description/url/type, twitter card.
+טבלה אחת `categories` עם:
+- `parent_id` (self-reference) — מאפשר עומק בלתי מוגבל
+- `level` (1-4: domain/category/subcategory/service)
+- `slug`, `name_he`, `name_en`, `icon`, `display_order`
+- `path` (materialized: "בנייה חדשה > גמרים > ריצוף > גרניט פורצלן") — לחיפוש מהיר
+- `is_popular`, `is_new`, `is_featured` (לפופולריות)
+- `search_keywords[]` (מילים נרדפות לחיפוש)
 
-### 2C. Structured data
-- `Organization` + `WebSite` sitewide.
-- `LocalBusiness` on `SiteLanding` / `ResidentsLanding`.
-- `FAQPage` on `Support`.
-- `BreadcrumbList` on category/deal pages.
-- `Product`/`Offer` on `DealDetail` and `SharedDeal`.
+### 1.2 שיוך ספק לרב־קטגוריות (כבר תומך AI עתידי)
+טבלת קשר חדשה `supplier_categories`:
+- `supplier_id`, `category_id`, `is_primary` (bool)
+- מאפשר לקבלן שיפוצים להופיע גם בגבס, גם בצבע, גם בריצוף
+- מחליף/משלים את `category_id` הקיים על `suppliers` (נשמר כ־primary)
 
-### 2D. Heading hierarchy audit
-Ensure every public page has exactly one `<h1>`; demote extras to `<h2>`/`<h3>`. Sweep listed pages.
+### 1.3 תגיות ספק
+טבלה `supplier_tags` + טבלת קשר `supplier_tag_assignments`:
+- תגיות מערכת: `recommended`, `verified`, `new`, `on_sale`, `24_7`, `emergency`, `home_visit`, `warranty`, `available_now`
+- אדמין מסמן; חלק אוטומטי (verified לפי מסמכים, new לפי תאריך הצטרפות, on_sale לפי הצעות פעילות)
 
-### 2E. Images / alt text
-Sweep `<img>` in public pages and marketing components; add descriptive `alt`. Decorative → `alt=""`.
+### 1.4 מאפייני ספק מורחבים
+הוספת עמודות ל־`suppliers`:
+- `service_areas[]` (כבר קיים חלקית — regions/cities)
+- `business_hours` (JSONB: ימים+שעות)
+- `years_experience` (int)
+- `employees_count` (int)
+- `languages[]` (עברית/ערבית/רוסית/אנגלית)
+- `payment_methods[]` (מזומן/אשראי/תשלומים/העברה/ביט)
+- `avg_response_time_hours` (int, מחושב)
+- `licenses[]` (JSONB: שם רישיון + מספר + תוקף)
+- `weekend_service` (bool), `emergency_service` (bool), `warranty_offered` (bool)
 
-### 2F. sitemap.xml / robots.txt
-- Current `public/sitemap.xml` is static and current. Extend to include marketing routes (`/residents`, `/suppliers`, `/gateway`) if present.
-- Consider adding a `predev`/`prebuild` generator script for dynamic deal URLs — **skip for now** unless user requests; keep static file.
-- `robots.txt` is already correct — no change.
-
-### 2G. Performance / Core Web Vitals
-- Verify LCP image preload on landing pages.
-- Ensure heavy admin/supplier routes are lazy-loaded in `App.tsx` (audit and add `React.lazy` where missing).
-- Add `loading="lazy"` and `decoding="async"` to non-LCP images.
-
-### 2H. Verify
-- Run `seo_chat--trigger_scan`.
+`supplier_gallery` כבר קיים — נוסיף `media_type` (image/video).
 
 ---
 
-## Notes / Non-goals
-- Not touching internal admin/resident/supplier authenticated routes for SEO (already `Disallow`ed in robots.txt).
-- Not migrating sitemap to a generator unless you ask.
-- Not changing visual design — SEO work is head-tag + semantic HTML only.
+## שלב 2 — סיד קטגוריות מלא (סקירת שוק)
 
-Confirm and I'll start with Phase 1A (edge function auth guards) and Phase 1B (RLS migration) in parallel.
+מבנה מבוסס על סקירה של Midrag, דפי זהב, איזי, HomeRun ומקבילים בעולם (Houzz, Angi, Thumbtack). כולל **הכל** מהרשימה שלך + מה שחסר:
+
+**תחומים ראשיים (7):**
+
+1. **תכנון ורישוי** — אדריכלים, מעצבי פנים, מהנדסי מבנים/אזרחי/חשמל, מודדים, יועצי קרקע/בטיחות/נגישות/אקוסטיקה/תרמי/גז, מפקחי בנייה, בדק בית, שמאים, יועצי היתרים, הדמיות 3D, יועצי גרין־בילדינג
+
+2. **בנייה ושלד** — שלד, בטון, ברזל, טפסנות, מנופים, חפירות, קידוחים, ממ"דים, פלדה, בנייה קלה, בנייה טרומית, יסודות, איטום, גגות, מעטפת, פיגומים, הריסות
+
+3. **מערכות הבית** — חשמל, אינסטלציה, מיזוג, גז, ספרינקלרים, גילוי אש, מצלמות, אינטרקום, בית חכם, תקשורת/רשתות, טעינת EV, סולארי/פוטוו־וולטאי, דודי שמש, משאבות חום, מערכות מים חמים, ונטילציה, מערכות מים אפורים
+
+4. **גמרים ועיצוב פנים** — ריצוף (קרמיקה/גרניט פורצלן/פרקט/שיש/אבן/PVC/אפוקסי), צבע, גבס, נגרות, מטבחים, שיש, זכוכית, מקלחונים, דלתות פנים/כניסה/פלדה, אלומיניום, חלונות, ארונות (קיר/הזזה/וורדרוב), תאורה, טפטים, חיפויי קירות, וילונות, שטיחים, טיח דקורטיבי, מדרגות
+
+5. **פיתוח חוץ וגינון** — גינון, השקיה, דקים, פרגולות, שערים אוטומטיים, גדרות, בריכות, ג'קוזי, ריצוף חוץ, דשא סינטטי, תאורת גן, ברביקיו בנוי, מטבחי חוץ, סככות רכב, אדריכלות נוף, מים ומזרקות
+
+6. **אחזקה ושירותים לבניין** — ניקיון, פוליש, הדברה, אחזקת גינון, אחזקת מעליות, אינסטלציה, חשמל, איטום, צביעת מבנים, ניקוי חזיתות, סנפלינג, פינוי פסולת, ניהול ועד בית, אחזקת בריכה, אחזקת מיזוג, אחזקת בית חכם, ניקוי מיכלי מים, פינוי גזם, דירתיים
+
+7. **חומרי בניין וציוד** — חומרי בניין, צבע, גבס, עץ, ברזל, קרמיקה, אינסטלציה, חשמל, אלומיניום, זכוכית, כלי עבודה, השכרת ציוד, השכרת מנופים, השכרת פיגומים, כלי עבודה חשמליים, ציוד בטיחות, חומרי איטום
+
+בסה"כ כ־250 שירותים ברמה 4.
+
+---
+
+## שלב 3 — UI: פופולריים, תגיות, סינון מתקדם, ניווט היררכי
+
+### 3.1 מסך קטגוריות ראשי (`CategoriesList.tsx`)
+- **מעל הרשימה**: שורת "פופולריים" (chips אופקיים): הכי מבוקש · חדש · מבצעים · קרוב אליי · מומלץ
+- למטה: 7 תחומים ראשיים כ־cards גדולים
+- לחיצה → מסך תחום עם קטגוריות → תת־קטגוריות → שירותים (drill־down)
+- **Breadcrumbs** בכל רמה
+
+### 3.2 סינון מתקדם (`DealsList.tsx` / רשימת ספקים)
+פאנל צד/גיליון תחתון:
+- מחיר (טווח)
+- דירוג (⭐ 3+/4+/5)
+- מרחק (רדיוס בק"מ)
+- זמן הגעה
+- פתוח עכשיו (לפי business_hours)
+- שירות חירום
+- מגיע לאזור שלי
+- אפשרות תשלומים
+- אחריות
+- שירות בסופי שבוע
+
+### 3.3 תגיות על כרטיסי ספק
+`SupplierCard` יציג badges צבעוניים: ✓ Verified, 🆕 חדש, 🔥 מבצע, ⚡ זמין עכשיו, 🏆 מומלץ, 🚨 24/7
+
+### 3.4 פרופיל ספק מורחב
+Sections חדשים: אזורי שירות, שעות פעילות, גלריה+וידאו, רישיונות, שנות ניסיון, צוות, שפות, אמצעי תשלום, זמן תגובה ממוצע
+
+### 3.5 ניהול אדמין (`AdminCategories.tsx`)
+- Tree view היררכי (drag & drop לסדר, לרמה)
+- הוספה/עריכה/מחיקה בכל רמה
+- ניהול תגיות ספק
+- assign־ספקים־לקטגוריות (multi-select)
+
+---
+
+## פרטים טכניים
+
+**Migrations (שלב 1):**
+```sql
+-- categories: parent_id, level, path, is_popular, is_new, search_keywords
+-- supplier_categories (many-to-many)
+-- supplier_tags + supplier_tag_assignments
+-- suppliers: business_hours, years_experience, employees_count, languages, 
+--            payment_methods, licenses, weekend_service, emergency_service, warranty_offered
+```
+
+**סיד (שלב 2):**
+- קובץ `supabase/seeds/categories_full.sql` עם כל 7 תחומים + עץ מלא
+- מיגרציה של קטגוריות קיימות למבנה החדש (mapping ישן→חדש; ספקים נשארים משויכים)
+
+**קומפוננטים חדשים (שלב 3):**
+- `CategoryTree.tsx` (recursive drill-down)
+- `PopularChips.tsx`
+- `AdvancedFilterSheet.tsx`
+- `SupplierTagsBadges.tsx`
+- `SupplierBusinessHours.tsx`, `SupplierLicenses.tsx`
+- `AdminCategoryTree.tsx` (drag & drop)
+
+**שמירה על תאימות לאחור:** `deals.category_id` ו־`suppliers.category_id` יישארו כ־FK ל־category ברמה כלשהי; קוד קיים ממשיך לעבוד עד שנעדכן כל צרכן.
+
+---
+
+## שאלה לפני שאני מתחיל
+
+1. **אישור לשלב 1** (תשתית DB) — אחריו נעבור לסיד, ואז ל־UI?
+2. **קטגוריות קיימות** — האם למחוק (soft-delete) את הרשימה הנוכחית ולבנות מאפס, או לנסות למפות אליהן? (**המלצה שלי:** soft-delete + מבנה חדש נקי, כי הרשימה הישנה שטוחה ומעורבבת.)
+3. **AI רב־קטגוריות** — התשתית תיבנה עכשיו, אבל ה־AI עצמו (שיוך אוטומטי) יגיע בשלב מאוחר יותר? (מניח שכן.)
