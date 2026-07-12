@@ -25,6 +25,8 @@ interface DbSupplier {
   offers_products: boolean | null;
 }
 
+type SupplierCategoryRow = { supplier_id: string; category_id: string };
+
 const NATIONAL_AREA = "כל הארץ";
 
 export default function CategorySuppliers() {
@@ -49,6 +51,25 @@ export default function CategorySuppliers() {
   const [supplierCouncilIds, setSupplierCouncilIds] = useState<Record<string, string[]>>({});
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
+  const relevantCategoryIds = useMemo(() => {
+    if (activeCategoryId === "all") return [];
+    const ids = new Set([activeCategoryId]);
+    categories.forEach((c) => {
+      if (c.parentId === activeCategoryId) ids.add(c.id);
+      if (c.id === activeCategoryId && c.parentId) ids.add(c.parentId);
+    });
+    let changed = true;
+    while (changed) {
+      changed = false;
+      categories.forEach((c) => {
+        if (c.parentId && ids.has(c.parentId) && !ids.has(c.id)) {
+          ids.add(c.id);
+          changed = true;
+        }
+      });
+    }
+    return Array.from(ids);
+  }, [activeCategoryId, categories]);
 
   useEffect(() => {
     setActiveCategoryId(categoryId ?? "all");
@@ -102,7 +123,19 @@ export default function CategorySuppliers() {
           categories: s.categories ?? [],
           service_areas: s.service_areas ?? [],
         }));
-        setSuppliers(list);
+        const supplierIds = list.map((s) => s.id);
+        const { data: categoryJoins } = supplierIds.length
+          ? await supabase.from("supplier_categories").select("supplier_id,category_id").in("supplier_id", supplierIds)
+          : { data: [] };
+        const categoriesBySupplier: Record<string, string[]> = {};
+        ((categoryJoins ?? []) as SupplierCategoryRow[]).forEach((row) => {
+          (categoriesBySupplier[row.supplier_id] ||= []).push(row.category_id);
+        });
+        const withNewCategories = list.map((s) => ({
+          ...s,
+          categories: categoriesBySupplier[s.id]?.length ? categoriesBySupplier[s.id] : s.categories,
+        }));
+        setSuppliers(withNewCategories);
         setLoading(false);
 
         const [regionsResult, citiesResult, councilsResult] = await Promise.all([
@@ -183,7 +216,7 @@ export default function CategorySuppliers() {
   const filteredSuppliers = useMemo(() => {
     const byCategory = activeCategoryId === "all"
       ? suppliers
-      : suppliers.filter((s) => (s.categories ?? []).includes(activeCategoryId));
+      : suppliers.filter((s) => (s.categories ?? []).some((id) => relevantCategoryIds.includes(id)));
 
     const supplierOffers = (s: DbSupplier) => ({
       service: Boolean(s.offers_services) || s.supplier_kind === "service",
@@ -196,7 +229,7 @@ export default function CategorySuppliers() {
     const byArea = byKind.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
     return byKind.filter(isNationalSupplier);
-  }, [suppliers, activeCategoryId, regionId, cityId, kindFilter, supplierRegionIds, supplierCityIds, supplierCouncilIds, regions, cities]);
+  }, [suppliers, activeCategoryId, relevantCategoryIds, regionId, cityId, kindFilter, supplierRegionIds, supplierCityIds, supplierCouncilIds, regions, cities]);
 
   const areaLabel =
     cityId !== "all"

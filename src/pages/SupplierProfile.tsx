@@ -52,6 +52,8 @@ type AreaJoinRow = {
   cities?: { name_he?: string | null } | null;
 };
 
+type SupplierCategoryRow = { category_id: string };
+
 const WhatsappIcon = (props: { className?: string }) => (
   <svg viewBox="0 0 24 24" className={props.className} fill="currentColor" aria-hidden="true">
     <path d="M20.52 3.48A11.86 11.86 0 0 0 12.05 0C5.5 0 .19 5.31.19 11.86a11.8 11.8 0 0 0 1.62 5.96L0 24l6.34-1.66a11.85 11.85 0 0 0 5.71 1.46h.01c6.55 0 11.86-5.31 11.86-11.86 0-3.17-1.23-6.15-3.4-8.46zM12.06 21.3a9.43 9.43 0 0 1-4.81-1.32l-.34-.2-3.76.98 1-3.66-.22-.37a9.46 9.46 0 1 1 8.13 4.57zm5.45-7.05c-.3-.15-1.77-.87-2.05-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.18.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.5-.9-.8-1.5-1.78-1.68-2.07-.18-.3-.02-.46.13-.61.13-.13.3-.34.45-.5.15-.18.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51-.18-.01-.37-.01-.57-.01-.2 0-.52.07-.8.37-.27.3-1.05 1.02-1.05 2.5 0 1.47 1.07 2.9 1.22 3.1.15.2 2.12 3.24 5.13 4.55.72.31 1.27.5 1.7.64.71.23 1.36.2 1.87.12.57-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.18-1.42-.08-.13-.27-.2-.57-.35z"/>
@@ -80,6 +82,7 @@ export default function SupplierProfile() {
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [deals, setDeals] = useState<RealDealCardData[]>([]);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [supplierCategoryIds, setSupplierCategoryIds] = useState<string[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -97,7 +100,7 @@ export default function SupplierProfile() {
     (async () => {
       try {
         setLoadError(null);
-        const [{ data: s }, { data: g }, { data: sregs }, { data: scits }, { data: dealsData }, { data: revData }] = await Promise.all([
+        const [{ data: s }, { data: g }, { data: sregs }, { data: scits }, { data: dealsData }, { data: revData }, { data: catRows }] = await Promise.all([
           withTimeout(supabase.from("suppliers").select("id,user_id,business_name,contact_name,phone,email,description,short_description,categories,serves_all_country,is_active,approval_status,logo_url,website_url,whatsapp_url,instagram_url,facebook_url,catalog_url,service_areas,supplier_kind,offers_services,offers_products").eq("id", supplierId).maybeSingle(), "טעינת ספק"),
           withTimeout(supabase.from("supplier_gallery").select("id,image_url,caption").eq("supplier_id", supplierId).order("display_order"), "טעינת גלריה"),
           withTimeout(supabase.from("supplier_regions").select("region_id, regions(name_he)").eq("supplier_id", supplierId), "טעינת אזורי שירות"),
@@ -114,10 +117,13 @@ export default function SupplierProfile() {
             .eq("supplier_id", supplierId)
             .order("created_at", { ascending: false })
             .limit(20), "טעינת ביקורות"),
+          withTimeout(supabase.from("supplier_categories").select("category_id").eq("supplier_id", supplierId), "טעינת תחומי ספק"),
         ]);
         if (cancelled) return;
       const sup = (s as DbSupplier | null) ?? null;
       setSupplier(sup);
+      const newCategoryIds = ((catRows ?? []) as SupplierCategoryRow[]).map((row) => row.category_id);
+      setSupplierCategoryIds(newCategoryIds.length ? newCategoryIds : (sup?.categories ?? []));
       setGallery((g as GalleryItem[] | null) ?? []);
 
       const regionNames = ((sregs ?? []) as AreaJoinRow[]).map((r) => r.regions?.name_he).filter(Boolean) as string[];
@@ -175,10 +181,10 @@ export default function SupplierProfile() {
 
   const supplierCategories = useMemo(() => {
     if (!supplier) return [] as { id: string; name: string; icon: string }[];
-    return (supplier.categories ?? [])
+    return supplierCategoryIds
       .map((cid) => categories.find((c) => c.id === cid))
       .filter(Boolean) as { id: string; name: string; icon: string }[];
-  }, [supplier, categories]);
+  }, [supplier, supplierCategoryIds, categories]);
 
   const whatsappHref = useMemo(
     () => normalizeWhatsappUrl(supplier?.whatsapp_url ?? supplier?.phone ?? null),
@@ -211,7 +217,7 @@ export default function SupplierProfile() {
         email: userEmail,
         city: prof?.city ?? null,
         project_name: prof?.project_id ?? null,
-        category_id: supplier.categories?.[0] ?? null,
+        category_id: supplierCategoryIds[0] ?? supplier.categories?.[0] ?? null,
         message: `התעניינות בשירותים של ${supplier.business_name}`,
         source: deals.length > 0 ? "supplier_with_deals" : "general",
         status: "new",

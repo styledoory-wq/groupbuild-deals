@@ -19,6 +19,8 @@ type SupplierRow = {
   category_name?: string | null;
 };
 
+type SupplierCategoryRow = { supplier_id: string; category_id: string };
+
 export default function Browse() {
   const [deals, setDeals] = useState<RealDealCardData[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -86,8 +88,16 @@ export default function Browse() {
           .limit(60);
 
         const supplierList = (sRows ?? []) as unknown as SupplierRow[];
+        const supplierIds = supplierList.map((s) => s.id);
+        const { data: supplierCategoryRows } = supplierIds.length
+          ? await supabase.from("supplier_categories").select("supplier_id,category_id").in("supplier_id", supplierIds)
+          : { data: [] };
+        const categoriesBySupplier: Record<string, string[]> = {};
+        ((supplierCategoryRows ?? []) as SupplierCategoryRow[]).forEach((row) => {
+          (categoriesBySupplier[row.supplier_id] ||= []).push(row.category_id);
+        });
         const catIds = Array.from(
-          new Set(supplierList.flatMap((s) => (Array.isArray(s.categories) ? s.categories : [])).filter(Boolean)),
+          new Set(supplierList.flatMap((s) => categoriesBySupplier[s.id]?.length ? categoriesBySupplier[s.id] : (Array.isArray(s.categories) ? s.categories : [])).filter(Boolean)),
         );
         const catMap = new Map<string, string>();
         if (catIds.length) {
@@ -96,7 +106,9 @@ export default function Browse() {
         }
         const enrichedSuppliers = supplierList.map((s) => ({
           ...s,
-          category_name: Array.isArray(s.categories) && s.categories[0] ? catMap.get(s.categories[0]) ?? null : null,
+          category_name: (categoriesBySupplier[s.id]?.[0] || (Array.isArray(s.categories) ? s.categories[0] : null))
+            ? catMap.get(categoriesBySupplier[s.id]?.[0] || String(s.categories?.[0])) ?? null
+            : null,
         }));
 
         let nextCounts: Record<string, number> = {};
