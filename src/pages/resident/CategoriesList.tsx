@@ -49,21 +49,17 @@ export default function CategoriesList() {
   const [type, setType] = useState<ProjectType>(() => {
     try { return (localStorage.getItem("gb:projectType") as ProjectType) || "new"; } catch { return "new"; }
   });
-  const meta = TYPE_META[type];
-  const [stageKey, setStageKey] = useState<string>(() => {
-    try { return localStorage.getItem(`gb:stage:${type}`) || meta.stages[0].key; }
-    catch { return meta.stages[0].key; }
-  });
-  const [stageMap, setStageMap] = useState<Record<string, string[]> | null>(null);
+  const typeMeta = PROJECT_TYPE_META[type] ?? PROJECT_TYPE_META.new;
+  const [stageKey, setStageKey] = useState<string>("");
+  // stages come entirely from DB, in execution order (display_order)
+  const [dbStages, setDbStages] = useState<StageEntry[] | null>(null);
 
   useEffect(() => {
     try { localStorage.setItem("gb:projectType", type); } catch {}
-    const stored = (() => { try { return localStorage.getItem(`gb:stage:${type}`); } catch { return null; } })();
-    setStageKey(stored || TYPE_META[type].stages[0].key);
   }, [type]);
 
   useEffect(() => {
-    try { localStorage.setItem(`gb:stage:${type}`, stageKey); } catch {}
+    try { if (stageKey) localStorage.setItem(`gb:stage:${type}`, stageKey); } catch {}
   }, [type, stageKey]);
 
   useEffect(() => {
@@ -75,23 +71,34 @@ export default function CategoriesList() {
         .eq("project_type", type)
         .order("display_order", { ascending: true });
       if (cancelled) return;
-      const next: Record<string, string[]> = {};
+      // Preserve stage_key insertion order = execution order
+      const orderedKeys: string[] = [];
+      const byStage: Record<string, string[]> = {};
       (data ?? []).forEach((row: { stage_key: string; category_id: string }) => {
-        (next[row.stage_key] ||= []).push(row.category_id);
+        if (!(row.stage_key in byStage)) {
+          byStage[row.stage_key] = [];
+          orderedKeys.push(row.stage_key);
+        }
+        byStage[row.stage_key].push(row.category_id);
       });
-      setStageMap(next);
+      const stages: StageEntry[] = orderedKeys.map((k) => {
+        const m = stageMeta(type, k);
+        return { key: k, title: m.title, emoji: m.emoji, catIds: byStage[k] };
+      });
+      setDbStages(stages);
+      // pick initial stage
+      const stored = (() => { try { return localStorage.getItem(`gb:stage:${type}`); } catch { return null; } })();
+      const nextKey = stored && stages.some((s) => s.key === stored) ? stored : stages[0]?.key ?? "";
+      setStageKey(nextKey);
     })();
     return () => { cancelled = true; };
   }, [type]);
 
   const [search, setSearch] = useState("");
-  const effectiveMeta = useMemo(() => {
-    if (!stageMap) return meta;
-    return {
-      ...meta,
-      stages: meta.stages.map((s) => ({ ...s, catIds: stageMap[s.key] ?? s.catIds })),
-    };
-  }, [meta, stageMap]);
+  const effectiveMeta = useMemo(
+    () => ({ ...typeMeta, stages: dbStages ?? [] }),
+    [typeMeta, dbStages]
+  );
   const effectiveStage = effectiveMeta.stages.find((s) => s.key === stageKey) ?? effectiveMeta.stages[0];
 
   const cached = getCachedValue<SupplierLite[]>("categories:suppliers:v2", 5 * 60_000);
