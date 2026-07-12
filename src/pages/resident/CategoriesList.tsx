@@ -6,13 +6,16 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
+import {
+  PROJECT_TYPE_META,
+  stageMeta,
+  type ProjectType,
+} from "@/lib/stageCatalog";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
 const BRAND = "#0E6B5A";
 const BRAND_DARK = "#0A4F43";
-
-type ProjectType = "new" | "reno" | "building";
 
 type StageEntry = {
   key: string;
@@ -22,52 +25,10 @@ type StageEntry = {
 };
 
 const TYPES: { id: ProjectType; emoji: string; title: string }[] = [
-  { id: "building", emoji: "🏢", title: "בניין משותף" },
-  { id: "new", emoji: "🏡", title: "בנייה חדשה" },
-  { id: "reno", emoji: "🧰", title: "שיפוץ" },
+  { id: "building", emoji: PROJECT_TYPE_META.building.emoji, title: PROJECT_TYPE_META.building.label },
+  { id: "new",      emoji: PROJECT_TYPE_META.new.emoji,      title: PROJECT_TYPE_META.new.label },
+  { id: "reno",     emoji: PROJECT_TYPE_META.reno.emoji,     title: PROJECT_TYPE_META.reno.label },
 ];
-
-const TYPE_META: Record<ProjectType, { label: string; sectionTitle: string; stages: StageEntry[] }> = {
-  new: {
-    label: "בנייה חדשה",
-    sectionTitle: "שלבי הבנייה",
-    stages: [
-      { key: "planning", title: "תכנון והיתרים", emoji: "📐", catIds: ["sc-arch", "sc-interior", "sc-consultants", "sc-supervision"] },
-      { key: "structure", title: "שלד וביסוס", emoji: "🏗️", catIds: ["sc-contractors", "sc-skeleton", "s-cont-turnkey"] },
-      { key: "envelope", title: "מעטפת", emoji: "🏠", catIds: ["sc-cladding", "sc-windows", "sc-doors"] },
-      { key: "systems", title: "מערכות", emoji: "⚡", catIds: ["sc-elec", "sc-plumb", "sc-climate", "sc-smart"] },
-      { key: "finishes", title: "גמרים", emoji: "🛋️", catIds: ["sc-paint", "sc-floor", "sc-gypsum", "sc-carpentry", "sc-closets", "sc-lighting", "sc-kitchen", "sc-bath"] },
-      { key: "outdoor", title: "חוץ ופיתוח", emoji: "🌳", catIds: ["sc-garden", "sc-hardscape"] },
-    ],
-  },
-  reno: {
-    label: "שיפוץ",
-    sectionTitle: "תחומי השיפוץ",
-    stages: [
-      { key: "kitchen-bath", title: "מטבח ואמבטיה", emoji: "🚿", catIds: ["sc-kitchen", "sc-bath", "s-bath-sanitary", "s-bath-showers"] },
-      { key: "paint-gypsum", title: "צבע וגבס", emoji: "🎨", catIds: ["sc-paint", "sc-gypsum"] },
-      { key: "electric", title: "חשמל", emoji: "⚡", catIds: ["sc-elec", "sc-lighting", "sc-smart"] },
-      { key: "plumbing", title: "אינסטלציה", emoji: "🔧", catIds: ["sc-plumb"] },
-      { key: "ac", title: "מיזוג", emoji: "❄️", catIds: ["sc-climate"] },
-      { key: "flooring", title: "ריצוף", emoji: "🟫", catIds: ["sc-floor", "sc-cladding"] },
-      { key: "doors-windows", title: "דלתות וחלונות", emoji: "🚪", catIds: ["sc-doors", "sc-windows", "s-door-security"] },
-    ],
-  },
-  building: {
-    label: "בניין משותף",
-    sectionTitle: "תחומי הבניין",
-    stages: [
-      { key: "elevators", title: "מעליות", emoji: "🛗", catIds: ["s-mnt-elevator"] },
-      { key: "cleaning", title: "ניקיון", emoji: "🧽", catIds: ["sc-cleaning"] },
-      { key: "garden", title: "גינון", emoji: "🌿", catIds: ["sc-garden"] },
-      { key: "cctv", title: "מצלמות", emoji: "📹", catIds: ["sc-security"] },
-      { key: "entrance", title: "דלתות כניסה", emoji: "🚪", catIds: ["s-door-security", "s-door-interior"] },
-      { key: "shared-electric", title: "חשמל משותף", emoji: "💡", catIds: ["sc-elec", "sc-lighting"] },
-      { key: "facade", title: "שיפוץ חזית", emoji: "🧱", catIds: ["sc-cladding", "sc-paint"] },
-      { key: "solar", title: "סולארי", emoji: "☀️", catIds: ["sc-solar"] },
-    ],
-  },
-};
 
 interface SupplierLite {
   id: string; business_name: string; short_description: string | null;
