@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Home as HomeIcon, Check, FileCheck2 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 import { PROJECT_TYPE_META, stageMeta, type ProjectType } from "@/lib/stageCatalog";
+import stagePlanningImg from "@/assets/stage-planning.jpg";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
@@ -15,14 +15,9 @@ const BRAND = "#0E6B5A";
 type StageEntry = { key: string; title: string; emoji: string; catIds: string[] };
 
 interface SupplierLite {
-  id: string; business_name: string; short_description: string | null;
-  logo_url: string | null; categories: string[]; service_areas: string[];
+  id: string; categories: string[];
 }
-
-type SupplierRow = Omit<SupplierLite, "categories" | "service_areas"> & {
-  categories: string[] | null;
-  service_areas: string[] | null;
-};
+type SupplierRow = { id: string; categories: string[] | null };
 type SupplierCategoryRow = { supplier_id: string; category_id: string };
 
 export default function CategoryStages() {
@@ -32,44 +27,10 @@ export default function CategoryStages() {
   const type = ((params.get("type") as ProjectType) || "new") as ProjectType;
   const typeMeta = PROJECT_TYPE_META[type] ?? PROJECT_TYPE_META.new;
 
-  const cached = getCachedValue<SupplierLite[]>("categories:suppliers:v2", 5 * 60_000);
-  const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
-  const [search, setSearch] = useState("");
   const [stages, setStages] = useState<StageEntry[]>([]);
+  const [stageKey, setStageKey] = useState<string>("");
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const data = await cachedQuery<SupplierLite[]>("categories:suppliers:v2", async () => {
-        const { data } = await supabase
-          .from("suppliers")
-          .select("id,business_name,short_description,logo_url,categories,service_areas")
-          .eq("is_active", true).eq("is_deleted", false)
-          .in("approval_status", ["approved", "active"])
-          .order("business_name");
-        const supplierRows = ((data ?? []) as SupplierRow[]).map((s) => ({
-          ...s,
-          categories: s.categories ?? [],
-          service_areas: s.service_areas ?? [],
-        }));
-        const supplierIds = supplierRows.map((s) => s.id);
-        const { data: joins } = supplierIds.length
-          ? await supabase.from("supplier_categories").select("supplier_id,category_id").in("supplier_id", supplierIds)
-          : { data: [] };
-        const bySupplier: Record<string, string[]> = {};
-        ((joins ?? []) as SupplierCategoryRow[]).forEach((row) => {
-          (bySupplier[row.supplier_id] ||= []).push(row.category_id);
-        });
-        return supplierRows.map((s) => ({
-          ...s,
-          categories: bySupplier[s.id]?.length ? bySupplier[s.id] : s.categories,
-        }));
-      }, 5 * 60_000);
-      if (!cancelled) setSuppliers(data);
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
+  // Load stages for this project type from DB
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -85,15 +46,48 @@ export default function CategoryStages() {
         if (!(r.stage_key in byStage)) { byStage[r.stage_key] = []; orderedKeys.push(r.stage_key); }
         byStage[r.stage_key].push(r.category_id);
       });
-      setStages(orderedKeys.map((k) => {
+      const built = orderedKeys.map((k) => {
         const m = stageMeta(type, k);
         return { key: k, title: m.title, emoji: m.emoji, catIds: byStage[k] };
-      }));
+      });
+      setStages(built);
+      const stored = (() => { try { return localStorage.getItem(`gb:stage:${type}`); } catch { return null; } })();
+      const next = stored && built.some((s) => s.key === stored) ? stored : built[0]?.key ?? "";
+      setStageKey(next);
     })();
     return () => { cancelled = true; };
   }, [type]);
 
-  const meta = { label: typeMeta.label, emoji: typeMeta.emoji, stages };
+  useEffect(() => {
+    try { if (stageKey) localStorage.setItem(`gb:stage:${type}`, stageKey); } catch {}
+  }, [type, stageKey]);
+
+  // Supplier counts per category
+  const cached = getCachedValue<SupplierLite[]>("categories:suppliers:v2", 5 * 60_000);
+  const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const data = await cachedQuery<SupplierLite[]>("categories:suppliers:v2", async () => {
+        const { data } = await supabase
+          .from("suppliers")
+          .select("id,categories")
+          .eq("is_active", true).eq("is_deleted", false)
+          .in("approval_status", ["approved", "active"]);
+        const rows = ((data ?? []) as SupplierRow[]).map((s) => ({ id: s.id, categories: s.categories ?? [] }));
+        const ids = rows.map((s) => s.id);
+        const { data: joins } = ids.length
+          ? await supabase.from("supplier_categories").select("supplier_id,category_id").in("supplier_id", ids)
+          : { data: [] };
+        const by: Record<string, string[]> = {};
+        ((joins ?? []) as SupplierCategoryRow[]).forEach((r) => { (by[r.supplier_id] ||= []).push(r.category_id); });
+        return rows.map((s) => ({ id: s.id, categories: by[s.id]?.length ? by[s.id] : s.categories }));
+      }, 5 * 60_000);
+      if (!cancelled) setSuppliers(data);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const counts = useMemo(() => {
     const map: Record<string, number> = {};
@@ -101,18 +95,30 @@ export default function CategoryStages() {
     return map;
   }, [suppliers]);
 
-  const q = search.trim().toLowerCase();
-  const searchResults = useMemo(() => {
-    if (!q) return [];
-    return suppliers.filter((s) => {
-      const catNames = (s.categories ?? [])
-        .map((cid) => categories.find((c) => c.id === cid)?.name?.toLowerCase() ?? "").join(" ");
-      return s.business_name.toLowerCase().includes(q)
-        || (s.short_description ?? "").toLowerCase().includes(q)
-        || (s.service_areas ?? []).some((a) => a.toLowerCase().includes(q))
-        || catNames.includes(q);
-    }).slice(0, 20);
-  }, [q, suppliers, categories]);
+  const stageIdx = Math.max(0, stages.findIndex((s) => s.key === stageKey));
+  const activeStage = stages[stageIdx];
+  const totalStages = stages.length;
+
+  // Scroll timeline to active
+  const timelineRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = timelineRef.current?.querySelector<HTMLElement>(`[data-tl="${stageKey}"]`);
+    el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [stageKey]);
+
+  const services = useMemo(() => {
+    if (!activeStage) return [];
+    return activeStage.catIds.flatMap((id) => {
+      const c = categories.find((cc) => cc.id === id);
+      if (!c) return [];
+      return [{
+        id,
+        name: c.name,
+        emoji: c.icon ?? activeStage.emoji,
+        count: counts[id] ?? 0,
+      }];
+    });
+  }, [activeStage, categories, counts]);
 
   return (
     <div
@@ -121,139 +127,184 @@ export default function CategoryStages() {
       style={{ background: "#FBF8F3", fontFamily: EPILOGUE, color: "#2D2D2D" }}
     >
       <div
-        className="mx-auto w-full max-w-[var(--app-max-w)] px-5 pt-[calc(env(safe-area-inset-top)+20px)]"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 120px)" }}
+        className="mx-auto w-full max-w-[var(--app-max-w)] px-5 pt-[calc(env(safe-area-inset-top)+16px)]"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 32px)" }}
       >
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-3">
+        {/* Header: back, title, home */}
+        <div className="flex items-center justify-between mb-5">
           <button
             onClick={() => navigate("/resident/categories")}
-            className="flex items-center gap-1 text-[12.5px] font-bold text-gray-600 bg-white px-3 py-1.5 rounded-full border border-gray-200 active:scale-95"
+            aria-label="חזרה"
+            className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center active:scale-95 transition-transform"
           >
-            <ChevronRight className="h-4 w-4" />
-            שינוי סוג
+            <ChevronRight className="h-5 w-5 text-[#1A1A1A]" strokeWidth={2.5} />
           </button>
-          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-            צעד 2 מתוך 2
-          </span>
-        </div>
-
-        {/* Title */}
-        <div className="flex items-center gap-3 mb-5">
-          <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center text-[26px]"
-            style={{ background: "linear-gradient(135deg,#F0F9F6 0%,#E3F1EC 100%)" }}
-          >
-            <span aria-hidden>{meta.emoji}</span>
-          </div>
-          <div>
-            <h1 className="text-[24px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
-              {meta.label}
+          <div className="text-center">
+            <h1 className="text-[19px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
+              {typeMeta.label}
             </h1>
-            <p className="text-[12.5px] text-gray-500">בחירת תחום פותחת את רשימת הספקים המומלצים</p>
+            <p className="text-[11.5px] text-gray-500 leading-tight mt-0.5">בחר שלב בפרויקט</p>
           </div>
+          <button
+            onClick={() => navigate("/resident/dashboard")}
+            aria-label="בית"
+            className="w-9 h-9 rounded-full bg-[#E8F2EC] flex items-center justify-center active:scale-95 transition-transform"
+          >
+            <HomeIcon className="h-5 w-5 text-[#0E6B5A]" strokeWidth={2.2} />
+          </button>
         </div>
 
-        {/* Search */}
-        <div className="relative flex items-center mb-5">
-          <input
-            type="text" dir="rtl" value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="חיפוש איש מקצוע..."
-            className="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pr-11 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#0E6B5A]/20 focus:border-[#0E6B5A] transition-all shadow-sm shadow-black/5"
-          />
-          <Search className="absolute right-4 h-5 w-5 text-gray-400" strokeWidth={2.5} />
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="absolute left-3 h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center"
-              aria-label="נקה"
-            >
-              <X className="h-3.5 w-3.5 text-gray-500" />
-            </button>
+        {/* Horizontal timeline */}
+        <div
+          ref={timelineRef}
+          className="flex items-start gap-0 overflow-x-auto pb-3 mb-5 -mx-5 px-5"
+          style={{ scrollbarWidth: "none" }}
+        >
+          {stages.map((s, i) => {
+            const isActive = i === stageIdx;
+            const isDone = i < stageIdx;
+            const isLast = i === stages.length - 1;
+            return (
+              <div key={s.key} data-tl={s.key} className="flex items-start shrink-0">
+                <button
+                  onClick={() => setStageKey(s.key)}
+                  className="flex flex-col items-center gap-1.5 shrink-0 w-[68px] active:scale-95 transition-transform"
+                >
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-extrabold"
+                    style={{
+                      background: isActive ? BRAND : isDone ? "#D9EBE3" : "#FFFFFF",
+                      color: isActive ? "#FFFFFF" : isDone ? BRAND : "#B5B0A6",
+                      border: isActive
+                        ? `2px solid ${BRAND}`
+                        : `1.5px solid ${isDone ? "#B7D9CC" : "#E4E1D9"}`,
+                      boxShadow: isActive ? `0 6px 14px -6px ${BRAND}80` : "none",
+                      fontFamily: URBANIST,
+                    }}
+                  >
+                    {isActive ? (
+                      <FileCheck2 className="h-4 w-4" strokeWidth={2.4} />
+                    ) : isDone ? (
+                      <Check className="h-4 w-4" strokeWidth={3} />
+                    ) : (
+                      i + 1
+                    )}
+                  </div>
+                  <span
+                    className="text-[10px] font-bold text-center leading-tight px-0.5 break-words"
+                    style={{
+                      color: isActive ? BRAND : "#8A8478",
+                      fontFamily: URBANIST,
+                    }}
+                  >
+                    {s.title}
+                  </span>
+                </button>
+                {!isLast && (
+                  <div
+                    className="h-[2px] w-4 mt-[18px] shrink-0 rounded-full"
+                    style={{ background: i < stageIdx ? "#B7D9CC" : "#E4E1D9" }}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Active stage hero */}
+        {activeStage && (
+          <div
+            className="relative overflow-hidden rounded-3xl mb-5 flex items-stretch gap-3 p-4"
+            style={{ background: "#F4EEE2", boxShadow: "0 8px 20px -14px rgba(0,0,0,0.12)" }}
+          >
+            <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+              <div>
+                <p className="text-[11px] font-bold text-gray-600 mb-1" style={{ fontFamily: URBANIST }}>
+                  שלב {stageIdx + 1} מתוך {totalStages}
+                </p>
+                <h2 className="text-[22px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
+                  {activeStage.title}
+                </h2>
+              </div>
+              <p className="text-[11.5px] text-gray-600 leading-snug mt-2">
+                בחר שירות ונציג לך את הספקים המומלצים לשלב זה
+              </p>
+            </div>
+            <div className="shrink-0 w-[112px] h-[100px] rounded-2xl overflow-hidden bg-white/50">
+              <img
+                src={stagePlanningImg}
+                alt={activeStage.title}
+                width={960}
+                height={512}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Services list */}
+        <div className="space-y-2">
+          {services.length === 0 ? (
+            <div className="bg-white rounded-2xl p-6 text-center text-[13px] text-gray-500 border border-gray-100">
+              ספקים יתווספו בקרוב בשלב זה
+            </div>
+          ) : (
+            services.map((c) => (
+              <Link
+                key={c.id}
+                to={`/resident/categories/${c.id}`}
+                className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-gray-100 shadow-sm shadow-black/[0.03] active:scale-[0.99] transition-transform"
+              >
+                <ChevronLeft className="h-4 w-4 text-gray-300 shrink-0" />
+                <div className="flex-1 min-w-0 text-right">
+                  <div
+                    className="text-[15px] font-extrabold text-[#1A1A1A] leading-snug"
+                    style={{ fontFamily: URBANIST }}
+                  >
+                    {c.name}
+                  </div>
+                  <div className="text-[11.5px] text-gray-500 mt-0.5">
+                    {c.count > 0 ? `${c.count} ספקים` : "בקרוב"}
+                  </div>
+                </div>
+                <div
+                  className="w-11 h-11 flex items-center justify-center rounded-xl text-[22px] shrink-0"
+                  style={{ background: "#F4F1EA" }}
+                >
+                  <span aria-hidden>{c.emoji}</span>
+                </div>
+              </Link>
+            ))
           )}
         </div>
 
-        {/* Search results */}
-        {q ? (
-          <div className="space-y-2">
-            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">
-              {searchResults.length} תוצאות
+        {/* Help card */}
+        <div className="mt-5 rounded-2xl bg-white border border-gray-100 p-4 flex items-center gap-3 shadow-sm">
+          <div
+            className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+            style={{ background: BRAND }}
+          >
+            <FileCheck2 className="h-5 w-5 text-white" strokeWidth={2.2} />
+          </div>
+          <div className="flex-1 min-w-0 text-right">
+            <p className="text-[13px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
+              לא בטוח מאיפה להתחיל?
             </p>
-            {searchResults.length === 0 ? (
-              <div className="bg-white rounded-2xl p-5 text-center text-[13px] text-gray-500 border border-gray-100">
-                לא נמצאו תוצאות ל"{search}"
-              </div>
-            ) : searchResults.map((s) => {
-              const catNames = (s.categories ?? [])
-                .map((cid) => categories.find((c) => c.id === cid)?.name)
-                .filter(Boolean).slice(0, 2).join(" · ");
-              return (
-                <button key={s.id} onClick={() => navigate(`/suppliers/${s.id}`)}
-                  className="w-full bg-white rounded-2xl p-3 border border-gray-100 shadow-sm flex items-center gap-3 text-right active:scale-[0.99] transition-transform">
-                  <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="sm" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[14px] text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
-                      {s.business_name}
-                    </p>
-                    <p className="text-[12px] text-gray-500">{catNames || "ספק"}</p>
-                  </div>
-                  <ChevronLeft className="h-4 w-4 text-gray-400" />
-                </button>
-              );
-            })}
+            <p className="text-[11px] text-gray-500 leading-snug mt-0.5">
+              ענה על כמה שאלות קצרות ונכוון אותך לשלב הנכון בפרויקט שלך
+            </p>
           </div>
-        ) : (
-          <div className="space-y-2.5">
-            {meta.stages.map((stage, idx) => {
-              const total = stage.catIds.reduce((sum, id) => sum + (counts[id] ?? 0), 0);
-              const firstCat = stage.catIds.find((id) => (counts[id] ?? 0) > 0) ?? stage.catIds[0];
-              const dim = total === 0;
-
-              const inner = (
-                <div className="flex items-center justify-between p-3.5 bg-white rounded-2xl border border-slate-100 shadow-sm shadow-black/[0.03]">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span
-                      className="flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-extrabold shrink-0 text-white"
-                      style={{ background: BRAND, fontFamily: URBANIST }}
-                    >
-                      {String(idx + 1).padStart(2, "0")}
-                    </span>
-                    <div
-                      className="w-11 h-11 flex items-center justify-center rounded-xl text-[22px] shrink-0"
-                      style={{ background: "#F0F9F6" }}
-                    >
-                      <span aria-hidden>{stage.emoji}</span>
-                    </div>
-                    <div className="min-w-0">
-                      <div
-                        className="text-[15px] font-bold text-slate-900 leading-snug break-words"
-                        style={{ fontFamily: URBANIST }}
-                      >
-                        {stage.title}
-                      </div>
-                      <div className="text-[11.5px] text-gray-400 font-medium mt-0.5">
-                        {dim ? "ספקים יתווספו בקרוב" : `${total} ספקים זמינים`}
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronLeft className="h-4 w-4 text-gray-300 shrink-0" />
-                </div>
-              );
-
-              if (dim || !firstCat) return <div key={stage.key} className="opacity-55">{inner}</div>;
-              return (
-                <Link key={stage.key} to={`/resident/categories/${firstCat}`} className="block active:scale-[0.985] transition-transform">
-                  {inner}
-                </Link>
-              );
-            })}
-          </div>
-        )}
+          <button
+            onClick={() => navigate("/resident/create-demand")}
+            className="shrink-0 inline-flex items-center gap-1 text-[12px] font-bold rounded-full px-3.5 py-2 border-2"
+            style={{ color: BRAND, borderColor: BRAND, fontFamily: URBANIST }}
+          >
+            <ChevronLeft className="h-3.5 w-3.5" strokeWidth={3} />
+            ייעוץ חינם
+          </button>
+        </div>
       </div>
-
-
-
 
       <BottomNav role="resident" />
     </div>
