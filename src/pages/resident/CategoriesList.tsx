@@ -158,6 +158,7 @@ export default function CategoriesList() {
 
   // Cards shown for the selected stage — map to categories table for names
   const stageCards = useMemo(() => {
+    if (!effectiveStage) return [];
     return effectiveStage.catIds.flatMap((id) => {
       const c = categories.find((cc) => cc.id === id);
       if (!c) return [];
