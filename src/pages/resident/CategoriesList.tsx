@@ -1,233 +1,448 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, ChevronLeft, Search, Star, Tag, MapPin, Sparkles, Trophy, Home, Hammer, Users } from "lucide-react";
+import {
+  Bell,
+  ChevronDown,
+  ChevronLeft,
+  ChevronUp,
+  Home as HomeIcon,
+  PaintRoller,
+  Building2,
+  Search,
+  UserRound,
+  Check,
+} from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import newBuildImg from "@/assets/journey-new-build.jpg";
-import renoImg from "@/assets/journey-renovation.jpg";
-import committeeImg from "@/assets/journey-committee.jpg";
-import type { ProjectType } from "@/lib/stageCatalog";
+import { useApp } from "@/store/AppStore";
+import { supabase } from "@/integrations/supabase/client";
+import { PROJECT_TYPE_META, type ProjectType } from "@/lib/stageCatalog";
 
-const URBANIST = "'Urbanist', system-ui, sans-serif";
-const EPILOGUE = "'Epilogue', system-ui, sans-serif";
+const INITIAL_VISIBLE = 5;
+const STORAGE_KEY = "gb:projectType";
 
-type Journey = {
-  id: ProjectType;
+type UiProjectType = Extract<ProjectType, "new" | "reno" | "building">;
+
+type ProjectTypeDef = {
+  id: UiProjectType;
   title: string;
-  desc: string;
-  img: string;
-  icon: typeof Home;
-  bg: string;
-  cta: string;
-  ctaText: string;
-  accent: string;
+  icon: typeof HomeIcon;
+  accent: "green" | "orange" | "blue";
+  color: string;
+  bgSelected: string;
+  borderSelected: string;
 };
 
-const JOURNEYS: Journey[] = [
+const PROJECT_TYPES: ProjectTypeDef[] = [
   {
     id: "new",
     title: "בנייה חדשה",
-    desc: "מתכננים בית חדש? נלווה אותך משלב התכנון ועד הכניסה לבית",
-    img: newBuildImg,
-    icon: Home,
-    bg: "#E8F2EC",
-    cta: "#0E6B5A",
-    ctaText: "#FFFFFF",
-    accent: "#0E6B5A",
+    icon: HomeIcon,
+    accent: "green",
+    color: "#16845b",
+    bgSelected: "linear-gradient(180deg,#EBF7EF,#FFFFFF)",
+    borderSelected: "rgba(22,132,91,0.55)",
   },
   {
     id: "reno",
-    title: "שיפוץ ובנייה קלה",
-    desc: "משדרגים, משפצים או מרחיבים? כל הספקים לשיפוץ מוצלח",
-    img: renoImg,
-    icon: Hammer,
-    bg: "#F5EEE1",
-    cta: "#A47148",
-    ctaText: "#FFFFFF",
-    accent: "#A47148",
+    title: "שיפוץ",
+    icon: PaintRoller,
+    accent: "orange",
+    color: "#d88919",
+    bgSelected: "linear-gradient(180deg,#FDF3E4,#FFFFFF)",
+    borderSelected: "rgba(216,137,25,0.55)",
   },
   {
     id: "building",
-    title: "ועד בית ובניין משותף",
-    desc: "תחזוקה, שדרוגים וניהול הבניין בצורה חכמה וחסכונית",
-    img: committeeImg,
-    icon: Users,
-    bg: "#E6ECF3",
-    cta: "#1E3A63",
-    ctaText: "#FFFFFF",
-    accent: "#1E3A63",
+    title: "בניין משותף\nועד בית",
+    icon: Building2,
+    accent: "blue",
+    color: "#34558e",
+    bgSelected: "linear-gradient(180deg,#EAF0FB,#FFFFFF)",
+    borderSelected: "rgba(52,85,142,0.55)",
   },
 ];
 
-const QUICK_CHIPS = [
-  { label: "פופולרי", icon: Star, color: "#F5A524", bg: "#FFF6E4" },
-  { label: "במבצע", icon: Tag, color: "#8B5CF6", bg: "#F1EBFB" },
-  { label: "קרוב אלי", icon: MapPin, color: "#0E6B5A", bg: "#E4F1EC" },
-  { label: "חדש", icon: Sparkles, color: "#2563EB", bg: "#E7EEFB" },
-  { label: "הכי נבחרים", icon: Trophy, color: "#DC2626", bg: "#FCE9E9" },
-];
+/* -------------------- Sub components -------------------- */
+
+function ProjectTypeCard({
+  def,
+  selected,
+  onSelect,
+}: {
+  def: ProjectTypeDef;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const Icon = def.icon;
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      className="relative flex flex-col items-center justify-center gap-3 rounded-[20px] px-2 py-4 min-h-[132px] transition-all active:scale-[0.98]"
+      style={{
+        background: selected ? def.bgSelected : "rgba(255,255,255,0.85)",
+        border: `1px solid ${selected ? def.borderSelected : "rgba(224,228,225,0.85)"}`,
+        boxShadow: selected
+          ? `0 10px 26px ${def.color}22`
+          : "0 6px 18px rgba(31,40,35,0.06)",
+        color: def.color,
+      }}
+    >
+      {selected && (
+        <span
+          className="absolute top-2 right-2 grid place-items-center rounded-full text-white"
+          style={{
+            width: 22,
+            height: 22,
+            background: def.color,
+            boxShadow: `0 4px 10px ${def.color}44`,
+          }}
+        >
+          <Check size={13} strokeWidth={3} />
+        </span>
+      )}
+      <Icon size={36} strokeWidth={1.7} />
+      <span className="flex flex-col items-center font-extrabold text-[13.5px] leading-tight text-[#1f2937]">
+        {def.title.split("\n").map((line) => (
+          <span key={line}>{line}</span>
+        ))}
+      </span>
+    </button>
+  );
+}
+
+function CategorySearch({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="flex items-center gap-3 h-[52px] px-4 rounded-[18px] bg-white/90 border border-[rgba(225,229,226,0.9)] shadow-sm text-[#667085]">
+      <Search size={20} strokeWidth={1.9} />
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="חפש שירות, ספק או מוצר..."
+        aria-label="חיפוש"
+        dir="rtl"
+        className="w-full bg-transparent border-0 outline-none text-right text-[14px] text-[#172033] placeholder:text-[#8b93a1]"
+      />
+    </label>
+  );
+}
+
+function CategoryCard({
+  name,
+  emoji,
+  onClick,
+  accentColor,
+}: {
+  name: string;
+  emoji: string;
+  onClick: () => void;
+  accentColor: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="relative flex flex-col items-center justify-center gap-2 rounded-[16px] px-2 pt-3 pb-6 min-h-[104px] bg-white/90 border border-[rgba(226,230,227,0.9)] shadow-sm active:scale-[0.98] transition-transform text-center"
+    >
+      <span className="text-[26px] leading-none" aria-hidden>
+        {emoji}
+      </span>
+      <strong className="text-[12.5px] leading-tight font-extrabold text-[#1e2530] break-words px-1">
+        {name}
+      </strong>
+      <span
+        className="absolute right-2 bottom-2 grid place-items-center w-[22px] h-[22px] rounded-full"
+        style={{ color: accentColor, background: `${accentColor}14` }}
+      >
+        <ChevronLeft size={14} strokeWidth={2.4} />
+      </span>
+    </button>
+  );
+}
+
+/* -------------------- Main -------------------- */
 
 export default function CategoriesList() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
+  const { categories } = useApp();
 
-  const chips = useMemo(() => QUICK_CHIPS, []);
+  const [selectedProject, setSelectedProject] = useState<UiProjectType>(() => {
+    try {
+      const v = localStorage.getItem(STORAGE_KEY);
+      if (v === "new" || v === "reno" || v === "building") return v;
+    } catch {
+      /* noop */
+    }
+    return "new";
+  });
+  const [expanded, setExpanded] = useState(false);
+  const [query, setQuery] = useState("");
 
-  const openJourney = (id: ProjectType) => {
-    try { localStorage.setItem("gb:projectType", id); } catch {}
-    navigate(`/resident/categories/stages?type=${id}`);
+  // Persist selection
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, selectedProject);
+    } catch {
+      /* noop */
+    }
+  }, [selectedProject]);
+
+  // Load category-per-project-type mapping from Supabase
+  const [mapping, setMapping] = useState<Record<string, string[]>>({});
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setErrorMsg(null);
+      const { data, error } = await supabase
+        .from("category_project_stages")
+        .select("project_type,category_id,display_order")
+        .order("display_order", { ascending: true });
+      if (cancelled) return;
+      if (error) {
+        setErrorMsg("שגיאה בטעינת הקטגוריות. נסה שוב.");
+        setLoading(false);
+        return;
+      }
+      const by: Record<string, string[]> = {};
+      const seen: Record<string, Set<string>> = {};
+      (data ?? []).forEach((r: { project_type: string; category_id: string }) => {
+        if (!seen[r.project_type]) {
+          seen[r.project_type] = new Set();
+          by[r.project_type] = [];
+        }
+        if (!seen[r.project_type].has(r.category_id)) {
+          seen[r.project_type].add(r.category_id);
+          by[r.project_type].push(r.category_id);
+        }
+      });
+      setMapping(by);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const currentDef =
+    PROJECT_TYPES.find((p) => p.id === selectedProject) ?? PROJECT_TYPES[0];
+
+  const projectCategories = useMemo(() => {
+    const ids = mapping[selectedProject] ?? [];
+    const byId = new Map(categories.map((c) => [c.id, c]));
+    const list = ids
+      .map((id) => byId.get(id))
+      .filter((c): c is NonNullable<typeof c> => Boolean(c));
+    return list.map((c) => ({
+      id: c.id,
+      name: c.name,
+      emoji: c.icon ?? "📦",
+    }));
+  }, [mapping, selectedProject, categories]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return projectCategories;
+    return projectCategories.filter((c) => c.name.toLowerCase().includes(q));
+  }, [projectCategories, query]);
+
+  const visible = expanded ? filtered : filtered.slice(0, INITIAL_VISIBLE);
+  const hasMore = filtered.length > INITIAL_VISIBLE;
+
+  const handleProjectChange = (id: UiProjectType) => {
+    setSelectedProject(id);
+    setExpanded(false);
+  };
+
+  const openCategory = (categoryId: string) => {
+    navigate(`/resident/categories/${categoryId}`);
   };
 
   return (
     <div
       dir="rtl"
       className="min-h-screen min-h-[100dvh] w-full"
-      style={{ background: "#FBF8F3", fontFamily: EPILOGUE, color: "#2D2D2D" }}
+      style={{
+        background:
+          "radial-gradient(circle at 15% 0%, rgba(238,203,153,0.18), transparent 35%)," +
+          "radial-gradient(circle at 90% 25%, rgba(167,204,185,0.16), transparent 36%)," +
+          "#f3f5f2",
+        fontFamily: "'Heebo', 'Inter', system-ui, sans-serif",
+        color: "#172033",
+      }}
     >
       <div
-        className="mx-auto w-full max-w-[var(--app-max-w)] px-5 pt-[calc(env(safe-area-inset-top)+16px)]"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 32px)" }}
+        className="mx-auto w-full max-w-[var(--app-max-w)] px-4 pt-[calc(env(safe-area-inset-top)+14px)]"
+        style={{
+          paddingBottom:
+            "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)",
+        }}
       >
-        {/* Top bar: bell + brand */}
-        <div className="relative flex items-center justify-center mb-6">
+        {/* Top bar: bell + avatar */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            aria-label="פרופיל"
+            onClick={() => navigate("/resident/profile")}
+            className="grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
+          >
+            <UserRound size={20} strokeWidth={2} className="text-[#172033]" />
+          </button>
           <button
             aria-label="התראות"
-            className="absolute right-0 w-10 h-10 flex items-center justify-center active:scale-95 transition-transform"
+            onClick={() => navigate("/resident/notifications")}
+            className="relative grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
           >
-            <div className="relative">
-              <Bell className="h-6 w-6 text-[#1A1A1A]" strokeWidth={2} />
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-1">3</span>
-            </div>
+            <Bell size={20} strokeWidth={1.9} className="text-[#172033]" />
+            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-1">
+              3
+            </span>
           </button>
-          <div className="text-center">
-            <div className="text-[20px] font-black tracking-wide text-[#0E6B5A]" style={{ fontFamily: URBANIST }}>
-              GROUPBUILD
-            </div>
-            <div className="text-[10px] text-gray-500 font-medium -mt-0.5">מאחדים דיירים, מורידים מחירים</div>
-          </div>
         </div>
 
-        {/* Title */}
-        <div className="text-center mb-6">
-          <h1 className="text-[28px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
+        {/* Hero copy */}
+        <div className="text-center mb-4 px-2">
+          <h1 className="text-[26px] font-extrabold text-[#1A1A1A] leading-tight">
             מה הפרויקט שלך?
           </h1>
-          <p className="text-[13px] text-gray-500 mt-1.5 leading-relaxed px-4">
-            בחר את סוג הפרויקט כדי שנציג לך את הספקים בדיוק לפי הצורך שלך
+          <p className="text-[13.5px] text-gray-500 leading-relaxed mt-1.5">
+            בחר את סוג הפרויקט כדי למצוא
+            <br />
+            את השירותים המתאימים לך
           </p>
         </div>
 
-        {/* 3 journey cards */}
-        <div className="space-y-3 mb-8">
-          {JOURNEYS.map((j) => {
-            const Icon = j.icon;
-            return (
-              <button
-                key={j.id}
-                onClick={() => openJourney(j.id)}
-                className="w-full text-right relative overflow-hidden rounded-3xl active:scale-[0.985] transition-transform"
-                style={{ background: j.bg, boxShadow: "0 10px 24px -18px rgba(0,0,0,0.15)" }}
-              >
-                {/* chevron left */}
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/70 flex items-center justify-center">
-                  <ChevronLeft className="h-4 w-4 text-[#1A1A1A]" strokeWidth={2.5} />
-                </span>
-
-                {/* content row */}
-                <div className="flex items-stretch gap-2 p-4 pl-10">
-                  {/* text */}
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                    <div>
-                      <div className="flex items-center gap-2 justify-start">
-                        <h3 className="text-[17px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
-                          {j.title}
-                        </h3>
-                      </div>
-                      <p className="text-[12px] text-gray-700/80 mt-1 leading-snug">{j.desc}</p>
-                    </div>
-                    <div className="mt-3">
-                      <span
-                        className="inline-flex items-center gap-1 text-[12px] font-bold rounded-full px-3.5 py-1.5"
-                        style={{ background: j.cta, color: j.ctaText, fontFamily: URBANIST }}
-                      >
-                        <ChevronLeft className="h-3.5 w-3.5" strokeWidth={3} />
-                        התחל
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* image */}
-                  <div className="relative shrink-0 w-[128px] h-[110px] rounded-2xl overflow-hidden bg-white/40">
-                    <img
-                      src={j.img}
-                      alt={j.title}
-                      loading="lazy"
-                      width={720}
-                      height={512}
-                      className="w-full h-full object-cover"
-                    />
-                    <span
-                      className="absolute top-1.5 left-1.5 w-7 h-7 rounded-full bg-white/85 flex items-center justify-center"
-                    >
-                      <Icon className="h-4 w-4" style={{ color: j.accent }} strokeWidth={2.2} />
-                    </span>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Quick search */}
+        {/* Search */}
         <div className="mb-4">
-          <h2 className="text-center text-[16px] font-extrabold text-[#1A1A1A] mb-3" style={{ fontFamily: URBANIST }}>
-            חיפוש מהיר
-          </h2>
-          <div className="relative flex items-center">
-            <input
-              type="text"
-              dir="rtl"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && search.trim()) navigate(`/search?q=${encodeURIComponent(search.trim())}`);
-              }}
-              placeholder="חפש שירות, ספק או מוצר..."
-              className="w-full bg-white border border-gray-200 rounded-2xl py-3 pr-4 pl-11 text-[13.5px] focus:outline-none focus:ring-2 focus:ring-[#0E6B5A]/20 focus:border-[#0E6B5A] transition-all shadow-sm"
+          <CategorySearch value={query} onChange={setQuery} />
+        </div>
+
+        {/* Project types (single row of 3) */}
+        <div className="grid grid-cols-3 gap-2.5 mb-6">
+          {PROJECT_TYPES.map((def) => (
+            <ProjectTypeCard
+              key={def.id}
+              def={def}
+              selected={def.id === selectedProject}
+              onSelect={() => handleProjectChange(def.id)}
             />
-            <Search className="absolute left-4 h-5 w-5 text-gray-400" strokeWidth={2.5} />
-          </div>
+          ))}
         </div>
 
-        {/* Chip row */}
-        <div className="flex justify-between gap-1.5 mb-5">
-          {chips.map((c) => {
-            const Icon = c.icon;
-            return (
+        {/* Categories section */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span
+                className="w-2.5 h-2.5 rounded-full"
+                style={{ background: currentDef.color }}
+              />
+              <h2 className="text-[15.5px] font-extrabold text-[#1A1A1A] m-0">
+                קטגוריות ב{currentDef.title.split("\n")[0]}
+              </h2>
+            </div>
+            {hasMore && (
               <button
-                key={c.label}
-                className="flex-1 flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+                type="button"
+                aria-label={expanded ? "הצג פחות" : "הצג עוד"}
+                onClick={() => setExpanded((v) => !v)}
+                className="grid place-items-center w-9 h-9 rounded-full bg-white/90 border border-white/70 shadow-sm text-[#172033]"
               >
-                <div
-                  className="w-11 h-11 rounded-full flex items-center justify-center"
-                  style={{ background: c.bg }}
-                >
-                  <Icon className="h-5 w-5" style={{ color: c.color }} strokeWidth={2.4} />
-                </div>
-                <span className="text-[10.5px] font-bold text-gray-700" style={{ fontFamily: URBANIST }}>
-                  {c.label}
-                </span>
+                {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
               </button>
-            );
-          })}
-        </div>
+            )}
+          </div>
 
-        {/* Info banner */}
-        <div className="rounded-2xl px-4 py-3 text-center border border-gray-100 bg-white/70">
-          <p className="text-[12px] text-gray-700 font-semibold" style={{ fontFamily: URBANIST }}>
-            ככל שמצטרפים יותר, המחיר יורד לכולם
-          </p>
-          <p className="text-[11px] text-gray-500 mt-0.5">מחירים קבוצתיים חכמים – חסכון אמיתי</p>
-        </div>
+          {loading ? (
+            <div className="grid grid-cols-3 gap-2.5">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="min-h-[104px] rounded-[16px] bg-white/70 border border-white/60 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : errorMsg ? (
+            <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
+              <strong className="text-[#26313c]">{errorMsg}</strong>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-[12px] font-bold text-[#0E6B5A] underline"
+              >
+                רענן
+              </button>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
+              <Search size={28} />
+              <strong className="text-[#26313c]">לא נמצאו שירותים</strong>
+              <span className="text-[12.5px]">
+                {query ? "נסה מונח חיפוש אחר" : "בקרוב נוסיף שירותים בקטגוריה זו"}
+              </span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-2.5">
+              {visible.map((c) => (
+                <CategoryCard
+                  key={c.id}
+                  name={c.name}
+                  emoji={c.emoji}
+                  onClick={() => openCategory(c.id)}
+                  accentColor={currentDef.color}
+                />
+              ))}
+              {hasMore && (
+                <button
+                  type="button"
+                  onClick={() => setExpanded((v) => !v)}
+                  className="relative flex flex-col items-center justify-center gap-2 rounded-[16px] min-h-[104px] bg-white/90 border border-[rgba(226,230,227,0.9)] shadow-sm active:scale-[0.98] transition-transform"
+                  style={{ color: currentDef.color }}
+                >
+                  {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                  <strong className="text-[12.5px] font-extrabold text-[#1e2530]">
+                    {expanded ? "הצג פחות" : "הצג עוד"}
+                  </strong>
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Promo (only collapsed & no query) */}
+        {!expanded && !query && !loading && !errorMsg && filtered.length > 0 && (
+          <aside
+            className="mt-6 rounded-[22px] p-4 border flex items-center gap-3 overflow-hidden"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(239,249,243,0.96), rgba(250,247,239,0.92))",
+              borderColor: "rgba(221,234,226,0.95)",
+            }}
+          >
+            <div
+              className="grid place-items-center w-[38px] h-[38px] rounded-[14px] font-black shrink-0"
+              style={{ color: "#16845b", border: "2px solid #16845b" }}
+            >
+              ✓
+            </div>
+            <div className="flex-1 min-w-0 text-right">
+              <strong className="block text-[14px] text-[#147652] mb-1">
+                כל שירות מצטרפים – המחיר יורד
+              </strong>
+              <span className="block text-[12px] text-[#52605a] leading-snug">
+                הצטרף לקבוצת רכישה וחסוך אלפי שקלים
+              </span>
+            </div>
+          </aside>
+        )}
       </div>
 
       <BottomNav role="resident" />
