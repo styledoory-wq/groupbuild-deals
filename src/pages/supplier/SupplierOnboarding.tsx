@@ -270,9 +270,12 @@ export default function SupplierOnboarding() {
         const { error } = await supabase.from("suppliers").update(payload).eq("id", sid);
         if (error) throw new Error(`שמירת פרטי העסק נכשלה: ${error.message}`);
       } else {
+        // Upsert on user_id — handles the case where a supplier row already
+        // exists for this user (e.g. created in a previous session, or the
+        // initial fetch missed it due to RLS/latency).
         const { data: ins, error } = await supabase
           .from("suppliers")
-          .insert(payload)
+          .upsert(payload, { onConflict: "user_id" })
           .select("id")
           .single();
         if (error) throw new Error(`יצירת פרופיל הספק נכשלה: ${error.message}`);
