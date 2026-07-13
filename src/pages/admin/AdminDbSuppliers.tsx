@@ -135,10 +135,6 @@ export default function AdminDbSuppliers() {
 
   const handleCreate = async () => {
     if (!form.business_name.trim()) return toast.error("שם עסק הוא שדה חובה");
-    if (form.categoryIds.length === 0) return toast.error("יש לבחור לפחות קטגוריה אחת");
-    if (!areas.servesAllCountry && areas.regionIds.length === 0 && areas.cityIds.length === 0) {
-      return toast.error("יש לבחור אזורי שירות (או 'כל הארץ')");
-    }
     setSaving(true);
     try {
       const { data, error } = await supabase.from("suppliers").insert({
