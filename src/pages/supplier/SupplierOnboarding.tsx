@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
+import { CategoryMultiPicker } from "@/components/categories/CategoryMultiPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
@@ -367,29 +368,11 @@ export default function SupplierOnboarding() {
           openKey={openStep} onToggle={setOpenStep}
         >
           <p className="text-fs-xs text-muted-foreground mb-2">בחר תחום אחד או יותר שאתה מספק:</p>
-          <div className="flex flex-wrap gap-1.5">
-            {categories.map((c) => {
-              const active = selectedCategories.includes(c.id);
-              return (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() =>
-                    setSelectedCategories((prev) =>
-                      active ? prev.filter((x) => x !== c.id) : [...prev, c.id],
-                    )
-                  }
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${
-                    active
-                      ? "bg-[#0E6B5A] text-white border-[#0E6B5A] font-bold"
-                      : "bg-card border-border text-foreground hover:border-[#0E6B5A]/50"
-                  }`}
-                >
-                  {c.icon} {c.name}
-                </button>
-              );
-            })}
-          </div>
+          <CategoryMultiPicker
+            categories={categories}
+            value={selectedCategories}
+            onChange={setSelectedCategories}
+          />
           <StepSaveButton onSave={save} saving={saving} onNext={() => setOpenStep("area")} />
         </StepCard>
 

@@ -329,6 +329,20 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
         },
       }).catch((e) => console.warn("[signup] notify-admin failed", e));
 
+      // Auto welcome email (with short intro + WhatsApp CTA)
+      supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "user-welcome",
+          recipientEmail: email.trim(),
+          idempotencyKey: `welcome-${newUserId ?? email.trim()}`,
+          templateData: {
+            name: fullName.trim() || undefined,
+            role,
+            appUrl: getSiteOrigin(),
+          },
+        },
+      }).catch((e) => console.warn("[signup] welcome email failed", e));
+
       // If Supabase returned a live session (auto-confirm on) → go straight in.
       if (data.session) {
         toast.success("נרשמת בהצלחה!");

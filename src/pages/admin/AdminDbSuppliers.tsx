@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Plus, Search, Phone, Calendar, MapPin, Eye } from "lucide-react";
+import { CategoryMultiPicker } from "@/components/categories/CategoryMultiPicker";
 import { computeCompleteness, type SupplierCompleteness } from "@/lib/supplierCompleteness";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -135,10 +136,6 @@ export default function AdminDbSuppliers() {
 
   const handleCreate = async () => {
     if (!form.business_name.trim()) return toast.error("שם עסק הוא שדה חובה");
-    if (form.categoryIds.length === 0) return toast.error("יש לבחור לפחות קטגוריה אחת");
-    if (!areas.servesAllCountry && areas.regionIds.length === 0 && areas.cityIds.length === 0) {
-      return toast.error("יש לבחור אזורי שירות (או 'כל הארץ')");
-    }
     setSaving(true);
     try {
       const { data, error } = await supabase.from("suppliers").insert({
@@ -315,26 +312,18 @@ export default function AdminDbSuppliers() {
             </div>
 
             <div className="pt-2 border-t">
-              <Label className="text-sm font-bold">קטגוריות *</Label>
-              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto mt-2">
-                {categories.map((c) => {
-                  const active = form.categoryIds.includes(c.id);
-                  return (
-                    <button key={c.id} type="button"
-                      onClick={() => setForm((f) => ({
-                        ...f,
-                        categoryIds: active ? f.categoryIds.filter((x) => x !== c.id) : [...f.categoryIds, c.id],
-                      }))}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${active ? "bg-[#0E6B5A] text-white border-[#1F2937] font-bold" : "bg-card border-border text-foreground hover:border-[#0E6B5A]/50"}`}>
-                      {c.icon} {c.name}
-                    </button>
-                  );
-                })}
-              </div>
+              <Label className="text-sm font-bold">קטגוריות</Label>
+              <p className="text-fs-xs text-muted-foreground mt-1 mb-2">אופציונלי — אפשר להשלים בהמשך</p>
+              <CategoryMultiPicker
+                categories={categories}
+                value={form.categoryIds}
+                onChange={(next) => setForm((f) => ({ ...f, categoryIds: next }))}
+              />
             </div>
 
             <div className="pt-2 border-t">
-              <Label className="text-sm font-bold">אזורי שירות *</Label>
+              <Label className="text-sm font-bold">אזורי שירות</Label>
+              <p className="text-fs-xs text-muted-foreground mt-1 mb-2">אופציונלי — אפשר להשלים בהמשך</p>
               <div className="mt-2">
                 <AreasCombobox value={areas} onChange={setAreas} />
               </div>
