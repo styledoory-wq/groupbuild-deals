@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
+import { CategoryMultiPicker } from "@/components/categories/CategoryMultiPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
