@@ -14,6 +14,7 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
+import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { uploadSupplierLogo } from "@/lib/supplierUploads";
 import { computeCompleteness } from "@/lib/supplierCompleteness";
 import {
@@ -30,7 +31,7 @@ type StepKey = SupplierOnboardingStep;
 
 export default function SupplierOnboarding() {
   const navigate = useNavigate();
-  const { categories } = useApp();
+  const { categories, setUser } = useApp();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -71,18 +72,11 @@ export default function SupplierOnboarding() {
 
         // Load DB state + local draft in parallel. Draft is our safety net
         // against network failures and lets the user resume mid-flow.
-        const [{ data: profile, error: profErr }, { data: existing, error: supErr }] = await Promise.all([
+        const [{ data: profile, error: profErr }, existing] = await Promise.all([
           supabase.from("profiles").select("full_name,phone,business_name").eq("id", uid).maybeSingle(),
-          supabase
-            .from("suppliers")
-            .select("*")
-            .eq("user_id", uid)
-            .order("updated_at", { ascending: false })
-            .limit(1)
-            .maybeSingle(),
+          resolveSupplierForUser(uid, sessionEmail, "*"),
         ]);
         if (profErr) console.warn("[onboarding] profile fetch failed:", profErr.message);
-        if (supErr) console.warn("[onboarding] supplier fetch failed:", supErr.message);
 
         const draft = loadSupplierDraft(uid);
 
@@ -252,59 +246,27 @@ export default function SupplierOnboarding() {
         throw new Error("החיבור פג — יש להתחבר מחדש. הנתונים נשמרו כטיוטה מקומית.");
       }
 
-      const payload = {
-        user_id: userId,
-        business_name: businessName.trim(),
-        contact_name: contactName.trim() || null,
-        phone: phone.trim() || null,
-        email: email.trim() || null,
-        short_description: shortDescription.trim() || null,
-        categories: selectedCategories,
-        serves_all_country: areas.servesAllCountry,
-        service_areas: areas.servesAllCountry ? ["כל הארץ"] : [],
-        logo_url: logoUrl,
-      };
-
-      let sid = supplierId;
-      if (sid) {
-        const { error } = await supabase.from("suppliers").update(payload).eq("id", sid);
-        if (error) throw new Error(`שמירת פרטי העסק נכשלה: ${error.message}`);
-      } else {
-        // Upsert on user_id — handles the case where a supplier row already
-        // exists for this user (e.g. created in a previous session, or the
-        // initial fetch missed it due to RLS/latency).
-        const { data: ins, error } = await supabase
-          .from("suppliers")
-          .upsert(payload, { onConflict: "user_id" })
-          .select("id")
-          .single();
-        if (error) throw new Error(`יצירת פרופיל הספק נכשלה: ${error.message}`);
-        sid = ins.id;
-        setSupplierId(sid);
-      }
-
-      // Replace areas
-      const [regDel, cityDel] = await Promise.all([
-        supabase.from("supplier_regions").delete().eq("supplier_id", sid),
-        supabase.from("supplier_cities").delete().eq("supplier_id", sid),
-      ]);
-      if (regDel.error) throw new Error(`ניקוי אזורי שירות נכשל: ${regDel.error.message}`);
-      if (cityDel.error) throw new Error(`ניקוי ערי שירות נכשל: ${cityDel.error.message}`);
-
-      if (!areas.servesAllCountry) {
-        if (areas.regionIds.length) {
-          const { error: regErr } = await supabase.from("supplier_regions").insert(
-            areas.regionIds.map((rid) => ({ supplier_id: sid!, region_id: rid })),
-          );
-          if (regErr) throw new Error(`שמירת אזורים נכשלה: ${regErr.message}`);
-        }
-        if (areas.cityIds.length) {
-          const { error: cityErr } = await supabase.from("supplier_cities").insert(
-            areas.cityIds.map((cid) => ({ supplier_id: sid!, city_id: cid })),
-          );
-          if (cityErr) throw new Error(`שמירת ערים נכשלה: ${cityErr.message}`);
-        }
-      }
+      const { data: sid, error } = await supabase.rpc("save_supplier_onboarding" as never, {
+        _business_name: businessName.trim(),
+        _contact_name: contactName.trim() || null,
+        _phone: phone.trim() || null,
+        _email: email.trim() || null,
+        _short_description: shortDescription.trim() || null,
+        _category_ids: selectedCategories,
+        _serves_all_country: areas.servesAllCountry,
+        _region_ids: areas.servesAllCountry ? [] : areas.regionIds,
+        _city_ids: areas.servesAllCountry ? [] : areas.cityIds,
+        _logo_url: logoUrl,
+      } as never);
+      if (error) throw new Error(`שמירת פרופיל הספק נכשלה: ${error.message}`);
+      if (typeof sid === "string") setSupplierId(sid);
+      setUser({
+        id: userId,
+        role: "supplier",
+        name: contactName.trim() || businessName.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+      });
       if (!opts.silent) toast.success("נשמר בהצלחה");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "שמירה נכשלה";

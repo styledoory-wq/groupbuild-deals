@@ -3,11 +3,22 @@ import { supabase } from "@/integrations/supabase/client";
 export type SupplierAccount = {
   id: string;
   business_name?: string | null;
+  contact_name?: string | null;
+  phone?: string | null;
   approval_status?: string | null;
   is_active?: boolean | null;
   user_id?: string | null;
   email?: string | null;
+  description?: string | null;
   categories?: string[] | null;
+  short_description?: string | null;
+  logo_url?: string | null;
+  website_url?: string | null;
+  whatsapp_url?: string | null;
+  instagram_url?: string | null;
+  facebook_url?: string | null;
+  catalog_url?: string | null;
+  serves_all_country?: boolean | null;
 };
 
 const DEFAULT_SUPPLIER_SELECT = "id,business_name,approval_status,is_active,user_id,email,categories";
