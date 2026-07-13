@@ -37,12 +37,16 @@ function missingFields(
   return missing
 }
 
-import { requireServiceRole } from "../_shared/auth.ts";
+import { requireAdmin, requireServiceRole } from "../_shared/auth.ts";
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
+  // Allow either service-role (cron) OR authenticated admin (manual "send reminder" button)
   const svc = requireServiceRole(req);
-  if (!svc.ok) return svc.response;
+  if (!svc.ok) {
+    const admin = await requireAdmin(req);
+    if (!admin.ok) return admin.response;
+  }
 
   const url = Deno.env.get('SUPABASE_URL')!
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
