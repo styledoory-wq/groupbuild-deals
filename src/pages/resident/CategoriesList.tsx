@@ -291,6 +291,13 @@ export default function CategoriesList() {
         {/* Top bar: bell + avatar */}
         <div className="flex items-center justify-between mb-4">
           <button
+            aria-label="פרופיל"
+            onClick={() => navigate("/resident/profile")}
+            className="grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
+          >
+            <UserRound size={20} strokeWidth={2} className="text-[#172033]" />
+          </button>
+          <button
             aria-label="התראות"
             onClick={() => navigate("/resident/notifications")}
             className="relative grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
@@ -299,13 +306,6 @@ export default function CategoriesList() {
             <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-1">
               3
             </span>
-          </button>
-          <button
-            aria-label="פרופיל"
-            onClick={() => navigate("/resident/profile")}
-            className="grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
-          >
-            <UserRound size={20} strokeWidth={2} className="text-[#172033]" />
           </button>
         </div>
 
