@@ -715,20 +715,12 @@ export default function AdminSupplierDetail() {
 
             <div className="pt-2 border-t">
               <Label className="text-sm font-bold">קטגוריות *</Label>
-              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto mt-2">
-                {categories.map((c) => {
-                  const active = form.categoryIds.includes(c.id);
-                  return (
-                    <button key={c.id} type="button"
-                      onClick={() => setForm((f) => ({
-                        ...f,
-                        categoryIds: active ? f.categoryIds.filter((x) => x !== c.id) : [...f.categoryIds, c.id],
-                      }))}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-smooth ${active ? "bg-[#0E6B5A] text-white border-[#1F2937] font-bold" : "bg-card border-border text-foreground hover:border-[#0E6B5A]/50"}`}>
-                      {c.icon} {c.name}
-                    </button>
-                  );
-                })}
+              <div className="mt-2">
+                <CategoryMultiPicker
+                  categories={categories}
+                  value={form.categoryIds}
+                  onChange={(next) => setForm((f) => ({ ...f, categoryIds: next }))}
+                />
               </div>
             </div>
 
