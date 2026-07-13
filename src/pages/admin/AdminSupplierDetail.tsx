@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
+import { CategoryMultiPicker } from "@/components/categories/CategoryMultiPicker";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { computeCompleteness } from "@/lib/supplierCompleteness";
