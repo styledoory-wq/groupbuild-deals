@@ -132,7 +132,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       resolvedRole === "resident" &&
       (profile as { onboarding_completed?: boolean } | null)?.onboarding_completed
     ) {
-      navigate("/onboarding?conflict=resident-vs-supplier");
+      navigate("/supplier/onboarding");
       return;
     }
 
@@ -332,7 +332,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       // If Supabase returned a live session (auto-confirm on) → go straight in.
       if (data.session) {
         toast.success("נרשמת בהצלחה!");
-        navigate(role === "supplier" ? "/supplier" : "/resident");
+        navigate(role === "supplier" ? "/supplier/onboarding" : "/resident");
         return;
       }
 

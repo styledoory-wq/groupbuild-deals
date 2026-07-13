@@ -3227,6 +3227,21 @@ export type Database = {
         Returns: undefined
       }
       rollback_supplier_categories_migration: { Args: never; Returns: number }
+      save_supplier_onboarding: {
+        Args: {
+          _business_name: string
+          _category_ids?: string[]
+          _city_ids?: string[]
+          _contact_name?: string
+          _email?: string
+          _logo_url?: string
+          _phone?: string
+          _region_ids?: string[]
+          _serves_all_country?: boolean
+          _short_description?: string
+        }
+        Returns: string
+      }
       set_deposit_hidden: {
         Args: { _deposit_id: string; _hidden: boolean }
         Returns: undefined

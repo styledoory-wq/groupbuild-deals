@@ -175,8 +175,16 @@ const RequireRole = ({ role, children }: { role: "resident" | "supplier"; childr
   return <>{children}</>;
 };
 
+const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+  const { user, authReady } = useApp();
+  if (!authReady) return <SuspenseFallback />;
+  if (!user) return <Navigate to="/auth" replace />;
+  return <>{children}</>;
+};
+
 const residentRoute = (el: React.ReactNode) => <RequireRole role="resident">{el}</RequireRole>;
 const supplierRoute = (el: React.ReactNode) => <RequireRole role="supplier">{el}</RequireRole>;
+const authRoute = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>;
 
 const PreloadImportantRoutes = () => {
   const { user, authReady } = useApp();
@@ -276,7 +284,7 @@ const App = () => (
                   <Route path="/privacy" element={<PublicPrivacy />} />
                   <Route path="/support" element={<PublicSupport />} />
                   <Route path="/supplier" element={supplierRoute(<SupplierDashboard />)} />
-                  <Route path="/supplier/onboarding" element={supplierRoute(<SupplierOnboarding />)} />
+                  <Route path="/supplier/onboarding" element={authRoute(<SupplierOnboarding />)} />
                   <Route path="/supplier/profile/edit" element={supplierRoute(<SupplierProfileEdit />)} />
                   <Route path="/supplier/offers" element={supplierRoute(<SupplierOffers />)} />
                   <Route path="/supplier/offers/new" element={supplierRoute(<OfferEditor />)} />

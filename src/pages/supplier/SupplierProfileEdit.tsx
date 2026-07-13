@@ -15,6 +15,7 @@ import { uploadSupplierLogo, uploadSupplierGalleryImage, uploadSupplierCatalog }
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
+import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { toast } from "sonner";
 
 const supplierSchema = z.object({
@@ -84,9 +85,9 @@ export default function SupplierProfileEdit() {
       setEmail(sessionEmail);
       setOriginalEmail(sessionEmail);
 
-      const [{ data: profile }, { data: existing }] = await Promise.all([
+      const [{ data: profile }, existing] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
-        supabase.from("suppliers").select("*").eq("user_id", uid).maybeSingle(),
+        resolveSupplierForUser(uid, sessionEmail, "*"),
       ]);
 
       if (existing) {
@@ -223,22 +224,31 @@ export default function SupplierProfileEdit() {
       const uid = session.session?.user?.id;
       if (!uid) throw new Error("לא מחובר");
 
-      const payload = {
-        user_id: uid,
-        business_name: businessName.trim(),
-        contact_name: contactName.trim() || null,
-        phone: phone.trim() || null,
-        email: originalEmail,
+      const { data: savedSupplierId, error: saveErr } = await supabase.rpc("save_supplier_onboarding" as never, {
+        _business_name: businessName.trim(),
+        _contact_name: contactName.trim() || null,
+        _phone: phone.trim() || null,
+        _email: originalEmail || email.trim() || null,
+        _short_description: shortDescription.trim() || null,
+        _category_ids: selectedCategories,
+        _serves_all_country: servesAll,
+        _region_ids: servesAll ? [] : selectedRegions,
+        _city_ids: servesAll ? [] : selectedCities,
+        _logo_url: logoUrl,
+      } as never);
+      if (saveErr) throw saveErr;
+
+      const sid = typeof savedSupplierId === "string" ? savedSupplierId : supplierId;
+      if (!sid) throw new Error("לא הצלחנו לזהות את פרופיל הספק לאחר השמירה");
+      setSupplierId(sid);
+
+      const extraPayload = {
         description: description.trim() || null,
-        short_description: shortDescription.trim() || null,
-        logo_url: logoUrl,
         website_url: websiteUrl.trim() || null,
         whatsapp_url: whatsappUrl.trim() || null,
         instagram_url: instagramUrl.trim() || null,
         facebook_url: facebookUrl.trim() || null,
         catalog_url: catalogUrl,
-        categories: selectedCategories,
-        serves_all_country: servesAll,
         is_active: isActive,
         supplier_kind: offersServices && !offersProducts ? "service" : !offersServices && offersProducts ? "product" : null,
         offers_services: offersServices,
@@ -250,39 +260,12 @@ export default function SupplierProfileEdit() {
         bank_account_number: bankAccountNumber.trim() || null,
         payment_instructions_note: paymentInstructionsNote.trim() || null,
       };
-
-      let sid = supplierId;
-      if (sid) {
-        const { error } = await supabase.from("suppliers").update(payload as never).eq("id", sid);
-        if (error) throw error;
-      } else {
-        const { data: ins, error } = await supabase.from("suppliers").insert(payload as never).select("id").single();
-        if (error) throw error;
-        sid = ins.id;
-        setSupplierId(sid);
-      }
-
-      // Replace regions and cities
-      await supabase.from("supplier_regions").delete().eq("supplier_id", sid);
-      await supabase.from("supplier_cities").delete().eq("supplier_id", sid);
-
-      if (!servesAll) {
-        if (selectedRegions.length) {
-          const { error } = await supabase.from("supplier_regions").insert(
-            selectedRegions.map((rid) => ({ supplier_id: sid!, region_id: rid }))
-          );
-          if (error) throw error;
-        }
-        if (selectedCities.length) {
-          const { error } = await supabase.from("supplier_cities").insert(
-            selectedCities.map((cid) => ({ supplier_id: sid!, city_id: cid }))
-          );
-          if (error) throw error;
-        }
-      }
+      const { error: extraErr } = await supabase.from("suppliers").update(extraPayload as never).eq("id", sid);
+      if (extraErr) throw extraErr;
 
       // Sync gallery: replace all
-      await supabase.from("supplier_gallery").delete().eq("supplier_id", sid);
+      const { error: galDeleteErr } = await supabase.from("supplier_gallery").delete().eq("supplier_id", sid);
+      if (galDeleteErr) throw galDeleteErr;
       if (gallery.length) {
         const { error: galErr } = await supabase.from("supplier_gallery").insert(
           gallery.map((g, idx) => ({
@@ -296,11 +279,12 @@ export default function SupplierProfileEdit() {
       }
 
       // Profile mirror (business_name + phone)
-      await supabase.from("profiles").update({
+      const { error: profileErr } = await supabase.from("profiles").update({
         business_name: businessName.trim(),
         full_name: contactName.trim() || null,
         phone: phone.trim() || null,
       }).eq("id", uid);
+      if (profileErr) throw profileErr;
 
       // Email change
       if (email.trim().toLowerCase() !== originalEmail.toLowerCase()) {
@@ -312,7 +296,10 @@ export default function SupplierProfileEdit() {
       }
       navigate("/supplier");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
+      console.error("[supplier-profile-edit] save failed", err);
+      toast.error("שמירה נכשלה", {
+        description: err instanceof Error ? err.message : "נסה שוב בעוד רגע",
+      });
     } finally {
       setSaving(false);
     }
