@@ -536,19 +536,56 @@ export default function AdminSupplierDetail() {
               <div className="text-fs-xs text-muted-foreground pt-1 border-t border-border/50">
                 🔒 הספק חסום מפרסום הצעות, מקבלת לידים, והופעה לדיירים עד להשלמת הפרטים.
               </div>
-              <div className="grid grid-cols-2 gap-2 pt-2">
+              <div className="grid grid-cols-3 gap-2 pt-2">
                 <button
                   onClick={async () => {
                     if (!supplierId) return;
-                    const { error } = await supabase.functions.invoke("send-supplier-profile-reminders", {
+                    const { data, error } = await supabase.functions.invoke("send-supplier-profile-reminders", {
                       body: { supplier_id: supplierId },
                     });
-                    if (error) toast.error("שליחת התזכורת נכשלה");
-                    else toast.success("נשלחה תזכורת לספק במייל");
+                    if (error) {
+                      let details = error.message;
+                      try {
+                        const err = error as { context?: { text?: () => Promise<string> } };
+                        if (err.context?.text) details = await err.context.text();
+                      } catch { /* noop */ }
+                      console.error("send reminder failed", details);
+                      toast.error(`שליחת התזכורת נכשלה: ${details}`);
+                      return;
+                    }
+                    const res = data as { results?: { status: string; reason?: string }[] } | null;
+                    const first = res?.results?.[0];
+                    if (first?.status === "sent") toast.success("נשלחה תזכורת לספק במייל");
+                    else if (first?.status === "skipped" && first.reason === "no_email") toast.error("לספק אין אימייל — שלח בוואטסאפ");
+                    else if (first?.status === "error") toast.error(`שליחה נכשלה: ${first.reason ?? ""}`);
+                    else toast.success("הבקשה עובדה");
                   }}
                   className="h-9 rounded-lg bg-amber-500 text-white text-fs-xs font-bold hover:bg-amber-600"
                 >
-                  ✉️ שלח תזכורת
+                  ✉️ מייל
+                </button>
+                <button
+                  onClick={() => {
+                    const phone = (form.phone ?? "").replace(/\D/g, "");
+                    if (!phone) {
+                      toast.error("לספק אין מספר טלפון");
+                      return;
+                    }
+                    const intl = phone.startsWith("0") ? `972${phone.slice(1)}` : phone;
+                    const url = `${window.location.origin}/supplier/onboarding`;
+                    const name = form.business_name || form.contact_name || "";
+                    const missingTxt = completeness.missing.join(" · ");
+                    const msg =
+                      `שלום ${name} 👋\n` +
+                      `הפרופיל שלך ב-GroupBuild עדיין לא הושלם (${completeness.percent}%).\n` +
+                      (missingTxt ? `חסר: ${missingTxt}\n` : "") +
+                      `כדי להתחיל לקבל לידים ולפרסם הצעות, השלם את הפרטים כאן:\n${url}`;
+                    const wa = `https://wa.me/${intl}?text=${encodeURIComponent(msg)}`;
+                    window.open(wa, "_blank", "noopener");
+                  }}
+                  className="h-9 rounded-lg bg-emerald-500 text-white text-fs-xs font-bold hover:bg-emerald-600"
+                >
+                  💬 וואטסאפ
                 </button>
                 <button
                   onClick={async () => {
@@ -562,7 +599,7 @@ export default function AdminSupplierDetail() {
                   }}
                   className="h-9 rounded-lg bg-muted text-foreground text-fs-xs font-bold hover:bg-muted/80"
                 >
-                  🔗 העתק קישור
+                  🔗 קישור
                 </button>
               </div>
             </>
