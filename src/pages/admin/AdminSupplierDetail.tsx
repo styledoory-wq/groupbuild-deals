@@ -95,6 +95,40 @@ export default function AdminSupplierDetail() {
   const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const [editing, setEditing] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [waSentTick, setWaSentTick] = useState(0);
+  const welcomeSentAt = supplierId ? getWhatsappSentAt(supplierId, "supplier_welcome") : null;
+  const reminderSentAt = supplierId ? getWhatsappSentAt(supplierId, "supplier_completion") : null;
+  void waSentTick;
+
+  const sendWhatsapp = (kind: "supplier_welcome" | "supplier_completion") => {
+    if (!supplierId) return;
+    const sentAt = getWhatsappSentAt(supplierId, kind);
+    if (sentAt) {
+      const label = kind === "supplier_welcome" ? "הודעת ברוך הבא" : "תזכורת השלמת פרטים";
+      const ok = window.confirm(
+        `${label} כבר נשלחה בתאריך ${formatSentAt(sentAt)}.\nלשלוח שוב?`,
+      );
+      if (!ok) return;
+    }
+    const name = form.contact_name || form.business_name || "";
+    const onboardingUrl = `${window.location.origin}/supplier/onboarding`;
+    const msg =
+      kind === "supplier_welcome"
+        ? supplierWelcomeMessage(name, onboardingUrl)
+        : supplierCompletionReminderMessage(name, onboardingUrl);
+    if (!openWhatsAppTo(form.phone, msg)) {
+      toast.error("לספק אין מספר טלפון תקין");
+      return;
+    }
+    markWhatsappSent(supplierId, kind);
+    setWaSentTick((t) => t + 1);
+  };
+
+  const resetWhatsapp = (kind: "supplier_welcome" | "supplier_completion") => {
+    if (!supplierId) return;
+    clearWhatsappSent(supplierId, kind);
+    setWaSentTick((t) => t + 1);
+  };
 
   // Match state
   const [matchOpen, setMatchOpen] = useState(false);
