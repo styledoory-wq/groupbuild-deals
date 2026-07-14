@@ -675,31 +675,33 @@ export default function AdminSupplierDetail() {
             <div className="pt-2 mt-2 border-t border-border/50 space-y-2">
               <h4 className="text-fs-xs font-bold text-muted-foreground px-1">וואטסאפ</h4>
               <button
-                onClick={() => {
-                  const name = form.contact_name || form.business_name || "";
-                  const onboardingUrl = `${window.location.origin}/supplier/onboarding`;
-                  const msg = supplierWelcomeMessage(name, onboardingUrl);
-                  if (!openWhatsAppTo(form.phone, msg)) {
-                    toast.error("לספק אין מספר טלפון תקין");
-                  }
-                }}
-                className="w-full h-10 rounded-xl bg-emerald-500 text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-600"
+                onClick={() => sendWhatsapp("supplier_welcome")}
+                className={`w-full h-10 rounded-xl text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 ${welcomeSentAt ? "bg-emerald-700 hover:bg-emerald-800" : "bg-emerald-500 hover:bg-emerald-600"}`}
               >
-                👋 שלח ברוך הבא
+                {welcomeSentAt ? <>✓ נשלח ברוך הבא · {formatSentAt(welcomeSentAt)}</> : <>👋 שלח ברוך הבא</>}
               </button>
+              {welcomeSentAt && (
+                <button
+                  onClick={() => resetWhatsapp("supplier_welcome")}
+                  className="w-full text-fs-xs text-muted-foreground underline"
+                >
+                  איפוס סימון "נשלח"
+                </button>
+              )}
               <button
-                onClick={() => {
-                  const name = form.contact_name || form.business_name || "";
-                  const onboardingUrl = `${window.location.origin}/supplier/onboarding`;
-                  const msg = supplierCompletionReminderMessage(name, onboardingUrl);
-                  if (!openWhatsAppTo(form.phone, msg)) {
-                    toast.error("לספק אין מספר טלפון תקין");
-                  }
-                }}
-                className="w-full h-10 rounded-xl bg-amber-500 text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 hover:bg-amber-600"
+                onClick={() => sendWhatsapp("supplier_completion")}
+                className={`w-full h-10 rounded-xl text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 ${reminderSentAt ? "bg-amber-700 hover:bg-amber-800" : "bg-amber-500 hover:bg-amber-600"}`}
               >
-                📝 תזכורת השלמת פרטים
+                {reminderSentAt ? <>✓ נשלחה תזכורת · {formatSentAt(reminderSentAt)}</> : <>📝 תזכורת השלמת פרטים</>}
               </button>
+              {reminderSentAt && (
+                <button
+                  onClick={() => resetWhatsapp("supplier_completion")}
+                  className="w-full text-fs-xs text-muted-foreground underline"
+                >
+                  איפוס סימון "נשלח"
+                </button>
+              )}
               <p className="text-fs-xs text-muted-foreground text-center">
                 נפתח בוואטסאפ עם הודעה מוכנה — אתה מאשר ושולח
               </p>
