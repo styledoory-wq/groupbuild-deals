@@ -94,15 +94,17 @@ export default function SupplierProfile() {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [resolvedId, setResolvedId] = useState<string | null>(routeId ?? null);
+  const [slugResolved, setSlugResolved] = useState<boolean>(!!routeId);
   const [shareOpen, setShareOpen] = useState(false);
   const dealsRef = useRef<HTMLDivElement>(null);
 
   // Resolve slug → id when the route is /supplier/:slug.
   // Only approved + active + not-deleted suppliers are publicly resolvable.
   useEffect(() => {
-    if (routeId) { setResolvedId(routeId); return; }
+    if (routeId) { setResolvedId(routeId); setSlugResolved(true); return; }
     if (!routeSlug) return;
     let cancelled = false;
+    setSlugResolved(false);
     (async () => {
       const { data } = await supabase
         .from("suppliers")
@@ -112,25 +114,17 @@ export default function SupplierProfile() {
         .eq("is_active", true)
         .eq("is_deleted", false)
         .maybeSingle();
-      if (!cancelled) setResolvedId(data?.id ?? null);
+      if (!cancelled) {
+        setResolvedId(data?.id ?? null);
+        setSlugResolved(true);
+        if (!data) setLoading(false); // no supplier → stop the initial loading state
+      }
     })();
     return () => { cancelled = true; };
   }, [routeId, routeSlug]);
 
   const supplierId = resolvedId;
 
-  // Slug given but no approved supplier found → treat as 404 (stop loading).
-  useEffect(() => {
-    if (routeId) return; // id-route: no slug resolution phase
-    if (!routeSlug) return;
-    if (resolvedId === null && loading) {
-      // wait a tick to let the async lookup finish; then if still null, mark not found
-      const t = window.setTimeout(() => {
-        if (resolvedId === null) setLoading(false);
-      }, 400);
-      return () => window.clearTimeout(t);
-    }
-  }, [routeId, routeSlug, resolvedId, loading]);
 
   useEffect(() => {
     if (!supplierId) return;
