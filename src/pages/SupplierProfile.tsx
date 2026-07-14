@@ -15,6 +15,7 @@ import type { RealDealCardData } from "@/components/deals/RealDealCard";
 import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
+import { trackSupplierEvent } from "@/lib/analytics";
 
 interface DbSupplier {
   id: string;
@@ -178,6 +179,11 @@ export default function SupplierProfile() {
     })();
     return () => { cancelled = true; window.clearTimeout(safety); };
   }, [supplierId]);
+
+  // Fire a view event once per supplier load (public analytics)
+  useEffect(() => {
+    if (supplier?.id) void trackSupplierEvent(supplier.id, "view");
+  }, [supplier?.id]);
 
   const supplierCategories = useMemo(() => {
     if (!supplier) return [] as { id: string; name: string; icon: string }[];
@@ -497,6 +503,7 @@ export default function SupplierProfile() {
                 rel="noreferrer noopener"
                 onClick={async () => {
                   if (!supplier) return;
+                  void trackSupplierEvent(supplier.id, "whatsapp");
                   const { data: sd } = await supabase.auth.getSession();
                   const uid = sd.session?.user.id;
                   if (!uid) return;
