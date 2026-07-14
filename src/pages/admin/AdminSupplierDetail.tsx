@@ -26,6 +26,11 @@ import { CategoryMultiPicker } from "@/components/categories/CategoryMultiPicker
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { computeCompleteness } from "@/lib/supplierCompleteness";
+import {
+  openWhatsAppTo,
+  supplierCompletionReminderMessage,
+  supplierWelcomeMessage,
+} from "@/lib/whatsappMessages";
 
 interface EditForm {
   business_name: string;
@@ -629,35 +634,35 @@ export default function AdminSupplierDetail() {
               <ToolBtn onClick={() => navigate(`/admin/suppliers/${supplierId}/areas`)} icon={<MapPin className="h-4 w-4" />}>אזורי שירות</ToolBtn>
               <ToolBtn onClick={() => navigate(`/suppliers/${supplierId}`)} icon={<ExternalLink className="h-4 w-4" />}>עמוד ציבורי</ToolBtn>
             </div>
-            <div className="pt-2 mt-2 border-t border-border/50">
+            <div className="pt-2 mt-2 border-t border-border/50 space-y-2">
+              <h4 className="text-fs-xs font-bold text-muted-foreground px-1">וואטסאפ</h4>
               <button
                 onClick={() => {
-                  const phone = (form.phone ?? "").replace(/\D/g, "");
-                  if (!phone) {
-                    toast.error("לספק אין מספר טלפון");
-                    return;
-                  }
-                  const intl = phone.startsWith("0") ? `972${phone.slice(1)}` : phone;
                   const name = form.contact_name || form.business_name || "";
                   const onboardingUrl = `${window.location.origin}/supplier/onboarding`;
-                  const supportPhone = "0526247941";
-                  const msg =
-                    `שלום ${name} 👋\n` +
-                    `ברוך הבא ל-GroupBuild — הפלטפורמה שמחברת אותך לדיירי פרויקטים חדשים בכל הארץ.\n\n` +
-                    `כאן תוכל:\n` +
-                    `• לפרסם הצעות מיוחדות לדיירים\n` +
-                    `• לקבל לידים איכותיים מפרויקטים באזורי השירות שלך\n` +
-                    `• לנהל את הפרופיל, קטלוג ומדיה בקלות\n\n` +
-                    `להשלמת הפרופיל וההתחלה:\n${onboardingUrl}\n\n` +
-                    `לכל שאלה — פשוט תענה כאן בהודעה, או ווטסאפ ל-${supportPhone}. נשמח לעזור! 🙌`;
-                  const wa = `https://wa.me/${intl}?text=${encodeURIComponent(msg)}`;
-                  window.open(wa, "_blank", "noopener");
+                  const msg = supplierWelcomeMessage(name, onboardingUrl);
+                  if (!openWhatsAppTo(form.phone, msg)) {
+                    toast.error("לספק אין מספר טלפון תקין");
+                  }
                 }}
                 className="w-full h-10 rounded-xl bg-emerald-500 text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-600"
               >
-                💬 שלח הודעת "ברוך הבא" בוואטסאפ
+                👋 שלח ברוך הבא
               </button>
-              <p className="text-fs-xs text-muted-foreground text-center mt-1.5">
+              <button
+                onClick={() => {
+                  const name = form.contact_name || form.business_name || "";
+                  const onboardingUrl = `${window.location.origin}/supplier/onboarding`;
+                  const msg = supplierCompletionReminderMessage(name, onboardingUrl);
+                  if (!openWhatsAppTo(form.phone, msg)) {
+                    toast.error("לספק אין מספר טלפון תקין");
+                  }
+                }}
+                className="w-full h-10 rounded-xl bg-amber-500 text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 hover:bg-amber-600"
+              >
+                📝 תזכורת השלמת פרטים
+              </button>
+              <p className="text-fs-xs text-muted-foreground text-center">
                 נפתח בוואטסאפ עם הודעה מוכנה — אתה מאשר ושולח
               </p>
             </div>
