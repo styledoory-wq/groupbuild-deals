@@ -40,7 +40,8 @@ export function BackHeader({ title, subtitle, right, onBack }: BackHeaderProps) 
           <div className="w-9" />
         )}
         <div className="flex-1 min-w-0">
-          <h1 className="text-base font-semibold text-[#1F1F1F] truncate">{title}</h1>
+          {/* Not the page H1 — that lives in page content. This is a nav label. */}
+          <div className="text-base font-semibold text-[#1F1F1F] truncate" role="heading" aria-level={2}>{title}</div>
           {subtitle && (
             <p className="text-xs text-[#6B6B6B] truncate">{subtitle}</p>
           )}
