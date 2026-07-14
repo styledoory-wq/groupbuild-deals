@@ -299,14 +299,32 @@ export default function SupplierProfile() {
   }
 
   if (loadError || !supplier) {
+    // Public supplier page not found (unknown slug, unapproved, removed).
+    // Do NOT let Google index this URL — emit noindex and a proper 404 UI.
+    const notFound = !loadError && !supplier;
     return (
       <MobileShell>
+        <Helmet prioritizeSeoTags>
+          <title>{notFound ? "ספק לא נמצא — GroupBuild" : "שגיאה בטעינת ספק — GroupBuild"}</title>
+          <meta name="robots" content="noindex, nofollow" />
+          <meta name="description" content="הכתובת שביקשת אינה זמינה יותר או שהעסק אינו פעיל." />
+        </Helmet>
         <BackHeader title={loadError ? "שגיאה בטעינת ספק" : "ספק לא נמצא"} />
         <div className="px-5 mt-6">
-          {loadError && <ErrorState title="שגיאה בטעינה" description={loadError} />}
-          <Button onClick={() => navigate(-1)} variant="outline" className="w-full">
-            <ArrowRight className="h-4 w-4 ml-2" /> חזרה
-          </Button>
+          <h1 className="text-[22px] font-extrabold text-[#1F2937] mb-2">
+            {loadError ? "אירעה שגיאה בטעינת הספק" : "העסק לא נמצא (404)"}
+          </h1>
+          <p className="text-sm text-[#6B7280] mb-4">
+            {loadError
+              ? loadError
+              : "ייתכן שהעסק הוסר, בהמתנה לאישור, או שהכתובת שגויה. גלו עסקים מומלצים בקטגוריות שלנו."}
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate("/categories")} className="flex-1">חזרה לקטגוריות</Button>
+            <Button onClick={() => navigate(-1)} variant="outline" className="flex-1">
+              <ArrowRight className="h-4 w-4 ml-2" /> חזרה
+            </Button>
+          </div>
         </div>
       </MobileShell>
     );
