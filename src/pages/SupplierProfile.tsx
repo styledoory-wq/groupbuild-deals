@@ -217,20 +217,14 @@ export default function SupplierProfile() {
     [supplier],
   );
 
-  const handleInterest = async () => {
-    if (supplier?.id) void trackSupplierEvent(supplier.id, "open_project");
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) {
-      toast.error("יש להתחבר כדי להביע עניין");
-      navigate("/auth");
-      return;
-    }
+  const submitInterest = async () => {
     if (!supplier) return;
+    const { data: session } = await supabase.auth.getSession();
+    const userId = session.session?.user.id;
+    if (!userId) return;
     setSubmitting(true);
     try {
-      const userId = session.session.user.id;
-      const userEmail = session.session.user.email ?? null;
-      // Pull profile contact details so the supplier sees a real lead
+      const userEmail = session.session?.user.email ?? null;
       const { data: prof } = await supabase
         .from("profiles")
         .select("full_name,phone,city,project_id")
@@ -257,6 +251,33 @@ export default function SupplierProfile() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleInterest = () => {
+    if (!supplier) return;
+    void trackSupplierEvent(supplier.id, "open_project");
+    requireAuth("פתיחת פרויקט וקבלת הצעות דורשת חשבון קצר", submitInterest);
+  };
+
+  const handleShare = async () => {
+    if (!supplier) return;
+    void trackSupplierEvent(supplier.id, "share");
+    const url = window.location.href;
+    const shareData = { title: supplier.business_name, text: `${supplier.business_name} ב־GroupBuild`, url };
+    try {
+      if (navigator.share) await navigator.share(shareData);
+      else {
+        await navigator.clipboard.writeText(url);
+        toast.success("הקישור הועתק");
+      }
+    } catch { /* user cancelled */ }
+  };
+
+  const handleNavigate = () => {
+    if (!supplier) return;
+    void trackSupplierEvent(supplier.id, "navigate");
+    const q = encodeURIComponent(supplier.business_name);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank", "noopener");
   };
 
   if (loading) {
