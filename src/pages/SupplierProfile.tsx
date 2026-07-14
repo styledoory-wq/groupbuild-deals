@@ -89,7 +89,22 @@ export default function SupplierProfile() {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [resolvedId, setResolvedId] = useState<string | null>(routeId ?? null);
   const dealsRef = useRef<HTMLDivElement>(null);
+
+  // Resolve slug → id when the route is /supplier/:slug
+  useEffect(() => {
+    if (routeId) { setResolvedId(routeId); return; }
+    if (!routeSlug) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("suppliers").select("id").eq("slug", routeSlug).maybeSingle();
+      if (!cancelled) setResolvedId(data?.id ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [routeId, routeSlug]);
+
+  const supplierId = resolvedId;
 
   useEffect(() => {
     if (!supplierId) return;
