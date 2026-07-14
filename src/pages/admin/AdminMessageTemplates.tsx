@@ -230,8 +230,8 @@ function SendSheet({ template, onClose }: { template: Template; onClose: () => v
         if (aud === "resident" || aud === "all") {
           const { data } = await supabase
             .from("profiles")
-            .select("id,full_name,email,phone,role")
-            .eq("role", "resident");
+            .select("id,full_name,email,phone,user_type")
+            .eq("user_type", "resident");
           (data || []).forEach((p: any) =>
             collected.push({ id: `r:${p.id}`, name: p.full_name || p.email || "דייר", email: p.email, phone: p.phone })
           );
