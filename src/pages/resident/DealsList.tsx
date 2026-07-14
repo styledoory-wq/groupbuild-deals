@@ -11,6 +11,7 @@ import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import { listFavoriteIds } from "@/lib/favorites";
 import type { OfferTier } from "@/lib/offerPricing";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
+import { Seo } from "@/components/seo/Seo";
 
 type DealWithSupplier = RealDealCardData;
 type TabKey = "active" | "favorites" | "archive";
