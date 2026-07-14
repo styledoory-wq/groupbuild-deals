@@ -8,6 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, UserPlus, Building2, Pencil, Trash2 } from "lucide-react";
 import {
+  clearWhatsappSent,
+  formatSentAt,
+  getWhatsappSentAt,
+  markWhatsappSent,
   openWhatsAppTo,
   residentCompletionReminderMessage,
   residentWelcomeMessage,
@@ -389,34 +393,65 @@ export default function AdminResidents() {
 
               <div className="space-y-2 pt-3 border-t border-border">
                 <h4 className="text-fs-xs font-bold text-muted-foreground">וואטסאפ</h4>
-                <button
-                  onClick={() => {
-                    if (!editing) return;
+                {(() => {
+                  const welcomeSentAt = getWhatsappSentAt(editing.id, "resident_welcome");
+                  const reminderSentAt = getWhatsappSentAt(editing.id, "resident_completion");
+                  const sendWA = (kind: "resident_welcome" | "resident_completion") => {
+                    const sentAt = getWhatsappSentAt(editing.id, kind);
+                    if (sentAt) {
+                      const label = kind === "resident_welcome" ? "הודעת ברוך הבא" : "תזכורת השלמת פרטים";
+                      const ok = window.confirm(
+                        `${label} כבר נשלחה בתאריך ${formatSentAt(sentAt)}.\nלשלוח שוב?`,
+                      );
+                      if (!ok) return;
+                    }
                     const name = eName || editing.email || "";
-                    const dashboardUrl = `${window.location.origin}/resident`;
-                    const msg = residentWelcomeMessage(name, dashboardUrl);
+                    const url =
+                      kind === "resident_welcome"
+                        ? `${window.location.origin}/resident`
+                        : `${window.location.origin}/resident/profile/edit`;
+                    const msg =
+                      kind === "resident_welcome"
+                        ? residentWelcomeMessage(name, url)
+                        : residentCompletionReminderMessage(name, url);
                     if (!openWhatsAppTo(ePhone, msg)) {
                       toast.error("לדייר אין מספר טלפון תקין");
+                      return;
                     }
-                  }}
-                  className="w-full h-10 rounded-xl bg-emerald-500 text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-600"
-                >
-                  👋 שלח ברוך הבא
-                </button>
-                <button
-                  onClick={() => {
-                    if (!editing) return;
-                    const name = eName || editing.email || "";
-                    const profileEditUrl = `${window.location.origin}/resident/profile/edit`;
-                    const msg = residentCompletionReminderMessage(name, profileEditUrl);
-                    if (!openWhatsAppTo(ePhone, msg)) {
-                      toast.error("לדייר אין מספר טלפון תקין");
-                    }
-                  }}
-                  className="w-full h-10 rounded-xl bg-amber-500 text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 hover:bg-amber-600"
-                >
-                  📝 תזכורת השלמת פרטים
-                </button>
+                    markWhatsappSent(editing.id, kind);
+                    setEditing({ ...editing });
+                  };
+                  const resetWA = (kind: "resident_welcome" | "resident_completion") => {
+                    clearWhatsappSent(editing.id, kind);
+                    setEditing({ ...editing });
+                  };
+                  return (
+                    <>
+                      <button
+                        onClick={() => sendWA("resident_welcome")}
+                        className={`w-full h-10 rounded-xl text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 ${welcomeSentAt ? "bg-emerald-700 hover:bg-emerald-800" : "bg-emerald-500 hover:bg-emerald-600"}`}
+                      >
+                        {welcomeSentAt ? <>✓ נשלח ברוך הבא · {formatSentAt(welcomeSentAt)}</> : <>👋 שלח ברוך הבא</>}
+                      </button>
+                      {welcomeSentAt && (
+                        <button onClick={() => resetWA("resident_welcome")} className="w-full text-fs-xs text-muted-foreground underline">
+                          איפוס סימון "נשלח"
+                        </button>
+                      )}
+                      <button
+                        onClick={() => sendWA("resident_completion")}
+                        className={`w-full h-10 rounded-xl text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 ${reminderSentAt ? "bg-amber-700 hover:bg-amber-800" : "bg-amber-500 hover:bg-amber-600"}`}
+                      >
+                        {reminderSentAt ? <>✓ נשלחה תזכורת · {formatSentAt(reminderSentAt)}</> : <>📝 תזכורת השלמת פרטים</>}
+                      </button>
+                      {reminderSentAt && (
+                        <button onClick={() => resetWA("resident_completion")} className="w-full text-fs-xs text-muted-foreground underline">
+                          איפוס סימון "נשלח"
+                        </button>
+                      )}
+                    </>
+                  );
+                })()}
                 <p className="text-fs-xs text-muted-foreground text-center">
                   נפתח בוואטסאפ עם הודעה מוכנה — אתה מאשר ושולח
                 </p>
