@@ -378,7 +378,7 @@ export default function SupplierProfile() {
             {supplier.phone ? (
               <a
                 href={`tel:${supplier.phone}`}
-                onClick={() => { void trackSupplierEvent(supplier.id, "reveal_phone"); void trackSupplierEvent(supplier.id, "call"); }}
+                onClick={() => { void trackSupplierEvent(supplier.id, "call"); }}
                 className="h-14 rounded-[16px] bg-[#0E6B5A] text-white text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(14,107,90,0.5)] active:scale-[0.97] transition-transform"
                 aria-label={`התקשר ל־${supplier.business_name}`}
               >
