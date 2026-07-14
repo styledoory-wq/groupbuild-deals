@@ -2,9 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
-  ChevronDown,
   ChevronLeft,
-  ChevronUp,
   Home as HomeIcon,
   PaintRoller,
   Building2,
@@ -13,11 +11,9 @@ import {
   Check,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import { PROJECT_TYPE_META, type ProjectType } from "@/lib/stageCatalog";
+import { stageMeta, type ProjectType } from "@/lib/stageCatalog";
 
-const INITIAL_VISIBLE = 5;
 const STORAGE_KEY = "gb:projectType";
 
 type UiProjectType = Extract<ProjectType, "new" | "reno" | "building">;
