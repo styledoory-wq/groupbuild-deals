@@ -27,6 +27,10 @@ import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { computeCompleteness } from "@/lib/supplierCompleteness";
 import {
+  clearWhatsappSent,
+  formatSentAt,
+  getWhatsappSentAt,
+  markWhatsappSent,
   openWhatsAppTo,
   supplierCompletionReminderMessage,
   supplierWelcomeMessage,
