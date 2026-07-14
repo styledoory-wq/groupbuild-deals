@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 export type SupplierEventType =
   | "view"
   | "call"
-  | "reveal_phone"
+  | "reveal_phone"       // reserved: fires only when a user explicitly reveals a hidden phone number
+  | "phone_impression"   // phone was rendered on screen (passive impression)
   | "whatsapp"
   | "website"
   | "navigate"

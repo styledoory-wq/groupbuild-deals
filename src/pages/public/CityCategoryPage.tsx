@@ -68,6 +68,10 @@ export default function CityCategoryPage() {
   const title = `${categoryName} ב${cityName} — GroupBuild`;
   const description = `רשימת ${categoryName} מומלצים ב${cityName}. השוואת ספקים, פרטי קשר, גלריות והצעות. ${rows.length > 0 ? `${rows.length} עסקים מוצגים.` : ""}`.slice(0, 160);
 
+  // Quality gate: only pages with ≥3 relevant suppliers are indexable.
+  // Thin pages (0–2 suppliers) render for direct visitors but stay out of Google.
+  const isIndexable = rows.length >= 3;
+
   const itemListLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -96,6 +100,7 @@ export default function CityCategoryPage() {
         <title>{title}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href={canonical} />
+        {!isIndexable && <meta name="robots" content="noindex, follow" />}
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonical} />

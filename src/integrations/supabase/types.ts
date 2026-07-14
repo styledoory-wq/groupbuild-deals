@@ -3154,6 +3154,10 @@ export type Database = {
         Returns: boolean
       }
       category_migration_report: { Args: never; Returns: Json }
+      city_category_qualifies: {
+        Args: { _category_slug: string; _city_slug: string }
+        Returns: boolean
+      }
       city_category_suppliers: {
         Args: { _category_slug: string; _city_slug: string }
         Returns: {
@@ -3423,6 +3427,14 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      sitemap_city_category_combos: {
+        Args: never
+        Returns: {
+          category_slug: string
+          city_slug: string
+          supplier_count: number
+        }[]
+      }
       slugify_text: { Args: { _input: string }; Returns: string }
       supplier_analytics_search_terms: {
         Args: {
