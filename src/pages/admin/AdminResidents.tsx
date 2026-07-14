@@ -8,6 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, UserPlus, Building2, Pencil, Trash2 } from "lucide-react";
 import {
+  clearWhatsappSent,
+  formatSentAt,
+  getWhatsappSentAt,
+  markWhatsappSent,
   openWhatsAppTo,
   residentCompletionReminderMessage,
   residentWelcomeMessage,
