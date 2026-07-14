@@ -71,6 +71,12 @@ export default function SearchPage() {
 
   return (
     <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
+      <Seo
+        title="חיפוש ספקים ובעלי מקצוע לפי שירות | GroupBuild"
+        description="חפשו ספקים, בעלי מקצוע ושירותים לבית החדש — לפי שם, קטגוריה או שירות. ללא הרשמה."
+        path="/search"
+        noindex
+      />
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
