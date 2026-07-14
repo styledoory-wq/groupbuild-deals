@@ -342,36 +342,24 @@ export default function CategoriesList() {
           ))}
         </div>
 
-        {/* Categories section */}
+        {/* Stages section (main categories) */}
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span
-                className="w-2.5 h-2.5 rounded-full"
-                style={{ background: currentDef.color }}
-              />
-              <h2 className="text-[15.5px] font-extrabold text-[#1A1A1A] m-0">
-                קטגוריות ב{currentDef.title.split("\n")[0]}
-              </h2>
-            </div>
-            {hasMore && (
-              <button
-                type="button"
-                aria-label={expanded ? "הצג פחות" : "הצג עוד"}
-                onClick={() => setExpanded((v) => !v)}
-                className="grid place-items-center w-9 h-9 rounded-full bg-white/90 border border-white/70 shadow-sm text-[#172033]"
-              >
-                {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-              </button>
-            )}
+          <div className="flex items-center gap-2 mb-3">
+            <span
+              className="w-2.5 h-2.5 rounded-full"
+              style={{ background: currentDef.color }}
+            />
+            <h2 className="text-[15.5px] font-extrabold text-[#1A1A1A] m-0">
+              שלבי {currentDef.title.split("\n")[0]}
+            </h2>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="space-y-2.5">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="min-h-[104px] rounded-[16px] bg-white/70 border border-white/60 animate-pulse"
+                  className="h-[76px] rounded-2xl bg-white/70 border border-white/60 animate-pulse"
                 />
               ))}
             </div>
@@ -388,41 +376,30 @@ export default function CategoriesList() {
           ) : filtered.length === 0 ? (
             <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
               <Search size={28} />
-              <strong className="text-[#26313c]">לא נמצאו שירותים</strong>
+              <strong className="text-[#26313c]">לא נמצאו שלבים</strong>
               <span className="text-[12.5px]">
-                {query ? "נסה מונח חיפוש אחר" : "בקרוב נוסיף שירותים בקטגוריה זו"}
+                {query ? "נסה מונח חיפוש אחר" : "בקרוב נוסיף שלבים למסלול זה"}
               </span>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-2.5">
-              {visible.map((c) => (
-                <CategoryCard
-                  key={c.id}
-                  name={c.name}
-                  emoji={c.emoji}
-                  onClick={() => openCategory(c.id)}
+            <div className="space-y-2.5">
+              {filtered.map((s, i) => (
+                <StageCard
+                  key={s.key}
+                  index={i + 1}
+                  title={s.title}
+                  emoji={s.emoji}
+                  serviceCount={s.serviceCount}
+                  onClick={() => openStage(s.key)}
                   accentColor={currentDef.color}
                 />
               ))}
-              {hasMore && (
-                <button
-                  type="button"
-                  onClick={() => setExpanded((v) => !v)}
-                  className="relative flex flex-col items-center justify-center gap-2 rounded-[16px] min-h-[104px] bg-white/90 border border-[rgba(226,230,227,0.9)] shadow-sm active:scale-[0.98] transition-transform"
-                  style={{ color: currentDef.color }}
-                >
-                  {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-                  <strong className="text-[12.5px] font-extrabold text-[#1e2530]">
-                    {expanded ? "הצג פחות" : "הצג עוד"}
-                  </strong>
-                </button>
-              )}
             </div>
           )}
         </section>
 
-        {/* Promo (only collapsed & no query) */}
-        {!expanded && !query && !loading && !errorMsg && filtered.length > 0 && (
+        {/* Promo */}
+        {!query && !loading && !errorMsg && filtered.length > 0 && (
           <aside
             className="mt-6 rounded-[22px] p-4 border flex items-center gap-3 overflow-hidden"
             style={{
