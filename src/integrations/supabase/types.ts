@@ -3149,6 +3149,10 @@ export type Database = {
         Args: { _project_id: string; _user_id: string }
         Returns: boolean
       }
+      can_view_supplier_analytics: {
+        Args: { _supplier_id: string }
+        Returns: boolean
+      }
       category_migration_report: { Args: never; Returns: Json }
       city_category_suppliers: {
         Args: { _category_slug: string; _city_slug: string }
@@ -3420,6 +3424,42 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       slugify_text: { Args: { _input: string }; Returns: string }
+      supplier_analytics_search_terms: {
+        Args: {
+          _from: string
+          _limit?: number
+          _supplier_id: string
+          _to: string
+        }
+        Returns: {
+          count: number
+          query: string
+        }[]
+      }
+      supplier_analytics_sources: {
+        Args: { _from: string; _supplier_id: string; _to: string }
+        Returns: {
+          count: number
+          source: string
+        }[]
+      }
+      supplier_analytics_summary: {
+        Args: { _from: string; _supplier_id: string; _to: string }
+        Returns: {
+          current_count: number
+          event_type: string
+          previous_count: number
+        }[]
+      }
+      supplier_analytics_timeseries: {
+        Args: { _from: string; _supplier_id: string; _to: string }
+        Returns: {
+          calls: number
+          day: string
+          views: number
+          whatsapp: number
+        }[]
+      }
       supplier_confirm_deposit: {
         Args: { _interest_id: string }
         Returns: undefined
