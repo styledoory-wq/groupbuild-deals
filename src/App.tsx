@@ -312,7 +312,9 @@ const App = () => (
                   <Route path="/admin/suppliers-mock" element={<Navigate to="/admin/suppliers" replace />} />
                   <Route path="/admin/residents" element={adminRoute(<AdminResidents />)} />
                   <Route path="/admin/categories" element={adminRoute(<AdminCategories />)} />
+                  <Route path="/admin/catalog" element={adminRoute(<AdminCatalog />)} />
                   <Route path="/admin/project-stages" element={adminRoute(<AdminProjectStages />)} />
+
                   <Route path="/admin/deals" element={adminRoute(<AdminDeals />)} />
                   <Route path="/admin/deposits" element={adminRoute(<AdminDeposits />)} />
                   <Route path="/admin/payment-settings" element={adminRoute(<AdminPaymentSettings />)} />
