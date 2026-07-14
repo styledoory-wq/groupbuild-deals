@@ -386,11 +386,10 @@ export default function CategoriesList() {
               </span>
             </div>
           ) : (
-            <div className="space-y-2.5">
-              {filtered.map((s, i) => (
-                <StageCard
+            <div className="grid grid-cols-3 gap-2.5">
+              {filtered.map((s) => (
+                <StageGridCard
                   key={s.key}
-                  index={i + 1}
                   title={s.title}
                   emoji={s.emoji}
                   serviceCount={s.serviceCount}
