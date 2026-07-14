@@ -228,6 +228,7 @@ const App = () => (
           <PreviewModeBanner />
           <PreloadImportantRoutes />
           <TermsAcceptanceGate>
+            <GuestGateProvider>
             <RouteTransition>
               <Suspense fallback={<SuspenseFallback />}>
                 <Routes>
