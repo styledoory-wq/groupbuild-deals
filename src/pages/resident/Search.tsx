@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { BackHeader, SkeletonList, EmptyState } from "@/components/ds";
 import { supabase } from "@/integrations/supabase/client";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { Seo } from "@/components/seo/Seo";
 
 type SupplierRow = {
   id: string;
@@ -70,11 +71,18 @@ export default function SearchPage() {
 
   return (
     <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
+      <Seo
+        title="חיפוש ספקים ובעלי מקצוע לפי שירות | GroupBuild"
+        description="חפשו ספקים, בעלי מקצוע ושירותים לבית החדש — לפי שם, קטגוריה או שירות. ללא הרשמה."
+        path="/search"
+        noindex
+      />
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
         <BackHeader title="חיפוש" subtitle="חפש שירותים, קטגוריות וספקים בכל עץ הקטגוריות" />
+        <h1 className="sr-only">חיפוש ספקים ובעלי מקצוע ב־GroupBuild</h1>
 
         {/* Search field */}
         <div className="px-5 mt-2">

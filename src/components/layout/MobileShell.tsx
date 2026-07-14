@@ -10,21 +10,15 @@ import { useApp } from "@/store/AppStore";
 /**
  * Adaptive shell.
  *
- * MOBILE (<lg): unchanged — single column, full bleed, BottomNav floats over content.
+ * Renders `children` EXACTLY ONCE and switches chrome (header, padding,
+ * container width) via responsive Tailwind classes. Rendering children twice
+ * caused duplicate <h1>, duplicate analytics events, and 2× data fetching.
  *
- * DESKTOP (≥lg) — Maven/Israeli-SaaS style:
- *   ┌─────────────────────────────────────────────────────┐
- *   │  TOP HEADER (56px, white, border-b)                 │
- *   │  [logo right] [search center] [bell + avatar left]  │
- *   ├──────────────┬──────────────────────────────────────┤
- *   │  RIGHT       │  MAIN CONTENT (max-w-[1200px])       │
- *   │  SIDEBAR     │  bg #F4F6F9, padding 24px            │
- *   │  (240px)     │                                      │
- *   │              │                                      │
- *   └──────────────┴──────────────────────────────────────┘
+ * MOBILE (<lg): full-bleed column capped at --app-max-w, safe-area padding,
+ * BottomNav floats over content.
  *
- * BottomNav is hidden on lg+ (handled inside BottomNav).
- * DesktopSidebar is rendered inside BottomNav and shown only on lg+.
+ * DESKTOP (≥lg): fixed top header + 1200px content area, padded around a
+ * right-anchored 248px sidebar (rendered by BottomNav).
  */
 export function MobileShell({ children, className }: { children: ReactNode; className?: string }) {
   const { user } = useApp();
@@ -63,30 +57,28 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
         </div>
       </header>
 
-      {/* Mobile layout (unchanged) — single column wrapper */}
-      <div className="lg:hidden flex justify-center min-h-screen min-h-[100dvh] overflow-x-hidden">
+      {/* Single content container — mobile styling by default, desktop overrides via lg: */}
+      <main
+        dir="rtl"
+        className={cn(
+          // Mobile
+          "flex justify-center min-h-screen min-h-[100dvh] overflow-x-hidden",
+          // Desktop resets: no flex-center, pad below fixed header
+          "lg:block lg:pt-14 lg:overflow-visible",
+        )}
+      >
         <div
           className={cn(
+            // Mobile column
             "w-full max-w-[var(--app-max-w)] min-h-screen min-h-[100dvh] relative z-10 overflow-x-hidden",
             "pt-[env(safe-area-inset-top)]",
             "pb-[calc(env(safe-area-inset-bottom)+var(--nav-h)+12px)]",
+            // Desktop overrides
+            "lg:max-w-[1200px] lg:mx-auto lg:px-6 lg:py-6 lg:min-h-0 lg:overflow-visible lg:pt-0 lg:pb-0",
             className,
           )}
         >
           {children}
-        </div>
-      </div>
-
-      {/* Desktop content area — sidebar lives in BottomNav (fixed, right) */}
-      <main
-        dir="rtl"
-        className={cn(
-          "hidden lg:block pt-14",
-          // body.has-desktop-sidebar pads padding-right:248px globally (via index.css)
-        )}
-      >
-        <div className="mx-auto max-w-[1200px] px-6 py-6">
-          <div className={className}>{children}</div>
         </div>
       </main>
 

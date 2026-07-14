@@ -94,22 +94,37 @@ export default function SupplierProfile() {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [resolvedId, setResolvedId] = useState<string | null>(routeId ?? null);
+  const [slugResolved, setSlugResolved] = useState<boolean>(!!routeId);
   const [shareOpen, setShareOpen] = useState(false);
   const dealsRef = useRef<HTMLDivElement>(null);
 
-  // Resolve slug → id when the route is /supplier/:slug
+  // Resolve slug → id when the route is /supplier/:slug.
+  // Only approved + active + not-deleted suppliers are publicly resolvable.
   useEffect(() => {
-    if (routeId) { setResolvedId(routeId); return; }
+    if (routeId) { setResolvedId(routeId); setSlugResolved(true); return; }
     if (!routeSlug) return;
     let cancelled = false;
+    setSlugResolved(false);
     (async () => {
-      const { data } = await supabase.from("suppliers").select("id").eq("slug", routeSlug).maybeSingle();
-      if (!cancelled) setResolvedId(data?.id ?? null);
+      const { data } = await supabase
+        .from("suppliers")
+        .select("id")
+        .eq("slug", routeSlug)
+        .eq("approval_status", "approved")
+        .eq("is_active", true)
+        .eq("is_deleted", false)
+        .maybeSingle();
+      if (!cancelled) {
+        setResolvedId(data?.id ?? null);
+        setSlugResolved(true);
+        if (!data) setLoading(false); // no supplier → stop the initial loading state
+      }
     })();
     return () => { cancelled = true; };
   }, [routeId, routeSlug]);
 
   const supplierId = resolvedId;
+
 
   useEffect(() => {
     if (!supplierId) return;
@@ -284,14 +299,32 @@ export default function SupplierProfile() {
   }
 
   if (loadError || !supplier) {
+    // Public supplier page not found (unknown slug, unapproved, removed).
+    // Do NOT let Google index this URL — emit noindex and a proper 404 UI.
+    const notFound = !loadError && !supplier;
     return (
       <MobileShell>
+        <Helmet prioritizeSeoTags>
+          <title>{notFound ? "ספק לא נמצא — GroupBuild" : "שגיאה בטעינת ספק — GroupBuild"}</title>
+          <meta name="robots" content="noindex, nofollow" />
+          <meta name="description" content="הכתובת שביקשת אינה זמינה יותר או שהעסק אינו פעיל." />
+        </Helmet>
         <BackHeader title={loadError ? "שגיאה בטעינת ספק" : "ספק לא נמצא"} />
         <div className="px-5 mt-6">
-          {loadError && <ErrorState title="שגיאה בטעינה" description={loadError} />}
-          <Button onClick={() => navigate(-1)} variant="outline" className="w-full">
-            <ArrowRight className="h-4 w-4 ml-2" /> חזרה
-          </Button>
+          <h1 className="text-[22px] font-extrabold text-[#1F2937] mb-2">
+            {loadError ? "אירעה שגיאה בטעינת הספק" : "העסק לא נמצא (404)"}
+          </h1>
+          <p className="text-sm text-[#6B7280] mb-4">
+            {loadError
+              ? loadError
+              : "ייתכן שהעסק הוסר, בהמתנה לאישור, או שהכתובת שגויה. גלו עסקים מומלצים בקטגוריות שלנו."}
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate("/categories")} className="flex-1">חזרה לקטגוריות</Button>
+            <Button onClick={() => navigate(-1)} variant="outline" className="flex-1">
+              <ArrowRight className="h-4 w-4 ml-2" /> חזרה
+            </Button>
+          </div>
         </div>
       </MobileShell>
     );

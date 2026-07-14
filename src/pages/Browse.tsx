@@ -9,6 +9,7 @@ import type { OfferTier } from "@/lib/offerPricing";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { SmartImg } from "@/components/ui/SmartImg";
+import { Seo } from "@/components/seo/Seo";
 
 type SupplierRow = {
   id: string;
@@ -144,6 +145,11 @@ export default function Browse() {
 
   return (
     <div dir="rtl" className="min-h-screen w-full bg-[#F7F5F0]">
+      <Seo
+        title="עיון חופשי — עסקאות וספקים לדיירים חדשים | GroupBuild"
+        description="גלו הצעות פעילות וספקים מובילים לפרויקטים חדשים. ללא הרשמה: צפייה, פרטי קשר ומידע מלא על כל עסק."
+        path="/browse"
+      />
       {/* Top bar */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-[#ECEEF2]">
         <div className="mx-auto w-full max-w-[1200px] flex items-center justify-between gap-3 px-4 lg:px-8 h-14">

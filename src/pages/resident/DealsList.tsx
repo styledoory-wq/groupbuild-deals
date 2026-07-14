@@ -11,6 +11,7 @@ import { fetchDealJoinerCounts } from "@/lib/dealCounts";
 import { listFavoriteIds } from "@/lib/favorites";
 import type { OfferTier } from "@/lib/offerPricing";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
+import { Seo } from "@/components/seo/Seo";
 
 type DealWithSupplier = RealDealCardData;
 type TabKey = "active" | "favorites" | "archive";
@@ -152,6 +153,11 @@ export default function DealsList() {
 
   return (
     <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
+      <Seo
+        title="הצעות פעילות מספקים לדיירים חדשים — מבצעים ורכישה קבוצתית | GroupBuild"
+        description="עשרות הצעות פעילות מספקים מובילים לפרויקטים חדשים. הצטרפו לרכישה קבוצתית וחסכו אלפי שקלים."
+        path="/deals"
+      />
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
@@ -160,6 +166,9 @@ export default function DealsList() {
           title={cat ? `${cat.icon} ${cat.name}` : stageTitle ? stageTitle : "כל ההצעות"}
           subtitle={loading ? "טוען..." : `${filtered.length} הצעות ${tab === "active" ? "פעילות" : tab === "favorites" ? "במועדפים" : "בארכיון"}`}
         />
+        <h1 className="sr-only">
+          {cat ? `הצעות בקטגוריית ${cat.name}` : stageTitle ? `הצעות בשלב ${stageTitle}` : "כל ההצעות הפעילות לדיירים חדשים"}
+        </h1>
 
         {/* Tabs — segmented control (gold accent) */}
         <div className="px-5 mt-3">

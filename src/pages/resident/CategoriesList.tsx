@@ -13,6 +13,7 @@ import {
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
+import { Seo } from "@/components/seo/Seo";
 
 const STORAGE_KEY = "gb:projectType";
 
@@ -305,6 +306,12 @@ export default function CategoriesList() {
   };
 
   return (
+    <>
+    <Seo
+      title="קטגוריות שירות לבית חדש — ספקים ובעלי מקצוע | GroupBuild"
+      description="מצאו ספקים מומלצים לפי תחום ושלב בפרויקט: תכנון, שלד, מערכות, גמרים, חוץ ופיתוח. ללא הרשמה."
+      path="/categories"
+    />
     <div
       dir="rtl"
       className="min-h-screen min-h-[100dvh] w-full"
@@ -505,5 +512,6 @@ export default function CategoriesList() {
 
       <BottomNav role="resident" />
     </div>
+    </>
   );
 }
