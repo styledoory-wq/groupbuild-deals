@@ -109,6 +109,7 @@ const SupplierDeposits = lazy(() => import("./pages/supplier/SupplierDeposits"))
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 const PublicSupplierRedirect = lazy(() => import("./pages/public/PublicSupplierRedirect"));
 const PublicCategoryRedirect = lazy(() => import("./pages/public/PublicCategoryRedirect"));
+const CityCategoryPage = lazy(() => import("./pages/public/CityCategoryPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -252,6 +253,7 @@ const App = () => (
                   <Route path="/suppliers/:supplierId" element={<SupplierProfile />} />
                   <Route path="/supplier/:slug" element={<PublicSupplierRedirect />} />
                   <Route path="/category/:slug" element={<PublicCategoryRedirect />} />
+                  <Route path="/city/:citySlug/:categorySlug" element={<CityCategoryPage />} />
                   <Route path="/resident" element={residentRoute(<ResidentDashboard />)} />
                   <Route path="/resident/projects" element={residentRoute(<ProjectsList />)} />
                   {/* Public read-only browsing — no auth required */}

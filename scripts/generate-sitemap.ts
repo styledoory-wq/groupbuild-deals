@@ -42,7 +42,7 @@ async function fetchDynamicEntries(): Promise<SitemapEntry[]> {
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
   const entries: SitemapEntry[] = [];
 
-  const [{ data: suppliers }, { data: categories }] = await Promise.all([
+  const [{ data: suppliers }, { data: categories }, { data: cities }] = await Promise.all([
     supabase
       .from("suppliers")
       .select("slug, updated_at")
@@ -55,6 +55,7 @@ async function fetchDynamicEntries(): Promise<SitemapEntry[]> {
       .eq("is_active", true)
       .eq("is_deleted", false)
       .not("slug", "is", null),
+    supabase.rpc("list_public_cities"),
   ]);
 
   (suppliers ?? []).forEach((s) => {
@@ -67,8 +68,10 @@ async function fetchDynamicEntries(): Promise<SitemapEntry[]> {
       });
     }
   });
+  const categorySlugs: string[] = [];
   (categories ?? []).forEach((c) => {
     if (c.slug) {
+      categorySlugs.push(c.slug);
       entries.push({
         path: `/category/${c.slug}`,
         lastmod: c.updated_at?.slice(0, 10),
@@ -76,6 +79,20 @@ async function fetchDynamicEntries(): Promise<SitemapEntry[]> {
         priority: "0.7",
       });
     }
+  });
+
+  // City × Category landing pages — massive long-tail SEO surface.
+  // Cap combinations to avoid a giant sitemap: top 30 cities × top 40 categories.
+  const cityList = ((cities ?? []) as Array<{ slug: string }>).slice(0, 30);
+  const catList = categorySlugs.slice(0, 40);
+  cityList.forEach((c) => {
+    catList.forEach((cat) => {
+      entries.push({
+        path: `/city/${c.slug}/${cat}`,
+        changefreq: "weekly",
+        priority: "0.6",
+      });
+    });
   });
 
   return entries;

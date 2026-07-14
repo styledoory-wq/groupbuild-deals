@@ -243,6 +243,7 @@ export type Database = {
           id: string
           name_he: string
           region_id: string
+          slug: string | null
         }
         Insert: {
           council_id?: string | null
@@ -250,6 +251,7 @@ export type Database = {
           id?: string
           name_he: string
           region_id: string
+          slug?: string | null
         }
         Update: {
           council_id?: string | null
@@ -257,6 +259,7 @@ export type Database = {
           id?: string
           name_he?: string
           region_id?: string
+          slug?: string | null
         }
         Relationships: [
           {
@@ -3147,6 +3150,18 @@ export type Database = {
         Returns: boolean
       }
       category_migration_report: { Args: never; Returns: Json }
+      city_category_suppliers: {
+        Args: { _category_slug: string; _city_slug: string }
+        Returns: {
+          business_name: string
+          logo_url: string
+          phone: string
+          short_description: string
+          slug: string
+          supplier_id: string
+          whatsapp_url: string
+        }[]
+      }
       claim_supplier_profile_by_email: { Args: never; Returns: string }
       close_expired_deals: { Args: never; Returns: number }
       complete_onboarding: {
@@ -3256,6 +3271,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      hebrew_to_slug: { Args: { _input: string }; Returns: string }
       is_committee_for_project: {
         Args: { _project_id: string; _user_id?: string }
         Returns: boolean
@@ -3281,6 +3297,13 @@ export type Database = {
         Returns: boolean
       }
       issue_vouchers_for_deal: { Args: { _deal_id: string }; Returns: number }
+      list_public_cities: {
+        Args: never
+        Returns: {
+          name_he: string
+          slug: string
+        }[]
+      }
       lookup_voucher_for_supplier: { Args: { _code: string }; Returns: Json }
       match_suppliers_for_demand: {
         Args: { _demand_id: string }
@@ -3374,6 +3397,19 @@ export type Database = {
           parent_id: string
           path: string
           score: number
+          supplier_count: number
+        }[]
+      }
+      search_global: {
+        Args: { _q: string }
+        Returns: {
+          icon: string
+          id: string
+          name: string
+          result_type: string
+          score: number
+          slug: string
+          subtitle: string
           supplier_count: number
         }[]
       }
