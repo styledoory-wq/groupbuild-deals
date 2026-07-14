@@ -198,6 +198,7 @@ export default function SupplierProfile() {
   );
 
   const handleInterest = async () => {
+    if (supplier?.id) void trackSupplierEvent(supplier.id, "open_project");
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
       toast.error("יש להתחבר כדי להביע עניין");
