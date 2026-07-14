@@ -306,6 +306,12 @@ export default function CategoriesList() {
   };
 
   return (
+    <>
+    <Seo
+      title="קטגוריות שירות לבית חדש — ספקים ובעלי מקצוע | GroupBuild"
+      description="מצאו ספקים מומלצים לפי תחום ושלב בפרויקט: תכנון, שלד, מערכות, גמרים, חוץ ופיתוח. ללא הרשמה."
+      path="/categories"
+    />
     <div
       dir="rtl"
       className="min-h-screen min-h-[100dvh] w-full"
