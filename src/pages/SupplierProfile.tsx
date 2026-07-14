@@ -202,10 +202,12 @@ export default function SupplierProfile() {
     return () => { cancelled = true; window.clearTimeout(safety); };
   }, [supplierId]);
 
-  // Fire a view event once per supplier load (public analytics)
+  // Fire view + reveal_phone once per supplier load (phone is publicly visible)
   useEffect(() => {
-    if (supplier?.id) void trackSupplierEvent(supplier.id, "view");
-  }, [supplier?.id]);
+    if (!supplier?.id) return;
+    void trackSupplierEvent(supplier.id, "view");
+    if (supplier.phone) void trackSupplierEvent(supplier.id, "reveal_phone");
+  }, [supplier?.id, supplier?.phone]);
 
   const supplierCategories = useMemo(() => {
     if (!supplier) return [] as { id: string; name: string; icon: string }[];
