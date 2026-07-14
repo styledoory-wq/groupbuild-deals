@@ -53,7 +53,7 @@ export async function trackSupplierEvent(
       referrer: typeof document !== "undefined" ? document.referrer || null : null,
       page_url: typeof window !== "undefined" ? window.location.href : null,
       ...utm,
-      meta,
+      meta: meta as never,
     });
   } catch (e) {
     // best-effort — never block UX

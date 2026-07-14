@@ -107,6 +107,8 @@ const CommitteeRequest = lazy(() => import("./pages/committee/CommitteeRequest")
 const CommitteeQuoteRequest = lazy(() => import("./pages/committee/CommitteeQuoteRequest"));
 const SupplierDeposits = lazy(() => import("./pages/supplier/SupplierDeposits"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
+const PublicSupplierRedirect = lazy(() => import("./pages/public/PublicSupplierRedirect"));
+const PublicCategoryRedirect = lazy(() => import("./pages/public/PublicCategoryRedirect"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -248,6 +250,8 @@ const App = () => (
                   <Route path="/terms/residents" element={<TermsResidents />} />
                   <Route path="/terms/suppliers" element={<TermsSuppliers />} />
                   <Route path="/suppliers/:supplierId" element={<SupplierProfile />} />
+                  <Route path="/supplier/:slug" element={<PublicSupplierRedirect />} />
+                  <Route path="/category/:slug" element={<PublicCategoryRedirect />} />
                   <Route path="/resident" element={residentRoute(<ResidentDashboard />)} />
                   <Route path="/resident/projects" element={residentRoute(<ProjectsList />)} />
                   {/* Public read-only browsing — no auth required */}
