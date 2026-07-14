@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingState, ErrorState } from "@/components/ds";
 import { MobileShell } from "@/components/layout/MobileShell";
+import CategorySuppliers from "@/pages/resident/CategorySuppliers";
 
 /**
  * Public SEO-friendly URL /category/:slug — resolves the category by slug and
- * renders the existing category suppliers page underneath.
+ * renders CategorySuppliers directly (no client-side redirect).
  */
 export default function PublicCategoryRedirect() {
   const { slug } = useParams();
-  const [state, setState] = useState<{ loading: boolean; id?: string; name?: string; notFound?: boolean }>({
+  const [state, setState] = useState<{ loading: boolean; id?: string; name?: string; description?: string | null; notFound?: boolean }>({
     loading: true,
   });
 
@@ -27,23 +28,14 @@ export default function PublicCategoryRedirect() {
         .eq("is_deleted", false)
         .maybeSingle();
       if (cancelled) return;
-      if (!data) {
-        setState({ loading: false, notFound: true });
-      } else {
-        setState({ loading: false, id: data.id, name: data.name });
-      }
+      if (!data) setState({ loading: false, notFound: true });
+      else setState({ loading: false, id: data.id, name: data.name, description: data.description });
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [slug]);
 
   if (state.loading) {
-    return (
-      <MobileShell>
-        <LoadingState label="טוען קטגוריה..." />
-      </MobileShell>
-    );
+    return <MobileShell><LoadingState label="טוען קטגוריה..." /></MobileShell>;
   }
   if (state.notFound || !state.id) {
     return (
@@ -59,7 +51,7 @@ export default function PublicCategoryRedirect() {
 
   const canonical = `https://groupbuild.co.il/category/${slug}`;
   const title = `${state.name} — ספקים ב־GroupBuild`;
-  const description = `כל הספקים המובילים בקטגוריית ${state.name}. השוואת עסקים, גלריות, ביקורות והצעות מיוחדות.`;
+  const description = state.description || `כל הספקים המובילים בקטגוריית ${state.name}. השוואת עסקים, גלריות, ביקורות והצעות מיוחדות.`;
 
   return (
     <>
@@ -72,7 +64,7 @@ export default function PublicCategoryRedirect() {
         <meta property="og:url" content={canonical} />
         <meta property="og:type" content="website" />
       </Helmet>
-      <Navigate to={`/categories/${state.id}`} replace />
+      <CategorySuppliers initialCategoryId={state.id} />
     </>
   );
 }
