@@ -119,6 +119,19 @@ export default function SupplierProfile() {
 
   const supplierId = resolvedId;
 
+  // Slug given but no approved supplier found → treat as 404 (stop loading).
+  useEffect(() => {
+    if (routeId) return; // id-route: no slug resolution phase
+    if (!routeSlug) return;
+    if (resolvedId === null && loading) {
+      // wait a tick to let the async lookup finish; then if still null, mark not found
+      const t = window.setTimeout(() => {
+        if (resolvedId === null) setLoading(false);
+      }, 400);
+      return () => window.clearTimeout(t);
+    }
+  }, [routeId, routeSlug, resolvedId, loading]);
+
   useEffect(() => {
     if (!supplierId) return;
     let cancelled = false;
