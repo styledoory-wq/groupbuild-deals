@@ -77,6 +77,7 @@ export default function SupplierProfile() {
   const routeSlug = (params.slug as string | undefined) ?? undefined;
   const routeId = (params.supplierId as string | undefined) ?? undefined;
   const navigate = useNavigate();
+  const { requireAuth } = useGuestGate();
   const { categories } = useApp();
   const [loading, setLoading] = useState(true);
   const [supplier, setSupplier] = useState<DbSupplier | null>(null);
