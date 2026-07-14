@@ -4,6 +4,7 @@ import { ArrowLeft, Building2, Briefcase } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import { isAdminEmail } from "@/lib/auth";
 import { BrandMark } from "@/components/BrandLogo";
+import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 import { cn } from "@/lib/utils";
 import { Seo } from "@/components/seo/Seo";
 
@@ -61,6 +62,14 @@ export default function Gateway() {
           <div className="mt-3 h-[2px] w-10 rounded-full bg-[#0E6B5A]" />
           <p className="mt-3 text-[#5B6472] text-[14px] font-medium leading-relaxed max-w-[24rem]">
             כוח קנייה קבוצתי שמחבר בין דיירים לספקים איכותיים — וחוסך לכולם.
+          </p>
+        </div>
+
+        {/* Global public search — SEO + user acquisition */}
+        <div className="mt-4 mb-2 animate-fade-up">
+          <GlobalSearchBar variant="hero" />
+          <p className="mt-2 text-center text-[11.5px] text-[#6B7280]">
+            מנוע חיפוש חופשי — קטגוריות, ספקים וערים. אין צורך בהרשמה.
           </p>
         </div>
 
