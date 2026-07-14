@@ -12,7 +12,8 @@ const SECTIONS: { title: string; items: Item[] }[] = [
   {
     title: "תוכן ומיון",
     items: [
-      { to: "/admin/categories", icon: LayoutGrid, title: "קטגוריות", desc: "ניהול קטגוריות שירות" },
+      { to: "/admin/catalog", icon: LayoutGrid, title: "עץ קטגוריות", desc: "ניהול מלא: תחומים, קטגוריות ושירותים" },
+      { to: "/admin/categories", icon: LayoutGrid, title: "קטגוריות (ישן)", desc: "ניהול קטגוריות שטוח" },
       { to: "/admin/project-stages", icon: Building2, title: "תחומי פרויקט", desc: "קטגוריות בכל שלב" },
       { to: "/admin/regions", icon: MapPin, title: "אזורי שירות", desc: "ערים, אזורים ומועצות" },
     ],

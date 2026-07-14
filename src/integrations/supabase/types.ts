@@ -127,6 +127,39 @@ export type Database = {
           },
         ]
       }
+      category_history: {
+        Row: {
+          action: string
+          after_data: Json | null
+          before_data: Json | null
+          category_id: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          action: string
+          after_data?: Json | null
+          before_data?: Json | null
+          category_id: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          action?: string
+          after_data?: Json | null
+          before_data?: Json | null
+          category_id?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+        }
+        Relationships: []
+      }
       category_migration_map: {
         Row: {
           created_at: string
