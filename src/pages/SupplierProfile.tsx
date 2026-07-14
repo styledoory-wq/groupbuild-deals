@@ -308,8 +308,32 @@ export default function SupplierProfile() {
   if (supplier.instagram_url) links.push({ label: "אינסטגרם", href: supplier.instagram_url, Icon: Instagram });
   if (supplier.facebook_url) links.push({ label: "פייסבוק", href: supplier.facebook_url, Icon: Facebook });
 
+  const canonical = `https://groupbuild.co.il/supplier/${routeSlug ?? supplier.id}`;
+  const seoTitle = `${supplier.business_name} — ספק ב־GroupBuild`;
+  const seoDesc = (supplier.short_description || supplier.description || `${supplier.business_name} — צור קשר, גלריה, ביקורות ומבצעים ב־GroupBuild`).slice(0, 160);
+
   return (
     <MobileShell>
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDesc} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDesc} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:type" content="business.business" />
+        {supplier.logo_url && <meta property="og:image" content={supplier.logo_url} />}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: supplier.business_name,
+          description: supplier.description || undefined,
+          telephone: supplier.phone || undefined,
+          url: canonical,
+          image: supplier.logo_url || undefined,
+          areaServed: supplier.serves_all_country ? "IL" : (serviceAreas.length ? serviceAreas : undefined),
+        })}</script>
+      </Helmet>
       {/* Hero */}
       <div className="px-5 pt-4 pb-4 relative">
         <BackHeader title={supplier.business_name} subtitle="פרופיל ספק" />
