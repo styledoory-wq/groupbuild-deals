@@ -240,14 +240,14 @@ export default function CategoriesList() {
           if (r.display_order < acc[t][s].minOrder) acc[t][s].minOrder = r.display_order;
         }
       );
+      // Use canonical STAGE_ORDER as source of truth; merge counts from DB.
       const out: Record<string, StageItem[]> = {};
-      Object.entries(acc).forEach(([t, byStage]) => {
-        out[t] = Object.entries(byStage)
-          .sort((a, b) => a[1].minOrder - b[1].minOrder)
-          .map(([key, v]) => {
-            const m = stageMeta(t as ProjectType, key);
-            return { key, title: m.title, emoji: m.emoji, serviceCount: v.count };
-          });
+      (Object.keys(STAGE_ORDER) as ProjectType[]).forEach((t) => {
+        const counts = acc[t] ?? {};
+        out[t] = STAGE_ORDER[t].map((key) => {
+          const m = stageMeta(t, key);
+          return { key, title: m.title, emoji: m.emoji, serviceCount: counts[key]?.count ?? 0 };
+        });
       });
       setStagesByType(out);
       setLoading(false);
