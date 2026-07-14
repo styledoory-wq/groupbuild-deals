@@ -512,5 +512,6 @@ export default function CategoriesList() {
 
       <BottomNav role="resident" />
     </div>
+    </>
   );
 }
