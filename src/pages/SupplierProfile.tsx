@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ArrowRight, Tag, Loader2 } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Phone, Share2, Navigation, Star, ArrowRight, Tag, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState, ErrorState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricin
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
 import { trackSupplierEvent } from "@/lib/analytics";
+import { useGuestGate } from "@/hooks/useGuestGate";
 
 interface DbSupplier {
   id: string;
