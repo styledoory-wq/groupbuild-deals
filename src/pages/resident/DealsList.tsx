@@ -166,6 +166,9 @@ export default function DealsList() {
           title={cat ? `${cat.icon} ${cat.name}` : stageTitle ? stageTitle : "כל ההצעות"}
           subtitle={loading ? "טוען..." : `${filtered.length} הצעות ${tab === "active" ? "פעילות" : tab === "favorites" ? "במועדפים" : "בארכיון"}`}
         />
+        <h1 className="sr-only">
+          {cat ? `הצעות בקטגוריית ${cat.name}` : stageTitle ? `הצעות בשלב ${stageTitle}` : "כל ההצעות הפעילות לדיירים חדשים"}
+        </h1>
 
         {/* Tabs — segmented control (gold accent) */}
         <div className="px-5 mt-3">
