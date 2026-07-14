@@ -217,11 +217,12 @@ export default function SupplierProfile() {
     return () => { cancelled = true; window.clearTimeout(safety); };
   }, [supplierId]);
 
-  // Fire view + reveal_phone once per supplier load (phone is publicly visible)
+  // Fire view + phone_impression once per supplier load. phone_impression is a passive signal —
+  // reveal_phone is reserved for an explicit "show number" click.
   useEffect(() => {
     if (!supplier?.id) return;
     void trackSupplierEvent(supplier.id, "view");
-    if (supplier.phone) void trackSupplierEvent(supplier.id, "reveal_phone");
+    if (supplier.phone) void trackSupplierEvent(supplier.id, "phone_impression");
   }, [supplier?.id, supplier?.phone]);
 
   const supplierCategories = useMemo(() => {
