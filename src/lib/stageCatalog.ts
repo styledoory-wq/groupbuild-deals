@@ -1,8 +1,10 @@
 /**
- * Single source of truth for project-type stage labels/emojis.
- * Stage ORDER and CATEGORY ASSIGNMENTS come from the DB table
- * `category_project_stages` (rows are sorted by `display_order`).
- * This file only maps stage_key → display title/emoji for each project type.
+ * Single source of truth for project-type stage labels/emojis and their
+ * canonical display ORDER (based on the real user journey).
+ *
+ * Stage → category mapping still lives in DB table `category_project_stages`.
+ * This file drives what stages are RENDERED and in what order — even if a
+ * stage has no categories yet (renders as "בקרוב").
  */
 
 export type ProjectType = "new" | "reno" | "building" | "maintenance" | "outdoor";
@@ -21,45 +23,95 @@ export const PROJECT_TYPE_META: Record<
 };
 
 /**
- * Human titles per stage_key. Fallback = capitalize the key.
- * Keys must match rows in DB table `category_project_stages`.
+ * Canonical ordered stage list per project type (user-journey order).
+ * The array order IS the display order.
+ */
+export const STAGE_ORDER: Record<ProjectType, string[]> = {
+  new: [
+    "pre-plan",
+    "planning",
+    "site-prep",
+    "foundation",
+    "envelope",
+    "systems",
+    "finishes",
+    "outdoor",
+    "handover",
+    "turnkey",
+  ],
+  reno: [
+    "reno-design",
+    "reno-demo",
+    "kitchen-bath",
+    "electric",
+    "plumbing",
+    "ac",
+    "paint-gypsum",
+    "flooring",
+    "reno-finishes",
+  ],
+  building: [
+    "management",
+    "cleaning",
+    "garden",
+    "elevators",
+    "shared-electric",
+    "cctv",
+    "entrance",
+    "facade",
+    "solar",
+    "extras",
+  ],
+  maintenance: ["routine", "systems-fix", "building-work"],
+  outdoor: ["design", "build", "plants", "water"],
+};
+
+/**
+ * Human titles per stage_key. Keys must match rows in DB table
+ * `category_project_stages` where mapping exists.
  */
 export const STAGE_LABELS: Record<ProjectType, Record<string, StageMeta>> = {
   new: {
-    // 9-stage execution order for בנייה חדשה
-    planning:        { title: "תכנון ורישוי",              emoji: "📐" },
-    "site-prep":     { title: "הכנת מגרש",                 emoji: "⛏️" },
-    foundation:      { title: "יסודות ושלד",                emoji: "🏗️" },
-    envelope:        { title: "מעטפת ואיטום",              emoji: "🧱" },
-    systems:         { title: "מערכות",                     emoji: "⚡" },
-    "interior-prep": { title: "טיח, בידוד וגבס",           emoji: "🎨" },
-    finishes:        { title: "גמרים",                      emoji: "🛋️" },
-    outdoor:         { title: "פיתוח חוץ",                  emoji: "🌳" },
-    handover:        { title: "מסירה ואכלוס",              emoji: "🔑" },
+    "pre-plan":      { title: "רעיון ותכנון",      emoji: "💡" },
+    planning:        { title: "תכנון ורישוי",      emoji: "📐" },
+    "site-prep":     { title: "עבודות הכנה",       emoji: "⛏️" },
+    foundation:      { title: "שלד ובנייה",        emoji: "🏗️" },
+    envelope:        { title: "מעטפת ואיטום",     emoji: "🧱" },
+    systems:         { title: "מערכות הבית",       emoji: "⚡" },
+    finishes:        { title: "גמרים ועיצוב פנים", emoji: "🛋️" },
+    outdoor:         { title: "פיתוח חוץ",         emoji: "🌳" },
+    handover:        { title: "מסירה ואכלוס",     emoji: "🔑" },
+    turnkey:         { title: "קבלן מפתח",         emoji: "🏘️" },
   },
   reno: {
-    "kitchen-bath":  { title: "מטבח ואמבטיה", emoji: "🚿" },
-    "paint-gypsum":  { title: "צבע וגבס",      emoji: "🎨" },
-    electric:        { title: "חשמל",          emoji: "⚡" },
-    plumbing:        { title: "אינסטלציה",     emoji: "🔧" },
-    ac:              { title: "מיזוג",         emoji: "❄️" },
-    flooring:        { title: "ריצוף",         emoji: "🟫" },
-    "doors-windows": { title: "דלתות וחלונות", emoji: "🚪" },
+    "reno-design":    { title: "תכנון ועיצוב",     emoji: "📐" },
+    "reno-demo":      { title: "הריסה והכנה",       emoji: "⛏️" },
+    "kitchen-bath":   { title: "מטבח ואמבטיה",     emoji: "🚿" },
+    electric:         { title: "חשמל ותקשורת",      emoji: "⚡" },
+    plumbing:         { title: "אינסטלציה",         emoji: "🔧" },
+    ac:               { title: "מיזוג ואוורור",     emoji: "❄️" },
+    "paint-gypsum":   { title: "צבע, גבס וטיח",     emoji: "🎨" },
+    flooring:         { title: "ריצוף ודלתות",      emoji: "🚪" },
+    "reno-finishes":  { title: "גמרים והרכבות",    emoji: "🛋️" },
+    // legacy keys (kept for backwards-compat with existing DB rows)
+    "doors-windows":  { title: "דלתות וחלונות",    emoji: "🚪" },
   },
   building: {
-    elevators:         { title: "מעליות",           emoji: "🛗" },
+    management:        { title: "ניהול ואחזקה",     emoji: "📋" },
     cleaning:          { title: "ניקיון",           emoji: "🧽" },
-    garden:            { title: "גינון",            emoji: "🌿" },
-    cctv:              { title: "מצלמות",           emoji: "📹" },
-    entrance:          { title: "דלתות כניסה",     emoji: "🚪" },
+    garden:            { title: "גינון משותף",      emoji: "🌿" },
+    elevators:         { title: "מעליות",           emoji: "🛗" },
     "shared-electric": { title: "חשמל משותף",       emoji: "💡" },
+    cctv:              { title: "מצלמות ואבטחה",   emoji: "📹" },
+    entrance:          { title: "דלתות וכניסות",    emoji: "🚪" },
     facade:            { title: "שיפוץ חזית",       emoji: "🏛️" },
-    solar:             { title: "סולארי",           emoji: "☀️" },
+    solar:             { title: "סולארי ואנרגיה",   emoji: "☀️" },
+    extras:            { title: "שירותים נוספים",   emoji: "✨" },
   },
   maintenance: {
-    routine:       { title: "אחזקה שוטפת", emoji: "🧹" },
-    "systems-fix": { title: "תיקוני מערכות", emoji: "🔧" },
-    "building-work": { title: "עבודות בניין", emoji: "🧱" },
+    routine:         { title: "אחזקה שוטפת",  emoji: "🧹" },
+    "systems-fix":   { title: "תיקוני מערכות", emoji: "🔧" },
+    "building-work": { title: "עבודות בניין",   emoji: "🧱" },
   },
   outdoor: {
     design: { title: "תכנון ועיצוב", emoji: "📐" },

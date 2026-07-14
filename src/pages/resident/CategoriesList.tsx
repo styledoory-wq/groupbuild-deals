@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
-import { stageMeta, type ProjectType } from "@/lib/stageCatalog";
+import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
 
 const STORAGE_KEY = "gb:projectType";
 
@@ -130,50 +130,54 @@ function CategorySearch({
   );
 }
 
-function StageCard({
-  index,
+function StageGridCard({
   title,
   emoji,
   serviceCount,
   onClick,
   accentColor,
 }: {
-  index: number;
   title: string;
   emoji: string;
   serviceCount: number;
   onClick: () => void;
   accentColor: string;
 }) {
+  const soon = serviceCount === 0;
   return (
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-3 rounded-2xl bg-white/95 border border-[rgba(226,230,227,0.9)] shadow-sm px-3 py-3 active:scale-[0.99] transition-transform text-right"
+      className="relative flex flex-col items-center justify-center gap-2 rounded-[20px] px-2 py-4 min-h-[124px] transition-all active:scale-[0.97]"
+      style={{
+        background: "rgba(255,255,255,0.92)",
+        border: `1px solid rgba(224,228,225,0.9)`,
+        boxShadow: "0 6px 18px rgba(31,40,35,0.06)",
+      }}
     >
+      {soon && (
+        <span
+          className="absolute top-1.5 right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+          style={{ background: "#F1EFE8", color: "#8b8574" }}
+        >
+          בקרוב
+        </span>
+      )}
+      <ChevronLeft
+        size={14}
+        className="absolute top-2 left-2 shrink-0"
+        style={{ color: `${accentColor}88` }}
+        strokeWidth={2.4}
+      />
       <div
-        className="grid place-items-center w-11 h-11 rounded-xl text-[22px] shrink-0"
-        style={{ background: `${accentColor}14` }}
+        className="grid place-items-center w-12 h-12 rounded-2xl text-[26px]"
+        style={{ background: `${accentColor}12` }}
       >
         <span aria-hidden>{emoji}</span>
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span
-            className="text-[10.5px] font-extrabold tracking-wide"
-            style={{ color: accentColor }}
-          >
-            שלב {String(index).padStart(2, "0")}
-          </span>
-        </div>
-        <strong className="block text-[14.5px] font-extrabold text-[#1e2530] leading-tight">
-          {title}
-        </strong>
-        <span className="block text-[11.5px] text-[#7b8490] mt-0.5">
-          {serviceCount} שירותים
-        </span>
-      </div>
-      <ChevronLeft size={18} className="text-[#b0b7bd] shrink-0" strokeWidth={2.2} />
+      <span className="block text-[12.5px] font-extrabold text-[#1e2530] leading-tight text-center px-1">
+        {title}
+      </span>
     </button>
   );
 }
@@ -236,14 +240,14 @@ export default function CategoriesList() {
           if (r.display_order < acc[t][s].minOrder) acc[t][s].minOrder = r.display_order;
         }
       );
+      // Use canonical STAGE_ORDER as source of truth; merge counts from DB.
       const out: Record<string, StageItem[]> = {};
-      Object.entries(acc).forEach(([t, byStage]) => {
-        out[t] = Object.entries(byStage)
-          .sort((a, b) => a[1].minOrder - b[1].minOrder)
-          .map(([key, v]) => {
-            const m = stageMeta(t as ProjectType, key);
-            return { key, title: m.title, emoji: m.emoji, serviceCount: v.count };
-          });
+      (Object.keys(STAGE_ORDER) as ProjectType[]).forEach((t) => {
+        const counts = acc[t] ?? {};
+        out[t] = STAGE_ORDER[t].map((key) => {
+          const m = stageMeta(t, key);
+          return { key, title: m.title, emoji: m.emoji, serviceCount: counts[key]?.count ?? 0 };
+        });
       });
       setStagesByType(out);
       setLoading(false);
@@ -382,11 +386,10 @@ export default function CategoriesList() {
               </span>
             </div>
           ) : (
-            <div className="space-y-2.5">
-              {filtered.map((s, i) => (
-                <StageCard
+            <div className="grid grid-cols-3 gap-2.5">
+              {filtered.map((s) => (
+                <StageGridCard
                   key={s.key}
-                  index={i + 1}
                   title={s.title}
                   emoji={s.emoji}
                   serviceCount={s.serviceCount}
