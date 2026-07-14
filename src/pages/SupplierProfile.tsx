@@ -18,6 +18,7 @@ import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
 import { trackSupplierEvent } from "@/lib/analytics";
 import { useGuestGate } from "@/hooks/useGuestGate";
+import { ShareBusinessSheet } from "@/components/public/ShareBusinessSheet";
 
 interface DbSupplier {
   id: string;
