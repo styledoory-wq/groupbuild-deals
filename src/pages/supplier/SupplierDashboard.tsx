@@ -555,6 +555,12 @@ export default function SupplierDashboard() {
         {/* ===== Week stats (single card) ===== */}
         <section className="px-5 mt-6">
           <div className="flex items-center justify-between mb-3">
+            <button
+              onClick={() => navigate("/supplier/analytics")}
+              className="text-[12px] font-semibold text-[#0E6B5A] flex items-center gap-0.5"
+            >
+              אנליטיקס מלא <ChevronLeft className="h-3 w-3" />
+            </button>
             <h2 className="text-[16px] font-bold text-[#0F172A] tracking-tight">ביצועי השבוע</h2>
           </div>
           <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-5">
