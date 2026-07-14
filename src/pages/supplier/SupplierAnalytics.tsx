@@ -263,7 +263,7 @@ export default function SupplierAnalytics() {
 
         {err && (
           <div className="px-5 mt-4">
-            <ErrorState title="שגיאה" message={err} />
+            <ErrorState title="שגיאה" description={err} />
           </div>
         )}
 
