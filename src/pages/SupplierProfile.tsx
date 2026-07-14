@@ -263,18 +263,9 @@ export default function SupplierProfile() {
     requireAuth("פתיחת פרויקט וקבלת הצעות דורשת חשבון קצר", submitInterest);
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
     if (!supplier) return;
-    void trackSupplierEvent(supplier.id, "share");
-    const url = window.location.href;
-    const shareData = { title: supplier.business_name, text: `${supplier.business_name} ב־GroupBuild`, url };
-    try {
-      if (navigator.share) await navigator.share(shareData);
-      else {
-        await navigator.clipboard.writeText(url);
-        toast.success("הקישור הועתק");
-      }
-    } catch { /* user cancelled */ }
+    setShareOpen(true);
   };
 
   const handleNavigate = () => {
