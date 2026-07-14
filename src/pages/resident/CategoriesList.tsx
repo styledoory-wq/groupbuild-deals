@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
-import { stageMeta, type ProjectType } from "@/lib/stageCatalog";
+import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
 
 const STORAGE_KEY = "gb:projectType";
 
