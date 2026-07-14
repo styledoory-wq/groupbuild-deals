@@ -354,6 +354,7 @@ const App = () => (
                 </Routes>
               </Suspense>
             </RouteTransition>
+            </GuestGateProvider>
           </TermsAcceptanceGate>
         </BrowserRouter>
         </HelmetProvider>
