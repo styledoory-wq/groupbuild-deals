@@ -185,6 +185,16 @@ function StageGridCard({
 /* -------------------- Main -------------------- */
 
 type StageItem = { key: string; title: string; emoji: string; serviceCount: number };
+type CatalogHit = {
+  id: string;
+  name: string;
+  icon: string | null;
+  level: number;
+  parent_id: string | null;
+  path: string | null;
+  supplier_count: number;
+  score: number;
+};
 
 export default function CategoriesList() {
   const navigate = useNavigate();
@@ -199,6 +209,8 @@ export default function CategoriesList() {
     return "new";
   });
   const [query, setQuery] = useState("");
+  const [catalogHits, setCatalogHits] = useState<CatalogHit[]>([]);
+  const [searching, setSearching] = useState(false);
 
   // Persist selection
   useEffect(() => {
@@ -209,10 +221,26 @@ export default function CategoriesList() {
     }
   }, [selectedProject]);
 
+  // Smart search across entire catalog tree
+  useEffect(() => {
+    const term = query.trim();
+    if (!term) { setCatalogHits([]); setSearching(false); return; }
+    let cancelled = false;
+    setSearching(true);
+    const t = setTimeout(async () => {
+      const { data } = await supabase.rpc("search_catalog", { _q: term });
+      if (cancelled) return;
+      setCatalogHits((data ?? []) as CatalogHit[]);
+      setSearching(false);
+    }, 220);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [query]);
+
   // Stages per project type (grouped from category_project_stages)
   const [stagesByType, setStagesByType] = useState<Record<string, StageItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
 
   useEffect(() => {
     let cancelled = false;
