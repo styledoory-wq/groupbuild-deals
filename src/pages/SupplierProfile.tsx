@@ -377,6 +377,39 @@ export default function SupplierProfile() {
 
 
       <div className="px-5 relative z-10 space-y-4 pb-32">
+        {/* Public contact strip — always visible, no auth required */}
+        <div className="gb-card p-3">
+          <div className="grid grid-cols-3 gap-2">
+            {supplier.phone ? (
+              <a
+                href={`tel:${supplier.phone}`}
+                onClick={() => { void trackSupplierEvent(supplier.id, "reveal_phone"); void trackSupplierEvent(supplier.id, "call"); }}
+                className="h-14 rounded-[16px] bg-[#0E6B5A] text-white text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(14,107,90,0.5)] active:scale-[0.97] transition-transform"
+                aria-label={`התקשר ל־${supplier.business_name}`}
+              >
+                <Phone className="h-4 w-4" />
+                <span dir="ltr" className="text-[11px] tracking-wide">{supplier.phone}</span>
+              </a>
+            ) : (
+              <div className="h-14 rounded-[16px] bg-[#F7F5F0] text-[11px] text-[#9CA3AF] flex items-center justify-center">אין טלפון</div>
+            )}
+            <button
+              onClick={handleNavigate}
+              className="h-14 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
+            >
+              <Navigation className="h-4 w-4 text-[#0E6B5A]" />
+              ניווט
+            </button>
+            <button
+              onClick={handleShare}
+              className="h-14 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
+            >
+              <Share2 className="h-4 w-4 text-[#0E6B5A]" />
+              שתף
+            </button>
+          </div>
+        </div>
+
         {/* Quick links */}
         {links.length > 0 && (
           <div className="gb-card p-3">
