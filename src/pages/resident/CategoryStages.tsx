@@ -165,38 +165,51 @@ export default function CategoryStages() {
           </div>
         </div>
 
-        {/* Services list */}
-        <div className="space-y-2">
-          {services.length === 0 ? (
-            <div className="bg-white rounded-2xl p-6 text-center text-[13px] text-gray-500 border border-gray-100">
-              ספקים יתווספו בקרוב בשלב זה
-            </div>
-          ) : (
-            services.map((c) => (
-              <Link
-                key={c.id}
-                to={`/resident/categories/${c.id}`}
-                className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-gray-100 shadow-sm shadow-black/[0.03] active:scale-[0.99] transition-transform"
-              >
-                <ChevronLeft className="h-4 w-4 text-gray-300 shrink-0" />
-                <div className="flex-1 min-w-0 text-right">
-                  <div className="text-[15px] font-extrabold text-[#1A1A1A] leading-snug" style={{ fontFamily: URBANIST }}>
-                    {c.name}
-                  </div>
-                  <div className="text-[11.5px] text-gray-500 mt-0.5">
-                    {c.count > 0 ? `${c.count} ספקים` : "בקרוב"}
-                  </div>
-                </div>
-                <div
-                  className="w-11 h-11 flex items-center justify-center rounded-xl text-[22px] shrink-0"
-                  style={{ background: "#F4F1EA" }}
+        {/* Services grid (3 per row) */}
+        {services.length === 0 ? (
+          <div className="bg-white rounded-2xl p-6 text-center text-[13px] text-gray-500 border border-gray-100">
+            שירותים יתווספו בקרוב בשלב זה
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2.5">
+            {services.map((c) => {
+              const soon = c.count === 0;
+              return (
+                <Link
+                  key={c.id}
+                  to={`/resident/categories/${c.id}`}
+                  className="relative flex flex-col items-center justify-center gap-2 rounded-[20px] bg-white border border-gray-100 shadow-sm shadow-black/[0.04] px-2 py-4 min-h-[124px] active:scale-[0.97] transition-transform"
                 >
-                  <span aria-hidden>{c.emoji}</span>
-                </div>
-              </Link>
-            ))
-          )}
-        </div>
+                  {soon && (
+                    <span
+                      className="absolute top-1.5 right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                      style={{ background: "#F1EFE8", color: "#8b8574" }}
+                    >
+                      בקרוב
+                    </span>
+                  )}
+                  <ChevronLeft
+                    className="absolute top-2 left-2 h-3.5 w-3.5 shrink-0"
+                    style={{ color: `${BRAND}88` }}
+                    strokeWidth={2.4}
+                  />
+                  <div
+                    className="grid place-items-center w-12 h-12 rounded-2xl text-[26px]"
+                    style={{ background: "#F4F1EA" }}
+                  >
+                    <span aria-hidden>{c.emoji}</span>
+                  </div>
+                  <span
+                    className="block text-[12.5px] font-extrabold text-[#1A1A1A] leading-tight text-center px-1"
+                    style={{ fontFamily: URBANIST }}
+                  >
+                    {c.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <BottomNav role="resident" />
