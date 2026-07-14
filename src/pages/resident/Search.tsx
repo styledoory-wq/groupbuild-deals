@@ -82,6 +82,7 @@ export default function SearchPage() {
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
       >
         <BackHeader title="חיפוש" subtitle="חפש שירותים, קטגוריות וספקים בכל עץ הקטגוריות" />
+        <h1 className="sr-only">חיפוש ספקים ובעלי מקצוע ב־GroupBuild</h1>
 
         {/* Search field */}
         <div className="px-5 mt-2">
