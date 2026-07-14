@@ -18,6 +18,7 @@ import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
 import { trackSupplierEvent } from "@/lib/analytics";
 import { useGuestGate } from "@/hooks/useGuestGate";
+import { ShareBusinessSheet } from "@/components/public/ShareBusinessSheet";
 
 interface DbSupplier {
   id: string;
@@ -93,6 +94,7 @@ export default function SupplierProfile() {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [resolvedId, setResolvedId] = useState<string | null>(routeId ?? null);
+  const [shareOpen, setShareOpen] = useState(false);
   const dealsRef = useRef<HTMLDivElement>(null);
 
   // Resolve slug → id when the route is /supplier/:slug
@@ -200,10 +202,12 @@ export default function SupplierProfile() {
     return () => { cancelled = true; window.clearTimeout(safety); };
   }, [supplierId]);
 
-  // Fire a view event once per supplier load (public analytics)
+  // Fire view + reveal_phone once per supplier load (phone is publicly visible)
   useEffect(() => {
-    if (supplier?.id) void trackSupplierEvent(supplier.id, "view");
-  }, [supplier?.id]);
+    if (!supplier?.id) return;
+    void trackSupplierEvent(supplier.id, "view");
+    if (supplier.phone) void trackSupplierEvent(supplier.id, "reveal_phone");
+  }, [supplier?.id, supplier?.phone]);
 
   const supplierCategories = useMemo(() => {
     if (!supplier) return [] as { id: string; name: string; icon: string }[];
@@ -259,18 +263,9 @@ export default function SupplierProfile() {
     requireAuth("פתיחת פרויקט וקבלת הצעות דורשת חשבון קצר", submitInterest);
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
     if (!supplier) return;
-    void trackSupplierEvent(supplier.id, "share");
-    const url = window.location.href;
-    const shareData = { title: supplier.business_name, text: `${supplier.business_name} ב־GroupBuild`, url };
-    try {
-      if (navigator.share) await navigator.share(shareData);
-      else {
-        await navigator.clipboard.writeText(url);
-        toast.success("הקישור הועתק");
-      }
-    } catch { /* user cancelled */ }
+    setShareOpen(true);
   };
 
   const handleNavigate = () => {
@@ -302,11 +297,11 @@ export default function SupplierProfile() {
     );
   }
 
-  const links: { label: string; href: string; Icon: React.ComponentType<{ className?: string }> }[] = [];
-  if (supplier.website_url) links.push({ label: "לאתר הספק", href: supplier.website_url, Icon: Globe });
-  if (whatsappHref) links.push({ label: "וואטסאפ", href: whatsappHref, Icon: WhatsappIcon });
-  if (supplier.instagram_url) links.push({ label: "אינסטגרם", href: supplier.instagram_url, Icon: Instagram });
-  if (supplier.facebook_url) links.push({ label: "פייסבוק", href: supplier.facebook_url, Icon: Facebook });
+  const links: { label: string; href: string; Icon: React.ComponentType<{ className?: string }>; event: "website" | "whatsapp" | "share" }[] = [];
+  if (supplier.website_url) links.push({ label: "לאתר הספק", href: supplier.website_url, Icon: Globe, event: "website" });
+  if (whatsappHref) links.push({ label: "וואטסאפ", href: whatsappHref, Icon: WhatsappIcon, event: "whatsapp" });
+  if (supplier.instagram_url) links.push({ label: "אינסטגרם", href: supplier.instagram_url, Icon: Instagram, event: "share" });
+  if (supplier.facebook_url) links.push({ label: "פייסבוק", href: supplier.facebook_url, Icon: Facebook, event: "share" });
 
   const canonical = `https://groupbuild.co.il/supplier/${routeSlug ?? supplier.id}`;
   const seoTitle = `${supplier.business_name} — ספק ב־GroupBuild`;
@@ -383,7 +378,7 @@ export default function SupplierProfile() {
             {supplier.phone ? (
               <a
                 href={`tel:${supplier.phone}`}
-                onClick={() => { void trackSupplierEvent(supplier.id, "reveal_phone"); void trackSupplierEvent(supplier.id, "call"); }}
+                onClick={() => { void trackSupplierEvent(supplier.id, "call"); }}
                 className="h-14 rounded-[16px] bg-[#0E6B5A] text-white text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(14,107,90,0.5)] active:scale-[0.97] transition-transform"
                 aria-label={`התקשר ל־${supplier.business_name}`}
               >
@@ -420,6 +415,7 @@ export default function SupplierProfile() {
                   href={l.href}
                   target="_blank"
                   rel="noreferrer noopener"
+                  onClick={() => { void trackSupplierEvent(supplier.id, l.event); }}
                   className="h-11 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
                 >
                   <l.Icon className="h-4 w-4 text-[#0E6B5A]" />
@@ -643,6 +639,14 @@ export default function SupplierProfile() {
           <SmartImg src={lightbox} size="detail" alt="" priority eager className="max-h-[90vh] max-w-full rounded-[20px]" />
         </div>
       )}
+
+      <ShareBusinessSheet
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        supplierId={supplier.id}
+        businessName={supplier.business_name}
+        url={typeof window !== "undefined" ? window.location.href : canonical}
+      />
     </MobileShell>
   );
 }
