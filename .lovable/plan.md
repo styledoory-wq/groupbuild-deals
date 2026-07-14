@@ -1,87 +1,142 @@
-# תכנית: עץ קטגוריות שלם + חיפוש חכם + ניהול אדמין
 
-הבקשה גדולה ומורכבת מ‑3 חלקים תלויים זה בזה. אני מציע לפצל לשלושה שלבים בהזמנות נפרדות (כדי שכל שלב יעבור בדיקה לפני שממשיכים), אבל התכנון להלן הוא של כולם יחד.
+# הפיכת GroupBuild לאינדקס ספקים ציבורי
 
----
-
-## שלב 1 — הרחבת עץ הקטגוריות (Data)
-
-מבנה היררכי 4 רמות בבסיס הנתונים:
-
-```text
-project_type  →  domain (תחום)  →  category (קטגוריה)  →  service (שירות)
-```
-
-### שינויי סכימה
-- טבלה חדשה `domains` — תחומים ראשיים לכל `project_type` (למשל: "גמרים ועיצוב פנים", "מערכות הבית", "אנרגיה"). שדות: `id, project_type, name, icon, display_order, is_active, is_deleted`.
-- טבלה חדשה `services` — הרמה הפנימית שמתחת לקטגוריה. שדות: `id, category_id, name, icon, keywords[], synonyms[], display_order, is_active, is_deleted`.
-- הוספה ל־`categories`: `domain_id` (FK), `keywords[]`, `synonyms[]`.
-- ל־`suppliers` תישאר השיוך הקיים לקטגוריות, ובנוסף `supplier_services` (M:N).
-- כל טבלה חדשה תקבל RLS + GRANTs לפי הכללים.
-
-### מילוי תוכן העץ המקיף
-אוסיף (Seed) בין 200–300 שירותים תחת ~40 קטגוריות ו־~12 תחומים, מבוסס על:
-- בנייה חדשה, שיפוץ, בניין משותף/ועד בית, תחזוקה, פיתוח חוץ.
-- אתרי ייחוס: Midrag, Houzz, Angi, דפי זהב.
-- כל התחומים שציינת: אנרגיה, גז, ריהוט, מטבחים, חדרי רחצה, בית חכם, הצללות, בריכות, מעליות, איכות הסביבה, שירותים משלימים (הובלות, אחסנה, ביטוח, מימון, משכנתאות, שמאות, בדק בית, הדברה, ניקיון).
-- בעלי מקצוע לאורך כל הדרך: אדריכל, מעצב פנים, מהנדס, מודד, יועץ קרקע, יועץ משכנתאות, קבלנים, גמרים, מסירה, תחזוקה.
-
-### מילים נרדפות (Synonyms) לדוגמה
-`"מזגן"→"מיזוג אוויר"`, `"סולרי"→"סולארי"`, `"חשמלאי"→"חשמל"`, `"דלת"→"דלתות פנים"+"דלתות כניסה"`, `"אינסטלטור"→"אינסטלציה"`.
+מטרה: להפוך את GroupBuild ממערכת סגורה למנוע חיפוש ציבורי בתחום הבנייה והשיפוצים, עם עמודי SEO, אנליטיקס וחיפוש גלובלי חכם — בלי לשבור את המערכת הקיימת לתושבים/ועדים/ספקים.
 
 ---
 
-## שלב 2 — חיפוש חכם
+## שלב 1 — תשתית ציבורית + SEO (בסיס להכל)
 
-עדכון `src/pages/resident/Search.tsx`:
-- החיפוש יפנה ל־RPC חדש `search_catalog(query text)` שמחזיר תוצאות מכל הרמות: domain / category / service / supplier.
-- הפונקציה תחפש ב־`name`, `keywords`, `synonyms` בעברית (ILIKE + `unaccent` + `pg_trgm` לדמיון fuzzy).
-- כל תוצאה תחזיר גם `path` (למשל: "בנייה חדשה › גמרים › דלתות פנים") ו־`href` לניווט מיידי.
-- לחיצה על תוצאה מסוג service → מעבירה ישר לרשימת הספקים בשירות הזה, עם התחום/הקטגוריה כבר פתוחים והשירות מודגש.
+### 1.1 מסד נתונים
+- הוספת עמודת `slug` (טקסט, unique) לטבלת `suppliers` — עם generator שמייצר slug באנגלית מהשם העברי (translit + fallback ל־`supplier-{shortid}`).
+- הוספת עמודת `slug` (טקסט, unique) לטבלת `categories` (כבר חלקית קיים).
+- Backfill לכל הספקים/הקטגוריות הקיימים.
+- Trigger שממלא slug אוטומטית ביצירת ספק חדש.
+- עדכון RLS: policy ציבורי (`anon` + `authenticated`) לקריאת ספקים פעילים ומאושרים בלבד, וקריאה מלאה של `categories`, `supplier_gallery`, `reviews` (רק מאושרות), `deals` (רק active).
 
-### שינויים ב־UX
-- קבוצות תוצאות: "שירותים", "קטגוריות", "ספקים".
-- הצעות פופולריות יעודכנו לפי שירותים אמיתיים.
+### 1.2 ראוטים ציבוריים חדשים (מחוץ ל־`/resident`)
+- `/category/:slug` — דף קטגוריה ציבורי
+- `/supplier/:slug` — כרטיס ספק ציבורי
+- `/search?q=...` — תוצאות חיפוש ציבוריות
+- דפים אלו נגישים ללא התחברות; header ציבורי עם CTA "הרשמה/התחברות".
+
+### 1.3 SEO per-route
+- התקנה של `react-helmet-async` (אם עוד לא) + HelmetProvider.
+- לכל דף ספק: `<title>`, `meta description`, `canonical`, `og:*`, JSON-LD `LocalBusiness` (שם, טלפון, אזורים, דירוג).
+- לכל דף קטגוריה: JSON-LD `ItemList` של הספקים.
+- עדכון `scripts/generate-sitemap.ts` שיושך את כל הקטגוריות והספקים הפעילים מה־DB.
+- `robots.txt` — מאפשר את כל הדפים הציבוריים, חוסם `/admin`, `/supplier/dashboard`, `/resident` (פרטי).
 
 ---
 
-## שלב 3 — ניהול מלא באדמין (ללא קוד)
+## שלב 2 — כרטיס ספק ציבורי (`/supplier/:slug`)
 
-מסך חדש `AdminCatalog` (מחליף/מרחיב את `AdminCategories` + `AdminProjectStages`):
+תצוגה מלאה: לוגו, קאבר, שם, תיאור, תחומי התמחות, אזורי שירות, שעות פעילות, טלפון, WhatsApp, אתר, גלריה, מבצעים פעילים, ביקורות + דירוג.
 
-עץ עם 4 רמות שניתן להרחיב/לכווץ:
-```text
-▸ בנייה חדשה
-   ▸ גמרים ועיצוב פנים
-       ▸ דלתות
-           • דלתות פנים
-           • דלתות כניסה
-           + הוסף שירות
-```
+כפתורי פעולה (כולם עם event tracking):
+- 📞 התקשר → `tel:`
+- 💬 WhatsApp → `wa.me`
+- 🌐 אתר → פתיחה בטאב חדש
+- 🧭 ניווט → Google Maps / Waze
+- ⭐ שמור למועדפים → **דורש הרשמה** (מציג bottom-sheet הרשמה מהירה)
+- 🚀 "פתח פרויקט לקבלת הצעות" → **דורש הרשמה**
 
-יכולות:
-- ✅ יצירת/עריכת/מחיקה רכה של תחום, קטגוריה, שירות
-- ✅ שינוי סדר בגרירה (dnd-kit) בתוך כל רמה
-- ✅ העברת קטגוריה בין תחומים, שירות בין קטגוריות (drag בין רשימות)
-- ✅ עריכת אייקון, שם, keywords, synonyms
-- ✅ חזרה מ־soft delete (סל מיחזור)
+Guest gating: hook `useGuestGate()` שמציג sheet של הרשמה מהירה במקום ניווט למסך חסום.
+
+---
+
+## שלב 3 — Analytics (Event Tracking)
+
+### 3.1 טבלה חדשה: `supplier_analytics_events`
+עמודות רלוונטיות: `supplier_id`, `event_type` (view / call / whatsapp / website / navigate / open_project / favorite_attempt), `session_id` (anon uuid ב־localStorage), `user_id` (nullable), `referrer`, `page_url`, `utm_*`.
+- GRANT `INSERT` ל־`anon` + `authenticated` בלבד. SELECT רק לספק עצמו ולאדמין.
+
+### 3.2 קליינט
+- `src/lib/analytics.ts` עם `trackEvent(type, supplierId, meta?)`.
+- Batching + `navigator.sendBeacon` ליציאה.
+- הזרקה בכל כפתורי כרטיס הספק ובצפיות דף (`useEffect` על mount).
+
+### 3.3 חיפושים שלא נמצאו
+- טבלה `search_queries` שמתעדת כל חיפוש: `query`, `results_count`, `session_id`, `user_id?`.
+
+---
+
+## שלב 4 — חיפוש גלובלי במסך הבית
+
+- קומפוננטת `GlobalSearchBar` שמופיעה במסך הראשי (Landing + Index) ובכל header ציבורי.
+- שימוש בפונקציית `search_catalog` הקיימת + הרחבה `search_global` שמחזירה גם:
+  - קטגוריות
+  - תתי־קטגוריות
+  - ספקים (לפי שם + תיאור + תחומים + אזורים)
+  - מבצעים פעילים
+- תמיכה בשאילתות טבעיות: "חשמלאי בצפת" → parsing של קטגוריה + עיר.
+- דף תוצאות `/search?q=...` עם טאבים: הכל / קטגוריות / ספקים / מבצעים.
+- Autocomplete בזמן אמת (debounce 220ms).
+
+---
+
+## שלב 5 — Dashboard לספק (סטטיסטיקות)
+
+הוספה ל־`SupplierDashboard`:
+- קלפי KPI: צפיות (שבוע/חודש), קליקים לטלפון, ל־WhatsApp, לאתר, פתיחות פרויקט.
+- מקורות תנועה: חיפוש פנימי, Google (מ־`referrer`).
+- גרף מגמות 30 יום.
+- שאילתות aggregated דרך view/RPC על `supplier_analytics_events`.
+
+## שלב 6 — Dashboard לאדמין
+
+הוספה ל־`AdminDashboard`:
+- הקטגוריות הכי מחופשות (top 20).
+- הספקים הכי נצפים.
+- הכי הרבה שיחות/WhatsApp/פתיחות פרויקט.
+- חיפושים ללא תוצאות → הזדמנויות להוספת קטגוריות/ספקים.
 
 ---
 
 ## פרטים טכניים
 
-- **Migrations**: 3 מיגרציות — (1) סכימה חדשה + RLS/GRANTs, (2) seed של העץ המקיף, (3) RPC לחיפוש + אינדקסי `pg_trgm` על השדות הרלוונטיים.
-- **Frontend חדש**: `AdminCatalog.tsx`, `useCatalogTree.ts`, עדכון `Search.tsx`, `CategoryStages.tsx` (לקרוא services מ־DB במקום stageCatalog הסטטי).
-- **Frontend קיים לתאימות**: `stageCatalog.ts` יהפוך ל־fallback בלבד; המקור יהיה ה־DB.
-- **ספקים**: מיפוי אוטומטי של השיוכים הקיימים ל־services החדשים בסיוע `category_migration_map`.
-- **תלויות חדשות**: `@dnd-kit/core` + `@dnd-kit/sortable` לגרירה.
+**קבצים חדשים עיקריים:**
+```text
+src/pages/public/CategoryPublic.tsx
+src/pages/public/SupplierPublic.tsx
+src/pages/public/SearchPublic.tsx
+src/components/public/PublicHeader.tsx
+src/components/public/GlobalSearchBar.tsx
+src/components/public/GuestActionSheet.tsx
+src/hooks/useGuestGate.ts
+src/lib/analytics.ts
+src/lib/slugify.ts
+src/components/seo/SupplierJsonLd.tsx
+src/components/seo/CategoryJsonLd.tsx
+src/pages/supplier/dashboard/AnalyticsCards.tsx
+src/pages/admin/AdminInsights.tsx
+```
+
+**מיגרציות SQL:**
+1. `slug` + backfill + trigger ל־suppliers/categories.
+2. RLS ציבורי לקריאה על suppliers/categories/gallery/reviews/deals.
+3. טבלת `supplier_analytics_events` + טבלת `search_queries` + GRANTs + policies.
+4. RPCs: `search_global`, `supplier_stats(supplier_id, days)`, `admin_insights()`.
+
+**עדכונים:**
+- `src/App.tsx` — הוספת ראוטים ציבוריים חדשים.
+- `scripts/generate-sitemap.ts` — משיכת slugs מ־DB.
+- `index.html` + `HelmetProvider` ב־main.
+- `public/robots.txt` — פתיחת דפים ציבוריים.
+
+**מה נשאר סגור להתחברות בלבד:**
+פתיחת פרויקט, קבלת הצעות, הצטרפות לרכישה קבוצתית, שמירת מועדפים, כל אזור `/resident`, `/admin`, dashboard ספק.
 
 ---
 
-## סדר ביצוע מומלץ
+## סדר ביצוע מוצע
 
-1. שלב 1 בלבד (סכימה + seed מקיף) — מיגרציה אחת גדולה, אני שולח לאישור.
-2. אחרי שהעץ יושב יפה — שלב 2 (RPC חיפוש + UI).
-3. לבסוף — שלב 3 (מסך אדמין מלא עם גרירה).
+1. שלב 1 (SQL slugs + RLS ציבורי + ראוטים + SEO תשתית)
+2. שלב 2 (כרטיס ספק ציבורי + guest gating)
+3. שלב 4 (חיפוש גלובלי — הכי גבוה בערך עבורך)
+4. שלב 3 (Analytics — תשתית לפני dashboardים)
+5. שלב 5 + 6 (dashboardים)
 
-**רוצה שאתחיל משלב 1 (הסכימה + מילוי העץ המקיף)?** או שאתה מעדיף סדר אחר (למשל האדמין קודם כדי שתמלא בעצמך)?
+כל שלב ניתן ל־QA עצמאי ולא שובר את הקיים.
+
+**אישור?** אתחיל בשלב 1 מיד כשתאשר.
