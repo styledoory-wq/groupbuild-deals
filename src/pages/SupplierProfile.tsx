@@ -94,6 +94,7 @@ export default function SupplierProfile() {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [resolvedId, setResolvedId] = useState<string | null>(routeId ?? null);
+  const [shareOpen, setShareOpen] = useState(false);
   const dealsRef = useRef<HTMLDivElement>(null);
 
   // Resolve slug → id when the route is /supplier/:slug
