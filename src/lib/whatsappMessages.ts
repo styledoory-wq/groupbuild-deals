@@ -2,6 +2,67 @@ import { normalizeWhatsappUrl } from "./whatsapp";
 
 const DEFAULT_SUPPORT_PHONE = "0526247941";
 
+export type WhatsappMessageKind =
+  | "supplier_welcome"
+  | "supplier_completion"
+  | "resident_welcome"
+  | "resident_completion";
+
+const SENT_KEY = "gb_wa_sent_v1";
+
+type SentMap = Record<string, number>;
+
+function readSentMap(): SentMap {
+  try {
+    const raw = localStorage.getItem(SENT_KEY);
+    return raw ? (JSON.parse(raw) as SentMap) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSentMap(map: SentMap) {
+  try {
+    localStorage.setItem(SENT_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore */
+  }
+}
+
+function sentKey(userId: string, kind: WhatsappMessageKind) {
+  return `${userId}::${kind}`;
+}
+
+export function getWhatsappSentAt(
+  userId: string | null | undefined,
+  kind: WhatsappMessageKind,
+): number | null {
+  if (!userId) return null;
+  const map = readSentMap();
+  return map[sentKey(userId, kind)] ?? null;
+}
+
+export function markWhatsappSent(userId: string, kind: WhatsappMessageKind) {
+  const map = readSentMap();
+  map[sentKey(userId, kind)] = Date.now();
+  writeSentMap(map);
+}
+
+export function clearWhatsappSent(userId: string, kind: WhatsappMessageKind) {
+  const map = readSentMap();
+  delete map[sentKey(userId, kind)];
+  writeSentMap(map);
+}
+
+export function formatSentAt(ts: number): string {
+  const d = new Date(ts);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  return `${dd}/${mm} ${hh}:${mi}`;
+}
+
 export function openWhatsAppTo(phone: string, message: string): boolean {
   const url = normalizeWhatsappUrl(phone);
   if (!url) return false;
