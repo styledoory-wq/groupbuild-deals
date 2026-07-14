@@ -374,7 +374,54 @@ export default function CategoriesList() {
           ))}
         </div>
 
-        {/* Stages section (main categories) */}
+        {/* When searching → show smart catalog results across the whole tree */}
+        {query.trim() ? (
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: currentDef.color }} />
+              <h2 className="text-[15.5px] font-extrabold text-[#1A1A1A] m-0">
+                תוצאות חיפוש{catalogHits.length ? ` (${catalogHits.length})` : ""}
+              </h2>
+            </div>
+            {searching ? (
+              <div className="space-y-2.5">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="h-[64px] rounded-2xl bg-white/70 border border-white/60 animate-pulse" />
+                ))}
+              </div>
+            ) : catalogHits.length === 0 ? (
+              <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
+                <Search size={28} />
+                <strong className="text-[#26313c]">לא נמצאו תוצאות</strong>
+                <span className="text-[12.5px]">נסה מונח חיפוש אחר</span>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {catalogHits.map((h) => (
+                  <Link
+                    key={h.id}
+                    to={`/resident/categories/${h.id}`}
+                    className="flex items-center gap-3 bg-white rounded-[18px] p-3 border border-white/70 shadow-sm active:scale-[0.99] transition-transform"
+                  >
+                    <span className="h-11 w-11 rounded-2xl bg-[#0E6B5A]/10 flex items-center justify-center text-xl shrink-0">
+                      {h.icon || "📁"}
+                    </span>
+                    <div className="flex-1 min-w-0 text-right">
+                      <p className="font-bold text-[14px] text-[#1F2937] truncate">{h.name}</p>
+                      {h.path && (
+                        <p className="text-[11px] text-[#6B7280] truncate mt-0.5" dir="rtl">{h.path}</p>
+                      )}
+                      <p className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">
+                        {h.supplier_count > 0 ? `${h.supplier_count} ספקים` : "בקרוב"}
+                      </p>
+                    </div>
+                    <ChevronLeft className="h-4 w-4 text-[#6B7280] shrink-0" strokeWidth={2.2} />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+        ) : (
         <section>
           <div className="flex items-center gap-2 mb-3">
             <span
@@ -408,10 +455,7 @@ export default function CategoriesList() {
           ) : filtered.length === 0 ? (
             <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
               <Search size={28} />
-              <strong className="text-[#26313c]">לא נמצאו שלבים</strong>
-              <span className="text-[12.5px]">
-                {query ? "נסה מונח חיפוש אחר" : "בקרוב נוסיף שלבים למסלול זה"}
-              </span>
+              <strong className="text-[#26313c]">בקרוב נוסיף שלבים למסלול זה</strong>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-2.5">
@@ -428,6 +472,8 @@ export default function CategoriesList() {
             </div>
           )}
         </section>
+        )}
+
 
         {/* Promo */}
         {!query && !loading && !errorMsg && filtered.length > 0 && (
