@@ -26,6 +26,11 @@ import { CategoryMultiPicker } from "@/components/categories/CategoryMultiPicker
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { computeCompleteness } from "@/lib/supplierCompleteness";
+import {
+  openWhatsAppTo,
+  supplierCompletionReminderMessage,
+  supplierWelcomeMessage,
+} from "@/lib/whatsappMessages";
 
 interface EditForm {
   business_name: string;

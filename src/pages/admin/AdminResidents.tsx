@@ -8,6 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, UserPlus, Building2, Pencil, Trash2 } from "lucide-react";
 import {
+  openWhatsAppTo,
+  residentCompletionReminderMessage,
+  residentWelcomeMessage,
+} from "@/lib/whatsappMessages";
+import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
