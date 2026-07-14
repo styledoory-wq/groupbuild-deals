@@ -3242,10 +3242,25 @@ export type Database = {
         }
         Returns: string
       }
+      search_catalog: {
+        Args: { _q: string }
+        Returns: {
+          icon: string
+          id: string
+          level: number
+          name: string
+          parent_id: string
+          path: string
+          score: number
+          supplier_count: number
+        }[]
+      }
       set_deposit_hidden: {
         Args: { _deposit_id: string; _hidden: boolean }
         Returns: undefined
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       supplier_confirm_deposit: {
         Args: { _interest_id: string }
         Returns: undefined
