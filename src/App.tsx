@@ -74,6 +74,7 @@ const SupplierLeads = lazy(() => import("./pages/supplier/SupplierLeads"));
 const SupplierReviews = lazy(() => import("./pages/supplier/SupplierReviews"));
 const SupplierAccount = lazy(() => import("./pages/supplier/SupplierAccount"));
 const SupplierRevenue = lazy(() => import("./pages/supplier/SupplierRevenue"));
+const SupplierAnalytics = lazy(() => import("./pages/supplier/SupplierAnalytics"));
 const SupplierDemandInbox = lazy(() => import("./pages/supplier/SupplierDemandInbox"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
