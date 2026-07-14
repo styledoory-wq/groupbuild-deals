@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_message_templates: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience: string
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          subject?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admin_settings: {
         Row: {
           created_at: string

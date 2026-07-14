@@ -102,6 +102,7 @@ const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications")
 const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
 const AdminDemandList = lazy(() => import("./pages/admin/AdminDemandList"));
 const AdminDemandDetail = lazy(() => import("./pages/admin/AdminDemandDetail"));
+const AdminMessageTemplates = lazy(() => import("./pages/admin/AdminMessageTemplates"));
 const CreateDemand = lazy(() => import("./pages/resident/CreateDemand"));
 const MyDemands = lazy(() => import("./pages/resident/MyDemands"));
 const CommitteeDashboard = lazy(() => import("./pages/committee/CommitteeDashboard"));
@@ -345,6 +346,7 @@ const App = () => (
                   <Route path="/admin/committee-requests" element={adminRoute(<AdminCommitteeRequests />)} />
                   <Route path="/admin/demand" element={adminRoute(<AdminDemandList />)} />
                   <Route path="/admin/demand/:id" element={adminRoute(<AdminDemandDetail />)} />
+                  <Route path="/admin/message-templates" element={adminRoute(<AdminMessageTemplates />)} />
                   <Route path="/admin/offers/new" element={adminRoute(<OfferEditor />)} />
                   <Route path="/admin/offers/:dealId/edit" element={adminRoute(<OfferEditor />)} />
                   <Route path="/committee" element={<CommitteeDashboard />} />
