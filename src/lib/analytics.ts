@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type SupplierEventType =
   | "view"
   | "call"
+  | "reveal_phone"
   | "whatsapp"
   | "website"
   | "navigate"
