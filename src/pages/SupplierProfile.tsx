@@ -639,6 +639,14 @@ export default function SupplierProfile() {
           <SmartImg src={lightbox} size="detail" alt="" priority eager className="max-h-[90vh] max-w-full rounded-[20px]" />
         </div>
       )}
+
+      <ShareBusinessSheet
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        supplierId={supplier.id}
+        businessName={supplier.business_name}
+        url={typeof window !== "undefined" ? window.location.href : canonical}
+      />
     </MobileShell>
   );
 }
