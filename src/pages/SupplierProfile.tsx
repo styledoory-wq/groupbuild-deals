@@ -97,13 +97,21 @@ export default function SupplierProfile() {
   const [shareOpen, setShareOpen] = useState(false);
   const dealsRef = useRef<HTMLDivElement>(null);
 
-  // Resolve slug → id when the route is /supplier/:slug
+  // Resolve slug → id when the route is /supplier/:slug.
+  // Only approved + active + not-deleted suppliers are publicly resolvable.
   useEffect(() => {
     if (routeId) { setResolvedId(routeId); return; }
     if (!routeSlug) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.from("suppliers").select("id").eq("slug", routeSlug).maybeSingle();
+      const { data } = await supabase
+        .from("suppliers")
+        .select("id")
+        .eq("slug", routeSlug)
+        .eq("approval_status", "approved")
+        .eq("is_active", true)
+        .eq("is_deleted", false)
+        .maybeSingle();
       if (!cancelled) setResolvedId(data?.id ?? null);
     })();
     return () => { cancelled = true; };
