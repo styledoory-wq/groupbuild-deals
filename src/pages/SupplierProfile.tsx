@@ -591,55 +591,48 @@ export default function SupplierProfile() {
       </div>
 
 
-      {/* Dual CTA */}
+      {/* Dual CTA — clearly two tracks: contact (open to all) + get offers (requires signup) */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
         <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-transparent">
+          <div className="mb-1.5 flex items-center justify-between text-[10px] font-bold text-[#6B7280] uppercase tracking-wider px-1">
+            <span>יצירת קשר ישיר — פתוח לכולם</span>
+            <span>דורש הרשמה</span>
+          </div>
           <div className="flex gap-2">
             {whatsappHref ? (
               <a
                 href={whatsappHref}
                 target="_blank"
                 rel="noreferrer noopener"
-                onClick={async () => {
-                  if (!supplier) return;
-                  void trackSupplierEvent(supplier.id, "whatsapp");
-                  const { data: sd } = await supabase.auth.getSession();
-                  const uid = sd.session?.user.id;
-                  if (!uid) return;
-                  void supabase.from("supplier_inquiries").insert({
-                    supplier_id: supplier.id,
-                    user_id: uid,
-                    message: `לחיצה על וואטסאפ מפרופיל הספק`,
-                    source: "whatsapp_click",
-                    status: "new",
-                  });
-                }}
+                onClick={() => { void trackSupplierEvent(supplier.id, "whatsapp"); }}
                 className="flex-1 h-12 rounded-[16px] bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 shadow-[0_4px_14px_-4px_rgba(37,211,102,0.5)] active:scale-[0.98] transition-transform"
               >
                 <WhatsappIcon className="h-5 w-5" />
-                בקשת הצעה
+                WhatsApp
+              </a>
+            ) : supplier.phone ? (
+              <a
+                href={`tel:${supplier.phone}`}
+                onClick={() => { void trackSupplierEvent(supplier.id, "call"); }}
+                className="flex-1 h-12 rounded-[16px] bg-[#0E6B5A] text-white font-bold inline-flex items-center justify-center gap-2 shadow-[0_4px_14px_-4px_rgba(14,107,90,0.5)] active:scale-[0.98] transition-transform"
+              >
+                <Phone className="h-5 w-5" />
+                התקשר
               </a>
             ) : (
-              <Button
-                onClick={handleInterest}
-                disabled={submitting || interested}
-                variant="outline"
-                className="flex-1 h-12"
-              >
-                {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ נרשם" : "השאר פרטים"}
-              </Button>
+              <div className="flex-1 h-12 rounded-[16px] bg-[#F7F5F0] text-[#9CA3AF] text-sm inline-flex items-center justify-center">אין ערוץ קשר</div>
             )}
             <Button
-              onClick={() => dealsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              disabled={deals.length === 0}
+              onClick={handleInterest}
+              disabled={submitting || interested}
               className="flex-1 h-12"
             >
-              <Tag className="h-4 w-4 ml-1.5" />
-              {deals.length > 0 ? `ראה עסקאות (${deals.length})` : "אין עסקאות פעילות"}
+              {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ נרשם" : "קבל כמה הצעות"}
             </Button>
           </div>
         </div>
       </div>
+
 
       {/* Lightbox */}
       {lightbox && (
