@@ -415,6 +415,7 @@ export default function SupplierProfile() {
                   href={l.href}
                   target="_blank"
                   rel="noreferrer noopener"
+                  onClick={() => { void trackSupplierEvent(supplier.id, l.event); }}
                   className="h-11 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
                 >
                   <l.Icon className="h-4 w-4 text-[#0E6B5A]" />
