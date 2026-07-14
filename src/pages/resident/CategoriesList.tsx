@@ -180,9 +180,10 @@ function StageCard({
 
 /* -------------------- Main -------------------- */
 
+type StageItem = { key: string; title: string; emoji: string; serviceCount: number };
+
 export default function CategoriesList() {
   const navigate = useNavigate();
-  const { categories } = useApp();
 
   const [selectedProject, setSelectedProject] = useState<UiProjectType>(() => {
     try {
@@ -193,7 +194,6 @@ export default function CategoriesList() {
     }
     return "new";
   });
-  const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState("");
 
   // Persist selection
@@ -205,8 +205,8 @@ export default function CategoriesList() {
     }
   }, [selectedProject]);
 
-  // Load category-per-project-type mapping from Supabase
-  const [mapping, setMapping] = useState<Record<string, string[]>>({});
+  // Stages per project type (grouped from category_project_stages)
+  const [stagesByType, setStagesByType] = useState<Record<string, StageItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -217,7 +217,7 @@ export default function CategoriesList() {
       setErrorMsg(null);
       const { data, error } = await supabase
         .from("category_project_stages")
-        .select("project_type,category_id,display_order")
+        .select("project_type,stage_key,category_id,display_order")
         .order("display_order", { ascending: true });
       if (cancelled) return;
       if (error) {
@@ -225,19 +225,27 @@ export default function CategoriesList() {
         setLoading(false);
         return;
       }
-      const by: Record<string, string[]> = {};
-      const seen: Record<string, Set<string>> = {};
-      (data ?? []).forEach((r: { project_type: string; category_id: string }) => {
-        if (!seen[r.project_type]) {
-          seen[r.project_type] = new Set();
-          by[r.project_type] = [];
+      const acc: Record<string, Record<string, { count: number; minOrder: number }>> = {};
+      (data ?? []).forEach(
+        (r: { project_type: string; stage_key: string; display_order: number }) => {
+          const t = r.project_type;
+          const s = r.stage_key;
+          if (!acc[t]) acc[t] = {};
+          if (!acc[t][s]) acc[t][s] = { count: 0, minOrder: r.display_order };
+          acc[t][s].count += 1;
+          if (r.display_order < acc[t][s].minOrder) acc[t][s].minOrder = r.display_order;
         }
-        if (!seen[r.project_type].has(r.category_id)) {
-          seen[r.project_type].add(r.category_id);
-          by[r.project_type].push(r.category_id);
-        }
+      );
+      const out: Record<string, StageItem[]> = {};
+      Object.entries(acc).forEach(([t, byStage]) => {
+        out[t] = Object.entries(byStage)
+          .sort((a, b) => a[1].minOrder - b[1].minOrder)
+          .map(([key, v]) => {
+            const m = stageMeta(t as ProjectType, key);
+            return { key, title: m.title, emoji: m.emoji, serviceCount: v.count };
+          });
       });
-      setMapping(by);
+      setStagesByType(out);
       setLoading(false);
     })();
     return () => {
@@ -248,35 +256,20 @@ export default function CategoriesList() {
   const currentDef =
     PROJECT_TYPES.find((p) => p.id === selectedProject) ?? PROJECT_TYPES[0];
 
-  const projectCategories = useMemo(() => {
-    const ids = mapping[selectedProject] ?? [];
-    const byId = new Map(categories.map((c) => [c.id, c]));
-    const list = ids
-      .map((id) => byId.get(id))
-      .filter((c): c is NonNullable<typeof c> => Boolean(c));
-    return list.map((c) => ({
-      id: c.id,
-      name: c.name,
-      emoji: c.icon ?? "📦",
-    }));
-  }, [mapping, selectedProject, categories]);
+  const stages = stagesByType[selectedProject] ?? [];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return projectCategories;
-    return projectCategories.filter((c) => c.name.toLowerCase().includes(q));
-  }, [projectCategories, query]);
-
-  const visible = expanded ? filtered : filtered.slice(0, INITIAL_VISIBLE);
-  const hasMore = filtered.length > INITIAL_VISIBLE;
+    if (!q) return stages;
+    return stages.filter((s) => s.title.toLowerCase().includes(q));
+  }, [stages, query]);
 
   const handleProjectChange = (id: UiProjectType) => {
     setSelectedProject(id);
-    setExpanded(false);
   };
 
-  const openCategory = (categoryId: string) => {
-    navigate(`/resident/categories/${categoryId}`);
+  const openStage = (stageKey: string) => {
+    navigate(`/resident/categories/stages?type=${selectedProject}&stage=${stageKey}`);
   };
 
   return (
