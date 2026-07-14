@@ -71,7 +71,9 @@ type ReviewItem = {
 };
 
 export default function SupplierProfile() {
-  const { supplierId } = useParams();
+  const params = useParams();
+  const routeSlug = (params.slug as string | undefined) ?? undefined;
+  const routeId = (params.supplierId as string | undefined) ?? undefined;
   const navigate = useNavigate();
   const { categories } = useApp();
   const [loading, setLoading] = useState(true);
