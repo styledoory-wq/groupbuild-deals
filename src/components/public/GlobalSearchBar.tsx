@@ -107,7 +107,7 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
       </form>
 
       {open && (
-        <div className="absolute top-[calc(100%+8px)] inset-x-0 z-40 bg-white rounded-2xl border border-[#ECEEF2] shadow-[0_20px_50px_-15px_rgba(10,31,61,0.28)] max-h-[70vh] overflow-y-auto">
+        <div className="absolute top-[calc(100%+8px)] inset-x-0 z-50 bg-white rounded-2xl border border-[#ECEEF2] shadow-[0_20px_50px_-15px_rgba(10,31,61,0.28)] max-h-[70vh] overflow-y-auto">
           {!term ? (
             <div className="p-4">
               <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider mb-2">חיפושים פופולריים</p>

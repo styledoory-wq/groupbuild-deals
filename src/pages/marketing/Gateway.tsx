@@ -66,7 +66,7 @@ export default function Gateway() {
         </div>
 
         {/* Global public search — SEO + user acquisition */}
-        <div className="mt-4 mb-2 animate-fade-up">
+        <div className="mt-4 mb-2 animate-fade-up relative z-30">
           <GlobalSearchBar variant="hero" />
           <p className="mt-2 text-center text-[11.5px] text-[#6B7280]">
             מנוע חיפוש חופשי — קטגוריות, ספקים וערים. אין צורך בהרשמה.
