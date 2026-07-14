@@ -130,14 +130,18 @@ function CategorySearch({
   );
 }
 
-function CategoryCard({
-  name,
+function StageCard({
+  index,
+  title,
   emoji,
+  serviceCount,
   onClick,
   accentColor,
 }: {
-  name: string;
+  index: number;
+  title: string;
   emoji: string;
+  serviceCount: number;
   onClick: () => void;
   accentColor: string;
 }) {
@@ -145,20 +149,31 @@ function CategoryCard({
     <button
       type="button"
       onClick={onClick}
-      className="relative flex flex-col items-center justify-center gap-2 rounded-[16px] px-2 pt-3 pb-6 min-h-[104px] bg-white/90 border border-[rgba(226,230,227,0.9)] shadow-sm active:scale-[0.98] transition-transform text-center"
+      className="w-full flex items-center gap-3 rounded-2xl bg-white/95 border border-[rgba(226,230,227,0.9)] shadow-sm px-3 py-3 active:scale-[0.99] transition-transform text-right"
     >
-      <span className="text-[26px] leading-none" aria-hidden>
-        {emoji}
-      </span>
-      <strong className="text-[12.5px] leading-tight font-extrabold text-[#1e2530] break-words px-1">
-        {name}
-      </strong>
-      <span
-        className="absolute right-2 bottom-2 grid place-items-center w-[22px] h-[22px] rounded-full"
-        style={{ color: accentColor, background: `${accentColor}14` }}
+      <div
+        className="grid place-items-center w-11 h-11 rounded-xl text-[22px] shrink-0"
+        style={{ background: `${accentColor}14` }}
       >
-        <ChevronLeft size={14} strokeWidth={2.4} />
-      </span>
+        <span aria-hidden>{emoji}</span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span
+            className="text-[10.5px] font-extrabold tracking-wide"
+            style={{ color: accentColor }}
+          >
+            שלב {String(index).padStart(2, "0")}
+          </span>
+        </div>
+        <strong className="block text-[14.5px] font-extrabold text-[#1e2530] leading-tight">
+          {title}
+        </strong>
+        <span className="block text-[11.5px] text-[#7b8490] mt-0.5">
+          {serviceCount} שירותים
+        </span>
+      </div>
+      <ChevronLeft size={18} className="text-[#b0b7bd] shrink-0" strokeWidth={2.2} />
     </button>
   );
 }
