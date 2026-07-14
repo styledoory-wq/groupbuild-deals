@@ -311,6 +311,7 @@ const App = () => (
                   <Route path="/supplier/scan" element={supplierRoute(<SupplierScan />)} />
                   <Route path="/supplier/redemptions" element={supplierRoute(<SupplierRedemptions />)} />
                   <Route path="/supplier/revenue" element={supplierRoute(<SupplierRevenue />)} />
+                  <Route path="/supplier/analytics" element={supplierRoute(<SupplierAnalytics />)} />
                   <Route path="/supplier/account" element={supplierRoute(<SupplierAccount />)} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/admin-login" element={<AdminLogin />} />
