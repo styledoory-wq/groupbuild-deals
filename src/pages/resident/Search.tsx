@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { BackHeader, SkeletonList, EmptyState } from "@/components/ds";
 import { supabase } from "@/integrations/supabase/client";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { Seo } from "@/components/seo/Seo";
 
 type SupplierRow = {
   id: string;
