@@ -9,6 +9,7 @@ import type { OfferTier } from "@/lib/offerPricing";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { SmartImg } from "@/components/ui/SmartImg";
+import { Seo } from "@/components/seo/Seo";
 
 type SupplierRow = {
   id: string;
