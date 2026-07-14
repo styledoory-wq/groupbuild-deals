@@ -386,6 +386,41 @@ export default function AdminResidents() {
                 <Label className="text-sm">חשבון פעיל</Label>
                 <Switch checked={eActive} onCheckedChange={setEActive} />
               </div>
+
+              <div className="space-y-2 pt-3 border-t border-border">
+                <h4 className="text-fs-xs font-bold text-muted-foreground">וואטסאפ</h4>
+                <button
+                  onClick={() => {
+                    if (!editing) return;
+                    const name = eName || editing.email || "";
+                    const dashboardUrl = `${window.location.origin}/resident`;
+                    const msg = residentWelcomeMessage(name, dashboardUrl);
+                    if (!openWhatsAppTo(ePhone, msg)) {
+                      toast.error("לדייר אין מספר טלפון תקין");
+                    }
+                  }}
+                  className="w-full h-10 rounded-xl bg-emerald-500 text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-600"
+                >
+                  👋 שלח ברוך הבא
+                </button>
+                <button
+                  onClick={() => {
+                    if (!editing) return;
+                    const name = eName || editing.email || "";
+                    const profileEditUrl = `${window.location.origin}/resident/profile/edit`;
+                    const msg = residentCompletionReminderMessage(name, profileEditUrl);
+                    if (!openWhatsAppTo(ePhone, msg)) {
+                      toast.error("לדייר אין מספר טלפון תקין");
+                    }
+                  }}
+                  className="w-full h-10 rounded-xl bg-amber-500 text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 hover:bg-amber-600"
+                >
+                  📝 תזכורת השלמת פרטים
+                </button>
+                <p className="text-fs-xs text-muted-foreground text-center">
+                  נפתח בוואטסאפ עם הודעה מוכנה — אתה מאשר ושולח
+                </p>
+              </div>
             </div>
           )}
           <DialogFooter className="mt-4 gap-2 sm:gap-2 flex-row">
