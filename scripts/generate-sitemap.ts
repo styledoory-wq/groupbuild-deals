@@ -42,7 +42,7 @@ async function fetchDynamicEntries(): Promise<SitemapEntry[]> {
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
   const entries: SitemapEntry[] = [];
 
-  const [{ data: suppliers }, { data: categories }, { data: cities }] = await Promise.all([
+  const [{ data: suppliers }, { data: categories }, { data: combos, error: combosErr }] = await Promise.all([
     supabase
       .from("suppliers")
       .select("slug, updated_at")
@@ -55,7 +55,7 @@ async function fetchDynamicEntries(): Promise<SitemapEntry[]> {
       .eq("is_active", true)
       .eq("is_deleted", false)
       .not("slug", "is", null),
-    supabase.rpc("list_public_cities"),
+    supabase.rpc("sitemap_city_category_combos"),
   ]);
 
   (suppliers ?? []).forEach((s) => {
@@ -68,10 +68,8 @@ async function fetchDynamicEntries(): Promise<SitemapEntry[]> {
       });
     }
   });
-  const categorySlugs: string[] = [];
   (categories ?? []).forEach((c) => {
     if (c.slug) {
-      categorySlugs.push(c.slug);
       entries.push({
         path: `/category/${c.slug}`,
         lastmod: c.updated_at?.slice(0, 10),
@@ -81,17 +79,16 @@ async function fetchDynamicEntries(): Promise<SitemapEntry[]> {
     }
   });
 
-  // City × Category landing pages — massive long-tail SEO surface.
-  // Cap combinations to avoid a giant sitemap: top 30 cities × top 40 categories.
-  const cityList = ((cities ?? []) as Array<{ slug: string }>).slice(0, 30);
-  const catList = categorySlugs.slice(0, 40);
-  cityList.forEach((c) => {
-    catList.forEach((cat) => {
-      entries.push({
-        path: `/city/${c.slug}/${cat}`,
-        changefreq: "weekly",
-        priority: "0.6",
-      });
+  // City × Category pages — ONLY combos that meet quality thresholds
+  // (≥3 approved suppliers, ≥1 with full profile+image). Enforced by RPC.
+  if (combosErr) {
+    console.warn("[sitemap] sitemap_city_category_combos failed:", combosErr.message);
+  }
+  ((combos ?? []) as Array<{ city_slug: string; category_slug: string }>).forEach((c) => {
+    entries.push({
+      path: `/city/${c.city_slug}/${c.category_slug}`,
+      changefreq: "weekly",
+      priority: "0.6",
     });
   });
 
