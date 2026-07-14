@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, LayoutGrid, MapPin, Users, MessageSquare, UserCheck, ShieldCheck, Building2, BarChart3, ArrowLeft, LifeBuoy, FlaskConical, type LucideIcon } from "lucide-react";
+import { Bell, LayoutGrid, MapPin, Users, MessageSquare, UserCheck, ShieldCheck, Building2, BarChart3, ArrowLeft, LifeBuoy, FlaskConical, Send, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
