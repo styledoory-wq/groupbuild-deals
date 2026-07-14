@@ -153,6 +153,11 @@ export default function DealsList() {
 
   return (
     <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
+      <Seo
+        title="הצעות פעילות מספקים לדיירים חדשים — מבצעים ורכישה קבוצתית | GroupBuild"
+        description="עשרות הצעות פעילות מספקים מובילים לפרויקטים חדשים. הצטרפו לרכישה קבוצתית וחסכו אלפי שקלים."
+        path="/deals"
+      />
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
