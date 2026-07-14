@@ -2,9 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
-  ChevronDown,
   ChevronLeft,
-  ChevronUp,
   Home as HomeIcon,
   PaintRoller,
   Building2,
@@ -13,11 +11,9 @@ import {
   Check,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import { PROJECT_TYPE_META, type ProjectType } from "@/lib/stageCatalog";
+import { stageMeta, type ProjectType } from "@/lib/stageCatalog";
 
-const INITIAL_VISIBLE = 5;
 const STORAGE_KEY = "gb:projectType";
 
 type UiProjectType = Extract<ProjectType, "new" | "reno" | "building">;
@@ -134,14 +130,18 @@ function CategorySearch({
   );
 }
 
-function CategoryCard({
-  name,
+function StageCard({
+  index,
+  title,
   emoji,
+  serviceCount,
   onClick,
   accentColor,
 }: {
-  name: string;
+  index: number;
+  title: string;
   emoji: string;
+  serviceCount: number;
   onClick: () => void;
   accentColor: string;
 }) {
@@ -149,29 +149,41 @@ function CategoryCard({
     <button
       type="button"
       onClick={onClick}
-      className="relative flex flex-col items-center justify-center gap-2 rounded-[16px] px-2 pt-3 pb-6 min-h-[104px] bg-white/90 border border-[rgba(226,230,227,0.9)] shadow-sm active:scale-[0.98] transition-transform text-center"
+      className="w-full flex items-center gap-3 rounded-2xl bg-white/95 border border-[rgba(226,230,227,0.9)] shadow-sm px-3 py-3 active:scale-[0.99] transition-transform text-right"
     >
-      <span className="text-[26px] leading-none" aria-hidden>
-        {emoji}
-      </span>
-      <strong className="text-[12.5px] leading-tight font-extrabold text-[#1e2530] break-words px-1">
-        {name}
-      </strong>
-      <span
-        className="absolute right-2 bottom-2 grid place-items-center w-[22px] h-[22px] rounded-full"
-        style={{ color: accentColor, background: `${accentColor}14` }}
+      <div
+        className="grid place-items-center w-11 h-11 rounded-xl text-[22px] shrink-0"
+        style={{ background: `${accentColor}14` }}
       >
-        <ChevronLeft size={14} strokeWidth={2.4} />
-      </span>
+        <span aria-hidden>{emoji}</span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span
+            className="text-[10.5px] font-extrabold tracking-wide"
+            style={{ color: accentColor }}
+          >
+            שלב {String(index).padStart(2, "0")}
+          </span>
+        </div>
+        <strong className="block text-[14.5px] font-extrabold text-[#1e2530] leading-tight">
+          {title}
+        </strong>
+        <span className="block text-[11.5px] text-[#7b8490] mt-0.5">
+          {serviceCount} שירותים
+        </span>
+      </div>
+      <ChevronLeft size={18} className="text-[#b0b7bd] shrink-0" strokeWidth={2.2} />
     </button>
   );
 }
 
 /* -------------------- Main -------------------- */
 
+type StageItem = { key: string; title: string; emoji: string; serviceCount: number };
+
 export default function CategoriesList() {
   const navigate = useNavigate();
-  const { categories } = useApp();
 
   const [selectedProject, setSelectedProject] = useState<UiProjectType>(() => {
     try {
@@ -182,7 +194,6 @@ export default function CategoriesList() {
     }
     return "new";
   });
-  const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState("");
 
   // Persist selection
@@ -194,8 +205,8 @@ export default function CategoriesList() {
     }
   }, [selectedProject]);
 
-  // Load category-per-project-type mapping from Supabase
-  const [mapping, setMapping] = useState<Record<string, string[]>>({});
+  // Stages per project type (grouped from category_project_stages)
+  const [stagesByType, setStagesByType] = useState<Record<string, StageItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -206,7 +217,7 @@ export default function CategoriesList() {
       setErrorMsg(null);
       const { data, error } = await supabase
         .from("category_project_stages")
-        .select("project_type,category_id,display_order")
+        .select("project_type,stage_key,category_id,display_order")
         .order("display_order", { ascending: true });
       if (cancelled) return;
       if (error) {
@@ -214,19 +225,27 @@ export default function CategoriesList() {
         setLoading(false);
         return;
       }
-      const by: Record<string, string[]> = {};
-      const seen: Record<string, Set<string>> = {};
-      (data ?? []).forEach((r: { project_type: string; category_id: string }) => {
-        if (!seen[r.project_type]) {
-          seen[r.project_type] = new Set();
-          by[r.project_type] = [];
+      const acc: Record<string, Record<string, { count: number; minOrder: number }>> = {};
+      (data ?? []).forEach(
+        (r: { project_type: string; stage_key: string; display_order: number }) => {
+          const t = r.project_type;
+          const s = r.stage_key;
+          if (!acc[t]) acc[t] = {};
+          if (!acc[t][s]) acc[t][s] = { count: 0, minOrder: r.display_order };
+          acc[t][s].count += 1;
+          if (r.display_order < acc[t][s].minOrder) acc[t][s].minOrder = r.display_order;
         }
-        if (!seen[r.project_type].has(r.category_id)) {
-          seen[r.project_type].add(r.category_id);
-          by[r.project_type].push(r.category_id);
-        }
+      );
+      const out: Record<string, StageItem[]> = {};
+      Object.entries(acc).forEach(([t, byStage]) => {
+        out[t] = Object.entries(byStage)
+          .sort((a, b) => a[1].minOrder - b[1].minOrder)
+          .map(([key, v]) => {
+            const m = stageMeta(t as ProjectType, key);
+            return { key, title: m.title, emoji: m.emoji, serviceCount: v.count };
+          });
       });
-      setMapping(by);
+      setStagesByType(out);
       setLoading(false);
     })();
     return () => {
@@ -237,35 +256,20 @@ export default function CategoriesList() {
   const currentDef =
     PROJECT_TYPES.find((p) => p.id === selectedProject) ?? PROJECT_TYPES[0];
 
-  const projectCategories = useMemo(() => {
-    const ids = mapping[selectedProject] ?? [];
-    const byId = new Map(categories.map((c) => [c.id, c]));
-    const list = ids
-      .map((id) => byId.get(id))
-      .filter((c): c is NonNullable<typeof c> => Boolean(c));
-    return list.map((c) => ({
-      id: c.id,
-      name: c.name,
-      emoji: c.icon ?? "📦",
-    }));
-  }, [mapping, selectedProject, categories]);
+  const stages = stagesByType[selectedProject] ?? [];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return projectCategories;
-    return projectCategories.filter((c) => c.name.toLowerCase().includes(q));
-  }, [projectCategories, query]);
-
-  const visible = expanded ? filtered : filtered.slice(0, INITIAL_VISIBLE);
-  const hasMore = filtered.length > INITIAL_VISIBLE;
+    if (!q) return stages;
+    return stages.filter((s) => s.title.toLowerCase().includes(q));
+  }, [stages, query]);
 
   const handleProjectChange = (id: UiProjectType) => {
     setSelectedProject(id);
-    setExpanded(false);
   };
 
-  const openCategory = (categoryId: string) => {
-    navigate(`/resident/categories/${categoryId}`);
+  const openStage = (stageKey: string) => {
+    navigate(`/resident/categories/stages?type=${selectedProject}&stage=${stageKey}`);
   };
 
   return (
@@ -338,36 +342,24 @@ export default function CategoriesList() {
           ))}
         </div>
 
-        {/* Categories section */}
+        {/* Stages section (main categories) */}
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span
-                className="w-2.5 h-2.5 rounded-full"
-                style={{ background: currentDef.color }}
-              />
-              <h2 className="text-[15.5px] font-extrabold text-[#1A1A1A] m-0">
-                קטגוריות ב{currentDef.title.split("\n")[0]}
-              </h2>
-            </div>
-            {hasMore && (
-              <button
-                type="button"
-                aria-label={expanded ? "הצג פחות" : "הצג עוד"}
-                onClick={() => setExpanded((v) => !v)}
-                className="grid place-items-center w-9 h-9 rounded-full bg-white/90 border border-white/70 shadow-sm text-[#172033]"
-              >
-                {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-              </button>
-            )}
+          <div className="flex items-center gap-2 mb-3">
+            <span
+              className="w-2.5 h-2.5 rounded-full"
+              style={{ background: currentDef.color }}
+            />
+            <h2 className="text-[15.5px] font-extrabold text-[#1A1A1A] m-0">
+              שלבי {currentDef.title.split("\n")[0]}
+            </h2>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="space-y-2.5">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="min-h-[104px] rounded-[16px] bg-white/70 border border-white/60 animate-pulse"
+                  className="h-[76px] rounded-2xl bg-white/70 border border-white/60 animate-pulse"
                 />
               ))}
             </div>
@@ -384,41 +376,30 @@ export default function CategoriesList() {
           ) : filtered.length === 0 ? (
             <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
               <Search size={28} />
-              <strong className="text-[#26313c]">לא נמצאו שירותים</strong>
+              <strong className="text-[#26313c]">לא נמצאו שלבים</strong>
               <span className="text-[12.5px]">
-                {query ? "נסה מונח חיפוש אחר" : "בקרוב נוסיף שירותים בקטגוריה זו"}
+                {query ? "נסה מונח חיפוש אחר" : "בקרוב נוסיף שלבים למסלול זה"}
               </span>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-2.5">
-              {visible.map((c) => (
-                <CategoryCard
-                  key={c.id}
-                  name={c.name}
-                  emoji={c.emoji}
-                  onClick={() => openCategory(c.id)}
+            <div className="space-y-2.5">
+              {filtered.map((s, i) => (
+                <StageCard
+                  key={s.key}
+                  index={i + 1}
+                  title={s.title}
+                  emoji={s.emoji}
+                  serviceCount={s.serviceCount}
+                  onClick={() => openStage(s.key)}
                   accentColor={currentDef.color}
                 />
               ))}
-              {hasMore && (
-                <button
-                  type="button"
-                  onClick={() => setExpanded((v) => !v)}
-                  className="relative flex flex-col items-center justify-center gap-2 rounded-[16px] min-h-[104px] bg-white/90 border border-[rgba(226,230,227,0.9)] shadow-sm active:scale-[0.98] transition-transform"
-                  style={{ color: currentDef.color }}
-                >
-                  {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-                  <strong className="text-[12.5px] font-extrabold text-[#1e2530]">
-                    {expanded ? "הצג פחות" : "הצג עוד"}
-                  </strong>
-                </button>
-              )}
             </div>
           )}
         </section>
 
-        {/* Promo (only collapsed & no query) */}
-        {!expanded && !query && !loading && !errorMsg && filtered.length > 0 && (
+        {/* Promo */}
+        {!query && !loading && !errorMsg && filtered.length > 0 && (
           <aside
             className="mt-6 rounded-[22px] p-4 border flex items-center gap-3 overflow-hidden"
             style={{
