@@ -2076,6 +2076,92 @@ export type Database = {
           },
         ]
       }
+      search_queries: {
+        Row: {
+          clicked_result_id: string | null
+          clicked_result_type: string | null
+          created_at: string
+          id: string
+          query: string
+          results_count: number
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          clicked_result_id?: string | null
+          clicked_result_type?: string | null
+          created_at?: string
+          id?: string
+          query: string
+          results_count?: number
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          clicked_result_id?: string | null
+          clicked_result_type?: string | null
+          created_at?: string
+          id?: string
+          query?: string
+          results_count?: number
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      supplier_analytics_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          meta: Json | null
+          page_url: string | null
+          referrer: string | null
+          session_id: string | null
+          supplier_id: string
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          meta?: Json | null
+          page_url?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          supplier_id: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          meta?: Json | null
+          page_url?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          supplier_id?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_analytics_events_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_catalogs: {
         Row: {
           created_at: string
@@ -2474,6 +2560,7 @@ export type Database = {
           serves_all_country: boolean
           service_areas: string[]
           short_description: string | null
+          slug: string | null
           success_fee: number
           success_fee_type: string
           successful_redemptions: number
@@ -2532,6 +2619,7 @@ export type Database = {
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
+          slug?: string | null
           success_fee?: number
           success_fee_type?: string
           successful_redemptions?: number
@@ -2590,6 +2678,7 @@ export type Database = {
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
+          slug?: string | null
           success_fee?: number
           success_fee_type?: string
           successful_redemptions?: number
@@ -3294,6 +3383,7 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      slugify_text: { Args: { _input: string }; Returns: string }
       supplier_confirm_deposit: {
         Args: { _interest_id: string }
         Returns: undefined
@@ -3317,6 +3407,13 @@ export type Database = {
       supplier_soft_delete_interest: {
         Args: { _interest_id: string }
         Returns: undefined
+      }
+      supplier_stats: {
+        Args: { _days?: number; _supplier_id: string }
+        Returns: {
+          count: number
+          event_type: string
+        }[]
       }
       supplier_update_interest_meta: {
         Args: { _interest_id: string; _notes?: string; _starred?: boolean }
