@@ -13,6 +13,7 @@ import {
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
+import { Seo } from "@/components/seo/Seo";
 
 const STORAGE_KEY = "gb:projectType";
 
