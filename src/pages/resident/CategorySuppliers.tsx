@@ -63,8 +63,9 @@ const CATEGORY_ID_ALIASES: Record<string, string> = {
 
 const NATIONAL_AREA = "כל הארץ";
 
-export default function CategorySuppliers() {
-  const { categoryId } = useParams();
+export default function CategorySuppliers({ initialCategoryId }: { initialCategoryId?: string } = {}) {
+  const { categoryId: routeCategoryId } = useParams();
+  const categoryId = initialCategoryId ?? routeCategoryId;
   const navigate = useNavigate();
   const { categories } = useApp();
   const { regions, cities } = useRegions();

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Star, ArrowRight, Tag, Loader2 } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Phone, Share2, Navigation, Star, ArrowRight, Tag, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState, ErrorState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricin
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
 import { trackSupplierEvent } from "@/lib/analytics";
+import { useGuestGate } from "@/hooks/useGuestGate";
 
 interface DbSupplier {
   id: string;
@@ -75,6 +77,7 @@ export default function SupplierProfile() {
   const routeSlug = (params.slug as string | undefined) ?? undefined;
   const routeId = (params.supplierId as string | undefined) ?? undefined;
   const navigate = useNavigate();
+  const { requireAuth } = useGuestGate();
   const { categories } = useApp();
   const [loading, setLoading] = useState(true);
   const [supplier, setSupplier] = useState<DbSupplier | null>(null);
@@ -214,20 +217,14 @@ export default function SupplierProfile() {
     [supplier],
   );
 
-  const handleInterest = async () => {
-    if (supplier?.id) void trackSupplierEvent(supplier.id, "open_project");
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) {
-      toast.error("יש להתחבר כדי להביע עניין");
-      navigate("/auth");
-      return;
-    }
+  const submitInterest = async () => {
     if (!supplier) return;
+    const { data: session } = await supabase.auth.getSession();
+    const userId = session.session?.user.id;
+    if (!userId) return;
     setSubmitting(true);
     try {
-      const userId = session.session.user.id;
-      const userEmail = session.session.user.email ?? null;
-      // Pull profile contact details so the supplier sees a real lead
+      const userEmail = session.session?.user.email ?? null;
       const { data: prof } = await supabase
         .from("profiles")
         .select("full_name,phone,city,project_id")
@@ -254,6 +251,33 @@ export default function SupplierProfile() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleInterest = () => {
+    if (!supplier) return;
+    void trackSupplierEvent(supplier.id, "open_project");
+    requireAuth("פתיחת פרויקט וקבלת הצעות דורשת חשבון קצר", submitInterest);
+  };
+
+  const handleShare = async () => {
+    if (!supplier) return;
+    void trackSupplierEvent(supplier.id, "share");
+    const url = window.location.href;
+    const shareData = { title: supplier.business_name, text: `${supplier.business_name} ב־GroupBuild`, url };
+    try {
+      if (navigator.share) await navigator.share(shareData);
+      else {
+        await navigator.clipboard.writeText(url);
+        toast.success("הקישור הועתק");
+      }
+    } catch { /* user cancelled */ }
+  };
+
+  const handleNavigate = () => {
+    if (!supplier) return;
+    void trackSupplierEvent(supplier.id, "navigate");
+    const q = encodeURIComponent(supplier.business_name);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank", "noopener");
   };
 
   if (loading) {
@@ -284,8 +308,32 @@ export default function SupplierProfile() {
   if (supplier.instagram_url) links.push({ label: "אינסטגרם", href: supplier.instagram_url, Icon: Instagram });
   if (supplier.facebook_url) links.push({ label: "פייסבוק", href: supplier.facebook_url, Icon: Facebook });
 
+  const canonical = `https://groupbuild.co.il/supplier/${routeSlug ?? supplier.id}`;
+  const seoTitle = `${supplier.business_name} — ספק ב־GroupBuild`;
+  const seoDesc = (supplier.short_description || supplier.description || `${supplier.business_name} — צור קשר, גלריה, ביקורות ומבצעים ב־GroupBuild`).slice(0, 160);
+
   return (
     <MobileShell>
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDesc} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDesc} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:type" content="business.business" />
+        {supplier.logo_url && <meta property="og:image" content={supplier.logo_url} />}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: supplier.business_name,
+          description: supplier.description || undefined,
+          telephone: supplier.phone || undefined,
+          url: canonical,
+          image: supplier.logo_url || undefined,
+          areaServed: supplier.serves_all_country ? "IL" : (serviceAreas.length ? serviceAreas : undefined),
+        })}</script>
+      </Helmet>
       {/* Hero */}
       <div className="px-5 pt-4 pb-4 relative">
         <BackHeader title={supplier.business_name} subtitle="פרופיל ספק" />
@@ -329,6 +377,39 @@ export default function SupplierProfile() {
 
 
       <div className="px-5 relative z-10 space-y-4 pb-32">
+        {/* Public contact strip — always visible, no auth required */}
+        <div className="gb-card p-3">
+          <div className="grid grid-cols-3 gap-2">
+            {supplier.phone ? (
+              <a
+                href={`tel:${supplier.phone}`}
+                onClick={() => { void trackSupplierEvent(supplier.id, "reveal_phone"); void trackSupplierEvent(supplier.id, "call"); }}
+                className="h-14 rounded-[16px] bg-[#0E6B5A] text-white text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(14,107,90,0.5)] active:scale-[0.97] transition-transform"
+                aria-label={`התקשר ל־${supplier.business_name}`}
+              >
+                <Phone className="h-4 w-4" />
+                <span dir="ltr" className="text-[11px] tracking-wide">{supplier.phone}</span>
+              </a>
+            ) : (
+              <div className="h-14 rounded-[16px] bg-[#F7F5F0] text-[11px] text-[#9CA3AF] flex items-center justify-center">אין טלפון</div>
+            )}
+            <button
+              onClick={handleNavigate}
+              className="h-14 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
+            >
+              <Navigation className="h-4 w-4 text-[#0E6B5A]" />
+              ניווט
+            </button>
+            <button
+              onClick={handleShare}
+              className="h-14 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
+            >
+              <Share2 className="h-4 w-4 text-[#0E6B5A]" />
+              שתף
+            </button>
+          </div>
+        </div>
+
         {/* Quick links */}
         {links.length > 0 && (
           <div className="gb-card p-3">
@@ -510,55 +591,48 @@ export default function SupplierProfile() {
       </div>
 
 
-      {/* Dual CTA */}
+      {/* Dual CTA — clearly two tracks: contact (open to all) + get offers (requires signup) */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
         <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-transparent">
+          <div className="mb-1.5 flex items-center justify-between text-[10px] font-bold text-[#6B7280] uppercase tracking-wider px-1">
+            <span>יצירת קשר ישיר — פתוח לכולם</span>
+            <span>דורש הרשמה</span>
+          </div>
           <div className="flex gap-2">
             {whatsappHref ? (
               <a
                 href={whatsappHref}
                 target="_blank"
                 rel="noreferrer noopener"
-                onClick={async () => {
-                  if (!supplier) return;
-                  void trackSupplierEvent(supplier.id, "whatsapp");
-                  const { data: sd } = await supabase.auth.getSession();
-                  const uid = sd.session?.user.id;
-                  if (!uid) return;
-                  void supabase.from("supplier_inquiries").insert({
-                    supplier_id: supplier.id,
-                    user_id: uid,
-                    message: `לחיצה על וואטסאפ מפרופיל הספק`,
-                    source: "whatsapp_click",
-                    status: "new",
-                  });
-                }}
+                onClick={() => { void trackSupplierEvent(supplier.id, "whatsapp"); }}
                 className="flex-1 h-12 rounded-[16px] bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 shadow-[0_4px_14px_-4px_rgba(37,211,102,0.5)] active:scale-[0.98] transition-transform"
               >
                 <WhatsappIcon className="h-5 w-5" />
-                בקשת הצעה
+                WhatsApp
+              </a>
+            ) : supplier.phone ? (
+              <a
+                href={`tel:${supplier.phone}`}
+                onClick={() => { void trackSupplierEvent(supplier.id, "call"); }}
+                className="flex-1 h-12 rounded-[16px] bg-[#0E6B5A] text-white font-bold inline-flex items-center justify-center gap-2 shadow-[0_4px_14px_-4px_rgba(14,107,90,0.5)] active:scale-[0.98] transition-transform"
+              >
+                <Phone className="h-5 w-5" />
+                התקשר
               </a>
             ) : (
-              <Button
-                onClick={handleInterest}
-                disabled={submitting || interested}
-                variant="outline"
-                className="flex-1 h-12"
-              >
-                {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ נרשם" : "השאר פרטים"}
-              </Button>
+              <div className="flex-1 h-12 rounded-[16px] bg-[#F7F5F0] text-[#9CA3AF] text-sm inline-flex items-center justify-center">אין ערוץ קשר</div>
             )}
             <Button
-              onClick={() => dealsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              disabled={deals.length === 0}
+              onClick={handleInterest}
+              disabled={submitting || interested}
               className="flex-1 h-12"
             >
-              <Tag className="h-4 w-4 ml-1.5" />
-              {deals.length > 0 ? `ראה עסקאות (${deals.length})` : "אין עסקאות פעילות"}
+              {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ נרשם" : "קבל כמה הצעות"}
             </Button>
           </div>
         </div>
       </div>
+
 
       {/* Lightbox */}
       {lightbox && (

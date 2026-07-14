@@ -14,6 +14,7 @@ import { isAdminEmail } from "@/lib/auth";
 import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 import { PreviewModeBanner } from "./components/PreviewModeBanner";
 import { getPreviewRole } from "./lib/previewMode";
+import { GuestGateProvider } from "./hooks/useGuestGate";
 
 const Welcome = lazy(() => import("./pages/Welcome"));
 const Gateway = lazy(() => import("./pages/marketing/Gateway"));
@@ -227,6 +228,7 @@ const App = () => (
           <PreviewModeBanner />
           <PreloadImportantRoutes />
           <TermsAcceptanceGate>
+            <GuestGateProvider>
             <RouteTransition>
               <Suspense fallback={<SuspenseFallback />}>
                 <Routes>
@@ -352,6 +354,7 @@ const App = () => (
                 </Routes>
               </Suspense>
             </RouteTransition>
+            </GuestGateProvider>
           </TermsAcceptanceGate>
         </BrowserRouter>
         </HelmetProvider>
