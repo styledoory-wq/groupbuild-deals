@@ -631,6 +631,38 @@ export default function AdminSupplierDetail() {
             </div>
             <div className="pt-2 mt-2 border-t border-border/50">
               <button
+                onClick={() => {
+                  const phone = (form.phone ?? "").replace(/\D/g, "");
+                  if (!phone) {
+                    toast.error("לספק אין מספר טלפון");
+                    return;
+                  }
+                  const intl = phone.startsWith("0") ? `972${phone.slice(1)}` : phone;
+                  const name = form.contact_name || form.business_name || "";
+                  const onboardingUrl = `${window.location.origin}/supplier/onboarding`;
+                  const supportPhone = "0526247941";
+                  const msg =
+                    `שלום ${name} 👋\n` +
+                    `ברוך הבא ל-GroupBuild — הפלטפורמה שמחברת אותך לדיירי פרויקטים חדשים בכל הארץ.\n\n` +
+                    `כאן תוכל:\n` +
+                    `• לפרסם הצעות מיוחדות לדיירים\n` +
+                    `• לקבל לידים איכותיים מפרויקטים באזורי השירות שלך\n` +
+                    `• לנהל את הפרופיל, קטלוג ומדיה בקלות\n\n` +
+                    `להשלמת הפרופיל וההתחלה:\n${onboardingUrl}\n\n` +
+                    `לכל שאלה — פשוט תענה כאן בהודעה, או ווטסאפ ל-${supportPhone}. נשמח לעזור! 🙌`;
+                  const wa = `https://wa.me/${intl}?text=${encodeURIComponent(msg)}`;
+                  window.open(wa, "_blank", "noopener");
+                }}
+                className="w-full h-10 rounded-xl bg-emerald-500 text-white text-fs-sm font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-600"
+              >
+                💬 שלח הודעת "ברוך הבא" בוואטסאפ
+              </button>
+              <p className="text-fs-xs text-muted-foreground text-center mt-1.5">
+                נפתח בוואטסאפ עם הודעה מוכנה — אתה מאשר ושולח
+              </p>
+            </div>
+            <div className="pt-2 mt-2 border-t border-border/50">
+              <button
                 onClick={() => setDeleteOpen(true)}
                 className="w-full h-10 rounded-xl text-destructive border border-destructive/30 text-fs-sm font-bold flex items-center justify-center gap-1.5 hover:bg-destructive/5"
               >
