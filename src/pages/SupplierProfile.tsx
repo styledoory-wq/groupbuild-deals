@@ -297,11 +297,11 @@ export default function SupplierProfile() {
     );
   }
 
-  const links: { label: string; href: string; Icon: React.ComponentType<{ className?: string }> }[] = [];
-  if (supplier.website_url) links.push({ label: "לאתר הספק", href: supplier.website_url, Icon: Globe });
-  if (whatsappHref) links.push({ label: "וואטסאפ", href: whatsappHref, Icon: WhatsappIcon });
-  if (supplier.instagram_url) links.push({ label: "אינסטגרם", href: supplier.instagram_url, Icon: Instagram });
-  if (supplier.facebook_url) links.push({ label: "פייסבוק", href: supplier.facebook_url, Icon: Facebook });
+  const links: { label: string; href: string; Icon: React.ComponentType<{ className?: string }>; event: "website" | "whatsapp" | "share" }[] = [];
+  if (supplier.website_url) links.push({ label: "לאתר הספק", href: supplier.website_url, Icon: Globe, event: "website" });
+  if (whatsappHref) links.push({ label: "וואטסאפ", href: whatsappHref, Icon: WhatsappIcon, event: "whatsapp" });
+  if (supplier.instagram_url) links.push({ label: "אינסטגרם", href: supplier.instagram_url, Icon: Instagram, event: "share" });
+  if (supplier.facebook_url) links.push({ label: "פייסבוק", href: supplier.facebook_url, Icon: Facebook, event: "share" });
 
   const canonical = `https://groupbuild.co.il/supplier/${routeSlug ?? supplier.id}`;
   const seoTitle = `${supplier.business_name} — ספק ב־GroupBuild`;
