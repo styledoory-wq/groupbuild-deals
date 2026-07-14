@@ -184,7 +184,7 @@ export default function SupplierAnalytics() {
   const getPrev = (t: string) => Number(map[t]?.previous_count ?? 0);
 
   const views = get("view");
-  const calls = get("call") + get("reveal_phone");
+  const calls = get("call");
   const wa = get("whatsapp");
   const nav = get("navigate");
   const shares = get("share");
@@ -297,7 +297,7 @@ export default function SupplierAnalytics() {
             <section className="mt-4">
               <div className="flex gap-3 overflow-x-auto px-5 pb-2 scrollbar-none lg:grid lg:grid-cols-4 lg:gap-3">
                 <KpiCard icon={Eye} label="צפיות בפרופיל" value={views} delta={pctChange(views, getPrev("view"))} />
-                <KpiCard icon={Phone} label="שיחות" value={calls} delta={pctChange(calls, getPrev("call") + getPrev("reveal_phone"))} />
+                <KpiCard icon={Phone} label="שיחות" value={calls} delta={pctChange(calls, getPrev("call"))} />
                 <KpiCard icon={MessageCircle} label="WhatsApp" value={wa} delta={pctChange(wa, getPrev("whatsapp"))} />
                 <KpiCard icon={Navigation} label="ניווט" value={nav} delta={pctChange(nav, getPrev("navigate"))} />
                 <KpiCard icon={Globe} label="אתר" value={website} delta={pctChange(website, getPrev("website"))} />
