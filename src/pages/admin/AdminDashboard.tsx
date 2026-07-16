@@ -125,10 +125,10 @@ export default function AdminDashboard() {
 
           {/* Quiet KPI row */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <KpiCard icon={Store} label="ספקים" value={snapshot.suppliersTotal} delta={snapshot.newSuppliersWeek} sub={`${snapshot.newSuppliersWeek > 0 ? "+" : ""}${snapshot.newSuppliersWeek} השבוע`} onClick={() => navigate("/admin/suppliers")} loading={loading} />
-            <KpiCard icon={Tag} label="הצעות" value={snapshot.dealsTotal} delta={snapshot.activeDeals} sub={`${snapshot.activeDeals} פעילות`} onClick={() => navigate("/admin/deals")} loading={loading} />
-            <KpiCard icon={Building2} label="פרויקטים" value={snapshot.projectsTotal} delta={snapshot.activeProjects} sub={`${snapshot.activeProjects} פעילים`} onClick={() => navigate("/admin/projects")} loading={loading} />
-            <KpiCard icon={Inbox} label="לידים" value={snapshot.leadsTotal} delta={snapshot.newLeadsWeek} sub={`${snapshot.newLeadsWeek > 0 ? "+" : ""}${snapshot.newLeadsWeek} השבוע`} onClick={() => navigate("/admin/leads")} loading={loading} />
+            <KpiCard icon={Store} label="ספקים" value={snapshot.suppliersTotal} sub={`${snapshot.newSuppliersWeek > 0 ? "+" : ""}${snapshot.newSuppliersWeek} השבוע`} onClick={() => navigate("/admin/suppliers")} loading={loading} />
+            <KpiCard icon={Tag} label="הצעות" value={snapshot.dealsTotal} sub={`${snapshot.activeDeals} פעילות`} onClick={() => navigate("/admin/deals")} loading={loading} />
+            <KpiCard icon={Building2} label="פרויקטים" value={snapshot.projectsTotal} sub={`${snapshot.activeProjects} פעילים`} onClick={() => navigate("/admin/projects")} loading={loading} />
+            <KpiCard icon={Inbox} label="לידים" value={snapshot.leadsTotal} sub={`${snapshot.newLeadsWeek > 0 ? "+" : ""}${snapshot.newLeadsWeek} השבוע`} onClick={() => navigate("/admin/leads")} loading={loading} />
           </section>
 
           {/* Activity feed */}
