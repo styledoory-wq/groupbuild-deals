@@ -96,7 +96,7 @@ const AdminDbSuppliers = lazy(() => import("./pages/admin/AdminDbSuppliers"));
 const AdminSupplierDetail = lazy(() => import("./pages/admin/AdminSupplierDetail"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
 const AdminCommitteeRequests = lazy(() => import("./pages/admin/AdminCommitteeRequests"));
-const AdminControl = lazy(() => import("./pages/admin/AdminControl"));
+
 const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
 const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
