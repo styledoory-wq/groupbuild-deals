@@ -1,77 +1,152 @@
-# Refactor מערכת האדמין
 
-## עקרונות מנחים
-- **3 שניות להבנה**: כל מסך עונה על "מה קורה עכשיו? מה דורש טיפול?"
-- **פחות ויותר**: פחות כרטיסים, יותר white space, פחות צבעים, יותר היררכיה
-- **Action-first**: כל מסך = דשבורד ממוקד + טבלה נקייה + סינון חכם
-- **Badges בתפריט** במקום מסך "בקרה" נפרד
+# תוכנית: פיצול GroupBuild לשני Builds נפרדים ל־App Store
 
-## שפת עיצוב חדשה (Design System אדמין)
-- רקע: `#F7F8FA` (אפור-תכלת עדין), כרטיסים `#FFFFFF`
-- פינות `rounded-[16px]`, הצללה עדינה מאוד: `shadow-[0_1px_3px_rgba(15,23,42,0.04),0_1px_2px_rgba(15,23,42,0.03)]`
-- גבולות: `border-[#EEF0F4]` (יותר עדין מהקיים)
-- טיפוגרפיה: כותרות `text-[22px] font-bold tracking-tight`, גוף `text-[13px]`
-- צבע יחיד לפעולות: `#0E6B5A` (הירוק הקיים). אדום/כתום רק ל-alerts אמיתיים.
-- אייקונים: `strokeWidth={1.75}` (עדין יותר מהקיים 2.2)
-- מרווחים: `p-6 lg:p-8`, `gap-4`, בין sections `space-y-8`
-- אנימציה: `transition-all duration-200 ease-out` על כל interactive
-- Glass effect: `backdrop-blur-xl bg-white/70` על sticky headers בלבד
+## עקרון מרכזי
+נשמור **פרויקט Vite אחד** עם **קוד משותף מלא** (Supabase client, hooks, types, UI, utils). ההפרדה תתבצע ע"י משתנה סביבה `VITE_APP_MODE` שקובע בזמן build אילו routes/layouts/nav נטענים. **אין monorepo** — עודף מורכבות; אין כפילויות; אין נגיעה ב־Supabase.
 
-## שינויים מבניים
-
-### 1. דשבורד חדש (`AdminDashboard.tsx` — כתיבה מחדש)
-```
-┌─ Header: "שלום, [שם]" · תאריך · כפתור פעולה מהירה
-├─ ATTENTION PANEL (הבלוק המרכזי — אם יש משהו)
-│   רק פריטים דורשי-טיפול, כל שורה clickable → מסך יעד
-├─ 4 KPI cards שקטים: ספקים חדשים · הצעות פעילות · פרויקטים פעילים · לידים חדשים
-│   (מספר בלבד + delta קטן, ללא גרפים)
-└─ Recent Activity: 8 שורות אחרונות (feed נקי)
-```
-מוסר: גרפים, נתוני הכנסה, פיקדונות, אחוזי המרה, סטטיסטיקות מפורטות → עוברים ל-`AdminStats`.
-
-### 2. Attention Panel (קומפוננטה חדשה)
-`src/components/admin/AttentionPanel.tsx` — שואב את הלוגיקה הקיימת מ-`AdminControl` אבל מציג רק פריטים עם `count > 0`, בעיצוב שקט: איקון עגול קטן + כותרת + מספר, בלי טונים דרמטיים. clickable rows.
-
-### 3. Sidebar Badges (חדש)
-`src/components/layout/BottomNav.tsx` + כל תפריט אדמין: hook `useAdminAttentionCounts()` שמחזיר `{suppliers, deals, complaints, leads, committee}`. Badge קטן אדום עם מספר ליד פריט התפריט. מבטל את הצורך במסך "בקרה" — `AdminControl` נמחק, ה-route משכתב redirect ל-dashboard.
-
-### 4. מסכי משנה — Mini Dashboard בכל מסך
-לכל אחד מ:
-- **Suppliers** (`AdminDbSuppliers`): Tabs עליונים — פעילים · ממתינים · לא מאושרים · חדשים השבוע
-- **Deals** (`AdminDeals`): Tabs — פעילות · טיוטות · ללא תמונה · הסתיימו
-- **Projects** (`AdminProjects`): Tabs — פעילים · חדשים · הסתיימו
-
-קומפוננטה משותפת חדשה: `src/components/admin/AdminTabsBar.tsx` — tabs עם counts, סגנון Linear-like.
-
-### 5. הגדרות (`AdminSettings.tsx`) — קיבוץ מחדש
-3 קבוצות בלבד:
-- **תוכן**: קטגוריות · תחומי פרויקט · אזורי שירות
-- **משתמשים**: משתמשים · דיירים · לידים · בקשות ועד · תלונות
-- **מערכת**: התראות · תמיכה · הודעות מוכנות · סטטיסטיקות · אמון ספקים · פיצ׳רים בטא
-
-מוסר את "קטגוריות (ישן)" מהתפריט (deprecated).
-
-### 6. Header אדמין אחיד
-`AdminPageHeader.tsx` — עדכון: פחות border, יותר breathing, כותרת גדולה יותר (`28px`), תיאור בגוון `#8B94A3`. sticky עם glass ברגע שמלגללים.
-
-## קבצים לשינוי
-- **חדש**: `src/components/admin/AttentionPanel.tsx`, `AdminTabsBar.tsx`, `src/hooks/useAdminAttention.ts`
-- **כתיבה מחדש**: `src/pages/admin/AdminDashboard.tsx`, `AdminSettings.tsx`, `AdminPageHeader.tsx`
-- **עדכון tabs**: `AdminDbSuppliers.tsx`, `AdminDeals.tsx`, `AdminProjects.tsx`
-- **עדכון**: `src/components/layout/BottomNav.tsx` (badges)
-- **מחיקה/redirect**: `AdminControl.tsx` → redirect ל-dashboard
-- **אין שינויי DB, אין שינויי לוגיקה עסקית** — רק presentation/UX.
-
-## מה לא ייכלל בשלב זה
-- שינויי backend/schema
-- שינוי לוגיקת הרשאות
-- שינוי מסכי resident/supplier
-- שינוי תוכן העמודים הפנימיים (רק tabs + header החדש)
-
-## הערכת גודל
-~8-10 קבצים חדשים/משוכתבים, 4-5 קבצים בעדכון tabs. עבודה בפעימה אחת.
+Backend (Supabase, Storage, Auth, Edge Functions, Realtime) — **נשאר כפי שהוא, משותף לשלוש האפליקציות**.
 
 ---
 
-**אישור להתחיל?** אם יש חלק שאתה רוצה לדלג עליו או לשנות (למשל להשאיר את מסך הבקרה, או להוסיף Analytics עמוד חדש במקום להעביר ל-AdminStats) — תגיד עכשיו.
+## 1. מיפוי Routes קיימים (מתוך `src/App.tsx`)
+
+### ציבורי (בכל ה־builds)
+`/`, `/suppliers`, `/residents`, `/auth`, `/auth/supplier`, `/auth/resident`, `/onboarding`, `/reset-password`, `/thank-you`, `/unsubscribe`, `/terms/*`, `/suppliers/:id`, `/supplier/:slug`, `/category/:slug`, `/city/:citySlug/:categorySlug`, `/share/deal/:id`, `/privacy`, `/support`, `/browse`, `/categories`, `/categories/:id`, `/deals`, `/deals/:id`, `/search`
+
+### דיירים (build residents בלבד)
+`/resident`, `/resident/projects`, `/resident/categories*`, `/resident/project-management`, `/project/join/:token`, `/resident/deals*`, `/resident/favorites`, `/resident/budget-planner`, `/resident/profile*`, `/resident/delete-account`, `/resident/notifications`, `/resident/my-offers`, `/resident/documents`, `/resident/deposits`, `/resident/my-vouchers`, `/resident/demand*`, `/resident/demands`, `/resident/search`, `/resident/privacy`
+
+### ספקים (build suppliers בלבד)
+`/supplier`, `/supplier/onboarding`, `/supplier/profile/edit`, `/supplier/offers*`, `/supplier/marketing-*`, `/supplier/leads`, `/supplier/demand-inbox`, `/supplier/reviews`, `/supplier/scan`, `/supplier/redemptions`, `/supplier/revenue`, `/supplier/analytics`, `/supplier/account`, `/supplier/delete-account`
+
+### אדמין (Web בלבד — לא ב־builds הניידים)
+כל `/admin/*` + `/admin/login`
+
+---
+
+## 2. Components / Hooks / Utils משותפים
+נשארים כפי שהם ב־`src/components/`, `src/hooks/`, `src/lib/`, `src/integrations/supabase/`, `src/types/`, `src/store/`. אין העברה, אין שכפול. נקודות שדורשות התאמה מינימלית:
+- `BottomNav`, `DesktopSidebar` — כבר role-aware; יעבדו כמו שהם
+- `Welcome.tsx` redirect — יכבד `APP_MODE`
+
+---
+
+## 3. מבנה קבצים חדש (שינויים בלבד)
+
+```text
+src/
+  config/
+    appMode.ts              ← NEW: קורא VITE_APP_MODE, מייצא APP_MODE
+  routes/
+    PublicRoutes.tsx        ← NEW: routes ציבוריים משותפים
+    ResidentRoutes.tsx      ← NEW: כל /resident/*
+    SupplierRoutes.tsx      ← NEW: כל /supplier/*
+    AdminRoutes.tsx         ← NEW: כל /admin/*
+  App.tsx                   ← UPDATED: טוען routes לפי APP_MODE
+  pages/Welcome.tsx         ← UPDATED: redirect לפי APP_MODE
+capacitor.config.residents.ts   ← NEW
+capacitor.config.suppliers.ts   ← NEW
+capacitor.config.ts             ← נשאר (default = residents לפיתוח)
+.env.residents                  ← NEW: VITE_APP_MODE=residents
+.env.suppliers                  ← NEW: VITE_APP_MODE=suppliers
+package.json                    ← UPDATED: scripts build:residents / build:suppliers / cap:sync:*
+ios/App/App-Residents/          ← NEW target (Bundle ID il.co.groupbuild.residents)
+ios/App/App-Suppliers/          ← NEW target (Bundle ID il.co.groupbuild.suppliers)
+```
+
+### מנגנון הפיצול (App.tsx)
+```ts
+const mode = import.meta.env.VITE_APP_MODE ?? "web"; // "residents" | "suppliers" | "web"
+// mode === "residents" → PublicRoutes + ResidentRoutes בלבד
+// mode === "suppliers" → PublicRoutes + SupplierRoutes בלבד
+// mode === "web"       → הכל כולל Admin (לדומיין admin.groupbuild.co.il והאתר הראשי)
+```
+מסכי ספקים לא ייכללו ב־bundle של דיירים כי `SupplierRoutes` פשוט לא ייובא (Vite tree-shakes).
+
+---
+
+## 4. Build & Bundle IDs
+
+### פקודות build
+```bash
+# דיירים
+VITE_APP_MODE=residents vite build --mode residents
+npx cap sync ios --config capacitor.config.residents.ts
+
+# ספקים
+VITE_APP_MODE=suppliers vite build --mode suppliers
+npx cap sync ios --config capacitor.config.suppliers.ts
+
+# Web (כולל אדמין) — נשאר כרגע
+VITE_APP_MODE=web vite build
+```
+
+### Capacitor configs
+| קובץ | appId | appName |
+|---|---|---|
+| `capacitor.config.residents.ts` | `il.co.groupbuild.residents` | `GroupBuild` |
+| `capacitor.config.suppliers.ts` | `il.co.groupbuild.suppliers` | `GroupBuild לעסקים` |
+
+Icons + Splash: תיקיות נפרדות תחת `resources/residents/` ו־`resources/suppliers/` שיוזרמו ל־Xcode targets מתאימים.
+
+### Supabase — משותף
+שני ה־configs מצביעים על אותו `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` הקיימים. **לא נוגעים ב־Supabase**.
+
+---
+
+## 5. קבצים שדורשים שינוי (שלב 1)
+1. `src/config/appMode.ts` — חדש
+2. `src/routes/PublicRoutes.tsx`, `ResidentRoutes.tsx`, `SupplierRoutes.tsx`, `AdminRoutes.tsx` — חדשים (רק מעבירים JSX קיים מ־App.tsx)
+3. `src/App.tsx` — refactor: מרכיב את הראוטים לפי `APP_MODE`
+4. `src/pages/Welcome.tsx` — redirect לפי mode (residents build לא ינווט ל־/supplier ולהפך)
+5. `src/components/layout/BottomNav.tsx` — מסנן את הפריטים לפי mode (הגנה כפולה)
+6. `src/lib/routePreload.ts` — מדלג על preloads שלא רלוונטיים ל־mode
+
+**אין מחיקת קוד, אין שינוי לוגיקה, אין נגיעה בעמודים עצמם.**
+
+---
+
+## 6. תוכנית מעבר בשלבים
+
+### שלב 1 — הפרדת routes/layouts/nav (ללא שינוי UX)
+- יצירת `appMode.ts` + 4 קובצי routes
+- Refactor `App.tsx` להרכיב לפי mode
+- ברירת מחדל: `VITE_APP_MODE=web` (הכל עובד כפי שהיה)
+- הגנת role guards קיימת נשמרת (`residentRoute`, `supplierRoute`, `adminRoute`)
+- **בדיקה:** האתר הנוכחי + Preview עובדים בדיוק כמו לפני
+
+### שלב 2 — Build modes + Capacitor
+- `.env.residents`, `.env.suppliers`
+- שני קבצי `capacitor.config.*.ts`
+- npm scripts: `build:residents`, `build:suppliers`, `cap:sync:residents`, `cap:sync:suppliers`
+- Icons + Splash לכל אפליקציה
+- Xcode: יצירת שני targets (הוראות למשתמש — Xcode לא נגיש מ־Lovable)
+
+### שלב 3 — QA
+- הרשמה/התחברות בכל build
+- העלאת תמונה מספק → הופעה אצל דייר ואדמין (אימות ש־Storage משותף)
+- יצירת בקשה מדייר → הופעה אצל ספק
+- Realtime, Deep links, Push
+- TestFlight לשני ה־builds
+
+---
+
+## 7. איך נמנעת כפילות קוד
+- **UI, hooks, lib, types, Supabase client** — שכבה אחת ויחידה ב־`src/`
+- Routes files מכילים רק `<Route>` — לא לוגיקה
+- אין העתקת עמודים
+- Tree-shaking של Vite מסיר קוד לא-בשימוש מ־bundle
+
+---
+
+## 8. מה לא נעשה
+- לא ניצור Supabase/Storage/DB חדש
+- לא נשנה schema או RLS
+- לא נגע ב־SEO של האתר הציבורי (`/`, `/city/*`, `/category/*`, `/suppliers/*` נשארים ב־web build)
+- לא נמחק את מסכי האדמין — הם רק לא ייטענו ב־mobile builds
+- לא ניצור monorepo
+
+---
+
+## שאלה לפני התחלה
+לאשר את התוכנית ואתחיל **שלב 1** (הפרדת routes ללא שינוי התנהגות). שלבים 2–3 דורשים גישה ל־Xcode/Apple Developer שאבצע כהוראות מודרכות למשתמש כשנגיע לשם.
