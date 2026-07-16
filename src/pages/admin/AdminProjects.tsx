@@ -1,20 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { AdminKpiRow } from "@/components/admin/AdminKpiRow";
+import { AdminTabsBar, type AdminTab } from "@/components/admin/AdminTabsBar";
 import { LoadingState } from "@/components/ds";
 import { useApp, formatILS } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useRegions } from "@/hooks/useRegions";
 import {
   Building2, MapPin, Plus, Pencil, Trash2, Search, Settings2,
-  Eye,
+  ArrowRight, Inbox, Users, Package, Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -22,17 +24,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import type { Project, ProjectStatus } from "@/types";
+import { MoreHorizontal } from "lucide-react";
 
-const statusLabel: Record<ProjectStatus, string> = {
-  planning: "בתכנון", construction: "בבנייה", delivery: "במסירה", completed: "הושלם",
-};
-const statusPill: Record<ProjectStatus, string> = {
-  planning: "bg-[#FEF3C7] text-[#92400E]",
-  construction: "bg-[#DCFCE7] text-[#166534]",
-  delivery: "bg-[#E0F2FE] text-[#075985]",
-  completed: "bg-[#F1F5F9] text-[#475569]",
+const statusMeta: Record<ProjectStatus, { label: string; cls: string; dot: string }> = {
+  planning:     { label: "בתכנון",  cls: "bg-amber-50 text-amber-700",    dot: "bg-amber-500" },
+  construction: { label: "בבנייה",  cls: "bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" },
+  delivery:     { label: "במסירה",  cls: "bg-sky-50 text-sky-700",         dot: "bg-sky-500" },
+  completed:    { label: "הושלם",   cls: "bg-slate-100 text-slate-600",    dot: "bg-slate-400" },
 };
 
 type FormState = {
@@ -54,10 +54,14 @@ type ProjectMetrics = {
   imageUrl?: string | null;
 };
 
+type TabKey = "all" | "planning" | "construction" | "delivery" | "completed";
+const VALID_TABS: TabKey[] = ["all", "planning", "construction", "delivery", "completed"];
+
 export default function AdminProjects() {
   const navigate = useNavigate();
   const { projects, setProjects } = useApp();
   const { cities } = useRegions();
+  const [searchParams, setSearchParams] = useSearchParams();
   const cityNames = useMemo(
     () => Array.from(new Set(cities.map((c) => c.name_he))).sort((a, b) => a.localeCompare(b, "he")),
     [cities],
@@ -69,6 +73,15 @@ export default function AdminProjects() {
   const [query, setQuery] = useState("");
   const [metrics, setMetrics] = useState<Record<string, ProjectMetrics>>({});
   const [loadingMetrics, setLoadingMetrics] = useState(true);
+
+  const urlTab = searchParams.get("tab") as TabKey | null;
+  const activeTab: TabKey = urlTab && VALID_TABS.includes(urlTab) ? urlTab : "all";
+  const setActiveTab = (key: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (key === "all") next.delete("tab");
+    else next.set("tab", key);
+    setSearchParams(next, { replace: true });
+  };
 
   useEffect(() => {
     (async () => {
@@ -119,23 +132,25 @@ export default function AdminProjects() {
     })();
   }, [projects.length]);
 
+  const tabCounts = useMemo(() => ({
+    all: projects.length,
+    planning: projects.filter((p) => p.status === "planning").length,
+    construction: projects.filter((p) => p.status === "construction").length,
+    delivery: projects.filter((p) => p.status === "delivery").length,
+    completed: projects.filter((p) => p.status === "completed").length,
+  }), [projects]);
+
   const filteredProjects = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return projects;
-    return projects.filter((p) =>
-      [p.name, p.city, statusLabel[p.status]].some((v) => (v ?? "").toLowerCase().includes(q)),
-    );
-  }, [projects, query]);
-
-  const kpi = useMemo(() => {
-    const totalApts = projects.reduce((s, p) => s + (p.apartmentCount ?? 0), 0);
-    let totalUsers = 0, totalDeposits = 0, totalDeals = 0, totalSuppliers = 0;
-    Object.values(metrics).forEach((m) => {
-      totalUsers += m.users; totalDeposits += m.deposits;
-      totalDeals += m.deals; totalSuppliers += m.suppliers;
-    });
-    return { active: projects.length, apartments: totalApts, users: totalUsers, deposits: totalDeposits, deals: totalDeals, suppliers: totalSuppliers };
-  }, [projects, metrics]);
+    let res = projects;
+    if (activeTab !== "all") res = res.filter((p) => p.status === activeTab);
+    if (q) {
+      res = res.filter((p) =>
+        [p.name, p.city, statusMeta[p.status]?.label].some((v) => (v ?? "").toLowerCase().includes(q)),
+      );
+    }
+    return res;
+  }, [projects, activeTab, query]);
 
   const openCreate = () => { setForm(emptyForm); setOpen(true); };
   const openEdit = (p: Project) => {
@@ -194,138 +209,157 @@ export default function AdminProjects() {
     } finally { setSaving(false); }
   };
 
+  const tabs: AdminTab[] = [
+    { key: "all", label: "כולם", count: tabCounts.all },
+    { key: "planning", label: "בתכנון", count: tabCounts.planning },
+    { key: "construction", label: "בבנייה", count: tabCounts.construction },
+    { key: "delivery", label: "במסירה", count: tabCounts.delivery },
+    { key: "completed", label: "הושלמו", count: tabCounts.completed },
+  ];
+
+  const emptyLabel: Record<TabKey, string> = {
+    all: "אין פרויקטים עדיין.",
+    planning: "אין פרויקטים בשלב תכנון.",
+    construction: "אין פרויקטים בבנייה.",
+    delivery: "אין פרויקטים במסירה.",
+    completed: "אין פרויקטים שהושלמו.",
+  };
+
   return (
     <MobileShell>
-      <AdminPageHeader
-        title="ניהול פרויקטים"
-        description={`${projects.length} פרויקטים`}
-        actions={
-          <button
-            onClick={openCreate}
-            className="h-9 px-3 rounded-[10px] bg-[#0E6B5A] text-white text-[12px] font-bold flex items-center gap-1.5 hover:bg-[#0a574a] transition-colors"
-          >
-            <Plus className="h-4 w-4" /> פרויקט חדש
-          </button>
-        }
-      />
-      <AdminKpiRow
-        items={[
-          { label: "פרויקטים פעילים", value: kpi.active, tone: "positive" },
-          { label: "ספקים פעילים", value: kpi.suppliers },
-          { label: "משתמשים רשומים", value: kpi.users.toLocaleString() },
-          { label: "פיקדונות שנאספו", value: formatILS(kpi.deposits), tone: "positive" },
-        ]}
-      />
-
-      <div dir="rtl" className="bg-white border-b border-[#ECEEF2] px-4 lg:px-8 py-2.5">
-        <div className="relative max-w-md">
-          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="חיפוש פרויקט, כתובת או עיר…"
-            className="h-9 pr-9 text-[13px] border-[#ECEEF2]"
-          />
-        </div>
-      </div>
-
-      <div className="p-2.5 lg:p-6">
-        {loadingMetrics && projects.length === 0 ? (
-          <LoadingState fullHeight={false} />
-        ) : filteredProjects.length === 0 ? (
-          <div className="bg-white border border-[#ECEEF2] rounded-[14px] px-6 py-12 text-center text-[13px] text-[#6B7280] font-medium">
-            לא נמצאו פרויקטים
+      <div dir="rtl" className="min-h-screen bg-[#F7F8FA] pb-32">
+        {/* Header */}
+        <header className="px-5 pt-6 pb-4">
+          <div className="flex items-center gap-2 mb-4">
+            <button
+              onClick={() => navigate(-1)}
+              aria-label="חזרה"
+              className="h-9 w-9 -mr-1 rounded-full flex items-center justify-center text-[#0F172A]/70 hover:bg-white transition"
+            >
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <div className="flex-1" />
+            <button
+              onClick={openCreate}
+              className="h-9 px-3.5 rounded-full bg-[#0F172A] text-white text-[13px] font-semibold inline-flex items-center gap-1.5 active:scale-95 transition-transform"
+            >
+              <Plus className="h-4 w-4" />
+              פרויקט חדש
+            </button>
           </div>
-        ) : (
-          <div dir="rtl" className="bg-white border border-[#ECEEF2] rounded-[14px] overflow-hidden">
-            {/* Header — desktop */}
-            <div className="hidden lg:grid grid-cols-[2fr_70px_80px_70px_80px_120px_140px_120px] gap-3 px-4 py-2.5 border-b border-[#ECEEF2] bg-[#F8F9FB] text-[10px] font-bold uppercase tracking-wider text-[#6B7280]">
-              <div>פרויקט</div>
-              <div className="text-center">דירות</div>
-              <div className="text-center">משתמשים</div>
-              <div className="text-center">ספקים</div>
-              <div className="text-center">הצעות</div>
-              <div className="text-center">פיקדונות</div>
-              <div>השתתפות</div>
-              <div className="text-left">פעולות</div>
-            </div>
+          <h1 className="text-[26px] font-bold text-[#0F172A] tracking-tight leading-tight">
+            פרויקטים
+            <span className="ms-2 text-[15px] font-semibold text-[#8B94A3] tabular-nums">
+              {tabCounts.all}
+            </span>
+          </h1>
 
-            <ul className="divide-y divide-[#F1F3F7]">
+          <div className="relative mt-4">
+            <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-[#8B94A3] pointer-events-none" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="חיפוש לפי שם, עיר או סטטוס…"
+              className="h-10 pr-9 text-[14px] rounded-xl bg-white border-[#EEF0F4] focus-visible:ring-1 focus-visible:ring-[#0F172A]/10"
+            />
+          </div>
+        </header>
+
+        {/* Tabs */}
+        <div className="px-5 pb-3 overflow-x-auto scrollbar-none">
+          <AdminTabsBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+        </div>
+
+        {/* Grid */}
+        <main className="px-4 pt-1">
+          {loadingMetrics && projects.length === 0 ? (
+            <LoadingState fullHeight={false} />
+          ) : filteredProjects.length === 0 ? (
+            <div className="mt-8 rounded-2xl bg-white border border-[#EEF0F4] p-10 text-center flex flex-col items-center gap-2">
+              <div className="h-11 w-11 rounded-full bg-[#F4F6FA] flex items-center justify-center">
+                <Inbox className="h-5 w-5 text-[#8B94A3]" />
+              </div>
+              <p className="text-[14px] font-semibold text-[#0F172A]">
+                {query ? "לא נמצאו פרויקטים תואמים" : emptyLabel[activeTab]}
+              </p>
+              {query && <p className="text-[12px] text-[#8B94A3]">נסה חיפוש אחר או בחר טאב אחר</p>}
+            </div>
+          ) : (
+            <ul className="grid grid-cols-2 gap-3">
               {filteredProjects.map((p) => {
                 const m = metrics[p.id] ?? { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 };
-                const participation = p.apartmentCount > 0 ? Math.min(100, Math.round((m.users / p.apartmentCount) * 100)) : 0;
-                const partTone = participation >= 50 ? "#0E6B5A" : participation >= 20 ? "#D97706" : "#9CA3AF";
+                const participation = p.apartmentCount > 0
+                  ? Math.min(100, Math.round((m.users / p.apartmentCount) * 100))
+                  : 0;
+                const meta = statusMeta[p.status];
+
                 return (
-                  <li key={p.id} className="hover:bg-[#FAFBFC] transition-colors">
-                    {/* Desktop row */}
-                    <div className="hidden lg:grid grid-cols-[2fr_70px_80px_70px_80px_120px_140px_120px] gap-3 px-4 py-2 items-center">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <ProjThumb url={m.imageUrl} />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <div className="font-extrabold text-[13px] text-[#0F172A] truncate">{p.name}</div>
-                            <span className={cn("shrink-0 px-1.5 py-0.5 rounded-md text-[9.5px] font-bold whitespace-nowrap", statusPill[p.status])}>
-                              {statusLabel[p.status]}
-                            </span>
+                  <li key={p.id}>
+                    <div className="group relative h-full bg-white rounded-2xl border border-[#EEF0F4] shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-200 hover:border-[#E1E5EC] hover:shadow-[0_2px_4px_rgba(15,23,42,0.04),0_10px_28px_-14px_rgba(15,23,42,0.15)] overflow-hidden">
+                      {/* Cover */}
+                      <button
+                        onClick={() => navigate(`/committee/dashboard?project=${p.id}`)}
+                        className="relative w-full aspect-[4/3] bg-[#F4F6FA] block overflow-hidden"
+                        aria-label={`פתח ${p.name}`}
+                      >
+                        {m.imageUrl ? (
+                          <img src={m.imageUrl} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Building2 className="h-7 w-7 text-[#CBD3DC]" />
                           </div>
-                          <div className="flex items-center gap-1 text-[11px] text-[#6B7280] mt-0.5">
-                            <MapPin className="h-2.5 w-2.5 shrink-0" />
+                        )}
+                        <span className={cn("absolute top-2 right-2 inline-flex items-center gap-1 text-[10.5px] font-semibold px-1.5 py-0.5 rounded-md shadow-sm", meta.cls)}>
+                          <span className={cn("h-1.5 w-1.5 rounded-full", meta.dot)} />
+                          {meta.label}
+                        </span>
+                        <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
+                          <ProjectMenu
+                            onOpen={() => navigate(`/committee/dashboard?project=${p.id}`)}
+                            onManage={() => navigate(`/committee/dashboard?project=${p.id}`)}
+                            onEdit={() => openEdit(p)}
+                            onDelete={() => setDeleteId(p.id)}
+                          />
+                        </div>
+                      </button>
+
+                      {/* Body */}
+                      <div className="p-3">
+                        <button
+                          onClick={() => navigate(`/committee/dashboard?project=${p.id}`)}
+                          className="text-right w-full"
+                        >
+                          <h3 className="font-bold text-[13.5px] text-[#0F172A] leading-tight line-clamp-1">
+                            {p.name}
+                          </h3>
+                          <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-[#8B94A3]">
+                            <MapPin className="h-3 w-3" />
                             <span className="truncate">{p.city}</span>
                           </div>
-                        </div>
-                      </div>
-                      <Num value={p.apartmentCount} />
-                      <Num value={m.users} />
-                      <Num value={m.suppliers} />
-                      <Num value={m.deals} />
-                      <div className="text-center text-[12px] font-extrabold tabular-nums text-[#0E6B5A]">{formatILS(m.deposits)}</div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
-                          <div className="h-full rounded-full" style={{ width: `${participation}%`, backgroundColor: partTone }} />
-                        </div>
-                        <span className="text-[11px] font-extrabold tabular-nums w-9 text-left" style={{ color: partTone }}>{participation}%</span>
-                      </div>
-                      <div className="flex items-center justify-end gap-1">
-                        <IconBtn label="ניהול" onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} icon={<Settings2 className="h-3.5 w-3.5" />} primary />
-                        <IconBtn label="צפייה" onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} icon={<Eye className="h-3.5 w-3.5" />} />
-                        <IconBtn label="עריכה" onClick={() => openEdit(p)} icon={<Pencil className="h-3.5 w-3.5" />} />
-                        <IconBtn label="מחיקה" onClick={() => setDeleteId(p.id)} icon={<Trash2 className="h-3.5 w-3.5" />} danger />
-                      </div>
-                    </div>
+                        </button>
 
-                    {/* Mobile row — ultra dense */}
-                    <div className="lg:hidden px-2.5 py-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <ProjThumb url={m.imageUrl} size={40} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <div className="font-extrabold text-[12.5px] text-[#0F172A] truncate flex-1 min-w-0">{p.name}</div>
-                            <span className={cn("shrink-0 px-1.5 py-0.5 rounded-md text-[9.5px] font-bold whitespace-nowrap", statusPill[p.status])}>
-                              {statusLabel[p.status]}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-x-2 gap-y-0 text-[10.5px] text-[#374151] mt-0.5 flex-wrap">
-                            <InlineKv label="דירות" value={p.apartmentCount} />
-                            <Sep />
-                            <InlineKv label="משת׳" value={m.users} />
-                            <Sep />
-                            <InlineKv label="ספקים" value={m.suppliers} />
-                            <Sep />
-                            <InlineKv label="הצעות" value={m.deals} />
-                            <Sep />
-                            <InlineKv label="פיק׳" value={formatILS(m.deposits)} tone="positive" />
-                          </div>
+                        {/* Micro stats */}
+                        <div className="mt-2 flex items-center justify-between text-[10.5px] text-[#6B7280]">
+                          <span className="inline-flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            <span className="tabular-nums font-semibold text-[#374151]">{m.users}/{p.apartmentCount || "—"}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Package className="h-3 w-3" />
+                            <span className="tabular-nums font-semibold text-[#374151]">{m.deals}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-[#0E6B5A]">
+                            <Wallet className="h-3 w-3" />
+                            <span className="tabular-nums font-bold">{formatILS(m.deposits)}</span>
+                          </span>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2 mt-1.5 pr-[48px]">
-                        <div className="flex-1 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
-                          <div className="h-full rounded-full" style={{ width: `${participation}%`, backgroundColor: partTone }} />
-                        </div>
-                        <span className="text-[10px] font-extrabold tabular-nums w-9 text-left" style={{ color: partTone }}>{participation}% השתת׳</span>
-                        <div className="flex items-center gap-0.5">
-                          <IconBtn label="ניהול" onClick={() => navigate(`/committee/dashboard?project=${p.id}`)} icon={<Settings2 className="h-3.5 w-3.5" />} primary compact />
-                          <IconBtn label="עריכה" onClick={() => openEdit(p)} icon={<Pencil className="h-3.5 w-3.5" />} compact />
-                          <IconBtn label="מחיקה" onClick={() => setDeleteId(p.id)} icon={<Trash2 className="h-3.5 w-3.5" />} danger compact />
+
+                        {/* Participation bar */}
+                        <div className="mt-2 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-[#0E6B5A] transition-all"
+                            style={{ width: `${participation}%` }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -333,129 +367,100 @@ export default function AdminProjects() {
                 );
               })}
             </ul>
-          </div>
-        )}
+          )}
+        </main>
+
+        {/* Create/edit dialog */}
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent dir="rtl" className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-right">{form.id ? "עריכת פרויקט" : "הוספת פרויקט חדש"}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 mt-2">
+              <div>
+                <Label className="text-xs">שם הפרויקט *</Label>
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="לדוגמה: מגדלי הים" />
+              </div>
+              <div>
+                <Label className="text-xs">עיר *</Label>
+                <CityCombobox value={form.city} cities={cityNames} onChange={(city) => setForm({ ...form, city })} />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">מס׳ בניינים</Label>
+                  <Input type="number" min="0" value={form.buildingCount} onChange={(e) => setForm({ ...form, buildingCount: e.target.value })} placeholder="0" />
+                </div>
+                <div>
+                  <Label className="text-xs">מס׳ דירות</Label>
+                  <Input type="number" min="0" value={form.apartmentCount} onChange={(e) => setForm({ ...form, apartmentCount: e.target.value })} placeholder="0" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">סטטוס</Label>
+                <div className="grid grid-cols-4 gap-1.5 mt-1">
+                  {(Object.keys(statusMeta) as ProjectStatus[]).map((st) => (
+                    <button key={st} type="button" onClick={() => setForm({ ...form, status: st })}
+                      className={"h-9 rounded-[12px] text-[12px] font-bold border transition " +
+                        (form.status === st ? "bg-[#0E6B5A] text-white border-[#0E6B5A]" : "bg-white text-[#1F2937] border-[#ECEEF2]")}>
+                      {statusMeta[st].label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="mt-4 gap-2 sm:gap-2">
+              <button onClick={() => setOpen(false)} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#F4F6FA] text-[#1F2937] text-sm font-bold flex-1 disabled:opacity-50">ביטול</button>
+              <button onClick={save} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#0E6B5A] text-white text-sm font-bold flex-1 disabled:opacity-50">
+                {saving ? "שומר…" : form.id ? "שמירה" : "הוספה"}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+          <AlertDialogContent dir="rtl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-right">מחיקת פרויקט</AlertDialogTitle>
+              <AlertDialogDescription className="text-right">הפרויקט יוסר מהרשימות הפעילות אך הנתונים יישמרו.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>ביטול</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete} disabled={saving} className="bg-destructive text-destructive-foreground">הסרה</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent dir="rtl" className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-right">{form.id ? "עריכת פרויקט" : "הוספת פרויקט חדש"}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 mt-2">
-            <div>
-              <Label className="text-xs">שם הפרויקט *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="לדוגמה: מגדלי הים" />
-            </div>
-            <div>
-              <Label className="text-xs">עיר *</Label>
-              <CityCombobox value={form.city} cities={cityNames} onChange={(city) => setForm({ ...form, city })} />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label className="text-xs">מס׳ בניינים</Label>
-                <Input type="number" min="0" value={form.buildingCount} onChange={(e) => setForm({ ...form, buildingCount: e.target.value })} placeholder="0" />
-              </div>
-              <div>
-                <Label className="text-xs">מס׳ דירות</Label>
-                <Input type="number" min="0" value={form.apartmentCount} onChange={(e) => setForm({ ...form, apartmentCount: e.target.value })} placeholder="0" />
-              </div>
-            </div>
-            <div>
-              <Label className="text-xs">סטטוס</Label>
-              <div className="grid grid-cols-4 gap-1.5 mt-1">
-                {(Object.keys(statusLabel) as ProjectStatus[]).map((st) => (
-                  <button key={st} type="button" onClick={() => setForm({ ...form, status: st })}
-                    className={"h-9 rounded-[12px] text-[12px] font-bold border transition " +
-                      (form.status === st ? "bg-[#0E6B5A] text-white border-[#0E6B5A]" : "bg-white text-[#1F2937] border-[#ECEEF2]")}>
-                    {statusLabel[st]}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="mt-4 gap-2 sm:gap-2">
-            <button onClick={() => setOpen(false)} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#F4F6FA] text-[#1F2937] text-sm font-bold flex-1 disabled:opacity-50">ביטול</button>
-            <button onClick={save} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#0E6B5A] text-white text-sm font-bold flex-1 disabled:opacity-50">
-              {saving ? "שומר…" : form.id ? "שמירה" : "הוספה"}
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
-        <AlertDialogContent dir="rtl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-right">מחיקת פרויקט</AlertDialogTitle>
-            <AlertDialogDescription className="text-right">הפרויקט יוסר מהרשימות הפעילות אך הנתונים יישמרו.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>ביטול</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={saving} className="bg-destructive text-destructive-foreground">הסרה</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <BottomNav role="admin" />
     </MobileShell>
   );
 }
 
-function ProjThumb({ url, size = 36 }: { url?: string | null; size?: number }) {
+function ProjectMenu({
+  onOpen, onManage, onEdit, onDelete,
+}: { onOpen: () => void; onManage: () => void; onEdit: () => void; onDelete: () => void }) {
   return (
-    <div
-      className="rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0 flex items-center justify-center"
-      style={{ width: size, height: size }}
-    >
-      {url ? (
-        <img src={url} alt="" className="w-full h-full object-cover" />
-      ) : (
-        <Building2 className="h-4 w-4 text-[#9CA3AF]" />
-      )}
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="h-8 w-8 rounded-lg bg-white/85 backdrop-blur border border-white/60 text-[#0F172A] hover:bg-white transition inline-flex items-center justify-center shadow-sm"
+          aria-label="פעולות"
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuItem onClick={onOpen}><Building2 className="h-4 w-4 me-2" /> פתח דשבורד</DropdownMenuItem>
+        <DropdownMenuItem onClick={onManage}><Settings2 className="h-4 w-4 me-2" /> ניהול</DropdownMenuItem>
+        <DropdownMenuItem onClick={onEdit}><Pencil className="h-4 w-4 me-2" /> עריכה</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onDelete} className="text-red-600 focus:text-red-600">
+          <Trash2 className="h-4 w-4 me-2" /> מחיקה
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
-
-function Num({ value }: { value: number | string }) {
-  return <div className="text-center text-[12px] font-bold tabular-nums text-[#0F172A]">{value}</div>;
-}
-
-function InlineKv({ label, value, tone = "neutral" }: { label: string; value: React.ReactNode; tone?: "neutral" | "positive" }) {
-  const cls = tone === "positive" ? "text-[#0E6B5A]" : "text-[#0F172A]";
-  return (
-    <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
-      <span className={cn("font-extrabold tabular-nums", cls)}>{value}</span>
-      <span className="text-[#9CA3AF] text-[10px]">{label}</span>
-    </span>
-  );
-}
-
-function Sep() {
-  return <span className="text-[#E5E7EB] text-[10px]">·</span>;
-}
-
-function IconBtn({
-  icon, label, onClick, primary, danger, compact,
-}: { icon: React.ReactNode; label: string; onClick: () => void; primary?: boolean; danger?: boolean; compact?: boolean }) {
-  const size = compact ? "h-7 w-7" : "h-8 w-8";
-  const cls = primary
-    ? "bg-[#0E6B5A] text-white hover:bg-[#0a574a] border-[#0E6B5A]"
-    : danger
-      ? "bg-white text-[#B91C1C] hover:bg-[#FEE2E2] border-[#ECEEF2]"
-      : "bg-white text-[#1F2937] hover:bg-[#F4F6FA] border-[#ECEEF2]";
-  return (
-    <button
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className={cn("rounded-[8px] border flex items-center justify-center transition-colors", size, cls)}
-    >
-      {icon}
-    </button>
-  );
-}
-
 
 function CityCombobox({ value, cities, onChange }: { value: string; cities: string[]; onChange: (city: string) => void }) {
   const [open, setOpen] = useState(false);
