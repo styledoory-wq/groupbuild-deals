@@ -26,6 +26,7 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { PaymentInstructionsCard, type SupplierPaymentInfo } from "@/components/deals/PaymentInstructionsCard";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
+import { useGuestGate } from "@/hooks/useGuestGate";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
 import { getCategoryCover } from "@/lib/categoryCover";
@@ -357,25 +358,18 @@ export default function DealDetail() {
     return () => { void supabase.removeChannel(channel); };
   }, [dealId]);
 
-  const handleJoinClick = async () => {
+  const { requireAuth } = useGuestGate();
+
+  const handleJoinClick = () => {
     if (!deal) return;
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) {
-      window.location.href = `/auth?redirect=/deal/${deal.id}`;
-      return;
-    }
-    setShowJoinModal(true);
+    requireAuth("להצטרף להצעות קבוצתיות", () => setShowJoinModal(true));
   };
 
-  const handleRequestGroupBuy = async () => {
+  const handleRequestGroupBuy = () => {
     if (!deal) return;
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) {
-      window.location.href = `/auth?redirect=/deal/${deal.id}`;
-      return;
-    }
-    setShowRequestGroupBuy(true);
+    requireAuth("לבקש קבוצת רכישה", () => setShowRequestGroupBuy(true));
   };
+
 
   const submitRequestGroupBuy = async () => {
     if (!deal) return;
