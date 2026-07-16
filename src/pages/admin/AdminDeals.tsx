@@ -159,10 +159,19 @@ export default function AdminDeals() {
 
   const priceFor = (d: DbDeal): number => {
     if (d.offer_type === "price_comparison" && d.discounted_price != null) return Number(d.discounted_price);
-    if (d.offer_type === "percentage" && d.original_price != null && d.discount_percentage != null) {
+    if (d.offer_type === "percentage" && d.original_price != null && Number(d.original_price) > 0 && d.discount_percentage != null) {
       return Number(d.original_price) * (1 - Number(d.discount_percentage) / 100);
     }
     return Number(d.base_price ?? d.original_price ?? 0);
+  };
+
+  const priceLabel = (d: DbDeal): string => {
+    const p = priceFor(d);
+    if (p > 0) return formatILS(p);
+    if (d.offer_type === "percentage" && d.discount_percentage != null && Number(d.discount_percentage) > 0) {
+      return `${Number(d.discount_percentage)}%- הנחה`;
+    }
+    return "—";
   };
 
   const tabs: AdminTab[] = [
