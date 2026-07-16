@@ -50,6 +50,11 @@ const roleRoutes: Record<Role, string[]> = {
 };
 
 export function preloadRoute(to: string) {
+  // Skip routes not bundled into the current build.
+  if (to.startsWith("/admin") && !includesAdminRoutes) return;
+  if (to.startsWith("/supplier") && !includesSupplierRoutes) return;
+  if (to.startsWith("/resident") && !includesResidentRoutes) return;
+
   const exact = routePreloads[to];
   if (exact) {
     void exact();
