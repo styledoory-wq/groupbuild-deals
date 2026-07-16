@@ -333,7 +333,7 @@ const App = () => (
                   <Route path="/admin/users" element={adminRoute(<AdminUsers />)} />
                   <Route path="/admin/settings" element={adminRoute(<AdminSettings />)} />
                   <Route path="/admin/payments" element={adminRoute(<AdminPayments />)} />
-                  <Route path="/admin/control" element={adminRoute(<AdminControl />)} />
+                  <Route path="/admin/control" element={<Navigate to="/admin" replace />} />
                   <Route path="/admin/notifications" element={adminRoute(<AdminNotifications />)} />
                   <Route path="/admin/support" element={adminRoute(<AdminSupport />)} />
                   <Route path="/admin/suppliers/:supplierId/areas" element={adminRoute(<AdminSupplierAreas />)} />
