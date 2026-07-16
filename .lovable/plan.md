@@ -1,152 +1,353 @@
+# שלב 2 — ארכיטקטורת Profiles Registry מלאה
 
-# תוכנית: פיצול GroupBuild לשני Builds נפרדים ל־App Store
-
-## עקרון מרכזי
-נשמור **פרויקט Vite אחד** עם **קוד משותף מלא** (Supabase client, hooks, types, UI, utils). ההפרדה תתבצע ע"י משתנה סביבה `VITE_APP_MODE` שקובע בזמן build אילו routes/layouts/nav נטענים. **אין monorepo** — עודף מורכבות; אין כפילויות; אין נגיעה ב־Supabase.
-
-Backend (Supabase, Storage, Auth, Edge Functions, Realtime) — **נשאר כפי שהוא, משותף לשלוש האפליקציות**.
+## עיקרון מרכזי
+**רישום פרופילים אחד** (`app-profiles.config.ts`) הוא מקור האמת. ממנו נגזרים אוטומטית: capacitor config, env, scripts, iOS folder, icons, splash, deep links, push credentials, Firebase, privacy manifest, App Store metadata, feature flags. **הוספת אפליקציה חדשה = הוספת רשומה אחת. אפס שינוי בקוד עסקי.** תיקיית `ios/` הקיימת לא נגעת.
 
 ---
 
-## 1. מיפוי Routes קיימים (מתוך `src/App.tsx`)
+## 1. סכימת Profile — כל הממדים הניתנים להתאמה
 
-### ציבורי (בכל ה־builds)
-`/`, `/suppliers`, `/residents`, `/auth`, `/auth/supplier`, `/auth/resident`, `/onboarding`, `/reset-password`, `/thank-you`, `/unsubscribe`, `/terms/*`, `/suppliers/:id`, `/supplier/:slug`, `/category/:slug`, `/city/:citySlug/:categorySlug`, `/share/deal/:id`, `/privacy`, `/support`, `/browse`, `/categories`, `/categories/:id`, `/deals`, `/deals/:id`, `/search`
+`app-profiles.config.ts` בשורש:
+```ts
+export type AppProfile = {
+  // Identity
+  id: string;                    // "residents" | "suppliers" | "committee" | ...
+  appMode: string;               // VITE_APP_MODE (מסנן routes)
+  appId: string;                 // Bundle ID (iOS + Android)
+  appName: string;               // CFBundleDisplayName / Android app_name
+  shortName?: string;            // תצוגה מקוצרת (Home Screen)
+  version?: string;              // ברירת מחדל מ־package.json
 
-### דיירים (build residents בלבד)
-`/resident`, `/resident/projects`, `/resident/categories*`, `/resident/project-management`, `/project/join/:token`, `/resident/deals*`, `/resident/favorites`, `/resident/budget-planner`, `/resident/profile*`, `/resident/delete-account`, `/resident/notifications`, `/resident/my-offers`, `/resident/documents`, `/resident/deposits`, `/resident/my-vouchers`, `/resident/demand*`, `/resident/demands`, `/resident/search`, `/resident/privacy`
+  // Visual assets (paths only — קבצים נטענים מאוחר)
+  resourcesDir: string;          // "resources/residents"
+  iconPath: string;              // `${resourcesDir}/icon.png` (1024x1024)
+  splashPath: string;            // `${resourcesDir}/splash.png` (2732x2732)
+  splashBackgroundColor: string; // "#F7F5F0"
+  themeColor: string;            // status bar / theme
 
-### ספקים (build suppliers בלבד)
-`/supplier`, `/supplier/onboarding`, `/supplier/profile/edit`, `/supplier/offers*`, `/supplier/marketing-*`, `/supplier/leads`, `/supplier/demand-inbox`, `/supplier/reviews`, `/supplier/scan`, `/supplier/redemptions`, `/supplier/revenue`, `/supplier/analytics`, `/supplier/account`, `/supplier/delete-account`
+  // Build outputs
+  webDir: string;                // "dist-residents"
+  iosDir: string;                // "ios-residents"
+  androidDir: string;            // "android-residents"
 
-### אדמין (Web בלבד — לא ב־builds הניידים)
-כל `/admin/*` + `/admin/login`
+  // Deep links
+  scheme?: string;               // "groupbuild-residents"
+  universalLinks: {
+    host: string;                // "groupbuild.co.il"
+    paths: string[];             // ["/r/*"]
+  };
+
+  // Push notifications
+  push: {
+    variant: string;             // "residents" — מפתח למיפוי credentials
+    apnsSecretPrefix: string;    // "APNS_RESIDENTS" → APNS_RESIDENTS_KEY/KEY_ID/TEAM_ID
+    fcmConfigPath?: string;      // `${resourcesDir}/google-services.json`
+  };
+
+  // Apple config
+  apple: {
+    teamId?: string;             // "ABCD123456" (אופציונלי, מ־secret)
+    entitlementsPath: string;    // `${iosDir}/App/App/App.entitlements`
+    provisioningProfileName?: string;
+  };
+
+  // Privacy manifest
+  privacyManifest: {
+    collectedDataTypes: string[];  // NSPrivacyCollectedDataType keys
+    accessedAPITypes: Array<{ type: string; reasons: string[] }>;
+    trackingEnabled: boolean;
+  };
+
+  // App Store metadata (נטען לפי CI ל־App Store Connect)
+  storeMetadata: {
+    primaryCategory: string;     // "BUSINESS" | "LIFESTYLE"
+    secondaryCategory?: string;
+    keywords: string[];          // עד 100 תווים סה"כ
+    supportUrl: string;
+    marketingUrl?: string;
+    privacyPolicyUrl: string;
+    description: {               // רב־לשוני
+      he: string;
+      en?: string;
+    };
+    promotionalText?: { he: string; en?: string };
+    ageRating?: string;          // "4+"
+  };
+
+  // Feature flags — כיבוי/הפעלה של פיצ'רים לכל אפליקציה
+  features: {
+    residentDeals?: boolean;
+    supplierScan?: boolean;
+    budgetPlanner?: boolean;
+    committeeQuotes?: boolean;
+    voucherRedemption?: boolean;
+    payments?: boolean;
+    ai?: boolean;
+    // ...הרחבה עתידית
+  };
+};
+
+export const APP_PROFILES: AppProfile[] = [
+  {
+    id: "residents",
+    appMode: "residents",
+    appId: "il.co.groupbuild.residents",
+    appName: "GroupBuild",
+    shortName: "GroupBuild",
+    resourcesDir: "resources/residents",
+    iconPath: "resources/residents/icon.png",
+    splashPath: "resources/residents/splash.png",
+    splashBackgroundColor: "#F7F5F0",
+    themeColor: "#F8F6F1",
+    webDir: "dist-residents",
+    iosDir: "ios-residents",
+    androidDir: "android-residents",
+    scheme: "groupbuild-residents",
+    universalLinks: { host: "groupbuild.co.il", paths: ["/r/*", "/share/deal/*"] },
+    push: {
+      variant: "residents",
+      apnsSecretPrefix: "APNS_RESIDENTS",
+      fcmConfigPath: "resources/residents/google-services.json",
+    },
+    apple: { entitlementsPath: "ios-residents/App/App/App.entitlements" },
+    privacyManifest: {
+      collectedDataTypes: ["Email","PhoneNumber","Name","PreciseLocation","PhotosorVideos"],
+      accessedAPITypes: [
+        { type: "UserDefaults", reasons: ["CA92.1"] },
+        { type: "FileTimestamp", reasons: ["C617.1"] },
+      ],
+      trackingEnabled: false,
+    },
+    storeMetadata: {
+      primaryCategory: "LIFESTYLE",
+      keywords: ["שיפוץ","דירה","קבוצת רכישה","דיירים","בית"],
+      supportUrl: "https://groupbuild.co.il/support",
+      privacyPolicyUrl: "https://groupbuild.co.il/privacy",
+      description: { he: "GroupBuild — רכישה קבוצתית לדיירים ומשפצים." },
+      ageRating: "4+",
+    },
+    features: {
+      residentDeals: true, budgetPlanner: true, voucherRedemption: true,
+      supplierScan: false, committeeQuotes: false, payments: true, ai: true,
+    },
+  },
+  {
+    id: "suppliers",
+    appMode: "suppliers",
+    appId: "il.co.groupbuild.suppliers",
+    appName: "GroupBuild לעסקים",
+    shortName: "GB Business",
+    resourcesDir: "resources/suppliers",
+    iconPath: "resources/suppliers/icon.png",
+    splashPath: "resources/suppliers/splash.png",
+    splashBackgroundColor: "#0E6B5A",
+    themeColor: "#0E6B5A",
+    webDir: "dist-suppliers",
+    iosDir: "ios-suppliers",
+    androidDir: "android-suppliers",
+    scheme: "groupbuild-suppliers",
+    universalLinks: { host: "groupbuild.co.il", paths: ["/b/*"] },
+    push: {
+      variant: "suppliers",
+      apnsSecretPrefix: "APNS_SUPPLIERS",
+      fcmConfigPath: "resources/suppliers/google-services.json",
+    },
+    apple: { entitlementsPath: "ios-suppliers/App/App/App.entitlements" },
+    privacyManifest: {
+      collectedDataTypes: ["Email","PhoneNumber","Name","PhotosorVideos"],
+      accessedAPITypes: [
+        { type: "UserDefaults", reasons: ["CA92.1"] },
+        { type: "FileTimestamp", reasons: ["C617.1"] },
+      ],
+      trackingEnabled: false,
+    },
+    storeMetadata: {
+      primaryCategory: "BUSINESS",
+      keywords: ["ספקים","קבלנים","לידים","הצעות","עסקים"],
+      supportUrl: "https://groupbuild.co.il/support",
+      privacyPolicyUrl: "https://groupbuild.co.il/privacy",
+      description: { he: "GroupBuild לעסקים — ניהול לידים והצעות לספקים וקבלנים." },
+      ageRating: "4+",
+    },
+    features: {
+      supplierScan: true, ai: true, payments: true,
+      residentDeals: false, budgetPlanner: false,
+      voucherRedemption: false, committeeQuotes: false,
+    },
+  },
+  // עתיד: committee, contractor — רק להוסיף רשומה, אין שינוי קוד
+];
+```
 
 ---
 
-## 2. Components / Hooks / Utils משותפים
-נשארים כפי שהם ב־`src/components/`, `src/hooks/`, `src/lib/`, `src/integrations/supabase/`, `src/types/`, `src/store/`. אין העברה, אין שכפול. נקודות שדורשות התאמה מינימלית:
-- `BottomNav`, `DesktopSidebar` — כבר role-aware; יעבדו כמו שהם
-- `Welcome.tsx` redirect — יכבד `APP_MODE`
+## 2. Generators — קוד שיוצר את כל השאר
+
+תיקיית `scripts/`:
+
+| Script | תפקיד |
+|---|---|
+| `build-app.ts` | build+sync+open לפי `APP_PROFILE` |
+| `generate-capacitor-config.ts` | ייצוא config מתאים בזמן ריצה |
+| `generate-aasa.ts` | יוצר `public/.well-known/apple-app-site-association` מכל הפרופילים |
+| `generate-privacy-manifest.ts` | יוצר `PrivacyInfo.xcprivacy` לכל `iosDir` |
+| `generate-info-plist-overrides.ts` | מזרים `CFBundleDisplayName`, `CFBundleURLTypes`, entitlements |
+| `sync-assets.ts` | מעתיק `icon.png`+`splash.png` ל־`Assets.xcassets` של הפרופיל בלבד |
+| `sync-firebase.ts` | מעתיק `google-services.json` ל־`androidDir` של הפרופיל בלבד |
+| `generate-store-metadata.ts` | מפיק מבנה fastlane `metadata/<lang>/` לכל פרופיל |
+| `generate-env.ts` | יוצר `.env.<id>` עם `VITE_APP_MODE`+`VITE_APP_PROFILE_ID` |
+
+הפרופיל **לעולם לא נוגע** בתיקיות של פרופיל אחר — כל sync פועל רק על `iosDir`/`androidDir`/`webDir` של הפרופיל הפעיל.
 
 ---
 
-## 3. מבנה קבצים חדש (שינויים בלבד)
+## 3. Capacitor config דינמי
+
+`capacitor.config.ts` בשורש, קורא מהרישום:
+```ts
+const id = process.env.APP_PROFILE ?? "residents";
+const p = APP_PROFILES.find(x => x.id === id)!;
+export default {
+  appId: p.appId,
+  appName: p.appName,
+  webDir: p.webDir,
+  ios: { path: p.iosDir, scheme: p.appName },
+  android: { path: p.androidDir },
+  plugins: {
+    SplashScreen: { backgroundColor: p.splashBackgroundColor, ... },
+    PushNotifications: { presentationOptions: ["badge","sound","alert"] },
+  },
+};
+```
+
+**התיקייה `ios/` הקיימת** מטופלת דרך `capacitor.config.dev.ts` נפרד להוט־רילוד ב־Lovable — לא נגעים בה.
+
+---
+
+## 4. Feature Flags בקוד — hook יחיד
+
+`src/config/features.ts`:
+```ts
+import { APP_PROFILES } from "../../app-profiles.config";
+const id = import.meta.env.VITE_APP_PROFILE_ID ?? "web";
+const profile = APP_PROFILES.find(p => p.id === id);
+export const FEATURES = profile?.features ?? {}; // web = הכל דלוק
+export const isFeatureEnabled = (k: string) => FEATURES[k] !== false;
+```
+שימוש בקוד קיים ללא שינוי לוגיקה:
+```tsx
+{isFeatureEnabled("budgetPlanner") && <BudgetPlannerLink />}
+```
+בשלב 2 **לא נוסיף בדיקות פיצ'ר לעמודים קיימים** — רק תשתית. הוספת feature flag לעמוד = שינוי נקודתי בהמשך.
+
+---
+
+## 5. Push credentials — Supabase secrets לפי variant
+
+Edge function `send-push` קיימת. תעודכן לקבל `app_variant` מ־`push_tokens` ולבחור credentials:
+```
+APNS_<VARIANT>_KEY, APNS_<VARIANT>_KEY_ID, APNS_<VARIANT>_TEAM_ID
+FCM_<VARIANT>_SERVICE_ACCOUNT_JSON
+```
+Migration עתידית (לא בשלב זה): הוספת עמודה `app_variant` ל־`device_tokens`.
+
+---
+
+## 6. Scripts ב־package.json
+
+```json
+"app:build":  "tsx scripts/build-app.ts",
+"app:sync":   "APP_PROFILE=$APP_PROFILE tsx scripts/build-app.ts --sync",
+"app:open":   "tsx scripts/build-app.ts --open",
+"app:add-ios":"tsx scripts/build-app.ts --add-ios",
+"app:add-android":"tsx scripts/build-app.ts --add-android",
+"app:aasa":   "tsx scripts/generate-aasa.ts",
+"app:store-metadata":"tsx scripts/generate-store-metadata.ts"
+```
+שימוש:
+```bash
+APP_PROFILE=residents npm run app:sync
+APP_PROFILE=suppliers npm run app:sync
+```
+
+---
+
+## 7. CI/CD (GitHub Actions) — matrix מהרישום
+
+```yaml
+strategy:
+  matrix:
+    profile: ${{ fromJson(needs.list-profiles.outputs.ids) }}
+steps:
+  - run: APP_PROFILE=${{ matrix.profile }} npm run app:sync
+  - run: APP_PROFILE=${{ matrix.profile }} npm run app:store-metadata
+  - uses: apple-actions/upload-testflight-build@v1
+    with:
+      app-path: ios-${{ matrix.profile }}/App/build/App.ipa
+      api-key-id: ${{ secrets[format('ASC_KEY_ID_{0}', matrix.profile)] }}
+      api-private-key: ${{ secrets[format('ASC_PKEY_{0}', matrix.profile)] }}
+```
+`list-profiles` job קורא את `APP_PROFILES` ומחזיר את ה־ids → matrix דינמי. **הוספת פרופיל ב־registry = מופיע ב־CI אוטומטית.**
+
+---
+
+## 8. הרחבה עתידית — 3 צעדים בלבד
+
+1. הוספת רשומה ל־`APP_PROFILES` עם כל השדות.
+2. הנחת icon+splash תחת `resources/<id>/`.
+3. הרצה: `APP_PROFILE=<id> npm run app:add-ios` (חד־פעמית, מקומית).
+
+**אין נגיעה בקוד עסקי, אין נגיעה ב־Supabase, אין נגיעה ב־builds אחרים.**
+
+---
+
+## 9. מבנה קבצים סופי
 
 ```text
-src/
-  config/
-    appMode.ts              ← NEW: קורא VITE_APP_MODE, מייצא APP_MODE
-  routes/
-    PublicRoutes.tsx        ← NEW: routes ציבוריים משותפים
-    ResidentRoutes.tsx      ← NEW: כל /resident/*
-    SupplierRoutes.tsx      ← NEW: כל /supplier/*
-    AdminRoutes.tsx         ← NEW: כל /admin/*
-  App.tsx                   ← UPDATED: טוען routes לפי APP_MODE
-  pages/Welcome.tsx         ← UPDATED: redirect לפי APP_MODE
-capacitor.config.residents.ts   ← NEW
-capacitor.config.suppliers.ts   ← NEW
-capacitor.config.ts             ← נשאר (default = residents לפיתוח)
-.env.residents                  ← NEW: VITE_APP_MODE=residents
-.env.suppliers                  ← NEW: VITE_APP_MODE=suppliers
-package.json                    ← UPDATED: scripts build:residents / build:suppliers / cap:sync:*
-ios/App/App-Residents/          ← NEW target (Bundle ID il.co.groupbuild.residents)
-ios/App/App-Suppliers/          ← NEW target (Bundle ID il.co.groupbuild.suppliers)
+app-profiles.config.ts           ← מקור אמת יחיד
+capacitor.config.ts              ← דינמי
+capacitor.config.dev.ts          ← Lovable hot-reload בלבד
+src/config/
+  appMode.ts                     ← קיים
+  features.ts                    ← NEW
+scripts/
+  build-app.ts
+  generate-capacitor-config.ts
+  generate-aasa.ts
+  generate-privacy-manifest.ts
+  generate-info-plist-overrides.ts
+  sync-assets.ts
+  sync-firebase.ts
+  generate-store-metadata.ts
+  generate-env.ts
+resources/
+  residents/{README.md}          ← icon/splash/fcm יתווספו בהמשך
+  suppliers/{README.md}
+ios/                             ← קיים, לא נגעים (dev/legacy)
+ios-residents/                   ← ייווצר מקומית ע"י המשתמש
+ios-suppliers/                   ← ייווצר מקומית ע"י המשתמש
+.env, .env.residents, .env.suppliers
 ```
 
-### מנגנון הפיצול (App.tsx)
-```ts
-const mode = import.meta.env.VITE_APP_MODE ?? "web"; // "residents" | "suppliers" | "web"
-// mode === "residents" → PublicRoutes + ResidentRoutes בלבד
-// mode === "suppliers" → PublicRoutes + SupplierRoutes בלבד
-// mode === "web"       → הכל כולל Admin (לדומיין admin.groupbuild.co.il והאתר הראשי)
-```
-מסכי ספקים לא ייכללו ב־bundle של דיירים כי `SupplierRoutes` פשוט לא ייובא (Vite tree-shakes).
-
 ---
 
-## 4. Build & Bundle IDs
+## מה יבוצע בשלב 2 (אחרי אישור)
 
-### פקודות build
-```bash
-# דיירים
-VITE_APP_MODE=residents vite build --mode residents
-npx cap sync ios --config capacitor.config.residents.ts
+1. `app-profiles.config.ts` עם residents + suppliers מלאים.
+2. `capacitor.config.ts` דינמי + שמירת `capacitor.config.dev.ts` להוט־רילוד הקיים.
+3. כל 9 ה־generators תחת `scripts/`.
+4. `src/config/features.ts`.
+5. עדכון `package.json` בסקריפטים גנריים.
+6. `.env.residents`, `.env.suppliers`.
+7. תיקיות `resources/residents`, `resources/suppliers` עם README.
+8. הוראות מדויקות למשתמש להרצת `app:add-ios` פעמיים.
 
-# ספקים
-VITE_APP_MODE=suppliers vite build --mode suppliers
-npx cap sync ios --config capacitor.config.suppliers.ts
+## מה לא יבוצע
+- לא ניגע ב־`ios/` הקיימת.
+- לא ניצור icons/splash — רק structure.
+- לא נוסיף `isFeatureEnabled(...)` בעמודים קיימים (רק תשתית).
+- לא נשנה schema של Supabase.
+- לא נשנה קוד עסקי, ראוטים או UI.
+- לא נריץ `cap add ios` מ־Lovable — אין Xcode בסביבה.
 
-# Web (כולל אדמין) — נשאר כרגע
-VITE_APP_MODE=web vite build
-```
-
-### Capacitor configs
-| קובץ | appId | appName |
-|---|---|---|
-| `capacitor.config.residents.ts` | `il.co.groupbuild.residents` | `GroupBuild` |
-| `capacitor.config.suppliers.ts` | `il.co.groupbuild.suppliers` | `GroupBuild לעסקים` |
-
-Icons + Splash: תיקיות נפרדות תחת `resources/residents/` ו־`resources/suppliers/` שיוזרמו ל־Xcode targets מתאימים.
-
-### Supabase — משותף
-שני ה־configs מצביעים על אותו `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` הקיימים. **לא נוגעים ב־Supabase**.
-
----
-
-## 5. קבצים שדורשים שינוי (שלב 1)
-1. `src/config/appMode.ts` — חדש
-2. `src/routes/PublicRoutes.tsx`, `ResidentRoutes.tsx`, `SupplierRoutes.tsx`, `AdminRoutes.tsx` — חדשים (רק מעבירים JSX קיים מ־App.tsx)
-3. `src/App.tsx` — refactor: מרכיב את הראוטים לפי `APP_MODE`
-4. `src/pages/Welcome.tsx` — redirect לפי mode (residents build לא ינווט ל־/supplier ולהפך)
-5. `src/components/layout/BottomNav.tsx` — מסנן את הפריטים לפי mode (הגנה כפולה)
-6. `src/lib/routePreload.ts` — מדלג על preloads שלא רלוונטיים ל־mode
-
-**אין מחיקת קוד, אין שינוי לוגיקה, אין נגיעה בעמודים עצמם.**
-
----
-
-## 6. תוכנית מעבר בשלבים
-
-### שלב 1 — הפרדת routes/layouts/nav (ללא שינוי UX)
-- יצירת `appMode.ts` + 4 קובצי routes
-- Refactor `App.tsx` להרכיב לפי mode
-- ברירת מחדל: `VITE_APP_MODE=web` (הכל עובד כפי שהיה)
-- הגנת role guards קיימת נשמרת (`residentRoute`, `supplierRoute`, `adminRoute`)
-- **בדיקה:** האתר הנוכחי + Preview עובדים בדיוק כמו לפני
-
-### שלב 2 — Build modes + Capacitor
-- `.env.residents`, `.env.suppliers`
-- שני קבצי `capacitor.config.*.ts`
-- npm scripts: `build:residents`, `build:suppliers`, `cap:sync:residents`, `cap:sync:suppliers`
-- Icons + Splash לכל אפליקציה
-- Xcode: יצירת שני targets (הוראות למשתמש — Xcode לא נגיש מ־Lovable)
-
-### שלב 3 — QA
-- הרשמה/התחברות בכל build
-- העלאת תמונה מספק → הופעה אצל דייר ואדמין (אימות ש־Storage משותף)
-- יצירת בקשה מדייר → הופעה אצל ספק
-- Realtime, Deep links, Push
-- TestFlight לשני ה־builds
-
----
-
-## 7. איך נמנעת כפילות קוד
-- **UI, hooks, lib, types, Supabase client** — שכבה אחת ויחידה ב־`src/`
-- Routes files מכילים רק `<Route>` — לא לוגיקה
-- אין העתקת עמודים
-- Tree-shaking של Vite מסיר קוד לא-בשימוש מ־bundle
-
----
-
-## 8. מה לא נעשה
-- לא ניצור Supabase/Storage/DB חדש
-- לא נשנה schema או RLS
-- לא נגע ב־SEO של האתר הציבורי (`/`, `/city/*`, `/category/*`, `/suppliers/*` נשארים ב־web build)
-- לא נמחק את מסכי האדמין — הם רק לא ייטענו ב־mobile builds
-- לא ניצור monorepo
-
----
-
-## שאלה לפני התחלה
-לאשר את התוכנית ואתחיל **שלב 1** (הפרדת routes ללא שינוי התנהגות). שלבים 2–3 דורשים גישה ל־Xcode/Apple Developer שאבצע כהוראות מודרכות למשתמש כשנגיע לשם.
+לאשר לבצע?
