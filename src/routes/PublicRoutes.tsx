@@ -40,6 +40,7 @@ const CommitteeQuoteRequest = lazy(() => import("@/pages/committee/CommitteeQuot
 export const publicRoutes = (
   <>
     <Route path="/" element={<Gateway />} />
+    <Route path="/preview/residents-home" element={<ResidentsHome />} />
     <Route path="/welcome" element={<Navigate to="/" replace />} />
     <Route path="/site" element={<Navigate to="/" replace />} />
     <Route path="/landing" element={<Navigate to="/" replace />} />
