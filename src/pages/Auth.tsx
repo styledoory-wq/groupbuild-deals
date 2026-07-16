@@ -21,6 +21,8 @@ import { loadSupplierCompletenessForUser } from "@/lib/supplierCompleteness";
 import { translateAuthError } from "@/lib/authErrors";
 import { Seo } from "@/components/seo/Seo";
 import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
+import { consumePendingReturnUrl, isSafeReturnUrl, peekPendingReturnUrl } from "@/lib/returnUrl";
+import { ArrowRight } from "lucide-react";
 
 
 type Mode = "signin" | "signup";
@@ -168,8 +170,10 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       return;
     }
 
-    const redirect = searchParams.get("redirect") ?? searchParams.get("return");
-    if (redirect) { navigate(redirect); return; }
+    const returnUrl = searchParams.get("returnUrl") ?? searchParams.get("redirect") ?? searchParams.get("return");
+    const storedReturn = consumePendingReturnUrl();
+    const target = (returnUrl && isSafeReturnUrl(returnUrl)) ? returnUrl : storedReturn;
+    if (target) { navigate(target, { replace: true }); return; }
     if (resolvedRole === "supplier") {
       // Gate: force onboarding until profile is complete
       try {
@@ -406,7 +410,28 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
         }}
       >
         {/* Brand header — clean logo, no badge */}
-        <div className="pt-6 pb-2 animate-fade-up flex flex-col items-center text-center">
+        {/* Back button — never leaves guests stranded inside auth. */}
+        <div className="pt-1 animate-fade-up">
+          <button
+            type="button"
+            onClick={() => {
+              const stored = peekPendingReturnUrl();
+              const q = searchParams.get("returnUrl") ?? searchParams.get("redirect") ?? searchParams.get("return");
+              const target = (q && isSafeReturnUrl(q)) ? q : stored;
+              if (target) { navigate(target); return; }
+              if (window.history.length > 1) {
+                try { navigate(-1); return; } catch { /* fall through */ }
+              }
+              navigate("/", { replace: true });
+            }}
+            aria-label="חזרה"
+            className="inline-flex items-center gap-1.5 text-[#0E6B5A] text-[13px] font-semibold h-10 pr-2 pl-3 rounded-full hover:bg-[#0E6B5A]/8 transition-colors"
+          >
+            <ArrowRight className="h-4 w-4" />
+            חזרה
+          </button>
+        </div>
+        <div className="pt-4 pb-2 animate-fade-up flex flex-col items-center text-center">
           <img
             src={groupBuildLogoCropped.url}
             alt="GroupBuild"
