@@ -3,6 +3,7 @@ import { Navigate, Route } from "react-router-dom";
 import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 
 const Gateway = lazy(() => import("@/pages/marketing/Gateway"));
+const ResidentsHome = lazy(() => import("@/pages/marketing/ResidentsHome"));
 const SuppliersLanding = lazy(() => import("@/pages/marketing/SuppliersLanding"));
 const ResidentsLanding = lazy(() => import("@/pages/marketing/ResidentsLanding"));
 const Auth = lazy(() => import("@/pages/Auth"));
@@ -39,6 +40,7 @@ const CommitteeQuoteRequest = lazy(() => import("@/pages/committee/CommitteeQuot
 export const publicRoutes = (
   <>
     <Route path="/" element={<Gateway />} />
+    <Route path="/preview/residents-home" element={<ResidentsHome />} />
     <Route path="/welcome" element={<Navigate to="/" replace />} />
     <Route path="/site" element={<Navigate to="/" replace />} />
     <Route path="/landing" element={<Navigate to="/" replace />} />
