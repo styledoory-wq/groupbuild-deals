@@ -173,6 +173,13 @@ export const APP_PROFILES: AppProfile[] = [
     appId: "il.co.groupbuild.suppliers",
     appName: "GroupBuild לעסקים",
     shortName: "GB Business",
+    version: "1.0.0",
+    buildNumber: "1",
+    iosUsageDescriptions: {
+      camera: "סריקת שוברי הטבה של דיירים בבית העסק",
+      photoLibrary: "העלאת תמונות של פרויקטים ועבודות לפרופיל הספק",
+      photoLibraryAdd: "שמירת הצעות מחיר ותעודות מהאפליקציה לגלריה",
+    },
     resourcesDir: "resources/suppliers",
     iconPath: "resources/suppliers/icon.png",
     splashPath: "resources/suppliers/splash.png",
