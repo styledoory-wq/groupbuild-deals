@@ -27,7 +27,17 @@ export type AppProfile = {
   appId: string;
   appName: string;
   shortName?: string;
-  version?: string;
+  version: string;      // CFBundleShortVersionString (marketing, e.g. "1.0.0")
+  buildNumber: string;  // CFBundleVersion (integer as string, e.g. "1")
+  // Per-profile iOS usage descriptions (shown in permission prompts).
+  iosUsageDescriptions: {
+    camera?: string;
+    photoLibrary?: string;
+    photoLibraryAdd?: string;
+    location?: string;
+    microphone?: string;
+    faceID?: string;
+  };
 
   // Visual assets
   resourcesDir: string;
@@ -93,6 +103,14 @@ export const APP_PROFILES: AppProfile[] = [
     appId: "il.co.groupbuild.residents",
     appName: "GroupBuild",
     shortName: "GroupBuild",
+    version: "1.0.0",
+    buildNumber: "1",
+    iosUsageDescriptions: {
+      photoLibrary: "העלאת תמונות ומסמכים לפרופיל, לפרויקטים ולהצעות מחיר",
+      photoLibraryAdd: "שמירת שוברים ותעודות מהאפליקציה לגלריה",
+      camera: "צילום מסמכים והעלאת תמונות פרופיל",
+      location: "איתור ספקים בקרבתך",
+    },
     resourcesDir: "resources/residents",
     iconPath: "resources/residents/icon.png",
     splashPath: "resources/residents/splash.png",
@@ -155,6 +173,13 @@ export const APP_PROFILES: AppProfile[] = [
     appId: "il.co.groupbuild.suppliers",
     appName: "GroupBuild לעסקים",
     shortName: "GB Business",
+    version: "1.0.0",
+    buildNumber: "1",
+    iosUsageDescriptions: {
+      camera: "סריקת שוברי הטבה של דיירים בבית העסק",
+      photoLibrary: "העלאת תמונות של פרויקטים ועבודות לפרופיל הספק",
+      photoLibraryAdd: "שמירת הצעות מחיר ותעודות מהאפליקציה לגלריה",
+    },
     resourcesDir: "resources/suppliers",
     iconPath: "resources/suppliers/icon.png",
     splashPath: "resources/suppliers/splash.png",
