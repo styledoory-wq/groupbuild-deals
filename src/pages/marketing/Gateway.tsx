@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Building2, Briefcase } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import { isAdminEmail } from "@/lib/auth";
+import { APP_MODE, IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 import { BrandMark } from "@/components/BrandLogo";
 import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 import { cn } from "@/lib/utils";
