@@ -331,25 +331,45 @@ export default function CategoriesList() {
             "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)",
         }}
       >
-        {/* Top bar: bell + avatar */}
+        {/* Top bar: guests see login CTA; authed users see personal chrome. */}
         <div className="flex items-center justify-between mb-4">
-          <button
-            aria-label="פרופיל"
-            onClick={() => navigate("/resident/profile")}
-            className="grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
-          >
-            <UserRound size={20} strokeWidth={2} className="text-[#172033]" />
-          </button>
-          <button
-            aria-label="התראות"
-            onClick={() => navigate("/resident/notifications")}
-            className="relative grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
-          >
-            <Bell size={20} strokeWidth={1.9} className="text-[#172033]" />
-            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-1">
-              3
-            </span>
-          </button>
+          {user ? (
+            <>
+              <button
+                aria-label="פרופיל"
+                onClick={() => navigate("/resident/profile")}
+                className="grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
+              >
+                <UserRound size={20} strokeWidth={2} className="text-[#172033]" />
+              </button>
+              <button
+                aria-label="התראות"
+                onClick={() => navigate("/resident/notifications")}
+                className="relative grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
+              >
+                <Bell size={20} strokeWidth={1.9} className="text-[#172033]" />
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-1">
+                  3
+                </span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate("/")}
+                className="font-extrabold text-[#0E6B5A] text-[15px] tracking-tight"
+                aria-label="דף הבית"
+              >
+                GroupBuild
+              </button>
+              <button
+                onClick={() => navigate(`/auth/resident?returnUrl=${encodeURIComponent(location.pathname + location.search)}`)}
+                className="text-[#0E6B5A] font-semibold text-[12.5px] border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
+              >
+                התחברות
+              </button>
+            </>
+          )}
         </div>
 
         {/* Hero copy */}
