@@ -101,7 +101,7 @@ export const APP_PROFILES: AppProfile[] = [
     id: "residents",
     appMode: "residents",
     appId: "il.co.groupbuild.residents",
-    appName: "GroupBuild",
+    appName: "GroupBuild Residents",
     shortName: "GroupBuild",
     version: "1.0.0",
     buildNumber: "1",
