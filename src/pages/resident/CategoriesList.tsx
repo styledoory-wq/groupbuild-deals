@@ -244,6 +244,11 @@ export default function CategoriesList() {
   const [stagesByType, setStagesByType] = useState<Record<string, StageItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [refreshTick, setRefreshTick] = useState(0);
+  const ptr = usePullToRefresh(async () => {
+    setRefreshTick((n) => n + 1);
+    await new Promise((r) => setTimeout(r, 400));
+  });
 
 
   useEffect(() => {
@@ -287,7 +292,7 @@ export default function CategoriesList() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshTick]);
 
   const currentDef =
     PROJECT_TYPES.find((p) => p.id === selectedProject) ?? PROJECT_TYPES[0];
