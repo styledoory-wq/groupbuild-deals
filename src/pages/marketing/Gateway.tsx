@@ -22,8 +22,8 @@ export default function Gateway() {
   useEffect(() => {
     if (!authReady) return;
     if (!user) {
-      // In native single-role builds, skip the gateway entirely.
-      if (IS_RESIDENTS_BUILD) { navigate("/auth/resident", { replace: true }); return; }
+      // Residents native build: show the premium discovery home (guest-friendly).
+      // Suppliers native build still routes straight to supplier auth.
       if (IS_SUPPLIERS_BUILD) { navigate("/auth/supplier", { replace: true }); return; }
       return;
     }
@@ -34,8 +34,13 @@ export default function Gateway() {
     navigate(user.role === "supplier" ? "/supplier" : "/resident", { replace: true });
   }, [authReady, user, needsOnboarding, navigate]);
 
-  // Native builds redirect immediately — never render the dual-role gateway.
-  if (!authReady || user || IS_RESIDENTS_BUILD || IS_SUPPLIERS_BUILD) {
+  // Residents build: render the premium discovery home for guests.
+  if (IS_RESIDENTS_BUILD && authReady && !user) {
+    return <ResidentsHome />;
+  }
+
+  // Other native builds redirect; while authed/loading show a blank surface.
+  if (!authReady || user || IS_SUPPLIERS_BUILD) {
     return <div style={{ minHeight: "100dvh", background: "#F7F5F0" }} aria-hidden />;
   }
 
