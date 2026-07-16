@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { toggleFavorite } from "@/lib/favorites";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useGuestGate } from "@/hooks/useGuestGate";
 
 export function FavoriteButton({
   dealId,
@@ -18,6 +19,7 @@ export function FavoriteButton({
 }) {
   const [on, setOn] = useState(initial);
   const [busy, setBusy] = useState(false);
+  const { requireAuth } = useGuestGate();
   useEffect(() => setOn(initial), [initial]);
 
   useEffect(() => {
@@ -43,7 +45,9 @@ export function FavoriteButton({
     if (busy) return;
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) {
-      window.location.href = `/auth?redirect=${encodeURIComponent(window.location.pathname)}`;
+      requireAuth("לשמור הצעות למועדפים", () => {
+        /* user will return to page and click again after signing in */
+      });
       return;
     }
     const next = !on;
