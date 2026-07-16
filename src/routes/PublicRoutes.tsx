@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { Navigate, Route } from "react-router-dom";
+import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 
 const Gateway = lazy(() => import("@/pages/marketing/Gateway"));
 const SuppliersLanding = lazy(() => import("@/pages/marketing/SuppliersLanding"));
