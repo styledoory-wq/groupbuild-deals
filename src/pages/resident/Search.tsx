@@ -6,6 +6,8 @@ import { BackHeader, SkeletonList, EmptyState } from "@/components/ds";
 import { supabase } from "@/integrations/supabase/client";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { Seo } from "@/components/seo/Seo";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 
 type SupplierRow = {
   id: string;
@@ -40,6 +42,10 @@ export default function SearchPage() {
   const [catalog, setCatalog] = useState<CatalogHit[]>([]);
   const [loading, setLoading] = useState(false);
   const term = q.trim();
+  const ptr = usePullToRefresh(async () => {
+    setQ((s) => s); // re-trigger effect trivially
+    await new Promise((r) => setTimeout(r, 300));
+  });
 
   useEffect(() => {
     if (!term) { setSuppliers([]); setCatalog([]); return; }
@@ -70,7 +76,8 @@ export default function SearchPage() {
   const hasResults = catalog.length + suppliers.length > 0;
 
   return (
-    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden" style={{ background: "#F7F5F0" }}>
+      <PullToRefreshIndicator {...ptr} />
       <Seo
         title="חיפוש ספקים ובעלי מקצוע לפי שירות | GroupBuild"
         description="חפשו ספקים, בעלי מקצוע ושירותים לבית החדש — לפי שם, קטגוריה או שירות. ללא הרשמה."
