@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Loader2, Plus, Search, Phone, Calendar, MapPin, Eye, Inbox } from "lucide-react";
+import {
+  Loader2, Plus, Search, MoreHorizontal, Eye, Pencil, Check, X, Pause, Trash2, Inbox, MapPin,
+} from "lucide-react";
 import { CategoryMultiPicker } from "@/components/categories/CategoryMultiPicker";
 import { computeCompleteness, type SupplierCompleteness } from "@/lib/supplierCompleteness";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { AdminTabsBar, type AdminTab } from "@/components/admin/AdminTabsBar";
@@ -12,6 +13,13 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
 import { useApp } from "@/store/AppStore";
+import { ArrowRight } from "lucide-react";
 
 interface Row {
   id: string;
@@ -35,8 +44,6 @@ interface Row {
   short_description: string | null;
   description: string | null;
   created_at: string | null;
-  dealsCount?: number;
-  leadsCount?: number;
   completeness?: SupplierCompleteness;
 }
 
@@ -68,6 +75,7 @@ export default function AdminDbSuppliers() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [supplierSearch, setSupplierSearch] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<Row | null>(null);
 
   const urlTab = searchParams.get("tab") as TabKey | null;
   const activeTab: TabKey = urlTab && VALID_TABS.includes(urlTab) ? urlTab : "all";
@@ -79,7 +87,7 @@ export default function AdminDbSuppliers() {
     setSearchParams(next, { replace: true });
   };
 
-  // Create
+  // Create dialog state
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<NewForm>(emptyForm);
   const [areas, setAreas] = useState<AreasComboboxValue>({
@@ -95,27 +103,10 @@ export default function AdminDbSuppliers() {
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
 
-    const [{ data: dls }, { data: ints }, { data: regs }, { data: cits }] = await Promise.all([
-      supabase.from("deals").select("id,supplier_id,status,is_deleted"),
-      supabase.from("deal_interests").select("deal_id,is_deleted"),
+    const [{ data: regs }, { data: cits }] = await Promise.all([
       supabase.from("supplier_regions").select("supplier_id"),
       supabase.from("supplier_cities").select("supplier_id"),
     ]);
-    const dealsBySupplier = new Map<string, number>();
-    const dealToSupplier = new Map<string, string>();
-    (dls ?? []).forEach((d: { id: string; supplier_id: string; status: string; is_deleted: boolean }) => {
-      dealToSupplier.set(d.id, d.supplier_id);
-      if (d.status === "active" && !d.is_deleted) {
-        dealsBySupplier.set(d.supplier_id, (dealsBySupplier.get(d.supplier_id) ?? 0) + 1);
-      }
-    });
-    const leadsBySupplier = new Map<string, number>();
-    (ints ?? []).forEach((i: { deal_id: string; is_deleted: boolean }) => {
-      if (i.is_deleted) return;
-      const sid = dealToSupplier.get(i.deal_id);
-      if (!sid) return;
-      leadsBySupplier.set(sid, (leadsBySupplier.get(sid) ?? 0) + 1);
-    });
     const regionsBySupplier = new Map<string, number>();
     (regs ?? []).forEach((r: { supplier_id: string }) => {
       regionsBySupplier.set(r.supplier_id, (regionsBySupplier.get(r.supplier_id) ?? 0) + 1);
@@ -127,8 +118,6 @@ export default function AdminDbSuppliers() {
 
     setRows(base.map((r) => ({
       ...r,
-      dealsCount: dealsBySupplier.get(r.id) ?? 0,
-      leadsCount: leadsBySupplier.get(r.id) ?? 0,
       completeness: computeCompleteness({
         business_name: r.business_name,
         phone: r.phone,
@@ -189,7 +178,44 @@ export default function AdminDbSuppliers() {
     }
   };
 
-  // Counts per tab (server-side data, computed once)
+  // Quick actions
+  const patchRow = (id: string, patch: Partial<Row>) => {
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  };
+
+  const doApprove = async (r: Row) => {
+    const prev = { approval_status: r.approval_status, is_active: r.is_active };
+    patchRow(r.id, { approval_status: "approved", is_active: true });
+    const { error } = await supabase.from("suppliers")
+      .update({ approval_status: "approved", is_active: true }).eq("id", r.id);
+    if (error) { patchRow(r.id, prev); toast.error("אישור נכשל"); }
+    else toast.success(`${r.business_name} אושר`);
+  };
+  const doReject = async (r: Row) => {
+    const prev = { approval_status: r.approval_status };
+    patchRow(r.id, { approval_status: "rejected" });
+    const { error } = await supabase.from("suppliers")
+      .update({ approval_status: "rejected" }).eq("id", r.id);
+    if (error) { patchRow(r.id, prev); toast.error("דחייה נכשלה"); }
+    else toast.success(`${r.business_name} נדחה`);
+  };
+  const doSuspend = async (r: Row) => {
+    const prev = { is_active: r.is_active };
+    patchRow(r.id, { is_active: !r.is_active });
+    const { error } = await supabase.from("suppliers")
+      .update({ is_active: !r.is_active }).eq("id", r.id);
+    if (error) { patchRow(r.id, prev); toast.error("פעולה נכשלה"); }
+    else toast.success(!r.is_active ? "הופעל" : "הושעה");
+  };
+  const doDelete = async (r: Row) => {
+    const backup = rows;
+    setRows((prev) => prev.filter((x) => x.id !== r.id));
+    const { error } = await supabase.from("suppliers").delete().eq("id", r.id);
+    if (error) { setRows(backup); toast.error("מחיקה נכשלה"); }
+    else toast.success(`${r.business_name} נמחק`);
+    setConfirmDelete(null);
+  };
+
   const counts = useMemo(() => {
     const now = Date.now();
     return {
@@ -221,278 +247,372 @@ export default function AdminDbSuppliers() {
   const tabs: AdminTab[] = [
     { key: "all", label: "כולם", count: counts.all },
     { key: "active", label: "פעילים", count: counts.active },
-    { key: "pending", label: "ממתינים לאישור", count: counts.pending },
-    { key: "rejected", label: "לא מאושרים", count: counts.rejected },
-    { key: "new", label: "חדשים השבוע", count: counts.new },
+    { key: "pending", label: "ממתינים", count: counts.pending },
+    { key: "rejected", label: "נדחו", count: counts.rejected },
+    { key: "new", label: "חדשים", count: counts.new },
   ];
 
   const emptyLabel: Record<TabKey, string> = {
     all: "אין ספקים רשומים עדיין.",
     active: "אין ספקים פעילים כרגע.",
     pending: "אין ספקים הממתינים לאישור.",
-    rejected: "אין ספקים לא מאושרים.",
+    rejected: "אין ספקים שנדחו.",
     new: "לא נוספו ספקים חדשים השבוע.",
   };
 
-  if (loading) {
-    return (
-      <MobileShell>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      </MobileShell>
-    );
-  }
-
   return (
     <MobileShell>
-      <PageHeader title="ניהול ספקים" subtitle={`${counts.all} ספקים · ${counts.pending} ממתינים`} back />
+      <div dir="rtl" className="min-h-screen bg-[#F7F8FA] pb-32">
+        {/* Header — clean, not sticky */}
+        <header className="px-5 pt-6 pb-4">
+          <div className="flex items-center gap-2 mb-4">
+            <button
+              onClick={() => navigate(-1)}
+              aria-label="חזרה"
+              className="h-9 w-9 -mr-1 rounded-full flex items-center justify-center text-[#0F172A]/70 hover:bg-white transition"
+            >
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <div className="flex-1" />
+            <button
+              onClick={() => { setForm(emptyForm); setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] }); setOpen(true); }}
+              className="h-9 px-3.5 rounded-full bg-[#0F172A] text-white text-[13px] font-semibold inline-flex items-center gap-1.5 active:scale-95 transition-transform"
+            >
+              <Plus className="h-4 w-4" />
+              הוסף ספק
+            </button>
+          </div>
+          <h1 className="text-[26px] font-bold text-[#0F172A] tracking-tight leading-tight">
+            ספקים
+            <span className="ms-2 text-[15px] font-semibold text-[#8B94A3] tabular-nums">
+              {counts.all}
+            </span>
+          </h1>
 
-      {/* Sticky filter bar */}
-      <div className="sticky top-[56px] z-20 bg-[#F7F8FA]/90 backdrop-blur-xl px-4 pt-2 pb-3 -mt-2 space-y-2.5 border-b border-transparent">
-        <div className="relative">
-          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-          <Input
-            value={supplierSearch}
-            onChange={(e) => setSupplierSearch(e.target.value)}
-            placeholder="חיפוש ספק…"
-            className="h-9 pr-9 text-fs-sm rounded-xl bg-white"
-          />
-        </div>
-        <div className="overflow-x-auto -mx-1 px-1 scrollbar-none">
+          <div className="relative mt-4">
+            <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-[#8B94A3] pointer-events-none" />
+            <Input
+              value={supplierSearch}
+              onChange={(e) => setSupplierSearch(e.target.value)}
+              placeholder="חיפוש לפי שם, תחום, טלפון…"
+              className="h-10 pr-9 text-[14px] rounded-xl bg-white border-[#EEF0F4] focus-visible:ring-1 focus-visible:ring-[#0F172A]/10"
+            />
+          </div>
+        </header>
+
+        {/* Tabs — small, clean, scrollable horizontally */}
+        <div className="px-5 pb-3 overflow-x-auto scrollbar-none">
           <AdminTabsBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
         </div>
-      </div>
 
-      <div className="px-4 pt-3 pb-32">
-        {filteredRows.length === 0 ? (
-          <EmptyState
-            title={supplierSearch ? "לא נמצאו ספקים תואמים" : emptyLabel[activeTab]}
-            hint={supplierSearch ? "נסה חיפוש אחר או בחר טאב אחר" : undefined}
-          />
-        ) : (
-          <div className="grid grid-cols-2 gap-2.5">
-            {filteredRows.map((r) => (
-              <SupplierGridCard key={r.id} row={r} onOpen={() => navigate(`/admin/suppliers/${r.id}`)} categories={categories} />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* FAB */}
-      <button
-        onClick={() => { setForm(emptyForm); setAreas({ servesAllCountry: false, regionIds: [], cityIds: [] }); setOpen(true); }}
-        className="fixed z-40 left-5 bottom-24 h-14 w-14 rounded-full bg-[#0E6B5A] text-white shadow-[0_8px_20px_-10px_rgba(10,31,61,0.45)] flex items-center justify-center active:scale-95 transition-transform"
-        aria-label="הוסף ספק חדש"
-      >
-        <Plus className="h-6 w-6" strokeWidth={2.6} />
-      </button>
-
-      {/* Create dialog */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
-          <DialogHeader>
-            <DialogTitle>ספק חדש</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>שם עסק *</Label>
-              <Input value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} />
+        {/* List */}
+        <main className="px-4 pt-1">
+          {loading ? (
+            <div className="min-h-[40vh] flex items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-[#8B94A3]" />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+          ) : filteredRows.length === 0 ? (
+            <EmptyState
+              title={supplierSearch ? "לא נמצאו ספקים תואמים" : emptyLabel[activeTab]}
+              hint={supplierSearch ? "נסה חיפוש אחר או בחר טאב אחר" : undefined}
+            />
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {filteredRows.map((r) => (
+                <SupplierRow
+                  key={r.id}
+                  row={r}
+                  categories={categories}
+                  onOpen={() => navigate(`/admin/suppliers/${r.id}`)}
+                  onEdit={() => navigate(`/admin/suppliers/${r.id}`)}
+                  onApprove={() => doApprove(r)}
+                  onReject={() => doReject(r)}
+                  onToggleActive={() => doSuspend(r)}
+                  onDelete={() => setConfirmDelete(r)}
+                />
+              ))}
+            </ul>
+          )}
+        </main>
+
+        {/* Create dialog */}
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" dir="rtl">
+            <DialogHeader>
+              <DialogTitle>ספק חדש</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
               <div>
-                <Label>איש קשר</Label>
-                <Input value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
+                <Label>שם עסק *</Label>
+                <Input value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label>איש קשר</Label>
+                  <Input value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
+                </div>
+                <div>
+                  <Label>טלפון</Label>
+                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                </div>
               </div>
               <div>
-                <Label>טלפון</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <Label>אימייל</Label>
+                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              </div>
+              <div>
+                <Label>תיאור קצר</Label>
+                <Textarea rows={2} value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
+              </div>
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-bold">קטגוריות</Label>
+                <p className="text-fs-xs text-muted-foreground mt-1 mb-2">אופציונלי — אפשר להשלים בהמשך</p>
+                <CategoryMultiPicker
+                  categories={categories}
+                  value={form.categoryIds}
+                  onChange={(next) => setForm((f) => ({ ...f, categoryIds: next }))}
+                />
+              </div>
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-bold">אזורי שירות</Label>
+                <p className="text-fs-xs text-muted-foreground mt-1 mb-2">אופציונלי — אפשר להשלים בהמשך</p>
+                <div className="mt-2">
+                  <AreasCombobox value={areas} onChange={setAreas} />
+                </div>
+              </div>
+              <label className="flex items-center gap-2 text-sm pt-2 border-t">
+                <input type="checkbox" checked={form.is_active}
+                  onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+                  className="h-4 w-4 accent-primary" />
+                פעיל
+              </label>
+              <div>
+                <Label>סטטוס אישור</Label>
+                <select value={form.approval_status}
+                  onChange={(e) => setForm({ ...form, approval_status: e.target.value as NewForm["approval_status"] })}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                  <option value="approved">מאושר</option>
+                  <option value="pending">ממתין</option>
+                  <option value="rejected">נדחה</option>
+                </select>
               </div>
             </div>
-            <div>
-              <Label>אימייל</Label>
-              <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            </div>
-            <div>
-              <Label>תיאור קצר</Label>
-              <Textarea rows={2} value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
-            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>ביטול</Button>
+              <Button onClick={handleCreate} disabled={saving} className="bg-[#0E6B5A] text-white font-bold">
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "צור ספק"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-            <div className="pt-2 border-t">
-              <Label className="text-sm font-bold">קטגוריות</Label>
-              <p className="text-fs-xs text-muted-foreground mt-1 mb-2">אופציונלי — אפשר להשלים בהמשך</p>
-              <CategoryMultiPicker
-                categories={categories}
-                value={form.categoryIds}
-                onChange={(next) => setForm((f) => ({ ...f, categoryIds: next }))}
-              />
-            </div>
-
-            <div className="pt-2 border-t">
-              <Label className="text-sm font-bold">אזורי שירות</Label>
-              <p className="text-fs-xs text-muted-foreground mt-1 mb-2">אופציונלי — אפשר להשלים בהמשך</p>
-              <div className="mt-2">
-                <AreasCombobox value={areas} onChange={setAreas} />
-              </div>
-            </div>
-
-            <label className="flex items-center gap-2 text-sm pt-2 border-t">
-              <input type="checkbox" checked={form.is_active}
-                onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                className="h-4 w-4 accent-primary" />
-              פעיל
-            </label>
-            <div>
-              <Label>סטטוס אישור</Label>
-              <select value={form.approval_status}
-                onChange={(e) => setForm({ ...form, approval_status: e.target.value as NewForm["approval_status"] })}
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                <option value="approved">מאושר</option>
-                <option value="pending">ממתין</option>
-                <option value="rejected">נדחה</option>
-              </select>
-            </div>
-            <p className="text-fs-xs text-muted-foreground">
-              💡 פרטים נוספים (לוגו, קטלוג, קישורים, חיוב) — לאחר יצירה, במסך הפרטים של הספק.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>ביטול</Button>
-            <Button onClick={handleCreate} disabled={saving} className="bg-[#0E6B5A] text-white font-bold">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "צור ספק"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        {/* Delete confirm */}
+        <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
+          <AlertDialogContent dir="rtl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>למחוק את הספק?</AlertDialogTitle>
+              <AlertDialogDescription>
+                פעולה זו תמחק את <b>{confirmDelete?.business_name}</b> לצמיתות. לא ניתן לשחזר.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>ביטול</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                onClick={() => confirmDelete && doDelete(confirmDelete)}
+              >
+                מחק
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
 
       <BottomNav role="admin" />
     </MobileShell>
   );
 }
 
+/* ---------- Row (compact card, ~110–130px) ---------- */
+
+function SupplierRow({
+  row, categories, onOpen, onEdit, onApprove, onReject, onToggleActive, onDelete,
+}: {
+  row: Row;
+  categories: { id: string; name: string; icon: string }[];
+  onOpen: () => void;
+  onEdit: () => void;
+  onApprove: () => void;
+  onReject: () => void;
+  onToggleActive: () => void;
+  onDelete: () => void;
+}) {
+  const isPending = row.approval_status === "pending";
+  const isRejected = row.approval_status === "rejected";
+  const isBlocked = !row.is_active && row.approval_status !== "rejected";
+  const isNational = row.serves_all_country || row.service_areas?.includes("כל הארץ");
+
+  const primaryCategory = row.categories?.[0]
+    ? categories.find((c) => c.id === row.categories[0])?.name ?? null
+    : null;
+  const areaLabel = isNational ? "כל הארץ" : row.service_areas?.[0] ?? "—";
+  const created = row.created_at ? new Date(row.created_at) : null;
+  const joinLabel = created
+    ? created.toLocaleDateString("he-IL", { day: "2-digit", month: "short", year: "2-digit" })
+    : "—";
+
+  return (
+    <li>
+      <div
+        className="bg-white rounded-2xl border border-[#EEF0F4] p-3.5 flex items-start gap-3 transition-shadow hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_4px_16px_-8px_rgba(15,23,42,0.08)]"
+      >
+        <button onClick={onOpen} className="shrink-0" aria-label={`פתח ${row.business_name}`}>
+          <SupplierLogo name={row.business_name} logoUrl={row.logo_url} size="md" />
+        </button>
+
+        <button onClick={onOpen} className="flex-1 min-w-0 text-right">
+          <div className="flex items-center gap-2 min-w-0">
+            <h3 className="font-semibold text-[15px] text-[#0F172A] truncate leading-tight">
+              {row.business_name}
+            </h3>
+            <StatusDot status={isRejected ? "rejected" : isPending ? "pending" : isBlocked ? "blocked" : "active"} />
+          </div>
+          <p className="mt-0.5 text-[12.5px] text-[#6B7280] truncate">
+            {primaryCategory ?? <span className="text-amber-700">ללא תחום</span>}
+          </p>
+          <div className="mt-1.5 flex items-center gap-3 text-[11.5px] text-[#8B94A3]">
+            <span className="inline-flex items-center gap-1 truncate">
+              <MapPin className="h-3 w-3" />
+              <span className="truncate">{areaLabel}</span>
+            </span>
+            <span className="tabular-nums shrink-0">הצטרף · {joinLabel}</span>
+          </div>
+
+          {isPending && row.completeness && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="h-1 rounded-full bg-[#F1F3F7] w-24 overflow-hidden">
+                <div
+                  className="h-full bg-amber-500 transition-all"
+                  style={{ width: `${row.completeness.percent}%` }}
+                />
+              </div>
+              <span className="text-[10.5px] font-semibold text-amber-700 tabular-nums">
+                {row.completeness.percent}% פרופיל
+              </span>
+            </div>
+          )}
+        </button>
+
+        {/* Actions area */}
+        {isPending ? (
+          <div className="flex flex-col gap-1.5 shrink-0">
+            <button
+              onClick={onApprove}
+              className="h-8 px-3 rounded-lg bg-[#0E6B5A] text-white text-[12px] font-semibold inline-flex items-center gap-1 active:scale-95 transition-transform"
+            >
+              <Check className="h-3.5 w-3.5" />
+              אישור
+            </button>
+            <button
+              onClick={onReject}
+              className="h-8 px-3 rounded-lg bg-white border border-[#EEF0F4] text-[#6B7280] text-[12px] font-semibold inline-flex items-center gap-1 hover:text-red-600 hover:border-red-200 transition"
+            >
+              <X className="h-3.5 w-3.5" />
+              דחייה
+            </button>
+          </div>
+        ) : (
+          <RowMenu
+            onOpen={onOpen}
+            onEdit={onEdit}
+            onApprove={onApprove}
+            onReject={onReject}
+            onToggleActive={onToggleActive}
+            onDelete={onDelete}
+            isActive={row.is_active}
+            isRejected={isRejected}
+          />
+        )}
+      </div>
+    </li>
+  );
+}
+
+function StatusDot({ status }: { status: "active" | "pending" | "rejected" | "blocked" }) {
+  const map = {
+    active: { label: "פעיל", color: "bg-emerald-500", text: "text-emerald-700" },
+    pending: { label: "ממתין", color: "bg-amber-500", text: "text-amber-700" },
+    rejected: { label: "נדחה", color: "bg-red-500", text: "text-red-700" },
+    blocked: { label: "מושהה", color: "bg-neutral-400", text: "text-neutral-600" },
+  }[status];
+  return (
+    <span className={`inline-flex items-center gap-1 shrink-0 text-[11px] font-medium ${map.text}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${map.color}`} />
+      {map.label}
+    </span>
+  );
+}
+
+function RowMenu({
+  onOpen, onEdit, onApprove, onReject, onToggleActive, onDelete, isActive, isRejected,
+}: {
+  onOpen: () => void; onEdit: () => void; onApprove: () => void; onReject: () => void;
+  onToggleActive: () => void; onDelete: () => void; isActive: boolean; isRejected: boolean;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="h-8 w-8 shrink-0 rounded-lg text-[#8B94A3] hover:bg-[#F4F6FA] hover:text-[#0F172A] transition inline-flex items-center justify-center"
+          aria-label="פעולות"
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuItem onClick={onOpen}>
+          <Eye className="h-4 w-4 me-2" /> צפייה בפרופיל
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onEdit}>
+          <Pencil className="h-4 w-4 me-2" /> עריכה
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {isRejected ? (
+          <DropdownMenuItem onClick={onApprove}>
+            <Check className="h-4 w-4 me-2 text-emerald-600" /> אישור
+          </DropdownMenuItem>
+        ) : (
+          <>
+            <DropdownMenuItem onClick={onApprove}>
+              <Check className="h-4 w-4 me-2 text-emerald-600" /> אישור
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onReject}>
+              <X className="h-4 w-4 me-2 text-red-600" /> דחייה
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onToggleActive}>
+              <Pause className="h-4 w-4 me-2" /> {isActive ? "השעיה" : "הפעלה"}
+            </DropdownMenuItem>
+          </>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onDelete} className="text-red-600 focus:text-red-600">
+          <Trash2 className="h-4 w-4 me-2" /> מחיקה
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/* ---------- Empty ---------- */
+
 function EmptyState({ title, hint }: { title: string; hint?: string }) {
   return (
-    <div className="mt-6 rounded-[16px] bg-white border border-[#EEF0F4] p-8 text-center flex flex-col items-center gap-2">
+    <div className="mt-8 rounded-2xl bg-white border border-[#EEF0F4] p-10 text-center flex flex-col items-center gap-2">
       <div className="h-11 w-11 rounded-full bg-[#F4F6FA] flex items-center justify-center">
         <Inbox className="h-5 w-5 text-[#8B94A3]" />
       </div>
       <p className="text-[14px] font-semibold text-[#0F172A]">{title}</p>
       {hint && <p className="text-[12px] text-[#8B94A3]">{hint}</p>}
     </div>
-  );
-}
-
-function SupplierGridCard({ row, onOpen, categories }: {
-  row: Row;
-  onOpen: () => void;
-  categories: { id: string; name: string; icon: string }[];
-}) {
-  const isNational = row.serves_all_country || row.service_areas?.includes("כל הארץ");
-  const rejected = row.approval_status === "rejected";
-  const blocked = !row.is_active;
-  const pending = row.approval_status === "pending";
-  const approved = row.approval_status === "approved" && row.is_active;
-  const statusBadge = rejected
-    ? { emoji: "🔴", label: "נדחה", cls: "bg-red-50 text-red-700 border-red-200" }
-    : blocked
-    ? { emoji: "⚫", label: "חסום", cls: "bg-neutral-100 text-neutral-700 border-neutral-200" }
-    : pending
-    ? { emoji: "🟡", label: "ממתין", cls: "bg-amber-50 text-amber-800 border-amber-200" }
-    : approved
-    ? { emoji: "🟢", label: "פעיל", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" }
-    : { emoji: "⚪", label: "לא פעיל", cls: "bg-muted text-muted-foreground border-border" };
-
-  const primaryCategory = row.categories?.[0]
-    ? categories.find((c) => c.id === row.categories[0])?.name ?? null
-    : null;
-  const extraCategories = Math.max(0, (row.categories?.length ?? 0) - 1);
-  const areaLabel = isNational ? "כל הארץ" : row.service_areas?.[0] ?? "—";
-  const missing: string[] = [];
-  if (!row.phone) missing.push("טלפון");
-  if (!row.categories || row.categories.length === 0) missing.push("תחום");
-  if (!isNational && (!row.service_areas || row.service_areas.length === 0)) missing.push("אזור");
-
-  const created = row.created_at ? new Date(row.created_at) : null;
-  const createdLabel = created
-    ? created.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit" })
-    : "—";
-
-  return (
-    <button
-      onClick={onOpen}
-      className="gb-card p-3 text-right flex flex-col gap-2 active:scale-[0.98] transition-transform"
-    >
-      <div className="flex items-center justify-between gap-1.5">
-        <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full border text-[10px] font-bold ${statusBadge.cls}`}>
-          <span aria-hidden>{statusBadge.emoji}</span>
-          {statusBadge.label}
-        </span>
-        {row.completeness && <CompletenessBadge percent={row.completeness.percent} />}
-        <span className="text-[10px] text-muted-foreground inline-flex items-center gap-0.5 ms-auto">
-          <Calendar className="h-2.5 w-2.5" />
-          {createdLabel}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <SupplierLogo name={row.business_name} logoUrl={row.logo_url} size="sm" />
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-fs-sm truncate leading-tight">{row.business_name}</h3>
-          <p className="text-fs-xs text-primary font-semibold truncate">
-            {primaryCategory ?? <span className="text-amber-700">ללא תחום</span>}
-            {extraCategories > 0 && ` +${extraCategories}`}
-          </p>
-        </div>
-      </div>
-
-      <div className="grid gap-1 text-fs-xs text-foreground/85">
-        <div className="flex items-center gap-1 truncate">
-          <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
-          <span className="truncate">{areaLabel}</span>
-        </div>
-        {row.phone && (
-          <div className="flex items-center gap-1 truncate">
-            <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
-            <span className="truncate" dir="ltr">{row.phone}</span>
-          </div>
-        )}
-      </div>
-
-      {missing.length > 0 && (
-        <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold self-start">
-          ⚠️ חסר: {missing.join(" · ")}
-        </div>
-      )}
-
-      <div
-        className={
-          "mt-1 h-8 rounded-lg text-fs-xs font-bold flex items-center justify-center gap-1 " +
-          (pending
-            ? "bg-amber-500 text-white"
-            : "bg-muted text-foreground")
-        }
-      >
-        <Eye className="h-3.5 w-3.5" />
-        {pending ? "בדיקה" : "פתח פרטים"}
-      </div>
-    </button>
-  );
-}
-
-function CompletenessBadge({ percent }: { percent: number }) {
-  const cls = percent >= 100
-    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-    : percent >= 60
-    ? "bg-amber-50 text-amber-800 border-amber-200"
-    : "bg-red-50 text-red-700 border-red-200";
-  const dot = percent >= 100 ? "🟢" : percent >= 60 ? "🟡" : "🔴";
-  return (
-    <span
-      className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full border text-[10px] font-bold tabular-nums ${cls}`}
-      title="השלמת פרופיל"
-    >
-      <span aria-hidden>{dot}</span>
-      {percent}%
-    </span>
   );
 }
