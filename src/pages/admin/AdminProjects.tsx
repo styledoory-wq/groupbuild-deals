@@ -42,8 +42,9 @@ type FormState = {
   buildingCount: string;
   apartmentCount: string;
   status: ProjectStatus;
+  imageUrl: string;
 };
-const emptyForm: FormState = { name: "", city: "", buildingCount: "", apartmentCount: "", status: "planning" };
+const emptyForm: FormState = { name: "", city: "", buildingCount: "", apartmentCount: "", status: "planning", imageUrl: "" };
 
 type ProjectMetrics = {
   users: number;
