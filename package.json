@@ -11,7 +11,15 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "app:build": "bunx tsx scripts/build-app.ts",
+    "app:sync": "bunx tsx scripts/build-app.ts --sync",
+    "app:open": "bunx tsx scripts/build-app.ts --open",
+    "app:add-ios": "bunx tsx scripts/build-app.ts --add-ios",
+    "app:add-android": "bunx tsx scripts/build-app.ts --add-android",
+    "app:aasa": "bunx tsx scripts/generate-aasa.ts",
+    "app:store-metadata": "bunx tsx scripts/generate-store-metadata.ts",
+    "app:env": "bunx tsx scripts/generate-env.ts"
   },
   "dependencies": {
     "@capacitor-mlkit/barcode-scanning": "^8.1.0",
