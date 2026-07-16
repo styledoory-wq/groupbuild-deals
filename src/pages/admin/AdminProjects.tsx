@@ -323,9 +323,12 @@ export default function AdminProjects() {
                   <li key={p.id}>
                     <div className="group relative h-full bg-white rounded-2xl border border-[#EEF0F4] shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-200 hover:border-[#E1E5EC] hover:shadow-[0_2px_4px_rgba(15,23,42,0.04),0_10px_28px_-14px_rgba(15,23,42,0.15)] overflow-hidden">
                       {/* Cover */}
-                      <button
+                      <div
+                        role="button"
+                        tabIndex={0}
                         onClick={() => navigate(`/committee?project=${p.id}`)}
-                        className="relative w-full aspect-[4/3] bg-[#F4F6FA] block overflow-hidden"
+                        onKeyDown={(e) => { if (e.key === "Enter") navigate(`/committee?project=${p.id}`); }}
+                        className="relative w-full aspect-[4/3] bg-[#F4F6FA] block overflow-hidden cursor-pointer"
                         aria-label={`פתח ${p.name}`}
                       >
                         {m.imageUrl ? (
@@ -347,7 +350,7 @@ export default function AdminProjects() {
                             onDelete={() => setDeleteId(p.id)}
                           />
                         </div>
-                      </button>
+                      </div>
 
                       {/* Body */}
                       <div className="p-3">
