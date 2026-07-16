@@ -1,19 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { AdminKpiRow } from "@/components/admin/AdminKpiRow";
+import { AdminTabsBar, type AdminTab } from "@/components/admin/AdminTabsBar";
 import { LoadingState } from "@/components/ds";
 import { formatILS, useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, ImageIcon, Plus, ChevronRight, ChevronLeft } from "lucide-react";
+import { ArrowRight, ImageIcon, Inbox, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
 import { Input } from "@/components/ui/input";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -41,44 +37,40 @@ type DbDeal = {
 
 type DealCounts = { paid: number; deposits: number };
 
-const STATUS_OPTIONS = [
-  { value: "all", label: "כל הסטטוסים" },
-  { value: "active", label: "פעילה" },
-  { value: "pending", label: "ממתינה" },
-  { value: "closed", label: "נסגרה" },
-  { value: "redeemed", label: "מומשה" },
-  { value: "inactive", label: "בטלה" },
-  { value: "draft", label: "טיוטה" },
-];
-
-const statusMeta: Record<string, { label: string; bg: string; text: string }> = {
-  active:   { label: "פעילה",   bg: "bg-[#DCFCE7]", text: "text-[#166534]" },
-  pending:  { label: "בהמתנה",  bg: "bg-[#FEF3C7]", text: "text-[#92400E]" },
-  draft:    { label: "טיוטה",   bg: "bg-[#FEF3C7]", text: "text-[#92400E]" },
-  closed:   { label: "נסגרה",   bg: "bg-[#E0F2FE]", text: "text-[#075985]" },
-  redeemed: { label: "מומשה",   bg: "bg-[#EDE9FE]", text: "text-[#5B21B6]" },
-  inactive: { label: "בטלה",    bg: "bg-[#FEE2E2]", text: "text-[#B91C1C]" },
+const statusMeta: Record<string, { label: string; cls: string; dot: string }> = {
+  active:   { label: "פעילה",   cls: "bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" },
+  pending:  { label: "ממתינה",  cls: "bg-amber-50 text-amber-700",     dot: "bg-amber-500" },
+  draft:    { label: "טיוטה",   cls: "bg-slate-100 text-slate-600",    dot: "bg-slate-400" },
+  closed:   { label: "הסתיימה", cls: "bg-sky-50 text-sky-700",         dot: "bg-sky-500" },
+  redeemed: { label: "מומשה",   cls: "bg-violet-50 text-violet-700",   dot: "bg-violet-500" },
+  inactive: { label: "בוטלה",   cls: "bg-red-50 text-red-700",         dot: "bg-red-500" },
 };
 
-const PAGE_SIZE = 12;
+type TabKey = "all" | "active" | "draft" | "no_image" | "closed" | "inactive";
+const VALID_TABS: TabKey[] = ["all", "active", "draft", "no_image", "closed", "inactive"];
 
 export default function AdminDeals() {
   const navigate = useNavigate();
   const { categories, projects } = useApp();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [deals, setDeals] = useState<DbDeal[]>([]);
   const [suppliers, setSuppliers] = useState<Record<string, string>>({});
   const [allSuppliers, setAllSuppliers] = useState<{ id: string; business_name: string }[]>([]);
   const [counts, setCounts] = useState<Record<string, DealCounts>>({});
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [projectFilter, setProjectFilter] = useState("all");
-  const [supplierFilter, setSupplierFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [page, setPage] = useState(1);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerSupplierId, setPickerSupplierId] = useState<string>("");
   const [pickerQuery, setPickerQuery] = useState("");
+
+  const urlTab = searchParams.get("tab") as TabKey | null;
+  const activeTab: TabKey = urlTab && VALID_TABS.includes(urlTab) ? urlTab : "all";
+  const setActiveTab = (key: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (key === "all") next.delete("tab");
+    else next.set("tab", key);
+    setSearchParams(next, { replace: true });
+  };
 
   useEffect(() => {
     supabase
@@ -107,9 +99,7 @@ export default function AdminDeals() {
       const supplierIds = Array.from(new Set(list.map((d) => d.supplier_id))).filter(Boolean);
       if (supplierIds.length) {
         const { data: srows } = await supabase
-          .from("suppliers")
-          .select("id,business_name")
-          .in("id", supplierIds);
+          .from("suppliers").select("id,business_name").in("id", supplierIds);
         const m: Record<string, string> = {};
         (srows ?? []).forEach((s: { id: string; business_name: string }) => { m[s.id] = s.business_name; });
         setSuppliers(m);
@@ -139,28 +129,33 @@ export default function AdminDeals() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { setPage(1); }, [query, projectFilter, supplierFilter, categoryFilter, statusFilter]);
 
-  const supplierOptions = useMemo(
-    () => Object.entries(suppliers).sort((a, b) => a[1].localeCompare(b[1], "he")),
-    [suppliers],
-  );
+  const tabCounts = useMemo(() => ({
+    all: deals.length,
+    active: deals.filter((d) => d.status === "active").length,
+    draft: deals.filter((d) => d.status === "draft" || d.status === "pending").length,
+    no_image: deals.filter((d) => !d.cover_image_url).length,
+    closed: deals.filter((d) => d.status === "closed" || d.status === "redeemed").length,
+    inactive: deals.filter((d) => d.status === "inactive").length,
+  }), [deals]);
 
-  const visibleDeals = useMemo(() => {
+  const filteredDeals = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return deals.filter((d) => {
-      if (statusFilter !== "all" && d.status !== statusFilter) return false;
-      if (projectFilter !== "all" && d.project_id !== projectFilter) return false;
-      if (supplierFilter !== "all" && d.supplier_id !== supplierFilter) return false;
-      if (categoryFilter !== "all" && d.category_id !== categoryFilter) return false;
-      if (q) {
-        const supplier = suppliers[d.supplier_id] ?? "";
-        const project = projects.find((p) => p.id === d.project_id)?.name ?? "";
-        if (![d.title, supplier, project].some((s) => (s ?? "").toLowerCase().includes(q))) return false;
-      }
-      return true;
-    });
-  }, [deals, query, statusFilter, projectFilter, supplierFilter, categoryFilter, suppliers, projects]);
+    let res = deals;
+    if (activeTab === "active") res = res.filter((d) => d.status === "active");
+    else if (activeTab === "draft") res = res.filter((d) => d.status === "draft" || d.status === "pending");
+    else if (activeTab === "no_image") res = res.filter((d) => !d.cover_image_url);
+    else if (activeTab === "closed") res = res.filter((d) => d.status === "closed" || d.status === "redeemed");
+    else if (activeTab === "inactive") res = res.filter((d) => d.status === "inactive");
+    if (q) {
+      res = res.filter((d) => {
+        const s = suppliers[d.supplier_id] ?? "";
+        const p = projects.find((pr) => pr.id === d.project_id)?.name ?? "";
+        return [d.title, s, p].some((v) => (v ?? "").toLowerCase().includes(q));
+      });
+    }
+    return res;
+  }, [deals, activeTab, query, suppliers, projects]);
 
   const priceFor = (d: DbDeal): number => {
     if (d.offer_type === "price_comparison" && d.discounted_price != null) return Number(d.discounted_price);
@@ -170,306 +165,214 @@ export default function AdminDeals() {
     return Number(d.base_price ?? d.original_price ?? 0);
   };
 
-  const kpi = useMemo(() => {
-    const active = deals.filter((d) => d.status === "active").length;
-    const pending = deals.filter((d) => d.status === "draft" || d.status === "pending").length;
-    let participants = 0, deposits = 0, expected = 0;
-    deals.forEach((d) => {
-      const c = counts[d.id];
-      if (!c) return;
-      participants += c.paid;
-      deposits += c.deposits;
-      expected += c.paid * priceFor(d);
-    });
-    return { active, pending, participants, deposits, expected };
-  }, [deals, counts]);
+  const tabs: AdminTab[] = [
+    { key: "all", label: "כולן", count: tabCounts.all },
+    { key: "active", label: "פעילות", count: tabCounts.active },
+    { key: "draft", label: "טיוטות", count: tabCounts.draft },
+    { key: "no_image", label: "ללא תמונה", count: tabCounts.no_image },
+    { key: "closed", label: "הסתיימו", count: tabCounts.closed },
+    { key: "inactive", label: "בוטלו", count: tabCounts.inactive },
+  ];
 
-  const totalPages = Math.max(1, Math.ceil(visibleDeals.length / PAGE_SIZE));
-  const pageDeals = useMemo(
-    () => visibleDeals.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [visibleDeals, page],
-  );
-  const rangeStart = visibleDeals.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const rangeEnd = Math.min(page * PAGE_SIZE, visibleDeals.length);
+  const emptyLabel: Record<TabKey, string> = {
+    all: "אין הצעות עדיין.",
+    active: "אין הצעות פעילות כרגע.",
+    draft: "אין טיוטות ממתינות.",
+    no_image: "כל ההצעות כוללות תמונת שער.",
+    closed: "אין הצעות שהסתיימו.",
+    inactive: "אין הצעות שבוטלו.",
+  };
 
   return (
     <MobileShell>
-      <AdminPageHeader
-        title="ניהול הצעות"
-        description={`${deals.length} הצעות`}
-        actions={
-          <button
-            onClick={() => { setPickerSupplierId(""); setPickerQuery(""); setPickerOpen(true); }}
-            className="h-9 px-3 rounded-[10px] bg-[#0E6B5A] text-white text-[12px] font-bold flex items-center gap-1.5 hover:bg-[#0a574a] transition-colors"
-          >
-            <Plus className="h-4 w-4" /> הצעה חדשה
-          </button>
-        }
-      />
-      <AdminKpiRow
-        items={[
-          { label: "הצעות פעילות", value: kpi.active, tone: "positive" },
-          { label: "פיקדונות שאספו", value: formatILS(kpi.deposits), tone: "positive" },
-          { label: "הכנסות צפויות", value: formatILS(kpi.expected) },
-          { label: "מצטרפים סהכ", value: kpi.participants.toLocaleString() },
-          { label: "ממתינות לאישור", value: kpi.pending, tone: kpi.pending > 0 ? "warning" : "neutral" },
-        ]}
-      />
-
-      {/* Filters */}
-      <div dir="rtl" className="bg-white border-b border-[#ECEEF2] px-4 lg:px-8 py-2.5 flex flex-wrap gap-2 items-center">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="חיפוש הצעה, ספק או פרויקט…"
-            className="h-9 pr-9 text-[13px] border-[#ECEEF2]"
-          />
-        </div>
-        <FilterSelect value={statusFilter} onChange={setStatusFilter} placeholder="סינון" options={STATUS_OPTIONS} />
-        <FilterSelect value={projectFilter} onChange={setProjectFilter} placeholder="פרויקט"
-          options={[{ value: "all", label: "כל הפרויקטים" }, ...projects.map((p) => ({ value: p.id, label: p.name }))]} />
-        <FilterSelect value={supplierFilter} onChange={setSupplierFilter} placeholder="ספק"
-          options={[{ value: "all", label: "כל הספקים" }, ...supplierOptions.map(([id, name]) => ({ value: id, label: name }))]} />
-        <FilterSelect value={categoryFilter} onChange={setCategoryFilter} placeholder="קטגוריה"
-          options={[{ value: "all", label: "כל הקטגוריות" }, ...categories.map((c) => ({ value: c.id, label: c.name }))]} />
-      </div>
-
-      <div className="p-3 lg:p-6">
-        {loading ? (
-          <LoadingState fullHeight={false} />
-        ) : visibleDeals.length === 0 ? (
-          <div className="bg-white border border-[#ECEEF2] rounded-[14px] px-6 py-12 text-center text-[13px] text-[#6B7280] font-medium">
-            לא נמצאו הצעות התואמות לסינון
+      <div dir="rtl" className="min-h-screen bg-[#F7F8FA] pb-32">
+        {/* Header */}
+        <header className="px-5 pt-6 pb-4">
+          <div className="flex items-center gap-2 mb-4">
+            <button
+              onClick={() => navigate(-1)}
+              aria-label="חזרה"
+              className="h-9 w-9 -mr-1 rounded-full flex items-center justify-center text-[#0F172A]/70 hover:bg-white transition"
+            >
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <div className="flex-1" />
+            <button
+              onClick={() => { setPickerSupplierId(""); setPickerQuery(""); setPickerOpen(true); }}
+              className="h-9 px-3.5 rounded-full bg-[#0F172A] text-white text-[13px] font-semibold inline-flex items-center gap-1.5 active:scale-95 transition-transform"
+            >
+              <Plus className="h-4 w-4" />
+              הצעה חדשה
+            </button>
           </div>
-        ) : (
-          <div dir="rtl" className="bg-white border border-[#ECEEF2] rounded-[14px] overflow-hidden">
-            {/* Header — desktop only */}
-            <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_120px_110px_110px_110px_90px_44px] gap-3 px-4 py-2.5 border-b border-[#ECEEF2] bg-[#F8F9FB] text-[10px] font-bold uppercase tracking-wider text-[#6B7280]">
-              <div>הצעה</div>
-              <div>ספק</div>
-              <div>פרויקט</div>
-              <div>מצטרפים / יעד</div>
-              <div>התקדמות</div>
-              <div>פיקדונות</div>
-              <div>הכנסה צפויה</div>
-              <div>סטטוס</div>
-              <div />
-            </div>
+          <h1 className="text-[26px] font-bold text-[#0F172A] tracking-tight leading-tight">
+            הצעות
+            <span className="ms-2 text-[15px] font-semibold text-[#8B94A3] tabular-nums">
+              {tabCounts.all}
+            </span>
+          </h1>
 
-            <ul className="divide-y divide-[#F1F3F7]">
-              {pageDeals.map((d) => {
+          <div className="relative mt-4">
+            <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-[#8B94A3] pointer-events-none" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="חיפוש לפי כותרת, ספק או פרויקט…"
+              className="h-10 pr-9 text-[14px] rounded-xl bg-white border-[#EEF0F4] focus-visible:ring-1 focus-visible:ring-[#0F172A]/10"
+            />
+          </div>
+        </header>
+
+        {/* Tabs */}
+        <div className="px-5 pb-3 overflow-x-auto scrollbar-none">
+          <AdminTabsBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+        </div>
+
+        {/* Grid */}
+        <main className="px-4 pt-1">
+          {loading ? (
+            <LoadingState fullHeight={false} />
+          ) : filteredDeals.length === 0 ? (
+            <div className="mt-8 rounded-2xl bg-white border border-[#EEF0F4] p-10 text-center flex flex-col items-center gap-2">
+              <div className="h-11 w-11 rounded-full bg-[#F4F6FA] flex items-center justify-center">
+                <Inbox className="h-5 w-5 text-[#8B94A3]" />
+              </div>
+              <p className="text-[14px] font-semibold text-[#0F172A]">
+                {query ? "לא נמצאו הצעות תואמות" : emptyLabel[activeTab]}
+              </p>
+              {query && <p className="text-[12px] text-[#8B94A3]">נסה חיפוש אחר או בחר טאב אחר</p>}
+            </div>
+          ) : (
+            <ul className="grid grid-cols-2 gap-3">
+              {filteredDeals.map((d) => {
                 const c = counts[d.id] ?? { paid: 0, deposits: 0 };
                 const target = d.target_participants ?? 0;
                 const pct = target > 0 ? Math.min(100, Math.round((c.paid / target) * 100)) : 0;
-                const pctTone = pct >= 80 ? "#0E6B5A" : pct >= 40 ? "#0E6B5A" : pct > 0 ? "#D97706" : "#9CA3AF";
-                const meta = statusMeta[d.status] ?? { label: d.status, bg: "bg-[#F3F4F6]", text: "text-[#374151]" };
+                const meta = statusMeta[d.status] ?? { label: d.status, cls: "bg-slate-100 text-slate-600", dot: "bg-slate-400" };
                 const supplierName = suppliers[d.supplier_id] ?? "—";
-                const projectName = projects.find((p) => p.id === d.project_id)?.name ?? "—";
-                const categoryName = categories.find((cat) => cat.id === d.category_id)?.name ?? "—";
-                const expected = c.paid * priceFor(d);
+                const categoryName = categories.find((cat) => cat.id === d.category_id)?.name ?? null;
 
                 return (
-                  <li key={d.id} className="hover:bg-[#FAFBFC] transition-colors">
-                    {/* Desktop row */}
-                    <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_120px_110px_110px_110px_90px_44px] gap-3 px-4 py-2 items-center">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-9 h-9 rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0">
-                          {d.cover_image_url ? (
-                            <SmartImg src={d.cover_image_url} size="thumb" alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ImageIcon className="h-3.5 w-3.5 text-[#9CA3AF]" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-bold text-[13px] text-[#0F172A] truncate">{d.title}</div>
-                          <div className="text-[11px] text-[#9CA3AF] truncate">{categoryName}</div>
-                        </div>
-                      </div>
-                      <div className="text-[12px] text-[#0F172A] truncate">{supplierName}</div>
-                      <div className="text-[12px] text-[#0F172A] truncate">{projectName}</div>
-                      <div className="text-[12px] font-bold text-[#0F172A] tabular-nums">
-                        {target ? `${c.paid} / ${target}` : c.paid}
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="text-[12px] font-extrabold w-9 tabular-nums" style={{ color: pctTone }}>{target ? `${pct}%` : "—"}</div>
-                        <div className="flex-1 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
-                          <div className="h-full rounded-full" style={{ width: `${target ? pct : 0}%`, backgroundColor: pctTone }} />
-                        </div>
-                      </div>
-                      <div className="text-[12px] font-extrabold text-[#0E6B5A] tabular-nums">{formatILS(c.deposits)}</div>
-                      <div className="text-[12px] font-bold text-[#0F172A] tabular-nums">{formatILS(expected)}</div>
-                      <div>
-                        <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap", meta.bg, meta.text)}>
+                  <li key={d.id}>
+                    <div className="group relative h-full bg-white rounded-2xl border border-[#EEF0F4] shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-200 hover:border-[#E1E5EC] hover:shadow-[0_2px_4px_rgba(15,23,42,0.04),0_10px_28px_-14px_rgba(15,23,42,0.15)] overflow-hidden">
+                      {/* Cover */}
+                      <button
+                        onClick={() => navigate(`/admin/offers/${d.id}/edit`)}
+                        className="relative w-full aspect-[4/3] bg-[#F4F6FA] block overflow-hidden"
+                        aria-label={`פתח ${d.title}`}
+                      >
+                        {d.cover_image_url ? (
+                          <SmartImg src={d.cover_image_url} size="thumb" alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ImageIcon className="h-6 w-6 text-[#CBD3DC]" />
+                          </div>
+                        )}
+                        <span className={cn("absolute top-2 right-2 inline-flex items-center gap-1 text-[10.5px] font-semibold px-1.5 py-0.5 rounded-md shadow-sm", meta.cls)}>
+                          <span className={cn("h-1.5 w-1.5 rounded-full", meta.dot)} />
                           {meta.label}
                         </span>
-                      </div>
-                      <div className="flex justify-end">
-                        <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} editPath={`/admin/offers/${d.id}/edit`} />
-                      </div>
-                    </div>
-
-                    {/* Mobile row — ultra dense, ~64px */}
-                    <div className="lg:hidden px-3 py-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-9 h-9 rounded-[8px] overflow-hidden bg-[#F4F6FA] shrink-0">
-                          {d.cover_image_url ? (
-                            <SmartImg src={d.cover_image_url} size="thumb" alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ImageIcon className="h-3.5 w-3.5 text-[#9CA3AF]" />
-                            </div>
-                          )}
+                        <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
+                          <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} editPath={`/admin/offers/${d.id}/edit`} />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <div className="font-bold text-[12.5px] text-[#0F172A] truncate flex-1 min-w-0">{d.title}</div>
-                            <span className={cn("shrink-0 px-1.5 py-0.5 rounded-md text-[9.5px] font-bold whitespace-nowrap", meta.bg, meta.text)}>
-                              {meta.label}
+                      </button>
+
+                      {/* Body */}
+                      <div className="p-3 flex flex-col gap-1.5">
+                        <button
+                          onClick={() => navigate(`/admin/offers/${d.id}/edit`)}
+                          className="text-right"
+                        >
+                          <h3 className="font-bold text-[13.5px] text-[#0F172A] leading-tight line-clamp-2 min-h-[2.2em]">
+                            {d.title}
+                          </h3>
+                          <div className="mt-1 text-[11px] text-[#8B94A3] truncate">
+                            {supplierName}
+                            {categoryName && <> <span className="text-[#E5E7EB]">·</span> {categoryName}</>}
+                          </div>
+                        </button>
+
+                        {/* Progress + metric */}
+                        <div className="mt-1">
+                          <div className="flex items-center justify-between text-[10.5px] mb-1">
+                            <span className="font-semibold text-[#374151] tabular-nums">
+                              {target ? `${c.paid}/${target} מצטרפים` : `${c.paid} מצטרפים`}
+                            </span>
+                            <span className="font-bold text-[#0E6B5A] tabular-nums">
+                              {formatILS(c.paid * priceFor(d))}
                             </span>
                           </div>
-                          <div className="text-[10.5px] text-[#6B7280] truncate mt-0.5">
-                            {supplierName} <span className="text-[#D1D5DB]">·</span> {projectName}
+                          <div className="h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-[#0E6B5A] transition-all"
+                              style={{ width: `${target ? pct : 0}%` }}
+                            />
                           </div>
                         </div>
-                        <DealActionsMenu dealId={d.id} status={d.status} onChanged={load} editPath={`/admin/offers/${d.id}/edit`} />
-                      </div>
-                      <div className="flex items-center gap-2 mt-1.5 pr-[44px]">
-                        <div className="flex-1 h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
-                          <div className="h-full rounded-full" style={{ width: `${target ? pct : 0}%`, backgroundColor: pctTone }} />
-                        </div>
-                        <span className="text-[10px] font-extrabold tabular-nums w-8 text-left" style={{ color: pctTone }}>
-                          {target ? `${pct}%` : "—"}
-                        </span>
-                        <span className="text-[10.5px] font-bold tabular-nums text-[#0F172A] whitespace-nowrap">
-                          {target ? `${c.paid}/${target}` : c.paid}
-                        </span>
-                        <span className="text-[#D1D5DB] text-[10px]">·</span>
-                        <span className="text-[10.5px] font-extrabold tabular-nums text-[#0E6B5A] whitespace-nowrap">
-                          {formatILS(c.deposits)}
-                        </span>
                       </div>
                     </div>
                   </li>
                 );
               })}
             </ul>
+          )}
+        </main>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-4 py-3 border-t border-[#ECEEF2] bg-[#FAFBFC] text-[12px] text-[#6B7280]">
-              <div>הצגת {rangeStart}-{rangeEnd} מתוך {visibleDeals.length} הצעות</div>
-              <div className="flex items-center gap-1">
-                <PageBtn disabled={page === 1} onClick={() => setPage(page - 1)} aria-label="הקודם">
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </PageBtn>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const start = Math.max(1, Math.min(page - 2, totalPages - 4));
-                  const n = start + i;
-                  if (n > totalPages) return null;
-                  return (
-                    <button key={n} onClick={() => setPage(n)}
-                      className={cn(
-                        "h-7 min-w-[28px] px-2 rounded-md text-[12px] font-bold transition-colors",
-                        n === page ? "bg-[#0E6B5A] text-white" : "bg-white text-[#1F2937] border border-[#ECEEF2] hover:bg-[#F4F6FA]",
-                      )}>
-                      {n}
-                    </button>
-                  );
-                })}
-                <PageBtn disabled={page >= totalPages} onClick={() => setPage(page + 1)} aria-label="הבא">
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                </PageBtn>
+        {/* Supplier picker dialog */}
+        <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+          <DialogContent dir="rtl" className="bg-white max-w-md">
+            <DialogHeader>
+              <DialogTitle>הצעה חדשה — בחירת ספק</DialogTitle>
+              <DialogDescription>בחר את הספק שעבורו תיווצר ההצעה.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Input
+                autoFocus
+                value={pickerQuery}
+                onChange={(e) => setPickerQuery(e.target.value)}
+                placeholder="חיפוש ספק…"
+                className="h-9 text-[13px]"
+              />
+              <div className="max-h-[320px] overflow-y-auto border border-[#ECEEF2] rounded-[10px] divide-y divide-[#F1F3F7]">
+                {allSuppliers.length === 0 ? (
+                  <div className="px-3 py-6 text-center text-[12px] text-[#6B7280]">טוען ספקים…</div>
+                ) : (
+                  allSuppliers
+                    .filter((s) => !pickerQuery.trim() || s.business_name.toLowerCase().includes(pickerQuery.trim().toLowerCase()))
+                    .slice(0, 100)
+                    .map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setPickerSupplierId(s.id)}
+                        className={cn(
+                          "w-full text-right px-3 py-2 text-[13px] hover:bg-[#F4F6FA] transition-colors",
+                          pickerSupplierId === s.id && "bg-[#E8F4F1] font-bold text-[#0E6B5A]",
+                        )}
+                      >
+                        {s.business_name}
+                      </button>
+                    ))
+                )}
               </div>
             </div>
-          </div>
-        )}
+            <DialogFooter className="flex-row-reverse gap-2 sm:flex-row-reverse">
+              <Button
+                disabled={!pickerSupplierId}
+                onClick={() => {
+                  setPickerOpen(false);
+                  navigate(`/admin/offers/new?supplierId=${pickerSupplierId}`);
+                }}
+                className="bg-[#0E6B5A] hover:bg-[#0a574a] text-white"
+              >
+                המשך ליצירת הצעה
+              </Button>
+              <Button variant="outline" onClick={() => setPickerOpen(false)}>ביטול</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
-        <DialogContent dir="rtl" className="bg-white max-w-md">
-          <DialogHeader>
-            <DialogTitle>הצעה חדשה — בחירת ספק</DialogTitle>
-            <DialogDescription>בחר את הספק שעבורו תיווצר ההצעה.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Input
-              autoFocus
-              value={pickerQuery}
-              onChange={(e) => setPickerQuery(e.target.value)}
-              placeholder="חיפוש ספק…"
-              className="h-9 text-[13px]"
-            />
-            <div className="max-h-[320px] overflow-y-auto border border-[#ECEEF2] rounded-[10px] divide-y divide-[#F1F3F7]">
-              {allSuppliers.length === 0 ? (
-                <div className="px-3 py-6 text-center text-[12px] text-[#6B7280]">טוען ספקים…</div>
-              ) : (
-                allSuppliers
-                  .filter((s) => !pickerQuery.trim() || s.business_name.toLowerCase().includes(pickerQuery.trim().toLowerCase()))
-                  .slice(0, 100)
-                  .map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => setPickerSupplierId(s.id)}
-                      className={cn(
-                        "w-full text-right px-3 py-2 text-[13px] hover:bg-[#F4F6FA] transition-colors",
-                        pickerSupplierId === s.id && "bg-[#E8F4F1] font-bold text-[#0E6B5A]",
-                      )}
-                    >
-                      {s.business_name}
-                    </button>
-                  ))
-              )}
-            </div>
-          </div>
-          <DialogFooter className="flex-row-reverse gap-2 sm:flex-row-reverse">
-            <Button
-              disabled={!pickerSupplierId}
-              onClick={() => {
-                setPickerOpen(false);
-                navigate(`/admin/offers/new?supplierId=${pickerSupplierId}`);
-              }}
-              className="bg-[#0E6B5A] hover:bg-[#0a574a] text-white"
-            >
-              המשך ליצירת הצעה
-            </Button>
-            <Button variant="outline" onClick={() => setPickerOpen(false)}>ביטול</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
       <BottomNav role="admin" />
     </MobileShell>
-  );
-}
-
-
-function PageBtn({ children, disabled, onClick, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="h-7 w-7 rounded-md bg-white border border-[#ECEEF2] flex items-center justify-center hover:bg-[#F4F6FA] disabled:opacity-40 disabled:cursor-not-allowed"
-      {...rest}
-    >
-      {children}
-    </button>
-  );
-}
-
-function FilterSelect({
-  value, onChange, placeholder, options,
-}: { value: string; onChange: (v: string) => void; placeholder: string; options: { value: string; label: string }[] }) {
-  return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="h-9 w-[130px] text-[12px] border-[#ECEEF2] bg-white">
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent className="bg-white z-50 max-h-[300px]">
-        {options.map((o) => (
-          <SelectItem key={o.value} value={o.value} className="text-[12px]">{o.label}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 }
