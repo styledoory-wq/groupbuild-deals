@@ -434,7 +434,112 @@ export default function AdminDbSuppliers() {
   );
 }
 
-/* ---------- Row (compact square card, refined) ---------- */
+/* ---------- Tile (square grid card) ---------- */
+
+function SupplierTile({
+  row, categories, onOpen, onEdit, onApprove, onReject, onToggleActive, onDelete,
+}: {
+  row: Row;
+  categories: { id: string; name: string; icon: string }[];
+  onOpen: () => void;
+  onEdit: () => void;
+  onApprove: () => void;
+  onReject: () => void;
+  onToggleActive: () => void;
+  onDelete: () => void;
+}) {
+  const isPending = row.approval_status === "pending";
+  const isRejected = row.approval_status === "rejected";
+  const isBlocked = !row.is_active && row.approval_status !== "rejected";
+  const isNational = row.serves_all_country || row.service_areas?.includes("כל הארץ");
+
+  const primaryCategory = row.categories?.[0]
+    ? categories.find((c) => c.id === row.categories[0])?.name ?? null
+    : null;
+  const areaLabel = isNational ? "כל הארץ" : row.service_areas?.[0] ?? "—";
+
+  const statusPill = isRejected
+    ? { label: "נדחה", cls: "bg-red-50 text-red-700", dot: "bg-red-500" }
+    : isPending
+      ? { label: "ממתין", cls: "bg-amber-50 text-amber-700", dot: "bg-amber-500" }
+      : isBlocked
+        ? { label: "מושהה", cls: "bg-neutral-100 text-neutral-600", dot: "bg-neutral-400" }
+        : { label: "פעיל", cls: "bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" };
+
+  return (
+    <li className="relative">
+      <div
+        className={`group relative h-full bg-white rounded-2xl border ${
+          isPending ? "border-amber-100" : "border-[#EEF0F4]"
+        } shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-200 hover:border-[#E1E5EC] hover:shadow-[0_2px_4px_rgba(15,23,42,0.04),0_10px_28px_-14px_rgba(15,23,42,0.15)] overflow-hidden`}
+      >
+        {isPending && row.completeness && (
+          <div className="absolute top-0 right-0 left-0 h-[3px] bg-amber-50 z-10">
+            <div className="h-full bg-amber-400" style={{ width: `${row.completeness.percent}%` }} />
+          </div>
+        )}
+
+        {/* Menu — floating top-left */}
+        <div className="absolute top-2 left-2 z-10">
+          <RowMenu
+            onOpen={onOpen}
+            onEdit={onEdit}
+            onApprove={onApprove}
+            onReject={onReject}
+            onToggleActive={onToggleActive}
+            onDelete={onDelete}
+            isActive={row.is_active}
+            isRejected={isRejected}
+          />
+        </div>
+
+        <button onClick={onOpen} className="w-full text-center p-4 pt-5 flex flex-col items-center gap-2">
+          <SupplierLogo name={row.business_name} logoUrl={row.logo_url} size="lg" />
+          <h3 className="mt-1 font-bold text-[13.5px] text-[#0F172A] leading-tight line-clamp-2 min-h-[2.2em] px-1">
+            {row.business_name}
+          </h3>
+          <span className={`inline-flex items-center gap-1 text-[10.5px] font-semibold px-2 py-0.5 rounded-md ${statusPill.cls}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${statusPill.dot}`} />
+            {statusPill.label}
+            {isPending && row.completeness && (
+              <span className="tabular-nums opacity-80 ms-0.5">· {row.completeness.percent}%</span>
+            )}
+          </span>
+          <div className="mt-1 text-[11px] text-[#8B94A3] leading-snug line-clamp-1 w-full">
+            {primaryCategory ?? <span className="text-amber-700">ללא תחום</span>}
+          </div>
+          <div className="text-[11px] text-[#8B94A3] leading-snug inline-flex items-center gap-1 justify-center max-w-full">
+            <MapPin className="h-3 w-3 shrink-0" />
+            <span className="truncate">{areaLabel}</span>
+          </div>
+        </button>
+
+        {isPending && (
+          <div className="px-3 pb-3 grid grid-cols-2 gap-2">
+            <button
+              onClick={onApprove}
+              className="h-8 rounded-lg bg-[#0E6B5A] text-white text-[12px] font-bold inline-flex items-center justify-center gap-1 shadow-[0_2px_8px_-2px_rgba(14,107,90,0.35)] active:scale-95 transition-transform"
+            >
+              <Check className="h-3.5 w-3.5" />
+              אישור
+            </button>
+            <button
+              onClick={onReject}
+              className="h-8 rounded-lg bg-white border border-[#EEF0F4] text-[#6B7280] text-[12px] font-semibold inline-flex items-center justify-center gap-1 hover:text-red-600 hover:border-red-200 transition"
+            >
+              <X className="h-3.5 w-3.5" />
+              דחייה
+            </button>
+          </div>
+        )}
+      </div>
+    </li>
+  );
+}
+
+/* ---------- Row (legacy — kept for reference) ---------- */
+
+
 
 function SupplierRow({
   row, categories, onOpen, onEdit, onApprove, onReject, onToggleActive, onDelete,
