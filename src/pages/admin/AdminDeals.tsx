@@ -159,10 +159,19 @@ export default function AdminDeals() {
 
   const priceFor = (d: DbDeal): number => {
     if (d.offer_type === "price_comparison" && d.discounted_price != null) return Number(d.discounted_price);
-    if (d.offer_type === "percentage" && d.original_price != null && d.discount_percentage != null) {
+    if (d.offer_type === "percentage" && d.original_price != null && Number(d.original_price) > 0 && d.discount_percentage != null) {
       return Number(d.original_price) * (1 - Number(d.discount_percentage) / 100);
     }
     return Number(d.base_price ?? d.original_price ?? 0);
+  };
+
+  const priceLabel = (d: DbDeal): string => {
+    const p = priceFor(d);
+    if (p > 0) return formatILS(p);
+    if (d.offer_type === "percentage" && d.discount_percentage != null && Number(d.discount_percentage) > 0) {
+      return `${Number(d.discount_percentage)}%- הנחה`;
+    }
+    return "—";
   };
 
   const tabs: AdminTab[] = [
@@ -302,7 +311,7 @@ export default function AdminDeals() {
                               {target ? `${c.paid}/${target} מצטרפים` : `${c.paid} מצטרפים`}
                             </span>
                             <span className="font-bold text-[#0E6B5A] tabular-nums">
-                              {priceFor(d) > 0 ? formatILS(priceFor(d)) : "—"}
+                              {priceLabel(d)}
                             </span>
                           </div>
                           <div className="h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
