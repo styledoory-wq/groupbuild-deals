@@ -21,6 +21,8 @@ import { loadSupplierCompletenessForUser } from "@/lib/supplierCompleteness";
 import { translateAuthError } from "@/lib/authErrors";
 import { Seo } from "@/components/seo/Seo";
 import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
+import { consumePendingReturnUrl, isSafeReturnUrl, peekPendingReturnUrl } from "@/lib/returnUrl";
+import { ArrowRight } from "lucide-react";
 
 
 type Mode = "signin" | "signup";
@@ -168,8 +170,10 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       return;
     }
 
-    const redirect = searchParams.get("redirect") ?? searchParams.get("return");
-    if (redirect) { navigate(redirect); return; }
+    const returnUrl = searchParams.get("returnUrl") ?? searchParams.get("redirect") ?? searchParams.get("return");
+    const storedReturn = consumePendingReturnUrl();
+    const target = (returnUrl && isSafeReturnUrl(returnUrl)) ? returnUrl : storedReturn;
+    if (target) { navigate(target, { replace: true }); return; }
     if (resolvedRole === "supplier") {
       // Gate: force onboarding until profile is complete
       try {
