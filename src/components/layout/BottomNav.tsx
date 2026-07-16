@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { preloadRoute } from "@/lib/routePreload";
 import { DesktopSidebar } from "./DesktopSidebar";
 import { useAdminAttention } from "@/hooks/useAdminAttention";
+import { useApp } from "@/store/AppStore";
+import { GuestBottomNav } from "./GuestBottomNav";
 import type { Role } from "@/types";
 
 const items: Record<Role, { to: string; label: string; icon: LucideIcon; badgeKey?: "suppliers" | "deals" | "total" }[]> = {
@@ -33,7 +35,14 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon; badgeKe
 
 function BottomNavImpl({ role }: { role: Role }) {
   const location = useLocation();
+  const { user, authReady } = useApp();
   const { data: attention } = useAdminAttention();
+
+  // Guest visitors get a completely separate nav (no profile, no notifications, no personal area).
+  // We only downgrade to the guest nav for resident-facing chrome — supplier/admin surfaces are auth-only.
+  if (role === "resident" && authReady && !user) {
+    return <GuestBottomNav />;
+  }
 
   const badgeFor = (key?: "suppliers" | "deals" | "total"): number => {
     if (role !== "admin" || !attention || !key) return 0;
