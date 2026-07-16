@@ -6,6 +6,7 @@ import { preloadRoute } from "@/lib/routePreload";
 import { DesktopSidebar } from "./DesktopSidebar";
 import { useAdminAttention } from "@/hooks/useAdminAttention";
 import type { Role } from "@/types";
+import { includesAdminRoutes, includesResidentRoutes, includesSupplierRoutes } from "@/config/appMode";
 
 const items: Record<Role, { to: string; label: string; icon: LucideIcon; badgeKey?: "suppliers" | "deals" | "total" }[]> = {
   resident: [
