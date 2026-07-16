@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "@/store/AppStore";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import {
   Bell,
   ChevronLeft,
@@ -244,6 +246,11 @@ export default function CategoriesList() {
   const [stagesByType, setStagesByType] = useState<Record<string, StageItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [refreshTick, setRefreshTick] = useState(0);
+  const ptr = usePullToRefresh(async () => {
+    setRefreshTick((n) => n + 1);
+    await new Promise((r) => setTimeout(r, 400));
+  });
 
 
   useEffect(() => {
@@ -287,7 +294,7 @@ export default function CategoriesList() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshTick]);
 
   const currentDef =
     PROJECT_TYPES.find((p) => p.id === selectedProject) ?? PROJECT_TYPES[0];
@@ -310,6 +317,7 @@ export default function CategoriesList() {
 
   return (
     <>
+    <PullToRefreshIndicator {...ptr} />
     <Seo
       title="קטגוריות שירות לבית חדש — ספקים ובעלי מקצוע | GroupBuild"
       description="מצאו ספקים מומלצים לפי תחום ושלב בפרויקט: תכנון, שלד, מערכות, גמרים, חוץ ופיתוח. ללא הרשמה."
