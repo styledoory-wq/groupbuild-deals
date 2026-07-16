@@ -24,11 +24,39 @@ export default function AdminComplaints() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("complaints")
-        .select("id, issue_type, description, status, created_at, user_id, deal_id, supplier_id, suppliers(business_name), profiles:user_id(full_name, email, phone)")
+        .select("id, issue_type, description, status, created_at, user_id, deal_id, supplier_id")
         .order("created_at", { ascending: false });
-      setRows((data ?? []) as unknown as Row[]);
+      if (error) {
+        console.error("[AdminComplaints] load failed", error);
+        toast.error("שגיאה בטעינת תלונות");
+        setLoading(false);
+        return;
+      }
+      const base = (data ?? []) as unknown as Row[];
+      // Enrich via separate lookups — no FK exists in DB, so embeds can't be used.
+      const supplierIds = Array.from(new Set(base.map((r) => r.supplier_id).filter(Boolean))) as string[];
+      const userIds = Array.from(new Set(base.map((r) => r.user_id).filter(Boolean))) as string[];
+      const [supRes, profRes] = await Promise.all([
+        supplierIds.length
+          ? supabase.from("suppliers").select("id, business_name").in("id", supplierIds)
+          : Promise.resolve({ data: [] as { id: string; business_name: string | null }[] }),
+        userIds.length
+          ? supabase.from("profiles").select("id, full_name, email, phone").in("id", userIds)
+          : Promise.resolve({ data: [] as { id: string; full_name: string | null; email: string | null; phone: string | null }[] }),
+      ]);
+      const supMap = new Map((supRes.data ?? []).map((s) => [s.id, s]));
+      const profMap = new Map((profRes.data ?? []).map((p) => [p.id, p]));
+      setRows(base.map((r) => ({
+        ...r,
+        suppliers: r.supplier_id ? { business_name: supMap.get(r.supplier_id)?.business_name ?? null } : null,
+        profiles: r.user_id ? {
+          full_name: profMap.get(r.user_id)?.full_name ?? null,
+          email: profMap.get(r.user_id)?.email ?? null,
+          phone: profMap.get(r.user_id)?.phone ?? null,
+        } : null,
+      })));
       setLoading(false);
     })();
   }, []);
