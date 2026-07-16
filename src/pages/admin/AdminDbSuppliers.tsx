@@ -569,7 +569,7 @@ function RowMenu({
           <MoreHorizontal className="h-4 w-4" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" dir="rtl" className="w-44">
+      <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuItem onClick={onOpen}>
           <Eye className="h-4 w-4 me-2" /> צפייה בפרופיל
         </DropdownMenuItem>
