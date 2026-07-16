@@ -160,6 +160,7 @@ export default function DealsList() {
 
   return (
     <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
+      <PullToRefreshIndicator {...ptr} />
       <Seo
         title="הצעות פעילות מספקים לדיירים חדשים — מבצעים ורכישה קבוצתית | GroupBuild"
         description="עשרות הצעות פעילות מספקים מובילים לפרויקטים חדשים. הצטרפו לרכישה קבוצתית וחסכו אלפי שקלים."
