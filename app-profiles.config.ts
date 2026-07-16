@@ -170,7 +170,7 @@ export const APP_PROFILES: AppProfile[] = [
     id: "suppliers",
     appMode: "suppliers",
     appId: "il.co.groupbuild.suppliers",
-    appName: "GroupBuild לעסקים",
+    appName: "GroupBuild Suppliers",
     shortName: "GB Business",
     version: "1.0.0",
     buildNumber: "1",
