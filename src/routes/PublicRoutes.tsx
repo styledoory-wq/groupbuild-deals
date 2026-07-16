@@ -44,11 +44,15 @@ export const publicRoutes = (
     <Route path="/landing" element={<Navigate to="/" replace />} />
     <Route path="/about" element={<Navigate to="/" replace />} />
     <Route path="/index" element={<Navigate to="/" replace />} />
-    <Route path="/suppliers" element={<SuppliersLanding />} />
-    <Route path="/residents" element={<ResidentsLanding />} />
+    {!IS_RESIDENTS_BUILD && <Route path="/suppliers" element={<SuppliersLanding />} />}
+    {!IS_SUPPLIERS_BUILD && <Route path="/residents" element={<ResidentsLanding />} />}
     <Route path="/auth" element={<Auth />} />
-    <Route path="/auth/supplier" element={<Auth lockedRole="supplier" />} />
-    <Route path="/auth/resident" element={<Auth lockedRole="resident" />} />
+    {!IS_RESIDENTS_BUILD && <Route path="/auth/supplier" element={<Auth lockedRole="supplier" />} />}
+    {!IS_SUPPLIERS_BUILD && <Route path="/auth/resident" element={<Auth lockedRole="resident" />} />}
+    {IS_RESIDENTS_BUILD && <Route path="/suppliers" element={<Navigate to="/" replace />} />}
+    {IS_RESIDENTS_BUILD && <Route path="/auth/supplier" element={<Navigate to="/auth/resident" replace />} />}
+    {IS_SUPPLIERS_BUILD && <Route path="/residents" element={<Navigate to="/" replace />} />}
+    {IS_SUPPLIERS_BUILD && <Route path="/auth/resident" element={<Navigate to="/auth/supplier" replace />} />}
     <Route path="/onboarding" element={<Onboarding />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/thank-you" element={<ThankYou />} />
