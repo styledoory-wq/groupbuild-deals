@@ -13,9 +13,13 @@ import { toast } from "sonner";
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 type Snapshot = {
+  suppliersTotal: number;
   newSuppliersWeek: number;
+  dealsTotal: number;
   activeDeals: number;
+  projectsTotal: number;
   activeProjects: number;
+  leadsTotal: number;
   newLeadsWeek: number;
 };
 
@@ -24,7 +28,12 @@ type ActivityItem = { id: string; label: string; time: string };
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { logout, user } = useApp();
-  const [snapshot, setSnapshot] = useState<Snapshot>({ newSuppliersWeek: 0, activeDeals: 0, activeProjects: 0, newLeadsWeek: 0 });
+  const [snapshot, setSnapshot] = useState<Snapshot>({
+    suppliersTotal: 0, newSuppliersWeek: 0,
+    dealsTotal: 0, activeDeals: 0,
+    projectsTotal: 0, activeProjects: 0,
+    leadsTotal: 0, newLeadsWeek: 0,
+  });
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,18 +41,30 @@ export default function AdminDashboard() {
     (async () => {
       try {
         const weekAgo = new Date(Date.now() - WEEK_MS).toISOString();
-        const [newSup, activeDeals, activeProjects, newLeads, recentSup, recentLeads] = await Promise.all([
+        const [
+          supTotal, newSup, dealsTotal, activeDeals,
+          projTotal, activeProjects, leadsTotal, newLeads,
+          recentSup, recentLeads,
+        ] = await Promise.all([
+          supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false).gte("created_at", weekAgo),
+          supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["active", "closing-soon"]),
+          supabase.from("projects").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("projects").select("id", { count: "exact", head: true }).eq("is_deleted", false).eq("is_active", true),
+          supabase.from("deal_interests").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("deal_interests").select("id", { count: "exact", head: true }).eq("is_deleted", false).gte("created_at", weekAgo),
           supabase.from("suppliers").select("id, business_name, created_at").eq("is_deleted", false).order("created_at", { ascending: false }).limit(4),
           supabase.from("deal_interests").select("id, full_name, created_at").eq("is_deleted", false).order("created_at", { ascending: false }).limit(4),
         ]);
         setSnapshot({
+          suppliersTotal: supTotal.count ?? 0,
           newSuppliersWeek: newSup.count ?? 0,
+          dealsTotal: dealsTotal.count ?? 0,
           activeDeals: activeDeals.count ?? 0,
+          projectsTotal: projTotal.count ?? 0,
           activeProjects: activeProjects.count ?? 0,
+          leadsTotal: leadsTotal.count ?? 0,
           newLeadsWeek: newLeads.count ?? 0,
         });
         const acts: ActivityItem[] = [];
@@ -104,10 +125,10 @@ export default function AdminDashboard() {
 
           {/* Quiet KPI row */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <KpiCard icon={Store} label="ספקים חדשים" value={snapshot.newSuppliersWeek} sub="השבוע" onClick={() => navigate("/admin/suppliers")} loading={loading} />
-            <KpiCard icon={Tag} label="הצעות פעילות" value={snapshot.activeDeals} sub="במערכת" onClick={() => navigate("/admin/deals")} loading={loading} />
-            <KpiCard icon={Building2} label="פרויקטים פעילים" value={snapshot.activeProjects} sub="במערכת" onClick={() => navigate("/admin/projects")} loading={loading} />
-            <KpiCard icon={Inbox} label="לידים חדשים" value={snapshot.newLeadsWeek} sub="השבוע" onClick={() => navigate("/admin/leads")} loading={loading} />
+            <KpiCard icon={Store} label="ספקים" value={snapshot.suppliersTotal} sub={`${snapshot.newSuppliersWeek > 0 ? "+" : ""}${snapshot.newSuppliersWeek} השבוע`} onClick={() => navigate("/admin/suppliers")} loading={loading} />
+            <KpiCard icon={Tag} label="הצעות" value={snapshot.dealsTotal} sub={`${snapshot.activeDeals} פעילות`} onClick={() => navigate("/admin/deals")} loading={loading} />
+            <KpiCard icon={Building2} label="פרויקטים" value={snapshot.projectsTotal} sub={`${snapshot.activeProjects} פעילים`} onClick={() => navigate("/admin/projects")} loading={loading} />
+            <KpiCard icon={Inbox} label="לידים" value={snapshot.leadsTotal} sub={`${snapshot.newLeadsWeek > 0 ? "+" : ""}${snapshot.newLeadsWeek} השבוע`} onClick={() => navigate("/admin/leads")} loading={loading} />
           </section>
 
           {/* Activity feed */}
