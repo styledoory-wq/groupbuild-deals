@@ -42,8 +42,9 @@ type FormState = {
   buildingCount: string;
   apartmentCount: string;
   status: ProjectStatus;
+  imageUrl: string;
 };
-const emptyForm: FormState = { name: "", city: "", buildingCount: "", apartmentCount: "", status: "planning" };
+const emptyForm: FormState = { name: "", city: "", buildingCount: "", apartmentCount: "", status: "planning", imageUrl: "" };
 
 type ProjectMetrics = {
   users: number;
@@ -159,8 +160,31 @@ export default function AdminProjects() {
       buildingCount: String(p.buildingCount ?? ""),
       apartmentCount: String(p.apartmentCount ?? ""),
       status: p.status ?? "planning",
+      imageUrl: metrics[p.id]?.imageUrl ?? "",
     });
     setOpen(true);
+  };
+
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) throw new Error("לא מחובר");
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${uid}/projects/${form.id ?? "new"}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("deal-images").upload(path, file, {
+        cacheControl: "3600", upsert: true, contentType: file.type,
+      });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("deal-images").getPublicUrl(path);
+      setForm((f) => ({ ...f, imageUrl: pub.publicUrl }));
+      toast.success("התמונה הועלתה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally { setUploadingImage(false); }
   };
 
   const save = async () => {
@@ -177,7 +201,8 @@ export default function AdminProjects() {
       const { error } = await supabase.from("projects").upsert({
         id: payload.id, name: payload.name, city: payload.city,
         building_count: payload.buildingCount, apartment_count: payload.apartmentCount,
-        status: payload.status, is_active: true, is_deleted: false, deleted_at: null,
+        status: payload.status, image_url: form.imageUrl || null,
+        is_active: true, is_deleted: false, deleted_at: null,
       });
       if (error) throw error;
       if (form.id) {
@@ -187,6 +212,7 @@ export default function AdminProjects() {
         setProjects([payload, ...projects]);
         toast.success("פרויקט חדש נוצר");
       }
+      setMetrics((m) => ({ ...m, [payload.id]: { ...(m[payload.id] ?? { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 }), imageUrl: form.imageUrl || null } }));
       setOpen(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
@@ -377,6 +403,31 @@ export default function AdminProjects() {
               <DialogTitle className="text-right">{form.id ? "עריכת פרויקט" : "הוספת פרויקט חדש"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-3 mt-2">
+              <div>
+                <Label className="text-xs">תמונת שער</Label>
+                <div className="mt-1 flex items-center gap-3">
+                  <label className="relative h-20 w-28 rounded-xl bg-[#F4F6FA] border border-dashed border-[#D5DAE3] overflow-hidden flex items-center justify-center cursor-pointer hover:border-[#0E6B5A] transition">
+                    {form.imageUrl ? (
+                      <img src={form.imageUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <Building2 className="h-6 w-6 text-[#8B94A3]" />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); e.target.value = ""; }}
+                    />
+                  </label>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[11px] text-[#8B94A3]">{uploadingImage ? "מעלה…" : "PNG / JPG"}</span>
+                    {form.imageUrl && (
+                      <button type="button" onClick={() => setForm({ ...form, imageUrl: "" })}
+                        className="text-[11px] text-red-600 font-semibold self-start">הסר תמונה</button>
+                    )}
+                  </div>
+                </div>
+              </div>
               <div>
                 <Label className="text-xs">שם הפרויקט *</Label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="לדוגמה: מגדלי הים" />
