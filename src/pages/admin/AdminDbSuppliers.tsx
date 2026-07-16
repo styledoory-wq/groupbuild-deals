@@ -317,9 +317,9 @@ export default function AdminDbSuppliers() {
               hint={supplierSearch ? "נסה חיפוש אחר או בחר טאב אחר" : undefined}
             />
           ) : (
-            <ul className="flex flex-col gap-2">
+            <ul className="grid grid-cols-2 gap-3">
               {filteredRows.map((r) => (
-                <SupplierRow
+                <SupplierTile
                   key={r.id}
                   row={r}
                   categories={categories}
@@ -332,6 +332,7 @@ export default function AdminDbSuppliers() {
                 />
               ))}
             </ul>
+
           )}
         </main>
 
