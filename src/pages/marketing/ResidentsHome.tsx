@@ -1,22 +1,30 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { Search, ChevronLeft, Wallet, Users, ListChecks, Tag, Sparkles } from "lucide-react";
+import { ChevronLeft, Wallet, Users, ListChecks, Tag, Sparkles } from "lucide-react";
 import { BrandMark } from "@/components/BrandLogo";
 import { Seo } from "@/components/seo/Seo";
 import { usePublicDeals, type PublicDeal } from "@/hooks/usePublicDeals";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
+import { HomeDealSkeletonList } from "@/components/ui/HomeDealSkeleton";
+import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 import { cn } from "@/lib/utils";
 
 /**
  * Residents Home — premium discovery entry for guests.
  * All content is live: featured deals are pulled from public, approved deals only.
- * Never shows demo/placeholder cards.
  */
 export default function ResidentsHome() {
-  const { data: deals, isLoading, isError } = usePublicDeals(4);
+  const { data: deals, isLoading, isError, refetch } = usePublicDeals(4);
+  const qc = useQueryClient();
+  const ptr = usePullToRefresh(async () => {
+    await Promise.all([refetch(), qc.invalidateQueries({ queryKey: ["public-deals"] })]);
+  });
 
   return (
     <div
       dir="rtl"
-      className="min-h-[100dvh] w-full flex justify-center text-[#0B1220]"
+      className="min-h-[100dvh] w-full flex justify-center text-[#0B1220] overflow-x-hidden"
       style={{ background: "#F7F5F0" }}
     >
       <Seo
@@ -24,6 +32,7 @@ export default function ResidentsHome() {
         description="חיפוש ספקים, קטגוריות ודילים קבוצתיים לדיירי פרויקטים חדשים. שימוש חופשי, ללא הרשמה."
         path="/"
       />
+      <PullToRefreshIndicator {...ptr} />
 
       <div
         className="relative w-full max-w-screen-sm flex flex-col"
@@ -51,13 +60,9 @@ export default function ResidentsHome() {
             <span className="text-[#0E6B5A]">המתאים ביותר</span> עבורכם
           </h1>
 
-          <Link
-            to="/search"
-            className="mt-5 relative block bg-white border border-stone-100 rounded-2xl shadow-[0_4px_16px_-8px_rgba(10,31,61,0.12)] py-4 pr-12 pl-4 text-right hover:shadow-[0_8px_20px_-8px_rgba(10,31,61,0.18)] transition-shadow"
-          >
-            <span className="text-stone-400 text-sm">חיפוש ספקים או שירותים...</span>
-            <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
-          </Link>
+          <div className="mt-5">
+            <GlobalSearchBar variant="hero" />
+          </div>
 
           <p className="mt-2 text-center text-[11.5px] text-[#6B7280]">
             מנוע חיפוש חופשי — קטגוריות, ספקים וערים. אין צורך בהרשמה.
@@ -100,7 +105,7 @@ export default function ResidentsHome() {
             )}
           </div>
 
-          {isLoading && <DealSkeleton />}
+          {isLoading && <HomeDealSkeletonList count={2} />}
           {!isLoading && isError && <DealsErrorState />}
           {!isLoading && !isError && (!deals || deals.length === 0) && <DealsEmptyState />}
           {!isLoading && !isError && deals && deals.length > 0 && (
@@ -180,18 +185,6 @@ function DealCard({ deal }: { deal: PublicDeal }) {
         </div>
       </div>
     </Link>
-  );
-}
-
-function DealSkeleton() {
-  return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-stone-100">
-      <div className="h-40 bg-stone-100 animate-pulse" />
-      <div className="p-4 space-y-2">
-        <div className="h-4 w-1/2 bg-stone-100 animate-pulse rounded" />
-        <div className="h-3 w-1/3 bg-stone-100 animate-pulse rounded" />
-      </div>
-    </div>
   );
 }
 
