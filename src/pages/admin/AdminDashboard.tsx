@@ -13,9 +13,13 @@ import { toast } from "sonner";
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 type Snapshot = {
+  suppliersTotal: number;
   newSuppliersWeek: number;
+  dealsTotal: number;
   activeDeals: number;
+  projectsTotal: number;
   activeProjects: number;
+  leadsTotal: number;
   newLeadsWeek: number;
 };
 
