@@ -101,6 +101,12 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
     };
   }, [open]);
 
+  // Close dropdown on any route change (back button, deep link, tab nav).
+  useEffect(() => {
+    setOpen(false);
+    inputRef.current?.blur();
+  }, [location.pathname, location.search]);
+
   const grouped = useMemo(() => ({
     categories: hits.filter((h) => h.result_type === "category").slice(0, 6),
     suppliers: hits.filter((h) => h.result_type === "supplier").slice(0, 6),
