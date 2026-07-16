@@ -28,7 +28,12 @@ type ActivityItem = { id: string; label: string; time: string };
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { logout, user } = useApp();
-  const [snapshot, setSnapshot] = useState<Snapshot>({ newSuppliersWeek: 0, activeDeals: 0, activeProjects: 0, newLeadsWeek: 0 });
+  const [snapshot, setSnapshot] = useState<Snapshot>({
+    suppliersTotal: 0, newSuppliersWeek: 0,
+    dealsTotal: 0, activeDeals: 0,
+    projectsTotal: 0, activeProjects: 0,
+    leadsTotal: 0, newLeadsWeek: 0,
+  });
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,18 +41,30 @@ export default function AdminDashboard() {
     (async () => {
       try {
         const weekAgo = new Date(Date.now() - WEEK_MS).toISOString();
-        const [newSup, activeDeals, activeProjects, newLeads, recentSup, recentLeads] = await Promise.all([
+        const [
+          supTotal, newSup, dealsTotal, activeDeals,
+          projTotal, activeProjects, leadsTotal, newLeads,
+          recentSup, recentLeads,
+        ] = await Promise.all([
+          supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("suppliers").select("id", { count: "exact", head: true }).eq("is_deleted", false).gte("created_at", weekAgo),
+          supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_deleted", false).in("status", ["active", "closing-soon"]),
+          supabase.from("projects").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("projects").select("id", { count: "exact", head: true }).eq("is_deleted", false).eq("is_active", true),
+          supabase.from("deal_interests").select("id", { count: "exact", head: true }).eq("is_deleted", false),
           supabase.from("deal_interests").select("id", { count: "exact", head: true }).eq("is_deleted", false).gte("created_at", weekAgo),
           supabase.from("suppliers").select("id, business_name, created_at").eq("is_deleted", false).order("created_at", { ascending: false }).limit(4),
           supabase.from("deal_interests").select("id, full_name, created_at").eq("is_deleted", false).order("created_at", { ascending: false }).limit(4),
         ]);
         setSnapshot({
+          suppliersTotal: supTotal.count ?? 0,
           newSuppliersWeek: newSup.count ?? 0,
+          dealsTotal: dealsTotal.count ?? 0,
           activeDeals: activeDeals.count ?? 0,
+          projectsTotal: projTotal.count ?? 0,
           activeProjects: activeProjects.count ?? 0,
+          leadsTotal: leadsTotal.count ?? 0,
           newLeadsWeek: newLeads.count ?? 0,
         });
         const acts: ActivityItem[] = [];
