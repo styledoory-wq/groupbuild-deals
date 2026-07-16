@@ -404,6 +404,31 @@ export default function AdminProjects() {
             </DialogHeader>
             <div className="space-y-3 mt-2">
               <div>
+                <Label className="text-xs">תמונת שער</Label>
+                <div className="mt-1 flex items-center gap-3">
+                  <label className="relative h-20 w-28 rounded-xl bg-[#F4F6FA] border border-dashed border-[#D5DAE3] overflow-hidden flex items-center justify-center cursor-pointer hover:border-[#0E6B5A] transition">
+                    {form.imageUrl ? (
+                      <img src={form.imageUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <Building2 className="h-6 w-6 text-[#8B94A3]" />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); e.target.value = ""; }}
+                    />
+                  </label>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[11px] text-[#8B94A3]">{uploadingImage ? "מעלה…" : "PNG / JPG"}</span>
+                    {form.imageUrl && (
+                      <button type="button" onClick={() => setForm({ ...form, imageUrl: "" })}
+                        className="text-[11px] text-red-600 font-semibold self-start">הסר תמונה</button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div>
                 <Label className="text-xs">שם הפרויקט *</Label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="לדוגמה: מגדלי הים" />
               </div>
