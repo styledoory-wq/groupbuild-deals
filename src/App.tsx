@@ -96,7 +96,7 @@ const AdminDbSuppliers = lazy(() => import("./pages/admin/AdminDbSuppliers"));
 const AdminSupplierDetail = lazy(() => import("./pages/admin/AdminSupplierDetail"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
 const AdminCommitteeRequests = lazy(() => import("./pages/admin/AdminCommitteeRequests"));
-const AdminControl = lazy(() => import("./pages/admin/AdminControl"));
+
 const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
 const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
@@ -333,7 +333,7 @@ const App = () => (
                   <Route path="/admin/users" element={adminRoute(<AdminUsers />)} />
                   <Route path="/admin/settings" element={adminRoute(<AdminSettings />)} />
                   <Route path="/admin/payments" element={adminRoute(<AdminPayments />)} />
-                  <Route path="/admin/control" element={adminRoute(<AdminControl />)} />
+                  <Route path="/admin/control" element={<Navigate to="/admin" replace />} />
                   <Route path="/admin/notifications" element={adminRoute(<AdminNotifications />)} />
                   <Route path="/admin/support" element={adminRoute(<AdminSupport />)} />
                   <Route path="/admin/suppliers/:supplierId/areas" element={adminRoute(<AdminSupplierAreas />)} />

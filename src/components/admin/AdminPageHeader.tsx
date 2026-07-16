@@ -1,8 +1,7 @@
 import { ReactNode } from "react";
 
 /**
- * Unified header for every admin screen.
- * Clean SaaS look — title + optional description + right actions slot.
+ * Unified header for every admin screen — calm, generous, Linear-like.
  */
 export function AdminPageHeader({
   title,
@@ -14,14 +13,17 @@ export function AdminPageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header dir="rtl" className="px-5 lg:px-8 pt-6 pb-4 border-b border-[#ECEEF2] bg-white">
-      <div className="flex items-start gap-3 justify-between">
+    <header
+      dir="rtl"
+      className="px-5 lg:px-8 pt-7 pb-5 bg-[#F7F8FA] sticky top-0 z-30 backdrop-blur-xl bg-[#F7F8FA]/85"
+    >
+      <div className="flex items-start gap-3 justify-between max-w-6xl">
         <div className="min-w-0">
-          <h1 className="text-[20px] lg:text-[24px] font-extrabold text-[#0F172A] tracking-tight leading-tight truncate">
+          <h1 className="text-[22px] lg:text-[26px] font-bold text-[#0F172A] tracking-tight leading-tight truncate">
             {title}
           </h1>
           {description && (
-            <p className="text-[13px] text-[#6B7280] mt-1 font-medium leading-snug">
+            <p className="text-[13px] text-[#8B94A3] mt-1 leading-snug">
               {description}
             </p>
           )}

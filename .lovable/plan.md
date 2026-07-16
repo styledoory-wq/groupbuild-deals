@@ -1,142 +1,77 @@
+# Refactor מערכת האדמין
 
-# הפיכת GroupBuild לאינדקס ספקים ציבורי
+## עקרונות מנחים
+- **3 שניות להבנה**: כל מסך עונה על "מה קורה עכשיו? מה דורש טיפול?"
+- **פחות ויותר**: פחות כרטיסים, יותר white space, פחות צבעים, יותר היררכיה
+- **Action-first**: כל מסך = דשבורד ממוקד + טבלה נקייה + סינון חכם
+- **Badges בתפריט** במקום מסך "בקרה" נפרד
 
-מטרה: להפוך את GroupBuild ממערכת סגורה למנוע חיפוש ציבורי בתחום הבנייה והשיפוצים, עם עמודי SEO, אנליטיקס וחיפוש גלובלי חכם — בלי לשבור את המערכת הקיימת לתושבים/ועדים/ספקים.
+## שפת עיצוב חדשה (Design System אדמין)
+- רקע: `#F7F8FA` (אפור-תכלת עדין), כרטיסים `#FFFFFF`
+- פינות `rounded-[16px]`, הצללה עדינה מאוד: `shadow-[0_1px_3px_rgba(15,23,42,0.04),0_1px_2px_rgba(15,23,42,0.03)]`
+- גבולות: `border-[#EEF0F4]` (יותר עדין מהקיים)
+- טיפוגרפיה: כותרות `text-[22px] font-bold tracking-tight`, גוף `text-[13px]`
+- צבע יחיד לפעולות: `#0E6B5A` (הירוק הקיים). אדום/כתום רק ל-alerts אמיתיים.
+- אייקונים: `strokeWidth={1.75}` (עדין יותר מהקיים 2.2)
+- מרווחים: `p-6 lg:p-8`, `gap-4`, בין sections `space-y-8`
+- אנימציה: `transition-all duration-200 ease-out` על כל interactive
+- Glass effect: `backdrop-blur-xl bg-white/70` על sticky headers בלבד
 
----
+## שינויים מבניים
 
-## שלב 1 — תשתית ציבורית + SEO (בסיס להכל)
-
-### 1.1 מסד נתונים
-- הוספת עמודת `slug` (טקסט, unique) לטבלת `suppliers` — עם generator שמייצר slug באנגלית מהשם העברי (translit + fallback ל־`supplier-{shortid}`).
-- הוספת עמודת `slug` (טקסט, unique) לטבלת `categories` (כבר חלקית קיים).
-- Backfill לכל הספקים/הקטגוריות הקיימים.
-- Trigger שממלא slug אוטומטית ביצירת ספק חדש.
-- עדכון RLS: policy ציבורי (`anon` + `authenticated`) לקריאת ספקים פעילים ומאושרים בלבד, וקריאה מלאה של `categories`, `supplier_gallery`, `reviews` (רק מאושרות), `deals` (רק active).
-
-### 1.2 ראוטים ציבוריים חדשים (מחוץ ל־`/resident`)
-- `/category/:slug` — דף קטגוריה ציבורי
-- `/supplier/:slug` — כרטיס ספק ציבורי
-- `/search?q=...` — תוצאות חיפוש ציבוריות
-- דפים אלו נגישים ללא התחברות; header ציבורי עם CTA "הרשמה/התחברות".
-
-### 1.3 SEO per-route
-- התקנה של `react-helmet-async` (אם עוד לא) + HelmetProvider.
-- לכל דף ספק: `<title>`, `meta description`, `canonical`, `og:*`, JSON-LD `LocalBusiness` (שם, טלפון, אזורים, דירוג).
-- לכל דף קטגוריה: JSON-LD `ItemList` של הספקים.
-- עדכון `scripts/generate-sitemap.ts` שיושך את כל הקטגוריות והספקים הפעילים מה־DB.
-- `robots.txt` — מאפשר את כל הדפים הציבוריים, חוסם `/admin`, `/supplier/dashboard`, `/resident` (פרטי).
-
----
-
-## שלב 2 — כרטיס ספק ציבורי (`/supplier/:slug`)
-
-תצוגה מלאה: לוגו, קאבר, שם, תיאור, תחומי התמחות, אזורי שירות, שעות פעילות, טלפון, WhatsApp, אתר, גלריה, מבצעים פעילים, ביקורות + דירוג.
-
-כפתורי פעולה (כולם עם event tracking):
-- 📞 התקשר → `tel:`
-- 💬 WhatsApp → `wa.me`
-- 🌐 אתר → פתיחה בטאב חדש
-- 🧭 ניווט → Google Maps / Waze
-- ⭐ שמור למועדפים → **דורש הרשמה** (מציג bottom-sheet הרשמה מהירה)
-- 🚀 "פתח פרויקט לקבלת הצעות" → **דורש הרשמה**
-
-Guest gating: hook `useGuestGate()` שמציג sheet של הרשמה מהירה במקום ניווט למסך חסום.
-
----
-
-## שלב 3 — Analytics (Event Tracking)
-
-### 3.1 טבלה חדשה: `supplier_analytics_events`
-עמודות רלוונטיות: `supplier_id`, `event_type` (view / call / whatsapp / website / navigate / open_project / favorite_attempt), `session_id` (anon uuid ב־localStorage), `user_id` (nullable), `referrer`, `page_url`, `utm_*`.
-- GRANT `INSERT` ל־`anon` + `authenticated` בלבד. SELECT רק לספק עצמו ולאדמין.
-
-### 3.2 קליינט
-- `src/lib/analytics.ts` עם `trackEvent(type, supplierId, meta?)`.
-- Batching + `navigator.sendBeacon` ליציאה.
-- הזרקה בכל כפתורי כרטיס הספק ובצפיות דף (`useEffect` על mount).
-
-### 3.3 חיפושים שלא נמצאו
-- טבלה `search_queries` שמתעדת כל חיפוש: `query`, `results_count`, `session_id`, `user_id?`.
-
----
-
-## שלב 4 — חיפוש גלובלי במסך הבית
-
-- קומפוננטת `GlobalSearchBar` שמופיעה במסך הראשי (Landing + Index) ובכל header ציבורי.
-- שימוש בפונקציית `search_catalog` הקיימת + הרחבה `search_global` שמחזירה גם:
-  - קטגוריות
-  - תתי־קטגוריות
-  - ספקים (לפי שם + תיאור + תחומים + אזורים)
-  - מבצעים פעילים
-- תמיכה בשאילתות טבעיות: "חשמלאי בצפת" → parsing של קטגוריה + עיר.
-- דף תוצאות `/search?q=...` עם טאבים: הכל / קטגוריות / ספקים / מבצעים.
-- Autocomplete בזמן אמת (debounce 220ms).
-
----
-
-## שלב 5 — Dashboard לספק (סטטיסטיקות)
-
-הוספה ל־`SupplierDashboard`:
-- קלפי KPI: צפיות (שבוע/חודש), קליקים לטלפון, ל־WhatsApp, לאתר, פתיחות פרויקט.
-- מקורות תנועה: חיפוש פנימי, Google (מ־`referrer`).
-- גרף מגמות 30 יום.
-- שאילתות aggregated דרך view/RPC על `supplier_analytics_events`.
-
-## שלב 6 — Dashboard לאדמין
-
-הוספה ל־`AdminDashboard`:
-- הקטגוריות הכי מחופשות (top 20).
-- הספקים הכי נצפים.
-- הכי הרבה שיחות/WhatsApp/פתיחות פרויקט.
-- חיפושים ללא תוצאות → הזדמנויות להוספת קטגוריות/ספקים.
-
----
-
-## פרטים טכניים
-
-**קבצים חדשים עיקריים:**
-```text
-src/pages/public/CategoryPublic.tsx
-src/pages/public/SupplierPublic.tsx
-src/pages/public/SearchPublic.tsx
-src/components/public/PublicHeader.tsx
-src/components/public/GlobalSearchBar.tsx
-src/components/public/GuestActionSheet.tsx
-src/hooks/useGuestGate.ts
-src/lib/analytics.ts
-src/lib/slugify.ts
-src/components/seo/SupplierJsonLd.tsx
-src/components/seo/CategoryJsonLd.tsx
-src/pages/supplier/dashboard/AnalyticsCards.tsx
-src/pages/admin/AdminInsights.tsx
+### 1. דשבורד חדש (`AdminDashboard.tsx` — כתיבה מחדש)
 ```
+┌─ Header: "שלום, [שם]" · תאריך · כפתור פעולה מהירה
+├─ ATTENTION PANEL (הבלוק המרכזי — אם יש משהו)
+│   רק פריטים דורשי-טיפול, כל שורה clickable → מסך יעד
+├─ 4 KPI cards שקטים: ספקים חדשים · הצעות פעילות · פרויקטים פעילים · לידים חדשים
+│   (מספר בלבד + delta קטן, ללא גרפים)
+└─ Recent Activity: 8 שורות אחרונות (feed נקי)
+```
+מוסר: גרפים, נתוני הכנסה, פיקדונות, אחוזי המרה, סטטיסטיקות מפורטות → עוברים ל-`AdminStats`.
 
-**מיגרציות SQL:**
-1. `slug` + backfill + trigger ל־suppliers/categories.
-2. RLS ציבורי לקריאה על suppliers/categories/gallery/reviews/deals.
-3. טבלת `supplier_analytics_events` + טבלת `search_queries` + GRANTs + policies.
-4. RPCs: `search_global`, `supplier_stats(supplier_id, days)`, `admin_insights()`.
+### 2. Attention Panel (קומפוננטה חדשה)
+`src/components/admin/AttentionPanel.tsx` — שואב את הלוגיקה הקיימת מ-`AdminControl` אבל מציג רק פריטים עם `count > 0`, בעיצוב שקט: איקון עגול קטן + כותרת + מספר, בלי טונים דרמטיים. clickable rows.
 
-**עדכונים:**
-- `src/App.tsx` — הוספת ראוטים ציבוריים חדשים.
-- `scripts/generate-sitemap.ts` — משיכת slugs מ־DB.
-- `index.html` + `HelmetProvider` ב־main.
-- `public/robots.txt` — פתיחת דפים ציבוריים.
+### 3. Sidebar Badges (חדש)
+`src/components/layout/BottomNav.tsx` + כל תפריט אדמין: hook `useAdminAttentionCounts()` שמחזיר `{suppliers, deals, complaints, leads, committee}`. Badge קטן אדום עם מספר ליד פריט התפריט. מבטל את הצורך במסך "בקרה" — `AdminControl` נמחק, ה-route משכתב redirect ל-dashboard.
 
-**מה נשאר סגור להתחברות בלבד:**
-פתיחת פרויקט, קבלת הצעות, הצטרפות לרכישה קבוצתית, שמירת מועדפים, כל אזור `/resident`, `/admin`, dashboard ספק.
+### 4. מסכי משנה — Mini Dashboard בכל מסך
+לכל אחד מ:
+- **Suppliers** (`AdminDbSuppliers`): Tabs עליונים — פעילים · ממתינים · לא מאושרים · חדשים השבוע
+- **Deals** (`AdminDeals`): Tabs — פעילות · טיוטות · ללא תמונה · הסתיימו
+- **Projects** (`AdminProjects`): Tabs — פעילים · חדשים · הסתיימו
+
+קומפוננטה משותפת חדשה: `src/components/admin/AdminTabsBar.tsx` — tabs עם counts, סגנון Linear-like.
+
+### 5. הגדרות (`AdminSettings.tsx`) — קיבוץ מחדש
+3 קבוצות בלבד:
+- **תוכן**: קטגוריות · תחומי פרויקט · אזורי שירות
+- **משתמשים**: משתמשים · דיירים · לידים · בקשות ועד · תלונות
+- **מערכת**: התראות · תמיכה · הודעות מוכנות · סטטיסטיקות · אמון ספקים · פיצ׳רים בטא
+
+מוסר את "קטגוריות (ישן)" מהתפריט (deprecated).
+
+### 6. Header אדמין אחיד
+`AdminPageHeader.tsx` — עדכון: פחות border, יותר breathing, כותרת גדולה יותר (`28px`), תיאור בגוון `#8B94A3`. sticky עם glass ברגע שמלגללים.
+
+## קבצים לשינוי
+- **חדש**: `src/components/admin/AttentionPanel.tsx`, `AdminTabsBar.tsx`, `src/hooks/useAdminAttention.ts`
+- **כתיבה מחדש**: `src/pages/admin/AdminDashboard.tsx`, `AdminSettings.tsx`, `AdminPageHeader.tsx`
+- **עדכון tabs**: `AdminDbSuppliers.tsx`, `AdminDeals.tsx`, `AdminProjects.tsx`
+- **עדכון**: `src/components/layout/BottomNav.tsx` (badges)
+- **מחיקה/redirect**: `AdminControl.tsx` → redirect ל-dashboard
+- **אין שינויי DB, אין שינויי לוגיקה עסקית** — רק presentation/UX.
+
+## מה לא ייכלל בשלב זה
+- שינויי backend/schema
+- שינוי לוגיקת הרשאות
+- שינוי מסכי resident/supplier
+- שינוי תוכן העמודים הפנימיים (רק tabs + header החדש)
+
+## הערכת גודל
+~8-10 קבצים חדשים/משוכתבים, 4-5 קבצים בעדכון tabs. עבודה בפעימה אחת.
 
 ---
 
-## סדר ביצוע מוצע
-
-1. שלב 1 (SQL slugs + RLS ציבורי + ראוטים + SEO תשתית)
-2. שלב 2 (כרטיס ספק ציבורי + guest gating)
-3. שלב 4 (חיפוש גלובלי — הכי גבוה בערך עבורך)
-4. שלב 3 (Analytics — תשתית לפני dashboardים)
-5. שלב 5 + 6 (dashboardים)
-
-כל שלב ניתן ל־QA עצמאי ולא שובר את הקיים.
-
-**אישור?** אתחיל בשלב 1 מיד כשתאשר.
+**אישור להתחיל?** אם יש חלק שאתה רוצה לדלג עליו או לשנות (למשל להשאיר את מסך הבקרה, או להוסיף Analytics עמוד חדש במקום להעביר ל-AdminStats) — תגיד עכשיו.
