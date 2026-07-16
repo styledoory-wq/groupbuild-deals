@@ -317,6 +317,7 @@ export default function CategoriesList() {
 
   return (
     <>
+    <PullToRefreshIndicator {...ptr} />
     <Seo
       title="קטגוריות שירות לבית חדש — ספקים ובעלי מקצוע | GroupBuild"
       description="מצאו ספקים מומלצים לפי תחום ושלב בפרויקט: תכנון, שלד, מערכות, גמרים, חוץ ופיתוח. ללא הרשמה."
