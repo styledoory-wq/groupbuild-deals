@@ -433,7 +433,7 @@ export default function AdminDbSuppliers() {
   );
 }
 
-/* ---------- Row (spacious card, metadata footer) ---------- */
+/* ---------- Row (compact square card, refined) ---------- */
 
 function SupplierRow({
   row, categories, onOpen, onEdit, onApprove, onReject, onToggleActive, onDelete,
@@ -462,23 +462,22 @@ function SupplierRow({
     : "—";
 
   const statusPill = isRejected
-    ? { label: "נדחה", cls: "bg-red-50 text-red-700" }
+    ? { label: "נדחה", cls: "bg-red-50 text-red-700", dot: "bg-red-500" }
     : isPending
-      ? { label: "ממתין לאישור", cls: "bg-amber-50 text-amber-700" }
+      ? { label: "ממתין", cls: "bg-amber-50 text-amber-700", dot: "bg-amber-500" }
       : isBlocked
-        ? { label: "מושהה", cls: "bg-neutral-100 text-neutral-600" }
-        : { label: "פעיל", cls: "bg-emerald-50 text-emerald-700" };
+        ? { label: "מושהה", cls: "bg-neutral-100 text-neutral-600", dot: "bg-neutral-400" }
+        : { label: "פעיל", cls: "bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" };
 
   return (
     <li>
       <div
-        className={`relative overflow-hidden bg-white rounded-2xl border ${
+        className={`group relative overflow-hidden bg-white rounded-2xl border ${
           isPending ? "border-amber-100" : "border-[#EEF0F4]"
-        } shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-shadow hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_6px_20px_-10px_rgba(15,23,42,0.10)]`}
+        } shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-200 hover:border-[#E1E5EC] hover:shadow-[0_2px_4px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.12)]`}
       >
-        {/* Pending progress strip on top */}
         {isPending && row.completeness && (
-          <div className="absolute top-0 right-0 left-0 h-1 bg-amber-50/80">
+          <div className="absolute top-0 right-0 left-0 h-[3px] bg-amber-50">
             <div
               className="h-full bg-amber-400 transition-all"
               style={{ width: `${row.completeness.percent}%` }}
@@ -486,107 +485,90 @@ function SupplierRow({
           </div>
         )}
 
-        <div className="p-4">
-          <div className="flex justify-between items-start gap-3">
-            <button
-              onClick={onOpen}
-              className="flex items-center gap-3 flex-1 min-w-0 text-right"
-              aria-label={`פתח ${row.business_name}`}
-            >
-              <SupplierLogo name={row.business_name} logoUrl={row.logo_url} size="md" />
-              <div className="min-w-0">
-                <h3 className="font-bold text-[15px] text-[#0F172A] leading-tight truncate">
-                  {row.business_name}
-                </h3>
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${statusPill.cls}`}>
-                    {statusPill.label}
-                  </span>
-                  {isPending && row.completeness ? (
-                    <span className="text-[11px] font-medium text-amber-700 tabular-nums">
-                      {row.completeness.percent}% הושלם
-                    </span>
-                  ) : (
-                    <span className="text-[11px] text-[#9CA3AF] tabular-nums">
-                      הצטרפות: {joinLabel}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </button>
+        <div className="p-3.5 flex items-center gap-3">
+          <button onClick={onOpen} className="shrink-0" aria-label={`פתח ${row.business_name}`}>
+            <SupplierLogo name={row.business_name} logoUrl={row.logo_url} size="md" />
+          </button>
 
-            {!isPending && (
-              <RowMenu
-                onOpen={onOpen}
-                onEdit={onEdit}
-                onApprove={onApprove}
-                onReject={onReject}
-                onToggleActive={onToggleActive}
-                onDelete={onDelete}
-                isActive={row.is_active}
-                isRejected={isRejected}
-              />
-            )}
-            {isPending && (
-              <RowMenu
-                onOpen={onOpen}
-                onEdit={onEdit}
-                onApprove={onApprove}
-                onReject={onReject}
-                onToggleActive={onToggleActive}
-                onDelete={onDelete}
-                isActive={row.is_active}
-                isRejected={isRejected}
-              />
-            )}
-          </div>
-
-          {/* Footer meta row */}
-          <div className="mt-3 pt-3 border-t border-[#F4F6FA] flex items-center gap-5 text-[11px]">
-            <div className="min-w-0">
-              <div className="text-[10px] font-medium text-[#9CA3AF]">קטגוריה</div>
-              <div className="text-[12px] font-medium text-[#374151] truncate">
+          <button onClick={onOpen} className="flex-1 min-w-0 text-right">
+            <div className="flex items-center gap-2 min-w-0">
+              <h3 className="font-bold text-[14.5px] text-[#0F172A] leading-tight truncate">
+                {row.business_name}
+              </h3>
+              <span className={`shrink-0 inline-flex items-center gap-1 text-[10.5px] font-semibold px-1.5 py-0.5 rounded-md ${statusPill.cls}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${statusPill.dot}`} />
+                {statusPill.label}
+              </span>
+            </div>
+            <div className="mt-1 flex items-center gap-2.5 text-[11.5px] text-[#8B94A3] min-w-0">
+              <span className="truncate">
                 {primaryCategory ?? <span className="text-amber-700">ללא תחום</span>}
-              </div>
-            </div>
-            <div className="min-w-0">
-              <div className="text-[10px] font-medium text-[#9CA3AF]">אזור</div>
-              <div className="text-[12px] font-medium text-[#374151] inline-flex items-center gap-1 truncate">
-                <MapPin className="h-3 w-3 text-[#9CA3AF]" />
+              </span>
+              <span className="text-[#E5E7EB]">·</span>
+              <span className="inline-flex items-center gap-1 truncate">
+                <MapPin className="h-3 w-3 shrink-0" />
                 <span className="truncate">{areaLabel}</span>
-              </div>
+              </span>
+              {!isPending && (
+                <>
+                  <span className="text-[#E5E7EB]">·</span>
+                  <span className="tabular-nums shrink-0">{joinLabel}</span>
+                </>
+              )}
+              {isPending && row.completeness && (
+                <>
+                  <span className="text-[#E5E7EB]">·</span>
+                  <span className="tabular-nums font-semibold text-amber-700 shrink-0">{row.completeness.percent}%</span>
+                </>
+              )}
             </div>
-            {isPending && (
-              <div className="ms-auto text-[10px] font-medium text-[#9CA3AF] tabular-nums shrink-0">
-                {joinLabel}
-              </div>
-            )}
-          </div>
+          </button>
 
-          {/* Pending quick actions — full width */}
-          {isPending && (
-            <div className="mt-3 pt-3 border-t border-[#F4F6FA] grid grid-cols-2 gap-3">
+          {isPending ? (
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={onApprove}
-                className="h-10 rounded-xl bg-[#0E6B5A] text-white text-[13px] font-bold shadow-[0_4px_12px_-4px_rgba(14,107,90,0.35)] active:scale-95 transition-transform inline-flex items-center justify-center gap-1.5"
+                aria-label="אישור"
+                className="h-9 w-9 rounded-xl bg-[#0E6B5A] text-white inline-flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(14,107,90,0.4)] active:scale-95 transition-transform"
               >
                 <Check className="h-4 w-4" />
-                אישור ספק
               </button>
               <button
                 onClick={onReject}
-                className="h-10 rounded-xl bg-white border border-[#EEF0F4] text-[#6B7280] text-[13px] font-semibold hover:text-red-600 hover:border-red-200 transition inline-flex items-center justify-center gap-1.5"
+                aria-label="דחייה"
+                className="h-9 w-9 rounded-xl bg-white border border-[#EEF0F4] text-[#6B7280] inline-flex items-center justify-center hover:text-red-600 hover:border-red-200 transition"
               >
                 <X className="h-4 w-4" />
-                דחייה
               </button>
+              <RowMenu
+                onOpen={onOpen}
+                onEdit={onEdit}
+                onApprove={onApprove}
+                onReject={onReject}
+                onToggleActive={onToggleActive}
+                onDelete={onDelete}
+                isActive={row.is_active}
+                isRejected={isRejected}
+              />
             </div>
+          ) : (
+            <RowMenu
+              onOpen={onOpen}
+              onEdit={onEdit}
+              onApprove={onApprove}
+              onReject={onReject}
+              onToggleActive={onToggleActive}
+              onDelete={onDelete}
+              isActive={row.is_active}
+              isRejected={isRejected}
+            />
           )}
         </div>
       </div>
     </li>
   );
 }
+
 
 
 function RowMenu({
