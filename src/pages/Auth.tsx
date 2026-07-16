@@ -506,7 +506,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
           ) : (
             <form onSubmit={handleSignUp} className="space-y-3.5 animate-fade-up">
               {/* Account type selector with explicit title — hidden when role is locked via route */}
-              {!lockedRole && (
+              {!effectiveLockedRole && (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 px-1">
                   <span className="text-[12px] font-bold tracking-wide text-[#6B7280] uppercase">בחר סוג חשבון</span>
