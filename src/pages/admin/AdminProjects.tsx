@@ -160,8 +160,31 @@ export default function AdminProjects() {
       buildingCount: String(p.buildingCount ?? ""),
       apartmentCount: String(p.apartmentCount ?? ""),
       status: p.status ?? "planning",
+      imageUrl: metrics[p.id]?.imageUrl ?? "",
     });
     setOpen(true);
+  };
+
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) throw new Error("לא מחובר");
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${uid}/projects/${form.id ?? "new"}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("deal-images").upload(path, file, {
+        cacheControl: "3600", upsert: true, contentType: file.type,
+      });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("deal-images").getPublicUrl(path);
+      setForm((f) => ({ ...f, imageUrl: pub.publicUrl }));
+      toast.success("התמונה הועלתה");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
+    } finally { setUploadingImage(false); }
   };
 
   const save = async () => {
@@ -178,7 +201,8 @@ export default function AdminProjects() {
       const { error } = await supabase.from("projects").upsert({
         id: payload.id, name: payload.name, city: payload.city,
         building_count: payload.buildingCount, apartment_count: payload.apartmentCount,
-        status: payload.status, is_active: true, is_deleted: false, deleted_at: null,
+        status: payload.status, image_url: form.imageUrl || null,
+        is_active: true, is_deleted: false, deleted_at: null,
       });
       if (error) throw error;
       if (form.id) {
@@ -188,6 +212,7 @@ export default function AdminProjects() {
         setProjects([payload, ...projects]);
         toast.success("פרויקט חדש נוצר");
       }
+      setMetrics((m) => ({ ...m, [payload.id]: { ...(m[payload.id] ?? { users: 0, suppliers: 0, deals: 0, deposits: 0, paid: 0 }), imageUrl: form.imageUrl || null } }));
       setOpen(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
