@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Search as SearchIcon, X, Store, FolderTree, MapPin, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { logSearchQuery } from "@/lib/analytics";
@@ -32,6 +32,7 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
   const [hits, setHits] = useState<Hit[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -99,6 +100,12 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
       document.removeEventListener("touchstart", onDown);
     };
   }, [open]);
+
+  // Close dropdown on any route change (back button, deep link, tab nav).
+  useEffect(() => {
+    setOpen(false);
+    inputRef.current?.blur();
+  }, [location.pathname, location.search]);
 
   const grouped = useMemo(() => ({
     categories: hits.filter((h) => h.result_type === "category").slice(0, 6),
