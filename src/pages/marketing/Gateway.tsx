@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Building2, Briefcase } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import { isAdminEmail } from "@/lib/auth";
+import { APP_MODE, IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 import { BrandMark } from "@/components/BrandLogo";
 import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 import { cn } from "@/lib/utils";
@@ -18,14 +19,22 @@ export default function Gateway() {
   const { user, authReady, needsOnboarding } = useApp();
 
   useEffect(() => {
-    if (!authReady || !user) return;
-    if (isAdminEmail(user.email)) { navigate("/admin", { replace: true }); return; }
+    if (!authReady) return;
+    if (!user) {
+      // In native single-role builds, skip the gateway entirely.
+      if (IS_RESIDENTS_BUILD) { navigate("/auth/resident", { replace: true }); return; }
+      if (IS_SUPPLIERS_BUILD) { navigate("/auth/supplier", { replace: true }); return; }
+      return;
+    }
+    if (isAdminEmail(user.email) && APP_MODE === "web") { navigate("/admin", { replace: true }); return; }
     if (needsOnboarding) { navigate("/onboarding", { replace: true }); return; }
+    if (IS_RESIDENTS_BUILD) { navigate("/resident", { replace: true }); return; }
+    if (IS_SUPPLIERS_BUILD) { navigate("/supplier", { replace: true }); return; }
     navigate(user.role === "supplier" ? "/supplier" : "/resident", { replace: true });
   }, [authReady, user, needsOnboarding, navigate]);
 
-  // While auth state resolves for a possibly-signed-in user, avoid a flash of the gateway.
-  if (!authReady || user) {
+  // Native builds redirect immediately — never render the dual-role gateway.
+  if (!authReady || user || IS_RESIDENTS_BUILD || IS_SUPPLIERS_BUILD) {
     return <div style={{ minHeight: "100dvh", background: "#F7F5F0" }} aria-hidden />;
   }
 
