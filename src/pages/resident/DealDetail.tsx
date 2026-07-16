@@ -167,6 +167,12 @@ export default function DealDetail() {
 
   const loadParticipantCount = async (id: string) => {
     // Pricing tier is driven by PAID deposits only — pending interests do not count.
+    // RPC requires authentication; guests see the base tier without a 401 request.
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      setParticipantCount(0);
+      return;
+    }
     const { data, error: rpcErr } = await supabase.rpc("get_deal_paid_count", { _deal_id: id });
     if (!rpcErr && typeof data === "number") setParticipantCount(data);
   };
