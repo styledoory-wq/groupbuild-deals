@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Loader2, Plus, Search, Phone, Calendar, MapPin, Eye } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Loader2, Plus, Search, Phone, Calendar, MapPin, Eye, Inbox } from "lucide-react";
 import { CategoryMultiPicker } from "@/components/categories/CategoryMultiPicker";
 import { computeCompleteness, type SupplierCompleteness } from "@/lib/supplierCompleteness";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
+import { AdminTabsBar, type AdminTab } from "@/components/admin/AdminTabsBar";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -56,16 +57,27 @@ const emptyForm: NewForm = {
   approval_status: "pending", is_active: true,
 };
 
+type TabKey = "all" | "active" | "pending" | "rejected" | "new";
+const VALID_TABS: TabKey[] = ["all", "active", "pending", "rejected", "new"];
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
 export default function AdminDbSuppliers() {
   const navigate = useNavigate();
   const { categories } = useApp();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [supplierSearch, setSupplierSearch] = useState("");
-  const [quickFilter, setQuickFilter] = useState<
-    "all" | "active" | "pending" | "no-deals" | "new" | "top"
-    | "profile-complete" | "profile-incomplete" | "missing-contact" | "missing-category" | "missing-area"
-  >("all");
+
+  const urlTab = searchParams.get("tab") as TabKey | null;
+  const activeTab: TabKey = urlTab && VALID_TABS.includes(urlTab) ? urlTab : "all";
+
+  const setActiveTab = (key: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (key === "all") next.delete("tab");
+    else next.set("tab", key);
+    setSearchParams(next, { replace: true });
+  };
 
   // Create
   const [open, setOpen] = useState(false);
@@ -177,29 +189,50 @@ export default function AdminDbSuppliers() {
     }
   };
 
+  // Counts per tab (server-side data, computed once)
+  const counts = useMemo(() => {
+    const now = Date.now();
+    return {
+      all: rows.length,
+      active: rows.filter((r) => r.is_active && r.approval_status === "approved").length,
+      pending: rows.filter((r) => r.approval_status === "pending").length,
+      rejected: rows.filter((r) => r.approval_status === "rejected").length,
+      new: rows.filter((r) => r.created_at && new Date(r.created_at).getTime() >= now - WEEK_MS).length,
+    };
+  }, [rows]);
+
   const filteredRows = useMemo(() => {
     const q = supplierSearch.trim().toLowerCase();
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    let res = !q ? rows : rows.filter((r) => {
-      const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name ?? "").join(" ") ?? "";
-      return [r.business_name, r.email, r.phone, catNames].some((v) => (v ?? "").toLowerCase().includes(q));
-    });
-    if (quickFilter === "active") res = res.filter((r) => r.is_active && r.approval_status === "approved");
-    else if (quickFilter === "pending") res = res.filter((r) => r.approval_status === "pending");
-    else if (quickFilter === "no-deals") res = res.filter((r) => (r.dealsCount ?? 0) === 0);
-    else if (quickFilter === "new") res = res.filter((r) => r.created_at && new Date(r.created_at).getTime() >= sevenDaysAgo);
-    else if (quickFilter === "top") res = [...res].sort((a, b) => (b.leadsCount ?? 0) - (a.leadsCount ?? 0)).filter((r) => (r.leadsCount ?? 0) > 0);
-    else if (quickFilter === "profile-complete") res = res.filter((r) => r.completeness?.complete);
-    else if (quickFilter === "profile-incomplete") res = res.filter((r) => r.completeness && !r.completeness.complete);
-    else if (quickFilter === "missing-contact") res = res.filter((r) => !r.phone || !r.email);
-    else if (quickFilter === "missing-category") res = res.filter((r) => !r.categories || r.categories.length === 0);
-    else if (quickFilter === "missing-area") res = res.filter((r) => !r.serves_all_country && (!r.service_areas || r.service_areas.length === 0));
+    const now = Date.now();
+    let res = rows;
+    if (activeTab === "active") res = res.filter((r) => r.is_active && r.approval_status === "approved");
+    else if (activeTab === "pending") res = res.filter((r) => r.approval_status === "pending");
+    else if (activeTab === "rejected") res = res.filter((r) => r.approval_status === "rejected");
+    else if (activeTab === "new") res = res.filter((r) => r.created_at && new Date(r.created_at).getTime() >= now - WEEK_MS);
+    if (q) {
+      res = res.filter((r) => {
+        const catNames = r.categories?.map((cid) => categories.find((c) => c.id === cid)?.name ?? "").join(" ") ?? "";
+        return [r.business_name, r.email, r.phone, catNames].some((v) => (v ?? "").toLowerCase().includes(q));
+      });
+    }
     return res;
-  }, [rows, supplierSearch, quickFilter, categories]);
+  }, [rows, supplierSearch, activeTab, categories]);
 
-  const incompleteCount = rows.filter((r) => r.completeness && !r.completeness.complete).length;
+  const tabs: AdminTab[] = [
+    { key: "all", label: "כולם", count: counts.all },
+    { key: "active", label: "פעילים", count: counts.active },
+    { key: "pending", label: "ממתינים לאישור", count: counts.pending },
+    { key: "rejected", label: "לא מאושרים", count: counts.rejected },
+    { key: "new", label: "חדשים השבוע", count: counts.new },
+  ];
 
-  const pendingCount = rows.filter((r) => r.approval_status === "pending").length;
+  const emptyLabel: Record<TabKey, string> = {
+    all: "אין ספקים רשומים עדיין.",
+    active: "אין ספקים פעילים כרגע.",
+    pending: "אין ספקים הממתינים לאישור.",
+    rejected: "אין ספקים לא מאושרים.",
+    new: "לא נוספו ספקים חדשים השבוע.",
+  };
 
   if (loading) {
     return (
@@ -213,56 +246,30 @@ export default function AdminDbSuppliers() {
 
   return (
     <MobileShell>
-      <PageHeader title="ניהול ספקים" subtitle={`${rows.length} ספקים · ${pendingCount} ממתינים`} back />
+      <PageHeader title="ניהול ספקים" subtitle={`${counts.all} ספקים · ${counts.pending} ממתינים`} back />
 
-      <div className="px-4 -mt-2 mb-3 space-y-2.5">
+      {/* Sticky filter bar */}
+      <div className="sticky top-[56px] z-20 bg-[#F7F8FA]/90 backdrop-blur-xl px-4 pt-2 pb-3 -mt-2 space-y-2.5 border-b border-transparent">
         <div className="relative">
           <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <Input
             value={supplierSearch}
             onChange={(e) => setSupplierSearch(e.target.value)}
             placeholder="חיפוש ספק…"
-            className="h-9 pr-9 text-fs-sm rounded-xl"
+            className="h-9 pr-9 text-fs-sm rounded-xl bg-white"
           />
         </div>
-        <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-0.5 scrollbar-none">
-          {([
-            ["all", `הכל (${rows.length})`],
-            ["pending", `ממתינים (${pendingCount})`],
-            ["active", "פעילים"],
-            ["profile-incomplete", `לא הושלם (${incompleteCount})`],
-            ["profile-complete", "הושלם 100%"],
-            ["missing-contact", "חסר קשר"],
-            ["missing-category", "חסר תחום"],
-            ["missing-area", "חסר אזור"],
-            ["no-deals", "ללא הצעות"],
-            ["new", "חדשים"],
-            ["top", "מובילים"],
-          ] as const).map(([k, lbl]) => {
-            const active = quickFilter === k;
-            return (
-              <button
-                key={k}
-                onClick={() => setQuickFilter(k)}
-                className={
-                  "shrink-0 h-7 px-3 rounded-full text-fs-xs font-bold border transition-all " +
-                  (active
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "bg-card text-muted-foreground border-border hover:border-[#0E6B5A]/40")
-                }
-              >
-                {lbl}
-              </button>
-            );
-          })}
+        <div className="overflow-x-auto -mx-1 px-1 scrollbar-none">
+          <AdminTabsBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
         </div>
       </div>
 
-      <div className="px-4 pb-32">
+      <div className="px-4 pt-3 pb-32">
         {filteredRows.length === 0 ? (
-          <div className="gb-card p-6 text-center text-sm text-muted-foreground">
-            {rows.length === 0 ? "אין ספקים רשומים עדיין." : "לא נמצאו ספקים תואמים"}
-          </div>
+          <EmptyState
+            title={supplierSearch ? "לא נמצאו ספקים תואמים" : emptyLabel[activeTab]}
+            hint={supplierSearch ? "נסה חיפוש אחר או בחר טאב אחר" : undefined}
+          />
         ) : (
           <div className="grid grid-cols-2 gap-2.5">
             {filteredRows.map((r) => (
@@ -360,6 +367,18 @@ export default function AdminDbSuppliers() {
 
       <BottomNav role="admin" />
     </MobileShell>
+  );
+}
+
+function EmptyState({ title, hint }: { title: string; hint?: string }) {
+  return (
+    <div className="mt-6 rounded-[16px] bg-white border border-[#EEF0F4] p-8 text-center flex flex-col items-center gap-2">
+      <div className="h-11 w-11 rounded-full bg-[#F4F6FA] flex items-center justify-center">
+        <Inbox className="h-5 w-5 text-[#8B94A3]" />
+      </div>
+      <p className="text-[14px] font-semibold text-[#0F172A]">{title}</p>
+      {hint && <p className="text-[12px] text-[#8B94A3]">{hint}</p>}
+    </div>
   );
 }
 
