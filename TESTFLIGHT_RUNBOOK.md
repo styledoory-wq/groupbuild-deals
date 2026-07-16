@@ -73,8 +73,8 @@ In the `App` target → Signing & Capabilities:
    - suppliers → `il.co.groupbuild.suppliers`
 3. Automatic signing ON (or manage a provisioning profile per app if you use manual).
 4. Capabilities enabled per app:
-   - Push Notifications
-   - Associated Domains → `applinks:groupbuild.co.il` (already in entitlements)
+   - **Push Notifications** — toggling this in Xcode adds `aps-environment` to the entitlements automatically (development for Debug, production for Distribution). Do not add it manually.
+   - Associated Domains → `applinks:groupbuild.co.il` (already written by the sync script)
    - Background Modes → Remote notifications (only if you use silent push)
 
 Repeat for the second app.

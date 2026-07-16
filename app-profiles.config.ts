@@ -109,7 +109,6 @@ export const APP_PROFILES: AppProfile[] = [
       photoLibrary: "העלאת תמונות ומסמכים לפרופיל, לפרויקטים ולהצעות מחיר",
       photoLibraryAdd: "שמירת שוברים ותעודות מהאפליקציה לגלריה",
       camera: "צילום מסמכים והעלאת תמונות פרופיל",
-      location: "איתור ספקים בקרבתך",
     },
     resourcesDir: "resources/residents",
     iconPath: "resources/residents/icon.png",
