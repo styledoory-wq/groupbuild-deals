@@ -8,6 +8,7 @@ import { BrandMark } from "@/components/BrandLogo";
 import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 import { cn } from "@/lib/utils";
 import { Seo } from "@/components/seo/Seo";
+import ResidentsHome from "@/pages/marketing/ResidentsHome";
 
 /**
  * Public entry gateway at "/".
