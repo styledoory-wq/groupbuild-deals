@@ -20,6 +20,7 @@ import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { loadSupplierCompletenessForUser } from "@/lib/supplierCompleteness";
 import { translateAuthError } from "@/lib/authErrors";
 import { Seo } from "@/components/seo/Seo";
+import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 
 
 type Mode = "signin" | "signup";
@@ -28,7 +29,10 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { setUser, projects } = useApp();
-  const [role, setRole] = useState<Exclude<Role, "admin">>(lockedRole ?? "resident");
+  // Native builds hard-lock the role so the auth screen can never expose the other flow.
+  const effectiveLockedRole: Exclude<Role, "admin"> | undefined =
+    lockedRole ?? (IS_RESIDENTS_BUILD ? "resident" : IS_SUPPLIERS_BUILD ? "supplier" : undefined);
+  const [role, setRole] = useState<Exclude<Role, "admin">>(effectiveLockedRole ?? "resident");
   const modeParam = searchParams.get("mode");
   const initialMode: Mode =
     modeParam === "signin" ? "signin"
