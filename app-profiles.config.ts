@@ -27,7 +27,17 @@ export type AppProfile = {
   appId: string;
   appName: string;
   shortName?: string;
-  version?: string;
+  version: string;      // CFBundleShortVersionString (marketing, e.g. "1.0.0")
+  buildNumber: string;  // CFBundleVersion (integer as string, e.g. "1")
+  // Per-profile iOS usage descriptions (shown in permission prompts).
+  iosUsageDescriptions: {
+    camera?: string;
+    photoLibrary?: string;
+    photoLibraryAdd?: string;
+    location?: string;
+    microphone?: string;
+    faceID?: string;
+  };
 
   // Visual assets
   resourcesDir: string;
