@@ -12,6 +12,8 @@ import { listFavoriteIds } from "@/lib/favorites";
 import type { OfferTier } from "@/lib/offerPricing";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 import { Seo } from "@/components/seo/Seo";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 
 type DealWithSupplier = RealDealCardData;
 type TabKey = "active" | "favorites" | "archive";
@@ -45,6 +47,11 @@ export default function DealsList() {
   const [tab, setTab] = useState<TabKey>("active");
   const [q, setQ] = useState("");
   const [favIds, setFavIds] = useState<Set<string>>(new Set());
+  const [refreshTick, setRefreshTick] = useState(0);
+  const ptr = usePullToRefresh(async () => {
+    setRefreshTick((n) => n + 1);
+    await new Promise((r) => setTimeout(r, 400));
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -124,7 +131,7 @@ export default function DealsList() {
       }
     })();
     return () => { cancelled = true; };
-  }, [categoryId, stageId, cacheKey]);
+  }, [categoryId, stageId, cacheKey, refreshTick]);
 
   useEffect(() => {
     let cancelled = false;
