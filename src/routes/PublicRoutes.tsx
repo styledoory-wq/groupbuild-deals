@@ -3,6 +3,7 @@ import { Navigate, Route } from "react-router-dom";
 import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 
 const Gateway = lazy(() => import("@/pages/marketing/Gateway"));
+const ResidentsHome = lazy(() => import("@/pages/marketing/ResidentsHome"));
 const SuppliersLanding = lazy(() => import("@/pages/marketing/SuppliersLanding"));
 const ResidentsLanding = lazy(() => import("@/pages/marketing/ResidentsLanding"));
 const Auth = lazy(() => import("@/pages/Auth"));
