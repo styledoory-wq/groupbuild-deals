@@ -302,7 +302,7 @@ export default function AdminDeals() {
                               {target ? `${c.paid}/${target} מצטרפים` : `${c.paid} מצטרפים`}
                             </span>
                             <span className="font-bold text-[#0E6B5A] tabular-nums">
-                              {formatILS(c.paid * priceFor(d))}
+                              {priceFor(d) > 0 ? formatILS(priceFor(d)) : "—"}
                             </span>
                           </div>
                           <div className="h-1 rounded-full bg-[#F1F3F7] overflow-hidden">
