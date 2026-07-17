@@ -19,11 +19,12 @@ export default function Gateway() {
   const navigate = useNavigate();
   const { user, authReady, needsOnboarding } = useApp();
 
+  // Residents native build: NEVER show the combined gateway. Always render
+  // the residents public home. Authed residents still get pushed to their
+  // dashboard from ResidentsHome / route guards elsewhere.
   useEffect(() => {
     if (!authReady) return;
     if (!user) {
-      // Residents native build: show the premium discovery home (guest-friendly).
-      // Suppliers native build still routes straight to supplier auth.
       if (IS_SUPPLIERS_BUILD) { navigate("/auth/supplier", { replace: true }); return; }
       return;
     }
@@ -34,12 +35,13 @@ export default function Gateway() {
     navigate(user.role === "supplier" ? "/supplier" : "/resident", { replace: true });
   }, [authReady, user, needsOnboarding, navigate]);
 
-  // Residents build: render the premium discovery home for guests.
-  if (IS_RESIDENTS_BUILD && authReady && !user) {
+  // Residents build always shows the residents home (guest or while auth loads).
+  // Authed residents get redirected by the effect above.
+  if (IS_RESIDENTS_BUILD) {
     return <ResidentsHome />;
   }
 
-  // Other native builds redirect; while authed/loading show a blank surface.
+  // Suppliers build redirects; while authed/loading show a blank surface.
   if (!authReady || user || IS_SUPPLIERS_BUILD) {
     return <div style={{ minHeight: "100dvh", background: "#F7F5F0" }} aria-hidden />;
   }
