@@ -306,14 +306,23 @@ export default function AdminCatalog() {
             <Plus className="h-3.5 w-3.5 ml-1" /> תחום ראשי חדש
           </Button>
           <Button
+            variant={editMode ? "default" : "outline"}
+            onClick={() => setEditMode((v) => !v)}
+            className={`h-9 rounded-lg text-xs ${editMode ? "bg-[#0E6B5A] text-white" : ""}`}
+          >
+            {editMode ? (<><Check className="h-3.5 w-3.5 ml-1" /> סיום</>) : (<><Pencil className="h-3.5 w-3.5 ml-1" /> עריכה</>)}
+          </Button>
+          <Button
             variant={showDeleted ? "default" : "outline"}
             onClick={() => setShowDeleted((v) => !v)}
             className="h-9 rounded-lg text-xs"
           >
             {showDeleted ? "הצג פעילים" : "פח המחזור"}
           </Button>
-          <Button variant="outline" onClick={() => setExpanded(new Set(all.map(c => c.id)))} className="h-9 rounded-lg text-xs">פתח הכל</Button>
-          <Button variant="outline" onClick={() => setExpanded(new Set())} className="h-9 rounded-lg text-xs">סגור</Button>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={() => setExpanded(new Set(all.map(c => c.id)))} className="h-8 rounded-lg text-xs flex-1">פתח הכל</Button>
+          <Button variant="ghost" onClick={() => setExpanded(new Set())} className="h-8 rounded-lg text-xs flex-1">סגור הכל</Button>
         </div>
       </div>
 
