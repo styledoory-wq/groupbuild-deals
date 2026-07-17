@@ -30,6 +30,7 @@ run("npx", ["vite", "build", "--mode", p.id, "--outDir", p.webDir]);
 
 // 2. Sync per-profile assets/manifest/entitlements into the native folder.
 run("npx", ["tsx", "scripts/sync-assets.ts"]);
+run("npx", ["tsx", "scripts/generate-app-icons.ts"]);
 run("npx", ["tsx", "scripts/generate-privacy-manifest.ts"]);
 run("npx", ["tsx", "scripts/generate-info-plist-overrides.ts"]);
 
