@@ -42,7 +42,8 @@ export default function CommitteeQuoteRequest() {
         supabase.from("suppliers").select("id,business_name").eq("is_active", true).eq("is_deleted", false).in("approval_status", ["approved", "active"]).order("business_name"),
       ]);
       if (cancelled) return;
-      const isC = (roles ?? []).some((r) => (r as { role: string }).role === "committee");
+      const rolesList = (roles ?? []).map((r) => (r as { role: string }).role);
+      const isC = rolesList.includes("committee") || rolesList.includes("admin") || isAdminEmail(user.email) || user.role === "admin";
       setIsCommittee(isC);
       const pid = (prof as { project_id?: string | null } | null)?.project_id ?? null;
       setProjectId(pid);
