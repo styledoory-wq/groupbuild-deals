@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { BackHeader, LoadingState, EmptyState } from "@/components/ds";
 import { Building2 } from "lucide-react";
+import { isAdminEmail } from "@/lib/auth";
 
 interface Category { id: string; name: string }
 interface Supplier { id: string; business_name: string }
