@@ -234,55 +234,46 @@ export default function AdminCatalog() {
     return (
       <div key={c.id}>
         <div
-          className={`flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-muted/50 ${c.is_active ? "" : "opacity-60"}`}
+          className={`flex items-center gap-2 py-2.5 px-2 rounded-lg hover:bg-muted/50 ${c.is_active ? "" : "opacity-60"}`}
           style={{ paddingInlineStart: depth * 16 + 8 }}
         >
-          <button onClick={() => toggle(c.id)} className="w-5 h-5 flex items-center justify-center" aria-label="פתח">
+          <button onClick={() => toggle(c.id)} className="w-6 h-6 flex items-center justify-center shrink-0" aria-label="פתח">
             {hasKids ? (isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />) : <span className="w-4" />}
           </button>
           <span className="text-lg shrink-0 w-6 text-center">{c.icon || "•"}</span>
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${LEVEL_COLORS[c.level] ?? ""}`}>
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${LEVEL_COLORS[c.level] ?? ""}`}>
             {LEVEL_LABELS[c.level] ?? `L${c.level}`}
           </span>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold truncate">{c.name}</div>
+            <div className="text-[14px] font-semibold truncate">{c.name}</div>
             {c.search_keywords && c.search_keywords.length > 0 && (
-              <div className="text-[10px] text-muted-foreground truncate">🔎 {c.search_keywords.slice(0, 6).join(" · ")}</div>
+              <div className="text-[10.5px] text-muted-foreground truncate">🔎 {c.search_keywords.slice(0, 6).join(" · ")}</div>
             )}
           </div>
-          {!showDeleted && c.level < 4 && (
-            <button onClick={() => setAddUnder(c)} className="h-7 w-7 rounded-md hover:bg-[#0E6B5A]/10 text-[#0E6B5A] flex items-center justify-center" title="הוסף תחת">
-              <Plus className="h-3.5 w-3.5" />
-            </button>
-          )}
-          {!showDeleted && (
-            <>
-              <button onClick={() => move(c, "up")} disabled={busy} className="h-7 w-6 rounded-md hover:bg-muted disabled:opacity-30 flex items-center justify-center">
-                <ArrowUp className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => move(c, "down")} disabled={busy} className="h-7 w-6 rounded-md hover:bg-muted disabled:opacity-30 flex items-center justify-center">
-                <ArrowDown className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => setEditing(c)} className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title="ערוך">
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => setMoveNode(c)} className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title="העבר להורה אחר">
-                <MoveRight className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => toggleActive(c)} className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title={c.is_active ? "השבת" : "הפעל"}>
-                {c.is_active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5 text-orange-500" />}
-              </button>
-              <button onClick={() => openHistory(c)} className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title="היסטוריה">
-                <History className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => softDelete(c)} className="h-7 w-7 rounded-md hover:bg-destructive/10 text-destructive flex items-center justify-center" title="מחק">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </>
-          )}
-          {showDeleted && (
-            <button onClick={() => restore(c)} className="h-7 px-2 rounded-md bg-[#0E6B5A]/10 text-[#0E6B5A] text-xs font-bold flex items-center gap-1" title="שחזר">
+
+          {showDeleted ? (
+            <button onClick={() => restore(c)} className="h-8 px-2.5 rounded-md bg-[#0E6B5A]/10 text-[#0E6B5A] text-xs font-bold flex items-center gap-1 shrink-0" title="שחזר">
               <RotateCcw className="h-3.5 w-3.5" /> שחזר
+            </button>
+          ) : editMode ? (
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={() => move(c, "up")} disabled={busy}
+                className="h-9 w-9 rounded-md border border-border hover:bg-muted disabled:opacity-30 flex items-center justify-center" aria-label="למעלה">
+                <ArrowUp className="h-4 w-4" />
+              </button>
+              <button onClick={() => move(c, "down")} disabled={busy}
+                className="h-9 w-9 rounded-md border border-border hover:bg-muted disabled:opacity-30 flex items-center justify-center" aria-label="למטה">
+                <ArrowDown className="h-4 w-4" />
+              </button>
+              <button onClick={() => setActionsFor(c)}
+                className="h-9 w-9 rounded-md border border-border hover:bg-muted flex items-center justify-center" aria-label="פעולות">
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => setActionsFor(c)}
+              className="h-9 w-9 rounded-md hover:bg-muted flex items-center justify-center shrink-0" aria-label="פעולות">
+              <MoreHorizontal className="h-4 w-4" />
             </button>
           )}
         </div>
