@@ -6,11 +6,13 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import {
   Plus, Trash2, Loader2, ArrowUp, ArrowDown, ChevronDown, ChevronLeft,
   Pencil, Search as SearchIcon, RotateCcw, EyeOff, Eye, History, MoveRight, X,
+  MoreHorizontal, Check,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
