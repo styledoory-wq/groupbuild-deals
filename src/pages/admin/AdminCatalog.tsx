@@ -6,11 +6,13 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import {
   Plus, Trash2, Loader2, ArrowUp, ArrowDown, ChevronDown, ChevronLeft,
   Pencil, Search as SearchIcon, RotateCcw, EyeOff, Eye, History, MoveRight, X,
+  MoreHorizontal, Check,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,6 +81,8 @@ export default function AdminCatalog() {
   const [historyFor, setHistoryFor] = useState<Cat | null>(null);
   const [historyRows, setHistoryRows] = useState<HistoryRow[]>([]);
   const [moveNode, setMoveNode] = useState<Cat | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [actionsFor, setActionsFor] = useState<Cat | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -230,55 +234,46 @@ export default function AdminCatalog() {
     return (
       <div key={c.id}>
         <div
-          className={`flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-muted/50 ${c.is_active ? "" : "opacity-60"}`}
+          className={`flex items-center gap-2 py-2.5 px-2 rounded-lg hover:bg-muted/50 ${c.is_active ? "" : "opacity-60"}`}
           style={{ paddingInlineStart: depth * 16 + 8 }}
         >
-          <button onClick={() => toggle(c.id)} className="w-5 h-5 flex items-center justify-center" aria-label="פתח">
+          <button onClick={() => toggle(c.id)} className="w-6 h-6 flex items-center justify-center shrink-0" aria-label="פתח">
             {hasKids ? (isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />) : <span className="w-4" />}
           </button>
           <span className="text-lg shrink-0 w-6 text-center">{c.icon || "•"}</span>
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${LEVEL_COLORS[c.level] ?? ""}`}>
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${LEVEL_COLORS[c.level] ?? ""}`}>
             {LEVEL_LABELS[c.level] ?? `L${c.level}`}
           </span>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold truncate">{c.name}</div>
+            <div className="text-[14px] font-semibold truncate">{c.name}</div>
             {c.search_keywords && c.search_keywords.length > 0 && (
-              <div className="text-[10px] text-muted-foreground truncate">🔎 {c.search_keywords.slice(0, 6).join(" · ")}</div>
+              <div className="text-[10.5px] text-muted-foreground truncate">🔎 {c.search_keywords.slice(0, 6).join(" · ")}</div>
             )}
           </div>
-          {!showDeleted && c.level < 4 && (
-            <button onClick={() => setAddUnder(c)} className="h-7 w-7 rounded-md hover:bg-[#0E6B5A]/10 text-[#0E6B5A] flex items-center justify-center" title="הוסף תחת">
-              <Plus className="h-3.5 w-3.5" />
-            </button>
-          )}
-          {!showDeleted && (
-            <>
-              <button onClick={() => move(c, "up")} disabled={busy} className="h-7 w-6 rounded-md hover:bg-muted disabled:opacity-30 flex items-center justify-center">
-                <ArrowUp className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => move(c, "down")} disabled={busy} className="h-7 w-6 rounded-md hover:bg-muted disabled:opacity-30 flex items-center justify-center">
-                <ArrowDown className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => setEditing(c)} className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title="ערוך">
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => setMoveNode(c)} className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title="העבר להורה אחר">
-                <MoveRight className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => toggleActive(c)} className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title={c.is_active ? "השבת" : "הפעל"}>
-                {c.is_active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5 text-orange-500" />}
-              </button>
-              <button onClick={() => openHistory(c)} className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title="היסטוריה">
-                <History className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => softDelete(c)} className="h-7 w-7 rounded-md hover:bg-destructive/10 text-destructive flex items-center justify-center" title="מחק">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </>
-          )}
-          {showDeleted && (
-            <button onClick={() => restore(c)} className="h-7 px-2 rounded-md bg-[#0E6B5A]/10 text-[#0E6B5A] text-xs font-bold flex items-center gap-1" title="שחזר">
+
+          {showDeleted ? (
+            <button onClick={() => restore(c)} className="h-8 px-2.5 rounded-md bg-[#0E6B5A]/10 text-[#0E6B5A] text-xs font-bold flex items-center gap-1 shrink-0" title="שחזר">
               <RotateCcw className="h-3.5 w-3.5" /> שחזר
+            </button>
+          ) : editMode ? (
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={() => move(c, "up")} disabled={busy}
+                className="h-9 w-9 rounded-md border border-border hover:bg-muted disabled:opacity-30 flex items-center justify-center" aria-label="למעלה">
+                <ArrowUp className="h-4 w-4" />
+              </button>
+              <button onClick={() => move(c, "down")} disabled={busy}
+                className="h-9 w-9 rounded-md border border-border hover:bg-muted disabled:opacity-30 flex items-center justify-center" aria-label="למטה">
+                <ArrowDown className="h-4 w-4" />
+              </button>
+              <button onClick={() => setActionsFor(c)}
+                className="h-9 w-9 rounded-md border border-border hover:bg-muted flex items-center justify-center" aria-label="פעולות">
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => setActionsFor(c)}
+              className="h-9 w-9 rounded-md hover:bg-muted flex items-center justify-center shrink-0" aria-label="פעולות">
+              <MoreHorizontal className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -311,14 +306,23 @@ export default function AdminCatalog() {
             <Plus className="h-3.5 w-3.5 ml-1" /> תחום ראשי חדש
           </Button>
           <Button
+            variant={editMode ? "default" : "outline"}
+            onClick={() => setEditMode((v) => !v)}
+            className={`h-9 rounded-lg text-xs ${editMode ? "bg-[#0E6B5A] text-white" : ""}`}
+          >
+            {editMode ? (<><Check className="h-3.5 w-3.5 ml-1" /> סיום</>) : (<><Pencil className="h-3.5 w-3.5 ml-1" /> עריכה</>)}
+          </Button>
+          <Button
             variant={showDeleted ? "default" : "outline"}
             onClick={() => setShowDeleted((v) => !v)}
             className="h-9 rounded-lg text-xs"
           >
             {showDeleted ? "הצג פעילים" : "פח המחזור"}
           </Button>
-          <Button variant="outline" onClick={() => setExpanded(new Set(all.map(c => c.id)))} className="h-9 rounded-lg text-xs">פתח הכל</Button>
-          <Button variant="outline" onClick={() => setExpanded(new Set())} className="h-9 rounded-lg text-xs">סגור</Button>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={() => setExpanded(new Set(all.map(c => c.id)))} className="h-8 rounded-lg text-xs flex-1">פתח הכל</Button>
+          <Button variant="ghost" onClick={() => setExpanded(new Set())} className="h-8 rounded-lg text-xs flex-1">סגור הכל</Button>
         </div>
       </div>
 
@@ -383,6 +387,44 @@ export default function AdminCatalog() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Actions sheet */}
+      <Sheet open={!!actionsFor} onOpenChange={(o) => { if (!o) setActionsFor(null); }}>
+        <SheetContent side="bottom" dir="rtl" className="rounded-t-2xl">
+          <SheetHeader className="text-right">
+            <SheetTitle className="flex items-center gap-2">
+              <span className="text-xl">{actionsFor?.icon || "•"}</span>
+              <span>{actionsFor?.name}</span>
+            </SheetTitle>
+          </SheetHeader>
+          {actionsFor && (
+            <div className="grid grid-cols-2 gap-2 pt-4 pb-2">
+              <Button variant="outline" className="h-12 justify-start gap-2" onClick={() => { const c = actionsFor; setActionsFor(null); setEditing(c); }}>
+                <Pencil className="h-4 w-4 text-[#0E6B5A]" /> ערוך פרטים
+              </Button>
+              {actionsFor.level < 4 && (
+                <Button variant="outline" className="h-12 justify-start gap-2" onClick={() => { const c = actionsFor; setActionsFor(null); setAddUnder(c); }}>
+                  <Plus className="h-4 w-4 text-[#0E6B5A]" /> הוסף תת-פריט
+                </Button>
+              )}
+              <Button variant="outline" className="h-12 justify-start gap-2" onClick={() => { const c = actionsFor; setActionsFor(null); setMoveNode(c); }}>
+                <MoveRight className="h-4 w-4" /> העבר להורה אחר
+              </Button>
+              <Button variant="outline" className="h-12 justify-start gap-2" onClick={() => { const c = actionsFor; setActionsFor(null); void toggleActive(c); }}>
+                {actionsFor.is_active
+                  ? (<><EyeOff className="h-4 w-4 text-orange-500" /> השבת</>)
+                  : (<><Eye className="h-4 w-4 text-[#0E6B5A]" /> הפעל</>)}
+              </Button>
+              <Button variant="outline" className="h-12 justify-start gap-2" onClick={() => { const c = actionsFor; setActionsFor(null); void openHistory(c); }}>
+                <History className="h-4 w-4" /> היסטוריה
+              </Button>
+              <Button variant="outline" className="h-12 justify-start gap-2 text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => { const c = actionsFor; setActionsFor(null); void softDelete(c); }}>
+                <Trash2 className="h-4 w-4" /> מחק
+              </Button>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
       <BottomNav role="admin" />
     </MobileShell>
