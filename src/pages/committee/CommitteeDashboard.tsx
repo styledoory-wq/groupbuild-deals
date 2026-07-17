@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp, formatILS } from "@/store/AppStore";
 import { BackHeader, LoadingState, EmptyState } from "@/components/ds";
 import { QuoteRequestSheet } from "@/components/committee/QuoteRequestSheet";
+import { isAdminEmail } from "@/lib/auth";
 
 interface Stats {
   project_id: string | null;
@@ -52,7 +53,8 @@ export default function CommitteeDashboard() {
     (async () => {
       const { data: roles } = await supabase
         .from("user_roles").select("role").eq("user_id", user.id);
-      const isC = (roles ?? []).some((r) => (r as { role: string }).role === "committee");
+      const rolesList = (roles ?? []).map((r) => (r as { role: string }).role);
+      const isC = rolesList.includes("committee") || rolesList.includes("admin") || isAdminEmail(user.email) || user.role === "admin";
       if (cancelled) return;
       setIsCommittee(isC);
       if (!isC) return;
