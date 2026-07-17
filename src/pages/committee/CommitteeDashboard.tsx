@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp, formatILS } from "@/store/AppStore";
 import { BackHeader, LoadingState, EmptyState } from "@/components/ds";
 import { QuoteRequestSheet } from "@/components/committee/QuoteRequestSheet";
+import { isAdminEmail } from "@/lib/auth";
 
 interface Stats {
   project_id: string | null;
