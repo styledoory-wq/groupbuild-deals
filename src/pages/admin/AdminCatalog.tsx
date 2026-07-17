@@ -81,6 +81,8 @@ export default function AdminCatalog() {
   const [historyFor, setHistoryFor] = useState<Cat | null>(null);
   const [historyRows, setHistoryRows] = useState<HistoryRow[]>([]);
   const [moveNode, setMoveNode] = useState<Cat | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [actionsFor, setActionsFor] = useState<Cat | null>(null);
 
   const load = async () => {
     setLoading(true);
