@@ -53,7 +53,8 @@ export default function CommitteeDashboard() {
     (async () => {
       const { data: roles } = await supabase
         .from("user_roles").select("role").eq("user_id", user.id);
-      const isC = (roles ?? []).some((r) => (r as { role: string }).role === "committee");
+      const rolesList = (roles ?? []).map((r) => (r as { role: string }).role);
+      const isC = rolesList.includes("committee") || rolesList.includes("admin") || isAdminEmail(user.email) || user.role === "admin";
       if (cancelled) return;
       setIsCommittee(isC);
       if (!isC) return;
