@@ -388,6 +388,44 @@ export default function AdminCatalog() {
         </DialogContent>
       </Dialog>
 
+      {/* Actions sheet */}
+      <Sheet open={!!actionsFor} onOpenChange={(o) => { if (!o) setActionsFor(null); }}>
+        <SheetContent side="bottom" dir="rtl" className="rounded-t-2xl">
+          <SheetHeader className="text-right">
+            <SheetTitle className="flex items-center gap-2">
+              <span className="text-xl">{actionsFor?.icon || "•"}</span>
+              <span>{actionsFor?.name}</span>
+            </SheetTitle>
+          </SheetHeader>
+          {actionsFor && (
+            <div className="grid grid-cols-2 gap-2 pt-4 pb-2">
+              <Button variant="outline" className="h-12 justify-start gap-2" onClick={() => { const c = actionsFor; setActionsFor(null); setEditing(c); }}>
+                <Pencil className="h-4 w-4 text-[#0E6B5A]" /> ערוך פרטים
+              </Button>
+              {actionsFor.level < 4 && (
+                <Button variant="outline" className="h-12 justify-start gap-2" onClick={() => { const c = actionsFor; setActionsFor(null); setAddUnder(c); }}>
+                  <Plus className="h-4 w-4 text-[#0E6B5A]" /> הוסף תת-פריט
+                </Button>
+              )}
+              <Button variant="outline" className="h-12 justify-start gap-2" onClick={() => { const c = actionsFor; setActionsFor(null); setMoveNode(c); }}>
+                <MoveRight className="h-4 w-4" /> העבר להורה אחר
+              </Button>
+              <Button variant="outline" className="h-12 justify-start gap-2" onClick={() => { const c = actionsFor; setActionsFor(null); void toggleActive(c); }}>
+                {actionsFor.is_active
+                  ? (<><EyeOff className="h-4 w-4 text-orange-500" /> השבת</>)
+                  : (<><Eye className="h-4 w-4 text-[#0E6B5A]" /> הפעל</>)}
+              </Button>
+              <Button variant="outline" className="h-12 justify-start gap-2" onClick={() => { const c = actionsFor; setActionsFor(null); void openHistory(c); }}>
+                <History className="h-4 w-4" /> היסטוריה
+              </Button>
+              <Button variant="outline" className="h-12 justify-start gap-2 text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => { const c = actionsFor; setActionsFor(null); void softDelete(c); }}>
+                <Trash2 className="h-4 w-4" /> מחק
+              </Button>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+
       <BottomNav role="admin" />
     </MobileShell>
   );
