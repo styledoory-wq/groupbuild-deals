@@ -1,8 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Wallet, Users, ListChecks, Tag, Sparkles } from "lucide-react";
+import { ChevronLeft, Wallet, Users, ListChecks, Tag, Sparkles, UserCircle2 } from "lucide-react";
 import { BrandMark } from "@/components/BrandLogo";
 import { Seo } from "@/components/seo/Seo";
+import { useApp } from "@/store/AppStore";
 import { usePublicDeals, type PublicDeal } from "@/hooks/usePublicDeals";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
@@ -11,10 +12,14 @@ import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 import { cn } from "@/lib/utils";
 
 /**
- * Residents Home — premium discovery entry for guests.
- * All content is live: featured deals are pulled from public, approved deals only.
+ * Residents Home — premium discovery entry point at "/".
+ * Always the residents build's initial screen, for guests AND signed-in
+ * residents alike. All content is live: featured deals are pulled from
+ * public, approved deals only. Personal actions (project, budget, deals,
+ * favorites, documents, personal area) are gated behind auth elsewhere.
  */
 export default function ResidentsHome() {
+  const { user } = useApp();
   const { data: deals, isLoading, isError, refetch } = usePublicDeals(4);
   const qc = useQueryClient();
   const ptr = usePullToRefresh(async () => {
@@ -44,12 +49,22 @@ export default function ResidentsHome() {
         {/* Header */}
         <header className="px-6 pt-2 pb-3 flex justify-between items-center animate-fade-up">
           <BrandMark className="h-10 w-auto" />
-          <Link
-            to="/auth/resident"
-            className="text-[#0E6B5A] font-semibold text-sm border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
-          >
-            התחברות
-          </Link>
+          {user ? (
+            <Link
+              to="/resident"
+              className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-sm border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
+            >
+              <UserCircle2 className="h-4 w-4" />
+              האזור האישי
+            </Link>
+          ) : (
+            <Link
+              to="/auth/resident"
+              className="text-[#0E6B5A] font-semibold text-sm border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
+            >
+              התחברות
+            </Link>
+          )}
         </header>
 
         {/* Hero + Search */}
@@ -134,10 +149,10 @@ export default function ResidentsHome() {
                 <Chip icon={<ListChecks className="h-3.5 w-3.5" />} label="משימות" />
               </div>
               <Link
-                to="/auth/resident?mode=signup"
+                to={user ? "/resident" : "/auth/resident?mode=signup"}
                 className="inline-flex items-center gap-1.5 bg-white text-[#0E6B5A] font-bold text-sm px-6 py-2.5 rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
               >
-                הצטרפות לקהילה
+                {user ? "לאזור האישי" : "הצטרפות לקהילה"}
                 <ChevronLeft className="h-4 w-4" />
               </Link>
             </div>

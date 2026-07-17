@@ -3,15 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Building2, Briefcase } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import { isAdminEmail } from "@/lib/auth";
-import { APP_MODE, IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
+import { APP_MODE, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 import { BrandMark } from "@/components/BrandLogo";
 import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 import { cn } from "@/lib/utils";
 import { Seo } from "@/components/seo/Seo";
-import ResidentsHome from "@/pages/marketing/ResidentsHome";
 
 /**
- * Public entry gateway at "/".
+ * Public entry gateway at "/". Only ever rendered for the web build and the
+ * suppliers build — the residents build routes "/" straight to
+ * ResidentsHome (see PublicRoutes.tsx) and never imports this module.
  * - Anonymous visitors: choose "אני דייר" or "אני ספק".
  * - Logged-in users: auto-redirect to their dashboard (same rules as before).
  */
@@ -19,9 +20,6 @@ export default function Gateway() {
   const navigate = useNavigate();
   const { user, authReady, needsOnboarding } = useApp();
 
-  // Residents native build: NEVER show the combined gateway. Always render
-  // the residents public home. Authed residents still get pushed to their
-  // dashboard from ResidentsHome / route guards elsewhere.
   useEffect(() => {
     if (!authReady) return;
     if (!user) {
@@ -30,16 +28,9 @@ export default function Gateway() {
     }
     if (isAdminEmail(user.email) && APP_MODE === "web") { navigate("/admin", { replace: true }); return; }
     if (needsOnboarding) { navigate("/onboarding", { replace: true }); return; }
-    if (IS_RESIDENTS_BUILD) { navigate("/resident", { replace: true }); return; }
     if (IS_SUPPLIERS_BUILD) { navigate("/supplier", { replace: true }); return; }
     navigate(user.role === "supplier" ? "/supplier" : "/resident", { replace: true });
   }, [authReady, user, needsOnboarding, navigate]);
-
-  // Residents build always shows the residents home (guest or while auth loads).
-  // Authed residents get redirected by the effect above.
-  if (IS_RESIDENTS_BUILD) {
-    return <ResidentsHome />;
-  }
 
   // Suppliers build redirects; while authed/loading show a blank surface.
   if (!authReady || user || IS_SUPPLIERS_BUILD) {
