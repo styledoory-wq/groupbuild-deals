@@ -66,7 +66,7 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
           <Link to="/" className="font-extrabold text-[#0E6B5A] text-[16px] tracking-tight">GroupBuild</Link>
           <div className="flex-1" />
           <Link
-            to="/auth/resident"
+            to="/auth/resident?mode=signin"
             className="text-[#0E6B5A] font-semibold text-[13px] border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
           >
             התחברות
