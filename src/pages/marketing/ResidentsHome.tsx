@@ -59,7 +59,7 @@ export default function ResidentsHome() {
             </Link>
           ) : (
             <Link
-              to="/auth/resident"
+              to="/auth/resident?mode=signin"
               className="text-[#0E6B5A] font-semibold text-sm border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
             >
               התחברות
