@@ -374,7 +374,7 @@ export default function CategoriesList() {
                 GroupBuild
               </button>
               <button
-                onClick={() => navigate(`/auth/resident?returnUrl=${encodeURIComponent(location.pathname + location.search)}`)}
+                onClick={() => navigate(`/auth/resident?mode=signin&returnUrl=${encodeURIComponent(location.pathname + location.search)}`)}
                 className="text-[#0E6B5A] font-semibold text-[12.5px] border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
               >
                 התחברות
