@@ -88,11 +88,10 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
   const relevantCategoryIds = useMemo(() => {
     if (activeCategoryId === "all") return [];
-    const ids = new Set([activeCategoryId]);
-    categories.forEach((c) => {
-      if (c.parentId === activeCategoryId) ids.add(c.id);
-      if (c.id === activeCategoryId && c.parentId) ids.add(c.parentId);
-    });
+    // Include the selected category and ONLY its descendants — never the parent or siblings.
+    // Previously we also added the parent (and then expanded ALL its children), which caused
+    // clicking a sub-category to show every supplier under the parent tree.
+    const ids = new Set<string>([activeCategoryId]);
     let changed = true;
     while (changed) {
       changed = false;
