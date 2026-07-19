@@ -1,353 +1,105 @@
-# שלב 2 — ארכיטקטורת Profiles Registry מלאה
+# Residents App — QA + Premium Polish Sprint
 
-## עיקרון מרכזי
-**רישום פרופילים אחד** (`app-profiles.config.ts`) הוא מקור האמת. ממנו נגזרים אוטומטית: capacitor config, env, scripts, iOS folder, icons, splash, deep links, push credentials, Firebase, privacy manifest, App Store metadata, feature flags. **הוספת אפליקציה חדשה = הוספת רשומה אחת. אפס שינוי בקוד עסקי.** תיקיית `ios/` הקיימת לא נגעת.
-
----
-
-## 1. סכימת Profile — כל הממדים הניתנים להתאמה
-
-`app-profiles.config.ts` בשורש:
-```ts
-export type AppProfile = {
-  // Identity
-  id: string;                    // "residents" | "suppliers" | "committee" | ...
-  appMode: string;               // VITE_APP_MODE (מסנן routes)
-  appId: string;                 // Bundle ID (iOS + Android)
-  appName: string;               // CFBundleDisplayName / Android app_name
-  shortName?: string;            // תצוגה מקוצרת (Home Screen)
-  version?: string;              // ברירת מחדל מ־package.json
-
-  // Visual assets (paths only — קבצים נטענים מאוחר)
-  resourcesDir: string;          // "resources/residents"
-  iconPath: string;              // `${resourcesDir}/icon.png` (1024x1024)
-  splashPath: string;            // `${resourcesDir}/splash.png` (2732x2732)
-  splashBackgroundColor: string; // "#F7F5F0"
-  themeColor: string;            // status bar / theme
-
-  // Build outputs
-  webDir: string;                // "dist-residents"
-  iosDir: string;                // "ios-residents"
-  androidDir: string;            // "android-residents"
-
-  // Deep links
-  scheme?: string;               // "groupbuild-residents"
-  universalLinks: {
-    host: string;                // "groupbuild.co.il"
-    paths: string[];             // ["/r/*"]
-  };
-
-  // Push notifications
-  push: {
-    variant: string;             // "residents" — מפתח למיפוי credentials
-    apnsSecretPrefix: string;    // "APNS_RESIDENTS" → APNS_RESIDENTS_KEY/KEY_ID/TEAM_ID
-    fcmConfigPath?: string;      // `${resourcesDir}/google-services.json`
-  };
-
-  // Apple config
-  apple: {
-    teamId?: string;             // "ABCD123456" (אופציונלי, מ־secret)
-    entitlementsPath: string;    // `${iosDir}/App/App/App.entitlements`
-    provisioningProfileName?: string;
-  };
-
-  // Privacy manifest
-  privacyManifest: {
-    collectedDataTypes: string[];  // NSPrivacyCollectedDataType keys
-    accessedAPITypes: Array<{ type: string; reasons: string[] }>;
-    trackingEnabled: boolean;
-  };
-
-  // App Store metadata (נטען לפי CI ל־App Store Connect)
-  storeMetadata: {
-    primaryCategory: string;     // "BUSINESS" | "LIFESTYLE"
-    secondaryCategory?: string;
-    keywords: string[];          // עד 100 תווים סה"כ
-    supportUrl: string;
-    marketingUrl?: string;
-    privacyPolicyUrl: string;
-    description: {               // רב־לשוני
-      he: string;
-      en?: string;
-    };
-    promotionalText?: { he: string; en?: string };
-    ageRating?: string;          // "4+"
-  };
-
-  // Feature flags — כיבוי/הפעלה של פיצ'רים לכל אפליקציה
-  features: {
-    residentDeals?: boolean;
-    supplierScan?: boolean;
-    budgetPlanner?: boolean;
-    committeeQuotes?: boolean;
-    voucherRedemption?: boolean;
-    payments?: boolean;
-    ai?: boolean;
-    // ...הרחבה עתידית
-  };
-};
-
-export const APP_PROFILES: AppProfile[] = [
-  {
-    id: "residents",
-    appMode: "residents",
-    appId: "il.co.groupbuild.residents",
-    appName: "GroupBuild",
-    shortName: "GroupBuild",
-    resourcesDir: "resources/residents",
-    iconPath: "resources/residents/icon.png",
-    splashPath: "resources/residents/splash.png",
-    splashBackgroundColor: "#F7F5F0",
-    themeColor: "#F8F6F1",
-    webDir: "dist-residents",
-    iosDir: "ios-residents",
-    androidDir: "android-residents",
-    scheme: "groupbuild-residents",
-    universalLinks: { host: "groupbuild.co.il", paths: ["/r/*", "/share/deal/*"] },
-    push: {
-      variant: "residents",
-      apnsSecretPrefix: "APNS_RESIDENTS",
-      fcmConfigPath: "resources/residents/google-services.json",
-    },
-    apple: { entitlementsPath: "ios-residents/App/App/App.entitlements" },
-    privacyManifest: {
-      collectedDataTypes: ["Email","PhoneNumber","Name","PreciseLocation","PhotosorVideos"],
-      accessedAPITypes: [
-        { type: "UserDefaults", reasons: ["CA92.1"] },
-        { type: "FileTimestamp", reasons: ["C617.1"] },
-      ],
-      trackingEnabled: false,
-    },
-    storeMetadata: {
-      primaryCategory: "LIFESTYLE",
-      keywords: ["שיפוץ","דירה","קבוצת רכישה","דיירים","בית"],
-      supportUrl: "https://groupbuild.co.il/support",
-      privacyPolicyUrl: "https://groupbuild.co.il/privacy",
-      description: { he: "GroupBuild — רכישה קבוצתית לדיירים ומשפצים." },
-      ageRating: "4+",
-    },
-    features: {
-      residentDeals: true, budgetPlanner: true, voucherRedemption: true,
-      supplierScan: false, committeeQuotes: false, payments: true, ai: true,
-    },
-  },
-  {
-    id: "suppliers",
-    appMode: "suppliers",
-    appId: "il.co.groupbuild.suppliers",
-    appName: "GroupBuild לעסקים",
-    shortName: "GB Business",
-    resourcesDir: "resources/suppliers",
-    iconPath: "resources/suppliers/icon.png",
-    splashPath: "resources/suppliers/splash.png",
-    splashBackgroundColor: "#0E6B5A",
-    themeColor: "#0E6B5A",
-    webDir: "dist-suppliers",
-    iosDir: "ios-suppliers",
-    androidDir: "android-suppliers",
-    scheme: "groupbuild-suppliers",
-    universalLinks: { host: "groupbuild.co.il", paths: ["/b/*"] },
-    push: {
-      variant: "suppliers",
-      apnsSecretPrefix: "APNS_SUPPLIERS",
-      fcmConfigPath: "resources/suppliers/google-services.json",
-    },
-    apple: { entitlementsPath: "ios-suppliers/App/App/App.entitlements" },
-    privacyManifest: {
-      collectedDataTypes: ["Email","PhoneNumber","Name","PhotosorVideos"],
-      accessedAPITypes: [
-        { type: "UserDefaults", reasons: ["CA92.1"] },
-        { type: "FileTimestamp", reasons: ["C617.1"] },
-      ],
-      trackingEnabled: false,
-    },
-    storeMetadata: {
-      primaryCategory: "BUSINESS",
-      keywords: ["ספקים","קבלנים","לידים","הצעות","עסקים"],
-      supportUrl: "https://groupbuild.co.il/support",
-      privacyPolicyUrl: "https://groupbuild.co.il/privacy",
-      description: { he: "GroupBuild לעסקים — ניהול לידים והצעות לספקים וקבלנים." },
-      ageRating: "4+",
-    },
-    features: {
-      supplierScan: true, ai: true, payments: true,
-      residentDeals: false, budgetPlanner: false,
-      voucherRedemption: false, committeeQuotes: false,
-    },
-  },
-  // עתיד: committee, contractor — רק להוסיף רשומה, אין שינוי קוד
-];
-```
+**Scope lock:** אפליקציית הדיירים בלבד. אפס נגיעה בקוד ספקים/אדמין או ב־Backend/סכמה.
+כל השינויים מאחורי `includesResidentRoutes` / `VITE_APP_MODE=residents` או ב־components/hooks שמשמשים רק את זרם הדיירים.
 
 ---
 
-## 2. Generators — קוד שיוצר את כל השאר
+## Phase 1 — Critical Bug Fixes (QA sweep)
 
-תיקיית `scripts/`:
+מטרה: לאפס באגים חוסמים לפני שנוגעים בעיצוב.
 
-| Script | תפקיד |
-|---|---|
-| `build-app.ts` | build+sync+open לפי `APP_PROFILE` |
-| `generate-capacitor-config.ts` | ייצוא config מתאים בזמן ריצה |
-| `generate-aasa.ts` | יוצר `public/.well-known/apple-app-site-association` מכל הפרופילים |
-| `generate-privacy-manifest.ts` | יוצר `PrivacyInfo.xcprivacy` לכל `iosDir` |
-| `generate-info-plist-overrides.ts` | מזרים `CFBundleDisplayName`, `CFBundleURLTypes`, entitlements |
-| `sync-assets.ts` | מעתיק `icon.png`+`splash.png` ל־`Assets.xcassets` של הפרופיל בלבד |
-| `sync-firebase.ts` | מעתיק `google-services.json` ל־`androidDir` של הפרופיל בלבד |
-| `generate-store-metadata.ts` | מפיק מבנה fastlane `metadata/<lang>/` לכל פרופיל |
-| `generate-env.ts` | יוצר `.env.<id>` עם `VITE_APP_MODE`+`VITE_APP_PROFILE_ID` |
+1. **Safe Area בכל מסך iPhone**
+   - לעבור על `MobileShell`, `GuestShell`, `ResidentShell`, headers של כל מסכי `/resident/*` + מסכי guest.
+   - לוודא `padding-top: env(safe-area-inset-top)` יעיל בפועל (כרגע יש `pt-[env(safe-area-inset-top)]` ב־MobileShell — לבדוק כפילויות ו־headers שדורסים אותו עם `pt-0`).
+   - להוסיף safe area גם ל־sticky headers, modals, sheets, ולמסך ההתחברות.
 
-הפרופיל **לעולם לא נוגע** בתיקיות של פרופיל אחר — כל sync פועל רק על `iosDir`/`androidDir`/`webDir` של הפרופיל הפעיל.
+2. **קטגוריה → ספקים של אותה קטגוריה בלבד**
+   - `CategoriesList` / `CategoryStages` / `CategorySuppliers`: לוודא ש־query מסנן לפי `categoryId` (כולל צאצאים אם צריך) ולא מחזיר את כל הספקים. לתקן route params + hook.
 
----
+3. **כפתור "התחברות" → Sign In, לא Sign Up**
+   - ב־`MobileShell` (הדסקטופ) וב־Gateway/GuestShell: לינק ל־`/auth/resident?mode=signin` (או ה־equivalent) במקום default signup.
+   - לוודא ש־`Auth.tsx` מכבד את ה־mode ופותח את הטאב הנכון.
 
-## 3. Capacitor config דינמי
+4. **Navigation audit**
+   - לעבור כפתור־כפתור ב־BottomNav, GuestBottomNav, כל CTA במסכי בית/קטגוריה/עסקה/פרופיל.
+   - לוודא `returnUrl` נשמר בכל gated action ומחזיר לאותו מקום אחרי login.
+   - Back button (native + web) — בדיקה בכל flow.
 
-`capacitor.config.ts` בשורש, קורא מהרישום:
-```ts
-const id = process.env.APP_PROFILE ?? "residents";
-const p = APP_PROFILES.find(x => x.id === id)!;
-export default {
-  appId: p.appId,
-  appName: p.appName,
-  webDir: p.webDir,
-  ios: { path: p.iosDir, scheme: p.appName },
-  android: { path: p.androidDir },
-  plugins: {
-    SplashScreen: { backgroundColor: p.splashBackgroundColor, ... },
-    PushNotifications: { presentationOptions: ["badge","sound","alert"] },
-  },
-};
-```
+5. **Auth flows**
+   - הרשמה, התחברות (email + Google), logout, session persistence אחרי reload, reset password.
+   - `SignupPromptSheet` — לוודא שהוא נסגר נכון ומעביר ל־auth עם returnUrl.
 
-**התיקייה `ios/` הקיימת** מטופלת דרך `capacitor.config.dev.ts` נפרד להוט־רילוד ב־Lovable — לא נגעים בה.
+6. **Search / Filters / Share**
+   - `GlobalSearchBar`, `Search.tsx`, סינוני קטגוריה/אזור — לתקן overflow ו־empty results.
+   - Share של Deal (`SharedDeal`) — לוודא meta tags וקישור עובד.
+
+7. **Layout hygiene**
+   - Overflow-x horizontal בכל מסך, gutters אחידים, scroll ב־sheets/modals, keyboard-open behavior.
+
+**Deliverable:** דוח QA קצר + כל התיקונים בקומיטים לוגיים.
 
 ---
 
-## 4. Feature Flags בקוד — hook יחיד
+## Phase 2 — Unified Design System
 
-`src/config/features.ts`:
-```ts
-import { APP_PROFILES } from "../../app-profiles.config";
-const id = import.meta.env.VITE_APP_PROFILE_ID ?? "web";
-const profile = APP_PROFILES.find(p => p.id === id);
-export const FEATURES = profile?.features ?? {}; // web = הכל דלוק
-export const isFeatureEnabled = (k: string) => FEATURES[k] !== false;
-```
-שימוש בקוד קיים ללא שינוי לוגיקה:
-```tsx
-{isFeatureEnabled("budgetPlanner") && <BudgetPlannerLink />}
-```
-בשלב 2 **לא נוסיף בדיקות פיצ'ר לעמודים קיימים** — רק תשתית. הוספת feature flag לעמוד = שינוי נקודתי בהמשך.
+מרכיב הכל ל־tokens מרכזיים ב־`src/index.css` + `tailwind.config.ts` + `src/lib/designSystem.ts`. כל מסכי הדיירים ישתמשו רק ב־tokens.
+
+- **Radius:** `--radius-sm/md/lg/xl` + `--radius-card`, `--radius-chip`, `--radius-button`.
+- **Shadows:** להשתמש רק ב־`--shadow-soft/card/elevated/floating` הקיימים. להסיר `boxShadow` ידניים.
+- **Spacing scale:** להשתמש רק ב־Tailwind scale + `--pad-x`. לאסור magic numbers ב־resident components.
+- **Typography:** להצמיד לכל resident screen את `text-fs-*` הקיים; להגדיר `H1/H2/H3/Body/Caption` primitives ב־`components/ds/`.
+- **Buttons/Chips:** לעבור על `Button` variants ו־chip components לוודא סט אחיד (primary, secondary, ghost, danger + sizes sm/md/lg).
+- **Icons:** רק `lucide-react`, stroke=1.9, size 20/24 סטנדרט.
+- **Colors:** להסיר כל `text-white`/`bg-[#...]` ב־`src/pages/resident/**` ו־guest shells → semantic tokens.
+- **Empty / Loading / Skeleton:** `EmptyState` הקיים + `SkeletonCard`, `SkeletonList`, `SkeletonDetail` חדשים ב־`components/ds/`.
+- **Motion:** `MOTION` tokens כבר קיימים — להשתמש דרך `transition-[all]` + duration/ease אחיד; להוסיף `fade-up`, `scale-in` על כל page mount.
 
 ---
 
-## 5. Push credentials — Supabase secrets לפי variant
+## Phase 3 — Premium Polish (screen-by-screen)
 
-Edge function `send-push` קיימת. תעודכן לקבל `app_variant` מ־`push_tokens` ולבחור credentials:
-```
-APNS_<VARIANT>_KEY, APNS_<VARIANT>_KEY_ID, APNS_<VARIANT>_TEAM_ID
-FCM_<VARIANT>_SERVICE_ACCOUNT_JSON
-```
-Migration עתידית (לא בשלב זה): הוספת עמודה `app_variant` ל־`device_tokens`.
+עוברים על כל מסך דיירים לפי הרשימה, ומיישמים: white space, hierarchy, כרטיסים עם עומק, טיפוגרפיה נקייה, יחס תמונות אחיד (16:10 לכרטיס, 4:5 להירו), micro-interactions, haptics (`Haptics.impact` מ־Capacitor במסכי native).
 
----
+מסכים: `ResidentsHome`, `CategoriesList`, `CategoryStages`, `CategorySuppliers`, `Search`, `SupplierProfile`, `DealDetail`, `DealsList`, `ResidentDashboard`, `ResidentProfile`/`Edit`, `Favorites`, `MyDeals/Vouchers/Documents/Offers/Demands/Deposits`, `Notifications`, `Auth`, `Onboarding`, `Welcome`, `Gateway`, `SharedDeal`, `NotFound`.
 
-## 6. Scripts ב־package.json
-
-```json
-"app:build":  "tsx scripts/build-app.ts",
-"app:sync":   "APP_PROFILE=$APP_PROFILE tsx scripts/build-app.ts --sync",
-"app:open":   "tsx scripts/build-app.ts --open",
-"app:add-ios":"tsx scripts/build-app.ts --add-ios",
-"app:add-android":"tsx scripts/build-app.ts --add-android",
-"app:aasa":   "tsx scripts/generate-aasa.ts",
-"app:store-metadata":"tsx scripts/generate-store-metadata.ts"
-```
-שימוש:
-```bash
-APP_PROFILE=residents npm run app:sync
-APP_PROFILE=suppliers npm run app:sync
-```
+לכל מסך: לפני/אחרי screenshot ב־Playwright (390×844) + הערות שינויים.
 
 ---
 
-## 7. CI/CD (GitHub Actions) — matrix מהרישום
+## Phase 4 — UX Review (First-time user lens)
 
-```yaml
-strategy:
-  matrix:
-    profile: ${{ fromJson(needs.list-profiles.outputs.ids) }}
-steps:
-  - run: APP_PROFILE=${{ matrix.profile }} npm run app:sync
-  - run: APP_PROFILE=${{ matrix.profile }} npm run app:store-metadata
-  - uses: apple-actions/upload-testflight-build@v1
-    with:
-      app-path: ios-${{ matrix.profile }}/App/build/App.ipa
-      api-key-id: ${{ secrets[format('ASC_KEY_ID_{0}', matrix.profile)] }}
-      api-private-key: ${{ secrets[format('ASC_PKEY_{0}', matrix.profile)] }}
-```
-`list-profiles` job קורא את `APP_PROFILES` ומחזיר את ה־ids → matrix דינמי. **הוספת פרופיל ב־registry = מופיע ב־CI אוטומטית.**
+לעבור על אותה רשימת מסכים ולוודא לכל אחד:
+- תוך 3 שניות ברור מה עושים במסך?
+- Primary action בולט וייחודי?
+- אין רעש/כפילויות/עומס?
+- תחושה בגובה Apple/Airbnb/Linear/Stripe?
+
+לתעד ממצאים ולתקן במקום.
 
 ---
 
-## 8. הרחבה עתידית — 3 צעדים בלבד
+## Phase 5 — WOW Factor
 
-1. הוספת רשומה ל־`APP_PROFILES` עם כל השדות.
-2. הנחת icon+splash תחת `resources/<id>/`.
-3. הרצה: `APP_PROFILE=<id> npm run app:add-ios` (חד־פעמית, מקומית).
-
-**אין נגיעה בקוד עסקי, אין נגיעה ב־Supabase, אין נגיעה ב־builds אחרים.**
-
----
-
-## 9. מבנה קבצים סופי
-
-```text
-app-profiles.config.ts           ← מקור אמת יחיד
-capacitor.config.ts              ← דינמי
-capacitor.config.dev.ts          ← Lovable hot-reload בלבד
-src/config/
-  appMode.ts                     ← קיים
-  features.ts                    ← NEW
-scripts/
-  build-app.ts
-  generate-capacitor-config.ts
-  generate-aasa.ts
-  generate-privacy-manifest.ts
-  generate-info-plist-overrides.ts
-  sync-assets.ts
-  sync-firebase.ts
-  generate-store-metadata.ts
-  generate-env.ts
-resources/
-  residents/{README.md}          ← icon/splash/fcm יתווספו בהמשך
-  suppliers/{README.md}
-ios/                             ← קיים, לא נגעים (dev/legacy)
-ios-residents/                   ← ייווצר מקומית ע"י המשתמש
-ios-suppliers/                   ← ייווצר מקומית ע"י המשתמש
-.env, .env.residents, .env.suppliers
-```
+- Page transitions ב־`RouteTransition` — fade+slide עדין.
+- Skeleton מדויק שמחקה את ה־layout האמיתי.
+- Empty states עם איור/אייקון גדול + CTA.
+- כרטיסי Deal/Supplier עם gradient overlay + hover/press states.
+- Pull-to-refresh (`usePullToRefresh` קיים) בכל רשימה רלוונטית.
+- Haptics עדין ב־CTA ראשיים ב־native.
+- Splash → Home crossfade חלק.
 
 ---
 
-## מה יבוצע בשלב 2 (אחרי אישור)
+## Technical Guardrails
 
-1. `app-profiles.config.ts` עם residents + suppliers מלאים.
-2. `capacitor.config.ts` דינמי + שמירת `capacitor.config.dev.ts` להוט־רילוד הקיים.
-3. כל 9 ה־generators תחת `scripts/`.
-4. `src/config/features.ts`.
-5. עדכון `package.json` בסקריפטים גנריים.
-6. `.env.residents`, `.env.suppliers`.
-7. תיקיות `resources/residents`, `resources/suppliers` עם README.
-8. הוראות מדויקות למשתמש להרצת `app:add-ios` פעמיים.
+- לא נוגעים ב־`src/pages/supplier/**`, `src/routes/SupplierRoutes.tsx`, `SupplierRoutes` gating, אדמין, Backend, migrations, edge functions.
+- כל resident screen עובר build + Playwright smoke (390×844 + iPhone 14 Pro viewport).
+- אין hardcoded colors ב־`src/pages/resident/**` בסוף Phase 2.
+- Bundle size לא גדל ביותר מ־5%.
 
-## מה לא יבוצע
-- לא ניגע ב־`ios/` הקיימת.
-- לא ניצור icons/splash — רק structure.
-- לא נוסיף `isFeatureEnabled(...)` בעמודים קיימים (רק תשתית).
-- לא נשנה schema של Supabase.
-- לא נשנה קוד עסקי, ראוטים או UI.
-- לא נריץ `cap add ios` מ־Lovable — אין Xcode בסביבה.
+## Execution Order
 
-לאשר לבצע?
+Phase 1 → אישור → Phase 2 → אישור → Phases 3+4+5 מסך־מסך (batched, ~5 מסכים לכל סבב) → QA סופי → Ready לגרסה יציבה.
+
+אאשר איתך אחרי Phase 1 לפני שממשיך.

@@ -88,11 +88,10 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
   const relevantCategoryIds = useMemo(() => {
     if (activeCategoryId === "all") return [];
-    const ids = new Set([activeCategoryId]);
-    categories.forEach((c) => {
-      if (c.parentId === activeCategoryId) ids.add(c.id);
-      if (c.id === activeCategoryId && c.parentId) ids.add(c.parentId);
-    });
+    // Include the selected category and ONLY its descendants — never the parent or siblings.
+    // Previously we also added the parent (and then expanded ALL its children), which caused
+    // clicking a sub-category to show every supplier under the parent tree.
+    const ids = new Set<string>([activeCategoryId]);
     let changed = true;
     while (changed) {
       changed = false;
@@ -287,9 +286,9 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
   return (
     <MobileShell>
       <div className="bg-slate-50 min-h-screen pb-24" dir="rtl">
-        <div className="px-4 pt-3 max-w-2xl mx-auto">
-          {/* Sticky Header */}
-          <header className="sticky top-0 z-20 bg-slate-50/90 backdrop-blur-md pb-3 pt-2 -mx-4 px-4">
+        <div className="px-4 max-w-2xl mx-auto" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}>
+          {/* Sticky Header — offset for iPhone Dynamic Island / status bar */}
+          <header className="sticky z-20 bg-slate-50/90 backdrop-blur-md pb-3 pt-2 -mx-4 px-4" style={{ top: "env(safe-area-inset-top)" }}>
             <button
               onClick={() => navigate(-1)}
               className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-emerald-700 transition mb-2"

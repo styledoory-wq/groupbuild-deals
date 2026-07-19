@@ -36,10 +36,11 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
     lockedRole ?? (IS_RESIDENTS_BUILD ? "resident" : IS_SUPPLIERS_BUILD ? "supplier" : undefined);
   const [role, setRole] = useState<Exclude<Role, "admin">>(effectiveLockedRole ?? "resident");
   const modeParam = searchParams.get("mode");
+  // Default to sign-in. Sign-up is only shown when explicitly requested via ?mode=signup —
+  // otherwise the "התחברות" button was surprisingly opening the registration form.
   const initialMode: Mode =
-    modeParam === "signin" ? "signin"
-    : modeParam === "signup" ? "signup"
-    : (lockedRole ? "signup" : "signin");
+    modeParam === "signup" ? "signup"
+    : "signin";
   const [mode, setMode] = useState<Mode>(initialMode);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
