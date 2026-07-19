@@ -26,7 +26,10 @@ export function BackHeader({ title, subtitle, right, onBack }: BackHeaderProps) 
     else navigate(-1);
   };
   return (
-    <header className="sticky top-0 z-10 bg-white border-b border-[#EDEAE3]">
+    <header
+      className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-[#EDEAE3]"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
       <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
         {onBack !== false ? (
           <button
