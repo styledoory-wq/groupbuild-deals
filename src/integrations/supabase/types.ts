@@ -2731,6 +2731,92 @@ export type Database = {
         }
         Relationships: []
       }
+      suppliers_public_profiles: {
+        Row: {
+          approval_status: string
+          business_name: string
+          catalog_url: string | null
+          categories: string[]
+          created_at: string
+          description: string | null
+          facebook_url: string | null
+          instagram_url: string | null
+          is_active: boolean
+          logo_url: string | null
+          offers_products: boolean
+          offers_services: boolean
+          phone: string | null
+          serves_all_country: boolean
+          service_areas: string[]
+          short_description: string | null
+          slug: string | null
+          supplier_id: string
+          supplier_kind: string | null
+          updated_at: string
+          user_id: string | null
+          website_url: string | null
+          whatsapp_url: string | null
+        }
+        Insert: {
+          approval_status: string
+          business_name: string
+          catalog_url?: string | null
+          categories?: string[]
+          created_at?: string
+          description?: string | null
+          facebook_url?: string | null
+          instagram_url?: string | null
+          is_active: boolean
+          logo_url?: string | null
+          offers_products?: boolean
+          offers_services?: boolean
+          phone?: string | null
+          serves_all_country?: boolean
+          service_areas?: string[]
+          short_description?: string | null
+          slug?: string | null
+          supplier_id: string
+          supplier_kind?: string | null
+          updated_at?: string
+          user_id?: string | null
+          website_url?: string | null
+          whatsapp_url?: string | null
+        }
+        Update: {
+          approval_status?: string
+          business_name?: string
+          catalog_url?: string | null
+          categories?: string[]
+          created_at?: string
+          description?: string | null
+          facebook_url?: string | null
+          instagram_url?: string | null
+          is_active?: boolean
+          logo_url?: string | null
+          offers_products?: boolean
+          offers_services?: boolean
+          phone?: string | null
+          serves_all_country?: boolean
+          service_areas?: string[]
+          short_description?: string | null
+          slug?: string | null
+          supplier_id?: string
+          supplier_kind?: string | null
+          updated_at?: string
+          user_id?: string | null
+          website_url?: string | null
+          whatsapp_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_public_profiles_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: true
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppressed_emails: {
         Row: {
           created_at: string
