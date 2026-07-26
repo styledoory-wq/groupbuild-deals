@@ -8,6 +8,7 @@ import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { supabase } from "@/integrations/supabase/client";
+import stagePlanningImg from "@/assets/stage-planning.jpg";
 
 interface DbSupplier {
   id: string;
@@ -303,14 +304,16 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
 
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex items-center gap-3 min-w-0">
-                {activeCategory?.icon && (
-                  <div
-                    className="h-11 w-11 rounded-[14px] bg-white border border-white/90 flex items-center justify-center text-xl shrink-0"
-                    style={{ boxShadow: "var(--shadow-elevated)" }}
-                  >
-                    {activeCategory.icon}
-                  </div>
-                )}
+                <div
+                  className="h-11 w-11 rounded-[14px] overflow-hidden bg-white border border-white/90 shrink-0"
+                  style={{ boxShadow: "var(--shadow-elevated)" }}
+                >
+                  <img
+                    src={stagePlanningImg}
+                    alt=""
+                    className="h-full w-full object-cover object-center"
+                  />
+                </div>
                 <div className="min-w-0">
                   <h1 className="text-[20px] leading-tight font-bold text-slate-900 truncate">
                     {activeCategory?.name ?? "ספקים"}
@@ -329,16 +332,23 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                   <Link
                     key={c.id}
                     to={`/resident/categories/${c.id}`}
-                    className="relative aspect-square flex flex-col items-center justify-center gap-1.5 rounded-[18px] border border-white/90 px-1.5 py-2 active:scale-[0.97] hover:-translate-y-0.5 transition-all duration-300"
+                    className="relative aspect-square flex flex-col overflow-hidden rounded-[18px] border border-white/90 active:scale-[0.97] hover:-translate-y-0.5 transition-all duration-300"
                     style={{
                       background: "rgba(255,255,255,0.96)",
                       boxShadow: "var(--shadow-elevated)",
                     }}
                   >
-                    <div className="grid place-items-center w-10 h-10 rounded-[14px] text-[22px] bg-slate-50">
-                      <span aria-hidden>{c.icon || "📁"}</span>
+                    <div className="flex-1 min-h-0 w-full px-2 pt-2">
+                      <div className="h-full w-full rounded-[12px] overflow-hidden bg-slate-50">
+                        <img
+                          src={stagePlanningImg}
+                          alt=""
+                          loading="lazy"
+                          className="h-full w-full object-cover object-center"
+                        />
+                      </div>
                     </div>
-                    <span className="block text-[11px] font-extrabold text-slate-900 leading-tight text-center px-0.5 line-clamp-2">
+                    <span className="block text-[11px] font-extrabold text-slate-900 leading-tight text-center px-1.5 py-2 line-clamp-2">
                       {c.name}
                     </span>
                   </Link>
