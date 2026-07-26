@@ -694,8 +694,48 @@ export default function SupplierOnboarding() {
                       autoFocus
                     />
                   </Field>
-                  <p className="text-[12px] text-muted-foreground text-left" dir="ltr">
-                    {shortDescription.length}/400
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[12px] text-muted-foreground" dir="ltr">
+                      {shortDescription.length}/400
+                    </p>
+                    <div className="flex items-center gap-2">
+                      {shortDescription.trim().length >= 5 ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={aiLoading !== null}
+                          onClick={() => runAiDescription("improve")}
+                          className="h-9 rounded-xl text-[13px] font-bold border-[#0E6B5A]/30 text-[#0E6B5A] hover:bg-[#0E6B5A]/5"
+                        >
+                          {aiLoading === "improve" ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin ml-1.5" />
+                          ) : (
+                            <Sparkles className="h-3.5 w-3.5 ml-1.5" />
+                          )}
+                          שפר עם AI
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={aiLoading !== null || !businessName.trim()}
+                          onClick={() => runAiDescription("generate")}
+                          className="h-9 rounded-xl text-[13px] font-bold border-[#0E6B5A]/30 text-[#0E6B5A] hover:bg-[#0E6B5A]/5"
+                        >
+                          {aiLoading === "generate" ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin ml-1.5" />
+                          ) : (
+                            <Sparkles className="h-3.5 w-3.5 ml-1.5" />
+                          )}
+                          כתוב לי עם AI
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    ה-AI מסתמך על שם העסק והתחומים שסימנתם. תמיד אפשר לערוך את הטקסט לאחר מכן.
                   </p>
                 </>
               )}
