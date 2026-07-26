@@ -358,79 +358,69 @@ export default function CategoriesList() {
             paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)",
           }}
         >
-          <CategoryHeroSearch value={query} onChange={setQuery} />
+          <div className="relative">
+            <CategoryHeroSearch value={query} onChange={setQuery} />
 
-          {!query.trim() && (
-            <div className="mb-7 flex items-start justify-between gap-1.5 px-0.5">
-              {PROJECT_TYPES.map((def) => (
-                <ProjectTypeCircle
-                  key={def.id}
-                  def={def}
-                  selected={def.id === selectedProject}
-                  onSelect={() => handleProjectChange(def.id)}
-                />
-              ))}
-            </div>
-          )}
-
-          {query.trim() ? (
-            <section>
-              <div className="mb-3.5 flex items-center justify-between">
-                <h2 className="m-0 text-[17px] font-extrabold text-slate-900">
-                  תוצאות חיפוש{catalogHits.length ? ` (${catalogHits.length})` : ""}
-                </h2>
+            {query.trim() && (
+              <div
+                className="absolute inset-x-3 z-40 -mt-3 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_40px_-16px_rgba(15,23,42,0.28)]"
+                style={{ maxHeight: 320 }}
+              >
+                {searching ? (
+                  <div className="p-4 text-center text-[13px] text-slate-500">מחפש…</div>
+                ) : catalogHits.length === 0 ? (
+                  <div className="p-4 text-center text-[13px] text-slate-500">לא נמצאו תוצאות</div>
+                ) : (
+                  <ul className="max-h-[320px] overflow-y-auto overscroll-contain py-1">
+                    {catalogHits.slice(0, 6).map((h) => {
+                      const HitIcon = iconForCategory(h.id, h.name);
+                      return (
+                        <li key={h.id}>
+                          <Link
+                            to={`/resident/categories/${h.id}`}
+                            className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 active:bg-slate-100"
+                          >
+                            <span
+                              className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
+                              style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+                            >
+                              <HitIcon size={18} strokeWidth={1.8} />
+                            </span>
+                            <span className="min-w-0 flex-1 text-right">
+                              <span className="block truncate text-[14px] font-bold text-slate-800">
+                                {h.name}
+                              </span>
+                              {h.path && (
+                                <span className="block truncate text-[11px] text-slate-500">
+                                  {h.path}
+                                </span>
+                              )}
+                            </span>
+                            <ChevronLeft className="h-4 w-4 shrink-0 text-slate-400" strokeWidth={2.2} />
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
-              {searching ? (
-                <div className="space-y-2.5">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-16 animate-pulse rounded-2xl border border-gray-100 bg-white shadow-sm"
-                    />
-                  ))}
-                </div>
-              ) : catalogHits.length === 0 ? (
-                <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
-                  <Search size={28} />
-                  <strong className="text-slate-800">לא נמצאו תוצאות</strong>
-                  <span className="text-[12.5px]">נסה מונח חיפוש אחר</span>
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  {catalogHits.map((h) => {
-                    const HitIcon = iconForCategory(h.id, h.name);
-                    return (
-                      <Link
-                        key={h.id}
-                        to={`/resident/categories/${h.id}`}
-                        className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm active:scale-[0.99] transition-transform"
-                      >
-                        <span
-                          className="grid h-11 w-11 shrink-0 place-items-center rounded-full"
-                          style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
-                        >
-                          <HitIcon size={22} strokeWidth={1.7} />
-                        </span>
-                        <div className="min-w-0 flex-1 text-right">
-                          <p className="truncate text-[14px] font-bold text-slate-800">{h.name}</p>
-                          {h.path && (
-                            <p className="mt-0.5 truncate text-[11px] text-slate-500" dir="rtl">
-                              {h.path}
-                            </p>
-                          )}
-                          <p className="mt-0.5 text-[11px] font-medium text-slate-400">
-                            {h.supplier_count > 0 ? `${h.supplier_count} ספקים` : "בקרוב"}
-                          </p>
-                        </div>
-                        <ChevronLeft className="h-4 w-4 shrink-0 text-slate-400" strokeWidth={2.2} />
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          ) : (
+            )}
+          </div>
+
+          <div className="mb-7 flex items-start justify-between gap-1.5 px-0.5">
+            {PROJECT_TYPES.map((def) => (
+              <ProjectTypeCircle
+                key={def.id}
+                def={def}
+                selected={def.id === selectedProject}
+                onSelect={() => handleProjectChange(def.id)}
+              />
+            ))}
+          </div>
+
+          {(
             <section>
+
               <div className="mb-3.5 flex items-center justify-between">
                 <h2 className="m-0 text-[17px] font-extrabold text-slate-900">קטגוריות מובילות</h2>
                 <button
