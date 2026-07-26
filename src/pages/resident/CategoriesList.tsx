@@ -5,10 +5,13 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import {
   Bell,
+  Building2,
+  Check,
   ChevronLeft,
+  Home as HomeIcon,
+  PaintRoller,
   Search,
   UserRound,
-  Check,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +22,7 @@ import {
   illustrationForProjectType,
 } from "@/lib/stageIllustrations";
 import { Seo } from "@/components/seo/Seo";
+import finishesImg from "@/assets/stages/stage-finishes.jpg";
 
 const STORAGE_KEY = "gb:projectType";
 
@@ -27,46 +31,42 @@ type UiProjectType = Extract<ProjectType, "new" | "reno" | "building">;
 type ProjectTypeDef = {
   id: UiProjectType;
   title: string;
+  subtitle: string;
   img: string;
-  accent: "green" | "orange" | "blue";
   color: string;
-  bgSelected: string;
-  borderSelected: string;
+  Icon: typeof HomeIcon;
 };
 
 const PROJECT_TYPES: ProjectTypeDef[] = [
   {
     id: "new",
     title: "בנייה חדשה",
+    subtitle: "הכל לבניית בית חדש",
     img: illustrationForProjectType("new"),
-    accent: "green",
-    color: "#16845b",
-    bgSelected: "linear-gradient(180deg,#EBF7EF,#FFFFFF)",
-    borderSelected: "rgba(22,132,91,0.55)",
+    color: "#0E6B5A",
+    Icon: HomeIcon,
   },
   {
     id: "reno",
     title: "שיפוץ",
+    subtitle: "שדרוג ושיפוץ הבית",
     img: illustrationForProjectType("reno"),
-    accent: "orange",
-    color: "#d88919",
-    bgSelected: "linear-gradient(180deg,#FDF3E4,#FFFFFF)",
-    borderSelected: "rgba(216,137,25,0.55)",
+    color: "#0E6B5A",
+    Icon: PaintRoller,
   },
   {
     id: "building",
-    title: "בניין משותף\nועד בית",
+    title: "בניין משותף",
+    subtitle: "ועד בית ותחזוקה",
     img: illustrationForProjectType("building"),
-    accent: "blue",
-    color: "#34558e",
-    bgSelected: "linear-gradient(180deg,#EAF0FB,#FFFFFF)",
-    borderSelected: "rgba(52,85,142,0.55)",
+    color: "#0E6B5A",
+    Icon: Building2,
   },
 ];
 
 /* -------------------- Sub components -------------------- */
 
-function ProjectTypeCard({
+function ProjectTypeCircle({
   def,
   selected,
   onSelect,
@@ -75,47 +75,62 @@ function ProjectTypeCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const Icon = def.Icon;
   return (
     <button
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="relative aspect-square flex flex-col overflow-hidden rounded-[18px] transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5"
-      style={{
-        background: selected ? def.bgSelected : "rgba(255,255,255,0.96)",
-        border: `1px solid ${selected ? def.borderSelected : "rgba(255,255,255,0.9)"}`,
-        boxShadow: selected
-          ? `0 16px 36px -18px ${def.color}55, 0 6px 14px -8px rgba(31,40,35,0.10)`
-          : "var(--shadow-elevated)",
-      }}
+      className="flex flex-col items-center gap-2 active:scale-[0.97] transition-transform"
     >
-      {selected && (
+      <span className="relative block w-[104px] h-[104px]">
         <span
-          className="absolute top-1.5 right-1.5 z-10 grid place-items-center rounded-full text-white"
+          className="absolute inset-0 rounded-full overflow-hidden bg-[#F4F1EA]"
           style={{
-            width: 18,
-            height: 18,
-            background: def.color,
-            boxShadow: `0 4px 10px ${def.color}44`,
+            boxShadow: selected
+              ? `0 0 0 3px ${def.color}, 0 14px 28px -16px ${def.color}66`
+              : "var(--shadow-elevated)",
           }}
         >
-          <Check size={11} strokeWidth={3} />
-        </span>
-      )}
-      <div className="flex-1 min-h-0 w-full px-2 pt-2">
-        <div className="h-full w-full rounded-[12px] overflow-hidden bg-white/50">
           <img
             src={def.img}
             alt=""
             loading="lazy"
             className="h-full w-full object-cover object-center"
           />
-        </div>
-      </div>
-      <span className="flex flex-col items-center font-extrabold text-[11px] leading-tight text-[#1f2937] px-1.5 py-2">
-        {def.title.split("\n").map((line) => (
-          <span key={line}>{line}</span>
-        ))}
+        </span>
+        {selected && (
+          <span
+            className="absolute -top-0.5 -right-0.5 z-10 grid place-items-center rounded-full text-white"
+            style={{
+              width: 24,
+              height: 24,
+              background: def.color,
+              boxShadow: `0 4px 10px ${def.color}55`,
+            }}
+          >
+            <Check size={13} strokeWidth={3} />
+          </span>
+        )}
+        <span
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 z-10 grid place-items-center rounded-full bg-white"
+          style={{
+            width: 28,
+            height: 28,
+            boxShadow: "var(--shadow-soft)",
+            color: def.color,
+          }}
+        >
+          <Icon size={14} strokeWidth={2.2} />
+        </span>
+      </span>
+      <span className="text-center px-0.5 mt-1">
+        <span className="block text-[13px] font-extrabold text-[#1A1A1A] leading-tight">
+          {def.title}
+        </span>
+        <span className="block text-[10.5px] text-[#6B7280] leading-tight mt-0.5">
+          {def.subtitle}
+        </span>
       </span>
     </button>
   );
@@ -129,7 +144,10 @@ function CategorySearch({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="flex items-center gap-3 h-[52px] px-4 rounded-[18px] bg-white/90 border border-[rgba(225,229,226,0.9)] shadow-sm text-[#667085]">
+    <label
+      className="flex items-center gap-3 h-[52px] px-4 rounded-full bg-white border border-[#ECEEF2] text-[#667085]"
+      style={{ boxShadow: "var(--shadow-elevated)" }}
+    >
       <Search size={20} strokeWidth={1.9} />
       <input
         value={value}
@@ -159,33 +177,22 @@ function StageGridCard({
     <button
       type="button"
       onClick={onClick}
-      className="relative aspect-square flex flex-col overflow-hidden rounded-[18px] transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5"
-      style={{
-        background: "rgba(255,255,255,0.96)",
-        border: "1px solid rgba(255,255,255,0.9)",
-        boxShadow: "var(--shadow-elevated)",
-      }}
+      className="aspect-square flex flex-col items-center justify-center gap-1.5 rounded-[20px] bg-white px-2 py-3 active:scale-[0.97] transition-transform"
+      style={{ boxShadow: "var(--shadow-elevated)" }}
     >
-      {soon && (
-        <span
-          className="absolute top-1 right-1 z-10 text-[8px] font-bold px-1 py-0.5 rounded-md"
-          style={{ background: "#F1EFE8", color: "#8b8574" }}
-        >
-          בקרוב
-        </span>
-      )}
-      <div className="flex-1 min-h-0 w-full px-2 pt-2">
-        <div className="h-full w-full rounded-[12px] overflow-hidden bg-[#F4F1EA]">
-          <img
-            src={img}
-            alt=""
-            loading="lazy"
-            className="h-full w-full object-cover object-center"
-          />
-        </div>
+      <div className="w-[52px] h-[52px] rounded-[14px] overflow-hidden bg-[#F4F7F5] shrink-0">
+        <img
+          src={img}
+          alt=""
+          loading="lazy"
+          className="h-full w-full object-cover object-center"
+        />
       </div>
-      <span className="block text-[11px] font-extrabold text-[#1e2530] leading-tight text-center px-1.5 py-2 line-clamp-2">
+      <span className="block text-[12px] font-extrabold text-[#1A1A1A] leading-tight text-center line-clamp-2 px-0.5">
         {title}
+      </span>
+      <span className="block text-[10.5px] font-semibold text-[#0E6B5A] leading-none">
+        {soon ? "בקרוב" : `${serviceCount} ספקים`}
       </span>
     </button>
   );
@@ -223,7 +230,6 @@ export default function CategoriesList() {
   const [catalogHits, setCatalogHits] = useState<CatalogHit[]>([]);
   const [searching, setSearching] = useState(false);
 
-  // Persist selection
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, selectedProject);
@@ -232,10 +238,13 @@ export default function CategoriesList() {
     }
   }, [selectedProject]);
 
-  // Smart search across entire catalog tree
   useEffect(() => {
     const term = query.trim();
-    if (!term) { setCatalogHits([]); setSearching(false); return; }
+    if (!term) {
+      setCatalogHits([]);
+      setSearching(false);
+      return;
+    }
     let cancelled = false;
     setSearching(true);
     const t = setTimeout(async () => {
@@ -244,10 +253,12 @@ export default function CategoriesList() {
       setCatalogHits((data ?? []) as CatalogHit[]);
       setSearching(false);
     }, 220);
-    return () => { cancelled = true; clearTimeout(t); };
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
   }, [query]);
 
-  // Stages per project type (grouped from category_project_stages)
   const [stagesByType, setStagesByType] = useState<Record<string, StageItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -256,7 +267,6 @@ export default function CategoriesList() {
     setRefreshTick((n) => n + 1);
     await new Promise((r) => setTimeout(r, 400));
   });
-
 
   useEffect(() => {
     let cancelled = false;
@@ -282,9 +292,8 @@ export default function CategoriesList() {
           if (!acc[t][s]) acc[t][s] = { count: 0, minOrder: r.display_order };
           acc[t][s].count += 1;
           if (r.display_order < acc[t][s].minOrder) acc[t][s].minOrder = r.display_order;
-        }
+        },
       );
-      // Use canonical STAGE_ORDER as source of truth; merge counts from DB.
       const out: Record<string, StageItem[]> = {};
       (Object.keys(STAGE_ORDER) as ProjectType[]).forEach((t) => {
         const counts = acc[t] ?? {};
@@ -322,236 +331,233 @@ export default function CategoriesList() {
 
   return (
     <>
-    <PullToRefreshIndicator {...ptr} />
-    <Seo
-      title="קטגוריות שירות לבית חדש — ספקים ובעלי מקצוע | GroupBuild"
-      description="מצאו ספקים מומלצים לפי תחום ושלב בפרויקט: תכנון, שלד, מערכות, גמרים, חוץ ופיתוח. ללא הרשמה."
-      path="/categories"
-    />
-    <div
-      dir="rtl"
-      className="min-h-screen min-h-[100dvh] w-full"
-      style={{
-        background:
-          "radial-gradient(circle at 15% 0%, rgba(238,203,153,0.18), transparent 35%)," +
-          "radial-gradient(circle at 90% 25%, rgba(167,204,185,0.16), transparent 36%)," +
-          "#f3f5f2",
-        fontFamily: "'Heebo', 'Inter', system-ui, sans-serif",
-        color: "#172033",
-      }}
-    >
+      <PullToRefreshIndicator {...ptr} />
+      <Seo
+        title="קטגוריות שירות לבית חדש — ספקים ובעלי מקצוע | GroupBuild"
+        description="מצאו ספקים מומלצים לפי תחום ושלב בפרויקט: תכנון, שלד, מערכות, גמרים, חוץ ופיתוח. ללא הרשמה."
+        path="/categories"
+      />
       <div
-        className="mx-auto w-full max-w-[var(--app-max-w)] px-4 pt-[calc(env(safe-area-inset-top)+14px)]"
+        dir="rtl"
+        className="min-h-screen min-h-[100dvh] w-full bg-[#F7F8F6]"
         style={{
-          paddingBottom:
-            "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)",
+          fontFamily: "'Heebo', 'Inter', system-ui, sans-serif",
+          color: "#172033",
         }}
       >
-        {/* Top bar: guests see login CTA; authed users see personal chrome. */}
-        <div className="flex items-center justify-between mb-4">
-          {user ? (
-            <>
-              <button
-                aria-label="פרופיל"
-                onClick={() => navigate("/resident/profile")}
-                className="grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
-              >
-                <UserRound size={20} strokeWidth={2} className="text-[#172033]" />
-              </button>
-              <button
-                aria-label="התראות"
-                onClick={() => navigate("/resident/notifications")}
-                className="relative grid place-items-center w-[40px] h-[40px] rounded-full bg-white/85 border border-white/70 shadow-sm active:scale-95 transition-transform"
-              >
-                <Bell size={20} strokeWidth={1.9} className="text-[#172033]" />
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-1">
-                  3
-                </span>
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => navigate("/")}
-                className="font-extrabold text-[#0E6B5A] text-[15px] tracking-tight"
-                aria-label="דף הבית"
-              >
-                GroupBuild
-              </button>
-              <button
-                onClick={() => navigate(`/auth/resident?mode=signin&returnUrl=${encodeURIComponent(location.pathname + location.search)}`)}
-                className="text-[#0E6B5A] font-semibold text-[12.5px] border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
-              >
-                התחברות
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Hero copy */}
-        <div className="text-center mb-4 px-2">
-          <h1 className="text-[26px] font-extrabold text-[#1A1A1A] leading-tight">
-            מה הפרויקט שלך?
-          </h1>
-          <p className="text-[13.5px] text-gray-500 leading-relaxed mt-1.5">
-            בחר את סוג הפרויקט כדי למצוא
-            <br />
-            את השירותים המתאימים לך
-          </p>
-        </div>
-
-        {/* Search */}
-        <div className="mb-4">
-          <CategorySearch value={query} onChange={setQuery} />
-        </div>
-
-        {/* Project types (floating squares) */}
-        <div className="grid grid-cols-3 gap-2.5 mb-6">
-          {PROJECT_TYPES.map((def) => (
-            <ProjectTypeCard
-              key={def.id}
-              def={def}
-              selected={def.id === selectedProject}
-              onSelect={() => handleProjectChange(def.id)}
-            />
-          ))}
-        </div>
-
-        {/* When searching → show smart catalog results across the whole tree */}
-        {query.trim() ? (
-          <section>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: currentDef.color }} />
-              <h2 className="text-[15.5px] font-extrabold text-[#1A1A1A] m-0">
-                תוצאות חיפוש{catalogHits.length ? ` (${catalogHits.length})` : ""}
-              </h2>
-            </div>
-            {searching ? (
-              <div className="space-y-2.5">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-[64px] rounded-2xl bg-white/70 border border-white/60 animate-pulse" />
-                ))}
-              </div>
-            ) : catalogHits.length === 0 ? (
-              <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
-                <Search size={28} />
-                <strong className="text-[#26313c]">לא נמצאו תוצאות</strong>
-                <span className="text-[12.5px]">נסה מונח חיפוש אחר</span>
-              </div>
+        <div
+          className="mx-auto w-full max-w-[var(--app-max-w)] px-4 pt-[calc(env(safe-area-inset-top)+14px)]"
+          style={{
+            paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)",
+          }}
+        >
+          {/* Top bar */}
+          <div className="flex items-center justify-between mb-3">
+            {user ? (
+              <>
+                <button
+                  aria-label="פרופיל"
+                  onClick={() => navigate("/resident/profile")}
+                  className="grid place-items-center w-[40px] h-[40px] rounded-full bg-white border border-[#ECEEF2] shadow-sm active:scale-95 transition-transform"
+                >
+                  <UserRound size={20} strokeWidth={2} className="text-[#172033]" />
+                </button>
+                <button
+                  aria-label="התראות"
+                  onClick={() => navigate("/resident/notifications")}
+                  className="relative grid place-items-center w-[40px] h-[40px] rounded-full bg-white border border-[#ECEEF2] shadow-sm active:scale-95 transition-transform"
+                >
+                  <Bell size={20} strokeWidth={1.9} className="text-[#172033]" />
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-1">
+                    3
+                  </span>
+                </button>
+              </>
             ) : (
-              <div className="space-y-2.5">
-                {catalogHits.map((h) => (
-                  <Link
-                    key={h.id}
-                    to={`/resident/categories/${h.id}`}
-                    className="flex items-center gap-3 bg-white rounded-[18px] p-3 border border-white/70 shadow-sm active:scale-[0.99] transition-transform"
-                  >
-                    <span className="h-11 w-11 rounded-2xl overflow-hidden bg-[#0E6B5A]/10 shrink-0">
-                      <img
-                        src={illustrationForCategory(h.id, h.name)}
-                        alt=""
-                        className="h-full w-full object-cover object-center"
-                      />
-                    </span>
-                    <div className="flex-1 min-w-0 text-right">
-                      <p className="font-bold text-[14px] text-[#1F2937] truncate">{h.name}</p>
-                      {h.path && (
-                        <p className="text-[11px] text-[#6B7280] truncate mt-0.5" dir="rtl">{h.path}</p>
-                      )}
-                      <p className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">
-                        {h.supplier_count > 0 ? `${h.supplier_count} ספקים` : "בקרוב"}
-                      </p>
-                    </div>
-                    <ChevronLeft className="h-4 w-4 text-[#6B7280] shrink-0" strokeWidth={2.2} />
-                  </Link>
-                ))}
-              </div>
+              <>
+                <button
+                  onClick={() => navigate("/")}
+                  className="font-extrabold text-[#0E6B5A] text-[15px] tracking-tight"
+                  aria-label="דף הבית"
+                >
+                  GroupBuild
+                </button>
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/auth/resident?mode=signin&returnUrl=${encodeURIComponent(location.pathname + location.search)}`,
+                    )
+                  }
+                  className="text-[#0E6B5A] font-semibold text-[12.5px] border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
+                >
+                  התחברות
+                </button>
+              </>
             )}
-          </section>
-        ) : (
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <span
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ background: currentDef.color }}
-            />
-            <h2 className="text-[15.5px] font-extrabold text-[#1A1A1A] m-0">
-              שלבי {currentDef.title.split("\n")[0]}
-            </h2>
           </div>
 
-          {loading ? (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="aspect-square rounded-[18px] bg-white/70 border border-white/60 animate-pulse"
-                  style={{ boxShadow: "var(--shadow-soft)" }}
-                />
-              ))}
-            </div>
-          ) : errorMsg ? (
-            <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
-              <strong className="text-[#26313c]">{errorMsg}</strong>
-              <button
-                onClick={() => window.location.reload()}
-                className="text-[12px] font-bold text-[#0E6B5A] underline"
-              >
-                רענן
-              </button>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
-              <Search size={28} />
-              <strong className="text-[#26313c]">בקרוב נוסיף שלבים למסלול זה</strong>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-              {filtered.map((s) => (
-                <StageGridCard
-                  key={s.key}
-                  title={s.title}
-                  img={illustrationForStage(s.key, selectedProject)}
-                  serviceCount={s.serviceCount}
-                  onClick={() => openStage(s.key)}
+          {/* Search */}
+          <div className="mb-5">
+            <CategorySearch value={query} onChange={setQuery} />
+          </div>
+
+          {/* Circular project types */}
+          {!query.trim() && (
+            <div className="flex items-start justify-between gap-2 mb-7 px-1">
+              {PROJECT_TYPES.map((def) => (
+                <ProjectTypeCircle
+                  key={def.id}
+                  def={def}
+                  selected={def.id === selectedProject}
+                  onSelect={() => handleProjectChange(def.id)}
                 />
               ))}
             </div>
           )}
-        </section>
-        )}
 
+          {/* Search results OR stage squares */}
+          {query.trim() ? (
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-[16px] font-extrabold text-[#1A1A1A] m-0">
+                  תוצאות חיפוש{catalogHits.length ? ` (${catalogHits.length})` : ""}
+                </h2>
+              </div>
+              {searching ? (
+                <div className="space-y-2.5">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-[64px] rounded-2xl bg-white border border-[#ECEEF2] animate-pulse"
+                    />
+                  ))}
+                </div>
+              ) : catalogHits.length === 0 ? (
+                <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
+                  <Search size={28} />
+                  <strong className="text-[#26313c]">לא נמצאו תוצאות</strong>
+                  <span className="text-[12.5px]">נסה מונח חיפוש אחר</span>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {catalogHits.map((h) => (
+                    <Link
+                      key={h.id}
+                      to={`/resident/categories/${h.id}`}
+                      className="flex items-center gap-3 bg-white rounded-[18px] p-3 border border-[#ECEEF2] active:scale-[0.99] transition-transform"
+                      style={{ boxShadow: "var(--shadow-soft)" }}
+                    >
+                      <span className="h-11 w-11 rounded-2xl overflow-hidden bg-[#0E6B5A]/10 shrink-0">
+                        <img
+                          src={illustrationForCategory(h.id, h.name)}
+                          alt=""
+                          className="h-full w-full object-cover object-center"
+                        />
+                      </span>
+                      <div className="flex-1 min-w-0 text-right">
+                        <p className="font-bold text-[14px] text-[#1F2937] truncate">{h.name}</p>
+                        {h.path && (
+                          <p className="text-[11px] text-[#6B7280] truncate mt-0.5" dir="rtl">
+                            {h.path}
+                          </p>
+                        )}
+                        <p className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">
+                          {h.supplier_count > 0 ? `${h.supplier_count} ספקים` : "בקרוב"}
+                        </p>
+                      </div>
+                      <ChevronLeft className="h-4 w-4 text-[#6B7280] shrink-0" strokeWidth={2.2} />
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </section>
+          ) : (
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-[16px] font-extrabold text-[#1A1A1A] m-0">
+                  קטגוריות מובילות
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const first = filtered[0];
+                    if (first) openStage(first.key);
+                  }}
+                  className="text-[12.5px] font-bold text-[#0E6B5A] inline-flex items-center gap-0.5"
+                >
+                  הצג הכל
+                  <ChevronLeft size={14} strokeWidth={2.5} />
+                </button>
+              </div>
 
-        {/* Promo */}
-        {!query && !loading && !errorMsg && filtered.length > 0 && (
-          <aside
-            className="mt-6 rounded-[22px] p-4 border flex items-center gap-3 overflow-hidden"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(239,249,243,0.96), rgba(250,247,239,0.92))",
-              borderColor: "rgba(221,234,226,0.95)",
-            }}
-          >
-            <div
-              className="grid place-items-center w-[38px] h-[38px] rounded-[14px] font-black shrink-0"
-              style={{ color: "#16845b", border: "2px solid #16845b" }}
+              {loading ? (
+                <div className="grid grid-cols-3 gap-3">
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="aspect-square rounded-[20px] bg-white animate-pulse"
+                      style={{ boxShadow: "var(--shadow-soft)" }}
+                    />
+                  ))}
+                </div>
+              ) : errorMsg ? (
+                <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
+                  <strong className="text-[#26313c]">{errorMsg}</strong>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="text-[12px] font-bold text-[#0E6B5A] underline"
+                  >
+                    רענן
+                  </button>
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
+                  <Search size={28} />
+                  <strong className="text-[#26313c]">בקרוב נוסיף שלבים למסלול זה</strong>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  {filtered.map((s) => (
+                    <StageGridCard
+                      key={s.key}
+                      title={s.title}
+                      img={illustrationForStage(s.key, selectedProject)}
+                      serviceCount={s.serviceCount}
+                      onClick={() => openStage(s.key)}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Promo banner */}
+          {!query && !loading && !errorMsg && filtered.length > 0 && (
+            <aside
+              className="mt-6 rounded-[22px] overflow-hidden flex items-stretch"
+              style={{ boxShadow: "var(--shadow-elevated)" }}
             >
-              ✓
-            </div>
-            <div className="flex-1 min-w-0 text-right">
-              <strong className="block text-[14px] text-[#147652] mb-1">
-                כל שירות מצטרפים – המחיר יורד
-              </strong>
-              <span className="block text-[12px] text-[#52605a] leading-snug">
-                הצטרף לקבוצת רכישה וחסוך אלפי שקלים
-              </span>
-            </div>
-          </aside>
-        )}
-      </div>
+              <div className="flex-1 min-w-0 bg-white p-4 flex flex-col justify-center text-right">
+                <strong className="block text-[14px] text-[#0E6B5A] mb-1 leading-snug">
+                  ספקים מאומתים ואמינים
+                </strong>
+                <span className="block text-[12px] text-[#52605a] leading-snug">
+                  כל שירות מצטרפים – המחיר יורד לכולם
+                </span>
+              </div>
+              <div className="w-[118px] shrink-0">
+                <img
+                  src={finishesImg}
+                  alt=""
+                  className="h-full w-full object-cover object-center min-h-[88px]"
+                />
+              </div>
+            </aside>
+          )}
+        </div>
 
-      <BottomNav role="resident" />
-    </div>
+        <BottomNav role="resident" />
+      </div>
     </>
   );
 }
