@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Phone, Share2, Navigation, Star, ArrowRight, Tag, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { BackHeader, LoadingState, ErrorState } from "@/components/ds";
+import { BackHeader, LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SmartImg } from "@/components/ui/SmartImg";
@@ -19,6 +19,13 @@ import { EditableField } from "@/components/admin/EditableField";
 import { trackSupplierEvent } from "@/lib/analytics";
 import { useGuestGate } from "@/hooks/useGuestGate";
 import { ShareBusinessSheet } from "@/components/public/ShareBusinessSheet";
+
+const BRAND = "#0E6B5A";
+
+const sectionLabel = "text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3";
+const floatCard = "rounded-2xl border border-gray-100 bg-white shadow-sm";
+const softBtn =
+  "flex rounded-2xl bg-white border border-gray-100 shadow-sm text-slate-800 text-xs font-bold items-center justify-center gap-1.5 active:scale-[0.97] transition-transform";
 
 interface DbSupplier {
   id: string;
@@ -331,15 +338,19 @@ export default function SupplierProfile() {
     );
   }
 
-  const links: { label: string; href: string; Icon: React.ComponentType<{ className?: string }>; event: "website" | "whatsapp" | "share" }[] = [];
-  if (supplier.website_url) links.push({ label: "לאתר הספק", href: supplier.website_url, Icon: Globe, event: "website" });
-  if (whatsappHref) links.push({ label: "וואטסאפ", href: whatsappHref, Icon: WhatsappIcon, event: "whatsapp" });
+  // Secondary channels only — WhatsApp stays in the primary bottom CTA.
+  const links: { label: string; href: string; Icon: React.ComponentType<{ className?: string }>; event: "website" | "share" }[] = [];
+  if (supplier.website_url) links.push({ label: "אתר", href: supplier.website_url, Icon: Globe, event: "website" });
   if (supplier.instagram_url) links.push({ label: "אינסטגרם", href: supplier.instagram_url, Icon: Instagram, event: "share" });
   if (supplier.facebook_url) links.push({ label: "פייסבוק", href: supplier.facebook_url, Icon: Facebook, event: "share" });
 
   const canonical = `https://groupbuild.co.il/supplier/${routeSlug ?? supplier.id}`;
   const seoTitle = `${supplier.business_name} — ספק ב־GroupBuild`;
   const seoDesc = (supplier.short_description || supplier.description || `${supplier.business_name} — צור קשר, גלריה, ביקורות ומבצעים ב־GroupBuild`).slice(0, 160);
+
+  const isSvc = Boolean(supplier.offers_services) || supplier.supplier_kind === "service";
+  const isProd = Boolean(supplier.offers_products) || supplier.supplier_kind === "product";
+  const kindLabel = isSvc && isProd ? "שירות + מוצרים" : isSvc ? "בעל מקצוע" : isProd ? "ספק מוצרים" : null;
 
   return (
     <MobileShell>
@@ -363,268 +374,256 @@ export default function SupplierProfile() {
           areaServed: supplier.serves_all_country ? "IL" : (serviceAreas.length ? serviceAreas : undefined),
         })}</script>
       </Helmet>
-      {/* Hero */}
-      <div className="px-5 pt-4 pb-4 relative">
-        <BackHeader title={supplier.business_name} subtitle="פרופיל ספק" />
-        <div className="gb-card p-4 flex items-center gap-4">
-          <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" className="shadow-[0_3px_8px_-2px_rgba(10,31,61,0.10)]" />
-          <div className="flex-1 min-w-0">
-            <EditableField
-              table="suppliers"
-              id={supplier.id}
-              field="business_name"
-              value={supplier.business_name}
-              as="h1"
-              className="block text-[20px] font-extrabold text-[#1F2937] tracking-tight leading-tight mb-1.5 line-clamp-2"
-            />
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-[#6B7280] [&>b]:text-[#1F2937] [&>span]:text-[#6B7280]" />
-              {(() => {
-                const isSvc = Boolean(supplier.offers_services) || supplier.supplier_kind === "service";
-                const isProd = Boolean(supplier.offers_products) || supplier.supplier_kind === "product";
-                if (isSvc && isProd) return (
-                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#F4F6FA] text-[#1F2937]">
-                    שירות + מוצרים
-                  </span>
-                );
-                if (isSvc) return (
-                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#EAF2FF] text-[#2F6BFF]">
-                    בעל מקצוע
-                  </span>
-                );
-                if (isProd) return (
-                  <span className="text-fs-xs font-extrabold px-2 py-0.5 rounded-full bg-[#E8F7EC] text-[#2EA85A]">
-                    ספק מוצרים
-                  </span>
-                );
-                return null;
-              })()}
-            </div>
-          </div>
-        </div>
-      </div>
 
-
-      <div className="px-5 relative z-10 space-y-4 pb-32">
-        {/* Public contact strip — always visible, no auth required */}
-        <div className="gb-card p-3">
-          <div className="grid grid-cols-3 gap-2">
-            {supplier.phone ? (
-              <a
-                href={`tel:${supplier.phone}`}
-                onClick={() => { void trackSupplierEvent(supplier.id, "call"); }}
-                className="h-14 rounded-[16px] bg-[#0E6B5A] text-white text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(14,107,90,0.5)] active:scale-[0.97] transition-transform"
-                aria-label={`התקשר ל־${supplier.business_name}`}
-              >
-                <Phone className="h-4 w-4" />
-                <span dir="ltr" className="text-[11px] tracking-wide">{supplier.phone}</span>
-              </a>
-            ) : (
-              <div className="h-14 rounded-[16px] bg-[#F7F5F0] text-[11px] text-[#9CA3AF] flex items-center justify-center">אין טלפון</div>
-            )}
-            <button
-              onClick={handleNavigate}
-              className="h-14 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
-            >
-              <Navigation className="h-4 w-4 text-[#0E6B5A]" />
-              ניווט
-            </button>
-            <button
-              onClick={handleShare}
-              className="h-14 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
-            >
-              <Share2 className="h-4 w-4 text-[#0E6B5A]" />
-              שתף
-            </button>
-          </div>
-        </div>
-
-        {/* Quick links */}
-        {links.length > 0 && (
-          <div className="gb-card p-3">
-            <div className="grid grid-cols-2 gap-2">
-              {links.map((l) => (
-                <a
-                  key={l.label}
-                  href={l.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  onClick={() => { void trackSupplierEvent(supplier.id, l.event); }}
-                  className="h-11 rounded-[16px] bg-white text-[#1F2937] text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] active:scale-[0.97] transition-transform"
-                >
-                  <l.Icon className="h-4 w-4 text-[#0E6B5A]" />
-                  {l.label}
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Catalogs */}
-        <SupplierCatalogsList supplierId={supplier.id} legacyUrl={supplier.catalog_url} />
-
-        {/* Description */}
-        {(supplier.description || true) && (() => {
-          const desc = supplier.description ?? "";
-          const isLong = desc.length > 220;
-          const shown = !isLong || showFullDesc ? desc : desc.slice(0, 220).trimEnd() + "…";
-          return (
-            <section className="gb-card p-4">
-              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">על העסק</h2>
+      <div className="bg-slate-50 min-h-screen" dir="rtl">
+        {/* Hero identity */}
+        <div className="px-4 pt-4 pb-3" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}>
+          <BackHeader title={supplier.business_name} subtitle="פרופיל ספק" />
+          <div className={`${floatCard} p-4 flex items-center gap-4`}>
+            <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" />
+            <div className="flex-1 min-w-0">
               <EditableField
                 table="suppliers"
                 id={supplier.id}
-                field="description"
-                value={desc}
-                type="textarea"
-                as="p"
-                className="text-sm text-foreground whitespace-pre-line leading-relaxed block"
-                placeholder="—"
-                render={() => shown || "—"}
+                field="business_name"
+                value={supplier.business_name}
+                as="h1"
+                className="block text-[20px] font-extrabold text-slate-900 tracking-tight leading-tight mb-1.5 line-clamp-2"
               />
-              {isLong && (
-                <button
-                  onClick={() => setShowFullDesc((v) => !v)}
-                  className="mt-2 text-xs font-bold text-[#0E6B5A] active:opacity-70 transition-opacity"
-                >
-                  {showFullDesc ? "הצג פחות" : "הצג עוד"}
-                </button>
-              )}
-            </section>
-          );
-        })()}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-slate-500 [&>b]:text-slate-900 [&>span]:text-slate-500" />
+                {kindLabel && (
+                  <span
+                    className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                    style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+                  >
+                    {kindLabel}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
-        {/* Gallery — below business details */}
-        {gallery.length > 0 && (
-          <section className="gb-card p-4">
-            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">גלריית עבודות</h2>
+        <div className="px-4 relative z-10 space-y-3 pb-36">
+          {/* Public contact strip */}
+          <div className={`${floatCard} p-3`}>
             <div className="grid grid-cols-3 gap-2">
-              {gallery.slice(0, 6).map((g) => (
-                <button
-                  key={g.id}
-                  onClick={() => setLightbox(g.image_url)}
-                  className="aspect-square rounded-[14px] overflow-hidden shadow-[0_2px_10px_-4px_rgba(10,31,61,0.10)] transition-transform active:scale-[0.98]"
+              {supplier.phone ? (
+                <a
+                  href={`tel:${supplier.phone}`}
+                  onClick={() => { void trackSupplierEvent(supplier.id, "call"); }}
+                  className="h-14 rounded-2xl text-white text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-sm active:scale-[0.97] transition-transform"
+                  style={{ background: BRAND }}
+                  aria-label={`התקשר ל־${supplier.business_name}`}
                 >
-                  <SmartImg src={g.image_url} size="card" alt={g.caption ?? "עבודה"} className="h-full w-full object-cover" />
-                </button>
-              ))}
+                  <Phone className="h-4 w-4" />
+                  <span dir="ltr" className="text-[11px] tracking-wide">{supplier.phone}</span>
+                </a>
+              ) : (
+                <div className="h-14 rounded-2xl bg-slate-50 text-[11px] text-slate-400 flex items-center justify-center border border-gray-100">
+                  אין טלפון
+                </div>
+              )}
+              <button type="button" onClick={handleNavigate} className={`h-14 flex-col gap-0.5 ${softBtn}`}>
+                <Navigation className="h-4 w-4" style={{ color: BRAND }} />
+                ניווט
+              </button>
+              <button type="button" onClick={handleShare} className={`h-14 flex-col gap-0.5 ${softBtn}`}>
+                <Share2 className="h-4 w-4" style={{ color: BRAND }} />
+                שתף
+              </button>
             </div>
-          </section>
-        )}
+          </div>
 
-        {/* Categories */}
-        {supplierCategories.length > 0 && (
-          <section className="gb-card p-4">
-            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> תחומים
-            </h2>
-            <div className="flex flex-wrap gap-1.5">
-              {supplierCategories.map((c) => (
-                <span
-                  key={c.id}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-extrabold bg-white text-[#1F2937] shadow-[0_1px_3px_rgba(10,31,61,0.06)]"
-                >
-                  <span>{c.icon}</span> {c.name}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Service area */}
-        <section className="gb-card p-4">
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5 text-[#0E6B5A]" /> אזורי שירות
-          </h2>
-          {supplier.serves_all_country ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-extrabold bg-[#F4F6FA] text-[#1F2937] shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
-              נותן שירות בכל הארץ
-            </span>
-          ) : serviceAreas.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {serviceAreas.map((name) => (
-                <span
-                  key={name}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-extrabold bg-[#EAF2FF] text-[#2F6BFF] shadow-[0_1px_3px_rgba(10,31,61,0.06)]"
-                >
-                  {name}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">לא הוגדרו אזורי שירות — צרו קשר לפרטים</p>
-          )}
-        </section>
-
-        {/* Active offers from this supplier */}
-        <section ref={dealsRef} className="gb-card p-4 scroll-mt-20">
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> ההצעות הפעילות
-            {deals.length > 0 && <span className="text-[#6B7280] font-medium">· {deals.length}</span>}
-          </h2>
-          {deals.length === 0 ? (
-            <p className="text-sm text-muted-foreground">אין עדיין הצעות פעילות מהספק הזה.</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-2.5">
-              {deals.map((d) => {
-                const cat = categories.find((c) => c.id === d.category_id);
-                return <CompactDealCard key={d.id} deal={d} categoryIcon={cat?.icon ?? null} categoryName={cat?.name ?? null} />;
-              })}
-            </div>
-          )}
-        </section>
-
-
-        {/* Reviews */}
-        <section className="gb-card p-4">
-          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <Star className="h-3.5 w-3.5 text-[#0E6B5A]" /> ביקורות אחרונות
-          </h2>
-          {reviews.length === 0 ? (
-            <p className="text-sm text-muted-foreground">אין עדיין ביקורות לספק זה.</p>
-          ) : (
-            <>
-              <div className="space-y-3">
-                {(showAllReviews ? reviews : reviews.slice(0, 3)).map((r) => (
-                  <div key={r.id} className="rounded-[16px] bg-white p-3 shadow-[0_1px_3px_rgba(10,31,61,0.06)]">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-bold text-[#1F2937]">{r.reviewer_name || "דייר"}</span>
-                      <div className="flex items-center gap-0.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-3.5 w-3.5 ${i < r.rating ? "fill-[#F5B600] text-[#F5B600]" : "text-[#E5E7EB]"}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    {r.comment && (
-                      <p className="text-sm text-[#4B5563] leading-relaxed whitespace-pre-line">{r.comment}</p>
-                    )}
-                    <div className="text-fs-xs text-muted-foreground mt-1.5">
-                      {new Date(r.created_at).toLocaleDateString("he-IL")}
-                    </div>
-                  </div>
+          {/* Secondary links — only channels that exist */}
+          {links.length > 0 && (
+            <section className={`${floatCard} p-3`}>
+              <h2 className={sectionLabel}>קישורים</h2>
+              <div className="grid grid-cols-2 gap-2">
+                {links.map((l) => (
+                  <a
+                    key={l.label}
+                    href={l.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    onClick={() => { void trackSupplierEvent(supplier.id, l.event); }}
+                    className={`h-11 ${softBtn}`}
+                  >
+                    <l.Icon className="h-4 w-4" style={{ color: BRAND }} />
+                    {l.label}
+                  </a>
                 ))}
               </div>
-              {reviews.length > 3 && (
-                <button
-                  onClick={() => setShowAllReviews((v) => !v)}
-                  className="mt-3 w-full h-10 rounded-[14px] text-sm font-bold text-[#0E6B5A] bg-white shadow-[0_1px_3px_rgba(10,31,61,0.06)] active:scale-[0.98] transition-transform"
-                >
-                  {showAllReviews ? "הצג פחות" : `הצג עוד (${reviews.length - 3})`}
-                </button>
-              )}
-            </>
+            </section>
           )}
-        </section>
+
+          <SupplierCatalogsList supplierId={supplier.id} legacyUrl={supplier.catalog_url} />
+
+          {/* Description */}
+          {(supplier.description || true) && (() => {
+            const desc = supplier.description ?? "";
+            const isLong = desc.length > 220;
+            const shown = !isLong || showFullDesc ? desc : desc.slice(0, 220).trimEnd() + "…";
+            return (
+              <section className={`${floatCard} p-4`}>
+                <h2 className={sectionLabel}>על העסק</h2>
+                <EditableField
+                  table="suppliers"
+                  id={supplier.id}
+                  field="description"
+                  value={desc}
+                  type="textarea"
+                  as="p"
+                  className="text-sm text-slate-700 whitespace-pre-line leading-relaxed block"
+                  placeholder="—"
+                  render={() => shown || "—"}
+                />
+                {isLong && (
+                  <button
+                    type="button"
+                    onClick={() => setShowFullDesc((v) => !v)}
+                    className="mt-2 text-xs font-bold active:opacity-70 transition-opacity"
+                    style={{ color: BRAND }}
+                  >
+                    {showFullDesc ? "הצג פחות" : "הצג עוד"}
+                  </button>
+                )}
+              </section>
+            );
+          })()}
+
+          {gallery.length > 0 && (
+            <section className={`${floatCard} p-4`}>
+              <h2 className={sectionLabel}>גלריית עבודות</h2>
+              <div className="grid grid-cols-3 gap-2">
+                {gallery.slice(0, 6).map((g) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => setLightbox(g.image_url)}
+                    className="aspect-square rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-transform active:scale-[0.98]"
+                  >
+                    <SmartImg src={g.image_url} size="card" alt={g.caption ?? "עבודה"} className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {supplierCategories.length > 0 && (
+            <section className={`${floatCard} p-4`}>
+              <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
+                <Tag className="h-3.5 w-3.5" style={{ color: BRAND }} /> תחומים
+              </h2>
+              <div className="flex flex-wrap gap-1.5">
+                {supplierCategories.map((c) => (
+                  <span
+                    key={c.id}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold bg-slate-50 text-slate-800 border border-gray-100"
+                  >
+                    <span>{c.icon}</span> {c.name}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className={`${floatCard} p-4`}>
+            <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
+              <MapPin className="h-3.5 w-3.5" style={{ color: BRAND }} /> אזורי שירות
+            </h2>
+            {supplier.serves_all_country ? (
+              <span
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold border border-gray-100"
+                style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+              >
+                נותן שירות בכל הארץ
+              </span>
+            ) : serviceAreas.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {serviceAreas.map((name) => (
+                  <span
+                    key={name}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold bg-slate-50 text-slate-800 border border-gray-100"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">לא הוגדרו אזורי שירות — צרו קשר לפרטים</p>
+            )}
+          </section>
+
+          <section ref={dealsRef} className={`${floatCard} p-4 scroll-mt-20`}>
+            <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
+              <Tag className="h-3.5 w-3.5" style={{ color: BRAND }} /> ההצעות הפעילות
+              {deals.length > 0 && <span className="text-slate-400 font-medium normal-case tracking-normal">· {deals.length}</span>}
+            </h2>
+            {deals.length === 0 ? (
+              <p className="text-sm text-slate-500">אין עדיין הצעות פעילות מהספק הזה.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2.5">
+                {deals.map((d) => {
+                  const cat = categories.find((c) => c.id === d.category_id);
+                  return <CompactDealCard key={d.id} deal={d} categoryIcon={cat?.icon ?? null} categoryName={cat?.name ?? null} />;
+                })}
+              </div>
+            )}
+          </section>
+
+          <section className={`${floatCard} p-4`}>
+            <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
+              <Star className="h-3.5 w-3.5" style={{ color: BRAND }} /> ביקורות אחרונות
+            </h2>
+            {reviews.length === 0 ? (
+              <p className="text-sm text-slate-500">אין עדיין ביקורות לספק זה.</p>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  {(showAllReviews ? reviews : reviews.slice(0, 3)).map((r) => (
+                    <div key={r.id} className="rounded-2xl bg-slate-50 border border-gray-100 p-3">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm font-bold text-slate-900">{r.reviewer_name || "דייר"}</span>
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-3.5 w-3.5 ${i < r.rating ? "fill-[#F5B600] text-[#F5B600]" : "text-slate-200"}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {r.comment && (
+                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{r.comment}</p>
+                      )}
+                      <div className="text-fs-xs text-slate-400 mt-1.5">
+                        {new Date(r.created_at).toLocaleDateString("he-IL")}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {reviews.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllReviews((v) => !v)}
+                    className="mt-3 w-full h-10 rounded-2xl text-sm font-bold bg-white border border-gray-100 shadow-sm active:scale-[0.98] transition-transform"
+                    style={{ color: BRAND }}
+                  >
+                    {showAllReviews ? "הצג פחות" : `הצג עוד (${reviews.length - 3})`}
+                  </button>
+                )}
+              </>
+            )}
+          </section>
+        </div>
       </div>
 
-
-      {/* Dual CTA — clearly two tracks: contact (open to all) + get offers (requires signup) */}
+      {/* Dual CTA */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-transparent">
-          <div className="mb-1.5 flex items-center justify-between text-[10px] font-bold text-[#6B7280] uppercase tracking-wider px-1">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent">
+          <div className="mb-1.5 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
             <span>יצירת קשר ישיר — פתוח לכולם</span>
             <span>דורש הרשמה</span>
           </div>
@@ -635,7 +634,7 @@ export default function SupplierProfile() {
                 target="_blank"
                 rel="noreferrer noopener"
                 onClick={() => { void trackSupplierEvent(supplier.id, "whatsapp"); }}
-                className="flex-1 h-12 rounded-[16px] bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 shadow-[0_4px_14px_-4px_rgba(37,211,102,0.5)] active:scale-[0.98] transition-transform"
+                className="flex-1 h-12 rounded-2xl bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-transform"
               >
                 <WhatsappIcon className="h-5 w-5" />
                 WhatsApp
@@ -644,33 +643,30 @@ export default function SupplierProfile() {
               <a
                 href={`tel:${supplier.phone}`}
                 onClick={() => { void trackSupplierEvent(supplier.id, "call"); }}
-                className="flex-1 h-12 rounded-[16px] bg-[#0E6B5A] text-white font-bold inline-flex items-center justify-center gap-2 shadow-[0_4px_14px_-4px_rgba(14,107,90,0.5)] active:scale-[0.98] transition-transform"
+                className="flex-1 h-12 rounded-2xl text-white font-bold inline-flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-transform"
+                style={{ background: BRAND }}
               >
                 <Phone className="h-5 w-5" />
                 התקשר
               </a>
             ) : (
-              <div className="flex-1 h-12 rounded-[16px] bg-[#F7F5F0] text-[#9CA3AF] text-sm inline-flex items-center justify-center">אין ערוץ קשר</div>
+              <div className="flex-1 h-12 rounded-2xl bg-slate-100 text-slate-400 text-sm inline-flex items-center justify-center">
+                אין ערוץ קשר
+              </div>
             )}
-            <Button
-              onClick={handleInterest}
-              disabled={submitting || interested}
-              className="flex-1 h-12"
-            >
+            <Button onClick={handleInterest} disabled={submitting || interested} className="flex-1 h-12 rounded-2xl">
               {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ נרשם" : "קבל כמה הצעות"}
             </Button>
           </div>
         </div>
       </div>
 
-
-      {/* Lightbox */}
       {lightbox && (
         <div
           onClick={() => setLightbox(null)}
-          className="fixed inset-0 z-50 bg-[#0E6B5A]/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-slate-900/80 flex items-center justify-center p-4"
         >
-          <SmartImg src={lightbox} size="detail" alt="" priority eager className="max-h-[90vh] max-w-full rounded-[20px]" />
+          <SmartImg src={lightbox} size="detail" alt="" priority eager className="max-h-[90vh] max-w-full rounded-2xl" />
         </div>
       )}
 
@@ -702,9 +698,9 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
   if (rows.length === 0 && !legacyUrl) return null;
 
   return (
-    <section className="gb-card p-4 space-y-2">
-      <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-        <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" /> קטלוגים
+    <section className="rounded-2xl border border-gray-100 bg-white shadow-sm p-4 space-y-2">
+      <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+        <FileText className="h-3.5 w-3.5" style={{ color: BRAND }} /> קטלוגים
       </h2>
       <div className="space-y-1.5">
         {rows.map((r) => {
@@ -715,26 +711,29 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
               href={r.file_url}
               target="_blank"
               rel="noreferrer noopener"
-              className="flex items-center gap-3 p-2.5 rounded-[16px] bg-white shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] transition-transform active:scale-[0.98]"
+              className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50 border border-gray-100 transition-transform active:scale-[0.98]"
             >
-              <div className="h-10 w-10 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                <FileText className="h-4 w-4 text-[#0E6B5A]" />
+              <div
+                className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: "rgba(14,107,90,0.08)" }}
+              >
+                <FileText className="h-4 w-4" style={{ color: BRAND }} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold truncate flex items-center gap-1.5">
+                <div className="text-sm font-bold truncate flex items-center gap-1.5 text-slate-900">
                   <span className="truncate">{r.name}</span>
-                  <span className="text-fs-xs font-normal px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
+                  <span className="text-fs-xs font-normal px-1.5 py-0.5 rounded-md bg-white border border-gray-100 text-slate-400 shrink-0">
                     {isLink ? "קישור" : "PDF"}
                   </span>
                 </div>
                 {r.description && (
-                  <div className="text-fs-xs text-muted-foreground line-clamp-1">{r.description}</div>
+                  <div className="text-fs-xs text-slate-500 line-clamp-1">{r.description}</div>
                 )}
-                <div className="text-fs-xs text-[#0A5446] font-bold mt-0.5">
+                <div className="text-fs-xs font-bold mt-0.5" style={{ color: BRAND }}>
                   {isLink ? "צפייה בקטלוג ↗" : "צפייה בקטלוג"}
                 </div>
               </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+              <ExternalLink className="h-4 w-4 text-slate-400 shrink-0" />
             </a>
           );
         })}
@@ -743,16 +742,19 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
             href={legacyUrl}
             target="_blank"
             rel="noreferrer noopener"
-            className="flex items-center gap-3 p-2.5 rounded-[16px] bg-white shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] transition-transform active:scale-[0.98]"
+            className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50 border border-gray-100 transition-transform active:scale-[0.98]"
           >
-            <div className="h-10 w-10 rounded-[12px] bg-[#F4F6FA] flex items-center justify-center shrink-0">
-              <FileText className="h-4 w-4 text-[#0E6B5A]" />
+            <div
+              className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "rgba(14,107,90,0.08)" }}
+            >
+              <FileText className="h-4 w-4" style={{ color: BRAND }} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold truncate">צפייה בקטלוג</div>
-              <div className="text-fs-xs text-muted-foreground">PDF · ייפתח בכרטיסיה חדשה</div>
+              <div className="text-sm font-bold truncate text-slate-900">צפייה בקטלוג</div>
+              <div className="text-fs-xs text-slate-500">PDF · ייפתח בכרטיסיה חדשה</div>
             </div>
-            <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+            <ExternalLink className="h-4 w-4 text-slate-400 shrink-0" />
           </a>
         )}
       </div>
@@ -791,9 +793,9 @@ function CompactDealCard({
   return (
     <Link
       to={`/resident/deals/${deal.id}`}
-      className="group block bg-white rounded-[16px] overflow-hidden border border-[#ECEEF2] shadow-[0_1px_2px_rgba(17,24,39,0.04)] hover:shadow-[0_6px_16px_-8px_rgba(17,24,39,0.15)] transition-all"
+      className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-[#F4F6FA] to-[#EAF2FF]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-50">
         {cover ? (
           <SmartImg
             src={cover}
@@ -802,24 +804,27 @@ function CompactDealCard({
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-[#0E6B5A]/70">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1" style={{ color: `${BRAND}B3` }}>
             <span className="text-3xl leading-none">{categoryIcon ?? "🏷️"}</span>
             {categoryName && (
-              <span className="text-[10px] font-bold text-[#0E6B5A]/80">{categoryName}</span>
+              <span className="text-[10px] font-bold" style={{ color: `${BRAND}CC` }}>{categoryName}</span>
             )}
           </div>
         )}
         {discountPct && (
-          <span className="absolute top-1.5 right-1.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#0E6B5A] text-white shadow-[0_2px_6px_-2px_rgba(14,107,90,0.5)]">
+          <span
+            className="absolute top-1.5 right-1.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full text-white shadow-sm"
+            style={{ background: BRAND }}
+          >
             {discountPct}
           </span>
         )}
       </div>
       <div className="p-2.5">
-        <h3 className="text-[12px] font-semibold text-[#1F2937] leading-snug line-clamp-2 min-h-[2.4em] mb-1">
+        <h3 className="text-[12px] font-semibold text-slate-900 leading-snug line-clamp-2 min-h-[2.4em] mb-1">
           {deal.title}
         </h3>
-        <div className="text-[13px] font-extrabold text-[#0E6B5A] leading-tight truncate">
+        <div className="text-[13px] font-extrabold leading-tight truncate" style={{ color: BRAND }}>
           {display.headline}
         </div>
       </div>
