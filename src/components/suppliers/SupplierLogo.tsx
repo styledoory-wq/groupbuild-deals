@@ -4,7 +4,7 @@ import { SmartImg } from "@/components/ui/SmartImg";
 interface SupplierLogoProps {
   name?: string | null;
   logoUrl?: string | null;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "hero";
   className?: string;
 }
 
@@ -15,6 +15,7 @@ const sizeMap = {
   md: "h-12 w-12 text-sm",
   lg: "h-[72px] w-[72px] text-base",
   xl: "h-24 w-24 text-2xl",
+  hero: "h-[112px] w-[112px] text-3xl",
 };
 
 const padMap = {
@@ -22,6 +23,7 @@ const padMap = {
   md: "p-1.5",
   lg: "p-2",
   xl: "p-2.5",
+  hero: "p-3",
 };
 
 function getInitials(name?: string | null) {
@@ -36,13 +38,13 @@ function getInitials(name?: string | null) {
  */
 export function SupplierLogo({ name, logoUrl, size = "md", className }: SupplierLogoProps) {
   const initials = getInitials(name);
-  // Small (sm/md) → thumb preset (96px). Large (lg/xl) → logo preset (200px).
+  // Small (sm/md) → thumb preset (96px). Large (lg/xl/hero) → logo preset (200px).
   const preset = size === "sm" || size === "md" ? "thumb" : "logo";
   return (
     <div
       className={cn(
         "shrink-0 rounded-full overflow-hidden flex items-center justify-center font-extrabold",
-        "bg-white border border-slate-200 shadow-[0_6px_16px_-8px_rgba(15,23,42,0.22)]",
+        "bg-white border-2 border-slate-200 shadow-[0_10px_28px_-12px_rgba(15,23,42,0.28)]",
         logoUrl ? padMap[size] : "bg-[rgba(14,107,90,0.12)]",
         sizeMap[size],
         className,
