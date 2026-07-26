@@ -6,9 +6,19 @@ import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 import { PROJECT_TYPE_META, stageMeta, type ProjectType } from "@/lib/stageCatalog";
+import stagePlanningImg from "@/assets/stage-planning.jpg";
+import newBuildImg from "@/assets/journey-new-build.jpg";
+import renoImg from "@/assets/journey-renovation.jpg";
+import committeeImg from "@/assets/journey-committee.jpg";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
+
+const TYPE_ILLUSTRATION: Partial<Record<ProjectType, string>> = {
+  new: newBuildImg,
+  reno: renoImg,
+  building: committeeImg,
+};
 
 interface SupplierLite { id: string; categories: string[] }
 type SupplierRow = { id: string; categories: string[] | null };
@@ -148,16 +158,10 @@ export default function CategoryStages() {
 
         {/* Stage hero */}
         <div
-          className="rounded-[22px] mb-5 p-4 flex items-center gap-3 border border-white/80"
+          className="rounded-[22px] mb-5 p-4 flex items-stretch gap-3 border border-white/80"
           style={{ background: "#F4EEE2", boxShadow: "var(--shadow-elevated)" }}
         >
-          <div
-            className="w-14 h-14 rounded-[16px] bg-white/90 grid place-items-center text-[30px] shrink-0"
-            style={{ boxShadow: "var(--shadow-soft)" }}
-          >
-            <span aria-hidden>{stageInfo.emoji}</span>
-          </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex flex-col justify-center">
             <h2 className="text-[19px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
               {stageInfo.title}
             </h2>
@@ -165,9 +169,20 @@ export default function CategoryStages() {
               בחר שירות ונציג לך את הספקים המומלצים
             </p>
           </div>
+          <div
+            className="w-[112px] h-[100px] rounded-[16px] overflow-hidden bg-white/70 shrink-0"
+            style={{ boxShadow: "var(--shadow-soft)" }}
+          >
+            <img
+              src={TYPE_ILLUSTRATION[type] ?? stagePlanningImg}
+              alt=""
+              loading="lazy"
+              className="h-full w-full object-cover object-center"
+            />
+          </div>
         </div>
 
-        {/* Services grid — floating luxury squares, 3–4 per row */}
+        {/* Services grid — floating luxury squares with illustrations, 3–4 per row */}
         {services.length === 0 ? (
           <div
             className="rounded-[18px] p-6 text-center text-[13px] text-gray-500 bg-white/95 border border-white/80"
@@ -183,7 +198,7 @@ export default function CategoryStages() {
                 <Link
                   key={c.id}
                   to={`/resident/categories/${c.id}`}
-                  className="relative aspect-square flex flex-col items-center justify-center gap-1.5 rounded-[18px] border border-white/90 px-1.5 py-2 active:scale-[0.97] hover:-translate-y-0.5 transition-all duration-300"
+                  className="relative aspect-square flex flex-col overflow-hidden rounded-[18px] border border-white/90 active:scale-[0.97] hover:-translate-y-0.5 transition-all duration-300"
                   style={{
                     background: "rgba(255,255,255,0.96)",
                     boxShadow: "var(--shadow-elevated)",
@@ -191,20 +206,24 @@ export default function CategoryStages() {
                 >
                   {soon && (
                     <span
-                      className="absolute top-1 right-1 text-[8px] font-bold px-1 py-0.5 rounded-md"
+                      className="absolute top-1 right-1 z-10 text-[8px] font-bold px-1 py-0.5 rounded-md"
                       style={{ background: "#F1EFE8", color: "#8b8574" }}
                     >
                       בקרוב
                     </span>
                   )}
-                  <div
-                    className="grid place-items-center w-10 h-10 rounded-[14px] text-[22px]"
-                    style={{ background: "#F4F1EA" }}
-                  >
-                    <span aria-hidden>{c.emoji}</span>
+                  <div className="flex-1 min-h-0 w-full px-2 pt-2">
+                    <div className="h-full w-full rounded-[12px] overflow-hidden bg-[#F4F1EA]">
+                      <img
+                        src={TYPE_ILLUSTRATION[type] ?? stagePlanningImg}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover object-center"
+                      />
+                    </div>
                   </div>
                   <span
-                    className="block text-[11px] font-extrabold text-[#1A1A1A] leading-tight text-center px-0.5 line-clamp-2"
+                    className="block text-[11px] font-extrabold text-[#1A1A1A] leading-tight text-center px-1.5 py-2 line-clamp-2"
                     style={{ fontFamily: URBANIST }}
                   >
                     {c.name}

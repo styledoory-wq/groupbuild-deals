@@ -6,9 +6,6 @@ import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import {
   Bell,
   ChevronLeft,
-  Home as HomeIcon,
-  PaintRoller,
-  Building2,
   Search,
   UserRound,
   Check,
@@ -17,6 +14,10 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
 import { Seo } from "@/components/seo/Seo";
+import newBuildImg from "@/assets/journey-new-build.jpg";
+import renoImg from "@/assets/journey-renovation.jpg";
+import committeeImg from "@/assets/journey-committee.jpg";
+import stagePlanningImg from "@/assets/stage-planning.jpg";
 
 const STORAGE_KEY = "gb:projectType";
 
@@ -25,7 +26,7 @@ type UiProjectType = Extract<ProjectType, "new" | "reno" | "building">;
 type ProjectTypeDef = {
   id: UiProjectType;
   title: string;
-  icon: typeof HomeIcon;
+  img: string;
   accent: "green" | "orange" | "blue";
   color: string;
   bgSelected: string;
@@ -36,7 +37,7 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
   {
     id: "new",
     title: "בנייה חדשה",
-    icon: HomeIcon,
+    img: newBuildImg,
     accent: "green",
     color: "#16845b",
     bgSelected: "linear-gradient(180deg,#EBF7EF,#FFFFFF)",
@@ -45,7 +46,7 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
   {
     id: "reno",
     title: "שיפוץ",
-    icon: PaintRoller,
+    img: renoImg,
     accent: "orange",
     color: "#d88919",
     bgSelected: "linear-gradient(180deg,#FDF3E4,#FFFFFF)",
@@ -54,7 +55,7 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
   {
     id: "building",
     title: "בניין משותף\nועד בית",
-    icon: Building2,
+    img: committeeImg,
     accent: "blue",
     color: "#34558e",
     bgSelected: "linear-gradient(180deg,#EAF0FB,#FFFFFF)",
@@ -73,25 +74,23 @@ function ProjectTypeCard({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const Icon = def.icon;
   return (
     <button
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="relative aspect-square flex flex-col items-center justify-center gap-2 rounded-[18px] px-1.5 py-2 transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5"
+      className="relative aspect-square flex flex-col overflow-hidden rounded-[18px] transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5"
       style={{
-        background: selected ? def.bgSelected : "rgba(255,255,255,0.94)",
-        border: `1px solid ${selected ? def.borderSelected : "rgba(255,255,255,0.85)"}`,
+        background: selected ? def.bgSelected : "rgba(255,255,255,0.96)",
+        border: `1px solid ${selected ? def.borderSelected : "rgba(255,255,255,0.9)"}`,
         boxShadow: selected
           ? `0 16px 36px -18px ${def.color}55, 0 6px 14px -8px rgba(31,40,35,0.10)`
           : "var(--shadow-elevated)",
-        color: def.color,
       }}
     >
       {selected && (
         <span
-          className="absolute top-1.5 right-1.5 grid place-items-center rounded-full text-white"
+          className="absolute top-1.5 right-1.5 z-10 grid place-items-center rounded-full text-white"
           style={{
             width: 18,
             height: 18,
@@ -102,8 +101,17 @@ function ProjectTypeCard({
           <Check size={11} strokeWidth={3} />
         </span>
       )}
-      <Icon size={28} strokeWidth={1.7} />
-      <span className="flex flex-col items-center font-extrabold text-[11.5px] leading-tight text-[#1f2937]">
+      <div className="flex-1 min-h-0 w-full px-2 pt-2">
+        <div className="h-full w-full rounded-[12px] overflow-hidden bg-white/50">
+          <img
+            src={def.img}
+            alt=""
+            loading="lazy"
+            className="h-full w-full object-cover object-center"
+          />
+        </div>
+      </div>
+      <span className="flex flex-col items-center font-extrabold text-[11px] leading-tight text-[#1f2937] px-1.5 py-2">
         {def.title.split("\n").map((line) => (
           <span key={line}>{line}</span>
         ))}
@@ -136,23 +144,21 @@ function CategorySearch({
 
 function StageGridCard({
   title,
-  emoji,
+  img,
   serviceCount,
   onClick,
-  accentColor,
 }: {
   title: string;
-  emoji: string;
+  img: string;
   serviceCount: number;
   onClick: () => void;
-  accentColor: string;
 }) {
   const soon = serviceCount === 0;
   return (
     <button
       type="button"
       onClick={onClick}
-      className="relative aspect-square flex flex-col items-center justify-center gap-1.5 rounded-[18px] px-1.5 py-2 transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5"
+      className="relative aspect-square flex flex-col overflow-hidden rounded-[18px] transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5"
       style={{
         background: "rgba(255,255,255,0.96)",
         border: "1px solid rgba(255,255,255,0.9)",
@@ -161,19 +167,23 @@ function StageGridCard({
     >
       {soon && (
         <span
-          className="absolute top-1 right-1 text-[8px] font-bold px-1 py-0.5 rounded-md"
+          className="absolute top-1 right-1 z-10 text-[8px] font-bold px-1 py-0.5 rounded-md"
           style={{ background: "#F1EFE8", color: "#8b8574" }}
         >
           בקרוב
         </span>
       )}
-      <div
-        className="grid place-items-center w-10 h-10 rounded-[14px] text-[22px]"
-        style={{ background: `${accentColor}12` }}
-      >
-        <span aria-hidden>{emoji}</span>
+      <div className="flex-1 min-h-0 w-full px-2 pt-2">
+        <div className="h-full w-full rounded-[12px] overflow-hidden bg-[#F4F1EA]">
+          <img
+            src={img}
+            alt=""
+            loading="lazy"
+            className="h-full w-full object-cover object-center"
+          />
+        </div>
       </div>
-      <span className="block text-[11px] font-extrabold text-[#1e2530] leading-tight text-center px-0.5 line-clamp-2">
+      <span className="block text-[11px] font-extrabold text-[#1e2530] leading-tight text-center px-1.5 py-2 line-clamp-2">
         {title}
       </span>
     </button>
@@ -496,10 +506,9 @@ export default function CategoriesList() {
                 <StageGridCard
                   key={s.key}
                   title={s.title}
-                  emoji={s.emoji}
+                  img={stagePlanningImg}
                   serviceCount={s.serviceCount}
                   onClick={() => openStage(s.key)}
-                  accentColor={currentDef.color}
                 />
               ))}
             </div>
