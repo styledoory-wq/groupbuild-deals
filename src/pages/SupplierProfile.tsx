@@ -384,7 +384,7 @@ export default function SupplierProfile() {
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen" dir="rtl">
-        {/* Hero identity — mock Style A */}
+        {/* Hero identity */}
         <div className="px-4 pb-3" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}>
           <button
             type="button"
@@ -395,32 +395,39 @@ export default function SupplierProfile() {
             חזרה
           </button>
 
-          <div className={`${floatCard} p-4 flex items-center gap-4`}>
-            <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" />
-            <div className="flex-1 min-w-0">
-              <EditableField
-                table="suppliers"
-                id={supplier.id}
-                field="business_name"
-                value={supplier.business_name}
-                as="h1"
-                className="block text-[22px] font-extrabold text-slate-900 tracking-tight leading-tight mb-2 line-clamp-2"
-              />
-              <SupplierRatingBadge supplierId={supplier.id} variant="stars" />
-              {kindLabel && (
-                <span
-                  className="mt-2 inline-flex text-[11px] font-bold px-2.5 py-1 rounded-full"
-                  style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
-                >
-                  {kindLabel}
-                </span>
-              )}
+          <div className={`${floatCard} p-4`}>
+            <div className="flex items-center gap-4">
+              <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" />
+              <div className="flex-1 min-w-0">
+                <EditableField
+                  table="suppliers"
+                  id={supplier.id}
+                  field="business_name"
+                  value={supplier.business_name}
+                  as="h1"
+                  className="block text-[22px] font-extrabold text-slate-900 tracking-tight leading-tight mb-1.5 line-clamp-2"
+                />
+                <SupplierRatingBadge supplierId={supplier.id} variant="stars" />
+                {kindLabel && (
+                  <span
+                    className="mt-2 inline-flex text-[11px] font-bold px-2.5 py-1 rounded-full"
+                    style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+                  >
+                    {kindLabel}
+                  </span>
+                )}
+              </div>
             </div>
+            {supplier.short_description && (
+              <p className="mt-3 text-[13px] text-slate-600 leading-relaxed">
+                {supplier.short_description}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="px-4 relative z-10 space-y-3 pb-36">
-          {/* Contact strip — labels like mock (התקשר / ניווט / שתף) */}
+          {/* Contact strip */}
           <div className="grid grid-cols-3 gap-2">
             {supplier.phone ? (
               <a
@@ -448,33 +455,28 @@ export default function SupplierProfile() {
             </button>
           </div>
 
-          {/* Secondary links — only channels that exist */}
+          {/* Secondary links — compact row, no empty grid holes */}
           {links.length > 0 && (
-            <section className={`${floatCard} p-3`}>
-              <h2 className={sectionLabel}>קישורים</h2>
-              <div className="grid grid-cols-2 gap-2">
-                {links.map((l) => (
-                  <a
-                    key={l.label}
-                    href={l.href}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    onClick={() => { void trackSupplierEvent(supplier.id, l.event); }}
-                    className={`h-11 ${softBtn}`}
-                  >
-                    <l.Icon className="h-4 w-4 text-[#0E6B5A]" />
-                    {l.label}
-                  </a>
-                ))}
-              </div>
-            </section>
+            <div className="flex flex-wrap gap-2">
+              {links.map((l) => (
+                <a
+                  key={l.label}
+                  href={l.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  onClick={() => { void trackSupplierEvent(supplier.id, l.event); }}
+                  className={`h-11 px-4 ${softBtn}`}
+                >
+                  <l.Icon className="h-4 w-4 text-[#0E6B5A]" />
+                  {l.label}
+                </a>
+              ))}
+            </div>
           )}
 
-          <SupplierCatalogsList supplierId={supplier.id} legacyUrl={supplier.catalog_url} />
-
-          {/* Description */}
-          {(() => {
-            const desc = supplier.description ?? "";
+          {/* About */}
+          {(supplier.description?.trim() || supplier.short_description?.trim()) && (() => {
+            const desc = (supplier.description ?? supplier.short_description ?? "").trim();
             const isLong = desc.length > 220;
             const shown = !isLong || showFullDesc ? desc : desc.slice(0, 220).trimEnd() + "…";
             return (
@@ -484,7 +486,7 @@ export default function SupplierProfile() {
                   table="suppliers"
                   id={supplier.id}
                   field="description"
-                  value={desc}
+                  value={supplier.description ?? ""}
                   type="textarea"
                   as="p"
                   className="text-sm text-slate-700 whitespace-pre-line leading-relaxed block"
@@ -505,16 +507,23 @@ export default function SupplierProfile() {
             );
           })()}
 
+          {/* Gallery — visual anchor */}
           {gallery.length > 0 && (
-            <section className={`${floatCard} p-4`}>
-              <h2 className={sectionLabel}>גלריית עבודות</h2>
-              <div className="grid grid-cols-3 gap-2">
-                {gallery.slice(0, 6).map((g) => (
+            <section className={`${floatCard} p-3`}>
+              <div className="flex items-center justify-between px-1 mb-2.5">
+                <h2 className={`${sectionLabel} mb-0`}>גלריית עבודות</h2>
+                <span className="text-[11px] font-semibold text-slate-400">{gallery.length} תמונות</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {gallery.slice(0, 6).map((g, i) => (
                   <button
                     key={g.id}
                     type="button"
                     onClick={() => setLightbox(g.image_url)}
-                    className="aspect-square rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-transform active:scale-[0.98]"
+                    className={
+                      "relative overflow-hidden rounded-xl border border-gray-100 transition-transform active:scale-[0.98] " +
+                      (i === 0 && gallery.length > 1 ? "col-span-2 row-span-2 aspect-square" : "aspect-square")
+                    }
                   >
                     <SmartImg src={g.image_url} size="card" alt={g.caption ?? "עבודה"} className="h-full w-full object-cover" />
                   </button>
@@ -523,19 +532,21 @@ export default function SupplierProfile() {
             </section>
           )}
 
+          <SupplierCatalogsList supplierId={supplier.id} legacyUrl={supplier.catalog_url} />
+
           {supplierCategories.length > 0 && (
             <section className={`${floatCard} p-4`}>
               <h2 className={sectionLabel}>תחומים</h2>
-              <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+              <div className="grid grid-cols-4 gap-2">
                 {supplierCategories.map((c) => {
                   const Icon = iconForCategory(c.id, c.name);
                   return (
                     <div
                       key={c.id}
-                      className="shrink-0 w-[88px] rounded-2xl border border-gray-100 bg-slate-50 px-2 py-3 flex flex-col items-center gap-1.5 text-center"
+                      className="rounded-2xl border border-gray-100 bg-white px-1.5 py-3 flex flex-col items-center gap-1.5 text-center shadow-sm"
                     >
                       <Icon size={22} strokeWidth={1.6} className="text-[#0E6B5A]" aria-hidden />
-                      <span className="text-[11px] font-bold text-slate-800 leading-snug line-clamp-2">{c.name}</span>
+                      <span className="text-[10px] font-bold text-slate-800 leading-snug line-clamp-2">{c.name}</span>
                     </div>
                   );
                 })}
@@ -543,94 +554,90 @@ export default function SupplierProfile() {
             </section>
           )}
 
-          <section className={`${floatCard} p-4`}>
-            <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
-              <MapPin className="h-3.5 w-3.5" style={{ color: BRAND }} /> אזורי שירות
-            </h2>
-            {supplier.serves_all_country ? (
-              <span
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold border border-gray-100"
-                style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
-              >
-                נותן שירות בכל הארץ
-              </span>
-            ) : serviceAreas.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {serviceAreas.map((name) => (
-                  <span
-                    key={name}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold bg-slate-50 text-slate-800 border border-gray-100"
-                  >
-                    {name}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">לא הוגדרו אזורי שירות — צרו קשר לפרטים</p>
-            )}
-          </section>
+          {(supplier.serves_all_country || serviceAreas.length > 0) && (
+            <section className={`${floatCard} p-4`}>
+              <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
+                <MapPin className="h-3.5 w-3.5" style={{ color: BRAND }} /> אזורי שירות
+              </h2>
+              {supplier.serves_all_country ? (
+                <span
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold border border-gray-100"
+                  style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+                >
+                  נותן שירות בכל הארץ
+                </span>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {serviceAreas.map((name) => (
+                    <span
+                      key={name}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold bg-slate-50 text-slate-800 border border-gray-100"
+                    >
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
-          <section ref={dealsRef} className={`${floatCard} p-4 scroll-mt-20`}>
-            <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
-              <Tag className="h-3.5 w-3.5" style={{ color: BRAND }} /> ההצעות הפעילות
-              {deals.length > 0 && <span className="text-slate-400 font-medium normal-case tracking-normal">· {deals.length}</span>}
-            </h2>
-            {deals.length === 0 ? (
-              <p className="text-sm text-slate-500">אין עדיין הצעות פעילות מהספק הזה.</p>
-            ) : (
+          {/* Offers — only when there is content */}
+          {deals.length > 0 && (
+            <section ref={dealsRef} className={`${floatCard} p-4 scroll-mt-20`}>
+              <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
+                <Tag className="h-3.5 w-3.5" style={{ color: BRAND }} /> ההצעות הפעילות
+                <span className="text-slate-400 font-medium normal-case tracking-normal">· {deals.length}</span>
+              </h2>
               <div className="grid grid-cols-2 gap-2.5">
                 {deals.map((d) => {
                   const cat = categories.find((c) => c.id === d.category_id);
                   return <CompactDealCard key={d.id} deal={d} categoryIcon={cat?.icon ?? null} categoryName={cat?.name ?? null} />;
                 })}
               </div>
-            )}
-          </section>
+            </section>
+          )}
 
-          <section className={`${floatCard} p-4`}>
-            <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
-              <Star className="h-3.5 w-3.5" style={{ color: BRAND }} /> ביקורות אחרונות
-            </h2>
-            {reviews.length === 0 ? (
-              <p className="text-sm text-slate-500">אין עדיין ביקורות לספק זה.</p>
-            ) : (
-              <>
-                <div className="space-y-3">
-                  {(showAllReviews ? reviews : reviews.slice(0, 3)).map((r) => (
-                    <div key={r.id} className="rounded-2xl bg-slate-50 border border-gray-100 p-3">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-bold text-slate-900">{r.reviewer_name || "דייר"}</span>
-                        <div className="flex items-center gap-0.5">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-3.5 w-3.5 ${i < r.rating ? "fill-[#F5B600] text-[#F5B600]" : "text-slate-200"}`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      {r.comment && (
-                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{r.comment}</p>
-                      )}
-                      <div className="text-fs-xs text-slate-400 mt-1.5">
-                        {new Date(r.created_at).toLocaleDateString("he-IL")}
+          {/* Reviews — only when there is content */}
+          {reviews.length > 0 && (
+            <section className={`${floatCard} p-4`}>
+              <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
+                <Star className="h-3.5 w-3.5" style={{ color: BRAND }} /> ביקורות אחרונות
+              </h2>
+              <div className="space-y-3">
+                {(showAllReviews ? reviews : reviews.slice(0, 3)).map((r) => (
+                  <div key={r.id} className="rounded-2xl bg-slate-50 border border-gray-100 p-3">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-sm font-bold text-slate-900">{r.reviewer_name || "דייר"}</span>
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3.5 w-3.5 ${i < r.rating ? "fill-[#F5B600] text-[#F5B600]" : "text-slate-200"}`}
+                          />
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
-                {reviews.length > 3 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllReviews((v) => !v)}
-                    className="mt-3 w-full h-10 rounded-2xl text-sm font-bold bg-white border border-gray-100 shadow-sm active:scale-[0.98] transition-transform"
-                    style={{ color: BRAND }}
-                  >
-                    {showAllReviews ? "הצג פחות" : `הצג עוד (${reviews.length - 3})`}
-                  </button>
-                )}
-              </>
-            )}
-          </section>
+                    {r.comment && (
+                      <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{r.comment}</p>
+                    )}
+                    <div className="text-fs-xs text-slate-400 mt-1.5">
+                      {new Date(r.created_at).toLocaleDateString("he-IL")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {reviews.length > 3 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllReviews((v) => !v)}
+                  className="mt-3 w-full h-10 rounded-2xl text-sm font-bold bg-white border border-gray-100 shadow-sm active:scale-[0.98] transition-transform"
+                  style={{ color: BRAND }}
+                >
+                  {showAllReviews ? "הצג פחות" : `הצג עוד (${reviews.length - 3})`}
+                </button>
+              )}
+            </section>
+          )}
         </div>
       </div>
 
