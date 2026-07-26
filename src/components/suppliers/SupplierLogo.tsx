@@ -13,7 +13,7 @@ const BRAND = "#0E6B5A";
 const sizeMap = {
   sm: "h-10 w-10 text-[11px]",
   md: "h-12 w-12 text-sm",
-  lg: "h-16 w-16 text-base",
+  lg: "h-[72px] w-[72px] text-base",
   xl: "h-24 w-24 text-2xl",
 };
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronDown, MapPin, ShieldCheck, Sparkles, Star, UserPlus, Wrench, Package } from "lucide-react";
+import { ArrowRight, ChevronDown, MapPin, Sparkles, UserPlus, Wrench, Package } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
@@ -280,11 +280,6 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
         ? regions.find((r) => r.id === regionId)?.name_he
         : "כל הארץ";
 
-  const nationalCount = useMemo(
-    () => filteredSuppliers.filter(isNationalSupplier).length,
-    [filteredSuppliers, supplierRegionIds, supplierCityIds, supplierCouncilIds],
-  );
-
   const kinds: { v: "all" | "service" | "product"; label: string; Icon: typeof Sparkles }[] = [
     { v: "all", label: "הכול", Icon: Sparkles },
     { v: "service", label: "בעלי מקצוע", Icon: Wrench },
@@ -307,67 +302,60 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
               חזרה לתחומים
             </button>
 
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className="h-11 w-11 rounded-full grid place-items-center shrink-0"
-                  style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
-                >
-                  <HeaderIcon size={22} strokeWidth={1.7} />
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-[20px] leading-tight font-bold text-slate-900 truncate">
-                    {activeCategory?.name ?? "ספקים"}
-                  </h1>
-                  <p className="text-[12px] text-slate-500 mt-0.5 truncate">
-                    {filteredSuppliers.length} ספקים זמינים · {areaLabel}
-                  </p>
-                </div>
+            <div className="flex items-center gap-3 min-w-0 mb-4">
+              <div
+                className="h-12 w-12 rounded-full grid place-items-center shrink-0 text-white shadow-sm"
+                style={{ background: BRAND }}
+              >
+                <HeaderIcon size={22} strokeWidth={1.8} />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-[22px] leading-tight font-extrabold text-slate-900 truncate">
+                  {activeCategory?.name ?? "ספקים"}
+                </h1>
+                <p className="text-[13px] text-slate-500 mt-0.5 truncate">
+                  {filteredSuppliers.length} ספקים זמינים · {areaLabel}
+                </p>
               </div>
             </div>
 
-            {/* Child categories — same white icon squares as CategoriesList */}
+            {/* Child categories — compact squares with counts (mock Style A) */}
             {childCategories.length > 0 && (
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-2.5 px-0.5">
-                  <h2 className="text-[15px] font-extrabold text-[#1A1A1A] m-0">תתי־קטגוריות</h2>
-                  <span className="text-[11px] font-semibold text-[#6B7280]">{childCategories.length}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-3.5">
-                  {childCategories.map((c) => (
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                {childCategories.map((c) => {
+                  const childIds = (() => {
+                    const ids = new Set<string>([c.id]);
+                    let changed = true;
+                    while (changed) {
+                      changed = false;
+                      categories.forEach((x) => {
+                        if (x.parentId && ids.has(x.parentId) && !ids.has(x.id)) {
+                          ids.add(x.id);
+                          changed = true;
+                        }
+                      });
+                    }
+                    return ids;
+                  })();
+                  const count = suppliers.filter((s) =>
+                    (s.categories ?? []).some((id) => childIds.has(id)),
+                  ).length;
+                  return (
                     <Link key={c.id} to={`/resident/categories/${c.id}`} className="block">
                       <CategorySquareCard
                         title={c.name}
                         Icon={iconForCategory(c.id, c.name)}
-                        subtitle="המשך"
+                        count={count}
                         as="div"
                       />
                     </Link>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             )}
 
-            {/* Summary chips */}
-            <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar -mx-1 px-1">
-              <div className="flex items-center gap-1.5 bg-[#0E6B5A]/8 text-[#0E6B5A] px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap">
-                <Star className="h-3 w-3 fill-current" />
-                ספקים מאומתים
-              </div>
-              {nationalCount > 0 && (
-                <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap">
-                  <Sparkles className="h-3 w-3" />
-                  {nationalCount} פועלים ארצית
-                </div>
-              )}
-              <div className="flex items-center gap-1.5 bg-white text-slate-600 px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap">
-                <ShieldCheck className="h-3 w-3" />
-                ביקורות אמיתיות
-              </div>
-            </div>
-
             {/* Filter chips */}
-            <nav className="flex gap-1.5 overflow-x-auto no-scrollbar pb-2 border-b border-slate-200/70">
+            <nav className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
               {kinds.map(({ v, label, Icon }) => {
                 const active = kindFilter === v;
                 return (
@@ -379,7 +367,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                       "whitespace-nowrap px-3.5 py-1.5 rounded-full text-[12px] font-bold inline-flex items-center gap-1.5 transition-all border " +
                       (active
                         ? "text-white border-transparent shadow-sm"
-                        : "bg-white text-slate-600 border-slate-200 hover:border-[#0E6B5A]/40")
+                        : "bg-white text-slate-600 border-slate-200")
                     }
                     style={active ? { background: BRAND, borderColor: BRAND } : undefined}
                   >
@@ -388,7 +376,6 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                   </button>
                 );
               })}
-              <div className="w-px h-6 bg-slate-200 mx-1 self-center" />
               <button
                 type="button"
                 onClick={() => setShowAreaPicker((v) => !v)}
@@ -472,82 +459,56 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
               </div>
             ) : (
               filteredSuppliers.map((s, idx) => {
-                const isSvc = Boolean(s.offers_services) || s.supplier_kind === "service";
-                const isProd = Boolean(s.offers_products) || s.supplier_kind === "product";
                 const isNational = isNationalSupplier(s);
-                const isFeatured = idx === 0;
+                const areaText = isNational
+                  ? "כל הארץ"
+                  : (s.service_areas?.slice(0, 2).join(" · ") || "אזור ייעודי");
 
                 return (
                   <article
                     key={s.id}
-                    className="rounded-2xl border border-gray-100 bg-white shadow-sm hover:-translate-y-0.5 transition-all duration-300 overflow-hidden animate-fade-up"
+                    className="rounded-2xl border border-gray-100 bg-white shadow-[0_8px_24px_-12px_rgba(15,23,42,0.12)] overflow-hidden animate-fade-up"
                     style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}
                   >
                     <Link to={`/suppliers/${s.id}`} className="block p-4 active:scale-[0.99] transition-transform">
-                      <div className="flex gap-3">
-                        <div className="shrink-0">
-                          <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="lg" />
-                        </div>
+                      <div className="flex gap-3.5 items-start">
                         <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start gap-2">
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                                <h3 className="text-[15px] font-bold text-slate-900 truncate">{s.business_name}</h3>
-                                {isFeatured && (
-                                  <span
-                                    className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-                                    style={{ background: "rgba(14,107,90,0.10)", color: BRAND }}
-                                  >
-                                    מומלץ
-                                  </span>
-                                )}
-                              </div>
-                              {s.short_description && (
-                                <p className="text-[12.5px] text-slate-500 leading-relaxed line-clamp-2">
-                                  {s.short_description}
-                                </p>
-                              )}
-                            </div>
-                            <div className="text-left shrink-0">
-                              <SupplierRatingBadge supplierId={s.id} showEmpty={false} />
-                            </div>
+                          <h3 className="text-[16px] font-extrabold text-slate-900 leading-snug line-clamp-1">
+                            {s.business_name}
+                          </h3>
+                          {s.short_description && (
+                            <p className="mt-1 text-[12.5px] text-slate-500 leading-relaxed line-clamp-2">
+                              {s.short_description}
+                            </p>
+                          )}
+                          <div className="mt-2">
+                            <SupplierRatingBadge supplierId={s.id} variant="stars" showEmpty />
                           </div>
-
-                          <div className="mt-2.5 flex items-center gap-3 flex-wrap text-[11px] text-slate-500">
-                            <span className="inline-flex items-center gap-1">
-                              <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                              {isNational ? "כל הארץ" : (s.service_areas?.slice(0, 2).join(" · ") || "אזור ייעודי")}
-                            </span>
-                            {isSvc && isProd ? (
-                              <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
-                                <Sparkles className="h-3 w-3" style={{ color: BRAND }} />
-                                שירות + מוצרים
-                              </span>
-                            ) : isSvc ? (
-                              <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
-                                <Wrench className="h-3 w-3" style={{ color: BRAND }} /> בעל מקצוע
-                              </span>
-                            ) : isProd ? (
-                              <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
-                                <Package className="h-3 w-3" style={{ color: BRAND }} /> ספק מוצרים
-                              </span>
-                            ) : null}
+                          <div className="mt-2 inline-flex items-center gap-1 text-[12px] text-slate-500">
+                            <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                            {areaText}
                           </div>
+                        </div>
+                        <div className="shrink-0 pt-0.5">
+                          <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="lg" />
                         </div>
                       </div>
                     </Link>
 
-                    <div className="bg-slate-50/70 border-t border-gray-100 px-4 py-2.5 flex justify-between items-center">
-                      <div className="flex items-center gap-1.5">
+                    <div className="px-3 pb-3 grid grid-cols-2 gap-2">
+                      <div className="h-11 rounded-xl bg-slate-50 border border-gray-100 inline-flex items-center justify-center gap-1.5 text-[12px] font-bold text-slate-700">
                         <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: BRAND }} />
+                          <span
+                            className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-70"
+                            style={{ background: BRAND }}
+                          />
                           <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: BRAND }} />
                         </span>
-                        <span className="text-[11px] font-medium text-slate-600">זמין לעבודות</span>
+                        זמין לעבודות
                       </div>
                       <Link
                         to={`/suppliers/${s.id}`}
-                        className="text-white px-4 py-1.5 rounded-xl text-[12px] font-bold shadow-sm active:scale-[0.97] transition-transform"
+                        className="h-11 rounded-xl text-white text-[12px] font-extrabold inline-flex items-center justify-center shadow-sm active:scale-[0.97] transition-transform"
                         style={{ background: BRAND }}
                       >
                         הצעת מחיר
