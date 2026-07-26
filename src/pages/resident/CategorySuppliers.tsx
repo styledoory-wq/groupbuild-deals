@@ -86,6 +86,10 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
   const [supplierCouncilIds, setSupplierCouncilIds] = useState<Record<string, string[]>>({});
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
+  const childCategories = useMemo(
+    () => categories.filter((c) => c.parentId === activeCategoryId),
+    [categories, activeCategoryId],
+  );
   const relevantCategoryIds = useMemo(() => {
     if (activeCategoryId === "all") return [];
     // Include the selected category and ONLY its descendants — never the parent or siblings.
@@ -300,7 +304,10 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex items-center gap-3 min-w-0">
                 {activeCategory?.icon && (
-                  <div className="h-11 w-11 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-xl shrink-0 shadow-sm">
+                  <div
+                    className="h-11 w-11 rounded-[14px] bg-white border border-white/90 flex items-center justify-center text-xl shrink-0"
+                    style={{ boxShadow: "var(--shadow-elevated)" }}
+                  >
                     {activeCategory.icon}
                   </div>
                 )}
@@ -314,6 +321,30 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                 </div>
               </div>
             </div>
+
+            {/* Child categories — floating luxury squares, 3–4 per row */}
+            {childCategories.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 mb-3">
+                {childCategories.map((c) => (
+                  <Link
+                    key={c.id}
+                    to={`/resident/categories/${c.id}`}
+                    className="relative aspect-square flex flex-col items-center justify-center gap-1.5 rounded-[18px] border border-white/90 px-1.5 py-2 active:scale-[0.97] hover:-translate-y-0.5 transition-all duration-300"
+                    style={{
+                      background: "rgba(255,255,255,0.96)",
+                      boxShadow: "var(--shadow-elevated)",
+                    }}
+                  >
+                    <div className="grid place-items-center w-10 h-10 rounded-[14px] text-[22px] bg-slate-50">
+                      <span aria-hidden>{c.icon || "📁"}</span>
+                    </div>
+                    <span className="block text-[11px] font-extrabold text-slate-900 leading-tight text-center px-0.5 line-clamp-2">
+                      {c.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
 
             {/* Summary chips */}
             <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar -mx-1 px-1">
@@ -404,17 +435,26 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
           {/* Suppliers list */}
           <main className="mt-4 space-y-3">
             {loading ? (
-              <div className="bg-white rounded-2xl border border-slate-100 p-10 text-center shadow-sm">
+              <div
+                className="rounded-[18px] border border-white/90 p-10 text-center"
+                style={{ background: "rgba(255,255,255,0.96)", boxShadow: "var(--shadow-elevated)" }}
+              >
                 <div className="h-8 w-8 rounded-full border-2 border-emerald-200 border-t-emerald-600 animate-spin mx-auto mb-3" />
                 <p className="text-slate-500 text-sm">טוען ספקים...</p>
               </div>
             ) : loadError ? (
-              <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-sm">
+              <div
+                className="rounded-[18px] border border-white/90 p-8 text-center"
+                style={{ background: "rgba(255,255,255,0.96)", boxShadow: "var(--shadow-elevated)" }}
+              >
                 <p className="text-sm font-bold text-slate-900">שגיאה בטעינה</p>
                 <p className="text-xs text-slate-500 mt-1.5">נסו לרענן את המסך בעוד רגע.</p>
               </div>
             ) : filteredSuppliers.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-sm">
+              <div
+                className="rounded-[18px] border border-white/90 p-8 text-center"
+                style={{ background: "rgba(255,255,255,0.96)", boxShadow: "var(--shadow-elevated)" }}
+              >
                 <div className="h-14 w-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-3">
                   <UserPlus className="h-6 w-6 text-emerald-600" />
                 </div>
@@ -440,8 +480,12 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                 return (
                   <article
                     key={s.id}
-                    className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden animate-fade-up"
-                    style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}
+                    className="rounded-[18px] border border-white/90 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden animate-fade-up"
+                    style={{
+                      background: "rgba(255,255,255,0.96)",
+                      boxShadow: "var(--shadow-elevated)",
+                      animationDelay: `${Math.min(idx, 8) * 40}ms`,
+                    }}
                   >
                     <Link to={`/suppliers/${s.id}`} className="block p-4">
                       <div className="flex gap-3">
