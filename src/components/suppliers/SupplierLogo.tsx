@@ -15,7 +15,7 @@ const sizeMap = {
   md: "h-12 w-12 text-sm",
   lg: "h-[72px] w-[72px] text-base",
   xl: "h-24 w-24 text-2xl",
-  hero: "h-[112px] w-[112px] text-3xl",
+  hero: "h-[132px] w-[132px] text-3xl",
 };
 
 const padMap = {
@@ -23,7 +23,7 @@ const padMap = {
   md: "p-1.5",
   lg: "p-2",
   xl: "p-2.5",
-  hero: "p-3",
+  hero: "p-1",
 };
 
 function getInitials(name?: string | null) {
@@ -45,6 +45,7 @@ export function SupplierLogo({ name, logoUrl, size = "md", className }: Supplier
       className={cn(
         "shrink-0 rounded-full overflow-hidden flex items-center justify-center font-extrabold",
         "bg-white border-2 border-slate-200 shadow-[0_10px_28px_-12px_rgba(15,23,42,0.28)]",
+        size === "hero" && "border-[3px] border-[#0E6B5A]/35 shadow-[0_14px_36px_-14px_rgba(14,107,90,0.45),0_6px_16px_-8px_rgba(15,23,42,0.2)]",
         logoUrl ? padMap[size] : "bg-[rgba(14,107,90,0.12)]",
         sizeMap[size],
         className,

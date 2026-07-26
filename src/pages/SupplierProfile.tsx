@@ -396,9 +396,18 @@ export default function SupplierProfile() {
             חזרה
           </button>
 
-          <div className={`${floatCard} px-4 pt-6 pb-5 text-center`}>
-            <div className="flex justify-center mb-3">
-              <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="hero" />
+          <div className={`${floatCard} px-4 pt-7 pb-5 text-center`}>
+            <div className="flex justify-center mb-4">
+              <div
+                className="rounded-full p-1.5"
+                style={{
+                  background:
+                    "linear-gradient(145deg, rgba(14,107,90,0.22) 0%, rgba(14,107,90,0.06) 55%, rgba(15,23,42,0.04) 100%)",
+                  boxShadow: "0 16px 40px -18px rgba(14,107,90,0.45)",
+                }}
+              >
+                <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="hero" />
+              </div>
             </div>
             <EditableField
               table="suppliers"
@@ -613,47 +622,65 @@ export default function SupplierProfile() {
             </section>
           )}
 
-          {/* 8. Reviews */}
-          {reviews.length > 0 && (
-            <section className={`${floatCard} p-4`}>
-              <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
-                <Star className="h-3.5 w-3.5" style={{ color: BRAND }} /> ביקורות אחרונות
-              </h2>
-              <div className="space-y-3">
-                {(showAllReviews ? reviews : reviews.slice(0, 3)).map((r) => (
-                  <div key={r.id} className="rounded-2xl bg-[#F4F7F6] border border-slate-200 p-3">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-bold text-slate-900">{r.reviewer_name || "דייר"}</span>
-                      <div className="flex items-center gap-0.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-3.5 w-3.5 ${i < r.rating ? "fill-[#F5B600] text-[#F5B600]" : "text-slate-200"}`}
-                          />
-                        ))}
+          {/* 8. Recommendations — always present at the bottom */}
+          <section className={`${floatCard} p-4`}>
+            <h2 className={`${sectionLabel} flex items-center justify-center gap-1.5`}>
+              <Star className="h-3.5 w-3.5" style={{ color: BRAND }} /> המלצות
+              {reviews.length > 0 && (
+                <span className="text-slate-500 font-medium">· {reviews.length}</span>
+              )}
+            </h2>
+            {reviews.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-[#F4F7F6] px-4 py-6 text-center">
+                <div
+                  className="mx-auto mb-2.5 h-11 w-11 rounded-full grid place-items-center"
+                  style={{ background: "rgba(14,107,90,0.12)", color: BRAND }}
+                >
+                  <Star className="h-5 w-5" />
+                </div>
+                <p className="text-sm font-extrabold text-slate-800">עדיין אין המלצות</p>
+                <p className="mt-1 text-[12px] text-slate-500 leading-relaxed">
+                  לקוחות שעבדו עם {supplier.business_name} יוכלו לשתף כאן חוות דעת.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  {(showAllReviews ? reviews : reviews.slice(0, 3)).map((r) => (
+                    <div key={r.id} className="rounded-2xl bg-[#F4F7F6] border border-slate-200 p-3 text-start">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm font-bold text-slate-900">{r.reviewer_name || "דייר"}</span>
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-3.5 w-3.5 ${i < r.rating ? "fill-[#F5B600] text-[#F5B600]" : "text-slate-200"}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {r.comment && (
+                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{r.comment}</p>
+                      )}
+                      <div className="text-fs-xs text-slate-500 mt-1.5">
+                        {new Date(r.created_at).toLocaleDateString("he-IL")}
                       </div>
                     </div>
-                    {r.comment && (
-                      <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{r.comment}</p>
-                    )}
-                    <div className="text-fs-xs text-slate-500 mt-1.5">
-                      {new Date(r.created_at).toLocaleDateString("he-IL")}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {reviews.length > 3 && (
-                <button
-                  type="button"
-                  onClick={() => setShowAllReviews((v) => !v)}
-                  className="mt-3 w-full h-10 rounded-2xl text-sm font-extrabold bg-white border border-slate-200 shadow-sm active:scale-[0.98] transition-transform"
-                  style={{ color: BRAND }}
-                >
-                  {showAllReviews ? "הצג פחות" : `הצג עוד (${reviews.length - 3})`}
-                </button>
-              )}
-            </section>
-          )}
+                  ))}
+                </div>
+                {reviews.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllReviews((v) => !v)}
+                    className="mt-3 w-full h-10 rounded-2xl text-sm font-extrabold bg-white border border-slate-200 shadow-sm active:scale-[0.98] transition-transform"
+                    style={{ color: BRAND }}
+                  >
+                    {showAllReviews ? "הצג פחות" : `הצג עוד (${reviews.length - 3})`}
+                  </button>
+                )}
+              </>
+            )}
+          </section>
         </div>
       </div>
 
