@@ -6,19 +6,14 @@ import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 import { PROJECT_TYPE_META, stageMeta, type ProjectType } from "@/lib/stageCatalog";
-import stagePlanningImg from "@/assets/stage-planning.jpg";
-import newBuildImg from "@/assets/journey-new-build.jpg";
-import renoImg from "@/assets/journey-renovation.jpg";
-import committeeImg from "@/assets/journey-committee.jpg";
+import {
+  illustrationForLabel,
+  illustrationForProjectType,
+  illustrationForStage,
+} from "@/lib/stageIllustrations";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
-
-const TYPE_ILLUSTRATION: Partial<Record<ProjectType, string>> = {
-  new: newBuildImg,
-  reno: renoImg,
-  building: committeeImg,
-};
 
 interface SupplierLite { id: string; categories: string[] }
 type SupplierRow = { id: string; categories: string[] | null };
@@ -174,7 +169,7 @@ export default function CategoryStages() {
             style={{ boxShadow: "var(--shadow-soft)" }}
           >
             <img
-              src={TYPE_ILLUSTRATION[type] ?? stagePlanningImg}
+              src={illustrationForStage(resolvedStageKey, type)}
               alt=""
               loading="lazy"
               className="h-full w-full object-cover object-center"
@@ -215,7 +210,7 @@ export default function CategoryStages() {
                   <div className="flex-1 min-h-0 w-full px-2 pt-2">
                     <div className="h-full w-full rounded-[12px] overflow-hidden bg-[#F4F1EA]">
                       <img
-                        src={TYPE_ILLUSTRATION[type] ?? stagePlanningImg}
+                        src={illustrationForLabel(c.name, illustrationForProjectType(type))}
                         alt=""
                         loading="lazy"
                         className="h-full w-full object-cover object-center"
