@@ -19,7 +19,7 @@ import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
 import { iconForCategory, iconForStage } from "@/lib/categoryIcons";
 import { Seo } from "@/components/seo/Seo";
 import finishesImg from "@/assets/stages/stage-finishes.jpg";
-import heroAtmosphereImg from "@/assets/project-renovation.jpg";
+import heroAtmosphereImg from "@/assets/categories-hero-living.jpg";
 import projectNewBuildImg from "@/assets/project-new-build.jpg";
 import projectRenoImg from "@/assets/project-renovation.jpg";
 import projectBuildingImg from "@/assets/project-building.jpg";
@@ -155,28 +155,38 @@ function CategoryHeroSearch({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="relative -mx-4 mb-5 overflow-hidden">
-      {/* Atmospheric blurred photo — matches sketch lifestyle room */}
+    <div
+      className="relative -mx-4 mb-5 overflow-hidden"
+      style={{ minHeight: "168px" }}
+    >
+      {/* Lifestyle photo — anchored to the right so it stays visible like the sketch */}
       <img
         src={heroAtmosphereImg}
         alt=""
         aria-hidden
-        className="absolute inset-0 h-full w-full scale-110 object-cover object-[center_40%] blur-[1.5px]"
+        className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover"
+        style={{
+          objectPosition: "72% 42%",
+          filter: "blur(2.5px) saturate(1.05)",
+        }}
       />
-      {/* Brand green → soft gray overlay */}
+
+      {/* Soft green wash on the LEFT, photo readable on the RIGHT — sketch composition */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(100deg, rgba(14,107,90,0.92) 0%, rgba(14,107,90,0.62) 42%, rgba(248,250,252,0.78) 78%, rgba(248,250,252,0.97) 100%)",
+            "linear-gradient(90deg, #0E6B5A 0%, rgba(14,107,90,0.88) 26%, rgba(14,107,90,0.45) 52%, rgba(14,107,90,0.12) 72%, rgba(248,250,252,0.35) 100%)",
         }}
       />
-      <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-b from-transparent to-slate-50" />
 
-      <div className="relative px-4 pt-[calc(env(safe-area-inset-top)+18px)] pb-8">
+      {/* Gentle fade into page background */}
+      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent via-slate-50/40 to-slate-50" />
+
+      <div className="relative flex min-h-[168px] flex-col justify-center px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-9">
         <label
           className="flex h-[52px] items-center gap-3 rounded-full bg-white px-5 text-slate-400"
-          style={{ boxShadow: "0 14px 32px -16px rgba(15,23,42,0.28)" }}
+          style={{ boxShadow: "0 14px 32px -14px rgba(15,23,42,0.32)" }}
         >
           <Search size={20} strokeWidth={1.9} className="shrink-0 text-slate-400" />
           <input
