@@ -385,14 +385,9 @@ export default function CategoriesList() {
                             <HitIcon size={18} strokeWidth={1.8} />
                           </span>
                           <span className="min-w-0 flex-1 text-right">
-                            <span className="block truncate text-[14px] font-bold text-slate-800">
+                            <span className="block truncate text-[15px] font-bold leading-6 text-slate-800">
                               {h.name}
                             </span>
-                            {h.path && (
-                              <span className="block truncate text-[11px] text-slate-500">
-                                {h.path}
-                              </span>
-                            )}
                           </span>
                           <ChevronLeft className="h-4 w-4 shrink-0 text-slate-400" strokeWidth={2.2} />
                         </Link>
