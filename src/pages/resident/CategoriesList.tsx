@@ -79,31 +79,31 @@ function ProjectTypeCard({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="relative flex flex-col items-center justify-center gap-3 rounded-[20px] px-2 py-4 min-h-[132px] transition-all active:scale-[0.98]"
+      className="relative aspect-square flex flex-col items-center justify-center gap-2 rounded-[18px] px-1.5 py-2 transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5"
       style={{
-        background: selected ? def.bgSelected : "rgba(255,255,255,0.85)",
-        border: `1px solid ${selected ? def.borderSelected : "rgba(224,228,225,0.85)"}`,
+        background: selected ? def.bgSelected : "rgba(255,255,255,0.94)",
+        border: `1px solid ${selected ? def.borderSelected : "rgba(255,255,255,0.85)"}`,
         boxShadow: selected
-          ? `0 10px 26px ${def.color}22`
-          : "0 6px 18px rgba(31,40,35,0.06)",
+          ? `0 16px 36px -18px ${def.color}55, 0 6px 14px -8px rgba(31,40,35,0.10)`
+          : "var(--shadow-elevated)",
         color: def.color,
       }}
     >
       {selected && (
         <span
-          className="absolute top-2 right-2 grid place-items-center rounded-full text-white"
+          className="absolute top-1.5 right-1.5 grid place-items-center rounded-full text-white"
           style={{
-            width: 22,
-            height: 22,
+            width: 18,
+            height: 18,
             background: def.color,
             boxShadow: `0 4px 10px ${def.color}44`,
           }}
         >
-          <Check size={13} strokeWidth={3} />
+          <Check size={11} strokeWidth={3} />
         </span>
       )}
-      <Icon size={36} strokeWidth={1.7} />
-      <span className="flex flex-col items-center font-extrabold text-[13.5px] leading-tight text-[#1f2937]">
+      <Icon size={28} strokeWidth={1.7} />
+      <span className="flex flex-col items-center font-extrabold text-[11.5px] leading-tight text-[#1f2937]">
         {def.title.split("\n").map((line) => (
           <span key={line}>{line}</span>
         ))}
@@ -152,34 +152,28 @@ function StageGridCard({
     <button
       type="button"
       onClick={onClick}
-      className="relative flex flex-col items-center justify-center gap-2 rounded-[20px] px-2 py-4 min-h-[124px] transition-all active:scale-[0.97]"
+      className="relative aspect-square flex flex-col items-center justify-center gap-1.5 rounded-[18px] px-1.5 py-2 transition-all duration-300 active:scale-[0.97] hover:-translate-y-0.5"
       style={{
-        background: "rgba(255,255,255,0.92)",
-        border: `1px solid rgba(224,228,225,0.9)`,
-        boxShadow: "0 6px 18px rgba(31,40,35,0.06)",
+        background: "rgba(255,255,255,0.96)",
+        border: "1px solid rgba(255,255,255,0.9)",
+        boxShadow: "var(--shadow-elevated)",
       }}
     >
       {soon && (
         <span
-          className="absolute top-1.5 right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+          className="absolute top-1 right-1 text-[8px] font-bold px-1 py-0.5 rounded-md"
           style={{ background: "#F1EFE8", color: "#8b8574" }}
         >
           בקרוב
         </span>
       )}
-      <ChevronLeft
-        size={14}
-        className="absolute top-2 left-2 shrink-0"
-        style={{ color: `${accentColor}88` }}
-        strokeWidth={2.4}
-      />
       <div
-        className="grid place-items-center w-12 h-12 rounded-2xl text-[26px]"
+        className="grid place-items-center w-10 h-10 rounded-[14px] text-[22px]"
         style={{ background: `${accentColor}12` }}
       >
         <span aria-hidden>{emoji}</span>
       </div>
-      <span className="block text-[12.5px] font-extrabold text-[#1e2530] leading-tight text-center px-1">
+      <span className="block text-[11px] font-extrabold text-[#1e2530] leading-tight text-center px-0.5 line-clamp-2">
         {title}
       </span>
     </button>
@@ -400,7 +394,7 @@ export default function CategoriesList() {
           <CategorySearch value={query} onChange={setQuery} />
         </div>
 
-        {/* Project types (single row of 3) */}
+        {/* Project types (floating squares) */}
         <div className="grid grid-cols-3 gap-2.5 mb-6">
           {PROJECT_TYPES.map((def) => (
             <ProjectTypeCard
@@ -472,11 +466,12 @@ export default function CategoriesList() {
           </div>
 
           {loading ? (
-            <div className="space-y-2.5">
-              {Array.from({ length: 6 }).map((_, i) => (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+              {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-[76px] rounded-2xl bg-white/70 border border-white/60 animate-pulse"
+                  className="aspect-square rounded-[18px] bg-white/70 border border-white/60 animate-pulse"
+                  style={{ boxShadow: "var(--shadow-soft)" }}
                 />
               ))}
             </div>
@@ -496,7 +491,7 @@ export default function CategoriesList() {
               <strong className="text-[#26313c]">בקרוב נוסיף שלבים למסלול זה</strong>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
               {filtered.map((s) => (
                 <StageGridCard
                   key={s.key}
