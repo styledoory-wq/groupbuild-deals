@@ -220,7 +220,11 @@ export function CategoryMultiPicker({
           const totalLeaves = leavesByDomain.get(d.id)?.length ?? 0;
           const selectedCount = (leavesByDomain.get(d.id) ?? []).filter((l) => selectedSet.has(l.id)).length;
           const allSelected = totalLeaves > 0 && selectedCount === totalLeaves;
-          const open = isFiltering || openDomains[d.id] || selectedCount > 0;
+          // Respect the user's explicit open/close. When they haven't toggled
+          // it yet (`undefined`), auto-open if there are already selections so
+          // the chips are visible; once toggled, honor their choice.
+          const userState = openDomains[d.id];
+          const open = isFiltering || (userState === undefined ? selectedCount > 0 : userState);
 
           // Sub-group leaves by their intermediate parent for readability.
           const groups = new Map<string, { name: string; icon: string; items: Leaf[] }>();
