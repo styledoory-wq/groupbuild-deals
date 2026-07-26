@@ -82,17 +82,17 @@ function ProjectTypeCircle({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="flex flex-col items-center gap-3 flex-1 min-w-0 active:scale-[0.97] transition-transform"
+      className="flex min-w-0 flex-1 flex-col items-center gap-3 active:scale-[0.97] transition-transform"
     >
       {/* Extra bottom space so the overlapping icon bubble isn't clipped */}
       <span className="relative mx-auto mb-3 block h-[104px] w-[104px]">
         <span
-          className="absolute inset-0 overflow-hidden rounded-full bg-slate-100"
-          style={{
-            boxShadow: selected
-              ? `0 0 0 3px ${BRAND}, 0 16px 32px -18px ${BRAND}99`
-              : "0 10px 24px -14px rgba(15,23,42,0.18)",
-          }}
+          className={
+            "absolute inset-0 overflow-hidden rounded-full bg-slate-100 " +
+            (selected
+              ? "border-[3px] border-emerald-700 shadow-[0_16px_32px_-18px_rgba(4,120,87,0.55)]"
+              : "border-0 shadow-[0_10px_24px_-14px_rgba(15,23,42,0.18)]")
+          }
         >
           <img
             src={def.img}
@@ -105,14 +105,8 @@ function ProjectTypeCircle({
         {/* Active V — top-right corner of the circle */}
         {selected && (
           <span
-            className="absolute right-0 top-0 z-20 grid place-items-center rounded-full text-white"
-            style={{
-              width: 26,
-              height: 26,
-              background: BRAND,
-              boxShadow: `0 4px 12px ${BRAND}66`,
-              transform: "translate(12%, -12%)",
-            }}
+            className="absolute right-0 top-0 z-20 grid h-[26px] w-[26px] place-items-center rounded-full bg-emerald-700 text-white shadow-md"
+            style={{ transform: "translate(12%, -12%)" }}
           >
             <Check size={14} strokeWidth={3} fill="none" />
           </span>
@@ -120,24 +114,28 @@ function ProjectTypeCircle({
 
         {/* Icon bubble overlapping the bottom edge of the photo circle */}
         <span
-          className="absolute left-1/2 z-20 grid place-items-center rounded-full border border-gray-100 bg-white"
+          className="absolute left-1/2 z-20 grid h-[34px] w-[34px] place-items-center rounded-full border border-gray-100 bg-white shadow-md"
           style={{
-            width: 34,
-            height: 34,
             bottom: 0,
             transform: "translate(-50%, 45%)",
             color: BRAND,
-            boxShadow: "0 4px 12px rgba(15,23,42,0.14)",
           }}
         >
-          <Icon size={16} strokeWidth={2} fill="none" style={{ color: BRAND, stroke: BRAND }} />
+          <Icon
+            size={16}
+            strokeWidth={2}
+            fill="none"
+            style={{ color: BRAND, stroke: BRAND }}
+          />
         </span>
       </span>
 
       <span className="px-0.5 text-center">
         <span
-          className="block text-[13.5px] font-extrabold leading-tight"
-          style={{ color: selected ? BRAND : "#0F172A" }}
+          className={
+            "block text-[13.5px] font-extrabold leading-tight " +
+            (selected ? "text-emerald-700" : "text-slate-900")
+          }
         >
           {def.title}
         </span>
@@ -490,7 +488,7 @@ export default function CategoriesList() {
                   {Array.from({ length: 9 }).map((_, i) => (
                     <div
                       key={i}
-                      className="aspect-[1/1.08] animate-pulse rounded-2xl border border-gray-100 bg-white shadow-sm"
+                      className="aspect-square animate-pulse rounded-2xl border border-gray-100 bg-white shadow-sm"
                     />
                   ))}
                 </div>
