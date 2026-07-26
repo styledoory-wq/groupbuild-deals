@@ -17,6 +17,7 @@ export function ScanFAB() {
   if (pathname.startsWith("/supplier/scan")) return null;
   // Hide on offer-editor / marketing flows to avoid covering form actions
   if (pathname.includes("/edit") || pathname.includes("/new") || pathname.includes("/marketing")) return null;
+  if (pathname.includes("/onboarding") || pathname.includes("/welcome") || pathname.includes("/auth")) return null;
 
   return (
     <button
