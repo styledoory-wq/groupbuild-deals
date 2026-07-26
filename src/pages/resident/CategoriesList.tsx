@@ -5,91 +5,22 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import {
   Bell,
-  Building2,
   Check,
   ChevronLeft,
-  ClipboardList,
-  Compass,
-  DoorOpen,
-  Droplets,
-  Fence,
-  Hammer,
-  Home as HomeIcon,
-  KeyRound,
-  Layers,
-  Lightbulb,
-  PaintRoller,
-  Ruler,
   Search,
   ShieldCheck,
-  Sofa,
-  Sparkles,
-  SunMedium,
-  Trees,
   UserRound,
-  Wind,
-  Wrench,
-  Zap,
-  type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
-import {
-  illustrationForCategory,
-  illustrationForProjectType,
-} from "@/lib/stageIllustrations";
+import { iconForCategory, iconForStage } from "@/lib/categoryIcons";
+import { illustrationForProjectType } from "@/lib/stageIllustrations";
 import { Seo } from "@/components/seo/Seo";
 import finishesImg from "@/assets/stages/stage-finishes.jpg";
-import newBuildImg from "@/assets/journey-new-build.jpg";
 
 const BRAND = "#0E6B5A";
-
-/** Line icons for stage squares — matches the approved combo mockup. */
-const STAGE_ICONS: Record<string, LucideIcon> = {
-  "pre-plan": Lightbulb,
-  planning: Ruler,
-  "site-prep": Hammer,
-  foundation: Building2,
-  envelope: Layers,
-  systems: Zap,
-  finishes: Sofa,
-  "interior-prep": PaintRoller,
-  outdoor: Trees,
-  handover: KeyRound,
-  turnkey: HomeIcon,
-  "reno-design": Compass,
-  "reno-demo": Hammer,
-  "kitchen-bath": Droplets,
-  electric: Zap,
-  plumbing: Wrench,
-  ac: Wind,
-  "paint-gypsum": PaintRoller,
-  flooring: Layers,
-  "reno-finishes": Sofa,
-  "doors-windows": DoorOpen,
-  management: ClipboardList,
-  cleaning: Sparkles,
-  garden: Trees,
-  elevators: Building2,
-  "shared-electric": Lightbulb,
-  cctv: ShieldCheck,
-  entrance: DoorOpen,
-  facade: Fence,
-  solar: SunMedium,
-  extras: Sparkles,
-  routine: Sparkles,
-  "systems-fix": Wrench,
-  "building-work": Building2,
-  design: Ruler,
-  build: Hammer,
-  plants: Trees,
-  water: Droplets,
-};
-
-function iconForStage(stageKey: string): LucideIcon {
-  return STAGE_ICONS[stageKey] ?? Sparkles;
-}
 
 const STORAGE_KEY = "gb:projectType";
 
@@ -100,8 +31,6 @@ type ProjectTypeDef = {
   title: string;
   subtitle: string;
   img: string;
-  color: string;
-  Icon: typeof HomeIcon;
 };
 
 const PROJECT_TYPES: ProjectTypeDef[] = [
@@ -110,24 +39,18 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
     title: "בנייה חדשה",
     subtitle: "הכל לבניית בית חדש",
     img: illustrationForProjectType("new"),
-    color: "#0E6B5A",
-    Icon: HomeIcon,
   },
   {
     id: "reno",
     title: "שיפוץ",
     subtitle: "שדרוג ושיפוץ הבית",
     img: illustrationForProjectType("reno"),
-    color: "#0E6B5A",
-    Icon: PaintRoller,
   },
   {
     id: "building",
     title: "בניין משותף",
     subtitle: "ועד בית ותחזוקה",
     img: illustrationForProjectType("building"),
-    color: "#0E6B5A",
-    Icon: Building2,
   },
 ];
 
@@ -142,7 +65,6 @@ function ProjectTypeCircle({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const Icon = def.Icon;
   return (
     <button
       type="button"
@@ -150,13 +72,13 @@ function ProjectTypeCircle({
       aria-pressed={selected}
       className="flex flex-col items-center gap-2.5 flex-1 min-w-0 active:scale-[0.97] transition-transform"
     >
-      <span className="relative block w-[108px] h-[108px] mx-auto">
+      <span className="relative block w-[104px] h-[104px] mx-auto">
         <span
           className="absolute inset-0 rounded-full overflow-hidden bg-[#E8EEE9]"
           style={{
             boxShadow: selected
-              ? `0 0 0 3px ${BRAND}, 0 16px 32px -18px ${BRAND}88`
-              : "0 10px 24px -14px rgba(16,24,40,0.18)",
+              ? `0 0 0 3px ${BRAND}, 0 14px 28px -16px ${BRAND}88`
+              : "0 8px 20px -12px rgba(16,24,40,0.16)",
           }}
         >
           <img
@@ -168,23 +90,17 @@ function ProjectTypeCircle({
         </span>
         {selected && (
           <span
-            className="absolute top-0 right-0 z-10 grid place-items-center rounded-full text-white"
+            className="absolute top-0.5 right-0.5 z-10 grid place-items-center rounded-full text-white"
             style={{
-              width: 26,
-              height: 26,
+              width: 24,
+              height: 24,
               background: BRAND,
               boxShadow: `0 4px 12px ${BRAND}55`,
             }}
           >
-            <Check size={14} strokeWidth={3} />
+            <Check size={13} strokeWidth={3} />
           </span>
         )}
-        <span
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 z-10 grid place-items-center rounded-full bg-white"
-          style={{ width: 30, height: 30, boxShadow: "0 4px 10px rgba(16,24,40,0.12)", color: BRAND }}
-        >
-          <Icon size={15} strokeWidth={2.2} />
-        </span>
       </span>
       <span className="text-center px-0.5">
         <span
@@ -209,66 +125,20 @@ function CategorySearch({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-[28px]">
-      <img
-        src={newBuildImg}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover opacity-30 scale-110"
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/70 to-[#F7F8F6]" />
-      <div className="relative px-1 py-5">
-        <label
-          className="flex items-center gap-3 h-[54px] px-5 rounded-full bg-white text-[#667085]"
-          style={{ boxShadow: "0 12px 28px -16px rgba(16,24,40,0.22)" }}
-        >
-          <Search size={20} strokeWidth={1.9} />
-          <input
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="חפש שירות, ספק או מוצר..."
-            aria-label="חיפוש"
-            dir="rtl"
-            className="w-full bg-transparent border-0 outline-none text-right text-[14px] text-[#172033] placeholder:text-[#8b93a1]"
-          />
-        </label>
-      </div>
-    </div>
-  );
-}
-
-function StageGridCard({
-  title,
-  stageKey,
-  serviceCount,
-  onClick,
-}: {
-  title: string;
-  stageKey: string;
-  serviceCount: number;
-  onClick: () => void;
-}) {
-  const Icon = iconForStage(stageKey);
-  const soon = serviceCount === 0;
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="aspect-square flex flex-col items-center justify-center gap-2 rounded-[22px] bg-white px-2.5 py-3 border border-[#EEF1EF] active:scale-[0.97] transition-transform"
-      style={{ boxShadow: "0 8px 20px -14px rgba(16,24,40,0.16)" }}
+    <label
+      className="flex items-center gap-3 h-[52px] px-5 rounded-full bg-white text-[#667085]"
+      style={{ boxShadow: "0 10px 24px -14px rgba(16,24,40,0.18)" }}
     >
-      <span
-        className="grid place-items-center w-12 h-12 rounded-2xl"
-        style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
-      >
-        <Icon size={26} strokeWidth={1.7} />
-      </span>
-      <span className="block text-[12.5px] font-extrabold text-[#1A1A1A] leading-tight text-center line-clamp-2 px-0.5">
-        {title}
-      </span>
-      <span className="block text-[11px] font-semibold leading-none" style={{ color: soon ? "#9CA3AF" : BRAND }}>
-        {soon ? "בקרוב" : `${serviceCount} ספקים`}
-      </span>
-    </button>
+      <Search size={20} strokeWidth={1.9} />
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="חפש שירות, ספק או מוצר..."
+        aria-label="חיפוש"
+        dir="rtl"
+        className="w-full bg-transparent border-0 outline-none text-right text-[14px] text-[#172033] placeholder:text-[#8b93a1]"
+      />
+    </label>
   );
 }
 
@@ -410,7 +280,7 @@ export default function CategoriesList() {
       />
       <div
         dir="rtl"
-        className="min-h-screen min-h-[100dvh] w-full bg-white"
+        className="min-h-screen min-h-[100dvh] w-full bg-[#F7F8F6]"
         style={{
           fontFamily: "'Heebo', 'Inter', system-ui, sans-serif",
           color: "#172033",
@@ -511,34 +381,36 @@ export default function CategoriesList() {
                 </div>
               ) : (
                 <div className="space-y-2.5">
-                  {catalogHits.map((h) => (
-                    <Link
-                      key={h.id}
-                      to={`/resident/categories/${h.id}`}
-                      className="flex items-center gap-3 bg-white rounded-[18px] p-3 border border-[#ECEEF2] active:scale-[0.99] transition-transform"
-                      style={{ boxShadow: "var(--shadow-soft)" }}
-                    >
-                      <span className="h-11 w-11 rounded-2xl overflow-hidden bg-[#0E6B5A]/10 shrink-0">
-                        <img
-                          src={illustrationForCategory(h.id, h.name)}
-                          alt=""
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </span>
-                      <div className="flex-1 min-w-0 text-right">
-                        <p className="font-bold text-[14px] text-[#1F2937] truncate">{h.name}</p>
-                        {h.path && (
-                          <p className="text-[11px] text-[#6B7280] truncate mt-0.5" dir="rtl">
-                            {h.path}
+                  {catalogHits.map((h) => {
+                    const HitIcon = iconForCategory(h.id, h.name);
+                    return (
+                      <Link
+                        key={h.id}
+                        to={`/resident/categories/${h.id}`}
+                        className="flex items-center gap-3 bg-white rounded-[18px] p-3 active:scale-[0.99] transition-transform"
+                        style={{ boxShadow: "0 6px 18px -10px rgba(16,24,40,0.12)" }}
+                      >
+                        <span
+                          className="h-11 w-11 rounded-full grid place-items-center shrink-0"
+                          style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+                        >
+                          <HitIcon size={22} strokeWidth={1.7} />
+                        </span>
+                        <div className="flex-1 min-w-0 text-right">
+                          <p className="font-bold text-[14px] text-[#1F2937] truncate">{h.name}</p>
+                          {h.path && (
+                            <p className="text-[11px] text-[#6B7280] truncate mt-0.5" dir="rtl">
+                              {h.path}
+                            </p>
+                          )}
+                          <p className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">
+                            {h.supplier_count > 0 ? `${h.supplier_count} ספקים` : "בקרוב"}
                           </p>
-                        )}
-                        <p className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">
-                          {h.supplier_count > 0 ? `${h.supplier_count} ספקים` : "בקרוב"}
-                        </p>
-                      </div>
-                      <ChevronLeft className="h-4 w-4 text-[#6B7280] shrink-0" strokeWidth={2.2} />
-                    </Link>
-                  ))}
+                        </div>
+                        <ChevronLeft className="h-4 w-4 text-[#6B7280] shrink-0" strokeWidth={2.2} />
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </section>
@@ -562,12 +434,12 @@ export default function CategoriesList() {
               </div>
 
               {loading ? (
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2.5">
                   {Array.from({ length: 9 }).map((_, i) => (
                     <div
                       key={i}
-                      className="aspect-square rounded-[20px] bg-white animate-pulse"
-                      style={{ boxShadow: "var(--shadow-soft)" }}
+                      className="aspect-[1/1.05] rounded-[22px] bg-white animate-pulse"
+                      style={{ boxShadow: "0 6px 18px -8px rgba(16,24,40,0.10)" }}
                     />
                   ))}
                 </div>
@@ -587,13 +459,13 @@ export default function CategoriesList() {
                   <strong className="text-[#26313c]">בקרוב נוסיף שלבים למסלול זה</strong>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2.5">
                   {filtered.map((s) => (
-                    <StageGridCard
+                    <CategorySquareCard
                       key={s.key}
                       title={s.title}
-                      stageKey={s.key}
-                      serviceCount={s.serviceCount}
+                      Icon={iconForStage(s.key)}
+                      count={s.serviceCount}
                       onClick={() => openStage(s.key)}
                     />
                   ))}

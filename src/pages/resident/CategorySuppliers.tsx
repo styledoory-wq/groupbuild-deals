@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronDown, MapPin, ShieldCheck, Sparkles, Star, UserPlus, Wrench, Package, SlidersHorizontal } from "lucide-react";
+import { ArrowRight, ChevronDown, MapPin, ShieldCheck, Sparkles, Star, UserPlus, Wrench, Package } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { supabase } from "@/integrations/supabase/client";
-import { illustrationForCategory } from "@/lib/stageIllustrations";
+import { iconForCategory } from "@/lib/categoryIcons";
+
+const BRAND = "#0E6B5A";
 
 interface DbSupplier {
   id: string;
@@ -288,15 +291,17 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
     { v: "product", label: "ספקי מוצרים", Icon: Package },
   ];
 
+  const HeaderIcon = iconForCategory(activeCategoryId, activeCategory?.name);
+
   return (
     <MobileShell>
-      <div className="bg-slate-50 min-h-screen pb-24" dir="rtl">
+      <div className="bg-[#F7F8F6] min-h-screen pb-24" dir="rtl">
         <div className="px-4 max-w-2xl mx-auto" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}>
           {/* Sticky Header — offset for iPhone Dynamic Island / status bar */}
-          <header className="sticky z-20 bg-slate-50/90 backdrop-blur-md pb-3 pt-2 -mx-4 px-4" style={{ top: "env(safe-area-inset-top)" }}>
+          <header className="sticky z-20 bg-[#F7F8F6]/92 backdrop-blur-md pb-3 pt-2 -mx-4 px-4" style={{ top: "env(safe-area-inset-top)" }}>
             <button
               onClick={() => navigate(-1)}
-              className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-emerald-700 transition mb-2"
+              className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-[#0E6B5A] transition mb-2"
             >
               <ArrowRight className="h-3.5 w-3.5" />
               חזרה לתחומים
@@ -305,14 +310,10 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div
-                  className="h-11 w-11 rounded-[14px] overflow-hidden bg-white border border-white/90 shrink-0"
-                  style={{ boxShadow: "var(--shadow-elevated)" }}
+                  className="h-11 w-11 rounded-full grid place-items-center shrink-0"
+                  style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
                 >
-                  <img
-                    src={illustrationForCategory(activeCategoryId, activeCategory?.name)}
-                    alt=""
-                    className="h-full w-full object-cover object-center"
-                  />
+                  <HeaderIcon size={22} strokeWidth={1.7} />
                 </div>
                 <div className="min-w-0">
                   <h1 className="text-[20px] leading-tight font-bold text-slate-900 truncate">
@@ -325,50 +326,41 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
               </div>
             </div>
 
-            {/* Child categories — floating luxury squares, 3–4 per row */}
+            {/* Child categories — same white icon squares as CategoriesList */}
             {childCategories.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 mb-3">
-                {childCategories.map((c) => (
-                  <Link
-                    key={c.id}
-                    to={`/resident/categories/${c.id}`}
-                    className="relative aspect-square flex flex-col overflow-hidden rounded-[18px] border border-white/90 active:scale-[0.97] hover:-translate-y-0.5 transition-all duration-300"
-                    style={{
-                      background: "rgba(255,255,255,0.96)",
-                      boxShadow: "var(--shadow-elevated)",
-                    }}
-                  >
-                    <div className="flex-1 min-h-0 w-full px-2 pt-2">
-                      <div className="h-full w-full rounded-[12px] overflow-hidden bg-slate-50">
-                        <img
-                          src={illustrationForCategory(c.id, c.name)}
-                          alt=""
-                          loading="lazy"
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </div>
-                    </div>
-                    <span className="block text-[11px] font-extrabold text-slate-900 leading-tight text-center px-1.5 py-2 line-clamp-2">
-                      {c.name}
-                    </span>
-                  </Link>
-                ))}
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-2.5 px-0.5">
+                  <h2 className="text-[15px] font-extrabold text-[#1A1A1A] m-0">תתי־קטגוריות</h2>
+                  <span className="text-[11px] font-semibold text-[#6B7280]">{childCategories.length}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2.5">
+                  {childCategories.map((c) => (
+                    <Link key={c.id} to={`/resident/categories/${c.id}`} className="block">
+                      <CategorySquareCard
+                        title={c.name}
+                        Icon={iconForCategory(c.id, c.name)}
+                        subtitle="המשך"
+                        as="div"
+                      />
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
 
             {/* Summary chips */}
             <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar -mx-1 px-1">
-              <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-emerald-100 whitespace-nowrap">
+              <div className="flex items-center gap-1.5 bg-[#0E6B5A]/8 text-[#0E6B5A] px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap">
                 <Star className="h-3 w-3 fill-current" />
                 ספקים מאומתים
               </div>
               {nationalCount > 0 && (
-                <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-amber-100 whitespace-nowrap">
+                <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap">
                   <Sparkles className="h-3 w-3" />
                   {nationalCount} פועלים ארצית
                 </div>
               )}
-              <div className="flex items-center gap-1.5 bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 whitespace-nowrap">
+              <div className="flex items-center gap-1.5 bg-white text-slate-600 px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap">
                 <ShieldCheck className="h-3 w-3" />
                 ביקורות אמיתיות
               </div>
@@ -386,9 +378,10 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                     className={
                       "whitespace-nowrap px-3.5 py-1.5 rounded-full text-[12px] font-bold inline-flex items-center gap-1.5 transition-all border " +
                       (active
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                        : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300")
+                        ? "text-white border-transparent shadow-sm"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-[#0E6B5A]/40")
                     }
+                    style={active ? { background: BRAND, borderColor: BRAND } : undefined}
                   >
                     <Icon className="h-3 w-3" />
                     {label}
@@ -475,7 +468,8 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                 <button
                   type="button"
                   onClick={() => { setRegionId("all"); setCityId("all"); }}
-                  className="mt-4 h-10 px-4 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-sm hover:bg-emerald-700"
+                  className="mt-4 h-10 px-4 rounded-xl text-white text-xs font-bold shadow-sm"
+                  style={{ background: BRAND }}
                 >
                   שנה אזור
                 </button>
@@ -556,7 +550,8 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                       </div>
                       <Link
                         to={`/suppliers/${s.id}`}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-[12px] font-bold transition-colors shadow-sm"
+                        className="text-white px-4 py-1.5 rounded-lg text-[12px] font-bold transition-colors shadow-sm"
+                        style={{ background: BRAND }}
                       >
                         הצעת מחיר
                       </Link>
