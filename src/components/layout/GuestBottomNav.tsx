@@ -38,22 +38,23 @@ function GuestBottomNavImpl() {
               onPointerDown={() => preloadRoute(to)}
               onTouchStart={() => preloadRoute(to)}
               className={cn(
-                "flex-1 flex flex-col items-center justify-center gap-[3px] relative transition-colors duration-150",
+                "flex-1 flex flex-col items-center justify-center gap-1 relative transition-colors duration-150",
                 active ? "text-[#0E6B5A]" : "text-[#6B7280] hover:text-[#1F2937]",
               )}
               style={{ minHeight: "var(--tap)" }}
             >
-              <span
+              <div
                 className={cn(
-                  "absolute top-0 left-1/2 -translate-x-1/2 h-[3px] rounded-b-full transition-all duration-200",
-                  active ? "w-10 bg-[#0E6B5A]" : "w-0 bg-transparent",
+                  "relative grid place-items-center rounded-xl transition-all duration-200",
+                  active ? "h-9 w-11 bg-[#0E6B5A]/12" : "h-9 w-11 bg-transparent",
                 )}
-              />
-              <Icon
-                className={cn("shrink-0 transition-transform duration-200", active && "scale-[1.08]")}
-                style={{ width: 24, height: 24 }}
-                strokeWidth={active ? 2.4 : 1.9}
-              />
+              >
+                <Icon
+                  className="shrink-0"
+                  style={{ width: 22, height: 22 }}
+                  strokeWidth={active ? 2.35 : 1.9}
+                />
+              </div>
               <span className={cn("text-[10.5px] leading-none truncate max-w-full px-0.5 tracking-tight", active ? "font-bold" : "font-semibold")}>
                 {label}
               </span>
