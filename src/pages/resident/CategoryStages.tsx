@@ -2,18 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Home as HomeIcon } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 import { PROJECT_TYPE_META, stageMeta, type ProjectType } from "@/lib/stageCatalog";
-import {
-  illustrationForCategory,
-  illustrationForProjectType,
-  illustrationForStage,
-} from "@/lib/stageIllustrations";
+import { iconForCategory, iconForStage } from "@/lib/categoryIcons";
 
-const URBANIST = "'Urbanist', system-ui, sans-serif";
-const EPILOGUE = "'Epilogue', system-ui, sans-serif";
+const BRAND = "#0E6B5A";
 
 interface SupplierLite { id: string; categories: string[] }
 type SupplierRow = { id: string; categories: string[] | null };
@@ -30,13 +26,11 @@ export default function CategoryStages() {
   const [catIds, setCatIds] = useState<string[]>([]);
   const [resolvedStageKey, setResolvedStageKey] = useState<string>(stageKeyParam);
 
-  // Load categories for this stage from DB
   useEffect(() => {
     let cancelled = false;
     (async () => {
       let sk = stageKeyParam;
       if (!sk) {
-        // fallback: pick first stage of the type
         const { data: first } = await supabase
           .from("category_project_stages")
           .select("stage_key,display_order")
@@ -60,7 +54,6 @@ export default function CategoryStages() {
     return () => { cancelled = true; };
   }, [type, stageKeyParam]);
 
-  // Supplier counts per category
   const cached = getCachedValue<SupplierLite[]>("categories:suppliers:v2", 5 * 60_000);
   const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
 
@@ -94,6 +87,7 @@ export default function CategoryStages() {
   }, [suppliers]);
 
   const stageInfo = stageMeta(type, resolvedStageKey);
+  const StageIcon = iconForStage(resolvedStageKey);
 
   const services = useMemo(() => {
     return catIds.flatMap((id) => {
@@ -102,47 +96,46 @@ export default function CategoryStages() {
       return [{
         id,
         name: c.name,
-        emoji: c.icon ?? stageInfo.emoji,
         count: counts[id] ?? 0,
       }];
     });
-  }, [catIds, categories, counts, stageInfo.emoji]);
+  }, [catIds, categories, counts]);
 
   return (
     <div
       dir="rtl"
-      className="min-h-screen min-h-[100dvh] w-full"
-      style={{ background: "#FBF8F3", fontFamily: EPILOGUE, color: "#2D2D2D" }}
+      className="min-h-screen min-h-[100dvh] w-full bg-[#F7F8F6]"
+      style={{ fontFamily: "'Heebo', system-ui, sans-serif", color: "#172033" }}
     >
       <div
-        className="mx-auto w-full max-w-[var(--app-max-w)] px-5 pt-[calc(env(safe-area-inset-top)+16px)]"
+        className="mx-auto w-full max-w-[var(--app-max-w)] px-4 pt-[calc(env(safe-area-inset-top)+16px)]"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 32px)" }}
       >
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate("/resident/categories")}
             aria-label="חזרה"
-            className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center active:scale-95 transition-transform"
+            className="w-9 h-9 rounded-full bg-white border border-[#EEF1EF] flex items-center justify-center active:scale-95 transition-transform"
+            style={{ boxShadow: "0 4px 12px rgba(16,24,40,0.08)" }}
           >
             <ChevronRight className="h-5 w-5 text-[#1A1A1A]" strokeWidth={2.5} />
           </button>
           <div className="text-center">
             <p className="text-[11px] font-bold text-gray-500 leading-tight">{typeMeta.label}</p>
-            <h1 className="text-[18px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
+            <h1 className="text-[18px] font-extrabold text-[#1A1A1A] leading-tight">
               {stageInfo.title}
             </h1>
           </div>
           <button
             onClick={() => navigate("/resident/dashboard")}
             aria-label="בית"
-            className="w-9 h-9 rounded-full bg-[#E8F2EC] flex items-center justify-center active:scale-95 transition-transform"
+            className="w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition-transform"
+            style={{ background: "rgba(14,107,90,0.10)", color: BRAND }}
           >
-            <HomeIcon className="h-5 w-5 text-[#0E6B5A]" strokeWidth={2.2} />
+            <HomeIcon className="h-5 w-5" strokeWidth={2.2} />
           </button>
         </div>
 
-        {/* Breadcrumb */}
         <div className="text-[11.5px] text-gray-500 mb-4 flex items-center gap-1.5 flex-wrap">
           <button onClick={() => navigate("/resident/categories")} className="hover:text-[#0E6B5A] font-medium">
             {typeMeta.label}
@@ -151,81 +144,51 @@ export default function CategoryStages() {
           <span className="font-extrabold text-[#1A1A1A]">{stageInfo.title}</span>
         </div>
 
-        {/* Stage hero */}
+        {/* Stage summary */}
         <div
-          className="rounded-[22px] mb-5 p-4 flex items-stretch gap-3 border border-white/80"
-          style={{ background: "#F4EEE2", boxShadow: "var(--shadow-elevated)" }}
+          className="rounded-[22px] mb-5 p-4 flex items-center gap-3 bg-white border border-[#EEF1EF]"
+          style={{ boxShadow: "0 8px 20px -14px rgba(16,24,40,0.14)" }}
         >
-          <div className="flex-1 min-w-0 flex flex-col justify-center">
-            <h2 className="text-[19px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
+          <span
+            className="grid place-items-center w-14 h-14 rounded-full shrink-0"
+            style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+          >
+            <StageIcon size={28} strokeWidth={1.7} />
+          </span>
+          <div className="flex-1 min-w-0 text-right">
+            <h2 className="text-[18px] font-extrabold text-[#1A1A1A] leading-tight">
               {stageInfo.title}
             </h2>
-            <p className="text-[11.5px] text-gray-600 leading-snug mt-1">
+            <p className="text-[12px] text-gray-500 leading-snug mt-1">
               בחר שירות ונציג לך את הספקים המומלצים
             </p>
           </div>
-          <div
-            className="w-[112px] h-[100px] rounded-[16px] overflow-hidden bg-white/70 shrink-0"
-            style={{ boxShadow: "var(--shadow-soft)" }}
-          >
-            <img
-              src={illustrationForStage(resolvedStageKey, type)}
-              alt=""
-              loading="lazy"
-              className="h-full w-full object-cover object-center"
-            />
-          </div>
         </div>
 
-        {/* Services grid — floating luxury squares with illustrations, 3–4 per row */}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[16px] font-extrabold text-[#1A1A1A] m-0">שירותים בתחום</h3>
+          <span className="text-[12px] font-semibold text-[#6B7280]">{services.length} קטגוריות</span>
+        </div>
+
         {services.length === 0 ? (
           <div
-            className="rounded-[18px] p-6 text-center text-[13px] text-gray-500 bg-white/95 border border-white/80"
-            style={{ boxShadow: "var(--shadow-elevated)" }}
+            className="rounded-[22px] p-6 text-center text-[13px] text-gray-500 bg-white border border-[#EEF1EF]"
+            style={{ boxShadow: "0 8px 20px -14px rgba(16,24,40,0.14)" }}
           >
             שירותים יתווספו בקרוב בשלב זה
           </div>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-            {services.map((c) => {
-              const soon = c.count === 0;
-              return (
-                <Link
-                  key={c.id}
-                  to={`/resident/categories/${c.id}`}
-                  className="relative aspect-square flex flex-col overflow-hidden rounded-[18px] border border-white/90 active:scale-[0.97] hover:-translate-y-0.5 transition-all duration-300"
-                  style={{
-                    background: "rgba(255,255,255,0.96)",
-                    boxShadow: "var(--shadow-elevated)",
-                  }}
-                >
-                  {soon && (
-                    <span
-                      className="absolute top-1 right-1 z-10 text-[8px] font-bold px-1 py-0.5 rounded-md"
-                      style={{ background: "#F1EFE8", color: "#8b8574" }}
-                    >
-                      בקרוב
-                    </span>
-                  )}
-                  <div className="flex-1 min-h-0 w-full px-2 pt-2">
-                    <div className="h-full w-full rounded-[12px] overflow-hidden bg-[#F4F1EA]">
-                      <img
-                        src={illustrationForCategory(c.id, c.name, illustrationForProjectType(type))}
-                        alt=""
-                        loading="lazy"
-                        className="h-full w-full object-cover object-center"
-                      />
-                    </div>
-                  </div>
-                  <span
-                    className="block text-[11px] font-extrabold text-[#1A1A1A] leading-tight text-center px-1.5 py-2 line-clamp-2"
-                    style={{ fontFamily: URBANIST }}
-                  >
-                    {c.name}
-                  </span>
-                </Link>
-              );
-            })}
+          <div className="grid grid-cols-3 gap-2.5">
+            {services.map((c) => (
+              <Link key={c.id} to={`/resident/categories/${c.id}`} className="block">
+                <CategorySquareCard
+                  title={c.name}
+                  Icon={iconForCategory(c.id, c.name)}
+                  count={c.count}
+                  as="div"
+                />
+              </Link>
+            ))}
           </div>
         )}
       </div>
