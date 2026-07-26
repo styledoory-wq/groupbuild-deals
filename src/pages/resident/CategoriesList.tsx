@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useApp } from "@/store/AppStore";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import {
-  Bell,
   Building2,
   Check,
   ChevronLeft,
@@ -12,7 +10,6 @@ import {
   PaintRoller,
   Search,
   ShieldCheck,
-  UserRound,
   type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -59,7 +56,7 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
   {
     id: "building",
     title: "בניין משותף",
-    subtitle: "ועד בית ותחזוקה",
+    subtitle: "ועד בית ואחזקה",
     img: projectBuildingImg,
     Icon: Building2,
   },
@@ -82,17 +79,18 @@ function ProjectTypeCircle({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="flex min-w-0 flex-1 flex-col items-center gap-3 active:scale-[0.97] transition-transform"
+      className="flex min-w-0 flex-1 flex-col items-center gap-2.5 active:scale-[0.97] transition-transform"
     >
       {/* Extra bottom space so the overlapping icon bubble isn't clipped */}
-      <span className="relative mx-auto mb-3 block h-[104px] w-[104px]">
+      <span className="relative mx-auto mb-3.5 block h-[100px] w-[100px]">
         <span
-          className={
-            "absolute inset-0 overflow-hidden rounded-full bg-slate-100 " +
-            (selected
-              ? "border-[3px] border-emerald-700 shadow-[0_16px_32px_-18px_rgba(4,120,87,0.55)]"
-              : "border-0 shadow-[0_10px_24px_-14px_rgba(15,23,42,0.18)]")
-          }
+          className="absolute inset-0 overflow-hidden rounded-full bg-slate-100"
+          style={{
+            /* Thick brand ring OUTSIDE the photo (doesn't shrink the image) */
+            boxShadow: selected
+              ? `0 0 0 3px ${BRAND}, 0 14px 28px -14px ${BRAND}88`
+              : "0 10px 22px -12px rgba(15,23,42,0.18)",
+          }}
         >
           <img
             src={def.img}
@@ -105,8 +103,12 @@ function ProjectTypeCircle({
         {/* Active V — top-right corner of the circle */}
         {selected && (
           <span
-            className="absolute right-0 top-0 z-20 grid h-[26px] w-[26px] place-items-center rounded-full bg-emerald-700 text-white shadow-md"
-            style={{ transform: "translate(12%, -12%)" }}
+            className="absolute z-20 grid h-[26px] w-[26px] place-items-center rounded-full text-white shadow-md"
+            style={{
+              top: -2,
+              right: -2,
+              background: BRAND,
+            }}
           >
             <Check size={14} strokeWidth={3} fill="none" />
           </span>
@@ -114,15 +116,15 @@ function ProjectTypeCircle({
 
         {/* Icon bubble overlapping the bottom edge of the photo circle */}
         <span
-          className="absolute left-1/2 z-20 grid h-[34px] w-[34px] place-items-center rounded-full border border-gray-100 bg-white shadow-md"
+          className="absolute left-1/2 z-20 grid h-8 w-8 place-items-center rounded-full bg-white shadow-[0_4px_12px_rgba(15,23,42,0.14)]"
           style={{
             bottom: 0,
-            transform: "translate(-50%, 45%)",
+            transform: "translate(-50%, 42%)",
             color: BRAND,
           }}
         >
           <Icon
-            size={16}
+            size={15}
             strokeWidth={2}
             fill="none"
             style={{ color: BRAND, stroke: BRAND }}
@@ -132,14 +134,12 @@ function ProjectTypeCircle({
 
       <span className="px-0.5 text-center">
         <span
-          className={
-            "block text-[13.5px] font-extrabold leading-tight " +
-            (selected ? "text-emerald-700" : "text-slate-900")
-          }
+          className="block text-[13px] font-extrabold leading-tight"
+          style={{ color: selected ? BRAND : "#0F172A" }}
         >
           {def.title}
         </span>
-        <span className="mt-0.5 block text-[10.5px] leading-tight text-slate-500 line-clamp-2">
+        <span className="mt-0.5 block text-[10px] leading-tight text-slate-500 line-clamp-2">
           {def.subtitle}
         </span>
       </span>
@@ -150,35 +150,32 @@ function ProjectTypeCircle({
 function CategoryHeroSearch({
   value,
   onChange,
-  topBar,
 }: {
   value: string;
   onChange: (v: string) => void;
-  topBar: ReactNode;
 }) {
   return (
-    <div className="relative -mx-4 mb-6 overflow-hidden">
-      {/* Atmospheric blurred photo */}
+    <div className="relative -mx-4 mb-5 overflow-hidden">
+      {/* Atmospheric blurred photo — matches sketch lifestyle room */}
       <img
         src={heroAtmosphereImg}
         alt=""
         aria-hidden
-        className="absolute inset-0 h-full w-full scale-110 object-cover object-center blur-[2px]"
+        className="absolute inset-0 h-full w-full scale-110 object-cover object-[center_40%] blur-[1.5px]"
       />
       {/* Brand green → soft gray overlay */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(105deg, rgba(14,107,90,0.88) 0%, rgba(14,107,90,0.55) 38%, rgba(247,248,246,0.82) 72%, rgba(248,250,252,0.96) 100%)",
+            "linear-gradient(100deg, rgba(14,107,90,0.92) 0%, rgba(14,107,90,0.62) 42%, rgba(248,250,252,0.78) 78%, rgba(248,250,252,0.97) 100%)",
         }}
       />
-      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-slate-50" />
+      <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-b from-transparent to-slate-50" />
 
-      <div className="relative px-4 pt-[calc(env(safe-area-inset-top)+12px)] pb-7">
-        {topBar}
+      <div className="relative px-4 pt-[calc(env(safe-area-inset-top)+18px)] pb-8">
         <label
-          className="mt-3 flex h-[54px] items-center gap-3 rounded-full bg-white px-5 text-slate-400"
+          className="flex h-[52px] items-center gap-3 rounded-full bg-white px-5 text-slate-400"
           style={{ boxShadow: "0 14px 32px -16px rgba(15,23,42,0.28)" }}
         >
           <Search size={20} strokeWidth={1.9} className="shrink-0 text-slate-400" />
@@ -212,8 +209,6 @@ type CatalogHit = {
 
 export default function CategoriesList() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user } = useApp();
 
   const [selectedProject, setSelectedProject] = useState<UiProjectType>(() => {
     try {
@@ -324,52 +319,6 @@ export default function CategoriesList() {
     navigate(`/resident/categories/stages?type=${selectedProject}&stage=${stageKey}`);
   };
 
-  const topBar = (
-    <div className="mb-1 flex items-center justify-between">
-      {user ? (
-        <>
-          <button
-            aria-label="פרופיל"
-            onClick={() => navigate("/resident/profile")}
-            className="grid h-10 w-10 place-items-center rounded-full border border-white/70 bg-white/90 shadow-sm active:scale-95 transition-transform"
-          >
-            <UserRound size={20} strokeWidth={2} className="text-slate-800" />
-          </button>
-          <button
-            aria-label="התראות"
-            onClick={() => navigate("/resident/notifications")}
-            className="relative grid h-10 w-10 place-items-center rounded-full border border-white/70 bg-white/90 shadow-sm active:scale-95 transition-transform"
-          >
-            <Bell size={20} strokeWidth={1.9} className="text-slate-800" />
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
-              3
-            </span>
-          </button>
-        </>
-      ) : (
-        <>
-          <button
-            onClick={() => navigate("/")}
-            className="text-[15px] font-extrabold tracking-tight text-white drop-shadow-sm"
-            aria-label="דף הבית"
-          >
-            GroupBuild
-          </button>
-          <button
-            onClick={() =>
-              navigate(
-                `/auth/resident?mode=signin&returnUrl=${encodeURIComponent(location.pathname + location.search)}`,
-              )
-            }
-            className="rounded-full border border-white/50 bg-white/90 px-4 py-1.5 text-[12.5px] font-semibold text-[#0E6B5A] shadow-sm transition-colors hover:bg-white"
-          >
-            התחברות
-          </button>
-        </>
-      )}
-    </div>
-  );
-
   return (
     <>
       <PullToRefreshIndicator {...ptr} />
@@ -392,11 +341,11 @@ export default function CategoriesList() {
             paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)",
           }}
         >
-          <CategoryHeroSearch value={query} onChange={setQuery} topBar={topBar} />
+          <CategoryHeroSearch value={query} onChange={setQuery} />
 
           {/* Circular project types */}
           {!query.trim() && (
-            <div className="mb-8 flex items-start justify-between gap-2 px-0.5">
+            <div className="mb-7 flex items-start justify-between gap-1.5 px-0.5">
               {PROJECT_TYPES.map((def) => (
                 <ProjectTypeCircle
                   key={def.id}
@@ -484,7 +433,7 @@ export default function CategoriesList() {
               </div>
 
               {loading ? (
-                <div className="grid grid-cols-3 gap-3.5">
+                <div className="grid grid-cols-3 gap-3">
                   {Array.from({ length: 9 }).map((_, i) => (
                     <div
                       key={i}
@@ -509,7 +458,7 @@ export default function CategoriesList() {
                   <strong className="text-slate-800">בקרוב נוסיף שלבים למסלול זה</strong>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-3.5">
+                <div className="grid grid-cols-3 gap-3">
                   {filtered.map((s) => (
                     <CategorySquareCard
                       key={s.key}
