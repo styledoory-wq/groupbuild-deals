@@ -1,5 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Search as SearchIcon, X, Store, FolderTree, MapPin, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,9 +35,6 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
   const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
-  const [maxHeight, setMaxHeight] = useState<number>(420);
 
   const term = q.trim();
 
@@ -57,41 +53,12 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
     return () => { cancelled = true; clearTimeout(t); };
   }, [term]);
 
-  // Recalculate portal position when open / on scroll / resize / viewport change.
-  useLayoutEffect(() => {
-    if (!open) return;
-    const update = () => {
-      const el = wrapRef.current;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      setRect({ top: r.bottom + 8, left: r.left, width: r.width });
-      // Prefer visualViewport (accounts for mobile keyboard).
-      const vv = (window as any).visualViewport;
-      const vh = vv?.height ?? window.innerHeight;
-      const vTop = vv?.offsetTop ?? 0;
-      const available = vh + vTop - (r.bottom + 8) - 16;
-      setMaxHeight(Math.max(220, Math.min(available, 520)));
-    };
-    update();
-    window.addEventListener("scroll", update, true);
-    window.addEventListener("resize", update);
-    (window as any).visualViewport?.addEventListener?.("resize", update);
-    (window as any).visualViewport?.addEventListener?.("scroll", update);
-    return () => {
-      window.removeEventListener("scroll", update, true);
-      window.removeEventListener("resize", update);
-      (window as any).visualViewport?.removeEventListener?.("resize", update);
-      (window as any).visualViewport?.removeEventListener?.("scroll", update);
-    };
-  }, [open, hits.length, term]);
-
   // Outside click / touch closes dropdown.
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node;
       if (wrapRef.current?.contains(target)) return;
-      if (panelRef.current?.contains(target)) return;
       setOpen(false);
     };
     document.addEventListener("mousedown", onDown);
@@ -140,28 +107,10 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
     ? "h-14 text-[15px] rounded-[20px] shadow-[0_8px_24px_-8px_rgba(10,31,61,0.18)]"
     : "h-12 text-[14px] rounded-[16px]";
 
-  const dropdown = open && rect ? (
-    <>
-      {/* Transparent click-away layer; kept under the focused search field. */}
+  const dropdown = open ? (
       <div
-        onMouseDown={() => setOpen(false)}
-        onTouchStart={() => setOpen(false)}
-        className="fixed inset-0 bg-transparent"
-        style={{ zIndex: 998 }}
-        aria-hidden
-      />
-      <div
-        ref={panelRef}
         dir="rtl"
-        style={{
-          position: "fixed",
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          maxHeight,
-          zIndex: 999,
-        }}
-        className="overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card shadow-floating"
+        className="absolute inset-x-0 top-full z-50 mt-2 max-h-[min(420px,calc(100dvh-180px))] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card shadow-floating"
       >
         {!term ? (
           <div className="p-4">
@@ -239,7 +188,6 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
           </div>
         )}
       </div>
-    </>
   ) : null;
 
   return (
@@ -266,7 +214,7 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
         )}
       </form>
 
-      {typeof document !== "undefined" && dropdown ? createPortal(dropdown, document.body) : null}
+      {dropdown}
     </div>
   );
 }
