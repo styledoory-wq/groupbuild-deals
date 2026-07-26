@@ -105,6 +105,41 @@ export default function SupplierOnboarding() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const [aiLoading, setAiLoading] = useState<null | "generate" | "improve">(null);
+
+  const runAiDescription = async (mode: "generate" | "improve") => {
+    if (aiLoading) return;
+    setAiLoading(mode);
+    try {
+      const catNames = selectedCategories
+        .map((id) => categories.find((c) => c.id === id)?.name)
+        .filter(Boolean) as string[];
+      const { data, error } = await supabase.functions.invoke("ai-supplier-description", {
+        body: {
+          businessName,
+          categories: catNames,
+          current: shortDescription,
+          mode,
+        },
+      });
+      if (error) throw error;
+      const text = (data as { text?: string } | null)?.text?.trim();
+      if (!text) throw new Error("empty");
+      setShortDescription(text);
+      toast.success(mode === "improve" ? "התיאור שופר" : "נוצר תיאור חדש");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("429") || msg.includes("rate_limited")) {
+        toast.error("יותר מדי בקשות — נסו שוב בעוד רגע");
+      } else if (msg.includes("402") || msg.includes("credits")) {
+        toast.error("חרגתם ממכסת ה-AI — פנו לתמיכה");
+      } else {
+        toast.error("לא הצלחנו להפעיל את ה-AI", { description: "נסו שוב בעוד רגע" });
+      }
+    } finally {
+      setAiLoading(null);
+    }
+  };
 
   const [step, setStep] = useState<StepKey>("business");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -659,8 +694,48 @@ export default function SupplierOnboarding() {
                       autoFocus
                     />
                   </Field>
-                  <p className="text-[12px] text-muted-foreground text-left" dir="ltr">
-                    {shortDescription.length}/400
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[12px] text-muted-foreground" dir="ltr">
+                      {shortDescription.length}/400
+                    </p>
+                    <div className="flex items-center gap-2">
+                      {shortDescription.trim().length >= 5 ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={aiLoading !== null}
+                          onClick={() => runAiDescription("improve")}
+                          className="h-9 rounded-xl text-[13px] font-bold border-[#0E6B5A]/30 text-[#0E6B5A] hover:bg-[#0E6B5A]/5"
+                        >
+                          {aiLoading === "improve" ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin ml-1.5" />
+                          ) : (
+                            <Sparkles className="h-3.5 w-3.5 ml-1.5" />
+                          )}
+                          שפר עם AI
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={aiLoading !== null || !businessName.trim()}
+                          onClick={() => runAiDescription("generate")}
+                          className="h-9 rounded-xl text-[13px] font-bold border-[#0E6B5A]/30 text-[#0E6B5A] hover:bg-[#0E6B5A]/5"
+                        >
+                          {aiLoading === "generate" ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin ml-1.5" />
+                          ) : (
+                            <Sparkles className="h-3.5 w-3.5 ml-1.5" />
+                          )}
+                          כתוב לי עם AI
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    ה-AI מסתמך על שם העסק והתחומים שסימנתם. תמיד אפשר לערוך את הטקסט לאחר מכן.
                   </p>
                 </>
               )}
