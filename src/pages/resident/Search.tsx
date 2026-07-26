@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search as SearchIcon, Store, X, ChevronLeft, FolderTree } from "lucide-react";
+import { Search as SearchIcon, Store, X, ChevronLeft } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { BackHeader, SkeletonList, EmptyState } from "@/components/ds";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { Seo } from "@/components/seo/Seo";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
+import { iconForCategory } from "@/lib/categoryIcons";
 
 type SupplierRow = {
   id: string;
@@ -148,27 +149,27 @@ export default function SearchPage() {
                     בעץ הקטגוריות ({catalog.length})
                   </h2>
                   <div className="space-y-2.5">
-                    {catalog.map((h) => (
-                      <Link
-                        key={h.id}
-                        to={catalogHref(h)}
-                        className="flex items-center gap-3 bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] active:scale-[0.99] transition-transform"
-                      >
-                        <span className="h-11 w-11 rounded-2xl bg-[#0E6B5A]/10 flex items-center justify-center text-xl shrink-0">
-                          {h.icon || <FolderTree className="h-5 w-5 text-[#0E6B5A]" />}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-[15px] text-[#1F2937] truncate tracking-tight">{h.name}</p>
-                          {h.path && (
-                            <p className="text-[11.5px] text-[#6B7280] truncate mt-0.5" dir="rtl">{h.path}</p>
-                          )}
-                          <p className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">
-                            {h.supplier_count > 0 ? `${h.supplier_count} ספקים` : "בקרוב"}
-                          </p>
-                        </div>
-                        <ChevronLeft className="h-4 w-4 text-[#6B7280] shrink-0" strokeWidth={2.2} />
-                      </Link>
-                    ))}
+                    {catalog.map((h) => {
+                      const CategoryIcon = iconForCategory(h.id, h.name);
+                      return (
+                        <Link
+                          key={h.id}
+                          to={catalogHref(h)}
+                          className="flex items-center gap-3 bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)] active:scale-[0.99] transition-transform"
+                        >
+                          <span className="h-11 w-11 rounded-2xl bg-[#0E6B5A]/10 flex items-center justify-center shrink-0">
+                            <CategoryIcon className="h-5 w-5 text-[#0E6B5A]" strokeWidth={2} />
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-[15px] text-[#1F2937] truncate tracking-tight">{h.name}</p>
+                            <p className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">
+                              {h.supplier_count > 0 ? `${h.supplier_count} ספקים` : "בקרוב"}
+                            </p>
+                          </div>
+                          <ChevronLeft className="h-4 w-4 text-[#6B7280] shrink-0" strokeWidth={2.2} />
+                        </Link>
+                      );
+                    })}
                   </div>
                 </section>
               )}

@@ -225,6 +225,7 @@ export function CategoryMultiPicker({
           }
           const groupEntries = Array.from(groups.entries());
           const singleGroup = groupEntries.length === 1 && groupEntries[0][0] === d.id;
+          const showFlatLeaves = isFiltering || singleGroup;
 
           return (
             <div key={d.id} className="bg-background">
@@ -264,9 +265,9 @@ export function CategoryMultiPicker({
 
               {open && (
                 <div className="px-3 pb-3 space-y-3">
-                  {singleGroup ? (
+                  {showFlatLeaves ? (
                     <div className="flex flex-wrap gap-1.5">
-                      {groupEntries[0][1].items.map((c) => (
+                      {leaves.map((c) => (
                         <LeafChip key={c.id} c={c} active={selectedSet.has(c.id)} onClick={() => toggle(c.id)} />
                       ))}
                     </div>
