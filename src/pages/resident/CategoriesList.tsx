@@ -310,9 +310,6 @@ export default function CategoriesList() {
     };
   }, [refreshTick]);
 
-  const currentDef =
-    PROJECT_TYPES.find((p) => p.id === selectedProject) ?? PROJECT_TYPES[0];
-
   const stages = stagesByType[selectedProject] ?? [];
 
   const filtered = useMemo(() => {
