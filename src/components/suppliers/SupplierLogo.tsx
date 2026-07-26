@@ -42,8 +42,8 @@ export function SupplierLogo({ name, logoUrl, size = "md", className }: Supplier
     <div
       className={cn(
         "shrink-0 rounded-full overflow-hidden flex items-center justify-center font-extrabold",
-        "bg-white border border-gray-100 shadow-sm",
-        logoUrl ? padMap[size] : "bg-[rgba(14,107,90,0.08)]",
+        "bg-white border border-slate-200 shadow-[0_6px_16px_-8px_rgba(15,23,42,0.22)]",
+        logoUrl ? padMap[size] : "bg-[rgba(14,107,90,0.12)]",
         sizeMap[size],
         className,
       )}

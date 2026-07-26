@@ -23,10 +23,11 @@ import { iconForCategory } from "@/lib/categoryIcons";
 
 const BRAND = "#0E6B5A";
 
-const sectionLabel = "text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3";
-const floatCard = "rounded-2xl border border-gray-100 bg-white shadow-sm";
+const sectionLabel = "text-[12px] font-extrabold text-slate-700 tracking-wide mb-3";
+const floatCard =
+  "rounded-2xl border border-slate-200/90 bg-white shadow-[0_10px_28px_-14px_rgba(15,23,42,0.22),0_2px_8px_-4px_rgba(15,23,42,0.08)]";
 const softBtn =
-  "flex rounded-2xl bg-white border border-gray-100 shadow-sm text-slate-800 text-xs font-bold items-center justify-center gap-1.5 active:scale-[0.97] transition-transform";
+  "flex rounded-2xl bg-white border border-slate-200 shadow-[0_4px_12px_-6px_rgba(15,23,42,0.18)] text-slate-900 text-xs font-extrabold items-center justify-center gap-1.5 active:scale-[0.97] transition-transform";
 
 interface DbSupplier {
   id: string;
@@ -383,7 +384,7 @@ export default function SupplierProfile() {
         })}</script>
       </Helmet>
 
-      <div className="bg-slate-50 min-h-screen" dir="rtl">
+      <div className="bg-[#EEF1F4] min-h-screen" dir="rtl">
         {/* Hero identity */}
         <div className="px-4 pb-3" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}>
           <button
@@ -441,7 +442,7 @@ export default function SupplierProfile() {
                 התקשר
               </a>
             ) : (
-              <div className="h-14 rounded-2xl bg-white text-[11px] text-slate-400 flex items-center justify-center border border-gray-100">
+              <div className="h-14 rounded-2xl bg-white text-[11px] text-slate-500 flex items-center justify-center border border-slate-200">
                 אין טלפון
               </div>
             )}
@@ -512,7 +513,7 @@ export default function SupplierProfile() {
             <section className={`${floatCard} p-3`}>
               <div className="flex items-center justify-between px-1 mb-2.5">
                 <h2 className={`${sectionLabel} mb-0`}>גלריית עבודות</h2>
-                <span className="text-[11px] font-semibold text-slate-400">{gallery.length} תמונות</span>
+                <span className="text-[11px] font-bold text-slate-500">{gallery.length} תמונות</span>
               </div>
               <div className="grid grid-cols-3 gap-1.5">
                 {gallery.slice(0, 6).map((g, i) => (
@@ -521,7 +522,7 @@ export default function SupplierProfile() {
                     type="button"
                     onClick={() => setLightbox(g.image_url)}
                     className={
-                      "relative overflow-hidden rounded-xl border border-gray-100 transition-transform active:scale-[0.98] " +
+                      "relative overflow-hidden rounded-xl border border-slate-200 transition-transform active:scale-[0.98] " +
                       (i === 0 && gallery.length > 1 ? "col-span-2 row-span-2 aspect-square" : "aspect-square")
                     }
                   >
@@ -543,10 +544,10 @@ export default function SupplierProfile() {
                   return (
                     <div
                       key={c.id}
-                      className="rounded-2xl border border-gray-100 bg-white px-1.5 py-3 flex flex-col items-center gap-1.5 text-center shadow-sm"
+                      className="rounded-2xl border border-slate-200 bg-[#F4F7F6] px-1.5 py-3 flex flex-col items-center gap-1.5 text-center shadow-[0_4px_12px_-6px_rgba(15,23,42,0.16)]"
                     >
-                      <Icon size={22} strokeWidth={1.6} className="text-[#0E6B5A]" aria-hidden />
-                      <span className="text-[10px] font-bold text-slate-800 leading-snug line-clamp-2">{c.name}</span>
+                      <Icon size={22} strokeWidth={1.8} className="text-[#0E6B5A]" aria-hidden />
+                      <span className="text-[10px] font-extrabold text-slate-900 leading-snug line-clamp-2">{c.name}</span>
                     </div>
                   );
                 })}
@@ -561,8 +562,8 @@ export default function SupplierProfile() {
               </h2>
               {supplier.serves_all_country ? (
                 <span
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold border border-gray-100"
-                  style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[12px] font-extrabold border border-[rgba(14,107,90,0.18)]"
+                  style={{ background: "rgba(14,107,90,0.12)", color: BRAND }}
                 >
                   נותן שירות בכל הארץ
                 </span>
@@ -571,7 +572,7 @@ export default function SupplierProfile() {
                   {serviceAreas.map((name) => (
                     <span
                       key={name}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold bg-slate-50 text-slate-800 border border-gray-100"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[12px] font-extrabold bg-[#F4F7F6] text-slate-800 border border-slate-200"
                     >
                       {name}
                     </span>
@@ -643,7 +644,7 @@ export default function SupplierProfile() {
 
       {/* Dual CTA — mock Style A */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-[#EEF1F4] via-[#EEF1F4] to-transparent">
           <div className="flex gap-2">
             {whatsappHref ? (
               <a
@@ -651,7 +652,7 @@ export default function SupplierProfile() {
                 target="_blank"
                 rel="noreferrer noopener"
                 onClick={() => { void trackSupplierEvent(supplier.id, "whatsapp"); }}
-                className="flex-1 h-12 rounded-2xl text-white font-bold inline-flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-transform"
+                className="flex-1 h-12 rounded-2xl text-white font-extrabold inline-flex items-center justify-center gap-2 shadow-[0_8px_18px_-8px_rgba(14,107,90,0.55)] active:scale-[0.98] transition-transform"
                 style={{ background: BRAND }}
               >
                 <WhatsappIcon className="h-5 w-5" />
@@ -661,14 +662,14 @@ export default function SupplierProfile() {
               <a
                 href={`tel:${supplier.phone}`}
                 onClick={() => { void trackSupplierEvent(supplier.id, "call"); }}
-                className="flex-1 h-12 rounded-2xl text-white font-bold inline-flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-transform"
+                className="flex-1 h-12 rounded-2xl text-white font-extrabold inline-flex items-center justify-center gap-2 shadow-[0_8px_18px_-8px_rgba(14,107,90,0.55)] active:scale-[0.98] transition-transform"
                 style={{ background: BRAND }}
               >
                 <Phone className="h-5 w-5" />
                 התקשר
               </a>
             ) : (
-              <div className="flex-1 h-12 rounded-2xl bg-slate-100 text-slate-400 text-sm inline-flex items-center justify-center">
+              <div className="flex-1 h-12 rounded-2xl bg-slate-200 text-slate-500 text-sm inline-flex items-center justify-center">
                 אין ערוץ קשר
               </div>
             )}
@@ -676,7 +677,7 @@ export default function SupplierProfile() {
               onClick={handleInterest}
               disabled={submitting || interested}
               variant="outline"
-              className="flex-1 h-12 rounded-2xl border-2 font-bold bg-white"
+              className="flex-1 h-12 rounded-2xl border-2 font-extrabold bg-white shadow-[0_4px_12px_-6px_rgba(15,23,42,0.18)]"
               style={{ borderColor: BRAND, color: BRAND }}
             >
               {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ נרשם" : "קבל כמה הצעות"}
@@ -722,11 +723,11 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
   if (rows.length === 0 && !legacyUrl) return null;
 
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white shadow-sm p-4 space-y-2">
-      <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+    <section className="rounded-2xl border border-slate-200/90 bg-white shadow-[0_10px_28px_-14px_rgba(15,23,42,0.22),0_2px_8px_-4px_rgba(15,23,42,0.08)] p-4 space-y-2">
+      <h2 className="text-[12px] font-extrabold text-slate-700 tracking-wide mb-3 flex items-center gap-1.5">
         <FileText className="h-3.5 w-3.5" style={{ color: BRAND }} /> קטלוגים
       </h2>
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         {rows.map((r) => {
           const isLink = r.kind === "link";
           return (
@@ -735,29 +736,29 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
               href={r.file_url}
               target="_blank"
               rel="noreferrer noopener"
-              className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50 border border-gray-100 transition-transform active:scale-[0.98]"
+              className="flex items-center gap-3 p-3 rounded-2xl bg-[#F4F7F6] border border-slate-200 transition-transform active:scale-[0.98]"
             >
               <div
-                className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: "rgba(14,107,90,0.08)" }}
+                className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0 text-white"
+                style={{ background: BRAND }}
               >
-                <FileText className="h-4 w-4" style={{ color: BRAND }} />
+                <FileText className="h-4 w-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold truncate flex items-center gap-1.5 text-slate-900">
+                <div className="text-sm font-extrabold truncate flex items-center gap-1.5 text-slate-900">
                   <span className="truncate">{r.name}</span>
-                  <span className="text-fs-xs font-normal px-1.5 py-0.5 rounded-md bg-white border border-gray-100 text-slate-400 shrink-0">
+                  <span className="text-fs-xs font-bold px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 shrink-0">
                     {isLink ? "קישור" : "PDF"}
                   </span>
                 </div>
                 {r.description && (
-                  <div className="text-fs-xs text-slate-500 line-clamp-1">{r.description}</div>
+                  <div className="text-fs-xs text-slate-600 line-clamp-1">{r.description}</div>
                 )}
-                <div className="text-fs-xs font-bold mt-0.5" style={{ color: BRAND }}>
+                <div className="text-fs-xs font-extrabold mt-0.5" style={{ color: BRAND }}>
                   {isLink ? "צפייה בקטלוג ↗" : "צפייה בקטלוג"}
                 </div>
               </div>
-              <ExternalLink className="h-4 w-4 text-slate-400 shrink-0" />
+              <ExternalLink className="h-4 w-4 text-slate-500 shrink-0" />
             </a>
           );
         })}
@@ -766,19 +767,19 @@ function SupplierCatalogsList({ supplierId, legacyUrl }: { supplierId: string; l
             href={legacyUrl}
             target="_blank"
             rel="noreferrer noopener"
-            className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50 border border-gray-100 transition-transform active:scale-[0.98]"
+            className="flex items-center gap-3 p-3 rounded-2xl bg-[#F4F7F6] border border-slate-200 transition-transform active:scale-[0.98]"
           >
             <div
-              className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "rgba(14,107,90,0.08)" }}
+              className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0 text-white"
+              style={{ background: BRAND }}
             >
-              <FileText className="h-4 w-4" style={{ color: BRAND }} />
+              <FileText className="h-4 w-4" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold truncate text-slate-900">צפייה בקטלוג</div>
-              <div className="text-fs-xs text-slate-500">PDF · ייפתח בכרטיסיה חדשה</div>
+              <div className="text-sm font-extrabold truncate text-slate-900">צפייה בקטלוג</div>
+              <div className="text-fs-xs text-slate-600">PDF · ייפתח בכרטיסיה חדשה</div>
             </div>
-            <ExternalLink className="h-4 w-4 text-slate-400 shrink-0" />
+            <ExternalLink className="h-4 w-4 text-slate-500 shrink-0" />
           </a>
         )}
       </div>
@@ -817,9 +818,9 @@ function CompactDealCard({
   return (
     <Link
       to={`/resident/deals/${deal.id}`}
-      className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+      className="group block bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-[0_8px_20px_-12px_rgba(15,23,42,0.2)] hover:shadow-[0_12px_28px_-12px_rgba(15,23,42,0.28)] transition-all active:scale-[0.98]"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-50">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#F4F7F6]">
         {cover ? (
           <SmartImg
             src={cover}
