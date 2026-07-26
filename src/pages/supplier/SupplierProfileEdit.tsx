@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { Save, ArrowRight, Briefcase, Phone, Mail, MapPin, Tag, User as UserIcon, FileText, Globe, Image as ImageIcon, Trash2, Plus, Link as LinkIcon, Instagram, Facebook, Wallet, Smartphone, Building2 } from "lucide-react";
+import {
+  Save, ArrowRight, Briefcase, Phone, Mail, Tag, User as UserIcon, FileText,
+  Image as ImageIcon, Trash2, Plus, Link as LinkIcon, Wallet, Smartphone,
+  Building2, MapPin, Sparkles,
+} from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
@@ -11,10 +15,11 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SupplierCatalogsManager } from "@/components/suppliers/SupplierCatalogsManager";
-import { uploadSupplierLogo, uploadSupplierGalleryImage, uploadSupplierCatalog } from "@/lib/supplierUploads";
+import { CategoryMultiPicker } from "@/components/categories/CategoryMultiPicker";
+import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
+import { uploadSupplierLogo, uploadSupplierGalleryImage } from "@/lib/supplierUploads";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
-import { useRegions } from "@/hooks/useRegions";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { toast } from "sonner";
 
@@ -29,7 +34,6 @@ const supplierSchema = z.object({
 export default function SupplierProfileEdit() {
   const navigate = useNavigate();
   const { categories } = useApp();
-  const { regions, cities } = useRegions();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -44,10 +48,12 @@ export default function SupplierProfileEdit() {
   const [originalEmail, setOriginalEmail] = useState("");
   const [description, setDescription] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [servesAll, setServesAll] = useState(false);
+  const [areas, setAreas] = useState<AreasComboboxValue>({
+    servesAllCountry: false,
+    regionIds: [],
+    cityIds: [],
+  });
   const [isActive, setIsActive] = useState(true);
-  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
-  const [selectedCities, setSelectedCities] = useState<string[]>([]);
 
   // Media + links
   const [shortDescription, setShortDescription] = useState("");
@@ -60,10 +66,8 @@ export default function SupplierProfileEdit() {
   const [gallery, setGallery] = useState<{ id?: string; image_url: string; caption: string | null }[]>([]);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
-  const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
-  const catalogInputRef = useRef<HTMLInputElement>(null);
 
   // Payment details (manual: Bit / bank transfer)
   const [bitPhone, setBitPhone] = useState("");
@@ -72,6 +76,20 @@ export default function SupplierProfileEdit() {
   const [bankBranch, setBankBranch] = useState("");
   const [bankAccountNumber, setBankAccountNumber] = useState("");
   const [paymentInstructionsNote, setPaymentInstructionsNote] = useState("");
+
+  // Only leaf categories are selectable in the hierarchical picker.
+  // Drop legacy parent-ids so the UI and saved payload stay consistent.
+  const leafCategoryIds = useMemo(() => {
+    const parentIds = new Set(
+      categories.map((c) => c.parentId).filter((id): id is string => Boolean(id)),
+    );
+    return new Set(categories.filter((c) => !parentIds.has(c.id)).map((c) => c.id));
+  }, [categories]);
+
+  const selectableCategories = useMemo(
+    () => selectedCategories.filter((id) => leafCategoryIds.has(id)),
+    [selectedCategories, leafCategoryIds],
+  );
 
   useEffect(() => {
     (async () => {
@@ -100,7 +118,6 @@ export default function SupplierProfileEdit() {
         setPhone(existing.phone ?? "");
         setDescription(existing.description ?? "");
         setSelectedCategories(existing.categories ?? []);
-        setServesAll(existing.serves_all_country);
         setIsActive(existing.is_active);
         setShortDescription(existing.short_description ?? "");
         setLogoUrl(existing.logo_url ?? null);
@@ -124,8 +141,11 @@ export default function SupplierProfileEdit() {
           supabase.from("supplier_cities").select("city_id").eq("supplier_id", existing.id),
           supabase.from("supplier_gallery").select("id,image_url,caption,display_order").eq("supplier_id", existing.id).order("display_order"),
         ]);
-        setSelectedRegions((regs ?? []).map((r) => r.region_id));
-        setSelectedCities((cits ?? []).map((c) => c.city_id));
+        setAreas({
+          servesAllCountry: existing.serves_all_country,
+          regionIds: (regs ?? []).map((r) => r.region_id),
+          cityIds: (cits ?? []).map((c) => c.city_id),
+        });
         setGallery((gal ?? []).map((g) => ({ id: g.id, image_url: g.image_url, caption: g.caption })));
       } else {
         setBusinessName(profile?.business_name ?? "");
@@ -135,10 +155,6 @@ export default function SupplierProfileEdit() {
       setLoading(false);
     })();
   }, [navigate]);
-
-  const toggle = (list: string[], setList: (v: string[]) => void, id: string) => {
-    setList(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
-  };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -186,23 +202,6 @@ export default function SupplierProfileEdit() {
     }
   };
 
-
-  const handleCatalogUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingCatalog(true);
-    try {
-      const url = await uploadSupplierCatalog(file);
-      setCatalogUrl(url);
-      toast.success("הקטלוג הועלה");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "העלאה נכשלה");
-    } finally {
-      setUploadingCatalog(false);
-      if (catalogInputRef.current) catalogInputRef.current.value = "";
-    }
-  };
-
   const removeGalleryItem = (idx: number) => setGallery((g) => g.filter((_, i) => i !== idx));
 
   const handleSave = async (e: React.FormEvent) => {
@@ -218,6 +217,14 @@ export default function SupplierProfileEdit() {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    if (selectableCategories.length === 0) {
+      toast.error("בחרו לפחות תחום שירות אחד");
+      return;
+    }
+    if (!areas.servesAllCountry && areas.regionIds.length === 0 && areas.cityIds.length === 0) {
+      toast.error("בחרו אזור שירות, ערים, או סמנו \"כל הארץ\"");
+      return;
+    }
     setSaving(true);
     try {
       const { data: session } = await supabase.auth.getSession();
@@ -230,10 +237,10 @@ export default function SupplierProfileEdit() {
         _phone: phone.trim() || null,
         _email: originalEmail || email.trim() || null,
         _short_description: shortDescription.trim() || null,
-        _category_ids: selectedCategories,
-        _serves_all_country: servesAll,
-        _region_ids: servesAll ? [] : selectedRegions,
-        _city_ids: servesAll ? [] : selectedCities,
+        _category_ids: selectableCategories,
+        _serves_all_country: areas.servesAllCountry,
+        _region_ids: areas.servesAllCountry ? [] : areas.regionIds,
+        _city_ids: areas.servesAllCountry ? [] : areas.cityIds,
         _logo_url: logoUrl,
       } as never);
       if (saveErr) throw saveErr;
@@ -315,16 +322,19 @@ export default function SupplierProfileEdit() {
 
   return (
     <MobileShell>
-      <BackHeader title="עריכת פרופיל ספק" subtitle="עדכנו את פרטי העסק" />
+      <BackHeader title="פרופיל העסק" subtitle="ניהול מקצועי של הפרטים שדיירים רואים" />
 
-      <form onSubmit={handleSave} className="px-5 space-y-5 pb-8">
-        <section className="gb-card p-4 space-y-3">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">פרטי העסק</h3>
+      <form onSubmit={handleSave} className="px-5 space-y-4 pb-28" dir="rtl">
+        {/* Business details */}
+        <Section
+          title="פרטי העסק"
+          subtitle="השם והתיאור שיופיעו בכרטיס שלכם"
+          icon={Briefcase}
+        >
           <Field label="שם העסק" icon={Briefcase}>
             <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} required className="h-11 rounded-xl" />
           </Field>
 
-          {/* Supplier kind: services / products / both (two checkboxes) */}
           <div className="space-y-1.5">
             <Label className="text-xs font-bold flex items-center gap-1.5">
               <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> סוג הספק
@@ -340,20 +350,26 @@ export default function SupplierProfileEdit() {
                   onClick={() => opt.set(!opt.checked)}
                   aria-pressed={opt.checked}
                   className={
-                    "rounded-[16px] p-3 text-right transition-all relative shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)] " +
+                    "rounded-[16px] p-3 text-right transition-all relative border " +
                     (opt.checked
-                      ? "bg-[#EAF2FF] text-[#1F2937] ring-2 ring-[#0E6B5A]/30"
-                      : "bg-white text-[#1F2937]")
+                      ? "bg-[#0E6B5A]/8 border-[#0E6B5A]/35 text-[#1F2937] ring-1 ring-[#0E6B5A]/20"
+                      : "bg-white border-[#EEF0F3] text-[#1F2937]")
                   }
                 >
-                  <div className={"text-sm font-bold " + (opt.checked ? "text-primary" : "text-foreground")}>{opt.label}</div>
+                  <div className={"text-sm font-bold " + (opt.checked ? "text-[#0E6B5A]" : "text-foreground")}>{opt.label}</div>
                   <div className="text-fs-xs text-muted-foreground mt-0.5 leading-tight">{opt.sub}</div>
-                  <span className={"absolute top-2 left-2 h-4 w-4 rounded-md flex items-center justify-center text-fs-xs shadow-[0_1px_3px_rgba(10,31,61,0.06)] " + (opt.checked ? "bg-[#0E6B5A] text-[#1F2937]" : "bg-[#F4F6FA]")}>{opt.checked ? "✓" : ""}</span>
+                  <span className={"absolute top-2 left-2 h-4 w-4 rounded-md flex items-center justify-center text-fs-xs " + (opt.checked ? "bg-[#0E6B5A] text-white" : "bg-[#F4F6FA] text-transparent")}>
+                    ✓
+                  </span>
                 </button>
               ))}
             </div>
             <p className="text-fs-xs text-muted-foreground">
-              {offersServices && offersProducts ? "ספק 'גם וגם' — תופיע בשני הסינונים" : !offersServices && !offersProducts ? "בחרו לפחות אפשרות אחת כדי להופיע לדיירים." : "ניתן לסמן את שתי האפשרויות אם אתם גם נותני שירות וגם מוכרי מוצרים."}
+              {offersServices && offersProducts
+                ? "ספק 'גם וגם' — תופיע בשני הסינונים"
+                : !offersServices && !offersProducts
+                  ? "בחרו לפחות אפשרות אחת כדי להופיע לדיירים."
+                  : "ניתן לסמן את שתי האפשרויות אם אתם גם נותני שירות וגם מוכרי מוצרים."}
             </p>
           </div>
 
@@ -376,18 +392,52 @@ export default function SupplierProfileEdit() {
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={4} className="rounded-xl" />
           </Field>
           <div className="flex items-center justify-between py-1 pt-2 border-t border-border">
-            <span className="text-sm">סטטוס פעילות</span>
+            <div>
+              <div className="text-sm font-semibold">סטטוס פעילות</div>
+              <p className="text-fs-xs text-muted-foreground mt-0.5">כבוי — הפרופיל לא יוצג לדיירים</p>
+            </div>
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </div>
-        </section>
+        </Section>
+
+        {/* Service categories — hierarchical picker */}
+        <Section
+          title="תחומי פעילות"
+          subtitle="חפשו או פתחו קטגוריה ובחרו את התחומים שאתם מספקים"
+          icon={Tag}
+        >
+          <div className="rounded-2xl bg-[#0E6B5A]/8 border border-[#0E6B5A]/15 px-3.5 py-3 flex gap-2.5">
+            <Sparkles className="h-4 w-4 text-[#0E6B5A] shrink-0 mt-0.5" />
+            <p className="text-[13px] text-[#0B1220] leading-relaxed">
+              <span className="font-bold">טיפ: </span>
+              סמנו את כל התחומים שאתם עושים בפועל — כך דיירים רלוונטיים ימצאו אתכם.
+            </p>
+          </div>
+          <CategoryMultiPicker
+            categories={categories}
+            value={selectableCategories}
+            onChange={setSelectedCategories}
+            placeholder="חפשו תחום — למשל נגרות, מיזוג, צבע…"
+          />
+        </Section>
+
+        {/* Service areas */}
+        <Section
+          title="אזורי שירות"
+          subtitle="היכן אתם באמת מגיעים — ערים, אזורים או כל הארץ"
+          icon={MapPin}
+        >
+          <div className="rounded-2xl bg-[#F4F6FA] border border-[#E5E9EC] px-3.5 py-3 flex gap-2.5">
+            <MapPin className="h-4 w-4 text-[#0E6B5A] shrink-0 mt-0.5" />
+            <p className="text-[13px] text-[#5B6472] leading-relaxed">
+              בחרו אזורים מדויקים כדי לקבל פניות מהמקומות שאתם משרתים.
+            </p>
+          </div>
+          <AreasCombobox value={areas} onChange={setAreas} />
+        </Section>
 
         {/* Branding & Media */}
-        <section className="gb-card p-4 space-y-4">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <ImageIcon className="h-3.5 w-3.5 text-[#0E6B5A]" /> מיתוג ומדיה
-          </h3>
-
-          {/* Logo */}
+        <Section title="מיתוג ומדיה" subtitle="לוגו, קישורים וגלריה שמחזקים את האמון" icon={ImageIcon}>
           <div className="flex items-center gap-4">
             <SupplierLogo name={businessName} logoUrl={logoUrl} size="lg" />
             <div className="flex-1 space-y-2">
@@ -403,7 +453,6 @@ export default function SupplierProfileEdit() {
             </div>
           </div>
 
-          {/* Links */}
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
               <LinkIcon className="h-3.5 w-3.5 text-[#0E6B5A]" /> קישורים
@@ -414,7 +463,6 @@ export default function SupplierProfileEdit() {
             <Input dir="ltr" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/..." className="h-10 rounded-xl text-sm" maxLength={500} />
           </div>
 
-          {/* Catalogs */}
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
               <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" /> קטלוגים
@@ -426,7 +474,6 @@ export default function SupplierProfileEdit() {
             )}
           </div>
 
-          {/* Gallery */}
           <div className="space-y-2 pt-2 border-t border-border">
             <Label className="text-xs font-bold flex items-center gap-1.5">
               <ImageIcon className="h-3.5 w-3.5 text-[#0E6B5A]" /> גלריית עבודות
@@ -455,17 +502,14 @@ export default function SupplierProfileEdit() {
               </div>
             )}
           </div>
-        </section>
+        </Section>
 
-        {/* Payment details (manual: Bit / bank transfer) */}
-        <section className="gb-card p-4 space-y-3">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Wallet className="h-3.5 w-3.5 text-[#0E6B5A]" /> פרטי תשלום (ביט / העברה בנקאית)
-          </h3>
-          <p className="text-fs-xs text-muted-foreground">
-            הפרטים האלה יוצגו לדיירים כדי שיוכלו להעביר אליך את הפיקדון ישירות.
-          </p>
-
+        {/* Payment details */}
+        <Section
+          title="פרטי תשלום"
+          subtitle="ביט או העברה בנקאית — יוצג לדיירים לפיקדון"
+          icon={Wallet}
+        >
           <Field label="טלפון לביט" icon={Smartphone}>
             <Input dir="ltr" value={bitPhone} onChange={(e) => setBitPhone(e.target.value)} maxLength={20} placeholder="050-0000000" className="h-11 rounded-xl" />
           </Field>
@@ -500,108 +544,62 @@ export default function SupplierProfileEdit() {
               placeholder="לדוגמה: נא לציין בהעברה את שם הפרויקט"
             />
           </Field>
-        </section>
-
-
-
-        <section className="gb-card p-4 space-y-3">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> קטגוריות שירות
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((c) => {
-              const on = selectedCategories.includes(c.id);
-              return (
-                <button
-                  type="button"
-                  key={c.id}
-                  onClick={() => toggle(selectedCategories, setSelectedCategories, c.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-transform active:scale-[0.97] shadow-[0_1px_3px_rgba(10,31,61,0.06)] ${
-                    on ? "bg-[#0E6B5A] text-white" : "bg-white text-[#1F2937]"
-                  }`}
-                >
-                  <span className="ml-1">{c.icon}</span>
-                  {c.name}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="gb-card p-4 space-y-3">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Globe className="h-3.5 w-3.5 text-[#0E6B5A]" /> אזורי שירות
-          </h3>
-          <div className="flex items-center justify-between py-1">
-            <span className="text-sm font-semibold">נותן שירות בכל הארץ</span>
-            <Switch checked={servesAll} onCheckedChange={setServesAll} />
-          </div>
-
-          {!servesAll && (
-            <>
-              <div>
-                <Label className="text-xs font-bold mb-2 block">אזורים שאני משרת</Label>
-                <div className="flex flex-wrap gap-2">
-                  {regions.map((r) => {
-                    const on = selectedRegions.includes(r.id);
-                    return (
-                      <button
-                        type="button"
-                        key={r.id}
-                        onClick={() => toggle(selectedRegions, setSelectedRegions, r.id)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-transform active:scale-[0.97] shadow-[0_1px_3px_rgba(10,31,61,0.06)] ${
-                          on ? "bg-[#EAF2FF] text-[#2F6BFF]" : "bg-white text-[#1F2937]"
-                        }`}
-                      >
-                        <MapPin className="h-3 w-3 inline ml-1" />
-                        {r.name_he}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-xs font-bold mb-2 block">ערים ספציפיות (אופציונלי)</Label>
-                <div className="max-h-56 overflow-y-auto rounded-[16px] bg-white p-2 space-y-1 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]">
-                  {cities.map((c) => {
-                    const on = selectedCities.includes(c.id);
-                    return (
-                      <label key={c.id} className="flex items-center gap-2 text-sm py-1 px-2 rounded-[12px] hover:bg-[#F4F6FA] cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={on}
-                          onChange={() => toggle(selectedCities, setSelectedCities, c.id)}
-                          className="accent-primary"
-                        />
-                        {c.name_he}
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            </>
-          )}
-        </section>
-
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-xl">
-            <ArrowRight className="h-4 w-4 ml-2" /> ביטול
-          </Button>
-          <Button type="submit" disabled={saving} className="flex-1 h-12 rounded-[16px]">
-            <Save className="h-4 w-4 ml-2" /> {saving ? "שומר…" : "שמירה"}
-          </Button>
-        </div>
+        </Section>
 
         <button
           type="button"
           onClick={() => navigate("/supplier/delete-account")}
-          className="mt-2 w-full h-[44px] rounded-[14px] flex items-center justify-center gap-2 text-[#DC2626] text-[13px] font-semibold"
+          className="w-full h-[44px] rounded-[14px] flex items-center justify-center gap-2 text-[#DC2626] text-[13px] font-semibold"
         >
           מחיקת חשבון
         </button>
+
+        {/* Sticky save bar */}
+        <div className="fixed bottom-0 inset-x-0 z-40 pointer-events-none">
+          <div className="mx-auto max-w-[var(--app-max-w)] px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 pointer-events-auto">
+            <div className="rounded-2xl bg-white/95 backdrop-blur border border-[#EEF0F3] shadow-[0_8px_28px_-12px_rgba(11,18,32,0.28)] p-2 flex gap-2">
+              <Button type="button" variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-xl">
+                <ArrowRight className="h-4 w-4 ml-2" /> ביטול
+              </Button>
+              <Button
+                type="submit"
+                disabled={saving}
+                className="flex-[1.4] h-12 rounded-[16px] bg-[#0E6B5A] hover:bg-[#0A5446] text-white"
+              >
+                <Save className="h-4 w-4 ml-2" /> {saving ? "שומר…" : "שמירת שינויים"}
+              </Button>
+            </div>
+          </div>
+        </div>
       </form>
     </MobileShell>
+  );
+}
+
+function Section({
+  title,
+  subtitle,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl border border-[#EEF0F3] bg-white p-4 space-y-3 shadow-[0_1px_2px_rgba(11,18,32,0.04),0_8px_24px_-12px_rgba(11,18,32,0.08)]">
+      <header className="flex items-start gap-3 pb-1">
+        <div className="h-10 w-10 rounded-2xl bg-[#0E6B5A]/10 flex items-center justify-center shrink-0">
+          <Icon className="h-[18px] w-[18px] text-[#0E6B5A]" strokeWidth={2.2} />
+        </div>
+        <div className="min-w-0 pt-0.5">
+          <h3 className="text-[15px] font-bold text-[#0F172A] leading-tight">{title}</h3>
+          <p className="text-[12px] text-[#8E95A2] mt-0.5 leading-snug">{subtitle}</p>
+        </div>
+      </header>
+      {children}
+    </section>
   );
 }
 
