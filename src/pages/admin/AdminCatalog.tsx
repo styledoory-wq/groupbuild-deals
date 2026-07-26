@@ -6,7 +6,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import {
   Plus, Trash2, Loader2, ArrowUp, ArrowDown, ChevronDown, ChevronLeft,
   Pencil, Search as SearchIcon, RotateCcw, EyeOff, Eye, History, MoveRight, X,
-  MoreHorizontal, Check,
+  MoreHorizontal, Check, LayoutGrid, List, Home as HomeIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
+import { iconForCategory } from "@/lib/categoryIcons";
 
 type Cat = {
   id: string;
