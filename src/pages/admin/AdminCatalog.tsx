@@ -306,28 +306,36 @@ export default function AdminCatalog() {
           )}
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setAddUnder("root")} className="h-9 rounded-lg bg-[#0E6B5A] text-white font-bold text-xs flex-1">
-            <Plus className="h-3.5 w-3.5 ml-1" /> תחום ראשי חדש
+          <Button onClick={() => setAddUnder(viewMode === "grid" ? (gridParentId ? (all.find(c => c.id === gridParentId) ?? "root") : "root") : "root")} className="h-9 rounded-lg bg-[#0E6B5A] text-white font-bold text-xs flex-1">
+            <Plus className="h-3.5 w-3.5 ml-1" /> הוסף כאן
           </Button>
           <Button
-            variant={editMode ? "default" : "outline"}
-            onClick={() => setEditMode((v) => !v)}
-            className={`h-9 rounded-lg text-xs ${editMode ? "bg-[#0E6B5A] text-white" : ""}`}
+            variant="outline"
+            onClick={() => setViewMode((v) => (v === "grid" ? "tree" : "grid"))}
+            className="h-9 rounded-lg text-xs"
+            title={viewMode === "grid" ? "עץ" : "רשת"}
           >
-            {editMode ? (<><Check className="h-3.5 w-3.5 ml-1" /> סיום</>) : (<><Pencil className="h-3.5 w-3.5 ml-1" /> עריכה</>)}
+            {viewMode === "grid" ? <List className="h-3.5 w-3.5 ml-1" /> : <LayoutGrid className="h-3.5 w-3.5 ml-1" />}
+            {viewMode === "grid" ? "עץ" : "רשת"}
           </Button>
           <Button
             variant={showDeleted ? "default" : "outline"}
             onClick={() => setShowDeleted((v) => !v)}
             className="h-9 rounded-lg text-xs"
           >
-            {showDeleted ? "הצג פעילים" : "פח המחזור"}
+            {showDeleted ? "הצג פעילים" : "פח"}
           </Button>
         </div>
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => setExpanded(new Set(all.map(c => c.id)))} className="h-8 rounded-lg text-xs flex-1">פתח הכל</Button>
-          <Button variant="ghost" onClick={() => setExpanded(new Set())} className="h-8 rounded-lg text-xs flex-1">סגור הכל</Button>
-        </div>
+        {viewMode === "tree" && (
+          <div className="flex gap-2">
+            <Button variant={editMode ? "default" : "outline"} onClick={() => setEditMode((v) => !v)}
+              className={`h-9 rounded-lg text-xs flex-1 ${editMode ? "bg-[#0E6B5A] text-white" : ""}`}>
+              {editMode ? (<><Check className="h-3.5 w-3.5 ml-1" /> סיום עריכה</>) : (<><Pencil className="h-3.5 w-3.5 ml-1" /> סדר/עריכה</>)}
+            </Button>
+            <Button variant="ghost" onClick={() => setExpanded(new Set(all.map(c => c.id)))} className="h-9 rounded-lg text-xs flex-1">פתח הכל</Button>
+            <Button variant="ghost" onClick={() => setExpanded(new Set())} className="h-9 rounded-lg text-xs flex-1">סגור הכל</Button>
+          </div>
+        )}
       </div>
 
       {loading ? (
