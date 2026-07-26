@@ -81,15 +81,17 @@ function ProjectTypeCircle({
       aria-pressed={selected}
       className="flex min-w-0 flex-1 flex-col items-center gap-2.5 active:scale-[0.97] transition-transform"
     >
-      {/* Extra bottom space so the overlapping icon bubble isn't clipped */}
-      <span className="relative mx-auto mb-3.5 block h-[100px] w-[100px]">
+      <span className="relative mx-auto mb-3.5 block h-[102px] w-[102px]">
         <span
-          className="absolute inset-0 overflow-hidden rounded-full bg-slate-100"
+          className={
+            "absolute inset-0 overflow-hidden rounded-full bg-slate-100 " +
+            (selected ? "border-[3px]" : "border border-gray-200")
+          }
           style={{
-            /* Thick brand ring OUTSIDE the photo (doesn't shrink the image) */
+            borderColor: selected ? BRAND : undefined,
             boxShadow: selected
-              ? `0 0 0 3px ${BRAND}, 0 14px 28px -14px ${BRAND}88`
-              : "0 10px 22px -12px rgba(15,23,42,0.18)",
+              ? `0 0 0 1px ${BRAND}, 0 14px 28px -14px ${BRAND}88`
+              : "0 8px 20px -12px rgba(15,23,42,0.16)",
           }}
         >
           <img
@@ -100,28 +102,18 @@ function ProjectTypeCircle({
           />
         </span>
 
-        {/* Active V — top-right corner of the circle */}
         {selected && (
           <span
             className="absolute z-20 grid h-[26px] w-[26px] place-items-center rounded-full text-white shadow-md"
-            style={{
-              top: -2,
-              right: -2,
-              background: BRAND,
-            }}
+            style={{ top: -3, right: -3, background: BRAND }}
           >
             <Check size={14} strokeWidth={3} fill="none" />
           </span>
         )}
 
-        {/* Icon bubble overlapping the bottom edge of the photo circle */}
         <span
           className="absolute left-1/2 z-20 grid h-8 w-8 place-items-center rounded-full bg-white shadow-[0_4px_12px_rgba(15,23,42,0.14)]"
-          style={{
-            bottom: 0,
-            transform: "translate(-50%, 42%)",
-            color: BRAND,
-          }}
+          style={{ bottom: 0, transform: "translate(-50%, 42%)", color: BRAND }}
         >
           <Icon
             size={15}
@@ -147,6 +139,10 @@ function ProjectTypeCircle({
   );
 }
 
+/**
+ * Sketch hero: solid brand-green LEFT → bright blurred living-room RIGHT.
+ * Search pill floats on the lower edge of the atmospheric band.
+ */
 function CategoryHeroSearch({
   value,
   onChange,
@@ -155,38 +151,53 @@ function CategoryHeroSearch({
   onChange: (v: string) => void;
 }) {
   return (
-    <div
-      className="relative -mx-4 mb-5 overflow-hidden"
-      style={{ minHeight: "168px" }}
-    >
-      {/* Lifestyle photo — anchored to the right so it stays visible like the sketch */}
-      <img
-        src={heroAtmosphereImg}
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover"
-        style={{
-          objectPosition: "72% 42%",
-          filter: "blur(2.5px) saturate(1.05)",
-        }}
-      />
+    <div className="relative -mx-4 mb-5 overflow-hidden">
+      {/* Photo layer — right side of the band (LTR) */}
+      <div className="absolute inset-0">
+        <img
+          src={heroAtmosphereImg}
+          alt=""
+          aria-hidden
+          className="h-full w-full object-cover"
+          style={{
+            objectPosition: "78% 40%",
+            filter: "blur(3px)",
+            transform: "scale(1.08)",
+          }}
+        />
+      </div>
 
-      {/* Soft green wash on the LEFT, photo readable on the RIGHT — sketch composition */}
+      {/* Green → photo blend (matches sketch: deep green left, room visible right) */}
       <div
         className="absolute inset-0"
         style={{
-          background:
-            "linear-gradient(90deg, #0E6B5A 0%, rgba(14,107,90,0.88) 26%, rgba(14,107,90,0.45) 52%, rgba(14,107,90,0.12) 72%, rgba(248,250,252,0.35) 100%)",
+          background: `
+            linear-gradient(
+              95deg,
+              #0E6B5A 0%,
+              #0E6B5A 22%,
+              rgba(14,107,90,0.82) 38%,
+              rgba(14,107,90,0.35) 58%,
+              rgba(255,255,255,0.08) 78%,
+              rgba(248,250,252,0.22) 100%
+            )
+          `,
         }}
       />
 
-      {/* Gentle fade into page background */}
-      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent via-slate-50/40 to-slate-50" />
+      {/* Soft bottom blend into page */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-16"
+        style={{
+          background:
+            "linear-gradient(to bottom, transparent 0%, rgba(248,250,252,0.55) 55%, #F8FAFC 100%)",
+        }}
+      />
 
-      <div className="relative flex min-h-[168px] flex-col justify-center px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-9">
+      <div className="relative px-4 pt-[calc(env(safe-area-inset-top)+22px)] pb-8">
         <label
           className="flex h-[52px] items-center gap-3 rounded-full bg-white px-5 text-slate-400"
-          style={{ boxShadow: "0 14px 32px -14px rgba(15,23,42,0.32)" }}
+          style={{ boxShadow: "0 12px 28px -12px rgba(15,23,42,0.28)" }}
         >
           <Search size={20} strokeWidth={1.9} className="shrink-0 text-slate-400" />
           <input
@@ -353,7 +364,6 @@ export default function CategoriesList() {
         >
           <CategoryHeroSearch value={query} onChange={setQuery} />
 
-          {/* Circular project types */}
           {!query.trim() && (
             <div className="mb-7 flex items-start justify-between gap-1.5 px-0.5">
               {PROJECT_TYPES.map((def) => (
@@ -367,7 +377,6 @@ export default function CategoriesList() {
             </div>
           )}
 
-          {/* Search results OR stage squares */}
           {query.trim() ? (
             <section>
               <div className="mb-3.5 flex items-center justify-between">
@@ -447,7 +456,7 @@ export default function CategoriesList() {
                   {Array.from({ length: 9 }).map((_, i) => (
                     <div
                       key={i}
-                      className="aspect-square animate-pulse rounded-2xl border border-gray-100 bg-white shadow-sm"
+                      className="aspect-[1/1.05] animate-pulse rounded-2xl border border-gray-100 bg-white shadow-sm"
                     />
                   ))}
                 </div>
@@ -483,7 +492,6 @@ export default function CategoriesList() {
             </section>
           )}
 
-          {/* Trust banner */}
           {!query && !loading && !errorMsg && filtered.length > 0 && (
             <aside className="mt-7 flex items-stretch overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
               <div className="flex min-w-0 flex-1 items-start gap-2.5 p-4 text-right">
