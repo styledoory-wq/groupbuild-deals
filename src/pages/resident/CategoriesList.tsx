@@ -360,151 +360,148 @@ export default function CategoriesList() {
         >
           <div className="relative">
             <CategoryHeroSearch value={query} onChange={setQuery} />
+          </div>
 
-            {query.trim() && (
-              <div
-                className="absolute inset-x-3 z-40 -mt-3 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_40px_-16px_rgba(15,23,42,0.28)]"
-                style={{ maxHeight: 320 }}
-              >
-                {searching ? (
-                  <div className="p-4 text-center text-[13px] text-slate-500">מחפש…</div>
-                ) : catalogHits.length === 0 ? (
-                  <div className="p-4 text-center text-[13px] text-slate-500">לא נמצאו תוצאות</div>
-                ) : (
-                  <ul className="max-h-[320px] overflow-y-auto overscroll-contain py-1">
-                    {catalogHits.slice(0, 6).map((h) => {
-                      const HitIcon = iconForCategory(h.id, h.name);
-                      return (
-                        <li key={h.id}>
-                          <Link
-                            to={`/resident/categories/${h.id}`}
-                            className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 active:bg-slate-100"
+          {query.trim() ? (
+            <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_40px_-16px_rgba(15,23,42,0.28)]">
+              {searching ? (
+                <div className="p-6 text-center text-[13px] text-slate-500">מחפש…</div>
+              ) : catalogHits.length === 0 ? (
+                <div className="p-6 text-center text-[13px] text-slate-500">לא נמצאו תוצאות</div>
+              ) : (
+                <ul className="py-1">
+                  {catalogHits.slice(0, 8).map((h) => {
+                    const HitIcon = iconForCategory(h.id, h.name);
+                    return (
+                      <li key={h.id}>
+                        <Link
+                          to={`/resident/categories/${h.id}`}
+                          className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 active:bg-slate-100"
+                        >
+                          <span
+                            className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
+                            style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
                           >
-                            <span
-                              className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
-                              style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
-                            >
-                              <HitIcon size={18} strokeWidth={1.8} />
+                            <HitIcon size={18} strokeWidth={1.8} />
+                          </span>
+                          <span className="min-w-0 flex-1 text-right">
+                            <span className="block truncate text-[14px] font-bold text-slate-800">
+                              {h.name}
                             </span>
-                            <span className="min-w-0 flex-1 text-right">
-                              <span className="block truncate text-[14px] font-bold text-slate-800">
-                                {h.name}
+                            {h.path && (
+                              <span className="block truncate text-[11px] text-slate-500">
+                                {h.path}
                               </span>
-                              {h.path && (
-                                <span className="block truncate text-[11px] text-slate-500">
-                                  {h.path}
-                                </span>
-                              )}
-                            </span>
-                            <ChevronLeft className="h-4 w-4 shrink-0 text-slate-400" strokeWidth={2.2} />
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="mb-7 flex items-start justify-between gap-1.5 px-0.5">
-            {PROJECT_TYPES.map((def) => (
-              <ProjectTypeCircle
-                key={def.id}
-                def={def}
-                selected={def.id === selectedProject}
-                onSelect={() => handleProjectChange(def.id)}
-              />
-            ))}
-          </div>
-
-          {(
-            <section>
-
-              <div className="mb-3.5 flex items-center justify-between">
-                <h2 className="m-0 text-[17px] font-extrabold text-slate-900">קטגוריות מובילות</h2>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const first = filtered[0];
-                    if (first) openStage(first.key);
-                  }}
-                  className="inline-flex items-center gap-0.5 text-[12.5px] font-bold"
-                  style={{ color: BRAND }}
-                >
-                  הצג הכל
-                  <ChevronLeft size={14} strokeWidth={2.5} />
-                </button>
+                            )}
+                          </span>
+                          <ChevronLeft className="h-4 w-4 shrink-0 text-slate-400" strokeWidth={2.2} />
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="mb-7 flex items-start justify-between gap-1.5 px-0.5">
+                {PROJECT_TYPES.map((def) => (
+                  <ProjectTypeCircle
+                    key={def.id}
+                    def={def}
+                    selected={def.id === selectedProject}
+                    onSelect={() => handleProjectChange(def.id)}
+                  />
+                ))}
               </div>
 
-              {loading ? (
-                <div className="grid grid-cols-3 gap-3">
-                  {Array.from({ length: 9 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="aspect-[1/1.05] animate-pulse rounded-2xl border border-gray-100 bg-white shadow-sm"
-                    />
-                  ))}
-                </div>
-              ) : errorMsg ? (
-                <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
-                  <strong className="text-slate-800">{errorMsg}</strong>
+              <section>
+                <div className="mb-3.5 flex items-center justify-between">
+                  <h2 className="m-0 text-[17px] font-extrabold text-slate-900">קטגוריות מובילות</h2>
                   <button
-                    onClick={() => window.location.reload()}
-                    className="text-[12px] font-bold underline"
+                    type="button"
+                    onClick={() => {
+                      const first = filtered[0];
+                      if (first) openStage(first.key);
+                    }}
+                    className="inline-flex items-center gap-0.5 text-[12.5px] font-bold"
                     style={{ color: BRAND }}
                   >
-                    רענן
+                    הצג הכל
+                    <ChevronLeft size={14} strokeWidth={2.5} />
                   </button>
                 </div>
-              ) : filtered.length === 0 ? (
-                <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
-                  <Search size={28} />
-                  <strong className="text-slate-800">בקרוב נוסיף שלבים למסלול זה</strong>
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-3">
-                  {filtered.map((s) => (
-                    <CategorySquareCard
-                      key={s.key}
-                      title={s.title}
-                      Icon={iconForStage(s.key)}
-                      count={s.serviceCount}
-                      onClick={() => openStage(s.key)}
+
+                {loading ? (
+                  <div className="grid grid-cols-3 gap-3">
+                    {Array.from({ length: 9 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="aspect-[1/1.05] animate-pulse rounded-2xl border border-gray-100 bg-white shadow-sm"
+                      />
+                    ))}
+                  </div>
+                ) : errorMsg ? (
+                  <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
+                    <strong className="text-slate-800">{errorMsg}</strong>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="text-[12px] font-bold underline"
+                      style={{ color: BRAND }}
+                    >
+                      רענן
+                    </button>
+                  </div>
+                ) : filtered.length === 0 ? (
+                  <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
+                    <Search size={28} />
+                    <strong className="text-slate-800">בקרוב נוסיף שלבים למסלול זה</strong>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-3">
+                    {filtered.map((s) => (
+                      <CategorySquareCard
+                        key={s.key}
+                        title={s.title}
+                        Icon={iconForStage(s.key)}
+                        count={s.serviceCount}
+                        onClick={() => openStage(s.key)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              {!loading && !errorMsg && filtered.length > 0 && (
+                <aside className="mt-7 flex items-stretch overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+                  <div className="flex min-w-0 flex-1 items-start gap-2.5 p-4 text-right">
+                    <span
+                      className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full"
+                      style={{ background: "rgba(14,107,90,0.10)", color: BRAND }}
+                    >
+                      <ShieldCheck size={18} strokeWidth={2.2} />
+                    </span>
+                    <div className="min-w-0">
+                      <strong className="mb-0.5 block text-[14px] leading-snug" style={{ color: BRAND }}>
+                        ספקים מאומתים
+                      </strong>
+                      <span className="block text-[12px] leading-snug text-slate-500">
+                        שקט נפשי לכל שלב בפרויקט
+                      </span>
+                    </div>
+                  </div>
+                  <div className="w-[112px] shrink-0">
+                    <img
+                      src={finishesImg}
+                      alt=""
+                      className="h-full min-h-[92px] w-full object-cover object-center"
                     />
-                  ))}
-                </div>
+                  </div>
+                </aside>
               )}
-            </section>
+            </>
           )}
 
-          {!query && !loading && !errorMsg && filtered.length > 0 && (
-            <aside className="mt-7 flex items-stretch overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-              <div className="flex min-w-0 flex-1 items-start gap-2.5 p-4 text-right">
-                <span
-                  className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full"
-                  style={{ background: "rgba(14,107,90,0.10)", color: BRAND }}
-                >
-                  <ShieldCheck size={18} strokeWidth={2.2} />
-                </span>
-                <div className="min-w-0">
-                  <strong className="mb-0.5 block text-[14px] leading-snug" style={{ color: BRAND }}>
-                    ספקים מאומתים
-                  </strong>
-                  <span className="block text-[12px] leading-snug text-slate-500">
-                    שקט נפשי לכל שלב בפרויקט
-                  </span>
-                </div>
-              </div>
-              <div className="w-[112px] shrink-0">
-                <img
-                  src={finishesImg}
-                  alt=""
-                  className="h-full min-h-[92px] w-full object-cover object-center"
-                />
-              </div>
-            </aside>
-          )}
         </div>
 
         <BottomNav role="resident" />
