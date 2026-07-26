@@ -15,8 +15,8 @@ type Props = {
 };
 
 /**
- * Shared category/stage square — white card, green line icon in soft circle,
- * title + optional supplier count. Matches the approved combo mockup.
+ * Premium service/category square — white card, green line icon,
+ * bold title + gray supplier count. Matches the approved mockup.
  */
 export function CategorySquareCard({
   title,
@@ -38,25 +38,22 @@ export function CategorySquareCard({
       type={as === "button" ? "button" : undefined}
       onClick={onClick}
       className={cn(
-        "aspect-[1/1.05] flex flex-col items-center justify-center gap-2 rounded-[22px] bg-white px-2 py-3",
+        "aspect-[1/1.08] flex flex-col items-center justify-center gap-2.5 rounded-2xl bg-white px-2.5 py-3.5",
+        "border border-gray-100 shadow-sm",
         as === "button" && "active:scale-[0.97] transition-transform",
         className,
       )}
-      style={{ boxShadow: "0 6px 18px -8px rgba(16,24,40,0.14)" }}
     >
-      <span
-        className="grid place-items-center w-[52px] h-[52px] rounded-full"
-        style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
-      >
-        <Icon size={26} strokeWidth={1.65} />
-      </span>
-      <span className="block text-[12.5px] font-extrabold text-[#1A1A1A] leading-tight text-center line-clamp-2 px-0.5">
+      <Icon size={28} strokeWidth={1.6} style={{ color: BRAND }} />
+      <span className="block text-[13px] font-bold text-slate-900 leading-tight text-center line-clamp-2 px-0.5">
         {title}
       </span>
       {bottom && (
         <span
-          className="block text-[11px] font-semibold leading-none"
-          style={{ color: soon && !subtitle ? "#9CA3AF" : BRAND }}
+          className={cn(
+            "block text-[11px] font-medium leading-none",
+            soon && !subtitle ? "text-gray-400" : "text-gray-400",
+          )}
         >
           {bottom}
         </span>

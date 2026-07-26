@@ -104,8 +104,8 @@ export default function CategoryStages() {
   return (
     <div
       dir="rtl"
-      className="min-h-screen min-h-[100dvh] w-full bg-[#F7F8F6]"
-      style={{ fontFamily: "'Heebo', system-ui, sans-serif", color: "#172033" }}
+      className="min-h-screen min-h-[100dvh] w-full bg-slate-50"
+      style={{ fontFamily: "'Heebo', system-ui, sans-serif", color: "#0F172A" }}
     >
       <div
         className="mx-auto w-full max-w-[var(--app-max-w)] px-4 pt-[calc(env(safe-area-inset-top)+16px)]"
@@ -178,7 +178,7 @@ export default function CategoryStages() {
             שירותים יתווספו בקרוב בשלב זה
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-3 gap-3.5">
             {services.map((c) => (
               <Link key={c.id} to={`/resident/categories/${c.id}`} className="block">
                 <CategorySquareCard
