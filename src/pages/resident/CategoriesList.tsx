@@ -20,10 +20,12 @@ import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
 import { iconForCategory, iconForStage } from "@/lib/categoryIcons";
-import { illustrationForProjectType } from "@/lib/stageIllustrations";
 import { Seo } from "@/components/seo/Seo";
 import finishesImg from "@/assets/stages/stage-finishes.jpg";
-import newBuildImg from "@/assets/journey-new-build.jpg";
+import heroAtmosphereImg from "@/assets/project-renovation.jpg";
+import projectNewBuildImg from "@/assets/project-new-build.jpg";
+import projectRenoImg from "@/assets/project-renovation.jpg";
+import projectBuildingImg from "@/assets/project-building.jpg";
 
 const BRAND = "#0E6B5A";
 
@@ -44,21 +46,21 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
     id: "new",
     title: "בנייה חדשה",
     subtitle: "הכל לבניית בית חדש",
-    img: illustrationForProjectType("new"),
+    img: projectNewBuildImg,
     Icon: HomeIcon,
   },
   {
     id: "reno",
     title: "שיפוץ",
     subtitle: "שדרוג ושיפוץ הבית",
-    img: illustrationForProjectType("reno"),
+    img: projectRenoImg,
     Icon: PaintRoller,
   },
   {
     id: "building",
     title: "בניין משותף",
     subtitle: "ועד בית ותחזוקה",
-    img: illustrationForProjectType("building"),
+    img: projectBuildingImg,
     Icon: Building2,
   },
 ];
@@ -80,11 +82,12 @@ function ProjectTypeCircle({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="flex flex-col items-center gap-2.5 flex-1 min-w-0 active:scale-[0.97] transition-transform"
+      className="flex flex-col items-center gap-3 flex-1 min-w-0 active:scale-[0.97] transition-transform"
     >
-      <span className="relative block w-[108px] h-[108px] mx-auto">
+      {/* Extra bottom space so the overlapping icon bubble isn't clipped */}
+      <span className="relative mx-auto mb-3 block h-[104px] w-[104px]">
         <span
-          className="absolute inset-0 rounded-full overflow-hidden bg-slate-100"
+          className="absolute inset-0 overflow-hidden rounded-full bg-slate-100"
           style={{
             boxShadow: selected
               ? `0 0 0 3px ${BRAND}, 0 16px 32px -18px ${BRAND}99`
@@ -99,42 +102,46 @@ function ProjectTypeCircle({
           />
         </span>
 
+        {/* Active V — top-right corner of the circle */}
         {selected && (
           <span
-            className="absolute top-0.5 right-0.5 z-10 grid place-items-center rounded-full text-white"
+            className="absolute right-0 top-0 z-20 grid place-items-center rounded-full text-white"
             style={{
               width: 26,
               height: 26,
               background: BRAND,
               boxShadow: `0 4px 12px ${BRAND}66`,
+              transform: "translate(12%, -12%)",
             }}
           >
-            <Check size={14} strokeWidth={3} />
+            <Check size={14} strokeWidth={3} fill="none" />
           </span>
         )}
 
-        {/* Small icon badge at bottom center */}
+        {/* Icon bubble overlapping the bottom edge of the photo circle */}
         <span
-          className="absolute -bottom-1 left-1/2 z-10 grid -translate-x-1/2 place-items-center rounded-full bg-white"
+          className="absolute left-1/2 z-20 grid place-items-center rounded-full border border-gray-100 bg-white"
           style={{
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
+            bottom: 0,
+            transform: "translate(-50%, 45%)",
             color: BRAND,
             boxShadow: "0 4px 12px rgba(15,23,42,0.14)",
           }}
         >
-          <Icon size={15} strokeWidth={2.2} />
+          <Icon size={16} strokeWidth={2} fill="none" style={{ color: BRAND, stroke: BRAND }} />
         </span>
       </span>
 
-      <span className="text-center px-0.5 mt-1">
+      <span className="px-0.5 text-center">
         <span
           className="block text-[13.5px] font-extrabold leading-tight"
           style={{ color: selected ? BRAND : "#0F172A" }}
         >
           {def.title}
         </span>
-        <span className="block text-[10.5px] text-slate-500 leading-tight mt-0.5 line-clamp-2">
+        <span className="mt-0.5 block text-[10.5px] leading-tight text-slate-500 line-clamp-2">
           {def.subtitle}
         </span>
       </span>
@@ -155,7 +162,7 @@ function CategoryHeroSearch({
     <div className="relative -mx-4 mb-6 overflow-hidden">
       {/* Atmospheric blurred photo */}
       <img
-        src={newBuildImg}
+        src={heroAtmosphereImg}
         alt=""
         aria-hidden
         className="absolute inset-0 h-full w-full scale-110 object-cover object-center blur-[2px]"

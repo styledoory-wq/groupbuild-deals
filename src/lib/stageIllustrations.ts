@@ -2,9 +2,9 @@
  * Contextual illustrations for category / stage tiles.
  * Prefer exact ID → id tokens → tight Hebrew keywords.
  */
-import newBuildImg from "@/assets/journey-new-build.jpg";
-import renoImg from "@/assets/journey-renovation.jpg";
-import committeeImg from "@/assets/journey-committee.jpg";
+import newBuildImg from "@/assets/project-new-build.jpg";
+import renoImg from "@/assets/project-renovation.jpg";
+import committeeImg from "@/assets/project-building.jpg";
 
 import planningImg from "@/assets/stages/stage-planning-desk.jpg";
 import sitePrepImg from "@/assets/stages/stage-site-prep.jpg";
