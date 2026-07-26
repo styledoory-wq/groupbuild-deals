@@ -8,7 +8,7 @@ import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { supabase } from "@/integrations/supabase/client";
-import stagePlanningImg from "@/assets/stage-planning.jpg";
+import { illustrationForLabel } from "@/lib/stageIllustrations";
 
 interface DbSupplier {
   id: string;
@@ -309,7 +309,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                   style={{ boxShadow: "var(--shadow-elevated)" }}
                 >
                   <img
-                    src={stagePlanningImg}
+                    src={illustrationForLabel(activeCategory?.name)}
                     alt=""
                     className="h-full w-full object-cover object-center"
                   />
@@ -341,7 +341,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                     <div className="flex-1 min-h-0 w-full px-2 pt-2">
                       <div className="h-full w-full rounded-[12px] overflow-hidden bg-slate-50">
                         <img
-                          src={stagePlanningImg}
+                          src={illustrationForLabel(c.name)}
                           alt=""
                           loading="lazy"
                           className="h-full w-full object-cover object-center"

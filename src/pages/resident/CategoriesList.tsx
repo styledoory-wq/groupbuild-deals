@@ -13,11 +13,8 @@ import {
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
+import { illustrationForStage, illustrationForProjectType } from "@/lib/stageIllustrations";
 import { Seo } from "@/components/seo/Seo";
-import newBuildImg from "@/assets/journey-new-build.jpg";
-import renoImg from "@/assets/journey-renovation.jpg";
-import committeeImg from "@/assets/journey-committee.jpg";
-import stagePlanningImg from "@/assets/stage-planning.jpg";
 
 const STORAGE_KEY = "gb:projectType";
 
@@ -37,7 +34,7 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
   {
     id: "new",
     title: "בנייה חדשה",
-    img: newBuildImg,
+    img: illustrationForProjectType("new"),
     accent: "green",
     color: "#16845b",
     bgSelected: "linear-gradient(180deg,#EBF7EF,#FFFFFF)",
@@ -46,7 +43,7 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
   {
     id: "reno",
     title: "שיפוץ",
-    img: renoImg,
+    img: illustrationForProjectType("reno"),
     accent: "orange",
     color: "#d88919",
     bgSelected: "linear-gradient(180deg,#FDF3E4,#FFFFFF)",
@@ -55,7 +52,7 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
   {
     id: "building",
     title: "בניין משותף\nועד בית",
-    img: committeeImg,
+    img: illustrationForProjectType("building"),
     accent: "blue",
     color: "#34558e",
     bgSelected: "linear-gradient(180deg,#EAF0FB,#FFFFFF)",
@@ -506,7 +503,7 @@ export default function CategoriesList() {
                 <StageGridCard
                   key={s.key}
                   title={s.title}
-                  img={stagePlanningImg}
+                  img={illustrationForStage(s.key, selectedProject)}
                   serviceCount={s.serviceCount}
                   onClick={() => openStage(s.key)}
                 />
