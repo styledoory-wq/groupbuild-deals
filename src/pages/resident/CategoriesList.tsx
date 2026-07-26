@@ -151,19 +151,25 @@ function CategoryHeroSearch({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="relative -mx-4 mb-5 overflow-hidden">
-      {/* Clear professional photo — readable on the right, not fogged out */}
+    <div
+      className="relative -mx-4 mb-5 overflow-hidden"
+      style={{
+        /* Taller band so the living-room photo reads bigger */
+        minHeight: "calc(210px + env(safe-area-inset-top))",
+      }}
+    >
+      {/* Clear professional photo — readable on the right */}
       <div className="absolute inset-0">
         <img
           src={heroAtmosphereImg}
           alt=""
           aria-hidden
           className="h-full w-full object-cover"
-          style={{ objectPosition: "70% 45%" }}
+          style={{ objectPosition: "68% 42%" }}
         />
       </div>
 
-      {/* Brand green LEFT → clear photo RIGHT (soft fade only, no heavy blur) */}
+      {/* Brand green LEFT → clear photo RIGHT */}
       <div
         className="absolute inset-0"
         style={{
@@ -183,16 +189,17 @@ function CategoryHeroSearch({
 
       {/* Soft bottom blend into page */}
       <div
-        className="absolute inset-x-0 bottom-0 h-14"
+        className="absolute inset-x-0 bottom-0 h-16"
         style={{
           background:
-            "linear-gradient(to bottom, transparent 0%, rgba(248,250,252,0.4) 50%, #F8FAFC 100%)",
+            "linear-gradient(to bottom, transparent 0%, rgba(248,250,252,0.35) 45%, #F8FAFC 100%)",
         }}
       />
 
-      <div className="relative px-4 pt-[calc(env(safe-area-inset-top)+22px)] pb-8">
+      {/* Search centered vertically in the larger hero */}
+      <div className="relative flex min-h-[inherit] items-center px-4 pt-[env(safe-area-inset-top)] pb-6">
         <label
-          className="flex h-[52px] items-center gap-3 rounded-full bg-white px-5 text-slate-400"
+          className="flex h-[52px] w-full items-center gap-3 rounded-full bg-white px-5 text-slate-400"
           style={{ boxShadow: "0 12px 28px -12px rgba(15,23,42,0.28)" }}
         >
           <Search size={20} strokeWidth={1.9} className="shrink-0 text-slate-400" />
