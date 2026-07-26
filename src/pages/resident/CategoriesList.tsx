@@ -13,7 +13,11 @@ import {
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
-import { illustrationForStage, illustrationForProjectType } from "@/lib/stageIllustrations";
+import {
+  illustrationForCategory,
+  illustrationForStage,
+  illustrationForProjectType,
+} from "@/lib/stageIllustrations";
 import { Seo } from "@/components/seo/Seo";
 
 const STORAGE_KEY = "gb:projectType";
@@ -442,8 +446,12 @@ export default function CategoriesList() {
                     to={`/resident/categories/${h.id}`}
                     className="flex items-center gap-3 bg-white rounded-[18px] p-3 border border-white/70 shadow-sm active:scale-[0.99] transition-transform"
                   >
-                    <span className="h-11 w-11 rounded-2xl bg-[#0E6B5A]/10 flex items-center justify-center text-xl shrink-0">
-                      {h.icon || "📁"}
+                    <span className="h-11 w-11 rounded-2xl overflow-hidden bg-[#0E6B5A]/10 shrink-0">
+                      <img
+                        src={illustrationForCategory(h.id, h.name)}
+                        alt=""
+                        className="h-full w-full object-cover object-center"
+                      />
                     </span>
                     <div className="flex-1 min-w-0 text-right">
                       <p className="font-bold text-[14px] text-[#1F2937] truncate">{h.name}</p>
