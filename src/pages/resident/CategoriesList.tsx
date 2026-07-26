@@ -8,21 +8,88 @@ import {
   Building2,
   Check,
   ChevronLeft,
+  ClipboardList,
+  Compass,
+  DoorOpen,
+  Droplets,
+  Fence,
+  Hammer,
   Home as HomeIcon,
+  KeyRound,
+  Layers,
+  Lightbulb,
   PaintRoller,
+  Ruler,
   Search,
+  ShieldCheck,
+  Sofa,
+  Sparkles,
+  SunMedium,
+  Trees,
   UserRound,
+  Wind,
+  Wrench,
+  Zap,
+  type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
 import {
   illustrationForCategory,
-  illustrationForStage,
   illustrationForProjectType,
 } from "@/lib/stageIllustrations";
 import { Seo } from "@/components/seo/Seo";
 import finishesImg from "@/assets/stages/stage-finishes.jpg";
+import newBuildImg from "@/assets/journey-new-build.jpg";
+
+const BRAND = "#0E6B5A";
+
+/** Line icons for stage squares — matches the approved combo mockup. */
+const STAGE_ICONS: Record<string, LucideIcon> = {
+  "pre-plan": Lightbulb,
+  planning: Ruler,
+  "site-prep": Hammer,
+  foundation: Building2,
+  envelope: Layers,
+  systems: Zap,
+  finishes: Sofa,
+  "interior-prep": PaintRoller,
+  outdoor: Trees,
+  handover: KeyRound,
+  turnkey: HomeIcon,
+  "reno-design": Compass,
+  "reno-demo": Hammer,
+  "kitchen-bath": Droplets,
+  electric: Zap,
+  plumbing: Wrench,
+  ac: Wind,
+  "paint-gypsum": PaintRoller,
+  flooring: Layers,
+  "reno-finishes": Sofa,
+  "doors-windows": DoorOpen,
+  management: ClipboardList,
+  cleaning: Sparkles,
+  garden: Trees,
+  elevators: Building2,
+  "shared-electric": Lightbulb,
+  cctv: ShieldCheck,
+  entrance: DoorOpen,
+  facade: Fence,
+  solar: SunMedium,
+  extras: Sparkles,
+  routine: Sparkles,
+  "systems-fix": Wrench,
+  "building-work": Building2,
+  design: Ruler,
+  build: Hammer,
+  plants: Trees,
+  water: Droplets,
+};
+
+function iconForStage(stageKey: string): LucideIcon {
+  return STAGE_ICONS[stageKey] ?? Sparkles;
+}
 
 const STORAGE_KEY = "gb:projectType";
 
@@ -81,15 +148,15 @@ function ProjectTypeCircle({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="flex flex-col items-center gap-2 active:scale-[0.97] transition-transform"
+      className="flex flex-col items-center gap-2.5 flex-1 min-w-0 active:scale-[0.97] transition-transform"
     >
-      <span className="relative block w-[104px] h-[104px]">
+      <span className="relative block w-[108px] h-[108px] mx-auto">
         <span
-          className="absolute inset-0 rounded-full overflow-hidden bg-[#F4F1EA]"
+          className="absolute inset-0 rounded-full overflow-hidden bg-[#E8EEE9]"
           style={{
             boxShadow: selected
-              ? `0 0 0 3px ${def.color}, 0 14px 28px -16px ${def.color}66`
-              : "var(--shadow-elevated)",
+              ? `0 0 0 3px ${BRAND}, 0 16px 32px -18px ${BRAND}88`
+              : "0 10px 24px -14px rgba(16,24,40,0.18)",
           }}
         >
           <img
@@ -101,34 +168,32 @@ function ProjectTypeCircle({
         </span>
         {selected && (
           <span
-            className="absolute -top-0.5 -right-0.5 z-10 grid place-items-center rounded-full text-white"
+            className="absolute top-0 right-0 z-10 grid place-items-center rounded-full text-white"
             style={{
-              width: 24,
-              height: 24,
-              background: def.color,
-              boxShadow: `0 4px 10px ${def.color}55`,
+              width: 26,
+              height: 26,
+              background: BRAND,
+              boxShadow: `0 4px 12px ${BRAND}55`,
             }}
           >
-            <Check size={13} strokeWidth={3} />
+            <Check size={14} strokeWidth={3} />
           </span>
         )}
         <span
           className="absolute -bottom-1 left-1/2 -translate-x-1/2 z-10 grid place-items-center rounded-full bg-white"
-          style={{
-            width: 28,
-            height: 28,
-            boxShadow: "var(--shadow-soft)",
-            color: def.color,
-          }}
+          style={{ width: 30, height: 30, boxShadow: "0 4px 10px rgba(16,24,40,0.12)", color: BRAND }}
         >
-          <Icon size={14} strokeWidth={2.2} />
+          <Icon size={15} strokeWidth={2.2} />
         </span>
       </span>
-      <span className="text-center px-0.5 mt-1">
-        <span className="block text-[13px] font-extrabold text-[#1A1A1A] leading-tight">
+      <span className="text-center px-0.5">
+        <span
+          className="block text-[13.5px] font-extrabold leading-tight"
+          style={{ color: selected ? BRAND : "#1A1A1A" }}
+        >
           {def.title}
         </span>
-        <span className="block text-[10.5px] text-[#6B7280] leading-tight mt-0.5">
+        <span className="block text-[10.5px] text-[#6B7280] leading-tight mt-0.5 line-clamp-2">
           {def.subtitle}
         </span>
       </span>
@@ -144,54 +209,63 @@ function CategorySearch({
   onChange: (v: string) => void;
 }) {
   return (
-    <label
-      className="flex items-center gap-3 h-[52px] px-4 rounded-full bg-white border border-[#ECEEF2] text-[#667085]"
-      style={{ boxShadow: "var(--shadow-elevated)" }}
-    >
-      <Search size={20} strokeWidth={1.9} />
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="חפש שירות, ספק או מוצר..."
-        aria-label="חיפוש"
-        dir="rtl"
-        className="w-full bg-transparent border-0 outline-none text-right text-[14px] text-[#172033] placeholder:text-[#8b93a1]"
+    <div className="relative overflow-hidden rounded-[28px]">
+      <img
+        src={newBuildImg}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover opacity-30 scale-110"
       />
-    </label>
+      <div className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/70 to-[#F7F8F6]" />
+      <div className="relative px-1 py-5">
+        <label
+          className="flex items-center gap-3 h-[54px] px-5 rounded-full bg-white text-[#667085]"
+          style={{ boxShadow: "0 12px 28px -16px rgba(16,24,40,0.22)" }}
+        >
+          <Search size={20} strokeWidth={1.9} />
+          <input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="חפש שירות, ספק או מוצר..."
+            aria-label="חיפוש"
+            dir="rtl"
+            className="w-full bg-transparent border-0 outline-none text-right text-[14px] text-[#172033] placeholder:text-[#8b93a1]"
+          />
+        </label>
+      </div>
+    </div>
   );
 }
 
 function StageGridCard({
   title,
-  img,
+  stageKey,
   serviceCount,
   onClick,
 }: {
   title: string;
-  img: string;
+  stageKey: string;
   serviceCount: number;
   onClick: () => void;
 }) {
+  const Icon = iconForStage(stageKey);
   const soon = serviceCount === 0;
   return (
     <button
       type="button"
       onClick={onClick}
-      className="aspect-square flex flex-col items-center justify-center gap-1.5 rounded-[20px] bg-white px-2 py-3 active:scale-[0.97] transition-transform"
-      style={{ boxShadow: "var(--shadow-elevated)" }}
+      className="aspect-square flex flex-col items-center justify-center gap-2 rounded-[22px] bg-white px-2.5 py-3 border border-[#EEF1EF] active:scale-[0.97] transition-transform"
+      style={{ boxShadow: "0 8px 20px -14px rgba(16,24,40,0.16)" }}
     >
-      <div className="w-[52px] h-[52px] rounded-[14px] overflow-hidden bg-[#F4F7F5] shrink-0">
-        <img
-          src={img}
-          alt=""
-          loading="lazy"
-          className="h-full w-full object-cover object-center"
-        />
-      </div>
-      <span className="block text-[12px] font-extrabold text-[#1A1A1A] leading-tight text-center line-clamp-2 px-0.5">
+      <span
+        className="grid place-items-center w-12 h-12 rounded-2xl"
+        style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+      >
+        <Icon size={26} strokeWidth={1.7} />
+      </span>
+      <span className="block text-[12.5px] font-extrabold text-[#1A1A1A] leading-tight text-center line-clamp-2 px-0.5">
         {title}
       </span>
-      <span className="block text-[10.5px] font-semibold text-[#0E6B5A] leading-none">
+      <span className="block text-[11px] font-semibold leading-none" style={{ color: soon ? "#9CA3AF" : BRAND }}>
         {soon ? "בקרוב" : `${serviceCount} ספקים`}
       </span>
     </button>
@@ -336,7 +410,7 @@ export default function CategoriesList() {
       />
       <div
         dir="rtl"
-        className="min-h-screen min-h-[100dvh] w-full bg-[#F7F8F6]"
+        className="min-h-screen min-h-[100dvh] w-full bg-white"
         style={{
           fontFamily: "'Heebo', 'Inter', system-ui, sans-serif",
           color: "#172033",
@@ -393,8 +467,8 @@ export default function CategoriesList() {
             )}
           </div>
 
-          {/* Search */}
-          <div className="mb-5">
+          {/* Search with soft hero bleed */}
+          <div className="mb-5 -mx-1">
             <CategorySearch value={query} onChange={setQuery} />
           </div>
 
@@ -518,7 +592,7 @@ export default function CategoriesList() {
                     <StageGridCard
                       key={s.key}
                       title={s.title}
-                      img={illustrationForStage(s.key, selectedProject)}
+                      stageKey={s.key}
                       serviceCount={s.serviceCount}
                       onClick={() => openStage(s.key)}
                     />
@@ -528,25 +602,33 @@ export default function CategoriesList() {
             </section>
           )}
 
-          {/* Promo banner */}
+          {/* Promo banner — lifestyle + trust */}
           {!query && !loading && !errorMsg && filtered.length > 0 && (
             <aside
-              className="mt-6 rounded-[22px] overflow-hidden flex items-stretch"
-              style={{ boxShadow: "var(--shadow-elevated)" }}
+              className="mt-6 rounded-[22px] overflow-hidden flex items-stretch bg-white border border-[#EEF1EF]"
+              style={{ boxShadow: "0 10px 24px -16px rgba(16,24,40,0.16)" }}
             >
-              <div className="flex-1 min-w-0 bg-white p-4 flex flex-col justify-center text-right">
-                <strong className="block text-[14px] text-[#0E6B5A] mb-1 leading-snug">
-                  ספקים מאומתים ואמינים
-                </strong>
-                <span className="block text-[12px] text-[#52605a] leading-snug">
-                  כל שירות מצטרפים – המחיר יורד לכולם
+              <div className="flex-1 min-w-0 p-4 flex items-start gap-2.5 text-right">
+                <span
+                  className="grid place-items-center w-9 h-9 rounded-full shrink-0 mt-0.5"
+                  style={{ background: "rgba(14,107,90,0.10)", color: BRAND }}
+                >
+                  <ShieldCheck size={18} strokeWidth={2.2} />
                 </span>
+                <div className="min-w-0">
+                  <strong className="block text-[14px] text-[#0E6B5A] mb-0.5 leading-snug">
+                    ספקים מאומתים
+                  </strong>
+                  <span className="block text-[12px] text-[#52605a] leading-snug">
+                    שקט נפשי לכל שלב בפרויקט
+                  </span>
+                </div>
               </div>
-              <div className="w-[118px] shrink-0">
+              <div className="w-[112px] shrink-0">
                 <img
                   src={finishesImg}
                   alt=""
-                  className="h-full w-full object-cover object-center min-h-[88px]"
+                  className="h-full w-full object-cover object-center min-h-[92px]"
                 />
               </div>
             </aside>
