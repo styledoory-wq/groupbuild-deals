@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Phone, Share2, Navigation, Star, ArrowRight, Tag, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { BackHeader, LoadingState } from "@/components/ds";
+import { LoadingState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SmartImg } from "@/components/ui/SmartImg";
@@ -19,6 +19,7 @@ import { EditableField } from "@/components/admin/EditableField";
 import { trackSupplierEvent } from "@/lib/analytics";
 import { useGuestGate } from "@/hooks/useGuestGate";
 import { ShareBusinessSheet } from "@/components/public/ShareBusinessSheet";
+import { iconForCategory } from "@/lib/categoryIcons";
 
 const BRAND = "#0E6B5A";
 
@@ -317,12 +318,19 @@ export default function SupplierProfile() {
           <meta name="robots" content="noindex, nofollow" />
           <meta name="description" content="הכתובת שביקשת אינה זמינה יותר או שהעסק אינו פעיל." />
         </Helmet>
-        <BackHeader title={loadError ? "שגיאה בטעינת ספק" : "ספק לא נמצא"} />
-        <div className="px-5 mt-6">
-          <h1 className="text-[22px] font-extrabold text-[#1F2937] mb-2">
+        <div className="bg-slate-50 min-h-screen px-4 pt-4" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }} dir="rtl">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1 text-[13px] font-semibold text-slate-500 mb-4"
+          >
+            <ArrowRight className="h-4 w-4" />
+            חזרה
+          </button>
+          <h1 className="text-[22px] font-extrabold text-slate-900 mb-2">
             {loadError ? "אירעה שגיאה בטעינת הספק" : "העסק לא נמצא (404)"}
           </h1>
-          <p className="text-sm text-[#6B7280] mb-4">
+          <p className="text-sm text-slate-500 mb-4">
             {loadError
               ? loadError
               : "ייתכן שהעסק הוסר, בהמתנה לאישור, או שהכתובת שגויה. גלו עסקים מומלצים בקטגוריות שלנו."}
@@ -376,9 +384,17 @@ export default function SupplierProfile() {
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen" dir="rtl">
-        {/* Hero identity */}
-        <div className="px-4 pt-4 pb-3" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}>
-          <BackHeader title={supplier.business_name} subtitle="פרופיל ספק" />
+        {/* Hero identity — mock Style A */}
+        <div className="px-4 pb-3" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1 text-[13px] font-semibold text-slate-500 mb-3 active:opacity-70"
+          >
+            <ArrowRight className="h-4 w-4" />
+            חזרה
+          </button>
+
           <div className={`${floatCard} p-4 flex items-center gap-4`}>
             <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="xl" />
             <div className="flex-1 min-w-0">
@@ -388,52 +404,48 @@ export default function SupplierProfile() {
                 field="business_name"
                 value={supplier.business_name}
                 as="h1"
-                className="block text-[20px] font-extrabold text-slate-900 tracking-tight leading-tight mb-1.5 line-clamp-2"
+                className="block text-[22px] font-extrabold text-slate-900 tracking-tight leading-tight mb-2 line-clamp-2"
               />
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <SupplierRatingBadge supplierId={supplier.id} className="text-fs-xs text-slate-500 [&>b]:text-slate-900 [&>span]:text-slate-500" />
-                {kindLabel && (
-                  <span
-                    className="text-[11px] font-bold px-2 py-0.5 rounded-full"
-                    style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
-                  >
-                    {kindLabel}
-                  </span>
-                )}
-              </div>
+              <SupplierRatingBadge supplierId={supplier.id} variant="stars" />
+              {kindLabel && (
+                <span
+                  className="mt-2 inline-flex text-[11px] font-bold px-2.5 py-1 rounded-full"
+                  style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+                >
+                  {kindLabel}
+                </span>
+              )}
             </div>
           </div>
         </div>
 
         <div className="px-4 relative z-10 space-y-3 pb-36">
-          {/* Public contact strip */}
-          <div className={`${floatCard} p-3`}>
-            <div className="grid grid-cols-3 gap-2">
-              {supplier.phone ? (
-                <a
-                  href={`tel:${supplier.phone}`}
-                  onClick={() => { void trackSupplierEvent(supplier.id, "call"); }}
-                  className="h-14 rounded-2xl text-white text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-sm active:scale-[0.97] transition-transform"
-                  style={{ background: BRAND }}
-                  aria-label={`התקשר ל־${supplier.business_name}`}
-                >
-                  <Phone className="h-4 w-4" />
-                  <span dir="ltr" className="text-[11px] tracking-wide">{supplier.phone}</span>
-                </a>
-              ) : (
-                <div className="h-14 rounded-2xl bg-slate-50 text-[11px] text-slate-400 flex items-center justify-center border border-gray-100">
-                  אין טלפון
-                </div>
-              )}
-              <button type="button" onClick={handleNavigate} className={`h-14 flex-col gap-0.5 ${softBtn}`}>
-                <Navigation className="h-4 w-4" style={{ color: BRAND }} />
-                ניווט
-              </button>
-              <button type="button" onClick={handleShare} className={`h-14 flex-col gap-0.5 ${softBtn}`}>
-                <Share2 className="h-4 w-4" style={{ color: BRAND }} />
-                שתף
-              </button>
-            </div>
+          {/* Contact strip — labels like mock (התקשר / ניווט / שתף) */}
+          <div className="grid grid-cols-3 gap-2">
+            {supplier.phone ? (
+              <a
+                href={`tel:${supplier.phone}`}
+                onClick={() => { void trackSupplierEvent(supplier.id, "call"); }}
+                className="h-14 rounded-2xl text-white text-xs font-bold flex flex-col items-center justify-center gap-0.5 shadow-sm active:scale-[0.97] transition-transform"
+                style={{ background: BRAND }}
+                aria-label={`התקשר ל־${supplier.business_name}`}
+              >
+                <Phone className="h-4 w-4" />
+                התקשר
+              </a>
+            ) : (
+              <div className="h-14 rounded-2xl bg-white text-[11px] text-slate-400 flex items-center justify-center border border-gray-100">
+                אין טלפון
+              </div>
+            )}
+            <button type="button" onClick={handleNavigate} className={`h-14 flex-col gap-0.5 ${softBtn}`}>
+              <Navigation className="h-4 w-4 text-[#0E6B5A]" />
+              ניווט
+            </button>
+            <button type="button" onClick={handleShare} className={`h-14 flex-col gap-0.5 ${softBtn}`}>
+              <Share2 className="h-4 w-4 text-[#0E6B5A]" />
+              שתף
+            </button>
           </div>
 
           {/* Secondary links — only channels that exist */}
@@ -513,18 +525,20 @@ export default function SupplierProfile() {
 
           {supplierCategories.length > 0 && (
             <section className={`${floatCard} p-4`}>
-              <h2 className={`${sectionLabel} flex items-center gap-1.5`}>
-                <Tag className="h-3.5 w-3.5" style={{ color: BRAND }} /> תחומים
-              </h2>
-              <div className="flex flex-wrap gap-1.5">
-                {supplierCategories.map((c) => (
-                  <span
-                    key={c.id}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-fs-xs font-bold bg-slate-50 text-slate-800 border border-gray-100"
-                  >
-                    <span>{c.icon}</span> {c.name}
-                  </span>
-                ))}
+              <h2 className={sectionLabel}>תחומים</h2>
+              <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+                {supplierCategories.map((c) => {
+                  const Icon = iconForCategory(c.id, c.name);
+                  return (
+                    <div
+                      key={c.id}
+                      className="shrink-0 w-[88px] rounded-2xl border border-gray-100 bg-slate-50 px-2 py-3 flex flex-col items-center gap-1.5 text-center"
+                    >
+                      <Icon size={22} strokeWidth={1.6} className="text-[#0E6B5A]" aria-hidden />
+                      <span className="text-[11px] font-bold text-slate-800 leading-snug line-clamp-2">{c.name}</span>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -620,13 +634,9 @@ export default function SupplierProfile() {
         </div>
       </div>
 
-      {/* Dual CTA */}
+      {/* Dual CTA — mock Style A */}
       <div className="fixed bottom-0 inset-x-0 z-30 flex justify-center pointer-events-none">
         <div className="pointer-events-auto w-full max-w-screen-sm px-4 pb-4 pt-3 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent">
-          <div className="mb-1.5 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
-            <span>יצירת קשר ישיר — פתוח לכולם</span>
-            <span>דורש הרשמה</span>
-          </div>
           <div className="flex gap-2">
             {whatsappHref ? (
               <a
@@ -634,7 +644,8 @@ export default function SupplierProfile() {
                 target="_blank"
                 rel="noreferrer noopener"
                 onClick={() => { void trackSupplierEvent(supplier.id, "whatsapp"); }}
-                className="flex-1 h-12 rounded-2xl bg-[#25D366] text-white font-bold inline-flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-transform"
+                className="flex-1 h-12 rounded-2xl text-white font-bold inline-flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-transform"
+                style={{ background: BRAND }}
               >
                 <WhatsappIcon className="h-5 w-5" />
                 WhatsApp
@@ -654,7 +665,13 @@ export default function SupplierProfile() {
                 אין ערוץ קשר
               </div>
             )}
-            <Button onClick={handleInterest} disabled={submitting || interested} className="flex-1 h-12 rounded-2xl">
+            <Button
+              onClick={handleInterest}
+              disabled={submitting || interested}
+              variant="outline"
+              className="flex-1 h-12 rounded-2xl border-2 font-bold bg-white"
+              style={{ borderColor: BRAND, color: BRAND }}
+            >
               {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : interested ? "✓ נרשם" : "קבל כמה הצעות"}
             </Button>
           </div>
