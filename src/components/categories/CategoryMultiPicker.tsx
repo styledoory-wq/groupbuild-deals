@@ -172,9 +172,15 @@ export function CategoryMultiPicker({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={placeholder}
-          className="h-10 pr-9 text-fs-sm rounded-xl"
+          className="h-11 pr-9 text-fs-sm rounded-xl"
         />
       </div>
+
+      {selectedChips.length === 0 && !isFiltering && (
+        <div className="rounded-xl border border-dashed border-[#0E6B5A]/35 bg-[#0E6B5A]/5 px-3 py-2.5 text-[12px] text-[#0B1220] leading-relaxed">
+          פתחו קטגוריה למטה או חפשו בשם התחום. אפשר גם ללחוץ ״בחר הכל״ על תחום שלם אם אתם מספקים את כולו.
+        </div>
+      )}
 
       {selectedChips.length > 0 && (
         <div className="rounded-xl border border-border bg-muted/40 p-2">
