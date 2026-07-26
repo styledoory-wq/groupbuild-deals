@@ -15,8 +15,8 @@ type Props = {
 };
 
 /**
- * Premium service/category square — white card, brand-green outline icon,
- * bold title + light-gray supplier count.
+ * Compact square service card — outline brand icon, text-sm title,
+ * light-gray supplier count. Matches sketch spacing 1:1.
  */
 export function CategorySquareCard({
   title,
@@ -38,25 +38,26 @@ export function CategorySquareCard({
       type={as === "button" ? "button" : undefined}
       onClick={onClick}
       className={cn(
-        "aspect-[1/1.1] flex flex-col items-center justify-center gap-2.5 rounded-2xl bg-white",
-        "border border-gray-100 shadow-sm px-3 py-4",
+        "aspect-square flex flex-col items-center justify-center gap-1.5",
+        "rounded-2xl border border-gray-100 bg-white shadow-sm",
+        "px-2 py-2.5",
         as === "button" && "active:scale-[0.97] transition-transform",
         className,
       )}
     >
       <Icon
-        size={28}
-        strokeWidth={1.65}
+        size={32}
+        strokeWidth={1.55}
         absoluteStrokeWidth={false}
         fill="none"
-        className="shrink-0"
+        className="h-8 w-8 shrink-0"
         style={{ color: BRAND, stroke: BRAND }}
       />
-      <span className="block px-0.5 text-center text-[13px] font-bold leading-tight text-slate-900 line-clamp-2">
+      <span className="block px-0.5 text-center text-sm font-bold leading-snug text-slate-900 line-clamp-2">
         {title}
       </span>
       {bottom && (
-        <span className="block text-[10.5px] font-normal leading-none text-gray-400">
+        <span className="block text-[10px] font-normal leading-none text-gray-400">
           {bottom}
         </span>
       )}
