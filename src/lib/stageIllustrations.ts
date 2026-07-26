@@ -1,6 +1,6 @@
 /**
  * Contextual illustrations for category / stage tiles.
- * Prefer ID-based matching (stable), then tight Hebrew keywords.
+ * Prefer exact ID → id tokens → tight Hebrew keywords.
  */
 import newBuildImg from "@/assets/journey-new-build.jpg";
 import renoImg from "@/assets/journey-renovation.jpg";
@@ -19,6 +19,8 @@ import plumbingImg from "@/assets/stages/stage-plumbing.jpg";
 import acImg from "@/assets/stages/stage-ac.jpg";
 import paintImg from "@/assets/stages/stage-paint.jpg";
 import flooringImg from "@/assets/stages/stage-flooring.jpg";
+import parquetImg from "@/assets/stages/stage-parquet.jpg";
+import tilesImg from "@/assets/stages/stage-tiles.jpg";
 import cleaningImg from "@/assets/stages/stage-cleaning.jpg";
 import elevatorsImg from "@/assets/stages/stage-elevators.jpg";
 import cctvImg from "@/assets/stages/stage-cctv.jpg";
@@ -27,6 +29,8 @@ import managementImg from "@/assets/stages/stage-management.jpg";
 import demoImg from "@/assets/stages/stage-demo.jpg";
 import waterImg from "@/assets/stages/stage-water.jpg";
 import windowsImg from "@/assets/stages/stage-windows.jpg";
+import doorsImg from "@/assets/stages/stage-doors.jpg";
+import entranceDoorImg from "@/assets/stages/stage-entrance-door.jpg";
 import carpentryImg from "@/assets/stages/stage-carpentry.jpg";
 import waterproofImg from "@/assets/stages/stage-waterproof.jpg";
 import pergolaImg from "@/assets/stages/stage-pergola.jpg";
@@ -66,9 +70,9 @@ const STAGE_ILLUSTRATION: Record<string, string> = {
   plumbing: plumbingImg,
   ac: acImg,
   "paint-gypsum": paintImg,
-  flooring: flooringImg,
+  flooring: tilesImg,
   "reno-finishes": finishesImg,
-  "doors-windows": windowsImg,
+  "doors-windows": doorsImg,
 
   management: managementImg,
   cleaning: cleaningImg,
@@ -76,7 +80,7 @@ const STAGE_ILLUSTRATION: Record<string, string> = {
   elevators: elevatorsImg,
   "shared-electric": systemsImg,
   cctv: cctvImg,
-  entrance: flooringImg,
+  entrance: entranceDoorImg,
   facade: envelopeImg,
   solar: solarImg,
   extras: managementImg,
@@ -93,17 +97,19 @@ const STAGE_ILLUSTRATION: Record<string, string> = {
 
 /**
  * Category id token → illustration.
- * Matches sc-kitchen, s-kit-*, c-fin-kitchen, d-systems, etc.
+ * More specific tokens first. Doors are NEVER mixed with windows.
  */
 const ID_TOKEN_ILLUSTRATION: Array<{ tokens: string[]; img: string }> = [
-  { tokens: ["arch", "interior", "plan", "permit", "eng", "cons", "surv", "survey", "appr", "insp", "supervision", "sup", "form"], img: planningImg },
-  { tokens: ["kitchen", "kit", "bath"], img: kitchenBathImg },
+  { tokens: ["parquet"], img: parquetImg },
+  { tokens: ["door", "doors"], img: doorsImg },
+  { tokens: ["win", "window", "windows", "aluminum", "blinds"], img: windowsImg },
+  { tokens: ["floor", "ceramic", "porcelain", "marble", "pvc", "epoxy", "tile", "tiles"], img: tilesImg },
+  { tokens: ["kitchen", "kit"], img: kitchenBathImg },
+  { tokens: ["bath"], img: kitchenBathImg },
   { tokens: ["plumb", "gas"], img: plumbingImg },
   { tokens: ["elec", "electric", "electrical", "light", "lighting", "smart", "net", "network", "ev", "charging"], img: systemsImg },
   { tokens: ["climate", "ac", "hvac"], img: acImg },
   { tokens: ["solar", "energy"], img: solarImg },
-  { tokens: ["floor", "parquet"], img: flooringImg },
-  { tokens: ["door", "doors", "win", "window", "windows", "aluminum", "openings"], img: windowsImg },
   { tokens: ["paint", "wallpaper", "gypsum", "gyp", "clad", "cladding"], img: paintImg },
   { tokens: ["closet", "closets", "carp", "carpentry"], img: carpentryImg },
   { tokens: ["fur", "furn", "furniture"], img: furnitureImg },
@@ -117,12 +123,14 @@ const ID_TOKEN_ILLUSTRATION: Array<{ tokens: string[]; img: string }> = [
   { tokens: ["sec", "security", "fire", "cctv"], img: cctvImg },
   { tokens: ["clean", "cleaning", "post", "mnt", "maintenance", "svc", "services", "warranty"], img: cleaningImg },
   { tokens: ["mat", "material", "materials", "supplies", "tool", "tools", "rent", "rental"], img: materialsImg },
+  { tokens: ["arch", "interior", "plan", "permit", "eng", "cons", "surv", "survey", "appr", "insp", "supervision", "sup", "form"], img: planningImg },
+  { tokens: ["openings"], img: doorsImg },
   { tokens: ["finish", "finishes"], img: finishesImg },
   { tokens: ["system", "systems"], img: systemsImg },
   { tokens: ["construct", "construction"], img: foundationImg },
 ];
 
-/** Exact id overrides (from live categories catalog). */
+/** Exact id overrides — doors / parquet / tiles split explicitly. */
 const ID_EXACT: Record<string, string> = {
   // domains
   "d-planning": planningImg,
@@ -134,7 +142,7 @@ const ID_EXACT: Record<string, string> = {
   "d-maintenance": cleaningImg,
   "d-materials": materialsImg,
 
-  // level-2 groups
+  // level-2
   "c-plan-design": planningImg,
   "c-plan-permits": planningImg,
   "c-plan-engineering": planningImg,
@@ -151,10 +159,10 @@ const ID_EXACT: Record<string, string> = {
   "c-sys-energy": solarImg,
   "c-fin-kitchen": kitchenBathImg,
   "c-fin-bath": kitchenBathImg,
-  "c-fin-openings": windowsImg,
+  "c-fin-openings": doorsImg,
   "c-fin-walls": paintImg,
   "c-fin-carpentry": carpentryImg,
-  "c-fin-flooring": flooringImg,
+  "c-fin-flooring": tilesImg,
   "c-out-garden": outdoorImg,
   "c-out-pools": waterImg,
   "c-out-fences": fenceImg,
@@ -173,7 +181,73 @@ const ID_EXACT: Record<string, string> = {
   "c-mat-tools": materialsImg,
   "c-mat-rental": materialsImg,
 
-  // level-3 service categories
+  // doors (NOT windows)
+  "sc-doors": doorsImg,
+  "s-door-interior": doorsImg,
+  "s-door-entrance": entranceDoorImg,
+  "s-door-security": entranceDoorImg,
+  "s-door-fire": doorsImg,
+
+  // windows / aluminum
+  "sc-windows": windowsImg,
+  "sc-aluminum": windowsImg,
+  "s-win-aluminum": windowsImg,
+  "s-win-pvc": windowsImg,
+  "s-win-glass": windowsImg,
+  "s-win-mosquito": windowsImg,
+  "s-win-blinds": windowsImg,
+
+  // flooring family
+  "sc-floor": tilesImg,
+  "sc-parquet": parquetImg,
+  "s-floor-parquet": parquetImg,
+  "s-floor-porcelain": tilesImg,
+  "s-floor-ceramic": tilesImg,
+  "s-floor-marble": tilesImg,
+  "s-floor-pvc": tilesImg,
+  "s-floor-epoxy": tilesImg,
+  "s-floor-polish": tilesImg,
+  "s-hard-paving": tilesImg,
+  "s-mat-ceramic": tilesImg,
+
+  // kitchens / baths
+  "sc-kitchen": kitchenBathImg,
+  "sc-bath": kitchenBathImg,
+  "s-kit-custom": kitchenBathImg,
+  "s-kit-modular": kitchenBathImg,
+  "s-kit-worktop": kitchenBathImg,
+  "s-kit-renovation": kitchenBathImg,
+  "s-bath-showers": kitchenBathImg,
+  "s-bath-sanitary": kitchenBathImg,
+  "s-bath-jacuzzi": kitchenBathImg,
+  "s-bath-cabinets": kitchenBathImg,
+  "s-bath-renovation": kitchenBathImg,
+
+  // closets / carpentry
+  "sc-closets": carpentryImg,
+  "sc-carpentry": carpentryImg,
+  "s-closet-walk-in": carpentryImg,
+  "s-closet-sliding": carpentryImg,
+  "s-closet-wall": carpentryImg,
+  "s-fur-closet": carpentryImg,
+  "s-carp-custom": carpentryImg,
+  "s-carp-stairs": carpentryImg,
+  "s-carp-tv-unit": carpentryImg,
+
+  // cladding / paint / gypsum
+  "sc-paint": paintImg,
+  "sc-gypsum": paintImg,
+  "sc-cladding": paintImg,
+  "sc-wallpaper": paintImg,
+  "s-clad-tiles": paintImg,
+  "s-clad-stone": paintImg,
+  "s-clad-wood": paintImg,
+  "s-clad-3d": paintImg,
+  "s-gyp-walls": paintImg,
+  "s-gyp-ceiling": paintImg,
+  "s-gyp-acoustic": paintImg,
+
+  // other level-3
   "sc-arch": planningImg,
   "sc-interior": finishesImg,
   "sc-engineers": planningImg,
@@ -193,8 +267,6 @@ const ID_EXACT: Record<string, string> = {
   "sc-drilling": sitePrepImg,
   "sc-heavy": sitePrepImg,
   "sc-site-fence": sitePrepImg,
-  "sc-kitchen": kitchenBathImg,
-  "sc-bath": kitchenBathImg,
   "sc-plumb": plumbingImg,
   "sc-gas": plumbingImg,
   "sc-elec": systemsImg,
@@ -204,17 +276,6 @@ const ID_EXACT: Record<string, string> = {
   "sc-ev-charging": systemsImg,
   "sc-climate": acImg,
   "sc-solar": solarImg,
-  "sc-floor": flooringImg,
-  "sc-parquet": flooringImg,
-  "sc-doors": windowsImg,
-  "sc-windows": windowsImg,
-  "sc-aluminum": windowsImg,
-  "sc-paint": paintImg,
-  "sc-gypsum": paintImg,
-  "sc-cladding": paintImg,
-  "sc-wallpaper": paintImg,
-  "sc-closets": carpentryImg,
-  "sc-carpentry": carpentryImg,
   "sc-garden": outdoorImg,
   "sc-irrigation": outdoorImg,
   "sc-hardscape": pergolaImg,
@@ -233,21 +294,24 @@ const ID_EXACT: Record<string, string> = {
   "sc-rental": materialsImg,
 };
 
-/** Tight keyword rules — order matters; more specific first. */
+/** Tight keyword rules — doors/parquet before broader matches. */
 const KEYWORD_ILLUSTRATIONS: Array<{ match: RegExp; img: string }> = [
+  { match: /דלת כניסה|דלת פלדה|רב[־\-]בריח|דלת ביטחון/i, img: entranceDoorImg },
+  { match: /דלת|דלתות/i, img: doorsImg },
+  { match: /חלון|חלונות|אלומינ|תריס|זכוכ|יתוש/i, img: windowsImg },
+  { match: /פרקט|למינצ/i, img: parquetImg },
+  { match: /ריצוף|פורצלן|קרמיק|PVC|ויניל|אפוקסי|שיש ואבן|גרניט/i, img: tilesImg },
   { match: /בריכ|ג['׳']קוזי|מזרק/i, img: waterImg },
-  { match: /פרגול|דק|סככ|ברביק|מטבח חוץ/i, img: pergolaImg },
+  { match: /פרגול|דק(?:ים)?|סככ|ברביק|מטבח חוץ/i, img: pergolaImg },
   { match: /גדר|שער/i, img: fenceImg },
   { match: /איטום|גג|רעפ|בידוד|רטיב/i, img: waterproofImg },
-  { match: /חלון|אלומינ|תריס|זכוכ|דלת/i, img: windowsImg },
   { match: /ארון|נגר|וורדרוב|מדרגות עץ/i, img: carpentryImg },
-  { match: /ריהוט|ספה|כורס|מזרן|כיסא|מזנון/i, img: furnitureImg },
-  { match: /מטבח|אמבט|סניטר|מקלחת|שיש|קוריאן/i, img: kitchenBathImg },
+  { match: /ריהוט|ספה|כורס|מזרן|כיסא|מזנון|מיט|שולחן|שיד/i, img: furnitureImg },
+  { match: /מטבח|אמבט|סניטר|מקלחת|קוריאן/i, img: kitchenBathImg },
   { match: /מיזוג|מזגן|VRF|חימום תת/i, img: acImg },
   { match: /אינסטל|צנרת|ביוב|ברז|גז(?!ם)/i, img: plumbingImg },
   { match: /חשמל|תאורה|בית חכם|טעינ|תקשורת|רשת|סיב|אינטרקום/i, img: systemsImg },
   { match: /סולאר|פוטו|פאנל|דוד שמש|משאבת חום/i, img: solarImg },
-  { match: /ריצוף|פרקט|פורצלן|PVC|אפוקסי/i, img: flooringImg },
   { match: /צבע|טיח|טפט|גבס|חיפוי/i, img: paintImg },
   { match: /מצלמ|אזעק|אבטח|ספרינק|גילוי אש|בקרת כניסה/i, img: cctvImg },
   { match: /מעלית/i, img: elevatorsImg },
@@ -261,7 +325,7 @@ const KEYWORD_ILLUSTRATIONS: Array<{ match: RegExp; img: string }> = [
   { match: /בדק בית|מסיר|טופס 4|אכלוס/i, img: handoverImg },
   { match: /אדריכל|מהנדס|יועץ|היתר|רישוי|פיקוח|מודד|שמאי|הדמי|עיצוב פנים|תכנון/i, img: planningImg },
   { match: /ניהול ועד|ועד בית/i, img: managementImg },
-  { match: /גמר|עיצוב פנים/i, img: finishesImg },
+  { match: /גמר/i, img: finishesImg },
 ];
 
 function tokensFromId(id: string): string[] {
@@ -285,14 +349,30 @@ export function illustrationForCategory(
   fallback?: string,
 ): string {
   const id = (categoryId ?? "").trim();
+  const text = (label ?? "").trim();
+
+  // Label-first for doors/parquet — catches cases even if id grouping is coarse
+  if (text) {
+    if (/דלת כניסה|דלת פלדה|רב[־\-]בריח|דלת ביטחון/i.test(text)) return entranceDoorImg;
+    if (/דלת/i.test(text)) return doorsImg;
+    if (/פרקט|למינצ/i.test(text)) return parquetImg;
+    if (/חלון|אלומינ|תריס/i.test(text)) return windowsImg;
+  }
+
   if (id && ID_EXACT[id]) return ID_EXACT[id];
 
   if (id) {
     const tokens = tokensFromId(id);
+    // Prefer door over security when both present (s-door-security)
+    if (tokens.includes("door") || tokens.includes("doors")) {
+      if (tokens.includes("entrance") || tokens.includes("security")) return entranceDoorImg;
+      return doorsImg;
+    }
+    if (tokens.includes("parquet")) return parquetImg;
+
     for (const rule of ID_TOKEN_ILLUSTRATION) {
       if (rule.tokens.some((t) => tokens.includes(t))) return rule.img;
     }
-    // prefix match: sc-kitchen, s-kit-custom → kitchen/kit
     for (const rule of ID_TOKEN_ILLUSTRATION) {
       if (rule.tokens.some((t) => id.includes(`-${t}`) || id.startsWith(`${t}-`) || id.includes(`-${t}-`))) {
         return rule.img;
@@ -300,7 +380,6 @@ export function illustrationForCategory(
     }
   }
 
-  const text = (label ?? "").trim();
   if (text) {
     for (const rule of KEYWORD_ILLUSTRATIONS) {
       if (rule.match.test(text)) return rule.img;
