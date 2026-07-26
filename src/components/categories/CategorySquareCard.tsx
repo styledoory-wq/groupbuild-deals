@@ -38,7 +38,7 @@ export function CategorySquareCard({
       type={as === "button" ? "button" : undefined}
       onClick={onClick}
       className={cn(
-        "aspect-square w-full flex flex-col items-center justify-center gap-2",
+        "aspect-[1/1.05] w-full flex flex-col items-center justify-center gap-2",
         "rounded-2xl border border-gray-100 bg-white shadow-sm",
         "px-2.5 py-3",
         as === "button" && "active:scale-[0.97] transition-transform",
