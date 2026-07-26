@@ -173,10 +173,15 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
         ((categoryJoins ?? []) as SupplierCategoryRow[]).forEach((row) => {
           (categoriesBySupplier[row.supplier_id] ||= []).push(row.category_id);
         });
-        const withNewCategories = list.map((s) => ({
-          ...s,
-          categories: categoriesBySupplier[s.id]?.length ? categoriesBySupplier[s.id] : s.categories,
-        }));
+        // Merge join-table categories with legacy `categories` array (aliased),
+        // so suppliers referenced only via legacy IDs still appear in the right
+        // categories, and legacy IDs missing from supplier_categories aren't lost.
+        const withNewCategories = list.map((s) => {
+          const legacy = (s.categories ?? []).map((id) => CATEGORY_ID_ALIASES[id] ?? id);
+          const joined = categoriesBySupplier[s.id] ?? [];
+          const merged = Array.from(new Set([...joined, ...legacy]));
+          return { ...s, categories: merged };
+        });
         setSuppliers(withNewCategories);
         setLoading(false);
 
