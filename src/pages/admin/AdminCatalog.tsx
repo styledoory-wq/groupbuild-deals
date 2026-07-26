@@ -340,7 +340,7 @@ export default function AdminCatalog() {
 
       {loading ? (
         <LoadingState fullHeight={false} />
-      ) : (
+      ) : viewMode === "tree" ? (
         <div className="px-3 pb-24">
           <div className="gb-card p-2 space-y-0.5">
             {showDeleted
@@ -353,6 +353,96 @@ export default function AdminCatalog() {
             )}
           </div>
         </div>
+      ) : (
+        (() => {
+          const gridParent = gridParentId ? all.find((c) => c.id === gridParentId) ?? null : null;
+          const gridItems = childrenOf(gridParent?.id ?? null);
+          // build breadcrumb
+          const crumbs: Cat[] = [];
+          let cur = gridParent;
+          while (cur) { crumbs.unshift(cur); cur = all.find((x) => x.id === cur!.parent_id) ?? null; }
+          return (
+            <div className="px-4 pb-24">
+              {/* Breadcrumb */}
+              <div className="flex items-center gap-1 flex-wrap mb-3 text-[13px]">
+                <button onClick={() => setGridParentId(null)} className="flex items-center gap-1 font-bold text-[#0E6B5A]">
+                  <HomeIcon className="h-3.5 w-3.5" /> ראשי
+                </button>
+                {crumbs.map((cr) => (
+                  <span key={cr.id} className="flex items-center gap-1">
+                    <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
+                    <button onClick={() => setGridParentId(cr.id)} className={`font-semibold ${cr.id === gridParentId ? "text-[#0E6B5A]" : "text-slate-700"}`}>
+                      {cr.name}
+                    </button>
+                  </span>
+                ))}
+              </div>
+
+              {gridParent && (
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground">{LEVEL_LABELS[gridParent.level]} · {gridItems.length} פריטים</div>
+                  <button onClick={() => setGridParentId(gridParent.parent_id)} className="text-xs font-bold text-[#0E6B5A] flex items-center gap-1">
+                    <ChevronLeft className="h-3.5 w-3.5" /> חזרה
+                  </button>
+                </div>
+              )}
+
+              <div className="grid grid-cols-3 gap-3">
+                {gridItems.map((c) => {
+                  const kidsCount = all.filter((x) => x.parent_id === c.id && !x.is_deleted).length;
+                  const canDrill = c.level < 4;
+                  return (
+                    <div key={c.id} className="relative">
+                      <CategorySquareCard
+                        title={c.name}
+                        Icon={iconForCategory(c.id, c.name)}
+                        subtitle={kidsCount > 0 ? `${kidsCount} תת־פריטים` : (LEVEL_LABELS[c.level] ?? "")}
+                        onClick={() => { if (canDrill) setGridParentId(c.id); else setEditing(c); }}
+                        className={c.is_active ? "" : "opacity-60"}
+                      />
+                      {/* Delete */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); void softDelete(c); }}
+                        className="absolute -top-1.5 -right-1.5 h-7 w-7 rounded-full bg-white border border-red-200 text-red-600 shadow-md grid place-items-center active:scale-90"
+                        aria-label="מחק"
+                        title="מחק"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                      {/* Edit */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setEditing(c); }}
+                        className="absolute -top-1.5 -left-1.5 h-7 w-7 rounded-full bg-white border border-slate-200 text-slate-600 shadow-md grid place-items-center active:scale-90"
+                        aria-label="ערוך"
+                        title="ערוך"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+
+                {/* Add tile */}
+                {(!gridParent || gridParent.level < 4) && (
+                  <button
+                    type="button"
+                    onClick={() => setAddUnder(gridParent ?? "root")}
+                    className="aspect-[1/1.05] w-full flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-[#0E6B5A]/40 bg-[#0E6B5A]/5 text-[#0E6B5A] active:scale-[0.97] transition-transform"
+                  >
+                    <Plus className="h-7 w-7" strokeWidth={2} />
+                    <span className="text-sm font-bold">הוסף</span>
+                  </button>
+                )}
+              </div>
+
+              {gridItems.length === 0 && (
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  אין פריטים כאן — לחץ "הוסף" כדי להתחיל
+                </div>
+              )}
+            </div>
+          );
+        })()
       )}
 
       {/* Edit dialog */}
