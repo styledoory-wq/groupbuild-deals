@@ -413,7 +413,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                     setRegionId(e.target.value);
                     setCityId("all");
                   }}
-                  className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-[13px] text-slate-700 focus:border-emerald-500 focus:outline-none"
+                  className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-[13px] text-slate-700 focus:border-[#0E6B5A] focus:outline-none"
                 >
                   <option value="all">כל האזורים</option>
                   {regions.map((r) => (
@@ -423,7 +423,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                 <select
                   value={cityId}
                   onChange={(e) => setCityId(e.target.value)}
-                  className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-[13px] text-slate-700 focus:border-emerald-500 focus:outline-none disabled:opacity-50"
+                  className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-[13px] text-slate-700 focus:border-[#0E6B5A] focus:outline-none disabled:opacity-50"
                   disabled={regionId === "all" && filteredCities.length === 0}
                 >
                   <option value="all">כל הערים</option>
@@ -435,31 +435,27 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
             )}
           </header>
 
-          {/* Suppliers list */}
+          {/* Suppliers list — Style A floating cards */}
           <main className="mt-4 space-y-3">
             {loading ? (
-              <div
-                className="rounded-[18px] border border-white/90 p-10 text-center"
-                style={{ background: "rgba(255,255,255,0.96)", boxShadow: "var(--shadow-elevated)" }}
-              >
-                <div className="h-8 w-8 rounded-full border-2 border-emerald-200 border-t-emerald-600 animate-spin mx-auto mb-3" />
+              <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-10 text-center">
+                <div
+                  className="h-8 w-8 rounded-full border-2 border-[rgba(14,107,90,0.2)] border-t-[#0E6B5A] animate-spin mx-auto mb-3"
+                />
                 <p className="text-slate-500 text-sm">טוען ספקים...</p>
               </div>
             ) : loadError ? (
-              <div
-                className="rounded-[18px] border border-white/90 p-8 text-center"
-                style={{ background: "rgba(255,255,255,0.96)", boxShadow: "var(--shadow-elevated)" }}
-              >
+              <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-8 text-center">
                 <p className="text-sm font-bold text-slate-900">שגיאה בטעינה</p>
                 <p className="text-xs text-slate-500 mt-1.5">נסו לרענן את המסך בעוד רגע.</p>
               </div>
             ) : filteredSuppliers.length === 0 ? (
-              <div
-                className="rounded-[18px] border border-white/90 p-8 text-center"
-                style={{ background: "rgba(255,255,255,0.96)", boxShadow: "var(--shadow-elevated)" }}
-              >
-                <div className="h-14 w-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-3">
-                  <UserPlus className="h-6 w-6 text-emerald-600" />
+              <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-8 text-center">
+                <div
+                  className="h-14 w-14 rounded-full flex items-center justify-center mx-auto mb-3"
+                  style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
+                >
+                  <UserPlus className="h-6 w-6" />
                 </div>
                 <p className="text-sm font-bold text-slate-900">לא נמצאו ספקים</p>
                 <p className="text-xs text-slate-500 mt-1.5 leading-relaxed max-w-[260px] mx-auto">
@@ -468,7 +464,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                 <button
                   type="button"
                   onClick={() => { setRegionId("all"); setCityId("all"); }}
-                  className="mt-4 h-10 px-4 rounded-xl text-white text-xs font-bold shadow-sm"
+                  className="mt-4 h-10 px-4 rounded-xl text-white text-xs font-bold shadow-sm active:scale-[0.97] transition-transform"
                   style={{ background: BRAND }}
                 >
                   שנה אזור
@@ -484,14 +480,10 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                 return (
                   <article
                     key={s.id}
-                    className="rounded-[18px] border border-white/90 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden animate-fade-up"
-                    style={{
-                      background: "rgba(255,255,255,0.96)",
-                      boxShadow: "var(--shadow-elevated)",
-                      animationDelay: `${Math.min(idx, 8) * 40}ms`,
-                    }}
+                    className="rounded-2xl border border-gray-100 bg-white shadow-sm hover:-translate-y-0.5 transition-all duration-300 overflow-hidden animate-fade-up"
+                    style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}
                   >
-                    <Link to={`/suppliers/${s.id}`} className="block p-4">
+                    <Link to={`/suppliers/${s.id}`} className="block p-4 active:scale-[0.99] transition-transform">
                       <div className="flex gap-3">
                         <div className="shrink-0">
                           <SupplierLogo name={s.business_name} logoUrl={s.logo_url} size="lg" />
@@ -502,11 +494,16 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                               <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
                                 <h3 className="text-[15px] font-bold text-slate-900 truncate">{s.business_name}</h3>
                                 {isFeatured && (
-                                  <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded">מומלץ</span>
+                                  <span
+                                    className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
+                                    style={{ background: "rgba(14,107,90,0.10)", color: BRAND }}
+                                  >
+                                    מומלץ
+                                  </span>
                                 )}
                               </div>
                               {s.short_description && (
-                                <p className="text-[12.5px] text-slate-600 leading-relaxed line-clamp-2">
+                                <p className="text-[12.5px] text-slate-500 leading-relaxed line-clamp-2">
                                   {s.short_description}
                                 </p>
                               )}
@@ -523,16 +520,16 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                             </span>
                             {isSvc && isProd ? (
                               <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
-                                <Sparkles className="h-3 w-3 text-emerald-600" />
+                                <Sparkles className="h-3 w-3" style={{ color: BRAND }} />
                                 שירות + מוצרים
                               </span>
                             ) : isSvc ? (
-                              <span className="inline-flex items-center gap-1 font-semibold text-blue-700">
-                                <Wrench className="h-3 w-3" /> בעל מקצוע
+                              <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
+                                <Wrench className="h-3 w-3" style={{ color: BRAND }} /> בעל מקצוע
                               </span>
                             ) : isProd ? (
-                              <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
-                                <Package className="h-3 w-3" /> ספק מוצרים
+                              <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
+                                <Package className="h-3 w-3" style={{ color: BRAND }} /> ספק מוצרים
                               </span>
                             ) : null}
                           </div>
@@ -540,17 +537,17 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                       </div>
                     </Link>
 
-                    <div className="bg-slate-50/60 border-t border-slate-100 px-4 py-2.5 flex justify-between items-center">
+                    <div className="bg-slate-50/70 border-t border-gray-100 px-4 py-2.5 flex justify-between items-center">
                       <div className="flex items-center gap-1.5">
                         <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: BRAND }} />
+                          <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: BRAND }} />
                         </span>
                         <span className="text-[11px] font-medium text-slate-600">זמין לעבודות</span>
                       </div>
                       <Link
                         to={`/suppliers/${s.id}`}
-                        className="text-white px-4 py-1.5 rounded-lg text-[12px] font-bold transition-colors shadow-sm"
+                        className="text-white px-4 py-1.5 rounded-xl text-[12px] font-bold shadow-sm active:scale-[0.97] transition-transform"
                         style={{ background: BRAND }}
                       >
                         הצעת מחיר
