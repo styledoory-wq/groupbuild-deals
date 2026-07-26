@@ -802,7 +802,10 @@ export default function SupplierOnboarding() {
         </div>
 
         {/* Sticky footer */}
-        <div className="fixed bottom-16 inset-x-0 z-30 px-4 pb-3 pt-3 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-transparent">
+        <div
+          className="fixed inset-x-0 z-30 px-4 pb-3 pt-3 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-transparent"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
+        >
           <div className="flex gap-2 max-w-lg mx-auto">
             {stepIndex > 0 && (
               <Button
