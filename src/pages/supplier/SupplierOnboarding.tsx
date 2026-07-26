@@ -105,6 +105,41 @@ export default function SupplierOnboarding() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const [aiLoading, setAiLoading] = useState<null | "generate" | "improve">(null);
+
+  const runAiDescription = async (mode: "generate" | "improve") => {
+    if (aiLoading) return;
+    setAiLoading(mode);
+    try {
+      const catNames = selectedCategories
+        .map((id) => categories.find((c) => c.id === id)?.name)
+        .filter(Boolean) as string[];
+      const { data, error } = await supabase.functions.invoke("ai-supplier-description", {
+        body: {
+          businessName,
+          categories: catNames,
+          current: shortDescription,
+          mode,
+        },
+      });
+      if (error) throw error;
+      const text = (data as { text?: string } | null)?.text?.trim();
+      if (!text) throw new Error("empty");
+      setShortDescription(text);
+      toast.success(mode === "improve" ? "התיאור שופר" : "נוצר תיאור חדש");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("429") || msg.includes("rate_limited")) {
+        toast.error("יותר מדי בקשות — נסו שוב בעוד רגע");
+      } else if (msg.includes("402") || msg.includes("credits")) {
+        toast.error("חרגתם ממכסת ה-AI — פנו לתמיכה");
+      } else {
+        toast.error("לא הצלחנו להפעיל את ה-AI", { description: "נסו שוב בעוד רגע" });
+      }
+    } finally {
+      setAiLoading(null);
+    }
+  };
 
   const [step, setStep] = useState<StepKey>("business");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
