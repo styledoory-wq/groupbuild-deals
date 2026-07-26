@@ -538,7 +538,7 @@ export default function SupplierOnboarding() {
           </div>
         </div>
 
-        <div className="px-4 py-5 pb-36">
+        <div className="px-4 py-5 pb-44">
           <div
             key={step}
             className="rounded-[22px] bg-white border border-[#E8ECEF] shadow-[0_8px_28px_-18px_rgba(11,18,32,0.18)] overflow-hidden animate-fade-up"
@@ -802,7 +802,10 @@ export default function SupplierOnboarding() {
         </div>
 
         {/* Sticky footer */}
-        <div className="fixed bottom-16 inset-x-0 z-30 px-4 pb-3 pt-3 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-transparent">
+        <div
+          className="fixed inset-x-0 z-30 px-4 pb-3 pt-3 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-transparent"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
+        >
           <div className="flex gap-2 max-w-lg mx-auto">
             {stepIndex > 0 && (
               <Button
