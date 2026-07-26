@@ -5,11 +5,8 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import {
   Bell,
-  Building2,
   Check,
   ChevronLeft,
-  Home as HomeIcon,
-  PaintRoller,
   Search,
   ShieldCheck,
   UserRound,
@@ -34,8 +31,6 @@ type ProjectTypeDef = {
   title: string;
   subtitle: string;
   img: string;
-  color: string;
-  Icon: typeof HomeIcon;
 };
 
 const PROJECT_TYPES: ProjectTypeDef[] = [
@@ -44,24 +39,18 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
     title: "בנייה חדשה",
     subtitle: "הכל לבניית בית חדש",
     img: illustrationForProjectType("new"),
-    color: "#0E6B5A",
-    Icon: HomeIcon,
   },
   {
     id: "reno",
     title: "שיפוץ",
     subtitle: "שדרוג ושיפוץ הבית",
     img: illustrationForProjectType("reno"),
-    color: "#0E6B5A",
-    Icon: PaintRoller,
   },
   {
     id: "building",
     title: "בניין משותף",
     subtitle: "ועד בית ותחזוקה",
     img: illustrationForProjectType("building"),
-    color: "#0E6B5A",
-    Icon: Building2,
   },
 ];
 
