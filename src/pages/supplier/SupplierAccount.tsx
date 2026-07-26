@@ -20,7 +20,7 @@ export default function SupplierAccount() {
   };
 
   const rows: Row[] = [
-    { icon: Building2, label: "פרטי עסק", sub: "שם, לוגו, פרטי קשר", to: "/supplier/profile/edit" },
+    { icon: Building2, label: "פרופיל העסק", sub: "פרטים, תחומים, אזורים ומיתוג", to: "/supplier/profile/edit" },
     { icon: CreditCard, label: "מנוי וחיובים", sub: "תכנית, חשבוניות, אמצעי תשלום" },
     { icon: Settings, label: "הגדרות", sub: "שפה, אזור פעילות, פרטיות" },
     { icon: Bell, label: "התראות", sub: "Email, Push, וואטסאפ", to: "/settings/notifications" },
