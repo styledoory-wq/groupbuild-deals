@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 import { PROJECT_TYPE_META, stageMeta, type ProjectType } from "@/lib/stageCatalog";
 import {
-  illustrationForLabel,
+  illustrationForCategory,
   illustrationForProjectType,
   illustrationForStage,
 } from "@/lib/stageIllustrations";
@@ -210,7 +210,7 @@ export default function CategoryStages() {
                   <div className="flex-1 min-h-0 w-full px-2 pt-2">
                     <div className="h-full w-full rounded-[12px] overflow-hidden bg-[#F4F1EA]">
                       <img
-                        src={illustrationForLabel(c.name, illustrationForProjectType(type))}
+                        src={illustrationForCategory(c.id, c.name, illustrationForProjectType(type))}
                         alt=""
                         loading="lazy"
                         className="h-full w-full object-cover object-center"
