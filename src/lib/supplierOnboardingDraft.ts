@@ -12,7 +12,18 @@ export type SupplierOnboardingStep =
   | "category"
   | "area"
   | "description"
-  | "logo";
+  | "logo"
+  | "review";
+
+export const SUPPLIER_ONBOARDING_STEPS: SupplierOnboardingStep[] = [
+  "business",
+  "contact",
+  "category",
+  "area",
+  "description",
+  "logo",
+  "review",
+];
 
 export type SupplierOnboardingDraft = {
   businessName: string;
@@ -35,6 +46,13 @@ function keyFor(userId: string) {
   return `${KEY_PREFIX}:${userId}`;
 }
 
+function normalizeStep(step: unknown): SupplierOnboardingStep {
+  if (typeof step === "string" && (SUPPLIER_ONBOARDING_STEPS as string[]).includes(step)) {
+    return step as SupplierOnboardingStep;
+  }
+  return "business";
+}
+
 export function loadSupplierDraft(userId: string): SupplierOnboardingDraft | null {
   try {
     const raw = localStorage.getItem(keyFor(userId));
@@ -54,7 +72,7 @@ export function loadSupplierDraft(userId: string): SupplierOnboardingDraft | nul
       },
       shortDescription: parsed.shortDescription ?? "",
       logoUrl: parsed.logoUrl ?? null,
-      openStep: (parsed.openStep as SupplierOnboardingStep) ?? "business",
+      openStep: normalizeStep(parsed.openStep),
       savedAt: parsed.savedAt ?? Date.now(),
     };
   } catch {

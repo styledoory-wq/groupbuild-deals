@@ -1,6 +1,6 @@
 import { useState, useLayoutEffect, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Building2, Briefcase, Mail, ArrowLeft, User as UserIcon, MapPin, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
+import { Building2, Briefcase, Mail, ArrowLeft, User as UserIcon, MapPin, Phone, Lock, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { BrandLogo, BrandMark } from "@/components/BrandLogo";
 const groupBuildLogoCropped = { url: "/brand/groupbuild-mark.png" };
 import { SupportButton } from "@/components/SupportButton";
@@ -334,7 +334,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
         body: {
           event: role === "supplier" ? "new_supplier" : "new_resident",
           title: role === "supplier" ? "ספק חדש נרשם" : "דייר חדש נרשם",
-          details: { full_name: fullName, email, phone: "", city, business_name: businessName, role },
+          details: { full_name: fullName, email, phone: phone.trim(), city, business_name: businessName, role },
         },
       }).catch((e) => console.warn("[signup] notify-admin failed", e));
 
@@ -629,7 +629,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                     />
                   </div>
                   <div className={fieldWrap}>
-                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none opacity-0" />
+                    <Phone className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                     <Input
                       type="tel"
                       inputMode="tel"
@@ -639,7 +639,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                       required
                       dir="ltr"
                       maxLength={20}
-                      className={fieldInput}
+                      className={cn(fieldInput, "text-left")}
                     />
                   </div>
                 </>
