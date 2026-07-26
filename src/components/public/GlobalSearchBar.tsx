@@ -4,6 +4,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Search as SearchIcon, X, Store, FolderTree, MapPin, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { logSearchQuery } from "@/lib/analytics";
+import { iconForCategory } from "@/lib/categoryIcons";
 
 type Hit = {
   result_type: "category" | "supplier" | "city";
@@ -141,11 +142,12 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
 
   const dropdown = open && rect ? (
     <>
-      {/* Backdrop — subtle, closes on tap. */}
+      {/* Transparent click-away layer; kept under the focused search field. */}
       <div
         onMouseDown={() => setOpen(false)}
         onTouchStart={() => setOpen(false)}
-        style={{ position: "fixed", inset: 0, zIndex: 998, background: "rgba(10,31,61,0.08)" }}
+        className="fixed inset-0 bg-transparent"
+        style={{ zIndex: 998 }}
         aria-hidden
       />
       <div
@@ -159,56 +161,60 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
           maxHeight,
           zIndex: 999,
         }}
-        className="bg-white rounded-2xl border border-[#ECEEF2] shadow-[0_20px_50px_-15px_rgba(10,31,61,0.28)] overflow-y-auto overscroll-contain"
+        className="overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card shadow-floating"
       >
         {!term ? (
           <div className="p-4">
-            <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider mb-2">חיפושים פופולריים</p>
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">חיפושים פופולריים</p>
             <div className="flex flex-wrap gap-2">
               {POPULAR.map((p) => (
-                <button key={p} onClick={() => { setQ(p); inputRef.current?.focus(); }} className="h-8 px-3 rounded-full bg-[#F7F5F0] text-[12px] font-semibold text-[#1F2937] hover:bg-[#0E6B5A] hover:text-white transition-colors">
+                <button key={p} onClick={() => { setQ(p); inputRef.current?.focus(); }} className="h-8 rounded-full bg-background px-3 text-[12px] font-semibold text-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
                   {p}
                 </button>
               ))}
             </div>
           </div>
         ) : loading ? (
-          <div className="p-6 text-center text-[13px] text-[#6B7280] flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 p-6 text-center text-[13px] text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> מחפש...
           </div>
         ) : hits.length === 0 ? (
           <div className="p-6 text-center">
-            <p className="text-[13px] text-[#6B7280]">לא נמצאו תוצאות ל־"{term}"</p>
-            <p className="text-[11px] text-[#9CA3AF] mt-1">נסה מילה קרובה או ראה את כל הקטגוריות</p>
+            <p className="text-[13px] text-muted-foreground">לא נמצאו תוצאות ל־"{term}"</p>
+            <p className="mt-1 text-[11px] text-muted-foreground/70">נסה מילה קרובה או ראה את כל הקטגוריות</p>
           </div>
         ) : (
           <div className="py-2">
             {grouped.categories.length > 0 && (
               <Section title="קטגוריות">
-                {grouped.categories.map((h) => (
-                  <button key={`c-${h.id}`} onClick={() => goTo(h)} className="w-full px-4 py-2 flex items-center gap-3 hover:bg-[#F7F5F0] text-right">
-                    <span className="h-9 w-9 rounded-xl bg-[#0E6B5A]/10 flex items-center justify-center text-lg">{h.icon || <FolderTree className="h-4 w-4 text-[#0E6B5A]" />}</span>
+                {grouped.categories.map((h) => {
+                  const CategoryIcon = iconForCategory(h.id, h.name) ?? FolderTree;
+                  return (
+                  <button key={`c-${h.id}`} onClick={() => goTo(h)} className="flex w-full items-center gap-3 px-4 py-2.5 text-right hover:bg-background">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
+                      <CategoryIcon className="h-4 w-4" strokeWidth={2} />
+                    </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-bold text-[#1F2937] truncate">{h.name}</p>
-                      {h.subtitle && <p className="text-[11px] text-[#6B7280] truncate">{h.subtitle}</p>}
+                      <p className="truncate text-[14px] font-bold text-foreground">{h.name}</p>
                     </div>
                     {typeof h.supplier_count === "number" && h.supplier_count > 0 && (
-                      <span className="text-[11px] font-semibold text-[#0E6B5A] shrink-0">{h.supplier_count} ספקים</span>
+                      <span className="shrink-0 text-[11px] font-semibold text-secondary">{h.supplier_count} ספקים</span>
                     )}
                   </button>
-                ))}
+                  );
+                })}
               </Section>
             )}
             {grouped.suppliers.length > 0 && (
               <Section title="ספקים">
                 {grouped.suppliers.map((h) => (
-                  <button key={`s-${h.id}`} onClick={() => goTo(h)} className="w-full px-4 py-2 flex items-center gap-3 hover:bg-[#F7F5F0] text-right">
-                    <span className="h-9 w-9 rounded-xl bg-[#F7F5F0] overflow-hidden flex items-center justify-center">
-                      {h.icon ? <img src={h.icon} alt={h.name} className="h-full w-full object-cover" /> : <Store className="h-4 w-4 text-[#6B7280]" />}
+                  <button key={`s-${h.id}`} onClick={() => goTo(h)} className="flex w-full items-center gap-3 px-4 py-2.5 text-right hover:bg-background">
+                    <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-background">
+                      {h.icon ? <img src={h.icon} alt={h.name} className="h-full w-full object-cover" /> : <Store className="h-4 w-4 text-muted-foreground" />}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-bold text-[#1F2937] truncate">{h.name}</p>
-                      {h.subtitle && <p className="text-[11px] text-[#6B7280] truncate">{h.subtitle}</p>}
+                      <p className="truncate text-[14px] font-bold text-foreground">{h.name}</p>
+                      {h.subtitle && <p className="truncate text-[11px] text-muted-foreground">{h.subtitle}</p>}
                     </div>
                   </button>
                 ))}
@@ -217,18 +223,18 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
             {grouped.cities.length > 0 && (
               <Section title="ערים">
                 {grouped.cities.map((h) => (
-                  <button key={`ci-${h.id}`} onClick={() => goTo(h)} className="w-full px-4 py-2 flex items-center gap-3 hover:bg-[#F7F5F0] text-right">
-                    <span className="h-9 w-9 rounded-xl bg-[#F7F5F0] flex items-center justify-center">
-                      <MapPin className="h-4 w-4 text-[#0E6B5A]" />
+                  <button key={`ci-${h.id}`} onClick={() => goTo(h)} className="flex w-full items-center gap-3 px-4 py-2.5 text-right hover:bg-background">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-background">
+                      <MapPin className="h-4 w-4 text-secondary" />
                     </span>
-                    <p className="text-[14px] font-bold text-[#1F2937] flex-1">{h.name}</p>
+                    <p className="flex-1 text-[14px] font-bold text-foreground">{h.name}</p>
                   </button>
                 ))}
               </Section>
             )}
-            <div className="border-t border-[#ECEEF2] px-4 py-2 text-[11px] text-[#6B7280] flex justify-between">
+            <div className="flex justify-between border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
               <span>{hits.length} תוצאות</span>
-              <Link onClick={closeAndBlur} to={`/search?q=${encodeURIComponent(term)}`} className="text-[#0E6B5A] font-bold">ראה הכל ←</Link>
+              <Link onClick={closeAndBlur} to={`/search?q=${encodeURIComponent(term)}`} className="font-bold text-secondary">ראה הכל ←</Link>
             </div>
           </div>
         )}
@@ -237,25 +243,25 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
   ) : null;
 
   return (
-    <div ref={wrapRef} className="relative w-full" dir="rtl">
+    <div ref={wrapRef} className={`relative w-full ${open ? "z-[1000]" : ""}`} dir="rtl">
       <form onSubmit={onSubmit}>
-        <SearchIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#6B7280] pointer-events-none z-10" strokeWidth={2} />
+        <SearchIcon className="pointer-events-none absolute right-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" strokeWidth={2} />
         <input
           ref={inputRef}
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           placeholder='חפש בעברית: "חשמלאי בצפת", "דלתות פנים", "מטבחים"...'
-          className={`w-full bg-white border border-[#ECEEF2] pr-11 pl-11 font-medium text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#0E6B5A] focus:ring-[3px] focus:ring-[#0E6B5A]/15 ${heroCls}`}
+          className={`w-full border border-border bg-card pr-11 pl-11 font-medium text-foreground placeholder:text-muted-foreground/65 focus:border-secondary focus:outline-none focus:ring-[3px] focus:ring-secondary/15 ${heroCls}`}
         />
         {q && (
           <button
             type="button"
             onClick={() => { setQ(""); inputRef.current?.focus(); }}
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-[#F7F5F0] flex items-center justify-center"
+            className="absolute left-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-background"
             aria-label="נקה"
           >
-            <X className="h-4 w-4 text-[#6B7280]" strokeWidth={2.4} />
+            <X className="h-4 w-4 text-muted-foreground" strokeWidth={2.4} />
           </button>
         )}
       </form>
@@ -268,7 +274,7 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="px-4 pt-2 pb-1 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">{title}</div>
+      <div className="px-4 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{title}</div>
       {children}
     </div>
   );
