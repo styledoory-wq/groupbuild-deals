@@ -450,7 +450,7 @@ export default function SupplierProfile() {
                     onClick={() => { void trackSupplierEvent(supplier.id, l.event); }}
                     className={`h-11 ${softBtn}`}
                   >
-                    <l.Icon className="h-4 w-4" style={{ color: BRAND }} />
+                    <l.Icon className="h-4 w-4 text-[#0E6B5A]" />
                     {l.label}
                   </a>
                 ))}
@@ -461,7 +461,7 @@ export default function SupplierProfile() {
           <SupplierCatalogsList supplierId={supplier.id} legacyUrl={supplier.catalog_url} />
 
           {/* Description */}
-          {(supplier.description || true) && (() => {
+          {(() => {
             const desc = supplier.description ?? "";
             const isLong = desc.length > 220;
             const shown = !isLong || showFullDesc ? desc : desc.slice(0, 220).trimEnd() + "…";
