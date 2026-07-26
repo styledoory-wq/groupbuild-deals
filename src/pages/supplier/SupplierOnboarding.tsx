@@ -538,7 +538,7 @@ export default function SupplierOnboarding() {
           </div>
         </div>
 
-        <div className="px-4 py-5 pb-36">
+        <div className="px-4 py-5 pb-44">
           <div
             key={step}
             className="rounded-[22px] bg-white border border-[#E8ECEF] shadow-[0_8px_28px_-18px_rgba(11,18,32,0.18)] overflow-hidden animate-fade-up"
