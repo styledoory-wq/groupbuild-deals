@@ -1,15 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "@/store/AppStore";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import {
   Bell,
+  Building2,
   Check,
   ChevronLeft,
+  Home as HomeIcon,
+  PaintRoller,
   Search,
   ShieldCheck,
   UserRound,
+  type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
@@ -19,6 +23,7 @@ import { iconForCategory, iconForStage } from "@/lib/categoryIcons";
 import { illustrationForProjectType } from "@/lib/stageIllustrations";
 import { Seo } from "@/components/seo/Seo";
 import finishesImg from "@/assets/stages/stage-finishes.jpg";
+import newBuildImg from "@/assets/journey-new-build.jpg";
 
 const BRAND = "#0E6B5A";
 
@@ -31,6 +36,7 @@ type ProjectTypeDef = {
   title: string;
   subtitle: string;
   img: string;
+  Icon: LucideIcon;
 };
 
 const PROJECT_TYPES: ProjectTypeDef[] = [
@@ -39,18 +45,21 @@ const PROJECT_TYPES: ProjectTypeDef[] = [
     title: "בנייה חדשה",
     subtitle: "הכל לבניית בית חדש",
     img: illustrationForProjectType("new"),
+    Icon: HomeIcon,
   },
   {
     id: "reno",
     title: "שיפוץ",
     subtitle: "שדרוג ושיפוץ הבית",
     img: illustrationForProjectType("reno"),
+    Icon: PaintRoller,
   },
   {
     id: "building",
     title: "בניין משותף",
     subtitle: "ועד בית ותחזוקה",
     img: illustrationForProjectType("building"),
+    Icon: Building2,
   },
 ];
 
@@ -65,6 +74,7 @@ function ProjectTypeCircle({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const Icon = def.Icon;
   return (
     <button
       type="button"
@@ -72,13 +82,13 @@ function ProjectTypeCircle({
       aria-pressed={selected}
       className="flex flex-col items-center gap-2.5 flex-1 min-w-0 active:scale-[0.97] transition-transform"
     >
-      <span className="relative block w-[104px] h-[104px] mx-auto">
+      <span className="relative block w-[108px] h-[108px] mx-auto">
         <span
-          className="absolute inset-0 rounded-full overflow-hidden bg-[#E8EEE9]"
+          className="absolute inset-0 rounded-full overflow-hidden bg-slate-100"
           style={{
             boxShadow: selected
-              ? `0 0 0 3px ${BRAND}, 0 14px 28px -16px ${BRAND}88`
-              : "0 8px 20px -12px rgba(16,24,40,0.16)",
+              ? `0 0 0 3px ${BRAND}, 0 16px 32px -18px ${BRAND}99`
+              : "0 10px 24px -14px rgba(15,23,42,0.18)",
           }}
         >
           <img
@@ -88,28 +98,43 @@ function ProjectTypeCircle({
             className="h-full w-full object-cover object-center"
           />
         </span>
+
         {selected && (
           <span
             className="absolute top-0.5 right-0.5 z-10 grid place-items-center rounded-full text-white"
             style={{
-              width: 24,
-              height: 24,
+              width: 26,
+              height: 26,
               background: BRAND,
-              boxShadow: `0 4px 12px ${BRAND}55`,
+              boxShadow: `0 4px 12px ${BRAND}66`,
             }}
           >
-            <Check size={13} strokeWidth={3} />
+            <Check size={14} strokeWidth={3} />
           </span>
         )}
+
+        {/* Small icon badge at bottom center */}
+        <span
+          className="absolute -bottom-1 left-1/2 z-10 grid -translate-x-1/2 place-items-center rounded-full bg-white"
+          style={{
+            width: 32,
+            height: 32,
+            color: BRAND,
+            boxShadow: "0 4px 12px rgba(15,23,42,0.14)",
+          }}
+        >
+          <Icon size={15} strokeWidth={2.2} />
+        </span>
       </span>
-      <span className="text-center px-0.5">
+
+      <span className="text-center px-0.5 mt-1">
         <span
           className="block text-[13.5px] font-extrabold leading-tight"
-          style={{ color: selected ? BRAND : "#1A1A1A" }}
+          style={{ color: selected ? BRAND : "#0F172A" }}
         >
           {def.title}
         </span>
-        <span className="block text-[10.5px] text-[#6B7280] leading-tight mt-0.5 line-clamp-2">
+        <span className="block text-[10.5px] text-slate-500 leading-tight mt-0.5 line-clamp-2">
           {def.subtitle}
         </span>
       </span>
@@ -117,28 +142,52 @@ function ProjectTypeCircle({
   );
 }
 
-function CategorySearch({
+function CategoryHeroSearch({
   value,
   onChange,
+  topBar,
 }: {
   value: string;
   onChange: (v: string) => void;
+  topBar: ReactNode;
 }) {
   return (
-    <label
-      className="flex items-center gap-3 h-[52px] px-5 rounded-full bg-white text-[#667085]"
-      style={{ boxShadow: "0 10px 24px -14px rgba(16,24,40,0.18)" }}
-    >
-      <Search size={20} strokeWidth={1.9} />
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="חפש שירות, ספק או מוצר..."
-        aria-label="חיפוש"
-        dir="rtl"
-        className="w-full bg-transparent border-0 outline-none text-right text-[14px] text-[#172033] placeholder:text-[#8b93a1]"
+    <div className="relative -mx-4 mb-6 overflow-hidden">
+      {/* Atmospheric blurred photo */}
+      <img
+        src={newBuildImg}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 h-full w-full scale-110 object-cover object-center blur-[2px]"
       />
-    </label>
+      {/* Brand green → soft gray overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(105deg, rgba(14,107,90,0.88) 0%, rgba(14,107,90,0.55) 38%, rgba(247,248,246,0.82) 72%, rgba(248,250,252,0.96) 100%)",
+        }}
+      />
+      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-slate-50" />
+
+      <div className="relative px-4 pt-[calc(env(safe-area-inset-top)+12px)] pb-7">
+        {topBar}
+        <label
+          className="mt-3 flex h-[54px] items-center gap-3 rounded-full bg-white px-5 text-slate-400"
+          style={{ boxShadow: "0 14px 32px -16px rgba(15,23,42,0.28)" }}
+        >
+          <Search size={20} strokeWidth={1.9} className="shrink-0 text-slate-400" />
+          <input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="חפש שירות, ספק או מוצר..."
+            aria-label="חיפוש"
+            dir="rtl"
+            className="w-full border-0 bg-transparent text-right text-[14px] text-slate-800 outline-none placeholder:text-slate-400"
+          />
+        </label>
+      </div>
+    </div>
   );
 }
 
@@ -270,6 +319,52 @@ export default function CategoriesList() {
     navigate(`/resident/categories/stages?type=${selectedProject}&stage=${stageKey}`);
   };
 
+  const topBar = (
+    <div className="mb-1 flex items-center justify-between">
+      {user ? (
+        <>
+          <button
+            aria-label="פרופיל"
+            onClick={() => navigate("/resident/profile")}
+            className="grid h-10 w-10 place-items-center rounded-full border border-white/70 bg-white/90 shadow-sm active:scale-95 transition-transform"
+          >
+            <UserRound size={20} strokeWidth={2} className="text-slate-800" />
+          </button>
+          <button
+            aria-label="התראות"
+            onClick={() => navigate("/resident/notifications")}
+            className="relative grid h-10 w-10 place-items-center rounded-full border border-white/70 bg-white/90 shadow-sm active:scale-95 transition-transform"
+          >
+            <Bell size={20} strokeWidth={1.9} className="text-slate-800" />
+            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+              3
+            </span>
+          </button>
+        </>
+      ) : (
+        <>
+          <button
+            onClick={() => navigate("/")}
+            className="text-[15px] font-extrabold tracking-tight text-white drop-shadow-sm"
+            aria-label="דף הבית"
+          >
+            GroupBuild
+          </button>
+          <button
+            onClick={() =>
+              navigate(
+                `/auth/resident?mode=signin&returnUrl=${encodeURIComponent(location.pathname + location.search)}`,
+              )
+            }
+            className="rounded-full border border-white/50 bg-white/90 px-4 py-1.5 text-[12.5px] font-semibold text-[#0E6B5A] shadow-sm transition-colors hover:bg-white"
+          >
+            התחברות
+          </button>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <>
       <PullToRefreshIndicator {...ptr} />
@@ -280,71 +375,23 @@ export default function CategoriesList() {
       />
       <div
         dir="rtl"
-        className="min-h-screen min-h-[100dvh] w-full bg-[#F7F8F6]"
+        className="min-h-screen min-h-[100dvh] w-full bg-slate-50"
         style={{
           fontFamily: "'Heebo', 'Inter', system-ui, sans-serif",
-          color: "#172033",
+          color: "#0F172A",
         }}
       >
         <div
-          className="mx-auto w-full max-w-[var(--app-max-w)] px-4 pt-[calc(env(safe-area-inset-top)+14px)]"
+          className="mx-auto w-full max-w-[var(--app-max-w)] px-4"
           style={{
             paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)",
           }}
         >
-          {/* Top bar */}
-          <div className="flex items-center justify-between mb-3">
-            {user ? (
-              <>
-                <button
-                  aria-label="פרופיל"
-                  onClick={() => navigate("/resident/profile")}
-                  className="grid place-items-center w-[40px] h-[40px] rounded-full bg-white border border-[#ECEEF2] shadow-sm active:scale-95 transition-transform"
-                >
-                  <UserRound size={20} strokeWidth={2} className="text-[#172033]" />
-                </button>
-                <button
-                  aria-label="התראות"
-                  onClick={() => navigate("/resident/notifications")}
-                  className="relative grid place-items-center w-[40px] h-[40px] rounded-full bg-white border border-[#ECEEF2] shadow-sm active:scale-95 transition-transform"
-                >
-                  <Bell size={20} strokeWidth={1.9} className="text-[#172033]" />
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-1">
-                    3
-                  </span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => navigate("/")}
-                  className="font-extrabold text-[#0E6B5A] text-[15px] tracking-tight"
-                  aria-label="דף הבית"
-                >
-                  GroupBuild
-                </button>
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/auth/resident?mode=signin&returnUrl=${encodeURIComponent(location.pathname + location.search)}`,
-                    )
-                  }
-                  className="text-[#0E6B5A] font-semibold text-[12.5px] border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
-                >
-                  התחברות
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Search with soft hero bleed */}
-          <div className="mb-5 -mx-1">
-            <CategorySearch value={query} onChange={setQuery} />
-          </div>
+          <CategoryHeroSearch value={query} onChange={setQuery} topBar={topBar} />
 
           {/* Circular project types */}
           {!query.trim() && (
-            <div className="flex items-start justify-between gap-2 mb-7 px-1">
+            <div className="mb-8 flex items-start justify-between gap-2 px-0.5">
               {PROJECT_TYPES.map((def) => (
                 <ProjectTypeCircle
                   key={def.id}
@@ -359,8 +406,8 @@ export default function CategoriesList() {
           {/* Search results OR stage squares */}
           {query.trim() ? (
             <section>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[16px] font-extrabold text-[#1A1A1A] m-0">
+              <div className="mb-3.5 flex items-center justify-between">
+                <h2 className="m-0 text-[17px] font-extrabold text-slate-900">
                   תוצאות חיפוש{catalogHits.length ? ` (${catalogHits.length})` : ""}
                 </h2>
               </div>
@@ -369,14 +416,14 @@ export default function CategoriesList() {
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div
                       key={i}
-                      className="h-[64px] rounded-2xl bg-white border border-[#ECEEF2] animate-pulse"
+                      className="h-16 animate-pulse rounded-2xl border border-gray-100 bg-white shadow-sm"
                     />
                   ))}
                 </div>
               ) : catalogHits.length === 0 ? (
-                <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
+                <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
                   <Search size={28} />
-                  <strong className="text-[#26313c]">לא נמצאו תוצאות</strong>
+                  <strong className="text-slate-800">לא נמצאו תוצאות</strong>
                   <span className="text-[12.5px]">נסה מונח חיפוש אחר</span>
                 </div>
               ) : (
@@ -387,27 +434,26 @@ export default function CategoriesList() {
                       <Link
                         key={h.id}
                         to={`/resident/categories/${h.id}`}
-                        className="flex items-center gap-3 bg-white rounded-[18px] p-3 active:scale-[0.99] transition-transform"
-                        style={{ boxShadow: "0 6px 18px -10px rgba(16,24,40,0.12)" }}
+                        className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm active:scale-[0.99] transition-transform"
                       >
                         <span
-                          className="h-11 w-11 rounded-full grid place-items-center shrink-0"
+                          className="grid h-11 w-11 shrink-0 place-items-center rounded-full"
                           style={{ background: "rgba(14,107,90,0.08)", color: BRAND }}
                         >
                           <HitIcon size={22} strokeWidth={1.7} />
                         </span>
-                        <div className="flex-1 min-w-0 text-right">
-                          <p className="font-bold text-[14px] text-[#1F2937] truncate">{h.name}</p>
+                        <div className="min-w-0 flex-1 text-right">
+                          <p className="truncate text-[14px] font-bold text-slate-800">{h.name}</p>
                           {h.path && (
-                            <p className="text-[11px] text-[#6B7280] truncate mt-0.5" dir="rtl">
+                            <p className="mt-0.5 truncate text-[11px] text-slate-500" dir="rtl">
                               {h.path}
                             </p>
                           )}
-                          <p className="text-[11px] text-[#0E6B5A] font-semibold mt-0.5">
+                          <p className="mt-0.5 text-[11px] font-medium text-slate-400">
                             {h.supplier_count > 0 ? `${h.supplier_count} ספקים` : "בקרוב"}
                           </p>
                         </div>
-                        <ChevronLeft className="h-4 w-4 text-[#6B7280] shrink-0" strokeWidth={2.2} />
+                        <ChevronLeft className="h-4 w-4 shrink-0 text-slate-400" strokeWidth={2.2} />
                       </Link>
                     );
                   })}
@@ -416,17 +462,16 @@ export default function CategoriesList() {
             </section>
           ) : (
             <section>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[16px] font-extrabold text-[#1A1A1A] m-0">
-                  קטגוריות מובילות
-                </h2>
+              <div className="mb-3.5 flex items-center justify-between">
+                <h2 className="m-0 text-[17px] font-extrabold text-slate-900">קטגוריות מובילות</h2>
                 <button
                   type="button"
                   onClick={() => {
                     const first = filtered[0];
                     if (first) openStage(first.key);
                   }}
-                  className="text-[12.5px] font-bold text-[#0E6B5A] inline-flex items-center gap-0.5"
+                  className="inline-flex items-center gap-0.5 text-[12.5px] font-bold"
+                  style={{ color: BRAND }}
                 >
                   הצג הכל
                   <ChevronLeft size={14} strokeWidth={2.5} />
@@ -434,32 +479,32 @@ export default function CategoriesList() {
               </div>
 
               {loading ? (
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-3 gap-3.5">
                   {Array.from({ length: 9 }).map((_, i) => (
                     <div
                       key={i}
-                      className="aspect-[1/1.05] rounded-[22px] bg-white animate-pulse"
-                      style={{ boxShadow: "0 6px 18px -8px rgba(16,24,40,0.10)" }}
+                      className="aspect-[1/1.08] animate-pulse rounded-2xl border border-gray-100 bg-white shadow-sm"
                     />
                   ))}
                 </div>
               ) : errorMsg ? (
-                <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
-                  <strong className="text-[#26313c]">{errorMsg}</strong>
+                <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
+                  <strong className="text-slate-800">{errorMsg}</strong>
                   <button
                     onClick={() => window.location.reload()}
-                    className="text-[12px] font-bold text-[#0E6B5A] underline"
+                    className="text-[12px] font-bold underline"
+                    style={{ color: BRAND }}
                   >
                     רענן
                   </button>
                 </div>
               ) : filtered.length === 0 ? (
-                <div className="min-h-[160px] grid place-items-center text-center gap-2 text-[#7b8490]">
+                <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
                   <Search size={28} />
-                  <strong className="text-[#26313c]">בקרוב נוסיף שלבים למסלול זה</strong>
+                  <strong className="text-slate-800">בקרוב נוסיף שלבים למסלול זה</strong>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-3 gap-3.5">
                   {filtered.map((s) => (
                     <CategorySquareCard
                       key={s.key}
@@ -474,24 +519,21 @@ export default function CategoriesList() {
             </section>
           )}
 
-          {/* Promo banner — lifestyle + trust */}
+          {/* Trust banner */}
           {!query && !loading && !errorMsg && filtered.length > 0 && (
-            <aside
-              className="mt-6 rounded-[22px] overflow-hidden flex items-stretch bg-white border border-[#EEF1EF]"
-              style={{ boxShadow: "0 10px 24px -16px rgba(16,24,40,0.16)" }}
-            >
-              <div className="flex-1 min-w-0 p-4 flex items-start gap-2.5 text-right">
+            <aside className="mt-7 flex items-stretch overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <div className="flex min-w-0 flex-1 items-start gap-2.5 p-4 text-right">
                 <span
-                  className="grid place-items-center w-9 h-9 rounded-full shrink-0 mt-0.5"
+                  className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full"
                   style={{ background: "rgba(14,107,90,0.10)", color: BRAND }}
                 >
                   <ShieldCheck size={18} strokeWidth={2.2} />
                 </span>
                 <div className="min-w-0">
-                  <strong className="block text-[14px] text-[#0E6B5A] mb-0.5 leading-snug">
+                  <strong className="mb-0.5 block text-[14px] leading-snug" style={{ color: BRAND }}>
                     ספקים מאומתים
                   </strong>
-                  <span className="block text-[12px] text-[#52605a] leading-snug">
+                  <span className="block text-[12px] leading-snug text-slate-500">
                     שקט נפשי לכל שלב בפרויקט
                   </span>
                 </div>
@@ -500,7 +542,7 @@ export default function CategoriesList() {
                 <img
                   src={finishesImg}
                   alt=""
-                  className="h-full w-full object-cover object-center min-h-[92px]"
+                  className="h-full min-h-[92px] w-full object-cover object-center"
                 />
               </div>
             </aside>

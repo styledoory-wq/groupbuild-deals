@@ -295,10 +295,10 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
 
   return (
     <MobileShell>
-      <div className="bg-[#F7F8F6] min-h-screen pb-24" dir="rtl">
+      <div className="bg-slate-50 min-h-screen pb-24" dir="rtl">
         <div className="px-4 max-w-2xl mx-auto" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}>
           {/* Sticky Header — offset for iPhone Dynamic Island / status bar */}
-          <header className="sticky z-20 bg-[#F7F8F6]/92 backdrop-blur-md pb-3 pt-2 -mx-4 px-4" style={{ top: "env(safe-area-inset-top)" }}>
+          <header className="sticky z-20 bg-slate-50/92 backdrop-blur-md pb-3 pt-2 -mx-4 px-4" style={{ top: "env(safe-area-inset-top)" }}>
             <button
               onClick={() => navigate(-1)}
               className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-[#0E6B5A] transition mb-2"
