@@ -73,25 +73,24 @@ function BottomNavImpl({ role }: { role: Role }) {
                 onPointerDown={() => preloadRoute(to)}
                 onTouchStart={() => preloadRoute(to)}
                 className={cn(
-                  "flex-1 flex flex-col items-center justify-center gap-[3px] relative transition-colors duration-150",
+                  "flex-1 flex flex-col items-center justify-center gap-1 relative transition-colors duration-150",
                   active ? "text-[#0E6B5A]" : "text-[#6B7280] hover:text-[#1F2937]",
                 )}
                 style={{ minHeight: "var(--tap)" }}
               >
-                <span
+                <div
                   className={cn(
-                    "absolute top-0 left-1/2 -translate-x-1/2 h-[3px] rounded-b-full transition-all duration-200",
-                    active ? "w-10 bg-[#0E6B5A]" : "w-0 bg-transparent",
+                    "relative grid place-items-center rounded-xl transition-all duration-200",
+                    active ? "h-9 w-11 bg-[#0E6B5A]/12" : "h-9 w-11 bg-transparent",
                   )}
-                />
-                <div className="relative">
+                >
                   <Icon
-                    className={cn("shrink-0 transition-transform duration-200", active && "scale-[1.08]")}
-                    style={{ width: 24, height: 24 }}
-                    strokeWidth={active ? 2.4 : 1.9}
+                    className="shrink-0"
+                    style={{ width: 22, height: 22 }}
+                    strokeWidth={active ? 2.35 : 1.9}
                   />
                   {badge > 0 && (
-                    <span className="absolute -top-1 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-[#C1483C] text-white text-[9.5px] font-bold flex items-center justify-center leading-none tabular-nums">
+                    <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-[#C1483C] text-white text-[9.5px] font-bold flex items-center justify-center leading-none tabular-nums">
                       {badge > 99 ? "99+" : badge}
                     </span>
                   )}

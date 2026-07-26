@@ -152,34 +152,30 @@ function CategoryHeroSearch({
 }) {
   return (
     <div className="relative -mx-4 mb-5 overflow-hidden">
-      {/* Photo layer — right side of the band (LTR) */}
+      {/* Clear professional photo — readable on the right, not fogged out */}
       <div className="absolute inset-0">
         <img
           src={heroAtmosphereImg}
           alt=""
           aria-hidden
           className="h-full w-full object-cover"
-          style={{
-            objectPosition: "78% 40%",
-            filter: "blur(3px)",
-            transform: "scale(1.08)",
-          }}
+          style={{ objectPosition: "70% 45%" }}
         />
       </div>
 
-      {/* Green → photo blend (matches sketch: deep green left, room visible right) */}
+      {/* Brand green LEFT → clear photo RIGHT (soft fade only, no heavy blur) */}
       <div
         className="absolute inset-0"
         style={{
           background: `
             linear-gradient(
-              95deg,
+              100deg,
               #0E6B5A 0%,
-              #0E6B5A 22%,
-              rgba(14,107,90,0.82) 38%,
-              rgba(14,107,90,0.35) 58%,
-              rgba(255,255,255,0.08) 78%,
-              rgba(248,250,252,0.22) 100%
+              #0E6B5A 18%,
+              rgba(14,107,90,0.72) 36%,
+              rgba(14,107,90,0.28) 52%,
+              rgba(14,107,90,0.06) 68%,
+              transparent 82%
             )
           `,
         }}
@@ -187,10 +183,10 @@ function CategoryHeroSearch({
 
       {/* Soft bottom blend into page */}
       <div
-        className="absolute inset-x-0 bottom-0 h-16"
+        className="absolute inset-x-0 bottom-0 h-14"
         style={{
           background:
-            "linear-gradient(to bottom, transparent 0%, rgba(248,250,252,0.55) 55%, #F8FAFC 100%)",
+            "linear-gradient(to bottom, transparent 0%, rgba(248,250,252,0.4) 50%, #F8FAFC 100%)",
         }}
       />
 
