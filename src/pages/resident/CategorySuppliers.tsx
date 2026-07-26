@@ -333,7 +333,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                   <h2 className="text-[15px] font-extrabold text-[#1A1A1A] m-0">תתי־קטגוריות</h2>
                   <span className="text-[11px] font-semibold text-[#6B7280]">{childCategories.length}</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-3 gap-3.5">
                   {childCategories.map((c) => (
                     <Link key={c.id} to={`/resident/categories/${c.id}`} className="block">
                       <CategorySquareCard
