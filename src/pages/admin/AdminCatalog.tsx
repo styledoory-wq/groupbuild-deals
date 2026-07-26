@@ -85,6 +85,8 @@ export default function AdminCatalog() {
   const [moveNode, setMoveNode] = useState<Cat | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [actionsFor, setActionsFor] = useState<Cat | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "tree">("grid");
+  const [gridParentId, setGridParentId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
