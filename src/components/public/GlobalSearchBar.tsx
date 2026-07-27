@@ -110,8 +110,8 @@ export function GlobalSearchBar({
   };
 
   const heroCls = variant === "hero"
-    ? "h-14 text-[15px] rounded-[20px] shadow-[0_8px_24px_-8px_rgba(10,31,61,0.18)]"
-    : "h-12 text-[14px] rounded-[16px]";
+    ? "h-14 leading-[56px] text-[16px] rounded-[20px] shadow-[0_8px_24px_-8px_rgba(10,31,61,0.18)]"
+    : "h-12 leading-[48px] text-[15px] rounded-[16px]";
 
   const dropdown = open ? (
       <div
@@ -123,7 +123,12 @@ export function GlobalSearchBar({
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">חיפושים פופולריים</p>
             <div className="flex flex-wrap gap-2">
               {POPULAR.map((p) => (
-                <button key={p} onClick={() => { setQ(p); inputRef.current?.focus(); }} className="h-8 rounded-full bg-background px-3 text-[12px] font-semibold text-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => { setQ(p); inputRef.current?.focus(); }}
+                  className="inline-flex h-8 items-center justify-center rounded-full bg-background px-3.5 text-[12px] font-semibold leading-none text-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
+                >
                   {p}
                 </button>
               ))}
@@ -198,7 +203,7 @@ export function GlobalSearchBar({
 
   return (
     <div ref={wrapRef} className={`relative w-full ${open ? "z-[1000]" : ""}`} dir="rtl">
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} className="relative">
         <SearchIcon className="pointer-events-none absolute right-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" strokeWidth={2} />
         <input
           ref={inputRef}
@@ -206,7 +211,17 @@ export function GlobalSearchBar({
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
-          className={`w-full border border-border bg-card pr-11 pl-11 font-medium text-foreground placeholder:text-muted-foreground/65 focus:border-secondary focus:outline-none focus:ring-[3px] focus:ring-secondary/15 ${heroCls}`}
+          className={
+            `w-full border border-border bg-card font-medium text-foreground ` +
+            `placeholder:text-muted-foreground/65 focus:border-secondary focus:outline-none ` +
+            `focus:ring-[3px] focus:ring-secondary/15 ` +
+            /* Vertical centering + avoid iOS glyph clipping */
+            `box-border py-0 leading-[inherit] appearance-none ` +
+            /* Room for search icon (right) and clear button (left) */
+            `${q ? "pr-12 pl-12" : "pr-12 pl-4"} ` +
+            heroCls
+          }
+          style={{ WebkitAppearance: "none" }}
         />
         {q && (
           <button

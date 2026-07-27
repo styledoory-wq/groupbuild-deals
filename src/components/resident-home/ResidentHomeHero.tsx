@@ -89,14 +89,14 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
               <Link
                 key={c.label}
                 to={`/search?q=${encodeURIComponent(c.q)}`}
-                className="h-8 px-3 rounded-full bg-white/80 border border-[#E4DFD4] text-[12px] font-bold text-[#334155] backdrop-blur-sm"
+                className="inline-flex h-8 items-center justify-center px-3.5 rounded-full bg-white/80 border border-[#E4DFD4] text-[12px] font-bold leading-none text-[#334155] backdrop-blur-sm"
               >
                 {c.label}
               </Link>
             ))}
             <Link
               to="/categories"
-              className="h-8 px-3 rounded-full bg-[#0E6B5A] text-white text-[12px] font-bold"
+              className="inline-flex h-8 items-center justify-center px-3.5 rounded-full bg-[#0E6B5A] text-white text-[12px] font-bold leading-none"
             >
               כל הקטגוריות
             </Link>
