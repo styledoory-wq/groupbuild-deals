@@ -347,28 +347,8 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
               </div>
             )}
 
-            {/* Filter chips */}
-            <nav className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-              {kinds.map(({ v, label, Icon }) => {
-                const active = kindFilter === v;
-                return (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setKindFilter(v)}
-                    className={
-                      "whitespace-nowrap px-3.5 py-1.5 rounded-full text-[12px] font-bold inline-flex items-center gap-1.5 transition-all border " +
-                      (active
-                        ? "text-white border-transparent shadow-sm"
-                        : "bg-white text-slate-600 border-slate-200")
-                    }
-                    style={active ? { background: BRAND, borderColor: BRAND } : undefined}
-                  >
-                    <Icon className="h-3 w-3" />
-                    {label}
-                  </button>
-                );
-              })}
+            {/* Area filter */}
+            <div className="flex gap-1.5 pb-1">
               <button
                 type="button"
                 onClick={() => setShowAreaPicker((v) => !v)}
@@ -383,7 +363,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                 {areaLabel}
                 <ChevronDown className={`h-3 w-3 transition-transform ${showAreaPicker ? "rotate-180" : ""}`} />
               </button>
-            </nav>
+            </div>
 
             {showAreaPicker && (
               <div className="mt-3 bg-white border border-slate-200 rounded-2xl p-3 shadow-sm grid grid-cols-2 gap-2 animate-fade-in">
