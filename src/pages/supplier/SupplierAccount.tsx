@@ -146,52 +146,64 @@ export default function SupplierAccount() {
           </div>
         </section>
 
-        {/* Settings list */}
-        <section className="px-5 mt-5">
+        {/* Settings list — available first */}
+        <section className="px-5 mt-5 space-y-3">
           <div className="bg-white rounded-3xl border border-[#EEF0F3] overflow-hidden shadow-sm">
-            {rows.map((r, i) => {
+            {rows.filter((r) => !r.unavailable).map((r, i, arr) => {
               const Icon = r.icon;
-              const disabled = !!r.unavailable;
-              const onClick = disabled
-                ? undefined
-                : r.onClick ?? (r.to ? () => navigate(r.to!) : undefined);
+              const onClick = r.onClick ?? (r.to ? () => navigate(r.to!) : undefined);
               return (
                 <button
                   key={r.label}
                   type="button"
                   onClick={onClick}
-                  disabled={disabled}
-                  aria-disabled={disabled}
                   className={
-                    "w-full flex items-center gap-3 p-4 text-right transition " +
-                    (disabled ? "opacity-55 cursor-not-allowed" : "active:bg-[#F7F8FA]") +
-                    (i < rows.length - 1 ? " border-b border-[#F2F4F7]" : "")
+                    "w-full flex items-center gap-3 p-4 text-right active:bg-[#F7F8FA] transition" +
+                    (i < arr.length - 1 ? " border-b border-[#F2F4F7]" : "")
                   }
                 >
-                  <div className={"h-10 w-10 rounded-xl flex items-center justify-center shrink-0 " + (disabled ? "bg-[#F1F5F9]" : "bg-[#E8F5F1]")}>
-                    <Icon className={"h-[18px] w-[18px] " + (disabled ? "text-[#94A3B8]" : "text-[#0E6B5A]")} strokeWidth={2} />
+                  <div className="h-10 w-10 rounded-xl bg-[#E8F5F1] flex items-center justify-center shrink-0">
+                    <Icon className="h-[18px] w-[18px] text-[#0E6B5A]" strokeWidth={2} />
                   </div>
                   <div className="flex-1 min-w-0 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {disabled && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#64748B]">
-                          לא זמין
-                        </span>
-                      )}
-                      <div className={"font-semibold text-[14px] " + (disabled ? "text-[#94A3B8]" : "text-[#0F172A]")}>
-                        {r.label}
-                      </div>
-                    </div>
-                    {r.sub && (
-                      <div className={"text-[12px] mt-0.5 truncate " + (disabled ? "text-[#CBD5E1]" : "text-[#8E95A2]")}>
-                        {r.sub}
-                      </div>
-                    )}
+                    <div className="font-semibold text-[14px] text-[#0F172A]">{r.label}</div>
+                    {r.sub && <div className="text-[12px] text-[#8E95A2] mt-0.5 truncate">{r.sub}</div>}
                   </div>
-                  {!disabled && <ChevronLeft className="h-4 w-4 text-[#8E95A2] shrink-0" />}
+                  <ChevronLeft className="h-4 w-4 text-[#8E95A2] shrink-0" />
                 </button>
               );
             })}
+          </div>
+
+          <div>
+            <div className="px-1 mb-2 text-[11px] font-bold text-[#94A3B8] tracking-wide">בקרוב</div>
+            <div className="bg-white/70 rounded-3xl border border-dashed border-[#E2E8F0] overflow-hidden">
+              {rows.filter((r) => r.unavailable).map((r, i, arr) => {
+                const Icon = r.icon;
+                return (
+                  <div
+                    key={r.label}
+                    className={
+                      "w-full flex items-center gap-3 p-4 opacity-60" +
+                      (i < arr.length - 1 ? " border-b border-[#F2F4F7]" : "")
+                    }
+                  >
+                    <div className="h-10 w-10 rounded-xl bg-[#F1F5F9] flex items-center justify-center shrink-0">
+                      <Icon className="h-[18px] w-[18px] text-[#94A3B8]" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#64748B]">
+                          לא זמין
+                        </span>
+                        <div className="font-semibold text-[14px] text-[#94A3B8]">{r.label}</div>
+                      </div>
+                      {r.sub && <div className="text-[12px] text-[#CBD5E1] mt-0.5 truncate">{r.sub}</div>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
 
