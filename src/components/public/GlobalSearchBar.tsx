@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Search as SearchIcon, X, Store, FolderTree, MapPin, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,9 +23,8 @@ const POPULAR = ["חשמלאי", "דלתות", "מזגן", "סולארי", "רי
  * Global search bar with autocomplete — searches categories, suppliers, and cities
  * in a single query. Fully public (no auth required).
  *
- * The results dropdown is rendered via a React Portal into `document.body` to avoid
- * being clipped by ancestors with `overflow-hidden`, transforms, or lower stacking
- * contexts. Position is recalculated from the input's bounding rect on scroll/resize.
+ * On mobile, the focused search is rendered as a full-screen portal so page content
+ * never appears above it or under it while the keyboard is open.
  */
 export function GlobalSearchBar({
   variant = "hero",
@@ -56,12 +56,25 @@ export function GlobalSearchBar({
 
   useEffect(() => {
     if (!(open && mobileSearch)) return;
+    const previousHtml = document.documentElement.style.overflow;
     const previous = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
     return () => {
+      document.documentElement.style.overflow = previousHtml;
       document.body.style.overflow = previous;
     };
   }, [mobileSearch, open]);
+
+  const mobileActive = open && mobileSearch;
+
+  useEffect(() => {
+    if (!mobileActive) return;
+    const frame = window.requestAnimationFrame(() => {
+      inputRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [mobileActive]);
 
   // Recompute dropdown max-height from the visual viewport so it fits above the
   // on-screen keyboard on iOS (dvh doesn't shrink when the keyboard opens).
@@ -156,7 +169,6 @@ export function GlobalSearchBar({
     ? "h-14 leading-[56px] text-[16px] rounded-[20px] shadow-[0_8px_24px_-8px_rgba(10,31,61,0.18)]"
     : "h-12 leading-[48px] text-[15px] rounded-[16px]";
 
-  const mobileActive = open && mobileSearch;
   const dropdown = open ? (
       <div
         dir="rtl"
@@ -246,25 +258,16 @@ export function GlobalSearchBar({
       </div>
   ) : null;
 
-  return (
-    <>
-      {mobileActive && (
-        <button
-          type="button"
-          aria-label="סגור חיפוש"
-          onClick={closeAndBlur}
-          className="fixed inset-0 z-[990] cursor-default bg-background/95 backdrop-blur-sm"
-        />
-      )}
-      <div
-        ref={wrapRef}
-        className={
-          mobileActive
-            ? "fixed left-4 right-4 top-[calc(env(safe-area-inset-top)+12px)] z-[1000]"
-            : `relative w-full ${open ? "z-[1000]" : ""}`
-        }
-        dir="rtl"
-      >
+  const searchShell = (
+    <div
+      ref={wrapRef}
+      className={
+        mobileActive
+          ? "absolute left-4 right-4 top-[calc(env(safe-area-inset-top)+12px)]"
+          : `relative w-full ${open ? "z-[1000]" : ""}`
+      }
+      dir="rtl"
+    >
       <form onSubmit={onSubmit} className="relative">
         <SearchIcon className="pointer-events-none absolute right-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" strokeWidth={2} />
         <input
@@ -306,9 +309,24 @@ export function GlobalSearchBar({
       </form>
 
       {dropdown}
-      </div>
-    </>
+    </div>
   );
+
+  if (mobileActive) {
+    return (
+      <>
+        <div aria-hidden className={variant === "hero" ? "h-14" : "h-12"} />
+        {createPortal(
+          <div dir="rtl" className="fixed inset-0 z-[9999] bg-background">
+            {searchShell}
+          </div>,
+          document.body,
+        )}
+      </>
+    );
+  }
+
+  return searchShell;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
