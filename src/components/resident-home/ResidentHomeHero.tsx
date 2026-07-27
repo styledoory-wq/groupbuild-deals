@@ -43,8 +43,14 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         style={{ paddingTop: "max(env(safe-area-inset-top), 16px)" }}
       >
         <header className="pt-2 pb-5 flex justify-between items-center gap-3">
-          <div className="inline-flex items-center rounded-2xl bg-white/90 backdrop-blur-md border border-white/95 shadow-sm px-2.5 py-1.5">
-            <BrandLogo size="sm" className="h-9" />
+          <div
+            className="inline-flex"
+            style={{
+              filter:
+                "drop-shadow(0 1px 1px rgba(255,255,255,0.65)) drop-shadow(0 3px 6px rgba(0,0,0,0.28)) drop-shadow(0 10px 18px rgba(0,0,0,0.22))",
+            }}
+          >
+            <BrandLogo size="md" className="h-12" />
           </div>
           {signedIn ? (
             <Link
@@ -68,15 +74,30 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         <section className="max-w-[22rem]">
           <h1
             className="text-[30px] font-extrabold text-[#0B1220] leading-[1.12] tracking-tight"
-            style={{ textShadow: "0 1px 0 rgba(255,255,255,0.9), 0 8px 24px rgba(247,245,240,0.85)" }}
+            style={{
+              WebkitTextStroke: "0.65px rgba(255,255,255,0.95)",
+              paintOrder: "stroke fill",
+              textShadow:
+                "0 0 1px #fff, 0 1px 0 #fff, 0 2px 6px rgba(0,0,0,0.22), 0 6px 16px rgba(0,0,0,0.18)",
+            }}
           >
             כוח הקנייה של כולם
             <br />
-            <span className="text-[#0E6B5A]">לחיסכון בבית ובבניין</span>
+            <span
+              className="text-[#0E6B5A]"
+              style={{
+                WebkitTextStroke: "0.65px rgba(255,255,255,0.95)",
+                paintOrder: "stroke fill",
+              }}
+            >
+              לחיסכון בבית ובבניין
+            </span>
           </h1>
           <p
-            className="mt-3 text-[14.5px] text-[#0B1220] font-semibold leading-relaxed"
-            style={{ textShadow: "0 1px 0 rgba(255,255,255,0.95), 0 6px 18px rgba(247,245,240,0.9)" }}
+            className="mt-3 text-[14.5px] text-white font-semibold leading-relaxed"
+            style={{
+              textShadow: "0 1px 2px rgba(0,0,0,0.55), 0 4px 14px rgba(0,0,0,0.4)",
+            }}
           >
             רכישה קבוצתית עם השכנים — ספקים מאומתים ומחירים חכמים.
           </p>
