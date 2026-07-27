@@ -183,39 +183,38 @@ export function CategoryMultiPicker({
       )}
 
       {selectedChips.length > 0 && (
-        <div className="rounded-xl border border-border bg-muted/40 p-2">
-          <div className="flex items-center justify-between mb-1.5 px-1">
-            <span className="text-fs-xs font-bold text-foreground">
-              {selectedChips.length === 1
-                ? "נבחר תחום אחד"
-                : `נבחרו ${selectedChips.length} תחומים`}
+        <div className="rounded-2xl border border-[#E6EAF0] bg-white px-3 py-3 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <span className="text-[13px] font-semibold text-[#0F172A]">
+              {selectedChips.length === 1 ? "תחום אחד נבחר" : `${selectedChips.length} תחומים נבחרו`}
             </span>
             <button
               type="button"
               onClick={() => onChange([])}
-              className="text-fs-xs text-muted-foreground hover:text-foreground"
+              className="shrink-0 text-[12px] font-medium text-[#64748B] hover:text-[#0F172A]"
             >
               נקה הכל
             </button>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {selectedChips.map((c) => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => toggle(c.id)}
-                className="inline-flex items-center gap-1 text-fs-xs px-2.5 py-1 rounded-full bg-[#0E6B5A] text-white"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#D9E5E1] bg-[#F6FAF9] px-2.5 py-1.5 text-[12px] font-medium text-[#0B5F50] transition-colors hover:border-[#0E6B5A]/40 hover:bg-[#EEF7F4]"
                 aria-label={`הסר ${c.name}`}
               >
-                <span>{c.icon} {c.name}</span>
-                <X className="h-3 w-3" />
+                <span className="text-[13px] leading-none opacity-70" aria-hidden>{c.icon}</span>
+                <span>{c.name}</span>
+                <X className="h-3 w-3 text-[#64748B]" />
               </button>
             ))}
           </div>
         </div>
       )}
 
-      <div className="rounded-2xl border border-[#E8ECF1] divide-y divide-[#EEF0F3] max-h-[420px] overflow-y-auto bg-[#FAFBFC]">
+      <div className="rounded-2xl border border-[#E6EAF0] divide-y divide-[#EEF0F3] max-h-[420px] overflow-y-auto bg-white shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
         {visibleDomains.length === 0 && (
           <p className="text-fs-xs text-muted-foreground py-6 text-center">לא נמצאו תחומים תואמים</p>
         )}
@@ -243,33 +242,32 @@ export function CategoryMultiPicker({
 
           return (
             <div key={d.id} className="bg-white">
-              <div className="flex items-center gap-2 px-2 py-2">
+              <div className="flex items-center gap-2.5 px-3 py-2.5">
                 <button
                   type="button"
                   onClick={() => toggleOpen(d.id)}
-                  className="flex-1 flex items-center gap-2 text-right px-2 py-2 rounded-xl hover:bg-[#F4F6FA] transition-colors"
+                  className="flex-1 flex items-center gap-3 text-right px-2 py-2 rounded-xl hover:bg-[#F8FAFC] transition-colors"
                 >
                   <ChevronDown
                     className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`}
                   />
-                  <span className="text-[13px] font-bold text-[#0F172A]">
-                    {d.icon} {d.name}
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[#E6EAF0] bg-[#F8FAFC] text-[15px] leading-none opacity-75" aria-hidden>
+                    {d.icon}
                   </span>
-                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                    selectedCount > 0
-                      ? "bg-[#0E6B5A]/12 text-[#0E6B5A]"
-                      : "bg-[#F4F6FA] text-[#8E95A2]"
-                  }`}>
-                    {selectedCount > 0 ? `${selectedCount}/${totalLeaves}` : `${totalLeaves}`}
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[13px] font-semibold text-[#0F172A]">{d.name}</span>
+                    <span className="block text-[11px] font-medium text-[#64748B]">
+                      {selectedCount > 0 ? `${selectedCount} מתוך ${totalLeaves} נבחרו` : `${totalLeaves} תחומים זמינים`}
+                    </span>
                   </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => toggleDomain(d.id)}
-                  className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-xl border transition-colors ${
+                  className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
                     allSelected
                       ? "bg-[#0E6B5A] text-white border-[#0E6B5A]"
-                      : "bg-white border-[#E8ECF1] text-[#334155] hover:border-[#0E6B5A]/50"
+                      : "bg-white border-[#DDE3EA] text-[#334155] hover:border-[#0E6B5A]/45 hover:bg-[#F8FAFC]"
                   }`}
                   aria-label={allSelected ? "בטל בחירה של כל התחום" : "בחר את כל התחום"}
                 >
@@ -282,9 +280,9 @@ export function CategoryMultiPicker({
               </div>
 
               {open && (
-                <div className="px-3 pb-3 space-y-3">
+                <div className="px-4 pb-4 space-y-4">
                   {showFlatLeaves ? (
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-2">
                       {leaves.map((c) => (
                         <LeafChip key={c.id} c={c} active={selectedSet.has(c.id)} onClick={() => toggle(c.id)} />
                       ))}
@@ -292,10 +290,13 @@ export function CategoryMultiPicker({
                   ) : (
                     groupEntries.map(([gid, g]) => (
                       <div key={gid}>
-                        <div className="text-[11px] font-bold text-[#8E95A2] mb-1.5 px-1 tracking-wide">
-                          {g.icon} {g.name}
+                        <div className="mb-2 flex items-center gap-2 px-1 text-[11px] font-semibold text-[#64748B]">
+                          <span className="grid h-5 w-5 place-items-center rounded-md bg-[#F1F5F9] text-[12px] leading-none opacity-70" aria-hidden>
+                            {g.icon}
+                          </span>
+                          <span>{g.name}</span>
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-2">
                           {g.items.map((c) => (
                             <LeafChip key={c.id} c={c} active={selectedSet.has(c.id)} onClick={() => toggle(c.id)} />
                           ))}
@@ -319,15 +320,22 @@ function LeafChip({ c, active, onClick }: { c: Category; active: boolean; onClic
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`inline-flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-xl border transition-smooth text-right ${
+      className={`inline-flex items-center gap-2 rounded-lg border px-3.5 py-2.5 text-right text-[13px] font-medium leading-snug transition-smooth ${
         active
-          ? "bg-[#0E6B5A] text-white border-[#0E6B5A] font-bold shadow-[0_2px_8px_-4px_rgba(14,107,90,0.55)]"
-          : "bg-white border-[#E8ECF1] text-[#1F2937] hover:border-[#0E6B5A]/45 hover:bg-[#F3FAF8]"
+          ? "bg-[#F1FAF7] text-[#0B5F50] border-[#BFDCD4] shadow-[0_1px_2px_rgba(14,107,90,0.08)]"
+          : "bg-white border-[#E2E8F0] text-[#1F2937] hover:border-[#0E6B5A]/35 hover:bg-[#F8FCFB]"
       }`}
     >
-      <span className="text-[14px] leading-none" aria-hidden>{c.icon}</span>
+      <span
+        className={`grid h-5 w-5 shrink-0 place-items-center rounded-md text-[13px] leading-none ${
+          active ? "bg-white/70 opacity-80" : "bg-[#F1F5F9] opacity-65"
+        }`}
+        aria-hidden
+      >
+        {c.icon}
+      </span>
       <span>{c.name}</span>
-      {active && <Check className="h-3 w-3 opacity-90 shrink-0" />}
+      {active && <Check className="h-3.5 w-3.5 shrink-0 text-[#0E6B5A]" />}
     </button>
   );
 }
