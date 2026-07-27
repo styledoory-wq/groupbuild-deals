@@ -429,9 +429,16 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
             )}
           </header>
 
-          {/* Suppliers list — Style A floating cards */}
+          {/* Suppliers list — only at leaf categories (no children) */}
           <main className="mt-4 space-y-3">
-            {loading ? (
+            {childCategories.length > 0 ? (
+              <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-6 text-center">
+                <p className="text-sm font-bold text-slate-900">בחרו תחום משנה</p>
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed max-w-[260px] mx-auto">
+                  הספקים יוצגו רק לאחר בחירת קטגוריה ספציפית.
+                </p>
+              </div>
+            ) : loading ? (
               <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-10 text-center">
                 <div
                   className="h-8 w-8 rounded-full border-2 border-[rgba(14,107,90,0.2)] border-t-[#0E6B5A] animate-spin mx-auto mb-3"
