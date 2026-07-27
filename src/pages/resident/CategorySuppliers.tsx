@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronDown, MapPin, Sparkles, UserPlus, Wrench, Package } from "lucide-react";
+import { ArrowRight, ChevronDown, MapPin, UserPlus } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
