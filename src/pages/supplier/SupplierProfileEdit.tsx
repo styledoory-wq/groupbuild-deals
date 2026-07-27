@@ -2,9 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import {
-  Save, X, Briefcase, Phone, Mail, Tag, User as UserIcon, FileText,
-  Image as ImageIcon, Trash2, Plus, Link as LinkIcon, Wallet, Smartphone,
-  Building2, MapPin, Sparkles,
+  Save, X, Plus, Trash2,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState } from "@/components/ds";
@@ -76,6 +74,7 @@ export default function SupplierProfileEdit() {
   const [bankBranch, setBankBranch] = useState("");
   const [bankAccountNumber, setBankAccountNumber] = useState("");
   const [paymentInstructionsNote, setPaymentInstructionsNote] = useState("");
+  const [activeSection, setActiveSection] = useState<"details" | "categories" | "areas" | "branding" | "payment">("details");
 
   // Only leaf categories are selectable in the hierarchical picker.
   // Drop legacy parent-ids so the UI and saved payload stay consistent.
@@ -322,237 +321,240 @@ export default function SupplierProfileEdit() {
 
   return (
     <MobileShell>
-      <BackHeader title="פרופיל העסק" subtitle="ניהול מקצועי של הפרטים שדיירים רואים" />
+      <BackHeader title="פרופיל העסק" subtitle="הפרטים שדיירים רואים עליכם" />
 
-      <form onSubmit={handleSave} className="px-5 space-y-4 pb-28" dir="rtl">
-        {/* Business details */}
-        <Section
-          title="פרטי העסק"
-          subtitle="השם והתיאור שיופיעו בכרטיס שלכם"
-          icon={Briefcase}
-        >
-          <Field label="שם העסק" icon={Briefcase}>
-            <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} required className="h-11 rounded-xl" />
-          </Field>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs font-bold flex items-center gap-1.5">
-              <Tag className="h-3.5 w-3.5 text-[#0E6B5A]" /> סוג הספק
-            </Label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { value: "service" as const, label: "בעל מקצוע", sub: "שירות / קבלן / מתקין", checked: offersServices, set: setOffersServices },
-                { value: "product" as const, label: "ספק מוצרים", sub: "חנות / יבואן / משווק", checked: offersProducts, set: setOffersProducts },
-              ].map((opt) => (
+      <form onSubmit={handleSave} className="pb-28" dir="rtl">
+        {/* Section switcher — keeps the form comfortable */}
+        <div className="px-4 sticky top-0 z-30 bg-[#F7F5F0]/95 backdrop-blur pt-1 pb-3">
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            {([
+              { k: "details" as const, label: "פרטים" },
+              { k: "categories" as const, label: "תחומים", badge: selectableCategories.length || undefined },
+              { k: "areas" as const, label: "אזורים" },
+              { k: "branding" as const, label: "מיתוג" },
+              { k: "payment" as const, label: "תשלום" },
+            ]).map((t) => {
+              const on = activeSection === t.k;
+              return (
                 <button
-                  key={opt.value}
+                  key={t.k}
                   type="button"
-                  onClick={() => opt.set(!opt.checked)}
-                  aria-pressed={opt.checked}
+                  onClick={() => setActiveSection(t.k)}
                   className={
-                    "rounded-[16px] p-3 text-right transition-all relative border " +
-                    (opt.checked
-                      ? "bg-[#0E6B5A]/8 border-[#0E6B5A]/35 text-[#1F2937] ring-1 ring-[#0E6B5A]/20"
-                      : "bg-white border-[#EEF0F3] text-[#1F2937]")
+                    "shrink-0 h-9 px-3.5 rounded-full text-[13px] font-semibold inline-flex items-center gap-1.5 transition-colors " +
+                    (on
+                      ? "bg-[#0E6B5A] text-white shadow-[0_4px_12px_-6px_rgba(14,107,90,0.55)]"
+                      : "bg-white text-[#475569] border border-[#EEF0F3]")
                   }
                 >
-                  <div className={"text-sm font-bold " + (opt.checked ? "text-[#0E6B5A]" : "text-foreground")}>{opt.label}</div>
-                  <div className="text-fs-xs text-muted-foreground mt-0.5 leading-tight">{opt.sub}</div>
-                  <span className={"absolute top-2 left-2 h-4 w-4 rounded-md flex items-center justify-center text-fs-xs " + (opt.checked ? "bg-[#0E6B5A] text-white" : "bg-[#F4F6FA] text-transparent")}>
-                    ✓
-                  </span>
+                  {t.label}
+                  {t.badge != null && (
+                    <span className={"text-[10px] font-bold px-1.5 py-0.5 rounded-full " + (on ? "bg-white/20" : "bg-[#F1F5F9] text-[#64748B]")}>
+                      {t.badge}
+                    </span>
+                  )}
                 </button>
-              ))}
-            </div>
-            <p className="text-fs-xs text-muted-foreground">
-              {offersServices && offersProducts
-                ? "ספק 'גם וגם' — תופיע בשני הסינונים"
-                : !offersServices && !offersProducts
-                  ? "בחרו לפחות אפשרות אחת כדי להופיע לדיירים."
-                  : "ניתן לסמן את שתי האפשרויות אם אתם גם נותני שירות וגם מוכרי מוצרים."}
-            </p>
+              );
+            })}
           </div>
+        </div>
 
-          <Field label="שם איש קשר" icon={UserIcon}>
-            <Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={60} className="h-11 rounded-xl" />
-          </Field>
-          <Field label="טלפון" icon={Phone}>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} dir="ltr" className="h-11 rounded-xl" />
-          </Field>
-          <Field label="אימייל" icon={Mail}>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-11 rounded-xl" />
-            {email.trim().toLowerCase() !== originalEmail.toLowerCase() && (
-              <p className="text-fs-xs text-[#0A5446] mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
-            )}
-          </Field>
-          <Field label="תיאור קצר (יוצג בכרטיס)" icon={FileText}>
-            <Input value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} maxLength={140} className="h-11 rounded-xl" placeholder="עד 140 תווים" />
-          </Field>
-          <Field label="תיאור עסק מלא" icon={FileText}>
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={4} className="rounded-xl" />
-          </Field>
-          <div className="flex items-center justify-between py-1 pt-2 border-t border-border">
-            <div>
-              <div className="text-sm font-semibold">סטטוס פעילות</div>
-              <p className="text-fs-xs text-muted-foreground mt-0.5">כבוי — הפרופיל לא יוצג לדיירים</p>
-            </div>
-            <Switch checked={isActive} onCheckedChange={setIsActive} />
-          </div>
-        </Section>
+        <div className="px-5 space-y-4">
+          {activeSection === "details" && (
+            <Section title="פרטי העסק" subtitle="שם, קשר ותיאור שיופיעו בכרטיס">
+              <Field label="שם העסק">
+                <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} required className="h-11 rounded-xl" />
+              </Field>
 
-        {/* Service categories — hierarchical picker */}
-        <Section
-          title="תחומי פעילות"
-          subtitle="חפשו או פתחו קטגוריה ובחרו את התחומים שאתם מספקים"
-          icon={Tag}
-        >
-          <div className="rounded-2xl bg-[#0E6B5A]/8 border border-[#0E6B5A]/15 px-3.5 py-3 flex gap-2.5">
-            <Sparkles className="h-4 w-4 text-[#0E6B5A] shrink-0 mt-0.5" />
-            <p className="text-[13px] text-[#0B1220] leading-relaxed">
-              <span className="font-bold">טיפ: </span>
-              סמנו את כל התחומים שאתם עושים בפועל — כך דיירים רלוונטיים ימצאו אתכם.
-            </p>
-          </div>
-          <CategoryMultiPicker
-            categories={categories}
-            value={selectableCategories}
-            onChange={setSelectedCategories}
-            placeholder="חפשו תחום — למשל נגרות, מיזוג, צבע…"
-          />
-        </Section>
-
-        {/* Service areas */}
-        <Section
-          title="אזורי שירות"
-          subtitle="היכן אתם באמת מגיעים — ערים, אזורים או כל הארץ"
-          icon={MapPin}
-        >
-          <div className="rounded-2xl bg-[#F4F6FA] border border-[#E5E9EC] px-3.5 py-3 flex gap-2.5">
-            <MapPin className="h-4 w-4 text-[#0E6B5A] shrink-0 mt-0.5" />
-            <p className="text-[13px] text-[#5B6472] leading-relaxed">
-              בחרו אזורים מדויקים כדי לקבל פניות מהמקומות שאתם משרתים.
-            </p>
-          </div>
-          <AreasCombobox value={areas} onChange={setAreas} />
-        </Section>
-
-        {/* Branding & Media */}
-        <Section title="מיתוג ומדיה" subtitle="לוגו, קישורים וגלריה שמחזקים את האמון" icon={ImageIcon}>
-          <div className="flex items-center gap-4">
-            <SupplierLogo name={businessName} logoUrl={logoUrl} size="lg" />
-            <div className="flex-1 space-y-2">
-              <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleLogoUpload} />
-              <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo} className="h-9 rounded-xl text-xs w-full">
-                {uploadingLogo ? "מעלה..." : logoUrl ? "החלפת לוגו" : "העלאת לוגו"}
-              </Button>
-              {logoUrl && (
-                <Button type="button" variant="ghost" onClick={() => setLogoUrl(null)} className="h-8 rounded-xl text-xs w-full text-destructive">
-                  הסרת לוגו
-                </Button>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2 pt-2 border-t border-border">
-            <Label className="text-xs font-bold flex items-center gap-1.5">
-              <LinkIcon className="h-3.5 w-3.5 text-[#0E6B5A]" /> קישורים
-            </Label>
-            <Input dir="ltr" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://example.com (אתר)" className="h-10 rounded-xl text-sm" maxLength={500} />
-            <Input dir="ltr" value={whatsappUrl} onChange={(e) => setWhatsappUrl(e.target.value)} placeholder="https://wa.me/972500000000" className="h-10 rounded-xl text-sm" maxLength={500} />
-            <Input dir="ltr" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/..." className="h-10 rounded-xl text-sm" maxLength={500} />
-            <Input dir="ltr" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/..." className="h-10 rounded-xl text-sm" maxLength={500} />
-          </div>
-
-          <div className="space-y-2 pt-2 border-t border-border">
-            <Label className="text-xs font-bold flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5 text-[#0E6B5A]" /> קטלוגים
-            </Label>
-            {supplierId ? (
-              <SupplierCatalogsManager supplierId={supplierId} />
-            ) : (
-              <p className="text-fs-xs text-muted-foreground">שמור את הפרופיל כדי להוסיף קטלוגים.</p>
-            )}
-          </div>
-
-          <div className="space-y-2 pt-2 border-t border-border">
-            <Label className="text-xs font-bold flex items-center gap-1.5">
-              <ImageIcon className="h-3.5 w-3.5 text-[#0E6B5A]" /> גלריית עבודות
-              <span className="text-[10px] font-normal text-muted-foreground mr-auto">{gallery.length}/{MAX_GALLERY_IMAGES}</span>
-            </Label>
-            <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleGalleryUpload} />
-            <Button type="button" variant="outline" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery || gallery.length >= MAX_GALLERY_IMAGES} className="h-9 rounded-xl text-xs w-full">
-              <Plus className="h-3.5 w-3.5 ml-1" /> {uploadingGallery ? "מעלה..." : gallery.length >= MAX_GALLERY_IMAGES ? "הגעת למקסימום" : "הוספת תמונות"}
-            </Button>
-
-            {gallery.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {gallery.map((g, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-[16px] overflow-hidden shadow-[0_2px_10px_-4px_rgba(10,31,61,0.10)] group">
-                    <img src={g.image_url} alt="" className="h-full w-full object-cover" />
+              <div className="space-y-1.5">
+                <Label className="text-[12px] font-semibold text-[#334155]">סוג הספק</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: "service" as const, label: "בעל מקצוע", sub: "שירות / קבלן", checked: offersServices, set: setOffersServices },
+                    { value: "product" as const, label: "ספק מוצרים", sub: "חנות / יבואן", checked: offersProducts, set: setOffersProducts },
+                  ].map((opt) => (
                     <button
+                      key={opt.value}
                       type="button"
-                      onClick={() => removeGalleryItem(idx)}
-                      className="absolute top-1 left-1 h-7 w-7 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
-                      aria-label="מחיקה"
+                      onClick={() => opt.set(!opt.checked)}
+                      aria-pressed={opt.checked}
+                      className={
+                        "rounded-2xl p-3.5 text-right transition-all relative border " +
+                        (opt.checked
+                          ? "bg-[#F1FAF7] border-[#0E6B5A]/40 text-[#0F172A]"
+                          : "bg-white border-[#EEF0F3] text-[#1F2937]")
+                      }
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <div className={"text-[14px] font-bold " + (opt.checked ? "text-[#0E6B5A]" : "text-foreground")}>{opt.label}</div>
+                      <div className="text-[11px] text-[#8E95A2] mt-0.5 leading-tight">{opt.sub}</div>
+                      <span className={"absolute top-2.5 left-2.5 h-5 w-5 rounded-md flex items-center justify-center text-[11px] font-bold " + (opt.checked ? "bg-[#0E6B5A] text-white" : "bg-[#F4F6FA] text-transparent")}>
+                        ✓
+                      </span>
                     </button>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                {!offersServices && !offersProducts && (
+                  <p className="text-[12px] text-[#B45309]">בחרו לפחות אפשרות אחת כדי להופיע לדיירים.</p>
+                )}
               </div>
-            )}
-          </div>
-        </Section>
 
-        {/* Payment details */}
-        <Section
-          title="פרטי תשלום"
-          subtitle="ביט או העברה בנקאית — יוצג לדיירים לפיקדון"
-          icon={Wallet}
-        >
-          <Field label="טלפון לביט" icon={Smartphone}>
-            <Input dir="ltr" value={bitPhone} onChange={(e) => setBitPhone(e.target.value)} maxLength={20} placeholder="050-0000000" className="h-11 rounded-xl" />
-          </Field>
+              <div className="grid grid-cols-1 gap-3">
+                <Field label="שם איש קשר">
+                  <Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={60} className="h-11 rounded-xl" />
+                </Field>
+                <Field label="טלפון">
+                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} dir="ltr" className="h-11 rounded-xl" />
+                </Field>
+                <Field label="אימייל">
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-11 rounded-xl" />
+                  {email.trim().toLowerCase() !== originalEmail.toLowerCase() && (
+                    <p className="text-[12px] text-[#0A5446] mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
+                  )}
+                </Field>
+                <Field label="תיאור קצר לכרטיס">
+                  <Input value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} maxLength={140} className="h-11 rounded-xl" placeholder="משפט אחד שמושך דיירים (עד 140 תווים)" />
+                </Field>
+                <Field label="תיאור עסק מלא">
+                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={4} className="rounded-xl" placeholder="ספרו על הניסיון, סוגי עבודות, ומה מייחד אתכם" />
+                </Field>
+              </div>
 
-          <div className="pt-2 border-t border-border space-y-3">
-            <Label className="text-xs font-bold flex items-center gap-1.5">
-              <Building2 className="h-3.5 w-3.5 text-[#0E6B5A]" /> חשבון בנק
-            </Label>
-            <Field label="שם בעל החשבון" icon={UserIcon}>
-              <Input value={bankAccountHolder} onChange={(e) => setBankAccountHolder(e.target.value)} maxLength={80} className="h-11 rounded-xl" />
-            </Field>
-            <div className="grid grid-cols-2 gap-2">
-              <Field label="בנק" icon={Building2}>
-                <Input value={bankName} onChange={(e) => setBankName(e.target.value)} maxLength={40} className="h-11 rounded-xl" />
+              <div className="flex items-center justify-between py-2 px-3 rounded-2xl bg-[#F8FAFC] border border-[#EEF0F3]">
+                <div>
+                  <div className="text-[14px] font-semibold text-[#0F172A]">פרופיל פעיל</div>
+                  <p className="text-[12px] text-[#8E95A2] mt-0.5">כבוי — לא יוצג לדיירים</p>
+                </div>
+                <Switch checked={isActive} onCheckedChange={setIsActive} />
+              </div>
+            </Section>
+          )}
+
+          {activeSection === "categories" && (
+            <Section title="תחומי פעילות" subtitle="בחרו רק את מה שאתם באמת מספקים">
+              <CategoryMultiPicker
+                categories={categories}
+                value={selectableCategories}
+                onChange={setSelectedCategories}
+                placeholder="חיפוש תחום…"
+              />
+            </Section>
+          )}
+
+          {activeSection === "areas" && (
+            <Section title="אזורי שירות" subtitle="ערים ואזורים שבהם אתם מגיעים">
+              <AreasCombobox value={areas} onChange={setAreas} />
+            </Section>
+          )}
+
+          {activeSection === "branding" && (
+            <Section title="מיתוג ומדיה" subtitle="לוגו, קישורים וגלריה">
+              <div className="flex items-center gap-4">
+                <SupplierLogo name={businessName} logoUrl={logoUrl} size="lg" />
+                <div className="flex-1 space-y-2">
+                  <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleLogoUpload} />
+                  <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo} className="h-10 rounded-xl text-[13px] w-full font-semibold">
+                    {uploadingLogo ? "מעלה..." : logoUrl ? "החלפת לוגו" : "העלאת לוגו"}
+                  </Button>
+                  {logoUrl && (
+                    <Button type="button" variant="ghost" onClick={() => setLogoUrl(null)} className="h-8 rounded-xl text-[12px] w-full text-destructive">
+                      הסרת לוגו
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-3 border-t border-[#F1F5F9]">
+                <Label className="text-[12px] font-semibold text-[#334155]">קישורים</Label>
+                <Input dir="ltr" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="אתר — https://..." className="h-10 rounded-xl text-sm" maxLength={500} />
+                <Input dir="ltr" value={whatsappUrl} onChange={(e) => setWhatsappUrl(e.target.value)} placeholder="WhatsApp — https://wa.me/..." className="h-10 rounded-xl text-sm" maxLength={500} />
+                <Input dir="ltr" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="Instagram" className="h-10 rounded-xl text-sm" maxLength={500} />
+                <Input dir="ltr" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="Facebook" className="h-10 rounded-xl text-sm" maxLength={500} />
+              </div>
+
+              <div className="space-y-2 pt-3 border-t border-[#F1F5F9]">
+                <Label className="text-[12px] font-semibold text-[#334155]">קטלוגים</Label>
+                {supplierId ? (
+                  <SupplierCatalogsManager supplierId={supplierId} />
+                ) : (
+                  <p className="text-[12px] text-[#8E95A2]">שמרו את הפרופיל כדי להוסיף קטלוגים.</p>
+                )}
+              </div>
+
+              <div className="space-y-2 pt-3 border-t border-[#F1F5F9]">
+                <div className="flex items-center justify-between">
+                  <Label className="text-[12px] font-semibold text-[#334155]">גלריית עבודות</Label>
+                  <span className="text-[11px] text-[#8E95A2]">{gallery.length}/{MAX_GALLERY_IMAGES}</span>
+                </div>
+                <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleGalleryUpload} />
+                <Button type="button" variant="outline" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery || gallery.length >= MAX_GALLERY_IMAGES} className="h-10 rounded-xl text-[13px] w-full font-semibold">
+                  <Plus className="h-3.5 w-3.5 ml-1" /> {uploadingGallery ? "מעלה..." : gallery.length >= MAX_GALLERY_IMAGES ? "הגעתם למקסימום" : "הוספת תמונות"}
+                </Button>
+                {gallery.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mt-1">
+                    {gallery.map((g, idx) => (
+                      <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group border border-[#EEF0F3]">
+                        <img src={g.image_url} alt="" className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeGalleryItem(idx)}
+                          className="absolute top-1.5 left-1.5 h-7 w-7 rounded-full bg-black/55 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                          aria-label="מחיקה"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Section>
+          )}
+
+          {activeSection === "payment" && (
+            <Section title="פרטי תשלום" subtitle="יוצגו לדיירים להעברת פיקדון">
+              <Field label="טלפון לביט">
+                <Input dir="ltr" value={bitPhone} onChange={(e) => setBitPhone(e.target.value)} maxLength={20} placeholder="050-0000000" className="h-11 rounded-xl" />
               </Field>
-              <Field label="סניף" icon={Building2}>
-                <Input dir="ltr" value={bankBranch} onChange={(e) => setBankBranch(e.target.value)} maxLength={10} className="h-11 rounded-xl" />
+
+              <div className="pt-1 space-y-3">
+                <p className="text-[12px] font-semibold text-[#334155]">חשבון בנק</p>
+                <Field label="שם בעל החשבון">
+                  <Input value={bankAccountHolder} onChange={(e) => setBankAccountHolder(e.target.value)} maxLength={80} className="h-11 rounded-xl" />
+                </Field>
+                <div className="grid grid-cols-2 gap-2">
+                  <Field label="בנק">
+                    <Input value={bankName} onChange={(e) => setBankName(e.target.value)} maxLength={40} className="h-11 rounded-xl" />
+                  </Field>
+                  <Field label="סניף">
+                    <Input dir="ltr" value={bankBranch} onChange={(e) => setBankBranch(e.target.value)} maxLength={10} className="h-11 rounded-xl" />
+                  </Field>
+                </div>
+                <Field label="מספר חשבון">
+                  <Input dir="ltr" value={bankAccountNumber} onChange={(e) => setBankAccountNumber(e.target.value)} maxLength={20} className="h-11 rounded-xl" />
+                </Field>
+              </div>
+
+              <Field label="הערות לדייר (אופציונלי)">
+                <Textarea
+                  value={paymentInstructionsNote}
+                  onChange={(e) => setPaymentInstructionsNote(e.target.value)}
+                  maxLength={400}
+                  rows={3}
+                  className="rounded-xl"
+                  placeholder="לדוגמה: נא לציין בהעברה את שם הפרויקט"
+                />
               </Field>
-            </div>
-            <Field label="מספר חשבון" icon={Building2}>
-              <Input dir="ltr" value={bankAccountNumber} onChange={(e) => setBankAccountNumber(e.target.value)} maxLength={20} className="h-11 rounded-xl" />
-            </Field>
-          </div>
+            </Section>
+          )}
 
-          <Field label="הערות תשלום לדייר (אופציונלי)" icon={FileText}>
-            <Textarea
-              value={paymentInstructionsNote}
-              onChange={(e) => setPaymentInstructionsNote(e.target.value)}
-              maxLength={400}
-              rows={3}
-              className="rounded-xl"
-              placeholder="לדוגמה: נא לציין בהעברה את שם הפרויקט"
-            />
-          </Field>
-        </Section>
-
-        <button
-          type="button"
-          onClick={() => navigate("/supplier/delete-account")}
-          className="w-full h-[44px] rounded-[14px] flex items-center justify-center gap-2 text-[#DC2626] text-[13px] font-semibold"
-        >
-          מחיקת חשבון
-        </button>
+          <button
+            type="button"
+            onClick={() => navigate("/supplier/delete-account")}
+            className="w-full h-11 rounded-2xl flex items-center justify-center text-[#DC2626] text-[13px] font-semibold"
+          >
+            מחיקת חשבון
+          </button>
+        </div>
 
         {/* Sticky save bar */}
         <div className="fixed bottom-0 inset-x-0 z-40 pointer-events-none">
@@ -579,36 +581,27 @@ export default function SupplierProfileEdit() {
 function Section({
   title,
   subtitle,
-  icon: Icon,
   children,
 }: {
   title: string;
   subtitle: string;
-  icon: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-[#EEF0F3] bg-white p-4 space-y-3 shadow-[0_1px_2px_rgba(11,18,32,0.04),0_8px_24px_-12px_rgba(11,18,32,0.08)]">
-      <header className="flex items-start gap-3 pb-1">
-        <div className="h-10 w-10 rounded-2xl bg-[#0E6B5A]/10 flex items-center justify-center shrink-0">
-          <Icon className="h-[18px] w-[18px] text-[#0E6B5A]" strokeWidth={2.2} />
-        </div>
-        <div className="min-w-0 pt-0.5">
-          <h3 className="text-[15px] font-bold text-[#0F172A] leading-tight">{title}</h3>
-          <p className="text-[12px] text-[#8E95A2] mt-0.5 leading-snug">{subtitle}</p>
-        </div>
+    <section className="rounded-3xl border border-[#EEF0F3] bg-white p-5 space-y-4 shadow-[0_1px_2px_rgba(11,18,32,0.04),0_8px_24px_-12px_rgba(11,18,32,0.06)]">
+      <header>
+        <h3 className="text-[16px] font-bold text-[#0F172A] leading-tight">{title}</h3>
+        <p className="text-[13px] text-[#8E95A2] mt-1 leading-snug">{subtitle}</p>
       </header>
       {children}
     </section>
   );
 }
 
-function Field({ label, icon: Icon, children }: { label: string; icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <Label className="text-xs font-bold flex items-center gap-1.5 mb-1.5">
-        <Icon className="h-3.5 w-3.5 text-[#0E6B5A]" /> {label}
-      </Label>
+      <Label className="text-[12px] font-semibold text-[#334155] mb-1.5 block">{label}</Label>
       {children}
     </div>
   );

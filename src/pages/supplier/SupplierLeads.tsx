@@ -107,21 +107,21 @@ function isHot(createdAt: string, stage: LeadStage): boolean {
 
 function StageChip({ stage, hot }: { stage: LeadStage; hot: boolean }) {
   const cfg: Record<LeadStage, { bg: string; fg: string; label: string }> = {
-    new:         { bg: "#ECFDF5", fg: "#059669", label: "חדש" },
-    in_progress: { bg: "#EFF6FF", fg: "#1D4ED8", label: "בטיפול" },
-    offer_sent:  { bg: "#F5F3FF", fg: "#6D28D9", label: "הצעה נשלחה" },
-    closed:      { bg: "#F1F5F9", fg: "#334155", label: "נסגר" },
+    new:         { bg: "#E8F5F1", fg: "#0E6B5A", label: "חדש" },
+    in_progress: { bg: "#F1F5F9", fg: "#334155", label: "בטיפול" },
+    offer_sent:  { bg: "#EEF2FF", fg: "#4338CA", label: "הצעה" },
+    closed:      { bg: "#F8FAFC", fg: "#64748B", label: "נסגר" },
   };
   if (hot) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 h-5 rounded-full text-[10px] font-extrabold bg-[#FFF1ED] text-[#C2410C] border border-[#FED7AA]">
+      <span className="inline-flex items-center gap-1 px-2 h-5 rounded-full text-[10px] font-bold bg-[#FFF7ED] text-[#C2410C] border border-[#FED7AA]">
         <Flame className="h-3 w-3" /> חם
       </span>
     );
   }
   const c = cfg[stage];
   return (
-    <span className="inline-flex items-center gap-1 px-2 h-5 rounded-full text-[10px] font-extrabold border" style={{ background: c.bg, color: c.fg, borderColor: `${c.fg}33` }}>
+    <span className="inline-flex items-center gap-1 px-2 h-5 rounded-full text-[10px] font-bold border" style={{ background: c.bg, color: c.fg, borderColor: `${c.fg}22` }}>
       {c.label}
     </span>
   );
@@ -438,8 +438,8 @@ export default function SupplierLeads() {
             <Trash2 className="h-4 w-4" /> מחק
           </button>
         )}
-        <div
-          className="bg-white rounded-2xl border border-[#EEF0F3] p-3 transition-transform relative z-10"
+          <div
+          className="bg-white rounded-2xl border border-[#EEF0F3] p-3.5 transition-transform relative z-10 shadow-[0_1px_2px_rgba(15,23,42,0.03)]"
           style={isSwiped ? { transform: "translateX(80px)" } : undefined}
           onTouchStart={trashed ? undefined : onTouchStart}
           onTouchEnd={trashed ? undefined : makeSwipeEnd(i.id)}
@@ -520,35 +520,35 @@ export default function SupplierLeads() {
             </div>
           ) : (
             /* Quick action bar */
-            <div className="mt-2.5 flex items-center gap-1">
+            <div className="mt-3 flex items-center gap-1.5">
               {phone ? (
                 <a href={`tel:${phone}`} aria-label="חיוג"
-                  className="flex-1 h-9 rounded-lg bg-[#0E6B5A] text-white text-[11px] font-extrabold inline-flex items-center justify-center gap-1">
+                  className="flex-1 h-10 rounded-xl bg-[#0E6B5A] text-white text-[12px] font-bold inline-flex items-center justify-center gap-1.5">
                   <Phone className="h-3.5 w-3.5" /> חיוג
                 </a>
-              ) : <div className="flex-1 h-9 rounded-lg bg-muted/40 text-muted-foreground text-[11px] inline-flex items-center justify-center">אין טלפון</div>}
+              ) : <div className="flex-1 h-10 rounded-xl bg-[#F1F5F9] text-[#94A3B8] text-[12px] inline-flex items-center justify-center">אין טלפון</div>}
               {wa && (
                 <a href={wa} target="_blank" rel="noreferrer" aria-label="וואטסאפ"
-                  className="flex-1 h-9 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] text-[11px] font-extrabold inline-flex items-center justify-center gap-1">
+                  className="flex-1 h-10 rounded-xl bg-[#F0FDF4] text-[#15803D] border border-[#BBF7D0] text-[12px] font-bold inline-flex items-center justify-center gap-1.5">
                   <MessageCircle className="h-3.5 w-3.5" /> וואטסאפ
                 </a>
               )}
               {i.lead_status !== "approved" && (
                 <button onClick={() => updateLeadStatus(i.id, "approved")} disabled={statusBusy === i.id}
                   aria-label="שלח הצעה"
-                  className="flex-1 h-9 rounded-lg bg-[#EEF2FF] text-[#3730A3] border border-[#C7D2FE] text-[11px] font-extrabold inline-flex items-center justify-center gap-1 disabled:opacity-50">
+                  className="flex-1 h-10 rounded-xl bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0] text-[12px] font-bold inline-flex items-center justify-center gap-1.5 disabled:opacity-50">
                   <Send className="h-3.5 w-3.5" /> הצעה
                 </button>
               )}
               <button onClick={() => setNoteEdit({ id: i.id, value: i.supplier_notes ?? "" })}
                 aria-label="הערה" title="הערה פנימית"
-                className="h-9 w-9 rounded-lg bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A] inline-flex items-center justify-center shrink-0">
+                className="h-10 w-10 rounded-xl bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A] inline-flex items-center justify-center shrink-0">
                 <StickyNote className="h-4 w-4" />
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button aria-label="עוד"
-                    className="h-9 w-9 rounded-lg bg-muted text-foreground inline-flex items-center justify-center shrink-0">
+                    className="h-10 w-10 rounded-xl bg-[#F8FAFC] text-[#64748B] border border-[#EEF0F3] inline-flex items-center justify-center shrink-0">
                     ⋯
                   </button>
                 </DropdownMenuTrigger>
@@ -586,9 +586,9 @@ export default function SupplierLeads() {
 
   return (
     <MobileShell>
-      <ScreenHeader title="לידים" subtitle="ניהול לקוחות והמרות" />
+      <ScreenHeader title="לידים" subtitle="פניות מדיירים — טיפול והמרה" />
 
-      <div className="px-4 -mt-4 relative z-10 pb-24 space-y-2.5">
+      <div className="px-4 -mt-2 relative z-10 pb-24 space-y-3">
         {loading ? (
           <LoadingState />
         ) : error ? (
@@ -597,37 +597,59 @@ export default function SupplierLeads() {
           <>
             <SupplierPendingBanner status={approvalStatus} />
 
-            {/* Compact stats strip */}
-            <div className="flex items-center justify-between gap-2 px-1 text-[11px] font-bold">
-              <span><span className="text-[#059669]">{stats.new}</span> <span className="text-muted-foreground">חדשים</span></span>
-              <span className="text-muted-foreground/40">·</span>
-              <span><span className="text-[#1D4ED8]">{stats.in_progress}</span> <span className="text-muted-foreground">בטיפול</span></span>
-              <span className="text-muted-foreground/40">·</span>
-              <span><span className="text-[#6D28D9]">{stats.offer_sent}</span> <span className="text-muted-foreground">הצעה</span></span>
-              <span className="text-muted-foreground/40">·</span>
-              <span><span className="text-[#334155]">{stats.closed}</span> <span className="text-muted-foreground">נסגרו</span></span>
+            {/* Stage filters — large, comfortable, no duplicate stats strip */}
+            <div className="grid grid-cols-5 gap-1.5">
+              {([
+                { k: "all" as TabKey, label: "הכל", count: stats.total },
+                { k: "new" as TabKey, label: "חדשים", count: stats.new },
+                { k: "in_progress" as TabKey, label: "בטיפול", count: stats.in_progress },
+                { k: "offer_sent" as TabKey, label: "הצעה", count: stats.offer_sent },
+                { k: "closed" as TabKey, label: "נסגרו", count: stats.closed },
+              ]).map((t) => {
+                const active = tab === t.k;
+                return (
+                  <button
+                    key={t.k}
+                    type="button"
+                    onClick={() => { setTab(t.k); setShowTrash(false); }}
+                    className={
+                      "rounded-2xl border px-1 py-2.5 text-center transition-colors " +
+                      (active
+                        ? "bg-[#0E6B5A] border-[#0E6B5A] text-white shadow-[0_6px_16px_-10px_rgba(14,107,90,0.7)]"
+                        : "bg-white border-[#EEF0F3] text-[#475569]")
+                    }
+                  >
+                    <div className={"text-[15px] font-bold tabular-nums leading-none " + (active ? "text-white" : "text-[#0F172A]")}>
+                      {t.count}
+                    </div>
+                    <div className={"text-[10px] font-semibold mt-1 truncate " + (active ? "text-white/85" : "text-[#8E95A2]")}>
+                      {t.label}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Search + Sort */}
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="חיפוש לפי שם, טלפון, פרויקט או הצעה"
-                  className="w-full h-10 rounded-xl bg-white border border-[#EEF0F3] pr-8 pl-3 text-[12px] font-medium text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-[#0E6B5A]"
+                  placeholder="חיפוש שם, טלפון או הצעה"
+                  className="w-full h-11 rounded-2xl bg-white border border-[#EEF0F3] pr-9 pl-3 text-[13px] font-medium text-foreground placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0E6B5A]"
                 />
                 {query && (
                   <button onClick={() => setQuery("")} aria-label="נקה"
-                    className="absolute left-1.5 top-1/2 -translate-y-1/2 h-6 w-6 inline-flex items-center justify-center text-muted-foreground">
+                    className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 inline-flex items-center justify-center text-[#94A3B8]">
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="h-10 px-3 rounded-xl bg-white border border-[#EEF0F3] inline-flex items-center gap-1 text-[12px] font-bold text-foreground shrink-0">
+                  <button className="h-11 px-3.5 rounded-2xl bg-white border border-[#EEF0F3] inline-flex items-center gap-1.5 text-[12px] font-bold text-[#0F172A] shrink-0">
                     <ArrowUpDown className="h-3.5 w-3.5" /> מיון
                   </button>
                 </DropdownMenuTrigger>
@@ -642,29 +664,6 @@ export default function SupplierLeads() {
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex items-center gap-1 bg-white rounded-xl p-1 border border-[#EEF0F3] overflow-x-auto">
-              {([
-                { k: "all", label: "הכל", count: stats.total },
-                { k: "new", label: "חדשים", count: stats.new },
-                { k: "in_progress", label: "בטיפול", count: stats.in_progress },
-                { k: "offer_sent", label: "הצעה", count: stats.offer_sent },
-                { k: "closed", label: "נסגרו", count: stats.closed },
-              ] as { k: TabKey; label: string; count: number }[]).map((t) => {
-                const active = tab === t.k;
-                return (
-                  <button key={t.k} onClick={() => setTab(t.k)}
-                    className={
-                      "flex-1 min-w-[56px] h-8 rounded-lg text-[11px] font-extrabold inline-flex items-center justify-center gap-1 transition-colors " +
-                      (active ? "bg-[#0E6B5A] text-white" : "text-[#475569] hover:bg-muted/60")
-                    }>
-                    {t.label}
-                    <span className={"text-[9px] font-bold px-1 rounded " + (active ? "bg-white/20" : "bg-muted text-muted-foreground")}>{t.count}</span>
-                  </button>
-                );
-              })}
             </div>
 
             {/* Trash toggle */}
