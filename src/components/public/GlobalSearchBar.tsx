@@ -235,7 +235,13 @@ export function GlobalSearchBar({
           ref={inputRef}
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            setOpen(true);
+            // Scroll input near top so the dropdown has room above the keyboard.
+            setTimeout(() => {
+              wrapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 250);
+          }}
           placeholder={placeholder}
           className={
             `w-full border border-border bg-card font-medium text-foreground ` +
