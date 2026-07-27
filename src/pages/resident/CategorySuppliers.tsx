@@ -82,7 +82,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
 
   const [regionId, setRegionId] = useState<string>("all");
   const [cityId, setCityId] = useState<string>("all");
-  const [kindFilter, setKindFilter] = useState<"all" | "service" | "product">("all");
+  
   const [showAreaPicker, setShowAreaPicker] = useState(false);
 
   const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
