@@ -8,24 +8,27 @@ import { supabase } from "@/integrations/supabase/client";
 export type CompletenessStep = {
   key:
     | "business_name"
+    | "contact_name"
     | "phone"
     | "email"
     | "category"
     | "area"
-    | "description";
+    | "description"
+    | "logo";
   label: string;
   done: boolean;
 };
 
 export type SupplierCompleteness = {
-  percent: number;               // 0..100
-  complete: boolean;             // all required steps done
-  missing: string[];             // labels of missing steps
-  steps: CompletenessStep[];     // ordered checklist
+  percent: number;
+  complete: boolean;
+  missing: string[];
+  steps: CompletenessStep[];
 };
 
 export type SupplierCompletenessInput = {
   business_name?: string | null;
+  contact_name?: string | null;
   phone?: string | null;
   email?: string | null;
   categories?: string[] | null;
@@ -34,6 +37,7 @@ export type SupplierCompletenessInput = {
   citiesCount: number;
   short_description?: string | null;
   description?: string | null;
+  logo_url?: string | null;
 };
 
 export function computeCompleteness(
@@ -44,6 +48,11 @@ export function computeCompleteness(
       key: "business_name",
       label: "שם עסק",
       done: !!s.business_name && s.business_name.trim().length >= 2,
+    },
+    {
+      key: "contact_name",
+      label: "איש קשר",
+      done: !!s.contact_name && s.contact_name.trim().length >= 2,
     },
     {
       key: "phone",
@@ -71,6 +80,11 @@ export function computeCompleteness(
       done:
         (!!s.short_description && s.short_description.trim().length >= 10) ||
         (!!s.description && s.description.trim().length >= 10),
+    },
+    {
+      key: "logo",
+      label: "לוגו",
+      done: !!s.logo_url && s.logo_url.trim().length > 0,
     },
   ];
   const done = steps.filter((s) => s.done).length;
