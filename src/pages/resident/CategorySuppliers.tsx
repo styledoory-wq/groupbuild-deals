@@ -265,18 +265,10 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
       ? suppliers
       : suppliers.filter((s) => (s.categories ?? []).some((id) => relevantCategoryIds.includes(id)));
 
-    const supplierOffers = (s: DbSupplier) => ({
-      service: Boolean(s.offers_services) || s.supplier_kind === "service",
-      product: Boolean(s.offers_products) || s.supplier_kind === "product",
-    });
-    const byKind = kindFilter === "all"
-      ? byCategory
-      : byCategory.filter((s) => supplierOffers(s)[kindFilter]);
-
-    const byArea = byKind.filter(matchesArea);
+    const byArea = byCategory.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
-    return byKind.filter(isNationalSupplier);
-  }, [suppliers, activeCategoryId, relevantCategoryIds, regionId, cityId, kindFilter, supplierRegionIds, supplierCityIds, supplierCouncilIds, regions, cities]);
+    return byCategory.filter(isNationalSupplier);
+  }, [suppliers, activeCategoryId, relevantCategoryIds, regionId, cityId, supplierRegionIds, supplierCityIds, supplierCouncilIds, regions, cities]);
 
   const areaLabel =
     cityId !== "all"
@@ -284,12 +276,6 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
       : regionId !== "all"
         ? regions.find((r) => r.id === regionId)?.name_he
         : "כל הארץ";
-
-  const kinds: { v: "all" | "service" | "product"; label: string; Icon: typeof Sparkles }[] = [
-    { v: "all", label: "הכול", Icon: Sparkles },
-    { v: "service", label: "בעלי מקצוע", Icon: Wrench },
-    { v: "product", label: "ספקי מוצרים", Icon: Package },
-  ];
 
   const HeaderIcon = iconForCategory(activeCategoryId, activeCategory?.name);
 
