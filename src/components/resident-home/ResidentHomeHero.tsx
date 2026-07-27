@@ -34,7 +34,7 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         className="absolute inset-0 -z-10"
         style={{
           background:
-            "linear-gradient(180deg, rgba(247,245,240,0.72) 0%, rgba(247,245,240,0.55) 28%, rgba(247,245,240,0.82) 72%, rgba(247,245,240,1) 100%), radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255,255,255,0.35), transparent 70%)",
+            "linear-gradient(180deg, rgba(247,245,240,0.88) 0%, rgba(247,245,240,0.82) 35%, rgba(247,245,240,0.92) 70%, rgba(247,245,240,1) 100%), linear-gradient(90deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.25) 55%, rgba(255,255,255,0.45) 100%)",
         }}
       />
 
@@ -68,12 +68,12 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         </header>
 
         <section>
-          <h1 className="text-[28px] font-extrabold text-[#0B1220] leading-[1.15] tracking-tight">
+          <h1 className="text-[28px] font-extrabold text-[#0B1220] leading-[1.15] tracking-tight drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]">
             כוח הקנייה של כולם
             <br />
             <span className="text-[#0E6B5A]">לחיסכון בבית ובבניין</span>
           </h1>
-          <p className="mt-3 text-[15px] text-[#3F4754] leading-relaxed max-w-[34ch]">
+          <p className="mt-3 text-[15px] text-[#1F2937] font-medium leading-relaxed max-w-[34ch]">
             GroupBuild מחברת דיירים לרכישה קבוצתית — ספקים מאומתים, מחירים חכמים, ושקיפות מלאה.
           </p>
 
