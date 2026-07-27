@@ -30,6 +30,7 @@ import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { SmartImg } from "@/components/ui/SmartImg";
 import { SupplierPendingBanner, isSupplierLocked } from "@/components/supplier/SupplierWorkspace";
+import { SUPPLIER } from "@/lib/supplierUi";
 
 type DealLite = { id: string; title: string; cover_image_url?: string | null; gallery_images?: string[] | null };
 type InterestRow = {
@@ -451,7 +452,7 @@ export default function SupplierLeads() {
           </button>
         )}
           <div
-          className="bg-white rounded-2xl border border-[#EEF0F3] p-3.5 transition-transform relative z-10 shadow-[0_1px_2px_rgba(15,23,42,0.03)]"
+          className={"p-3.5 transition-transform relative z-10 " + SUPPLIER.card + " !rounded-2xl"}
           style={isSwiped ? { transform: "translateX(80px)" } : undefined}
           onTouchStart={trashed ? undefined : onTouchStart}
           onTouchEnd={trashed ? undefined : makeSwipeEnd(i.id)}
@@ -460,7 +461,7 @@ export default function SupplierLeads() {
           <div className="flex items-start gap-2.5">
             {cover ? (
               <SmartImg src={cover} size="thumb" alt=""
-                className="h-14 w-14 rounded-xl object-cover shrink-0 border border-[#EEF0F3]" />
+                className="h-14 w-14 rounded-xl object-cover shrink-0 border border-[#D5DED9]" />
             ) : (
               <div className="h-14 w-14 rounded-xl flex items-center justify-center text-[#0E6B5A] font-extrabold text-[15px] shrink-0"
                 style={{ background: avatarHue(name) }}>
@@ -550,7 +551,7 @@ export default function SupplierLeads() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button aria-label="עוד"
-                    className="h-11 w-11 rounded-2xl bg-[#F8FAFC] text-[#64748B] border border-[#EEF0F3] inline-flex items-center justify-center shrink-0">
+                    className="h-11 w-11 rounded-2xl bg-[#F3F7F5] text-[#64748B] border border-[#D5DED9] inline-flex items-center justify-center shrink-0">
                     ⋯
                   </button>
                 </DropdownMenuTrigger>
@@ -595,7 +596,7 @@ export default function SupplierLeads() {
   const totalTrashed = trashedInterests.length;
 
   return (
-    <MobileShell>
+    <MobileShell className="bg-[#E4EBE7]">
       <ScreenHeader title="לידים" subtitle="פניות שממתינות לכם" />
 
       <div className="px-4 -mt-2 relative z-10 pb-24 space-y-3">
@@ -608,7 +609,7 @@ export default function SupplierLeads() {
             <SupplierPendingBanner status={approvalStatus} />
 
             {/* Stage filters — 3 calm segments */}
-            <div className="bg-white rounded-2xl border border-[#EEF0F3] p-1 grid grid-cols-3 gap-1">
+            <div className={SUPPLIER.card + " p-1 grid grid-cols-3 gap-1 !rounded-2xl"}>
               {([
                 { k: "all" as TabKey, label: "הכל", count: stats.total },
                 { k: "open" as TabKey, label: "פתוחים", count: stats.open },
@@ -646,7 +647,7 @@ export default function SupplierLeads() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="חיפוש שם, טלפון או הצעה"
-                  className="w-full h-11 rounded-2xl bg-white border border-[#EEF0F3] pr-9 pl-3 text-[13px] font-medium text-foreground placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0E6B5A]"
+                  className={"w-full pr-9 pl-3 text-[13px] font-medium text-foreground placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0E6B5A] " + SUPPLIER.input}
                 />
                 {query && (
                   <button onClick={() => setQuery("")} aria-label="נקה"
@@ -657,7 +658,7 @@ export default function SupplierLeads() {
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="h-11 px-3.5 rounded-2xl bg-white border border-[#EEF0F3] inline-flex items-center gap-1.5 text-[12px] font-bold text-[#0F172A] shrink-0">
+                  <button className="h-11 px-3.5 rounded-2xl bg-white border border-[#D5DED9] shadow-sm inline-flex items-center gap-1.5 text-[12px] font-bold text-[#0F172A] shrink-0">
                     <ArrowUpDown className="h-3.5 w-3.5" /> מיון
                   </button>
                 </DropdownMenuTrigger>
@@ -688,7 +689,7 @@ export default function SupplierLeads() {
             {/* List */}
             {showTrash ? (
               totalTrashed === 0 ? (
-                <div className="bg-white rounded-2xl border border-[#EEF0F3] p-6 text-center">
+                <div className={SUPPLIER.card + " p-6 text-center !rounded-2xl"}>
                   <div className="mx-auto h-12 w-12 rounded-xl bg-[#F0F9F6] flex items-center justify-center mb-2">
                     <Archive className="h-5 w-5 text-[#9CA3AF]" />
                   </div>
@@ -701,7 +702,7 @@ export default function SupplierLeads() {
                 </div>
               )
             ) : visible.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-[#EEF0F3] p-7 text-center">
+              <div className={SUPPLIER.card + " p-7 text-center !rounded-2xl"}>
                 <div className="mx-auto h-14 w-14 rounded-2xl bg-[#E8F5F1] flex items-center justify-center mb-3">
                   <Inbox className="h-6 w-6 text-[#0E6B5A]" />
                 </div>

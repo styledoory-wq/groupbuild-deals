@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { SupplierPendingBanner, isSupplierLocked } from "@/components/supplier/SupplierWorkspace";
+import { SUPPLIER } from "@/lib/supplierUi";
 
 type Tx = {
   id: string;
@@ -18,7 +19,7 @@ type Tx = {
   customer: string;
 };
 
-const GREEN = "#0E6B5A";
+const GREEN = SUPPLIER.green;
 
 function formatILS(n: number): string {
   return `₪${Math.round(n).toLocaleString("he-IL")}`;
@@ -171,8 +172,8 @@ export default function SupplierRevenue() {
 
   if (loading) {
     return (
-      <MobileShell>
-        <div className="min-h-[60vh] flex items-center justify-center bg-[#F7F8FA]">
+      <MobileShell className="bg-[#E4EBE7]">
+        <div className="min-h-[60vh] flex items-center justify-center" style={{ background: SUPPLIER.pageBg }}>
           <LoadingState label="טוען נתוני הכנסות..." />
         </div>
         <BottomNav role="supplier" />
@@ -181,11 +182,11 @@ export default function SupplierRevenue() {
   }
 
   return (
-    <MobileShell>
-      <div className="min-h-screen bg-[#F7F8FA] pb-8" dir="rtl">
+    <MobileShell className="bg-[#E4EBE7]">
+      <div className="min-h-screen pb-8" style={{ background: SUPPLIER.pageBg }} dir="rtl">
         <header className="px-5 pt-6 pb-4">
           <h1 className="text-[22px] font-bold text-[#0F172A] tracking-tight">הכנסות</h1>
-          <p className="text-[13px] text-[#8E95A2] mt-1">מימושים, פיקדונות ומעקב חודשי</p>
+          <p className="text-[13px] text-[#64748B] mt-1">מימושים, פיקדונות ומעקב חודשי</p>
         </header>
 
         <div className="px-5 mb-4">
@@ -194,7 +195,7 @@ export default function SupplierRevenue() {
 
         {/* Hero revenue card */}
         <section className="px-5">
-          <div className="rounded-3xl p-6 text-white shadow-sm" style={{ background: `linear-gradient(135deg, ${GREEN} 0%, #1A8870 100%)` }}>
+          <div className="rounded-[24px] p-6 text-white shadow-[0_8px_28px_-12px_rgba(14,107,90,0.45)]" style={{ background: `linear-gradient(135deg, ${GREEN} 0%, #1A8870 100%)` }}>
             <div className="flex items-center gap-2 text-white/80 text-[12px] font-medium">
               <Wallet className="h-3.5 w-3.5" /> סה״כ הכנסות
             </div>
@@ -220,7 +221,7 @@ export default function SupplierRevenue() {
 
         {isEmpty ? (
           <section className="px-5 mt-5">
-            <div className="bg-white rounded-3xl border border-[#EEF0F3] p-6 shadow-sm">
+            <div className={SUPPLIER.cardPad}>
               <div className="h-12 w-12 rounded-2xl bg-[#E8F5F1] flex items-center justify-center mb-3">
                 <Wallet className="h-5 w-5 text-[#0E6B5A]" />
               </div>
@@ -231,7 +232,7 @@ export default function SupplierRevenue() {
                     ? "עוד אין מימושים על ההצעות"
                     : "התחילו מהצעה — ההכנסות יגיעו אחריה"}
               </h2>
-              <p className="text-[13px] text-[#8E95A2] mt-1.5 leading-relaxed text-right">
+              <p className="text-[13px] text-[#64748B] mt-1.5 leading-relaxed text-right">
                 {isSupplierLocked(approvalStatus)
                   ? "אחרי האישור תוכלו לפרסם הצעות ולקבל פיקדונות. המסך הזה יציג סיכום חודשי ועסקאות."
                   : "כשלקוח מממש קופון או משלם פיקדון — העסקה תופיע כאן עם סכום ותאריך."}
@@ -241,7 +242,7 @@ export default function SupplierRevenue() {
                   <Button
                     type="button"
                     onClick={() => navigate(hasDeals ? "/supplier/offers" : "/supplier/offers/new")}
-                    className="w-full h-11 rounded-2xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white font-semibold"
+                    className={"w-full " + SUPPLIER.btnPrimary}
                   >
                     {hasDeals ? (
                       <><Briefcase className="h-4 w-4 ml-2" /> להצעות שלי</>
@@ -254,7 +255,7 @@ export default function SupplierRevenue() {
                   <Button
                     type="button"
                     onClick={() => navigate("/supplier/profile/edit")}
-                    className="w-full h-11 rounded-2xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white font-semibold"
+                    className={"w-full " + SUPPLIER.btnPrimary}
                   >
                     השלמת פרופיל
                   </Button>
@@ -266,10 +267,10 @@ export default function SupplierRevenue() {
           <>
             {/* Monthly chart */}
             <section className="px-5 mt-6">
-              <div className="bg-white rounded-3xl border border-[#EEF0F3] p-5 shadow-sm">
+              <div className={SUPPLIER.cardPad}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-[15px] font-bold text-[#0F172A]">הכנסות חודשיות</h2>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#8E95A2]">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#64748B]">
                     <TrendingUp className="h-3 w-3" /> 6 חודשים אחרונים
                   </span>
                 </div>
@@ -283,7 +284,7 @@ export default function SupplierRevenue() {
                           className="w-full rounded-t-xl"
                           style={{ height: h, background: `linear-gradient(180deg, ${GREEN} 0%, rgba(14,107,90,0.4) 100%)` }}
                         />
-                        <div className="text-[10px] text-[#8E95A2] font-medium">{monthLabels[i]}</div>
+                        <div className="text-[10px] text-[#64748B] font-medium">{monthLabels[i]}</div>
                       </div>
                     );
                   })}
@@ -302,18 +303,18 @@ export default function SupplierRevenue() {
                 </button>
                 <h2 className="text-[15px] font-bold text-[#0F172A]">עסקאות אחרונות</h2>
               </div>
-              <div className="bg-white rounded-3xl border border-[#EEF0F3] overflow-hidden shadow-sm">
+              <div className={SUPPLIER.card + " overflow-hidden"}>
                 {transactions.map((t, i) => (
-                  <div key={t.id} className={`flex items-center gap-3 p-4 ${i < transactions.length - 1 ? "border-b border-[#F2F4F7]" : ""}`}>
+                  <div key={t.id} className={`flex items-center gap-3 p-4 ${i < transactions.length - 1 ? "border-b border-[#E8EEEB]" : ""}`}>
                     <div className="text-left shrink-0">
                       <div className="font-bold text-[14px]" style={{ color: t.status === "paid" ? GREEN : "#B45309" }}>
                         {formatILS(t.amount)}
                       </div>
-                      <div className="text-[10px] text-[#8E95A2] mt-0.5">{timeAgo(t.at)}</div>
+                      <div className="text-[10px] text-[#64748B] mt-0.5">{timeAgo(t.at)}</div>
                     </div>
                     <div className="flex-1 min-w-0 text-right">
                       <div className="font-semibold text-[14px] text-[#0F172A] truncate">{t.title}</div>
-                      <div className="text-[12px] text-[#8E95A2] truncate mt-0.5">{t.customer}</div>
+                      <div className="text-[12px] text-[#64748B] truncate mt-0.5">{t.customer}</div>
                     </div>
                   </div>
                 ))}

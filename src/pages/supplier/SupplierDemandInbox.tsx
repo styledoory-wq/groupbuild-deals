@@ -8,6 +8,7 @@ import { ScreenHeader, LoadingState, ErrorState, EmptyState } from "@/components
 import { supabase } from "@/integrations/supabase/client";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { useApp } from "@/store/AppStore";
+import { SUPPLIER } from "@/lib/supplierUi";
 
 type InviteStatus = "pending" | "viewed" | "interested" | "declined" | "submitted_offer";
 
@@ -26,7 +27,7 @@ type Row = {
 };
 
 const GREEN = "#0E6B5A";
-const BG = "#F7F8FA";
+const BG = SUPPLIER.pageBg;
 
 function timeAgo(iso: string): string {
   const m = Math.floor((Date.now() - +new Date(iso)) / 60000);
@@ -218,7 +219,7 @@ export default function SupplierDemandInbox() {
                   key={r.invitation_id}
                   className="bg-white rounded-2xl p-4 border transition"
                   style={{
-                    borderColor: highlight ? GREEN : "#EEF0F3",
+                    borderColor: highlight ? GREEN : "#D5DED9",
                     boxShadow: highlight ? "0 4px 20px rgba(14,107,90,0.10)" : "0 1px 2px rgba(15,23,42,0.04)",
                   }}
                 >
@@ -262,7 +263,7 @@ export default function SupplierDemandInbox() {
                     <button
                       disabled={busy === r.invitation_id}
                       onClick={() => updateStatus(r, "declined")}
-                      className="h-10 rounded-xl border border-[#EEF0F3] text-[#6B7280] font-semibold text-[13px] flex items-center justify-center gap-1 disabled:opacity-60"
+                      className="h-10 rounded-xl border border-[#D5DED9] text-[#6B7280] font-semibold text-[13px] flex items-center justify-center gap-1 disabled:opacity-60"
                     >
                       <X className="h-4 w-4" /> לא רלוונטי
                     </button>

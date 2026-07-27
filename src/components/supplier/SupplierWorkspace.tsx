@@ -6,7 +6,8 @@ import {
 import { Button } from "@/components/ui/button";
 import type { SupplierCompleteness } from "@/lib/supplierCompleteness";
 
-export const SUPPLIER_BG = "#F7F8FA";
+export const SUPPLIER_PAGE_BG = "#E4EBE7";
+export const SUPPLIER_BG = SUPPLIER_PAGE_BG; // backwards-compatible alias
 export const SUPPLIER_GREEN = "#0E6B5A";
 
 export type SupplierApproval = "pending" | "rejected" | "approved" | "active" | string;
@@ -165,7 +166,7 @@ export function SupplierPendingWorkspace({
 
       {/* Profile readiness */}
       {completeness && (
-        <section className="rounded-3xl border border-[#EEF0F3] bg-white p-5 shadow-sm">
+        <section className="rounded-[24px] border border-[#D5DED9] bg-white p-5 shadow-[0_2px_14px_-6px_rgba(15,23,42,0.10)]">
           <div className="flex items-center justify-between gap-3 mb-3">
             <span className="text-[13px] font-bold text-[#0E6B5A] tabular-nums">{percent}%</span>
             <div className="text-right">
@@ -271,7 +272,7 @@ function ToolPreview({
     <button
       type="button"
       onClick={() => navigate(to)}
-      className="w-full text-right rounded-2xl border border-[#EEF0F3] bg-white p-4 shadow-sm active:scale-[0.99] transition flex items-start gap-3"
+      className="w-full text-right rounded-2xl border border-[#D5DED9] bg-white p-4 shadow-[0_2px_14px_-6px_rgba(15,23,42,0.10)] active:scale-[0.99] transition flex items-start gap-3"
     >
       <div className="h-10 w-10 rounded-2xl bg-[#0E6B5A]/10 text-[#0E6B5A] flex items-center justify-center shrink-0">
         <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />

@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/store/AppStore";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { toast } from "sonner";
+import { SUPPLIER } from "@/lib/supplierUi";
 
 const supplierSchema = z.object({
   business_name: z.string().trim().min(2, "שם עסק קצר מדי").max(80),
@@ -313,19 +314,19 @@ export default function SupplierProfileEdit() {
 
   if (loading) {
     return (
-      <MobileShell>
+      <MobileShell className="bg-[#E4EBE7]">
         <LoadingState />
       </MobileShell>
     );
   }
 
   return (
-    <MobileShell>
+    <MobileShell className="bg-[#E4EBE7]">
       <BackHeader title="פרופיל העסק" subtitle="הפרטים שדיירים רואים עליכם" />
 
-      <form onSubmit={handleSave} className="pb-36" dir="rtl">
+      <form onSubmit={handleSave} className="pb-36" dir="rtl" style={{ background: SUPPLIER.pageBg }}>
         {/* Section switcher — keeps the form comfortable */}
-        <div className="px-4 sticky top-0 z-30 bg-[#F7F5F0]/95 backdrop-blur pt-1 pb-3">
+        <div className="px-4 sticky top-0 z-30 bg-[#E4EBE7]/95 backdrop-blur pt-1 pb-3">
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
             {([
               { k: "details" as const, label: "פרטים" },
@@ -344,7 +345,7 @@ export default function SupplierProfileEdit() {
                     "shrink-0 h-9 px-3.5 rounded-full text-[13px] font-semibold inline-flex items-center gap-1.5 transition-colors " +
                     (on
                       ? "bg-[#0E6B5A] text-white shadow-[0_4px_12px_-6px_rgba(14,107,90,0.55)]"
-                      : "bg-white text-[#475569] border border-[#EEF0F3]")
+                      : "bg-white text-[#475569] border border-[#D5DED9]")
                   }
                 >
                   {t.label}
@@ -375,7 +376,7 @@ export default function SupplierProfileEdit() {
           {activeSection === "details" && (
             <Section title="פרטי העסק" subtitle="שם, קשר ותיאור שיופיעו בכרטיס">
               <Field label="שם העסק">
-                <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} required className="h-12 rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" />
+                <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} required className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
               </Field>
 
               <div className="space-y-1.5">
@@ -394,7 +395,7 @@ export default function SupplierProfileEdit() {
                         "rounded-2xl p-3.5 text-right transition-all relative border " +
                         (opt.checked
                           ? "bg-[#F1FAF7] border-[#0E6B5A]/40 text-[#0F172A]"
-                          : "bg-white border-[#EEF0F3] text-[#1F2937]")
+                          : "bg-white border-[#D5DED9] text-[#1F2937]")
                       }
                     >
                       <div className={"text-[14px] font-bold " + (opt.checked ? "text-[#0E6B5A]" : "text-foreground")}>{opt.label}</div>
@@ -412,22 +413,22 @@ export default function SupplierProfileEdit() {
 
               <div className="grid grid-cols-1 gap-4">
                 <Field label="שם איש קשר">
-                  <Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={60} className="h-12 rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" />
+                  <Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={60} className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
                 </Field>
                 <Field label="טלפון">
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} dir="ltr" className="h-12 rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" />
+                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} dir="ltr" className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
                 </Field>
                 <Field label="אימייל">
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-12 rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" />
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
                   {email.trim().toLowerCase() !== originalEmail.toLowerCase() && (
                     <p className="text-[12px] text-[#0A5446] mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
                   )}
                 </Field>
                 <Field label="תיאור קצר לכרטיס">
-                  <Input value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} maxLength={140} className="h-12 rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" placeholder="משפט אחד שמושך דיירים (עד 140 תווים)" />
+                  <Input value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} maxLength={140} className="h-12 rounded-2xl bg-white border-[#D5DED9]" placeholder="משפט אחד שמושך דיירים (עד 140 תווים)" />
                 </Field>
                 <Field label="תיאור עסק מלא">
-                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={4} className="rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" placeholder="ספרו על הניסיון, סוגי עבודות, ומה מייחד אתכם" />
+                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={4} className="rounded-2xl bg-white border-[#D5DED9]" placeholder="ספרו על הניסיון, סוגי עבודות, ומה מייחד אתכם" />
                 </Field>
               </div>
 
@@ -504,7 +505,7 @@ export default function SupplierProfileEdit() {
                 {gallery.length > 0 && (
                   <div className="grid grid-cols-3 gap-2 mt-1">
                     {gallery.map((g, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group border border-[#EEF0F3]">
+                      <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group border border-[#D5DED9]">
                         <img src={g.image_url} alt="" className="h-full w-full object-cover" />
                         <button
                           type="button"
@@ -604,7 +605,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-[#EEF0F3] bg-white p-5 space-y-4 shadow-[0_1px_2px_rgba(11,18,32,0.04),0_8px_24px_-12px_rgba(11,18,32,0.06)]">
+    <section className={SUPPLIER.cardPad + " space-y-4"}>
       <header>
         <h3 className="text-[16px] font-bold text-[#0F172A] leading-tight">{title}</h3>
         <p className="text-[13px] text-[#8E95A2] mt-1 leading-snug">{subtitle}</p>

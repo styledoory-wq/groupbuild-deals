@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Plus, Briefcase, Pencil, Eye, Heart, Users, TrendingUp,
-  Wallet, Calendar, Flame, ChevronDown, SlidersHorizontal, Tag, Coins, Clock,
+  Flame, ChevronDown, Tag, Coins, Clock,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { ScreenHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
@@ -14,6 +14,7 @@ import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricin
 import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
 import { SmartImg } from "@/components/ui/SmartImg";
 import { SupplierPendingBanner, isSupplierLocked } from "@/components/supplier/SupplierWorkspace";
+import { SUPPLIER } from "@/lib/supplierUi";
 
 type DealRow = {
   id: string;
@@ -38,28 +39,6 @@ function extractPriceNum(headline: string): number {
   return m ? parseFloat(m[0]) : 0;
 }
 
-// sparkline seed from deterministic id hash (visual decoration only)
-function hashId(id: string): number {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-// generate a smooth sparkline path
-function sparkPath(seed: number, w = 64, h = 22): string {
-  const pts: number[] = [];
-  let v = 0.5;
-  for (let i = 0; i < 12; i++) {
-    const r = (Math.sin(seed * 0.13 + i * 1.7) + 1) / 2;
-    v = v * 0.55 + r * 0.45;
-    pts.push(v);
-  }
-  // trend up bias
-  pts.sort((a, b) => a - b - 0.02);
-  const step = w / (pts.length - 1);
-  return pts.map((p, i) => `${i === 0 ? "M" : "L"} ${(i * step).toFixed(1)} ${(h - p * (h - 2) - 1).toFixed(1)}`).join(" ");
-}
-
 const ILS = (n: number) => `₪${Math.round(n).toLocaleString("he-IL")}`;
 const compact = (n: number) =>
   n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` :
@@ -72,37 +51,6 @@ function daysAgo(iso: string): number {
 }
 
 // ---------- small UI ----------
-function StatCard({
-  label, value, subtitle, tone, icon, seed, className = "",
-}: {
-  label: string; value: string; subtitle: string; tone: "violet" | "amber" | "emerald" | "sky";
-  icon: React.ReactNode; seed: number; className?: string;
-}) {
-  const tones = {
-    violet: { bg: "bg-violet-50", fg: "text-violet-600", stroke: "stroke-violet-500" },
-    amber:  { bg: "bg-amber-50",  fg: "text-amber-600",  stroke: "stroke-amber-500" },
-    emerald:{ bg: "bg-emerald-50",fg: "text-emerald-600",stroke: "stroke-emerald-500" },
-    sky:    { bg: "bg-sky-50",    fg: "text-sky-600",    stroke: "stroke-sky-500" },
-  }[tone];
-  return (
-    <div className={`rounded-[14px] bg-white border border-[#EEF0F4] p-2.5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.08)] flex-1 min-w-0 ${className}`}>
-      <div className={`h-7 w-7 rounded-full ${tones.bg} ${tones.fg} flex items-center justify-center mb-2`}>
-        {icon}
-      </div>
-      <div className="text-[16px] leading-none font-extrabold text-[#0F172A] tracking-tight">
-        {value}
-      </div>
-      <div className="mt-1 text-[10px] text-[#6B7280] font-medium leading-tight truncate">{label}</div>
-      <div className="mt-1 text-[9.5px] font-semibold text-[#6B7280] truncate">
-        {subtitle}
-      </div>
-      <svg viewBox="0 0 64 22" className="mt-1.5 w-full h-4 overflow-visible">
-        <path d={sparkPath(seed)} fill="none" strokeWidth="1.6" className={tones.stroke} strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </div>
-  );
-}
-
 function ProgressBar({ pct, tone = "emerald" }: { pct: number; tone?: "emerald" | "amber" }) {
   const color = tone === "amber" ? "from-amber-400 to-amber-500" : "from-emerald-400 to-emerald-600";
   return (
@@ -267,64 +215,55 @@ export default function SupplierOffers() {
 
   // ---------- render ----------
   return (
-    <MobileShell className="bg-[#F7F8FA]">
-      <ScreenHeader title="ההצעות שלי" subtitle="נהל ונתח את כל ההצעות הפעילות שלך" />
+    <MobileShell className="bg-[#E4EBE7]">
+      <ScreenHeader title="ההצעות שלי" subtitle="ניהול, מעקב וביצועים של כל ההצעות" />
 
       {/* CTA */}
       <div className="px-5 -mt-3 relative z-10 space-y-3">
         <SupplierPendingBanner status={approvalStatus} />
         {!isSupplierLocked(approvalStatus) && (
           <Link to="/supplier/offers/new">
-            <Button className="h-11 px-4 rounded-[14px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-[0_8px_22px_-10px_rgba(5,150,105,0.6)]">
+            <Button className={"w-full " + SUPPLIER.btnPrimary}>
               <Plus className="h-4 w-4 ml-1.5" /> הצעה חדשה
             </Button>
           </Link>
         )}
       </div>
 
-      {/* Stats — real-time aggregates */}
+      {/* Stats — unified brand strip */}
       {!loading && !error && supplierId && deals.length > 0 && (
-        <div className="px-5 mt-4 flex gap-2">
-          <StatCard
-            label="מצטרפים" value={`${totals.newLeads}`}
-            subtitle={`ב-${deals.length} הצעות`}
-            tone="amber" icon={<Users className="h-3.5 w-3.5" />} seed={27}
-          />
-          <StatCard
-            label="שמירות" value={`${totals.totalSaves}`}
-            subtitle="סה״כ עניין"
-            tone="violet" icon={<Heart className="h-3.5 w-3.5" />} seed={11}
-          />
-          <StatCard
-            label="הכנסה צפויה" value={ILS(totals.potential)}
-            subtitle="לפי מצטרפים בפועל"
-            tone="emerald" icon={<Wallet className="h-3.5 w-3.5" />} seed={43}
-          />
-          <StatCard
-            label="פעילות" value={`${totals.activeCount}`}
-            subtitle={`${totals.closedCount} הסתיימו`}
-            tone="sky" icon={<Briefcase className="h-3.5 w-3.5" />} seed={59}
-          />
+        <div className="px-5 mt-4">
+          <div className={SUPPLIER.card + " p-3 grid grid-cols-4 gap-2"}>
+            {[
+              { label: "מצטרפים", value: `${totals.newLeads}`, hint: `${deals.length} הצעות` },
+              { label: "שמירות", value: `${totals.totalSaves}`, hint: "עניין" },
+              { label: "צפוי", value: ILS(totals.potential), hint: "הכנסה" },
+              { label: "פעילות", value: `${totals.activeCount}`, hint: `${totals.closedCount} הסתיימו` },
+            ].map((s) => (
+              <div key={s.label} className="text-center px-1 py-2 rounded-xl bg-[#F3F7F5]">
+                <div className="text-[13px] font-extrabold text-[#0F172A] tabular-nums truncate">{s.value}</div>
+                <div className="text-[10px] font-bold text-[#0E6B5A] mt-0.5">{s.label}</div>
+                <div className="text-[9px] text-[#64748B] mt-0.5 truncate">{s.hint}</div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* Filter row */}
       {!loading && !error && supplierId && deals.length > 0 && (
-        <div className="px-5 mt-5 flex items-center gap-2">
-          <button className="h-9 px-3 rounded-full bg-white border border-[#EEF0F4] text-[12px] font-bold text-[#1F2937] inline-flex items-center gap-1.5 shadow-sm">
-            <SlidersHorizontal className="h-3.5 w-3.5" /> סינון
-          </button>
-          <div className="ml-auto inline-flex items-center bg-white border border-[#EEF0F4] rounded-full p-1 shadow-sm">
+        <div className="px-5 mt-4">
+          <div className={SUPPLIER.card + " p-1 grid grid-cols-3 gap-1"}>
             {([
-              { k: "closed", label: "הסתיימו" },
-              { k: "active", label: "פעילות" },
-              { k: "all",    label: "הכל" },
-            ] as { k: StatusKey; label: string }[]).map((t) => (
+              { k: "all" as StatusKey, label: "הכל" },
+              { k: "active" as StatusKey, label: "פעילות" },
+              { k: "closed" as StatusKey, label: "הסתיימו" },
+            ]).map((t) => (
               <button
                 key={t.k}
                 onClick={() => setFilter(t.k)}
-                className={`h-7 px-3 text-[12px] font-bold rounded-full transition-colors ${
-                  filter === t.k ? "bg-emerald-50 text-emerald-700" : "text-[#6B7280]"
+                className={`h-9 text-[12px] font-bold rounded-xl transition-colors ${
+                  filter === t.k ? "bg-[#0E6B5A] text-white" : "text-[#64748B]"
                 }`}
               >
                 {t.label}
@@ -335,14 +274,17 @@ export default function SupplierOffers() {
       )}
 
       {/* List */}
-      <div className="px-5 mt-4 space-y-4 pb-8">
+      <div className="px-5 mt-4 space-y-3 pb-8">
         {loading && <LoadingState />}
         {!loading && error && <ErrorState title="שגיאה בטעינה" description={error} onRetry={refresh} />}
         {!loading && !error && !supplierId && (
-          <EmptyState icon={<Briefcase className="h-7 w-7 text-[#9CA3AF]" />} title="חסר פרופיל ספק"
-            description="השלם את פרטי הספק לפני יצירת הצעות." />
+          <div className={SUPPLIER.card + " p-4"}>
+            <EmptyState icon={<Briefcase className="h-7 w-7 text-[#0E6B5A]" />} title="חסר פרופיל ספק"
+              description="השלם את פרטי הספק לפני יצירת הצעות." />
+          </div>
         )}
         {!loading && !error && supplierId && deals.length === 0 && (
+          <div className={SUPPLIER.card + " p-4"}>
           <EmptyState
             icon={<Briefcase className="h-7 w-7 text-[#0E6B5A]" />}
             title={isSupplierLocked(approvalStatus) ? "הצעות אחרי האישור" : "אין הצעות עדיין"}
@@ -367,6 +309,7 @@ export default function SupplierOffers() {
               )
             }
           />
+          </div>
         )}
 
         {/* Deals — compact by default; expand on tap to full view */}
@@ -413,7 +356,7 @@ function FeaturedDealCard({
   const savingsPerUnit = Math.max(0, (d.original_price ?? 0) - unitPrice);
 
   return (
-    <article className="rounded-[22px] bg-white border border-[#EEF0F4] overflow-hidden shadow-[0_2px_8px_rgba(16,24,40,0.04),0_16px_40px_-18px_rgba(16,24,40,0.12)]">
+    <article className={SUPPLIER.card + " rounded-[22px] overflow-hidden"}>
       <div className="flex gap-3 p-3">
         {/* Image */}
         <div className="relative w-[44%] shrink-0 rounded-[16px] overflow-hidden bg-[#F1F3F7] self-stretch">
@@ -527,7 +470,7 @@ function FeaturedDealCard({
         <div className="flex items-center gap-2">
           <Link
             to={`/supplier/offers/${d.id}/edit`}
-            className="h-10 px-3 rounded-[12px] bg-white border border-[#EEF0F4] text-[#1F2937] text-[12px] font-bold inline-flex items-center gap-1.5"
+            className="h-10 px-3 rounded-[12px] bg-white border border-[#D5DED9] text-[#1F2937] text-[12px] font-bold inline-flex items-center gap-1.5"
           >
             <Pencil className="h-3.5 w-3.5" /> ניהול הצעה
           </Link>
@@ -570,7 +513,7 @@ function CompactDealCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
-      className="cursor-pointer rounded-[20px] bg-white border border-[#EEF0F4] p-3 flex gap-3 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_24px_-16px_rgba(16,24,40,0.12)] hover:shadow-[0_12px_32px_-14px_rgba(16,24,40,0.18)] hover:-translate-y-0.5 transition-all duration-300"
+      className={"cursor-pointer p-3 flex gap-3 hover:shadow-[0_12px_32px_-14px_rgba(16,24,40,0.18)] hover:-translate-y-0.5 transition-all duration-300 " + SUPPLIER.card + " !rounded-[20px]"}
     >
       {/* Image */}
       <div className="relative w-[110px] shrink-0 aspect-square rounded-[14px] overflow-hidden bg-[#F1F3F7]">
@@ -629,7 +572,7 @@ function CompactDealCard({
         <div className="mt-2.5 flex items-center justify-end gap-2" onClick={stop}>
           <Link
             to={`/supplier/offers/${d.id}/edit`}
-            className="h-8 px-3 rounded-[10px] bg-white border border-[#EEF0F4] text-[#1F2937] text-[11px] font-bold inline-flex items-center gap-1.5 hover:bg-[#F7F8FA]"
+            className="h-8 px-3 rounded-[10px] bg-white border border-[#D5DED9] text-[#1F2937] text-[11px] font-bold inline-flex items-center gap-1.5 hover:bg-[#F3F7F5]"
           >
             <Pencil className="h-3 w-3" /> ניהול הצעה
           </Link>
