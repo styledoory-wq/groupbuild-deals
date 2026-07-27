@@ -185,7 +185,11 @@ export function CategoryMultiPicker({
       {selectedChips.length > 0 && (
         <div className="rounded-xl border border-border bg-muted/40 p-2">
           <div className="flex items-center justify-between mb-1.5 px-1">
-            <span className="text-fs-xs font-bold text-foreground">נבחרו {selectedChips.length} תחומים</span>
+            <span className="text-fs-xs font-bold text-foreground">
+              {selectedChips.length === 1
+                ? "נבחר תחום אחד"
+                : `נבחרו ${selectedChips.length} תחומים`}
+            </span>
             <button
               type="button"
               onClick={() => onChange([])}

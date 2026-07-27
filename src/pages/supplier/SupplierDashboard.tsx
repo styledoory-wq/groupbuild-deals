@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus, Pencil, Clock, Users, TrendingUp, Bell, Wallet, Eye,
-  Sparkles, ArrowLeft, Heart, ChevronLeft, Tag, ScanLine,
+  Plus, Users, TrendingUp, Bell, Wallet, Eye,
+  Sparkles, ArrowLeft, Heart, ChevronLeft, Tag,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { LoadingState, ErrorState } from "@/components/ds";
-import { Button } from "@/components/ui/button";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,6 +15,12 @@ import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { loadSupplierCompletenessForUser, type SupplierCompleteness } from "@/lib/supplierCompleteness";
 import { HelpButton } from "@/components/OnboardingFlow";
 import { SmartImg } from "@/components/ui/SmartImg";
+import {
+  SUPPLIER_BG as BG,
+  SUPPLIER_GREEN as GREEN,
+  SupplierPendingWorkspace,
+  SupplierGettingStarted,
+} from "@/components/supplier/SupplierWorkspace";
 
 type DbSupplier = {
   id: string;
@@ -49,9 +54,6 @@ type ActivityItem = {
   subtitle: string;
   at: string;
 };
-
-const BG = "#F7F8FA";
-const GREEN = "#0E6B5A";
 
 function priceFor(d: DbDeal): number {
   if (d.offer_type === "price_comparison" && d.discounted_price != null) return Number(d.discounted_price);
@@ -382,21 +384,13 @@ export default function SupplierDashboard() {
       <MobileShell>
         <div className="min-h-screen" style={{ background: BG }}>
           <TopBar />
-          <div className="px-5 mt-6">
-            <div className="bg-white rounded-3xl p-7 border border-[#EEF0F3] shadow-sm text-center">
-              <div className="h-14 w-14 mx-auto rounded-2xl bg-[#E8F5F1] flex items-center justify-center mb-4">
-                <Clock className="h-6 w-6" style={{ color: GREEN }} strokeWidth={2} />
-              </div>
-              <h2 className="font-semibold text-[#0F172A] text-[18px] mb-2 tracking-tight">
-                {isRejected ? "ההרשמה נדחתה" : "ממתין לאישור מנהל"}
-              </h2>
-              <p className="text-[14px] text-[#8E95A2] leading-relaxed mb-5">
-                {isRejected ? "לצערנו ההרשמה לא אושרה. ניתן לפנות לתמיכה." : "נעדכן אותך לאחר האישור ותוכל להתחיל לפרסם הצעות ולקבל לידים."}
-              </p>
-              <Button onClick={() => navigate("/supplier/profile/edit")} className="w-full h-12 rounded-2xl bg-[#0F172A] hover:bg-black text-white font-semibold">
-                <Pencil className="h-4 w-4 ml-2" /> השלמת פרטי הספק
-              </Button>
-            </div>
+          <div className="mt-4">
+            <SupplierPendingWorkspace
+              businessName={businessName}
+              firstName={firstName}
+              status={dbSupplier?.approval_status}
+              completeness={completeness}
+            />
           </div>
           <BottomNav role="supplier" />
         </div>
@@ -416,7 +410,12 @@ export default function SupplierDashboard() {
       <div className="min-h-screen w-full overflow-x-hidden pb-8" style={{ background: BG }}>
         <TopBar />
 
+        {myDeals.length === 0 && (
+          <SupplierGettingStarted businessName={businessName} />
+        )}
+
         {/* ===== Action Center ===== */}
+        {myDeals.length > 0 && (
         <section className="px-5 mt-5">
           <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-5">
             <div className="flex items-center justify-between mb-4">
@@ -446,6 +445,7 @@ export default function SupplierDashboard() {
             </button>
           </div>
         </section>
+        )}
 
         {/* ===== Top Offer ===== */}
         {topDeal && topCounts && (
