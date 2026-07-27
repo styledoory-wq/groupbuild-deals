@@ -37,12 +37,37 @@ export function GlobalSearchBar({
   const [open, setOpen] = useState(false);
   const [hits, setHits] = useState<Hit[]>([]);
   const [loading, setLoading] = useState(false);
+  const [maxH, setMaxH] = useState<number>(420);
   const navigate = useNavigate();
   const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const term = q.trim();
+
+  // Recompute dropdown max-height from the visual viewport so it fits above the
+  // on-screen keyboard on iOS (dvh doesn't shrink when the keyboard opens).
+  useEffect(() => {
+    if (!open) return;
+    const compute = () => {
+      const vv = window.visualViewport;
+      const vh = vv?.height ?? window.innerHeight;
+      const rect = wrapRef.current?.getBoundingClientRect();
+      const inputBottom = rect ? rect.bottom : 120;
+      const available = vh - inputBottom - 16;
+      setMaxH(Math.max(180, Math.min(420, available)));
+    };
+    compute();
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", compute);
+    vv?.addEventListener("scroll", compute);
+    window.addEventListener("resize", compute);
+    return () => {
+      vv?.removeEventListener("resize", compute);
+      vv?.removeEventListener("scroll", compute);
+      window.removeEventListener("resize", compute);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!term) { setHits([]); return; }
