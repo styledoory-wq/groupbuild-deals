@@ -63,7 +63,7 @@ const TRASH_DAYS = 30;
 const HOURS_24 = 24 * 3600_000;
 
 type LeadStage = "new" | "in_progress" | "offer_sent" | "closed";
-type TabKey = "all" | "new" | "in_progress" | "offer_sent" | "closed";
+type TabKey = "all" | "open" | "closed";
 type SortKey = "newest" | "oldest" | "status" | "deal" | "joiners";
 
 const daysLeftToPurge = (deletedAt?: string | null) => {
@@ -388,13 +388,25 @@ export default function SupplierLeads() {
       else if (st === "offer_sent") s_off++;
       else s_closed++;
     }
-    return { total: interests.length, new: s_new, in_progress: s_in, offer_sent: s_off, closed: s_closed };
+    return {
+      total: interests.length,
+      open: s_new + s_in + s_off,
+      closed: s_closed,
+      new: s_new,
+      in_progress: s_in,
+      offer_sent: s_off,
+    };
   }, [interests]);
 
   // === Filter + search + sort ===
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    let arr = interests.filter((i) => tab === "all" || interestStage(i) === tab);
+    let arr = interests.filter((i) => {
+      const st = interestStage(i);
+      if (tab === "all") return true;
+      if (tab === "closed") return st === "closed";
+      return st !== "closed";
+    });
     if (q) {
       arr = arr.filter((i) => {
         const p = profiles[i.user_id];
@@ -520,39 +532,37 @@ export default function SupplierLeads() {
             </div>
           ) : (
             /* Quick action bar */
-            <div className="mt-3 flex items-center gap-1.5">
+            <div className="mt-3 flex items-center gap-2">
               {phone ? (
                 <a href={`tel:${phone}`} aria-label="חיוג"
-                  className="flex-1 h-10 rounded-xl bg-[#0E6B5A] text-white text-[12px] font-bold inline-flex items-center justify-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5" /> חיוג
+                  className="flex-1 h-11 rounded-2xl bg-[#0E6B5A] text-white text-[13px] font-bold inline-flex items-center justify-center gap-1.5">
+                  <Phone className="h-4 w-4" /> חיוג
                 </a>
-              ) : <div className="flex-1 h-10 rounded-xl bg-[#F1F5F9] text-[#94A3B8] text-[12px] inline-flex items-center justify-center">אין טלפון</div>}
-              {wa && (
+              ) : (
+                <div className="flex-1 h-11 rounded-2xl bg-[#F1F5F9] text-[#94A3B8] text-[13px] inline-flex items-center justify-center">אין טלפון</div>
+              )}
+              {wa ? (
                 <a href={wa} target="_blank" rel="noreferrer" aria-label="וואטסאפ"
-                  className="flex-1 h-10 rounded-xl bg-[#F0FDF4] text-[#15803D] border border-[#BBF7D0] text-[12px] font-bold inline-flex items-center justify-center gap-1.5">
-                  <MessageCircle className="h-3.5 w-3.5" /> וואטסאפ
+                  className="flex-1 h-11 rounded-2xl bg-white text-[#0E6B5A] border border-[#0E6B5A]/30 text-[13px] font-bold inline-flex items-center justify-center gap-1.5">
+                  <MessageCircle className="h-4 w-4" /> וואטסאפ
                 </a>
-              )}
-              {i.lead_status !== "approved" && (
-                <button onClick={() => updateLeadStatus(i.id, "approved")} disabled={statusBusy === i.id}
-                  aria-label="שלח הצעה"
-                  className="flex-1 h-10 rounded-xl bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0] text-[12px] font-bold inline-flex items-center justify-center gap-1.5 disabled:opacity-50">
-                  <Send className="h-3.5 w-3.5" /> הצעה
-                </button>
-              )}
-              <button onClick={() => setNoteEdit({ id: i.id, value: i.supplier_notes ?? "" })}
-                aria-label="הערה" title="הערה פנימית"
-                className="h-10 w-10 rounded-xl bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A] inline-flex items-center justify-center shrink-0">
-                <StickyNote className="h-4 w-4" />
-              </button>
+              ) : null}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button aria-label="עוד"
-                    className="h-10 w-10 rounded-xl bg-[#F8FAFC] text-[#64748B] border border-[#EEF0F3] inline-flex items-center justify-center shrink-0">
+                    className="h-11 w-11 rounded-2xl bg-[#F8FAFC] text-[#64748B] border border-[#EEF0F3] inline-flex items-center justify-center shrink-0">
                     ⋯
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="text-[12px]">
+                  <DropdownMenuItem onClick={() => setNoteEdit({ id: i.id, value: i.supplier_notes ?? "" })}>
+                    <StickyNote className="h-3.5 w-3.5 ml-1" /> הערה פנימית
+                  </DropdownMenuItem>
+                  {i.lead_status !== "approved" && (
+                    <DropdownMenuItem onClick={() => updateLeadStatus(i.id, "approved")} disabled={statusBusy === i.id}>
+                      <Send className="h-3.5 w-3.5 ml-1" /> סמן כהצעה נשלחה
+                    </DropdownMenuItem>
+                  )}
                   {email && (
                     <DropdownMenuItem onClick={() => window.location.assign(`mailto:${email}`)}>
                       <Mail className="h-3.5 w-3.5 ml-1" /> שלח אימייל
@@ -586,7 +596,7 @@ export default function SupplierLeads() {
 
   return (
     <MobileShell>
-      <ScreenHeader title="לידים" subtitle="פניות מדיירים — טיפול והמרה" />
+      <ScreenHeader title="לידים" subtitle="פניות שממתינות לכם" />
 
       <div className="px-4 -mt-2 relative z-10 pb-24 space-y-3">
         {loading ? (
@@ -597,13 +607,11 @@ export default function SupplierLeads() {
           <>
             <SupplierPendingBanner status={approvalStatus} />
 
-            {/* Stage filters — large, comfortable, no duplicate stats strip */}
-            <div className="grid grid-cols-5 gap-1.5">
+            {/* Stage filters — 3 calm segments */}
+            <div className="bg-white rounded-2xl border border-[#EEF0F3] p-1 grid grid-cols-3 gap-1">
               {([
                 { k: "all" as TabKey, label: "הכל", count: stats.total },
-                { k: "new" as TabKey, label: "חדשים", count: stats.new },
-                { k: "in_progress" as TabKey, label: "בטיפול", count: stats.in_progress },
-                { k: "offer_sent" as TabKey, label: "הצעה", count: stats.offer_sent },
+                { k: "open" as TabKey, label: "פתוחים", count: stats.open },
                 { k: "closed" as TabKey, label: "נסגרו", count: stats.closed },
               ]).map((t) => {
                 const active = tab === t.k;
@@ -613,16 +621,16 @@ export default function SupplierLeads() {
                     type="button"
                     onClick={() => { setTab(t.k); setShowTrash(false); }}
                     className={
-                      "rounded-2xl border px-1 py-2.5 text-center transition-colors " +
+                      "rounded-xl px-2 py-2.5 text-center transition-colors " +
                       (active
-                        ? "bg-[#0E6B5A] border-[#0E6B5A] text-white shadow-[0_6px_16px_-10px_rgba(14,107,90,0.7)]"
-                        : "bg-white border-[#EEF0F3] text-[#475569]")
+                        ? "bg-[#0E6B5A] text-white shadow-[0_6px_16px_-10px_rgba(14,107,90,0.7)]"
+                        : "text-[#475569]")
                     }
                   >
-                    <div className={"text-[15px] font-bold tabular-nums leading-none " + (active ? "text-white" : "text-[#0F172A]")}>
+                    <div className={"text-[16px] font-bold tabular-nums leading-none " + (active ? "text-white" : "text-[#0F172A]")}>
                       {t.count}
                     </div>
-                    <div className={"text-[10px] font-semibold mt-1 truncate " + (active ? "text-white/85" : "text-[#8E95A2]")}>
+                    <div className={"text-[11px] font-semibold mt-1 " + (active ? "text-white/85" : "text-[#8E95A2]")}>
                       {t.label}
                     </div>
                   </button>
@@ -704,7 +712,9 @@ export default function SupplierLeads() {
                       ? "עוד אין לידים — והחשבון בבדיקה"
                       : tab === "all"
                         ? "עוד אין לידים"
-                        : `אין לידים ב״${tab === "new" ? "חדשים" : tab === "in_progress" ? "בטיפול" : tab === "offer_sent" ? "הצעה" : "נסגרו"}״`}
+                        : tab === "open"
+                          ? "אין לידים פתוחים"
+                          : "אין לידים שנסגרו"}
                 </h3>
                 <p className="text-[13px] text-[#8E95A2] mt-1.5 leading-relaxed max-w-[280px] mx-auto">
                   {query
@@ -713,7 +723,7 @@ export default function SupplierLeads() {
                       ? "אחרי האישור, פניות מדיירים יופיעו כאן עם טלפון ושלב טיפול."
                       : tab === "all"
                         ? "פרסמו הצעה פעילה — דיירים בפרויקטים רלוונטיים יוכלו לפנות אליכם."
-                        : "עברו לטאב ״הכל״ או המתינו לפניות חדשות."}
+                        : "עברו ל״הכל״ או המתינו לפניות חדשות."}
                 </p>
                 {!query && tab === "all" && !isSupplierLocked(approvalStatus) && (
                   <Link to="/supplier/offers/new"

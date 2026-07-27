@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import {
-  Save, X, Plus, Trash2,
+  Save, Plus, Trash2,
 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BackHeader, LoadingState } from "@/components/ds";
@@ -323,7 +323,7 @@ export default function SupplierProfileEdit() {
     <MobileShell>
       <BackHeader title="פרופיל העסק" subtitle="הפרטים שדיירים רואים עליכם" />
 
-      <form onSubmit={handleSave} className="pb-28" dir="rtl">
+      <form onSubmit={handleSave} className="pb-36" dir="rtl">
         {/* Section switcher — keeps the form comfortable */}
         <div className="px-4 sticky top-0 z-30 bg-[#F7F5F0]/95 backdrop-blur pt-1 pb-3">
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
@@ -360,10 +360,22 @@ export default function SupplierProfileEdit() {
         </div>
 
         <div className="px-5 space-y-4">
+          {/* Live preview — how residents see you */}
+          <div className="rounded-[28px] border border-[#0E6B5A]/15 bg-gradient-to-l from-[#E8F5F1] to-white p-4 flex items-center gap-3.5 shadow-sm">
+            <SupplierLogo name={businessName || "ספק"} logoUrl={logoUrl} size="md" />
+            <div className="flex-1 min-w-0 text-right">
+              <div className="text-[11px] font-bold text-[#0E6B5A] mb-0.5">כך זה נראה לדיירים</div>
+              <div className="text-[15px] font-bold text-[#0F172A] truncate">{businessName || "שם העסק"}</div>
+              <div className="text-[12px] text-[#64748B] mt-0.5 line-clamp-2">
+                {shortDescription.trim() || "הוסיפו תיאור קצר — הוא יופיע בכרטיס שלכם"}
+              </div>
+            </div>
+          </div>
+
           {activeSection === "details" && (
             <Section title="פרטי העסק" subtitle="שם, קשר ותיאור שיופיעו בכרטיס">
               <Field label="שם העסק">
-                <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} required className="h-11 rounded-xl" />
+                <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} required className="h-12 rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" />
               </Field>
 
               <div className="space-y-1.5">
@@ -398,31 +410,31 @@ export default function SupplierProfileEdit() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-4">
                 <Field label="שם איש קשר">
-                  <Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={60} className="h-11 rounded-xl" />
+                  <Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={60} className="h-12 rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" />
                 </Field>
                 <Field label="טלפון">
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} dir="ltr" className="h-11 rounded-xl" />
+                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} dir="ltr" className="h-12 rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" />
                 </Field>
                 <Field label="אימייל">
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-11 rounded-xl" />
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-12 rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" />
                   {email.trim().toLowerCase() !== originalEmail.toLowerCase() && (
                     <p className="text-[12px] text-[#0A5446] mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
                   )}
                 </Field>
                 <Field label="תיאור קצר לכרטיס">
-                  <Input value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} maxLength={140} className="h-11 rounded-xl" placeholder="משפט אחד שמושך דיירים (עד 140 תווים)" />
+                  <Input value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} maxLength={140} className="h-12 rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" placeholder="משפט אחד שמושך דיירים (עד 140 תווים)" />
                 </Field>
                 <Field label="תיאור עסק מלא">
-                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={4} className="rounded-xl" placeholder="ספרו על הניסיון, סוגי עבודות, ומה מייחד אתכם" />
+                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={4} className="rounded-2xl bg-[#F8FAFC] border-[#E8ECF1]" placeholder="ספרו על הניסיון, סוגי עבודות, ומה מייחד אתכם" />
                 </Field>
               </div>
 
-              <div className="flex items-center justify-between py-2 px-3 rounded-2xl bg-[#F8FAFC] border border-[#EEF0F3]">
+              <div className="flex items-center justify-between py-3 px-4 rounded-2xl bg-[#F1FAF7] border border-[#0E6B5A]/15">
                 <div>
-                  <div className="text-[14px] font-semibold text-[#0F172A]">פרופיל פעיל</div>
-                  <p className="text-[12px] text-[#8E95A2] mt-0.5">כבוי — לא יוצג לדיירים</p>
+                  <div className="text-[14px] font-semibold text-[#0F172A]">מוצג לדיירים</div>
+                  <p className="text-[12px] text-[#64748B] mt-0.5">{isActive ? "הפרופיל גלוי בחיפוש" : "כבוי — לא יוצג לדיירים"}</p>
                 </div>
                 <Switch checked={isActive} onCheckedChange={setIsActive} />
               </div>
@@ -550,26 +562,30 @@ export default function SupplierProfileEdit() {
           <button
             type="button"
             onClick={() => navigate("/supplier/delete-account")}
-            className="w-full h-11 rounded-2xl flex items-center justify-center text-[#DC2626] text-[13px] font-semibold"
+            className="w-full h-10 flex items-center justify-center text-[#94A3B8] text-[12px] font-medium"
           >
             מחיקת חשבון
           </button>
         </div>
 
-        {/* Sticky save bar */}
+        {/* Sticky save — single primary action */}
         <div className="fixed bottom-0 inset-x-0 z-40 pointer-events-none">
-          <div className="mx-auto max-w-[var(--app-max-w)] px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 pointer-events-auto">
-            <div className="rounded-2xl bg-white/95 backdrop-blur border border-[#EEF0F3] shadow-[0_8px_28px_-12px_rgba(11,18,32,0.28)] p-2 flex gap-2">
-              <Button type="button" variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-xl">
-                <X className="h-4 w-4 ml-2" /> ביטול
-              </Button>
+          <div className="mx-auto max-w-[var(--app-max-w)] px-5 pb-[max(14px,env(safe-area-inset-bottom))] pt-2 pointer-events-auto">
+            <div className="space-y-2">
               <Button
                 type="submit"
                 disabled={saving}
-                className="flex-[1.4] h-12 rounded-[16px] bg-[#0E6B5A] hover:bg-[#0A5446] text-white"
+                className="w-full h-13 h-[52px] rounded-2xl bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[15px] font-bold shadow-[0_10px_28px_-12px_rgba(14,107,90,0.55)]"
               >
-                <Save className="h-4 w-4 ml-2" /> {saving ? "שומר…" : "שמירת שינויים"}
+                <Save className="h-4 w-4 ml-2" /> {saving ? "שומר…" : "שמירה"}
               </Button>
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="w-full h-9 text-[13px] font-semibold text-[#64748B]"
+              >
+                ביטול
+              </button>
             </div>
           </div>
         </div>
