@@ -151,7 +151,7 @@ export async function loadSupplierCompletenessById(
   const [{ data: s }, { count: regionsCount }, { count: citiesCount }] = await Promise.all([
     supabase
       .from("suppliers")
-      .select("business_name,phone,email,categories,serves_all_country,short_description,description")
+      .select("business_name,contact_name,phone,email,categories,serves_all_country,short_description,description,logo_url")
       .eq("id", supplierId)
       .maybeSingle(),
     supabase
@@ -165,6 +165,7 @@ export async function loadSupplierCompletenessById(
   ]);
   return computeCompleteness({
     business_name: s?.business_name,
+    contact_name: s?.contact_name,
     phone: s?.phone,
     email: s?.email,
     categories: s?.categories,
@@ -173,5 +174,6 @@ export async function loadSupplierCompletenessById(
     citiesCount: citiesCount ?? 0,
     short_description: s?.short_description,
     description: s?.description,
+    logo_url: s?.logo_url,
   });
 }
