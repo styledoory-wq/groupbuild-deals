@@ -99,7 +99,7 @@ export async function loadSupplierCompletenessForUser(
 ): Promise<{ supplierId: string | null; completeness: SupplierCompleteness }> {
   const { data: supplier } = await supabase
     .from("suppliers")
-    .select("id,business_name,phone,email,categories,serves_all_country,short_description,description")
+    .select("id,business_name,contact_name,phone,email,categories,serves_all_country,short_description,description,logo_url")
     .eq("user_id", userId)
     .order("updated_at", { ascending: false })
     .limit(1)
@@ -130,6 +130,7 @@ export async function loadSupplierCompletenessForUser(
     supplierId: supplier.id,
     completeness: computeCompleteness({
       business_name: supplier.business_name,
+      contact_name: supplier.contact_name,
       phone: supplier.phone,
       email: supplier.email,
       categories: supplier.categories,
@@ -138,6 +139,7 @@ export async function loadSupplierCompletenessForUser(
       citiesCount: citiesCount ?? 0,
       short_description: supplier.short_description,
       description: supplier.description,
+      logo_url: supplier.logo_url,
     }),
   };
 }
