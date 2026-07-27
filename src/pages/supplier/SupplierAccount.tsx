@@ -13,7 +13,14 @@ import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { loadSupplierCompletenessForUser, type SupplierCompleteness } from "@/lib/supplierCompleteness";
 import { SupplierPendingBanner, isSupplierLive } from "@/components/supplier/SupplierWorkspace";
 
-type Row = { icon: LucideIcon; label: string; sub?: string; to?: string; onClick?: () => void };
+type Row = {
+  icon: LucideIcon;
+  label: string;
+  sub?: string;
+  to?: string;
+  onClick?: () => void;
+  unavailable?: boolean;
+};
 
 export default function SupplierAccount() {
   const navigate = useNavigate();
@@ -54,8 +61,8 @@ export default function SupplierAccount() {
 
   const rows: Row[] = [
     { icon: Building2, label: "פרופיל העסק", sub: "פרטים, תחומים, אזורים ומיתוג", to: "/supplier/profile/edit" },
-    { icon: CreditCard, label: "מנוי וחיובים", sub: "תכנית, חשבוניות, אמצעי תשלום" },
-    { icon: Settings, label: "הגדרות", sub: "שפה, אזור פעילות, פרטיות" },
+    { icon: CreditCard, label: "מנוי וחיובים", sub: "תכנית, חשבוניות, אמצעי תשלום", unavailable: true },
+    { icon: Settings, label: "הגדרות", sub: "שפה, אזור פעילות, פרטיות", unavailable: true },
     { icon: Bell, label: "התראות", sub: "Email, Push, וואטסאפ", to: "/settings/notifications" },
     { icon: LifeBuoy, label: "תמיכה", sub: "מרכז עזרה, צור קשר", to: "/support" },
   ];
@@ -70,7 +77,7 @@ export default function SupplierAccount() {
       <div className="min-h-screen bg-[#F7F8FA] pb-8" dir="rtl">
         <header className="px-5 pt-6 pb-4">
           <h1 className="text-[22px] font-bold text-[#0F172A] tracking-tight">חשבון</h1>
-          <p className="text-[13px] text-[#8E95A2] mt-1">ניהול העסק, מנוי והגדרות</p>
+          <p className="text-[13px] text-[#8E95A2] mt-1">ניהול העסק והגדרות</p>
         </header>
 
         <div className="px-5 mb-4">
@@ -144,21 +151,44 @@ export default function SupplierAccount() {
           <div className="bg-white rounded-3xl border border-[#EEF0F3] overflow-hidden shadow-sm">
             {rows.map((r, i) => {
               const Icon = r.icon;
-              const onClick = r.onClick ?? (r.to ? () => navigate(r.to!) : () => toast.message("בקרוב"));
+              const disabled = !!r.unavailable;
+              const onClick = disabled
+                ? undefined
+                : r.onClick ?? (r.to ? () => navigate(r.to!) : undefined);
               return (
                 <button
                   key={r.label}
+                  type="button"
                   onClick={onClick}
-                  className={`w-full flex items-center gap-3 p-4 text-right active:bg-[#F7F8FA] transition ${i < rows.length - 1 ? "border-b border-[#F2F4F7]" : ""}`}
+                  disabled={disabled}
+                  aria-disabled={disabled}
+                  className={
+                    "w-full flex items-center gap-3 p-4 text-right transition " +
+                    (disabled ? "opacity-55 cursor-not-allowed" : "active:bg-[#F7F8FA]") +
+                    (i < rows.length - 1 ? " border-b border-[#F2F4F7]" : "")
+                  }
                 >
-                  <div className="h-10 w-10 rounded-xl bg-[#E8F5F1] flex items-center justify-center shrink-0">
-                    <Icon className="h-[18px] w-[18px] text-[#0E6B5A]" strokeWidth={2} />
+                  <div className={"h-10 w-10 rounded-xl flex items-center justify-center shrink-0 " + (disabled ? "bg-[#F1F5F9]" : "bg-[#E8F5F1]")}>
+                    <Icon className={"h-[18px] w-[18px] " + (disabled ? "text-[#94A3B8]" : "text-[#0E6B5A]")} strokeWidth={2} />
                   </div>
                   <div className="flex-1 min-w-0 text-right">
-                    <div className="font-semibold text-[14px] text-[#0F172A]">{r.label}</div>
-                    {r.sub && <div className="text-[12px] text-[#8E95A2] mt-0.5 truncate">{r.sub}</div>}
+                    <div className="flex items-center justify-end gap-2">
+                      {disabled && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#64748B]">
+                          לא זמין
+                        </span>
+                      )}
+                      <div className={"font-semibold text-[14px] " + (disabled ? "text-[#94A3B8]" : "text-[#0F172A]")}>
+                        {r.label}
+                      </div>
+                    </div>
+                    {r.sub && (
+                      <div className={"text-[12px] mt-0.5 truncate " + (disabled ? "text-[#CBD5E1]" : "text-[#8E95A2]")}>
+                        {r.sub}
+                      </div>
+                    )}
                   </div>
-                  <ChevronLeft className="h-4 w-4 text-[#8E95A2] shrink-0" />
+                  {!disabled && <ChevronLeft className="h-4 w-4 text-[#8E95A2] shrink-0" />}
                 </button>
               );
             })}
