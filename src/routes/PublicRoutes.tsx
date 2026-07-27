@@ -7,6 +7,7 @@ const Gateway = lazy(() => import("@/pages/marketing/Gateway"));
 const SuppliersLanding = lazy(() => import("@/pages/marketing/SuppliersLanding"));
 const ResidentsLanding = lazy(() => import("@/pages/marketing/ResidentsLanding"));
 const ResidentsHome = lazy(() => import("@/pages/marketing/ResidentsHome"));
+const SuppliersHome = lazy(() => import("@/pages/marketing/SuppliersHome"));
 const Auth = lazy(() => import("@/pages/Auth"));
 const Onboarding = lazy(() => import("@/pages/Onboarding"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
@@ -40,10 +41,16 @@ const CommitteeQuoteRequest = lazy(() => import("@/pages/committee/CommitteeQuot
  */
 export const publicRoutes = (
   <>
-    {/* Residents build: always the public residents home, never the combined
-        gateway. Keeps "Gateway" (and its "אני ספק" copy) out of the initial
-        route entirely so it's never fetched/executed on launch. */}
-    <Route path="/" element={IS_RESIDENTS_BUILD ? <ResidentsHome /> : <Gateway />} />
+    {/* Role-specific app homes:
+        - residents build → ResidentsHome
+        - suppliers build → SuppliersHome
+        - web → Gateway chooser */}
+    <Route
+      path="/"
+      element={
+        IS_RESIDENTS_BUILD ? <ResidentsHome /> : IS_SUPPLIERS_BUILD ? <SuppliersHome /> : <Gateway />
+      }
+    />
     <Route path="/welcome" element={<Navigate to="/" replace />} />
     <Route path="/site" element={<Navigate to="/" replace />} />
     <Route path="/landing" element={<Navigate to="/" replace />} />
