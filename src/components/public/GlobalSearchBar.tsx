@@ -26,7 +26,13 @@ const POPULAR = ["חשמלאי", "דלתות", "מזגן", "סולארי", "רי
  * being clipped by ancestors with `overflow-hidden`, transforms, or lower stacking
  * contexts. Position is recalculated from the input's bounding rect on scroll/resize.
  */
-export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "compact" }) {
+export function GlobalSearchBar({
+  variant = "hero",
+  placeholder = 'חפש בעברית: "חשמלאי בצפת", "דלתות פנים", "מטבחים"...',
+}: {
+  variant?: "hero" | "compact";
+  placeholder?: string;
+}) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [hits, setHits] = useState<Hit[]>([]);
@@ -199,7 +205,7 @@ export function GlobalSearchBar({ variant = "hero" }: { variant?: "hero" | "comp
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
-          placeholder='חפש בעברית: "חשמלאי בצפת", "דלתות פנים", "מטבחים"...'
+          placeholder={placeholder}
           className={`w-full border border-border bg-card pr-11 pl-11 font-medium text-foreground placeholder:text-muted-foreground/65 focus:border-secondary focus:outline-none focus:ring-[3px] focus:ring-secondary/15 ${heroCls}`}
         />
         {q && (
