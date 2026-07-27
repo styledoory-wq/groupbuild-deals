@@ -22,36 +22,34 @@ function setResidentIntent() {
 
 export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
   return (
-    <div className="relative isolate overflow-hidden min-h-[420px]">
-      {/* Full-bleed photo — kept vivid */}
+    <div className="relative isolate overflow-hidden">
       <div
         aria-hidden
-        className="absolute inset-0 -z-20 bg-cover bg-center"
+        className="absolute inset-0 -z-20 bg-cover bg-[center_30%]"
         style={{ backgroundImage: `url("${HERO_BG}")` }}
       />
-      {/* Light bottom fade only — blends into page, does not wash the photo */}
+      {/* Soft vignette only under the copy — no card, photo stays open */}
       <div
         aria-hidden
         className="absolute inset-0 -z-10"
         style={{
           background:
-            "linear-gradient(180deg, rgba(247,245,240,0.18) 0%, rgba(247,245,240,0.08) 45%, rgba(247,245,240,0.55) 82%, rgba(247,245,240,1) 100%)",
+            "radial-gradient(120% 70% at 70% 18%, rgba(247,245,240,0.78) 0%, rgba(247,245,240,0.35) 42%, rgba(247,245,240,0.08) 70%), linear-gradient(180deg, rgba(247,245,240,0.25) 0%, rgba(247,245,240,0.05) 55%, rgba(247,245,240,0.92) 100%)",
         }}
       />
 
       <div
-        className="px-6 pb-6"
+        className="px-6 pb-5"
         style={{ paddingTop: "max(env(safe-area-inset-top), 16px)" }}
       >
-        <header className="pt-2 pb-4 flex justify-between items-center gap-3">
-          <div className="inline-flex items-center rounded-2xl bg-white/90 backdrop-blur-md border border-white/95 shadow-[0_8px_22px_-14px_rgba(11,18,32,0.25)] px-2.5 py-1.5">
+        <header className="pt-2 pb-5 flex justify-between items-center gap-3">
+          <div className="inline-flex items-center rounded-2xl bg-white/90 backdrop-blur-md border border-white/95 shadow-sm px-2.5 py-1.5">
             <BrandLogo size="sm" className="h-9" />
           </div>
-
           {signedIn ? (
             <Link
               to="/resident"
-              className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-sm border border-[#0E6B5A]/25 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-sm"
+              className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-sm bg-white/90 backdrop-blur-md border border-[#0E6B5A]/20 px-4 py-1.5 rounded-full"
             >
               <UserCircle2 className="h-4 w-4" />
               האזור האישי
@@ -60,51 +58,48 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
             <Link
               to="/auth/resident?mode=signin"
               onClick={setResidentIntent}
-              className="text-[#0E6B5A] font-semibold text-sm border border-[#0E6B5A]/25 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-sm"
+              className="text-[#0E6B5A] font-semibold text-sm bg-white/90 backdrop-blur-md border border-[#0E6B5A]/20 px-4 py-1.5 rounded-full"
             >
               התחברות
             </Link>
           )}
         </header>
 
-        <section>
-          {/* Text plate — readability without washing the photo */}
-          <div className="rounded-[24px] bg-white/92 backdrop-blur-md border border-white/95 shadow-[0_12px_32px_-16px_rgba(11,18,32,0.28)] p-4">
-            <h1 className="text-[28px] font-extrabold text-[#0B1220] leading-[1.15] tracking-tight">
-              כוח הקנייה של כולם
-              <br />
-              <span className="text-[#0E6B5A]">לחיסכון בבית ובבניין</span>
-            </h1>
-            <p className="mt-3 text-[15px] text-[#334155] font-medium leading-relaxed">
-              GroupBuild מחברת דיירים לרכישה קבוצתית — ספקים מאומתים, מחירים חכמים, ושקיפות מלאה.
-            </p>
-          </div>
-
-          <div className="mt-4 sticky top-[max(12px,env(safe-area-inset-top))] z-20">
-            <GlobalSearchBar
-              variant="hero"
-              placeholder="איזה ספק או שירות אתם מחפשים היום?"
-            />
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            {QUICK_CHIPS.map((c) => (
-              <Link
-                key={c.label}
-                to={`/search?q=${encodeURIComponent(c.q)}`}
-                className="inline-flex h-8 items-center justify-center px-3.5 rounded-full bg-white/90 border border-[#E4DFD4] text-[12px] font-bold leading-none text-[#334155] backdrop-blur-sm shadow-sm"
-              >
-                {c.label}
-              </Link>
-            ))}
-            <Link
-              to="/categories"
-              className="inline-flex h-8 items-center justify-center px-3.5 rounded-full bg-[#0E6B5A] text-white text-[12px] font-bold leading-none shadow-sm"
-            >
-              כל הקטגוריות
-            </Link>
-          </div>
+        <section className="max-w-[22rem]">
+          <h1
+            className="text-[30px] font-extrabold text-[#0B1220] leading-[1.12] tracking-tight"
+            style={{ textShadow: "0 1px 0 rgba(255,255,255,0.9), 0 8px 24px rgba(247,245,240,0.85)" }}
+          >
+            כוח הקנייה של כולם
+            <br />
+            <span className="text-[#0E6B5A]">לחיסכון בבית ובבניין</span>
+          </h1>
+          <p
+            className="mt-3 text-[14.5px] text-[#0B1220] font-semibold leading-relaxed"
+            style={{ textShadow: "0 1px 0 rgba(255,255,255,0.95), 0 6px 18px rgba(247,245,240,0.9)" }}
+          >
+            רכישה קבוצתית עם השכנים — ספקים מאומתים ומחירים חכמים.
+          </p>
         </section>
+
+        <div className="mt-5 sticky top-[max(12px,env(safe-area-inset-top))] z-20">
+          <GlobalSearchBar
+            variant="hero"
+            placeholder="איזה ספק או שירות אתם מחפשים היום?"
+          />
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {QUICK_CHIPS.map((c) => (
+            <Link
+              key={c.label}
+              to={`/search?q=${encodeURIComponent(c.q)}`}
+              className="inline-flex h-8 items-center justify-center px-3.5 rounded-full bg-white/90 border border-white text-[12px] font-bold leading-none text-[#334155] shadow-sm"
+            >
+              {c.label}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
