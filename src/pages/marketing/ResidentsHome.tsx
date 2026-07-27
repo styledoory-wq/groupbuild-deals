@@ -1,25 +1,28 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Wallet, Users, ListChecks, Tag, Sparkles, UserCircle2 } from "lucide-react";
-import { BrandMark } from "@/components/BrandLogo";
+import { ChevronLeft, Sparkles, Tag } from "lucide-react";
 import { Seo } from "@/components/seo/Seo";
 import { useApp } from "@/store/AppStore";
 import { usePublicDeals, type PublicDeal } from "@/hooks/usePublicDeals";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { HomeDealSkeletonList } from "@/components/ui/HomeDealSkeleton";
-import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
+import { ResidentHomeHero } from "@/components/resident-home/ResidentHomeHero";
+import { WhatIsSection } from "@/components/resident-home/WhatIsSection";
+import { HowItWorksSection } from "@/components/resident-home/HowItWorksSection";
+import { BenefitsSection } from "@/components/resident-home/BenefitsSection";
+import { ResidentHomeCta } from "@/components/resident-home/ResidentHomeCta";
+import { Reveal } from "@/components/resident-home/Reveal";
 import { cn } from "@/lib/utils";
 
 /**
  * Residents Home — premium discovery entry point at "/".
- * Always the residents build's initial screen, for guests AND signed-in
- * residents alike. All content is live: featured deals are pulled from
- * public, approved deals only. Personal actions (project, budget, deals,
- * favorites, documents, personal area) are gated behind auth elsewhere.
+ * Hero + search first; scroll-reveal marketing sections; live featured deals.
+ * Guests and signed-in residents share this screen.
  */
 export default function ResidentsHome() {
   const { user } = useApp();
+  const signedIn = !!user;
   const { data: deals, isLoading, isError, refetch } = usePublicDeals(4);
   const qc = useQueryClient();
   const ptr = usePullToRefresh(async () => {
@@ -33,83 +36,28 @@ export default function ResidentsHome() {
       style={{ background: "#F7F5F0" }}
     >
       <Seo
-        title="GroupBuild — מצאו ספקים איכותיים לבית שלכם"
-        description="חיפוש ספקים, קטגוריות ודילים קבוצתיים לדיירי פרויקטים חדשים. שימוש חופשי, ללא הרשמה."
+        title="GroupBuild — כוח קנייה קבוצתי לדיירים"
+        description="התאגדות דיירים לרכישה קבוצתית — חיפוש ספקים, הצעות משתלמות וחיסכון בבית ובבניין."
         path="/"
       />
       <PullToRefreshIndicator {...ptr} />
 
       <div
         className="relative w-full max-w-screen-sm flex flex-col"
-        style={{
-          paddingTop: "max(env(safe-area-inset-top), 24px)",
-          paddingBottom: "max(env(safe-area-inset-bottom), 24px)",
-        }}
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 28px)" }}
       >
-        {/* Header */}
-        <header className="px-6 pt-2 pb-3 flex justify-between items-center animate-fade-up">
-          <BrandMark className="h-10 w-auto" />
-          {user ? (
-            <Link
-              to="/resident"
-              className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-sm border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
-            >
-              <UserCircle2 className="h-4 w-4" />
-              האזור האישי
-            </Link>
-          ) : (
-            <Link
-              to="/auth/resident?mode=signin"
-              className="text-[#0E6B5A] font-semibold text-sm border border-[#0E6B5A]/25 px-4 py-1.5 rounded-full hover:bg-[#0E6B5A]/5 transition-colors"
-            >
-              התחברות
-            </Link>
-          )}
-        </header>
+        <ResidentHomeHero signedIn={signedIn} />
 
-        {/* Hero + Search */}
-        <section className="px-6 pt-3 pb-2 animate-fade-up">
-          <h1 className="text-[26px] font-extrabold text-[#0B1220] leading-tight tracking-tight">
-            מצאו את הספק
-            <br />
-            <span className="text-[#0E6B5A]">המתאים ביותר</span> עבורכם
-          </h1>
+        <WhatIsSection />
+        <HowItWorksSection />
+        <BenefitsSection />
+        <ResidentHomeCta signedIn={signedIn} />
 
-          <div className="mt-5">
-            <GlobalSearchBar variant="hero" />
-          </div>
-
-          <p className="mt-2 text-center text-[11.5px] text-[#6B7280]">
-            מנוע חיפוש חופשי — קטגוריות, ספקים וערים. אין צורך בהרשמה.
-          </p>
-        </section>
-
-        {/* Categories chips */}
-        <section className="py-3 animate-fade-up">
-          <div className="flex gap-3 px-6 overflow-x-auto no-scrollbar">
-            <Link
-              to="/categories"
-              className="flex-shrink-0 px-5 py-2.5 bg-[#0E6B5A] text-white rounded-full text-sm font-medium shadow-[0_4px_12px_-4px_rgba(14,107,90,0.35)]"
-            >
-              כל הקטגוריות
-            </Link>
-            {["חשמלאים", "אינסטלטורים", "מיזוג אוויר", "מטבחים", "ריצוף"].map((label) => (
-              <Link
-                key={label}
-                to="/categories"
-                className="flex-shrink-0 px-5 py-2.5 bg-white text-stone-600 rounded-full text-sm font-medium border border-stone-100 shadow-sm hover:border-[#0E6B5A]/30 transition-colors"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* Featured deals — real data only */}
-        <section className="px-6 py-3 animate-fade-up pb-24">
+        {/* Featured deals — real data */}
+        <Reveal className="px-6 mt-10 pb-4">
           <div className="flex justify-between items-end mb-4">
             <h2 className="text-lg font-bold text-[#0B1220]">מבצעים לחברי הקהילה</h2>
-            {(deals && deals.length > 0) && (
+            {deals && deals.length > 0 && (
               <Link
                 to="/deals"
                 className="text-[#0E6B5A] text-[11px] font-bold uppercase tracking-wider flex items-center gap-0.5"
@@ -130,36 +78,7 @@ export default function ResidentsHome() {
               ))}
             </div>
           )}
-        </section>
-
-        {/* Personal features teaser */}
-        <section className="px-6 pt-2 pb-6 animate-fade-up">
-          <div
-            className="relative rounded-2xl p-6 text-white overflow-hidden shadow-[0_16px_40px_-16px_rgba(14,107,90,0.5)]"
-            style={{ background: "linear-gradient(135deg, #0E6B5A 0%, #0a4f42 100%)" }}
-          >
-            <div className="relative z-10">
-              <h3 className="text-lg font-bold mb-2">נהלו את הפרויקט שלכם</h3>
-              <p className="text-[12.5px] text-white/85 leading-relaxed mb-5 max-w-[26rem]">
-                תקציב, משימות, עסקאות קבוצתיות והצעות מותאמות — הכל במקום אחד.
-              </p>
-              <div className="flex flex-wrap gap-2 mb-5">
-                <Chip icon={<Wallet className="h-3.5 w-3.5" />} label="תקציב" />
-                <Chip icon={<Users className="h-3.5 w-3.5" />} label="עסקאות קבוצתיות" />
-                <Chip icon={<ListChecks className="h-3.5 w-3.5" />} label="משימות" />
-              </div>
-              <Link
-                to={user ? "/resident" : "/auth/resident?mode=signup"}
-                className="inline-flex items-center gap-1.5 bg-white text-[#0E6B5A] font-bold text-sm px-6 py-2.5 rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
-              >
-                {user ? "לאזור האישי" : "הצטרפות לקהילה"}
-                <ChevronLeft className="h-4 w-4" />
-              </Link>
-            </div>
-            <div aria-hidden className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full blur-2xl" style={{ background: "rgba(255,255,255,0.10)" }} />
-            <div aria-hidden className="absolute -top-10 -right-10 w-24 h-24 rounded-full blur-xl" style={{ background: "rgba(255,255,255,0.06)" }} />
-          </div>
-        </section>
+        </Reveal>
       </div>
     </div>
   );
@@ -170,7 +89,7 @@ function DealCard({ deal }: { deal: PublicDeal }) {
   return (
     <Link
       to={`/deals/${deal.id}`}
-      className="block bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm hover:shadow-md transition-shadow"
+      className="block bg-white rounded-2xl overflow-hidden border border-[#E4DFD4] shadow-[0_10px_30px_-16px_rgba(11,18,32,0.12)] hover:shadow-md transition-shadow"
     >
       <div
         className={cn(
@@ -205,7 +124,7 @@ function DealCard({ deal }: { deal: PublicDeal }) {
 
 function DealsEmptyState() {
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 p-8 text-center">
+    <div className="bg-white rounded-2xl border border-[#E4DFD4] p-8 text-center">
       <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-[#0E6B5A]/10 text-[#0E6B5A] mb-3">
         <Sparkles className="h-6 w-6" />
       </div>
@@ -226,21 +145,12 @@ function DealsEmptyState() {
 
 function DealsErrorState() {
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 p-6 text-center">
+    <div className="bg-white rounded-2xl border border-[#E4DFD4] p-6 text-center">
       <div className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-stone-100 text-stone-500 mb-2">
         <Tag className="h-5 w-5" />
       </div>
       <p className="text-[13px] text-stone-600 font-semibold">לא הצלחנו לטעון את הדילים</p>
       <p className="text-[11.5px] text-stone-400 mt-1">נסו לרענן את המסך.</p>
     </div>
-  );
-}
-
-function Chip({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm text-white text-[11.5px] font-medium px-2.5 py-1 rounded-full">
-      {icon}
-      {label}
-    </span>
   );
 }
