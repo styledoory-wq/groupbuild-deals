@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { loadSupplierCompletenessForUser, type SupplierCompleteness } from "@/lib/supplierCompleteness";
 import { SupplierPendingBanner, isSupplierLive } from "@/components/supplier/SupplierWorkspace";
+import { SUPPLIER } from "@/lib/supplierUi";
 
 type Row = {
   icon: LucideIcon;
@@ -73,11 +74,11 @@ export default function SupplierAccount() {
   const percent = completeness?.percent ?? null;
 
   return (
-    <MobileShell>
-      <div className="min-h-screen bg-[#F7F8FA] pb-8" dir="rtl">
+    <MobileShell className="bg-[#E4EBE7]">
+      <div className="min-h-screen pb-8" style={{ background: SUPPLIER.pageBg }} dir="rtl">
         <header className="px-5 pt-6 pb-4">
           <h1 className="text-[22px] font-bold text-[#0F172A] tracking-tight">חשבון</h1>
-          <p className="text-[13px] text-[#8E95A2] mt-1">ניהול העסק והגדרות</p>
+          <p className="text-[13px] text-[#64748B] mt-1">ניהול העסק והגדרות</p>
         </header>
 
         <div className="px-5 mb-4">
@@ -86,14 +87,14 @@ export default function SupplierAccount() {
 
         {/* Identity card */}
         <section className="px-5">
-          <div className="bg-white rounded-3xl border border-[#EEF0F3] p-5 shadow-sm">
+          <div className={SUPPLIER.cardPad}>
             <div className="flex items-center gap-4">
               <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#0E6B5A] to-[#1A8870] text-white font-bold text-[20px] flex items-center justify-center">
                 {initial}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-[16px] text-[#0F172A] truncate">{displayName}</div>
-                <div className="text-[12px] text-[#8E95A2] truncate mt-0.5">{user?.email ?? "ספק"}</div>
+                <div className="text-[12px] text-[#64748B] truncate mt-0.5">{user?.email ?? "ספק"}</div>
                 <div className="mt-2 flex items-center gap-2 flex-wrap">
                   <span
                     className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full ${
@@ -123,12 +124,12 @@ export default function SupplierAccount() {
             </div>
 
             {percent != null && percent < 100 && (
-              <div className="mt-4 pt-4 border-t border-[#F2F4F7]">
+              <div className="mt-4 pt-4 border-t border-[#E8EEEB]">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[11px] font-bold text-[#0E6B5A]">{percent}%</span>
                   <span className="text-[12px] font-semibold text-[#0F172A]">השלמת פרופיל</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-[#F1F5F9] overflow-hidden">
+                <div className="h-1.5 rounded-full bg-[#E8EEEB] overflow-hidden">
                   <div
                     className="h-full rounded-full"
                     style={{ width: `${percent}%`, background: "linear-gradient(90deg,#0E6B5A,#1A8870)" }}
@@ -148,7 +149,7 @@ export default function SupplierAccount() {
 
         {/* Settings list — available first */}
         <section className="px-5 mt-5 space-y-3">
-          <div className="bg-white rounded-3xl border border-[#EEF0F3] overflow-hidden shadow-sm">
+          <div className={SUPPLIER.card + " overflow-hidden"}>
             {rows.filter((r) => !r.unavailable).map((r, i, arr) => {
               const Icon = r.icon;
               const onClick = r.onClick ?? (r.to ? () => navigate(r.to!) : undefined);
@@ -158,8 +159,8 @@ export default function SupplierAccount() {
                   type="button"
                   onClick={onClick}
                   className={
-                    "w-full flex items-center gap-3 p-4 text-right active:bg-[#F7F8FA] transition" +
-                    (i < arr.length - 1 ? " border-b border-[#F2F4F7]" : "")
+                    "w-full flex items-center gap-3 p-4 text-right active:bg-[#F3F7F5] transition" +
+                    (i < arr.length - 1 ? " border-b border-[#E8EEEB]" : "")
                   }
                 >
                   <div className="h-10 w-10 rounded-xl bg-[#E8F5F1] flex items-center justify-center shrink-0">
@@ -167,9 +168,9 @@ export default function SupplierAccount() {
                   </div>
                   <div className="flex-1 min-w-0 text-right">
                     <div className="font-semibold text-[14px] text-[#0F172A]">{r.label}</div>
-                    {r.sub && <div className="text-[12px] text-[#8E95A2] mt-0.5 truncate">{r.sub}</div>}
+                    {r.sub && <div className="text-[12px] text-[#64748B] mt-0.5 truncate">{r.sub}</div>}
                   </div>
-                  <ChevronLeft className="h-4 w-4 text-[#8E95A2] shrink-0" />
+                  <ChevronLeft className="h-4 w-4 text-[#64748B] shrink-0" />
                 </button>
               );
             })}
@@ -177,7 +178,7 @@ export default function SupplierAccount() {
 
           <div>
             <div className="px-1 mb-2 text-[11px] font-bold text-[#94A3B8] tracking-wide">בקרוב</div>
-            <div className="bg-white/70 rounded-3xl border border-dashed border-[#E2E8F0] overflow-hidden">
+            <div className="bg-white/75 rounded-[24px] border border-dashed border-[#D5DED9] overflow-hidden">
               {rows.filter((r) => r.unavailable).map((r, i, arr) => {
                 const Icon = r.icon;
                 return (
@@ -185,7 +186,7 @@ export default function SupplierAccount() {
                     key={r.label}
                     className={
                       "w-full flex items-center gap-3 p-4 opacity-60" +
-                      (i < arr.length - 1 ? " border-b border-[#F2F4F7]" : "")
+                      (i < arr.length - 1 ? " border-b border-[#E8EEEB]" : "")
                     }
                   >
                     <div className="h-10 w-10 rounded-xl bg-[#F1F5F9] flex items-center justify-center shrink-0">
@@ -211,7 +212,7 @@ export default function SupplierAccount() {
         <section className="px-5 mt-6">
           <button
             onClick={handleLogout}
-            className="w-full py-3.5 rounded-2xl bg-white border border-[#FECACA] text-[#DC2626] font-bold flex items-center justify-center gap-2 active:scale-[0.99] transition"
+            className="w-full py-3.5 rounded-2xl bg-white border border-[#FECACA] text-[#DC2626] font-bold flex items-center justify-center gap-2 active:scale-[0.99] transition shadow-[0_2px_14px_-6px_rgba(15,23,42,0.08)]"
           >
             <LogOut className="h-4 w-4" strokeWidth={2.4} />
             יציאה מהחשבון

@@ -16,11 +16,12 @@ import { loadSupplierCompletenessForUser, type SupplierCompleteness } from "@/li
 import { HelpButton } from "@/components/OnboardingFlow";
 import { SmartImg } from "@/components/ui/SmartImg";
 import {
-  SUPPLIER_BG as BG,
+  SUPPLIER_PAGE_BG as BG,
   SUPPLIER_GREEN as GREEN,
   SupplierPendingWorkspace,
   SupplierGettingStarted,
 } from "@/components/supplier/SupplierWorkspace";
+import { SUPPLIER } from "@/lib/supplierUi";
 
 type DbSupplier = {
   id: string;
@@ -329,16 +330,16 @@ export default function SupplierDashboard() {
   const initial = (firstName?.[0] ?? "ס").toUpperCase();
 
   const TopBar = () => (
-    <header className="px-5 pt-6 pb-1">
+    <header className="px-5 pt-6 pb-2">
       <div className="flex items-center justify-between gap-3">
         <button
           onClick={() => navigate("/settings/notifications")}
-          className="shrink-0 h-10 w-10 rounded-full bg-white border border-[#EEF0F3] flex items-center justify-center relative"
+          className="shrink-0 h-11 w-11 rounded-2xl bg-white border border-[#D5DED9] shadow-sm flex items-center justify-center relative"
           aria-label="התראות"
         >
-          <Bell className="h-[17px] w-[17px] text-[#0F172A]" strokeWidth={2} />
+          <Bell className="h-[18px] w-[18px] text-[#0F172A]" strokeWidth={2} />
           {pendingLeads > 0 && (
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#EA6A3A] ring-2 ring-white" />
+            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[#EA6A3A] ring-2 ring-white" />
           )}
         </button>
         <div className="flex items-center gap-3 flex-1 justify-end min-w-0">
@@ -346,11 +347,11 @@ export default function SupplierDashboard() {
             <h1 className="text-[20px] font-bold text-[#0F172A] leading-tight tracking-tight truncate">
               שלום, {firstName}
             </h1>
-            <div className="text-[12px] text-[#8E95A2] mt-0.5 truncate">{businessName}</div>
+            <div className="text-[12px] text-[#64748B] mt-0.5 truncate">{businessName}</div>
           </div>
           <button
             onClick={() => navigate("/supplier/account")}
-            className="shrink-0 h-11 w-11 rounded-full bg-gradient-to-br from-[#0E6B5A] to-[#1A8870] text-white font-bold text-[15px] flex items-center justify-center"
+            className="shrink-0 h-11 w-11 rounded-full bg-gradient-to-br from-[#0E6B5A] to-[#1A8870] text-white font-bold text-[15px] flex items-center justify-center shadow-sm"
             aria-label="חשבון"
           >
             {initial}
@@ -395,67 +396,49 @@ export default function SupplierDashboard() {
           <SupplierGettingStarted businessName={businessName} />
         )}
 
-        {/* ===== What needs attention — action tiles ===== */}
+        {/* ===== Action Center — rich list on elevated card ===== */}
         {myDeals.length > 0 && (
         <section className="px-5 mt-5">
-          <div className="rounded-[28px] overflow-hidden border border-[#0E6B5A]/15 shadow-sm"
-            style={{ background: "linear-gradient(145deg, #0E6B5A 0%, #146F5F 55%, #1A8870 100%)" }}>
-            <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-              <span className="text-[12px] font-bold text-white/80 tabular-nums">
-                {actionTotal > 0 ? `${actionTotal} לטיפול` : "הכל מעודכן"}
+          <div className={SUPPLIER.cardPad}>
+            <div className="flex items-center justify-between mb-4">
+              <span className="inline-flex items-center justify-center min-w-[28px] h-[28px] px-2 rounded-full bg-[#0E6B5A] text-white text-[12px] font-bold">
+                {actionTotal}
               </span>
               <div className="text-right">
-                <h2 className="text-[16px] font-bold text-white tracking-tight">מה דורש טיפול</h2>
+                <h2 className="text-[16px] font-bold text-[#0F172A] tracking-tight">מרכז פעולות</h2>
+                <div className="text-[12px] text-[#64748B] mt-0.5">דברים שמחכים לטיפול שלך</div>
               </div>
             </div>
-            <div className="px-3 pb-3 grid grid-cols-2 gap-2">
-              <ActionTile
-                label="לידים חדשים"
-                count={pendingLeads}
-                onClick={() => navigate("/supplier/leads")}
-              />
-              <ActionTile
-                label="ללא מענה"
-                count={unrespondedLeads}
-                onClick={() => navigate("/supplier/leads")}
-              />
-              <ActionTile
-                label="לקראת סיום"
-                count={endingSoonOffers}
-                onClick={() => navigate("/supplier/offers")}
-              />
-              <ActionTile
-                label="טיוטות"
-                count={pendingOffers}
-                onClick={() => navigate("/supplier/offers")}
-              />
+
+            <div className="rounded-2xl bg-[#F3F7F5] border border-[#D5DED9] divide-y divide-[#D5DED9]/80 overflow-hidden">
+              <ActionRow label="לידים חדשים" count={pendingLeads} accent={GREEN} onClick={() => navigate("/supplier/leads")} />
+              <ActionRow label="לקוחות ללא מענה" count={unrespondedLeads} accent="#0E6B5A" onClick={() => navigate("/supplier/leads")} />
+              <ActionRow label="הצעות לקראת סיום" count={endingSoonOffers} accent="#C2410C" onClick={() => navigate("/supplier/offers")} />
+              <ActionRow label="הצעות בטיוטה" count={pendingOffers} accent="#475569" onClick={() => navigate("/supplier/offers")} />
             </div>
-            {actionTotal > 0 && (
-              <div className="px-3 pb-4">
-                <button
-                  onClick={() => navigate(primaryAction.to)}
-                  className="w-full h-12 rounded-2xl bg-white text-[#0E6B5A] font-bold flex items-center justify-center gap-2 active:scale-[0.99] transition"
-                >
-                  {primaryAction.label}
-                  <ArrowLeft className="h-4 w-4" strokeWidth={2.4} />
-                </button>
-              </div>
-            )}
+
+            <button
+              onClick={() => navigate(primaryAction.to)}
+              className={"mt-4 w-full " + SUPPLIER.btnPrimary}
+            >
+              {primaryAction.label}
+              <ArrowLeft className="h-4 w-4" strokeWidth={2.4} />
+            </button>
           </div>
         </section>
         )}
 
-        {/* ===== Top Offer — clean media card ===== */}
+        {/* ===== Top Offer ===== */}
         {topDeal && topCounts && (
-          <section className="px-5 mt-6">
+          <section className="px-5 mt-5">
             <div className="flex items-center justify-between mb-3">
               <button onClick={() => navigate("/supplier/offers")} className="text-[12px] font-semibold text-[#0E6B5A] flex items-center gap-0.5">
                 הכל <ChevronLeft className="h-3 w-3" />
               </button>
               <h2 className="text-[15px] font-bold text-[#0F172A] tracking-tight">ההצעה המובילה</h2>
             </div>
-            <div className="bg-white rounded-[28px] border border-[#EEF0F3] shadow-sm overflow-hidden">
-              <div className="relative h-[180px] bg-[#0F172A]">
+            <div className={SUPPLIER.card + " overflow-hidden"}>
+              <div className="relative h-[168px] bg-[#0F172A]">
                 {topImage ? (
                   <SmartImg src={topImage} size="card" alt={topDeal.title} className="absolute inset-0 w-full h-full object-cover" />
                 ) : (
@@ -463,13 +446,14 @@ export default function SupplierDashboard() {
                     <Tag className="h-10 w-10 text-white/40" />
                   </div>
                 )}
-                <div className="absolute top-3 right-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-white bg-[#0E6B5A]/95 backdrop-blur">
+                <div className="absolute top-3 right-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-white bg-[#0E6B5A]/95">
                   <span className="h-1.5 w-1.5 rounded-full bg-white" /> פעילה
                 </div>
               </div>
               <div className="p-4 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="text-left shrink-0">
+                    <div className="text-[10px] text-[#64748B] font-medium">מחיר נוכחי</div>
                     <div className="font-bold text-[22px] tracking-tight tabular-nums" style={{ color: GREEN }}>
                       {shortILS(priceFor(topDeal))}
                     </div>
@@ -478,19 +462,25 @@ export default function SupplierDashboard() {
                     {topDeal.title}
                   </h3>
                 </div>
-                <div className="text-[12px] text-[#64748B] font-medium text-right">
-                  {topCounts.interests}/{topGoal} מצטרפים · צפוי {shortILS(topRevenue)}
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-[#0F172A] shrink-0">{topProgress}%</span>
+                  <div className="flex-1 h-2 rounded-full bg-[#E8EEEB] overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${topProgress}%`, background: GREEN }} />
+                  </div>
+                  <span className="text-[11px] text-[#64748B] font-semibold shrink-0">{topCounts.interests}/{topGoal}</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-[#F1F5F9] overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${topProgress}%`, background: GREEN }} />
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <div className="text-left">
+                    <div className="text-[10px] text-[#64748B]">הכנסה צפויה</div>
+                    <div className="font-bold text-[14px] text-[#0F172A]">{shortILS(topRevenue)}</div>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/supplier/offers/${topDeal.id}/edit`)}
+                    className="h-10 px-4 rounded-xl bg-[#0E6B5A] text-white text-[13px] font-bold"
+                  >
+                    ניהול הצעה
+                  </button>
                 </div>
-                <button
-                  onClick={() => navigate(`/supplier/offers/${topDeal.id}/edit`)}
-                  className="w-full h-11 rounded-2xl text-white font-bold active:scale-[0.99] transition"
-                  style={{ background: GREEN }}
-                >
-                  ניהול הצעה
-                </button>
               </div>
             </div>
           </section>
@@ -498,29 +488,27 @@ export default function SupplierDashboard() {
 
         {/* ===== Recent activity ===== */}
         {activity.length > 0 && (
-          <section className="px-5 mt-6">
+          <section className="px-5 mt-5">
             <div className="flex items-center justify-between mb-3">
               <button onClick={() => navigate("/supplier/leads")} className="text-[12px] font-semibold text-[#0E6B5A] flex items-center gap-0.5">
                 הכל <ChevronLeft className="h-3 w-3" />
               </button>
-              <h2 className="text-[16px] font-bold text-[#0F172A] tracking-tight">פעילות אחרונה</h2>
+              <h2 className="text-[15px] font-bold text-[#0F172A] tracking-tight">פעילות אחרונה</h2>
             </div>
-            <div className="bg-white rounded-3xl border border-[#EEF0F3] shadow-sm p-2">
+            <div className={SUPPLIER.card + " p-2"}>
               {activity.map((a, i) => (
                 <div key={a.id} className="flex items-center gap-3 px-3 py-3 relative">
-                  <div className="text-[10px] text-[#8E95A2] font-medium shrink-0 w-14 text-left">{timeAgo(a.at)}</div>
+                  <div className="text-[10px] text-[#64748B] font-medium shrink-0 w-14 text-left">{timeAgo(a.at)}</div>
                   <div className="flex-1 min-w-0 text-right">
                     <div className="font-semibold text-[13px] text-[#0F172A] truncate">{a.title}</div>
-                    <div className="text-[11px] text-[#8E95A2] truncate mt-0.5">{a.subtitle}</div>
+                    <div className="text-[11px] text-[#64748B] truncate mt-0.5">{a.subtitle}</div>
                   </div>
                   <div
                     className="h-2 w-2 rounded-full shrink-0"
-                    style={{
-                      background: a.type === "lead" ? GREEN : a.type === "paid" ? "#7C3AED" : "#EA6A3A",
-                    }}
+                    style={{ background: a.type === "lead" ? GREEN : a.type === "paid" ? "#0E6B5A" : "#C2410C" }}
                   />
                   {i < activity.length - 1 && (
-                    <div className="absolute bottom-0 right-3 left-3 h-px bg-[#F2F4F7]" />
+                    <div className="absolute bottom-0 right-3 left-3 h-px bg-[#E8EEEB]" />
                   )}
                 </div>
               ))}
@@ -529,7 +517,7 @@ export default function SupplierDashboard() {
         )}
 
         {/* ===== Week stats ===== */}
-        <section className="px-5 mt-6">
+        <section className="px-5 mt-5">
           <div className="flex items-center justify-between mb-3">
             <button
               onClick={() => navigate("/supplier/analytics")}
@@ -539,7 +527,7 @@ export default function SupplierDashboard() {
             </button>
             <h2 className="text-[15px] font-bold text-[#0F172A] tracking-tight">ביצועי השבוע</h2>
           </div>
-          <div className="bg-white rounded-[24px] border border-[#EEF0F3] shadow-sm p-4">
+          <div className={SUPPLIER.cardPad}>
             <div className="grid grid-cols-4 gap-2">
               <WeekStat icon={Eye} value={weekStats.favs.toString()} label="צפיות" />
               <WeekStat icon={Users} value={weekStats.leads.toString()} label="לידים" />
@@ -549,28 +537,29 @@ export default function SupplierDashboard() {
           </div>
         </section>
 
-        {/* ===== Customer savings insight ===== */}
         {customerSavings > 0 && (
           <section className="px-5 mt-4">
-            <div className="bg-white rounded-2xl border border-[#EEF0F3] p-4 flex items-center gap-3">
+            <div className={SUPPLIER.card + " p-4 flex items-center gap-3"}>
               <div className="h-10 w-10 rounded-xl bg-[#E8F5F1] flex items-center justify-center shrink-0">
                 <TrendingUp className="h-5 w-5" style={{ color: GREEN }} strokeWidth={2.2} />
               </div>
               <div className="flex-1 min-w-0 text-right">
-                <div className="text-[11px] text-[#8E95A2] font-medium">חסכת ללקוחות שלך</div>
+                <div className="text-[11px] text-[#64748B] font-medium">חסכת ללקוחות שלך</div>
                 <div className="font-bold text-[16px] text-[#0F172A]">{shortILS(customerSavings)}</div>
               </div>
             </div>
           </section>
         )}
 
-        {/* ===== Primary create CTA only ===== */}
-        <div className="px-5 mt-6 pb-2">
-          <button
-            onClick={() => navigate("/supplier/offers/new")}
-            className="w-full h-12 rounded-2xl bg-[#0F172A] text-white font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition"
-          >
+        <div className="px-5 mt-5 space-y-2 pb-2">
+          <button onClick={() => navigate("/supplier/offers/new")} className={"w-full " + SUPPLIER.btnInk}>
             <Plus className="h-4 w-4" strokeWidth={2.6} /> הצעה חדשה
+          </button>
+          <button onClick={() => navigate("/supplier/demand-inbox")} className={"w-full " + SUPPLIER.btnGhost}>
+            <Bell className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2.4} /> ביקושים פתוחים באזור שלך
+          </button>
+          <button onClick={() => navigate("/supplier/deposits")} className={"w-full " + SUPPLIER.btnGhost}>
+            <Wallet className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2.4} /> פיקדונות לאישור
           </button>
         </div>
       </div>
@@ -581,25 +570,15 @@ export default function SupplierDashboard() {
   );
 }
 
-/* ───────── helpers ───────── */
-
-function ActionTile({ label, count, onClick }: { label: string; count: number; onClick: () => void }) {
-  const active = count > 0;
+function ActionRow({
+  label, count, accent, onClick,
+}: { label: string; count: number; accent: string; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={
-        "rounded-2xl p-3.5 text-right transition active:scale-[0.98] " +
-        (active ? "bg-white text-[#0F172A]" : "bg-white/12 text-white/75")
-      }
-    >
-      <div className={"text-[22px] font-bold tabular-nums leading-none " + (active ? "text-[#0E6B5A]" : "text-white/70")}>
+    <button type="button" onClick={onClick} className="w-full flex items-center justify-between py-3.5 px-3.5 text-right active:bg-white/70 transition">
+      <div className="font-bold text-[15px] tabular-nums" style={{ color: count > 0 ? accent : "#94A3B8" }}>
         {count}
       </div>
-      <div className={"text-[12px] font-semibold mt-1.5 " + (active ? "text-[#334155]" : "text-white/65")}>
-        {label}
-      </div>
+      <div className="text-[14px] text-[#0F172A] font-semibold flex-1 mr-3">{label}</div>
     </button>
   );
 }
@@ -607,9 +586,11 @@ function ActionTile({ label, count, onClick }: { label: string; count: number; o
 function WeekStat({ icon: Icon, value, label }: { icon: typeof Users; value: string; label: string }) {
   return (
     <div className="flex flex-col items-center text-center py-1">
-      <Icon className="h-4 w-4 text-[#94A3B8] mb-2" strokeWidth={2} />
+      <div className="h-8 w-8 rounded-xl bg-[#E8F5F1] flex items-center justify-center mb-2">
+        <Icon className="h-4 w-4 text-[#0E6B5A]" strokeWidth={2} />
+      </div>
       <div className="font-bold text-[15px] text-[#0F172A] leading-none tracking-tight truncate w-full">{value}</div>
-      <div className="text-[10px] text-[#8E95A2] font-medium mt-1.5">{label}</div>
+      <div className="text-[10px] text-[#64748B] font-medium mt-1.5">{label}</div>
     </div>
   );
 }
