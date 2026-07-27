@@ -8,24 +8,27 @@ import { supabase } from "@/integrations/supabase/client";
 export type CompletenessStep = {
   key:
     | "business_name"
+    | "contact_name"
     | "phone"
     | "email"
     | "category"
     | "area"
-    | "description";
+    | "description"
+    | "logo";
   label: string;
   done: boolean;
 };
 
 export type SupplierCompleteness = {
-  percent: number;               // 0..100
-  complete: boolean;             // all required steps done
-  missing: string[];             // labels of missing steps
-  steps: CompletenessStep[];     // ordered checklist
+  percent: number;
+  complete: boolean;
+  missing: string[];
+  steps: CompletenessStep[];
 };
 
 export type SupplierCompletenessInput = {
   business_name?: string | null;
+  contact_name?: string | null;
   phone?: string | null;
   email?: string | null;
   categories?: string[] | null;
@@ -34,6 +37,7 @@ export type SupplierCompletenessInput = {
   citiesCount: number;
   short_description?: string | null;
   description?: string | null;
+  logo_url?: string | null;
 };
 
 export function computeCompleteness(
@@ -44,6 +48,11 @@ export function computeCompleteness(
       key: "business_name",
       label: "שם עסק",
       done: !!s.business_name && s.business_name.trim().length >= 2,
+    },
+    {
+      key: "contact_name",
+      label: "איש קשר",
+      done: !!s.contact_name && s.contact_name.trim().length >= 2,
     },
     {
       key: "phone",
@@ -72,6 +81,11 @@ export function computeCompleteness(
         (!!s.short_description && s.short_description.trim().length >= 10) ||
         (!!s.description && s.description.trim().length >= 10),
     },
+    {
+      key: "logo",
+      label: "לוגו",
+      done: !!s.logo_url && s.logo_url.trim().length > 0,
+    },
   ];
   const done = steps.filter((s) => s.done).length;
   const percent = Math.round((done / steps.length) * 100);
@@ -85,7 +99,7 @@ export async function loadSupplierCompletenessForUser(
 ): Promise<{ supplierId: string | null; completeness: SupplierCompleteness }> {
   const { data: supplier } = await supabase
     .from("suppliers")
-    .select("id,business_name,phone,email,categories,serves_all_country,short_description,description")
+    .select("id,business_name,contact_name,phone,email,categories,serves_all_country,short_description,description,logo_url")
     .eq("user_id", userId)
     .order("updated_at", { ascending: false })
     .limit(1)
@@ -116,6 +130,7 @@ export async function loadSupplierCompletenessForUser(
     supplierId: supplier.id,
     completeness: computeCompleteness({
       business_name: supplier.business_name,
+      contact_name: supplier.contact_name,
       phone: supplier.phone,
       email: supplier.email,
       categories: supplier.categories,
@@ -124,6 +139,7 @@ export async function loadSupplierCompletenessForUser(
       citiesCount: citiesCount ?? 0,
       short_description: supplier.short_description,
       description: supplier.description,
+      logo_url: supplier.logo_url,
     }),
   };
 }
@@ -135,7 +151,7 @@ export async function loadSupplierCompletenessById(
   const [{ data: s }, { count: regionsCount }, { count: citiesCount }] = await Promise.all([
     supabase
       .from("suppliers")
-      .select("business_name,phone,email,categories,serves_all_country,short_description,description")
+      .select("business_name,contact_name,phone,email,categories,serves_all_country,short_description,description,logo_url")
       .eq("id", supplierId)
       .maybeSingle(),
     supabase
@@ -149,6 +165,7 @@ export async function loadSupplierCompletenessById(
   ]);
   return computeCompleteness({
     business_name: s?.business_name,
+    contact_name: s?.contact_name,
     phone: s?.phone,
     email: s?.email,
     categories: s?.categories,
@@ -157,5 +174,6 @@ export async function loadSupplierCompletenessById(
     citiesCount: citiesCount ?? 0,
     short_description: s?.short_description,
     description: s?.description,
+    logo_url: s?.logo_url,
   });
 }

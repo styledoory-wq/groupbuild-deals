@@ -273,6 +273,7 @@ export default function SupplierOnboarding() {
   const completeness = useMemo(() =>
     computeCompleteness({
       business_name: businessName,
+      contact_name: contactName,
       phone,
       email,
       categories: selectedCategories,
@@ -280,8 +281,9 @@ export default function SupplierOnboarding() {
       regionsCount: areas.regionIds.length,
       citiesCount: areas.cityIds.length,
       short_description: shortDescription,
+      logo_url: logoUrl,
     }),
-  [businessName, phone, email, selectedCategories, areas, shortDescription]);
+  [businessName, contactName, phone, email, selectedCategories, areas, shortDescription, logoUrl]);
 
   const categoryNames = useMemo(() => {
     const byId = new Map(categories.map((c) => [c.id, c.name]));
