@@ -319,7 +319,9 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                   {activeCategory?.name ?? "ספקים"}
                 </h1>
                 <p className="text-[13px] text-slate-500 mt-0.5 truncate">
-                  {filteredSuppliers.length} ספקים זמינים · {areaLabel}
+                  {childCategories.length > 0
+                    ? `${childCategories.length} תחומי משנה`
+                    : `${filteredSuppliers.length} ספקים זמינים · ${areaLabel}`}
                 </p>
               </div>
             </div>
