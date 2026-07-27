@@ -141,7 +141,8 @@ export function GlobalSearchBar({
   const dropdown = open ? (
       <div
         dir="rtl"
-        className="absolute inset-x-0 top-full z-50 mt-2 max-h-[min(420px,calc(100dvh-180px))] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card shadow-floating"
+        style={{ maxHeight: maxH }}
+        className="absolute inset-x-0 top-full z-50 mt-2 overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card shadow-floating"
       >
         {!term ? (
           <div className="p-4">
