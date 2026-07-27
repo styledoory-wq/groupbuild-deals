@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Search as SearchIcon, X, Store, FolderTree, MapPin, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,9 +23,8 @@ const POPULAR = ["חשמלאי", "דלתות", "מזגן", "סולארי", "רי
  * Global search bar with autocomplete — searches categories, suppliers, and cities
  * in a single query. Fully public (no auth required).
  *
- * The results dropdown is rendered via a React Portal into `document.body` to avoid
- * being clipped by ancestors with `overflow-hidden`, transforms, or lower stacking
- * contexts. Position is recalculated from the input's bounding rect on scroll/resize.
+ * On mobile, the focused search is rendered as a full-screen portal so page content
+ * never appears above it or under it while the keyboard is open.
  */
 export function GlobalSearchBar({
   variant = "hero",
@@ -38,6 +38,7 @@ export function GlobalSearchBar({
   const [hits, setHits] = useState<Hit[]>([]);
   const [loading, setLoading] = useState(false);
   const [maxH, setMaxH] = useState<number>(420);
+  const [mobileSearch, setMobileSearch] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -45,17 +46,47 @@ export function GlobalSearchBar({
 
   const term = q.trim();
 
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const update = () => setMobileSearch(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (!(open && mobileSearch)) return;
+    const previousHtml = document.documentElement.style.overflow;
+    const previous = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = previousHtml;
+      document.body.style.overflow = previous;
+    };
+  }, [mobileSearch, open]);
+
+  const mobileActive = open && mobileSearch;
+
+  useEffect(() => {
+    if (!mobileActive) return;
+    const frame = window.requestAnimationFrame(() => {
+      inputRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [mobileActive]);
+
   // Recompute dropdown max-height from the visual viewport so it fits above the
   // on-screen keyboard on iOS (dvh doesn't shrink when the keyboard opens).
   useEffect(() => {
     if (!open) return;
     const compute = () => {
       const vv = window.visualViewport;
-      const vh = vv?.height ?? window.innerHeight;
+      const viewportBottom = (vv?.offsetTop ?? 0) + (vv?.height ?? window.innerHeight);
       const rect = wrapRef.current?.getBoundingClientRect();
       const inputBottom = rect ? rect.bottom : 120;
-      const available = vh - inputBottom - 16;
-      setMaxH(Math.max(180, Math.min(420, available)));
+      const available = viewportBottom - inputBottom - 12;
+      setMaxH(Math.min(mobileSearch ? 560 : 420, Math.max(96, available)));
     };
     compute();
     const vv = window.visualViewport;
@@ -67,7 +98,7 @@ export function GlobalSearchBar({
       vv?.removeEventListener("scroll", compute);
       window.removeEventListener("resize", compute);
     };
-  }, [open]);
+  }, [mobileSearch, open]);
 
   useEffect(() => {
     if (!term) { setHits([]); return; }
@@ -227,8 +258,16 @@ export function GlobalSearchBar({
       </div>
   ) : null;
 
-  return (
-    <div ref={wrapRef} className={`relative w-full ${open ? "z-[1000]" : ""}`} dir="rtl">
+  const searchShell = (
+    <div
+      ref={wrapRef}
+      className={
+        mobileActive
+          ? "absolute left-4 right-4 top-[calc(env(safe-area-inset-top)+12px)]"
+          : `relative w-full ${open ? "z-[1000]" : ""}`
+      }
+      dir="rtl"
+    >
       <form onSubmit={onSubmit} className="relative">
         <SearchIcon className="pointer-events-none absolute right-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" strokeWidth={2} />
         <input
@@ -237,10 +276,12 @@ export function GlobalSearchBar({
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => {
             setOpen(true);
-            // Scroll input near top so the dropdown has room above the keyboard.
-            setTimeout(() => {
-              wrapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }, 250);
+            if (!window.matchMedia("(max-width: 768px)").matches) {
+              // Desktop/tablet: keep the existing scroll behavior for long pages.
+              setTimeout(() => {
+                wrapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 250);
+            }
           }}
           placeholder={placeholder}
           className={
@@ -270,6 +311,22 @@ export function GlobalSearchBar({
       {dropdown}
     </div>
   );
+
+  if (mobileActive) {
+    return (
+      <>
+        <div aria-hidden className={variant === "hero" ? "h-14" : "h-12"} />
+        {createPortal(
+          <div dir="rtl" className="fixed inset-0 z-[9999] bg-background">
+            {searchShell}
+          </div>,
+          document.body,
+        )}
+      </>
+    );
+  }
+
+  return searchShell;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
