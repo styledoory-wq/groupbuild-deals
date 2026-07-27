@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import {
-  Save, ArrowRight, Briefcase, Phone, Mail, Tag, User as UserIcon, FileText,
+  Save, X, Briefcase, Phone, Mail, Tag, User as UserIcon, FileText,
   Image as ImageIcon, Trash2, Plus, Link as LinkIcon, Wallet, Smartphone,
   Building2, MapPin, Sparkles,
 } from "lucide-react";
@@ -559,7 +559,7 @@ export default function SupplierProfileEdit() {
           <div className="mx-auto max-w-[var(--app-max-w)] px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 pointer-events-auto">
             <div className="rounded-2xl bg-white/95 backdrop-blur border border-[#EEF0F3] shadow-[0_8px_28px_-12px_rgba(11,18,32,0.28)] p-2 flex gap-2">
               <Button type="button" variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 rounded-xl">
-                <ArrowRight className="h-4 w-4 ml-2" /> ביטול
+                <X className="h-4 w-4 ml-2" /> ביטול
               </Button>
               <Button
                 type="submit"

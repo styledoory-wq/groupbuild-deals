@@ -29,6 +29,7 @@ import { isAdminEmail } from "@/lib/auth";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { SmartImg } from "@/components/ui/SmartImg";
+import { SupplierPendingBanner, isSupplierLocked } from "@/components/supplier/SupplierWorkspace";
 
 type DealLite = { id: string; title: string; cover_image_url?: string | null; gallery_images?: string[] | null };
 type InterestRow = {
@@ -143,6 +144,7 @@ export default function SupplierLeads() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("newest");
   const [noteEdit, setNoteEdit] = useState<{ id: string; value: string } | null>(null);
+  const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const touchStartX = useRef(0);
 
   const updateLeadStatus = async (interestId: string, status: "approved" | "rejected") => {
@@ -311,11 +313,14 @@ export default function SupplierLeads() {
         const email = session.session.user.email ?? "";
         if (!cancelled) setIsAdmin(isAdminEmail(email));
 
-        const sup = await resolveSupplierForUser<{ id: string }>(userId, email, "id");
+        const sup = await resolveSupplierForUser<{ id: string; approval_status: string }>(
+          userId, email, "id, approval_status",
+        );
         if (!sup) {
           if (!cancelled) { setError("לא נמצא פרופיל ספק. השלם את הפרטים תחילה."); setLoading(false); }
           return;
         }
+        if (!cancelled) setApprovalStatus(sup.approval_status);
 
         const { data: dealsData } = await supabase
           .from("deals").select("id,title,cover_image_url,gallery_images,is_deleted").eq("supplier_id", sup.id);
@@ -590,6 +595,8 @@ export default function SupplierLeads() {
           <ErrorState title="שגיאה בטעינה" description={error} />
         ) : (
           <>
+            <SupplierPendingBanner status={approvalStatus} />
+
             {/* Compact stats strip */}
             <div className="flex items-center justify-between gap-2 px-1 text-[11px] font-bold">
               <span><span className="text-[#059669]">{stats.new}</span> <span className="text-muted-foreground">חדשים</span></span>
@@ -687,16 +694,38 @@ export default function SupplierLeads() {
                 </div>
               )
             ) : visible.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-[#EEF0F3] p-8 text-center">
-                <div className="mx-auto h-14 w-14 rounded-xl bg-[#F0F9F6] flex items-center justify-center mb-2">
+              <div className="bg-white rounded-2xl border border-[#EEF0F3] p-7 text-center">
+                <div className="mx-auto h-14 w-14 rounded-2xl bg-[#E8F5F1] flex items-center justify-center mb-3">
                   <Inbox className="h-6 w-6 text-[#0E6B5A]" />
                 </div>
-                <h3 className="text-[14px] font-extrabold">{query ? "לא נמצאו לידים תואמים" : "אין לידים בקטגוריה זו"}</h3>
-                <p className="text-[12px] text-muted-foreground mt-1">{query ? "נסה מילים אחרות" : "פרסם הצעה נוספת כדי לקבל יותר פניות"}</p>
-                {!query && (
+                <h3 className="text-[15px] font-bold text-[#0F172A]">
+                  {query
+                    ? "לא נמצאו לידים תואמים"
+                    : isSupplierLocked(approvalStatus)
+                      ? "עוד אין לידים — והחשבון בבדיקה"
+                      : tab === "all"
+                        ? "עוד אין לידים"
+                        : `אין לידים ב״${tab === "new" ? "חדשים" : tab === "in_progress" ? "בטיפול" : tab === "offer_sent" ? "הצעה" : "נסגרו"}״`}
+                </h3>
+                <p className="text-[13px] text-[#8E95A2] mt-1.5 leading-relaxed max-w-[280px] mx-auto">
+                  {query
+                    ? "נסו מילים אחרות או נקו את החיפוש"
+                    : isSupplierLocked(approvalStatus)
+                      ? "אחרי האישור, פניות מדיירים יופיעו כאן עם טלפון ושלב טיפול."
+                      : tab === "all"
+                        ? "פרסמו הצעה פעילה — דיירים בפרויקטים רלוונטיים יוכלו לפנות אליכם."
+                        : "עברו לטאב ״הכל״ או המתינו לפניות חדשות."}
+                </p>
+                {!query && tab === "all" && !isSupplierLocked(approvalStatus) && (
                   <Link to="/supplier/offers/new"
-                    className="mt-3 inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#0E6B5A] text-white text-[12px] font-extrabold">
-                    <PlusCircle className="h-4 w-4" /> צור הצעה
+                    className="mt-4 inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-[#0E6B5A] text-white text-[13px] font-bold">
+                    <PlusCircle className="h-4 w-4" /> יצירת הצעה
+                  </Link>
+                )}
+                {!query && isSupplierLocked(approvalStatus) && (
+                  <Link to="/supplier/profile/edit"
+                    className="mt-4 inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-[#0E6B5A] text-white text-[13px] font-bold">
+                    השלמת פרופיל
                   </Link>
                 )}
               </div>

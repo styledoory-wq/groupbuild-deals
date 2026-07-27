@@ -13,6 +13,7 @@ import { getCurrentSupplier } from "@/lib/supplierAuth";
 import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
 import { SmartImg } from "@/components/ui/SmartImg";
+import { SupplierPendingBanner, isSupplierLocked } from "@/components/supplier/SupplierWorkspace";
 
 type DealRow = {
   id: string;
@@ -145,6 +146,7 @@ export default function SupplierOffers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [supplierId, setSupplierId] = useState<string | null>(null);
+  const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const [deals, setDeals] = useState<DealRow[]>([]);
   const [participantsByDeal, setParticipantsByDeal] = useState<Record<string, number>>({});
   const [savesByDeal, setSavesByDeal] = useState<Record<string, number>>({});
@@ -196,13 +198,16 @@ export default function SupplierOffers() {
     let cancelled = false;
     (async () => {
       try {
-        const { session, supplier } = await getCurrentSupplier<{ id: string }>("id");
+        const { session, supplier } = await getCurrentSupplier<{ id: string; approval_status: string }>("id, approval_status");
         if (!session) {
           if (!cancelled) { setError("יש להתחבר כספק."); setLoading(false); }
           return;
         }
         const sid = supplier?.id ?? null;
-        if (!cancelled) setSupplierId(sid);
+        if (!cancelled) {
+          setSupplierId(sid);
+          setApprovalStatus(supplier?.approval_status ?? null);
+        }
         if (!sid) { if (!cancelled) setLoading(false); return; }
         await loadDeals(sid);
       } catch (e) {
@@ -266,12 +271,15 @@ export default function SupplierOffers() {
       <ScreenHeader title="ההצעות שלי" subtitle="נהל ונתח את כל ההצעות הפעילות שלך" />
 
       {/* CTA */}
-      <div className="px-5 -mt-3 relative z-10">
-        <Link to="/supplier/offers/new">
-          <Button className="h-11 px-4 rounded-[14px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-[0_8px_22px_-10px_rgba(5,150,105,0.6)]">
-            <Plus className="h-4 w-4 ml-1.5" /> הצעה חדשה
-          </Button>
-        </Link>
+      <div className="px-5 -mt-3 relative z-10 space-y-3">
+        <SupplierPendingBanner status={approvalStatus} />
+        {!isSupplierLocked(approvalStatus) && (
+          <Link to="/supplier/offers/new">
+            <Button className="h-11 px-4 rounded-[14px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-[0_8px_22px_-10px_rgba(5,150,105,0.6)]">
+              <Plus className="h-4 w-4 ml-1.5" /> הצעה חדשה
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Stats — real-time aggregates */}
@@ -336,15 +344,27 @@ export default function SupplierOffers() {
         )}
         {!loading && !error && supplierId && deals.length === 0 && (
           <EmptyState
-            icon={<Briefcase className="h-7 w-7 text-[#9CA3AF]" />}
-            title="אין הצעות עדיין"
-            description="צור את ההצעה הראשונה שלך ותתחיל לקבל לידים."
+            icon={<Briefcase className="h-7 w-7 text-[#0E6B5A]" />}
+            title={isSupplierLocked(approvalStatus) ? "הצעות אחרי האישור" : "אין הצעות עדיין"}
+            description={
+              isSupplierLocked(approvalStatus)
+                ? "בינתיים אפשר להשלים את הפרופיל. אחרי האישור תוכלו לפרסם הצעה ולקבל לידים."
+                : "צרו את ההצעה הראשונה — דיירים בפרויקטים רלוונטיים יוכלו לפנות אליכם."
+            }
             action={
-              <Link to="/supplier/offers/new">
-                <Button className="h-11 px-5 rounded-2xl bg-emerald-600 text-white font-bold">
-                  <Plus className="h-4 w-4 ml-2" /> צרו הצעה חדשה
-                </Button>
-              </Link>
+              isSupplierLocked(approvalStatus) ? (
+                <Link to="/supplier/profile/edit">
+                  <Button className="h-11 px-5 rounded-2xl bg-[#0E6B5A] text-white font-bold">
+                    השלמת פרופיל
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/supplier/offers/new">
+                  <Button className="h-11 px-5 rounded-2xl bg-[#0E6B5A] text-white font-bold">
+                    <Plus className="h-4 w-4 ml-2" /> יצירת הצעה ראשונה
+                  </Button>
+                </Link>
+              )
             }
           />
         )}
