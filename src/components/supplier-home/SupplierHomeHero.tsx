@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { UserCircle2 } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { SupplierHeroTransition } from "@/components/supplier-home/SupplierHeroTransition";
 
 const HERO_BG = "/marketing/supplier-hero-bg.jpg";
 
@@ -45,28 +46,7 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
         }}
       />
 
-      {/* Long bottom dissolve (~320px) — almost imperceptible */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 -z-10 h-[320px] pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(247,245,240,0) 0%, rgba(247,245,240,0.08) 28%, rgba(247,245,240,0.35) 55%, rgba(247,245,240,0.72) 78%, #F7F5F0 100%)",
-        }}
-      />
-
-      {/* Organic wave — image feels continuous into the page */}
-      <svg
-        aria-hidden
-        className="absolute bottom-0 inset-x-0 z-[1] w-full h-[72px] sm:h-[88px]"
-        viewBox="0 0 1440 120"
-        preserveAspectRatio="none"
-      >
-        <path
-          fill="#F7F5F0"
-          d="M0,72 C180,108 360,28 540,52 C780,84 960,128 1200,76 C1320,48 1380,40 1440,56 L1440,120 L0,120 Z"
-        />
-      </svg>
+      <SupplierHeroTransition variant="a" />
 
       <div
         className="relative z-[2] px-5 pb-28 pt-2 min-h-[560px] flex flex-col"

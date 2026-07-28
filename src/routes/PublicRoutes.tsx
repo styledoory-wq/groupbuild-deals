@@ -8,6 +8,7 @@ const SuppliersLanding = lazy(() => import("@/pages/marketing/SuppliersLanding")
 const ResidentsLanding = lazy(() => import("@/pages/marketing/ResidentsLanding"));
 const ResidentsHome = lazy(() => import("@/pages/marketing/ResidentsHome"));
 const SuppliersHome = lazy(() => import("@/pages/marketing/SuppliersHome"));
+const SupplierHeroDemos = lazy(() => import("@/pages/marketing/SupplierHeroDemos"));
 const Auth = lazy(() => import("@/pages/Auth"));
 const Onboarding = lazy(() => import("@/pages/Onboarding"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));

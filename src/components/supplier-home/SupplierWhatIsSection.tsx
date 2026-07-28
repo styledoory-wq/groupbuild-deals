@@ -1,8 +1,15 @@
 import { Reveal } from "@/components/resident-home/Reveal";
+import { cn } from "@/lib/utils";
 
-export function SupplierWhatIsSection() {
+type SupplierWhatIsSectionProps = {
+  overlapClass?: string;
+};
+
+export function SupplierWhatIsSection({
+  overlapClass = "-mt-[72px] sm:-mt-[88px]",
+}: SupplierWhatIsSectionProps) {
   return (
-    <section className="relative z-20 px-5 -mt-[72px] sm:-mt-[88px]">
+    <section className={cn("relative z-20 px-5", overlapClass)}>
       <Reveal>
         <div className="rounded-[28px] bg-white border border-[#E8EEEB] shadow-[0_18px_40px_-18px_rgba(15,23,42,0.22)] p-5">
           <div className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-[#E8F5F1] text-[#0E6B5A] text-[11px] font-extrabold mb-2.5">
