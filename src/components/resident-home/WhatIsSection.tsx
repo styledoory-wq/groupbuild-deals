@@ -1,42 +1,57 @@
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/components/resident-home/Reveal";
+import { Building2, ShieldCheck, Sparkles } from "lucide-react";
+
+const points = [
+  {
+    icon: Building2,
+    title: "קבוצה בבניין שלכם",
+    text: "מצטרפים לדיירים מאותו בניין ויוצרים כוח קנייה אמיתי מול ספקים.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "שקיפות מלאה",
+    text: "רואים הצעות, התקדמות והחלטות במקום אחד — בלי טלפונים מפוזרים.",
+  },
+  {
+    icon: Sparkles,
+    title: "תוצאה טובה יותר",
+    text: "תחרות בין ספקים + התארגנות קבוצתית = מחיר ושירות טובים יותר.",
+  },
+];
 
 export function WhatIsSection() {
   return (
-    <section className="px-6 mt-8">
-      <Reveal>
-        <div className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-[#E8F5F1] text-[#0E6B5A] text-[11px] font-extrabold mb-2.5">
-          למה זה משתלם
-        </div>
-        <h2 className="text-[22px] font-extrabold text-[#0B1220] tracking-tight leading-snug">
-          מה זה GroupBuild?
-        </h2>
-        <p className="mt-2 text-[14px] text-[#5B6573] leading-relaxed">
-          במקום שכל דייר יתמקח לבד — מתאגדים יחד, ומקבלים מחיר קבוצתי מספקים.
-        </p>
-      </Reveal>
-
-      <Reveal delayMs={80} className="mt-4">
-        <div
-          className="rounded-[24px] p-4 text-white space-y-2.5 shadow-[0_16px_36px_-18px_rgba(14,107,90,0.55)]"
-          style={{ background: "linear-gradient(135deg, rgba(14,107,90,0.95), #1A8870)" }}
-        >
-          {[
-            "דיירים בפרויקט / בניין",
-            "ביקוש משותף לספק",
-            "מחיר מוזל ושקוף",
-          ].map((label, i) => (
-            <div key={label} className="flex items-center gap-2.5 text-[14px] font-bold">
-              <span className="h-7 w-7 rounded-[10px] bg-white/15 inline-flex items-center justify-center text-[12px]">
-                {i + 1}
-              </span>
-              {label}
+    <section className="relative z-10 -mt-[72px] px-4 pb-16 sm:-mt-[88px] sm:px-6 sm:pb-20 lg:px-8">
+      <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-[#0E6B5A]/10 bg-white shadow-[0_24px_60px_rgba(11,18,32,0.12)]">
+        <div className="px-5 py-12 sm:px-8 sm:py-14 lg:px-12 lg:py-16">
+          <Reveal>
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-sm font-semibold text-[#0E6B5A]">מה זה GroupBuild</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#0B1220] sm:text-4xl">
+                פלטפורמה שמארגנת דיירים לעסקאות משותפות
+              </h2>
+              <p className="mt-4 text-base leading-8 text-[#5B6472] sm:text-lg">
+                במקום שכל דייר יתמודד לבד מול ספקים, GroupBuild בונה קבוצה חכמה בבניין — עם תהליך ברור,
+                הצעות תחרותיות ומעקב עד הביצוע.
+              </p>
             </div>
-          ))}
-          <p className="text-[12px] font-semibold text-white/75 pr-9 pt-1">
-            התאגדות = כוח מיקוח = חיסכון אמיתי
-          </p>
+          </Reveal>
+
+          <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            {points.map((point, index) => (
+              <Reveal key={point.title} delayMs={index * 80}>
+                <div className="h-full rounded-3xl bg-[#F7F5F0] p-6">
+                  <div className="flex size-12 items-center justify-center rounded-2xl bg-[#0E6B5A]/10 text-[#0E6B5A]">
+                    <point.icon className="size-6" />
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold text-[#0B1220]">{point.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-[#5B6472]">{point.text}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
-      </Reveal>
+      </div>
     </section>
   );
 }
