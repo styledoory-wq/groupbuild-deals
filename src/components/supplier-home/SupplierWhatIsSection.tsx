@@ -18,7 +18,7 @@ export function SupplierWhatIsSection() {
       <Reveal delayMs={80} className="mt-4">
         <div
           className="rounded-[24px] p-4 text-white space-y-2.5 shadow-[0_16px_36px_-18px_rgba(14,107,90,0.55)]"
-          style={{ background: "linear-gradient(135deg, rgba(14,107,90,0.95), #1A8870)" }}
+          style={{ background: "linear-gradient(135deg, #0E6B5A 0%, #1A8870 55%, #34A88E 100%)" }}
         >
           {[
             "דיירים וועדים בפרויקטים אמיתיים",

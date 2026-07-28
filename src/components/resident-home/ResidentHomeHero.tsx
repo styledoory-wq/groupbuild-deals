@@ -49,8 +49,9 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         className="absolute inset-0 -z-10"
         style={{
           background: [
-            "linear-gradient(270deg, #F7F5F0 0%, #F7F5F0 48%, rgba(247,245,240,0.92) 58%, rgba(247,245,240,0.45) 72%, rgba(247,245,240,0.12) 86%, rgba(247,245,240,0) 100%)",
-            "linear-gradient(180deg, rgba(247,245,240,0) 0%, rgba(247,245,240,0) 55%, rgba(247,245,240,0.4) 78%, #F7F5F0 100%)",
+            "linear-gradient(270deg, #F1F7F4 0%, #F3F8F5 40%, #F7F5F0 50%, rgba(247,245,240,0.88) 60%, rgba(247,245,240,0.4) 74%, rgba(247,245,240,0.1) 88%, rgba(247,245,240,0) 100%)",
+            "radial-gradient(90% 70% at 85% 35%, rgba(14,107,90,0.10) 0%, rgba(52,168,142,0.06) 35%, transparent 70%)",
+            "linear-gradient(180deg, rgba(247,245,240,0) 0%, rgba(247,245,240,0) 55%, rgba(232,245,241,0.55) 78%, #F7F5F0 100%)",
           ].join(", "),
         }}
       />
