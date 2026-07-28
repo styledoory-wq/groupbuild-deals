@@ -12,37 +12,6 @@ const QUICK_CHIPS = [
   { label: "ריצוף", q: "ריצוף" },
 ];
 
-/** Soft white rim — thinner than before */
-const headlineHalo: React.CSSProperties = {
-  WebkitTextStroke: "0.45px rgba(255,255,255,0.9)",
-  paintOrder: "stroke fill",
-  textShadow: [
-    "-1px 0 0 rgba(255,255,255,0.95)",
-    "1px 0 0 rgba(255,255,255,0.95)",
-    "0 -1px 0 rgba(255,255,255,0.95)",
-    "0 1px 0 rgba(255,255,255,0.95)",
-    "0 2px 8px rgba(0,0,0,0.22)",
-  ].join(", "),
-};
-
-/** White fill + black outline for supporting line */
-const subOutline: React.CSSProperties = {
-  color: "#FFFFFF",
-  WebkitTextStroke: "0.85px rgba(0,0,0,0.88)",
-  paintOrder: "stroke fill",
-  textShadow: [
-    "-1.2px 0 0 #000",
-    "1.2px 0 0 #000",
-    "0 -1.2px 0 #000",
-    "0 1.2px 0 #000",
-    "-0.8px -0.8px 0 #000",
-    "0.8px -0.8px 0 #000",
-    "-0.8px 0.8px 0 #000",
-    "0.8px 0.8px 0 #000",
-    "0 3px 10px rgba(0,0,0,0.35)",
-  ].join(", "),
-};
-
 function setResidentIntent() {
   try {
     sessionStorage.setItem("gb_intent", "resident");
@@ -51,104 +20,107 @@ function setResidentIntent() {
   }
 }
 
+/**
+ * Split hero: clean content on the start (RTL right), atmosphere photo on the end (left).
+ * No text-over-photo collision.
+ */
 export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
   return (
-    <div
-      className="relative isolate overflow-hidden"
+    <section
+      className="relative overflow-hidden"
       style={{ background: "#F7F5F0" }}
+      dir="rtl"
     >
       <div
-        aria-hidden
-        className="absolute inset-0 -z-20 bg-cover bg-[center_30%]"
-        style={{
-          backgroundImage: `url("${HERO_BG}")`,
-          WebkitMaskImage:
-            "linear-gradient(180deg, #000 0%, #000 48%, rgba(0,0,0,0.55) 72%, transparent 100%)",
-          maskImage:
-            "linear-gradient(180deg, #000 0%, #000 48%, rgba(0,0,0,0.55) 72%, transparent 100%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 -z-10 h-[55%]"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(247,245,240,0) 0%, rgba(247,245,240,0.45) 42%, #F7F5F0 100%)",
-        }}
-      />
-
-      <div
-        className="relative px-6 pb-14"
-        style={{ paddingTop: "max(env(safe-area-inset-top), 16px)" }}
+        className="grid grid-cols-[1.15fr_0.95fr] min-h-[460px] sm:min-h-[500px]"
+        style={{ paddingTop: "max(env(safe-area-inset-top), 12px)" }}
       >
-        <header className="pt-2 pb-5 flex justify-between items-center gap-3">
-          <div
-            className="inline-flex items-center"
-            style={{
-              filter:
-                "drop-shadow(0 0 10px rgba(255,255,255,0.55)) drop-shadow(0 3px 6px rgba(0,0,0,0.4)) drop-shadow(0 12px 20px rgba(0,0,0,0.28))",
-            }}
-          >
-            <BrandLogo variant="light" size="xl" className="h-[68px]" />
+        {/* Content — clean panel */}
+        <div
+          className="relative z-10 flex flex-col px-5 pb-8 pt-2"
+          style={{
+            background:
+              "linear-gradient(165deg, #F7F5F0 0%, #F1F6F3 48%, #E8F5F1 100%)",
+          }}
+        >
+          <header className="flex items-center justify-between gap-2 mb-6">
+            <BrandLogo size="lg" className="h-12" />
+            {signedIn ? (
+              <Link
+                to="/resident"
+                className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-[12.5px] border border-[#0E6B5A]/25 bg-white px-3 py-1.5 rounded-full shrink-0"
+              >
+                <UserCircle2 className="h-3.5 w-3.5" />
+                האזור האישי
+              </Link>
+            ) : (
+              <Link
+                to="/auth/resident?mode=signin"
+                onClick={setResidentIntent}
+                className="text-[#0E6B5A] font-semibold text-[12.5px] border border-[#0E6B5A]/25 bg-white px-3 py-1.5 rounded-full shrink-0"
+              >
+                התחברות
+              </Link>
+            )}
+          </header>
+
+          <div className="flex-1 flex flex-col justify-center">
+            <h1 className="text-[26px] sm:text-[30px] font-extrabold text-[#0B1220] leading-[1.15] tracking-tight max-w-[17rem]">
+              כוח הקנייה של כולם
+              <br />
+              <span className="text-[#0E6B5A]">לחיסכון בבית ובבניין</span>
+            </h1>
+            <p className="mt-3 text-[13.5px] sm:text-[14.5px] text-[#475569] font-medium leading-relaxed max-w-[17.5rem]">
+              רכישה קבוצתית עם השכנים — ספקים מאומתים ומחירים חכמים.
+            </p>
+
+            <div className="mt-5">
+              <GlobalSearchBar
+                variant="hero"
+                placeholder="איזה ספק או שירות אתם מחפשים היום?"
+              />
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              {QUICK_CHIPS.map((c) => (
+                <Link
+                  key={c.label}
+                  to={`/search?q=${encodeURIComponent(c.q)}`}
+                  className="inline-flex h-8 items-center justify-center px-3 rounded-full bg-white border border-[#E4DFD4] text-[12px] font-bold leading-none text-[#334155] shadow-sm"
+                >
+                  {c.label}
+                </Link>
+              ))}
+            </div>
           </div>
-          {signedIn ? (
-            <Link
-              to="/resident"
-              className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-sm bg-white/90 backdrop-blur-md border border-[#0E6B5A]/20 px-4 py-1.5 rounded-full shrink-0"
-            >
-              <UserCircle2 className="h-4 w-4" />
-              האזור האישי
-            </Link>
-          ) : (
-            <Link
-              to="/auth/resident?mode=signin"
-              onClick={setResidentIntent}
-              className="text-[#0E6B5A] font-semibold text-sm bg-white/90 backdrop-blur-md border border-[#0E6B5A]/20 px-4 py-1.5 rounded-full shrink-0"
-            >
-              התחברות
-            </Link>
-          )}
-        </header>
+        </div>
 
-        <section className="max-w-[22rem]">
-          <h1
-            className="text-[30px] font-extrabold text-[#0B1220] leading-[1.12] tracking-tight"
-            style={headlineHalo}
-          >
-            כוח הקנייה של כולם
-            <br />
-            <span className="text-[#0E6B5A]" style={headlineHalo}>
-              לחיסכון בבית ובבניין
-            </span>
-          </h1>
-
-          <p
-            className="mt-3.5 text-[15px] font-bold leading-relaxed"
-            style={subOutline}
-          >
-            רכישה קבוצתית עם השכנים — ספקים מאומתים ומחירים חכמים.
-          </p>
-        </section>
-
-        <div className="mt-5 sticky top-[max(12px,env(safe-area-inset-top))] z-20">
-          <GlobalSearchBar
-            variant="hero"
-            placeholder="איזה ספק או שירות אתם מחפשים היום?"
+        {/* Image — full-bleed visual plane */}
+        <div className="relative min-h-[460px] sm:min-h-[500px]">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url("${HERO_BG}")` }}
+            role="img"
+            aria-label="בית ובניין"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-y-0 right-0 w-10"
+            style={{
+              background:
+                "linear-gradient(270deg, rgba(247,245,240,0.55) 0%, rgba(247,245,240,0) 100%)",
+            }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 h-16"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(247,245,240,0) 0%, #F7F5F0 100%)",
+            }}
           />
         </div>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {QUICK_CHIPS.map((c) => (
-            <Link
-              key={c.label}
-              to={`/search?q=${encodeURIComponent(c.q)}`}
-              className="inline-flex h-8 items-center justify-center px-3.5 rounded-full bg-white/90 border border-white text-[12px] font-bold leading-none text-[#334155] shadow-sm"
-            >
-              {c.label}
-            </Link>
-          ))}
-        </div>
       </div>
-    </div>
+    </section>
   );
 }
