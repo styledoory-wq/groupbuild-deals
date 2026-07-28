@@ -13,9 +13,9 @@ function setSupplierIntent() {
 }
 
 /**
- * Full-bleed photo that soft-blends into the page.
- * Right (RTL start): cleaner wash so logo + copy read clearly.
- * Left (RTL end): photo stays vivid; small white login chip sits on it.
+ * Full-bleed photo soft-blends into the page.
+ * Right: gradually brighter wash for readable copy.
+ * Left: open/clean photo with almost no overlay.
  */
 export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
   return (
@@ -24,7 +24,6 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
       style={{ background: "#F7F5F0" }}
       dir="rtl"
     >
-      {/* Full-bleed photo — fades into page at bottom */}
       <div
         aria-hidden
         className="absolute inset-0 -z-20 bg-cover bg-[center_35%]"
@@ -37,13 +36,17 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
         }}
       />
 
-      {/* Side wash: stronger on the right (content), open on the left (photo) */}
+      {/* Horizontal: bright on right → clear on left. Vertical: soft bottom blend. */}
       <div
         aria-hidden
         className="absolute inset-0 -z-10"
         style={{
-          background:
-            "linear-gradient(270deg, rgba(247,245,240,0.94) 0%, rgba(247,245,240,0.88) 34%, rgba(247,245,240,0.35) 58%, rgba(247,245,240,0.08) 78%, rgba(247,245,240,0) 100%), linear-gradient(180deg, rgba(247,245,240,0.12) 0%, rgba(247,245,240,0) 40%, rgba(247,245,240,0.55) 82%, #F7F5F0 100%)",
+          background: [
+            // Right → left: brighter/cleaner for text, then open photo
+            "linear-gradient(270deg, rgba(255,255,255,0.92) 0%, rgba(247,245,240,0.88) 22%, rgba(247,245,240,0.55) 42%, rgba(247,245,240,0.18) 62%, rgba(247,245,240,0.04) 80%, rgba(247,245,240,0) 100%)",
+            // Bottom blend into page
+            "linear-gradient(180deg, rgba(247,245,240,0) 0%, rgba(247,245,240,0) 55%, rgba(247,245,240,0.4) 78%, #F7F5F0 100%)",
+          ].join(", "),
         }}
       />
 
@@ -51,7 +54,6 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
         className="relative px-5 pb-14"
         style={{ paddingTop: "max(env(safe-area-inset-top), 14px)" }}
       >
-        {/* Top row: logo right, login on photo left */}
         <header className="flex items-start justify-between gap-3 mb-8">
           <BrandLogo size="lg" className="h-12" />
           {signedIn ? (
@@ -73,7 +75,6 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
           )}
         </header>
 
-        {/* Copy stack — sits in the clean right wash */}
         <div className="max-w-[17.5rem]">
           <h1 className="text-[28px] font-extrabold text-[#0B1220] leading-[1.18] tracking-tight">
             לידים איכותיים
@@ -84,34 +85,35 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
           <p className="mt-3 text-[14.5px] text-[#334155] font-medium leading-relaxed">
             פניות מדיירים וועדים שכבר מתאגדים לקנייה — בלי שיווק קר.
           </p>
+        </div>
 
-          <div className="mt-6 space-y-2">
-            {signedIn ? (
+        {/* CTAs — centered, previous larger size */}
+        <div className="mt-7 mx-auto w-full max-w-sm space-y-2.5">
+          {signedIn ? (
+            <Link
+              to="/supplier"
+              className="flex h-14 items-center justify-center rounded-2xl bg-[#0E6B5A] text-white text-[15px] font-extrabold shadow-[0_10px_28px_-12px_rgba(14,107,90,0.55)]"
+            >
+              כניסה למרחב הספק
+            </Link>
+          ) : (
+            <>
               <Link
-                to="/supplier"
-                className="flex h-[50px] items-center justify-center rounded-2xl bg-[#0E6B5A] text-white text-[14.5px] font-extrabold shadow-[0_10px_28px_-12px_rgba(14,107,90,0.55)]"
+                to="/auth/supplier?mode=signup"
+                onClick={setSupplierIntent}
+                className="flex h-14 items-center justify-center rounded-2xl bg-[#0E6B5A] text-white text-[15px] font-extrabold shadow-[0_10px_28px_-12px_rgba(14,107,90,0.55)]"
               >
-                כניסה למרחב הספק
+                הצטרף כספק
               </Link>
-            ) : (
-              <>
-                <Link
-                  to="/auth/supplier?mode=signup"
-                  onClick={setSupplierIntent}
-                  className="flex h-[50px] items-center justify-center rounded-2xl bg-[#0E6B5A] text-white text-[14.5px] font-extrabold shadow-[0_10px_28px_-12px_rgba(14,107,90,0.55)]"
-                >
-                  הצטרף כספק
-                </Link>
-                <Link
-                  to="/auth/supplier?mode=signin"
-                  onClick={setSupplierIntent}
-                  className="flex h-9 items-center justify-center text-[13px] font-bold text-[#0E6B5A]"
-                >
-                  כבר רשום? התחבר
-                </Link>
-              </>
-            )}
-          </div>
+              <Link
+                to="/auth/supplier?mode=signin"
+                onClick={setSupplierIntent}
+                className="flex h-11 items-center justify-center text-[14px] font-bold text-[#0E6B5A]"
+              >
+                כבר רשום? התחבר
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </section>
