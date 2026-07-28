@@ -48,8 +48,10 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         aria-hidden
         className="absolute inset-0 -z-10"
         style={{
-          background:
-            "linear-gradient(270deg, rgba(247,245,240,0.94) 0%, rgba(247,245,240,0.88) 34%, rgba(247,245,240,0.35) 58%, rgba(247,245,240,0.08) 78%, rgba(247,245,240,0) 100%), linear-gradient(180deg, rgba(247,245,240,0.12) 0%, rgba(247,245,240,0) 40%, rgba(247,245,240,0.55) 82%, #F7F5F0 100%)",
+          background: [
+            "linear-gradient(270deg, rgba(255,255,255,0.92) 0%, rgba(247,245,240,0.88) 22%, rgba(247,245,240,0.55) 42%, rgba(247,245,240,0.18) 62%, rgba(247,245,240,0.04) 80%, rgba(247,245,240,0) 100%)",
+            "linear-gradient(180deg, rgba(247,245,240,0) 0%, rgba(247,245,240,0) 55%, rgba(247,245,240,0.4) 78%, #F7F5F0 100%)",
+          ].join(", "),
         }}
       />
 
