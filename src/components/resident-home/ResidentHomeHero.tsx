@@ -49,7 +49,7 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         className="absolute inset-0 -z-10"
         style={{
           background: [
-            "linear-gradient(270deg, rgba(255,255,255,0.92) 0%, rgba(247,245,240,0.88) 22%, rgba(247,245,240,0.55) 42%, rgba(247,245,240,0.18) 62%, rgba(247,245,240,0.04) 80%, rgba(247,245,240,0) 100%)",
+            "linear-gradient(270deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.94) 18%, rgba(247,245,240,0.82) 36%, rgba(247,245,240,0.35) 55%, rgba(247,245,240,0.08) 72%, rgba(247,245,240,0) 100%)",
             "linear-gradient(180deg, rgba(247,245,240,0) 0%, rgba(247,245,240,0) 55%, rgba(247,245,240,0.4) 78%, #F7F5F0 100%)",
           ].join(", "),
         }}
