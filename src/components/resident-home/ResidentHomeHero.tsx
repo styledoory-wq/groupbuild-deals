@@ -1,5 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { UserCircle2 } from "lucide-react";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 
@@ -21,14 +23,48 @@ function setResidentIntent() {
 }
 
 export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
+  const location = useLocation();
+  const [params] = useSearchParams();
+  const motionPreview =
+    params.get("motion") === "preview" && (location.pathname === "/" || location.pathname === "/residents");
+
+  const reduceMotion = useReducedMotion();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
+
+  // Scroll-based transforms (Preview-only).
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+
+  const bgScale = useTransform(scrollYProgress, [0, 1], isMobile ? [1.03, 1] : [1.06, 1]);
+  const bgY = useTransform(scrollYProgress, [0, 1], isMobile ? [0, -6] : [0, -14]);
+
+  const titleY = useTransform(scrollYProgress, [0, 1], isMobile ? [0, -6] : [0, -10]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 1], isMobile ? [1, 0.82] : [1, 0.75]);
+
   return (
-    <div className="relative isolate overflow-hidden">
+    <div ref={heroRef} className="relative isolate overflow-hidden">
       {/* Full-bleed atmosphere — edge to edge */}
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-20 bg-cover bg-center"
-        style={{ backgroundImage: `url("${HERO_BG}")` }}
-      />
+      {motionPreview && !reduceMotion ? (
+        <motion.div
+          aria-hidden
+          className="absolute inset-0 -z-20 bg-cover bg-center"
+          style={{
+            backgroundImage: `url("${HERO_BG}")`,
+            scale: bgScale,
+            y: bgY,
+            transformOrigin: "center center",
+          }}
+        />
+      ) : (
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-20 bg-cover bg-center"
+          style={{ backgroundImage: `url("${HERO_BG}")` }}
+        />
+      )}
       <div
         aria-hidden
         className="absolute inset-0 -z-10"
@@ -68,11 +104,22 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         </header>
 
         <section>
-          <h1 className="text-[28px] font-extrabold text-[#0B1220] leading-[1.15] tracking-tight">
-            כוח הקנייה של כולם
-            <br />
-            <span className="text-[#0E6B5A]">לחיסכון בבית ובבניין</span>
-          </h1>
+          {motionPreview && !reduceMotion ? (
+            <motion.h1
+              className="text-[28px] font-extrabold text-[#0B1220] leading-[1.15] tracking-tight"
+              style={{ y: titleY, opacity: titleOpacity }}
+            >
+              כוח הקנייה של כולם
+              <br />
+              <span className="text-[#0E6B5A]">לחיסכון בבית ובבניין</span>
+            </motion.h1>
+          ) : (
+            <h1 className="text-[28px] font-extrabold text-[#0B1220] leading-[1.15] tracking-tight">
+              כוח הקנייה של כולם
+              <br />
+              <span className="text-[#0E6B5A]">לחיסכון בבית ובבניין</span>
+            </h1>
+          )}
           <p className="mt-3 text-[15px] text-[#3F4754] leading-relaxed max-w-[34ch]">
             GroupBuild מחברת דיירים לרכישה קבוצתית — ספקים מאומתים, מחירים חכמים, ושקיפות מלאה.
           </p>
