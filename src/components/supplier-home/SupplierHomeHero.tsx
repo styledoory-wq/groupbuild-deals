@@ -4,19 +4,34 @@ import { BrandLogo } from "@/components/BrandLogo";
 
 const HERO_BG = "/marketing/supplier-hero-bg.jpg";
 
-const headlineHalo = {
-  WebkitTextStroke: "1px rgba(255,255,255,0.92)",
-  paintOrder: "stroke fill" as const,
+/** Soft white rim — thinner than before */
+const headlineHalo: React.CSSProperties = {
+  WebkitTextStroke: "0.45px rgba(255,255,255,0.9)",
+  paintOrder: "stroke fill",
   textShadow: [
-    "-2px 0 0 #fff",
-    "2px 0 0 #fff",
-    "0 -2px 0 #fff",
-    "0 2px 0 #fff",
-    "-1.5px -1.5px 0 #fff",
-    "1.5px -1.5px 0 #fff",
-    "-1.5px 1.5px 0 #fff",
-    "1.5px 1.5px 0 #fff",
-    "0 3px 10px rgba(0,0,0,0.28)",
+    "-1px 0 0 rgba(255,255,255,0.95)",
+    "1px 0 0 rgba(255,255,255,0.95)",
+    "0 -1px 0 rgba(255,255,255,0.95)",
+    "0 1px 0 rgba(255,255,255,0.95)",
+    "0 2px 8px rgba(0,0,0,0.22)",
+  ].join(", "),
+};
+
+/** White fill + black outline for supporting line */
+const subOutline: React.CSSProperties = {
+  color: "#FFFFFF",
+  WebkitTextStroke: "0.85px rgba(0,0,0,0.88)",
+  paintOrder: "stroke fill",
+  textShadow: [
+    "-1.2px 0 0 #000",
+    "1.2px 0 0 #000",
+    "0 -1.2px 0 #000",
+    "0 1.2px 0 #000",
+    "-0.8px -0.8px 0 #000",
+    "0.8px -0.8px 0 #000",
+    "-0.8px 0.8px 0 #000",
+    "0.8px 0.8px 0 #000",
+    "0 3px 10px rgba(0,0,0,0.35)",
   ].join(", "),
 };
 
@@ -34,7 +49,6 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
       className="relative isolate overflow-hidden"
       style={{ background: "#F7F5F0" }}
     >
-      {/* Photo fades out into page color — no hard cut */}
       <div
         aria-hidden
         className="absolute inset-0 -z-20 bg-cover bg-[center_35%]"
@@ -46,7 +60,6 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
             "linear-gradient(180deg, #000 0%, #000 48%, rgba(0,0,0,0.55) 72%, transparent 100%)",
         }}
       />
-      {/* Soft bottom blend into page wash */}
       <div
         aria-hidden
         className="absolute inset-x-0 bottom-0 -z-10 h-[55%]"
@@ -61,19 +74,20 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
         style={{ paddingTop: "max(env(safe-area-inset-top), 16px)" }}
       >
         <header className="pt-2 pb-5 flex justify-between items-center gap-3">
+          {/* Bigger mark + light wordmark — pops on photo without a white plate */}
           <div
-            className="inline-flex"
+            className="inline-flex items-center"
             style={{
               filter:
-                "drop-shadow(0 2px 3px rgba(0,0,0,0.35)) drop-shadow(0 8px 14px rgba(0,0,0,0.28))",
+                "drop-shadow(0 0 10px rgba(255,255,255,0.55)) drop-shadow(0 3px 6px rgba(0,0,0,0.4)) drop-shadow(0 12px 20px rgba(0,0,0,0.28))",
             }}
           >
-            <BrandLogo size="lg" className="h-14" />
+            <BrandLogo variant="light" size="xl" className="h-[68px]" />
           </div>
           {signedIn ? (
             <Link
               to="/supplier"
-              className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-sm bg-white/90 backdrop-blur-md border border-[#0E6B5A]/20 px-4 py-1.5 rounded-full"
+              className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-sm bg-white/90 backdrop-blur-md border border-[#0E6B5A]/20 px-4 py-1.5 rounded-full shrink-0"
             >
               <UserCircle2 className="h-4 w-4" />
               אזור הספק
@@ -82,7 +96,7 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
             <Link
               to="/auth/supplier?mode=signin"
               onClick={setSupplierIntent}
-              className="text-[#0E6B5A] font-semibold text-sm bg-white/90 backdrop-blur-md border border-[#0E6B5A]/20 px-4 py-1.5 rounded-full"
+              className="text-[#0E6B5A] font-semibold text-sm bg-white/90 backdrop-blur-md border border-[#0E6B5A]/20 px-4 py-1.5 rounded-full shrink-0"
             >
               התחברות
             </Link>
@@ -101,8 +115,10 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
             </span>
           </h1>
 
-          {/* Dark glass chip — makes white copy actually readable */}
-          <p className="mt-3.5 inline-block max-w-full rounded-2xl bg-[#0B1220]/55 backdrop-blur-md px-3.5 py-2.5 text-[14px] font-semibold leading-relaxed text-white shadow-[0_8px_24px_-12px_rgba(0,0,0,0.45)]">
+          <p
+            className="mt-3.5 text-[15px] font-bold leading-relaxed"
+            style={subOutline}
+          >
             פניות מדיירים וועדים שכבר מתאגדים לקנייה — בלי שיווק קר.
           </p>
         </section>
