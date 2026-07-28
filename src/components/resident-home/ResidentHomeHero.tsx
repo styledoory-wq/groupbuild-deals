@@ -1,132 +1,151 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Search } from "lucide-react";
+import { UserCircle2 } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
+import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 
-const heroImage = "/marketing/resident-hero-bg.jpg";
+const HERO_BG = "/marketing/resident-hero-bg.jpg";
 
-type ResidentHomeHeroProps = {
-  onOpenAuth: (mode?: "login" | "signup") => void;
-};
+const QUICK_CHIPS = [
+  { label: "דלתות", q: "דלתות" },
+  { label: "מזגן", q: "מזגן" },
+  { label: "חשמלאי", q: "חשמלאי" },
+  { label: "ריצוף", q: "ריצוף" },
+];
 
-export function ResidentHomeHero({ onOpenAuth }: ResidentHomeHeroProps) {
-  const { user } = useAuth();
+function setResidentIntent() {
+  try {
+    sessionStorage.setItem("gb_intent", "resident");
+  } catch {
+    /* ignore */
+  }
+}
 
+/**
+ * Premium Apple-style hero:
+ * - Full-bleed sharp photo (majority visible)
+ * - Soft dark scrim only behind copy
+ * - Long bottom dissolve + organic wave into the page
+ */
+export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
   return (
-    <header className="relative isolate overflow-hidden bg-[#F7F5F0]">
-      {/* Full-bleed photo — stays large and sharp */}
-      <div className="absolute inset-0">
-        <img
-          src={heroImage}
-          alt=""
-          aria-hidden
-          className="h-full w-full object-cover object-[center_32%] sm:object-[center_28%]"
-        />
-        {/* Soft dark scrim only on text side for readability */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-l from-black/55 via-black/28 to-transparent sm:from-black/50 sm:via-black/22"
-        />
-        {/* Long dissolve into page cream — starts only at the bottom */}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-[min(38vh,360px)] bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0]/55 to-transparent"
-        />
-      </div>
+    <section
+      className="relative isolate overflow-hidden"
+      style={{ background: "#F7F5F0" }}
+      dir="rtl"
+    >
+      {/* Sharp full-bleed photo — kept large and unblurred */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-30 bg-cover bg-[center_30%]"
+        style={{
+          backgroundImage: `url("${HERO_BG}")`,
+          minHeight: "100%",
+        }}
+      />
 
-      {/* Organic bottom edge — image continues into the page */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] leading-[0]" aria-hidden>
-        <svg
-          viewBox="0 0 1440 120"
-          preserveAspectRatio="none"
-          className="block h-[72px] w-full sm:h-[96px] md:h-[112px]"
-        >
-          <path
-            fill="#F7F5F0"
-            d="M0,72 C180,118 360,18 540,52 C720,86 900,118 1080,64 C1200,28 1320,40 1440,72 L1440,120 L0,120 Z"
-          />
-        </svg>
-      </div>
+      {/* Soft dark overlay ONLY on the text side (RTL right) — not whitening the photo */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-20 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(270deg, rgba(11,18,32,0.52) 0%, rgba(11,18,32,0.34) 28%, rgba(11,18,32,0.12) 48%, rgba(11,18,32,0) 68%)",
+        }}
+      />
 
-      <div className="relative z-[1] mx-auto flex min-h-[min(92vh,920px)] w-full max-w-6xl flex-col px-4 pb-28 pt-5 sm:px-6 sm:pb-32 sm:pt-6 lg:px-8">
-        <div className="flex items-center justify-between gap-3">
-          <BrandLogo
-            to="/"
-            height={36}
-            className="drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] [&_img]:brightness-0 [&_img]:invert"
-          />
-          <div className="flex items-center gap-2">
-            {user ? (
-              <Button
-                asChild
-                size="sm"
-                className="rounded-full bg-white px-4 text-[#0B1220] shadow-md hover:bg-white/95"
-              >
-                <Link to="/app">
-                  לאפליקציה
-                  <ArrowLeft className="size-4" />
-                </Link>
-              </Button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => onOpenAuth("login")}
-                className="rounded-full border border-white/35 bg-white/15 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur-[2px] transition hover:bg-white/25"
-              >
-                התחברות
-              </button>
-            )}
+      {/* Long bottom dissolve (~320px) — almost imperceptible */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 -z-10 h-[320px] pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(247,245,240,0) 0%, rgba(247,245,240,0.08) 28%, rgba(247,245,240,0.35) 55%, rgba(247,245,240,0.72) 78%, #F7F5F0 100%)",
+        }}
+      />
+
+      {/* Organic wave — image feels continuous into the page */}
+      <svg
+        aria-hidden
+        className="absolute bottom-0 inset-x-0 z-[1] w-full h-[72px] sm:h-[88px]"
+        viewBox="0 0 1440 120"
+        preserveAspectRatio="none"
+      >
+        <path
+          fill="#F7F5F0"
+          d="M0,72 C180,108 360,28 540,52 C780,84 960,128 1200,76 C1320,48 1380,40 1440,56 L1440,120 L0,120 Z"
+        />
+      </svg>
+
+      <div
+        className="relative z-[2] px-5 pb-28 pt-2 min-h-[560px] flex flex-col"
+        style={{ paddingTop: "max(env(safe-area-inset-top), 14px)" }}
+      >
+        <header className="flex items-start justify-between gap-3 mb-10">
+          <div
+            style={{
+              filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.35))",
+            }}
+          >
+            <BrandLogo variant="light" size="lg" className="h-12" />
           </div>
+          {signedIn ? (
+            <Link
+              to="/resident"
+              className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-[12.5px] bg-white border border-white/90 shadow-md px-3.5 py-1.5 rounded-full shrink-0"
+            >
+              <UserCircle2 className="h-3.5 w-3.5" />
+              האזור האישי
+            </Link>
+          ) : (
+            <Link
+              to="/auth/resident?mode=signin"
+              onClick={setResidentIntent}
+              className="text-[#0E6B5A] font-semibold text-[12.5px] bg-white border border-white/90 shadow-md px-3.5 py-1.5 rounded-full shrink-0"
+            >
+              התחברות
+            </Link>
+          )}
+        </header>
+
+        <div className="max-w-[17.5rem] mt-2">
+          <h1
+            className="text-[28px] font-extrabold text-white leading-[1.18] tracking-tight"
+            style={{ textShadow: "0 2px 18px rgba(0,0,0,0.35)" }}
+          >
+            כוח הקנייה של כולם
+          </h1>
+          <p
+            className="mt-1 text-[28px] font-extrabold text-[#7DDBB8] leading-[1.18] tracking-tight"
+            style={{ textShadow: "0 2px 18px rgba(0,0,0,0.3)" }}
+          >
+            לחיסכון בבית ובבניין
+          </p>
+          <p
+            className="mt-3 text-[14.5px] text-white/90 font-medium leading-relaxed"
+            style={{ textShadow: "0 1px 10px rgba(0,0,0,0.35)" }}
+          >
+            רכישה קבוצתית עם השכנים — ספקים מאומתים ומחירים חכמים.
+          </p>
         </div>
 
-        <div className="flex flex-1 flex-col justify-center py-10 sm:py-14">
-          <div className="mx-auto w-full max-w-xl text-center sm:mx-0 sm:max-w-lg sm:text-right lg:max-w-xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
-              לדיירים ולוועדי בית
-            </p>
-
-            <h1 className="mt-4 text-[clamp(2.15rem,5.2vw,3.85rem)] font-semibold leading-[1.08] tracking-[-0.03em] text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.35)]">
-              תחסכו יחד.
-              <span className="mt-1 block text-white/92">תתקדמו מהר יותר.</span>
-            </h1>
-
-            <p className="mx-auto mt-5 max-w-md text-[15px] leading-7 text-white/82 drop-shadow-[0_1px_10px_rgba(0,0,0,0.3)] sm:mx-0 sm:text-base sm:leading-8">
-              GroupBuild מחברת דיירים באותו בניין לעסקאות קבוצתיות חכמות — שקיפות מלאה, הצעות תחרותיות
-              והתקדמות ברורה עד הביצוע.
-            </p>
-
-            <div className="mt-8 flex flex-col items-center gap-3 sm:items-stretch">
-              <Button
-                asChild
-                size="lg"
-                className="h-14 w-full max-w-sm rounded-2xl bg-[#0E6B5A] px-8 text-base font-semibold text-white shadow-[0_14px_36px_rgba(14,107,90,0.38)] hover:bg-[#0c5d4e] sm:max-w-none"
+        <div className="mt-auto pt-10 w-full max-w-md pb-2">
+          <GlobalSearchBar
+            variant="hero"
+            placeholder="איזה ספק או שירות אתם מחפשים היום?"
+          />
+          <div className="mt-3 flex flex-wrap gap-2">
+            {QUICK_CHIPS.map((c) => (
+              <Link
+                key={c.label}
+                to={`/search?q=${encodeURIComponent(c.q)}`}
+                className="inline-flex h-8 items-center justify-center px-3 rounded-full bg-white/95 border border-white text-[12px] font-bold leading-none text-[#334155] shadow-md"
               >
-                <Link to="/residents/explore">
-                  <Search className="size-5" />
-                  גלו הצעות באזור שלכם
-                </Link>
-              </Button>
-
-              {!user ? (
-                <Button
-                  type="button"
-                  size="lg"
-                  variant="outline"
-                  onClick={() => onOpenAuth("signup")}
-                  className={cn(
-                    "h-14 w-full max-w-sm rounded-2xl border-white/40 bg-white/10 px-8 text-base font-semibold text-white",
-                    "backdrop-blur-[2px] hover:bg-white/18 sm:max-w-none",
-                  )}
-                >
-                  הרשמה לדיירים
-                </Button>
-              ) : null}
-            </div>
+                {c.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
-    </header>
+    </section>
   );
 }
