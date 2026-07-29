@@ -45,7 +45,7 @@ export default function ResidentsHome() {
       {/* Status-bar scrim — keeps scrolling content from appearing under the iOS clock */}
       <div
         aria-hidden
-        className="fixed top-0 inset-x-0 z-[100] pointer-events-none bg-[#F7F5F0]/85 backdrop-blur-md"
+        className="fixed top-0 inset-x-0 z-[100] pointer-events-none bg-[#F7F5F0]"
         style={{ height: "env(safe-area-inset-top)" }}
       />
 
