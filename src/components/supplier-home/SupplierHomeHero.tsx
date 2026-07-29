@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
 import { UserCircle2 } from "lucide-react";
-import { BrandLogo } from "@/components/BrandLogo";
-
 const HERO_BG = "/marketing/supplier-hero-bg.jpg";
 
 function setSupplierIntent() {
@@ -74,13 +72,22 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
         className="relative z-[2] px-5 pb-28 pt-2 min-h-[560px] flex flex-col"
         style={{ paddingTop: "max(env(safe-area-inset-top), 14px)" }}
       >
-        <header className="flex items-start justify-between gap-3 mb-10">
+        <header className="flex items-start justify-between gap-3 mb-10 mt-2 mr-1">
           <div
+            className="inline-flex items-center rounded-2xl px-3 py-2"
             style={{
-              filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.35))",
+              background: "rgba(10,20,18,0.18)",
+              backdropFilter: "blur(4px)",
+              WebkitBackdropFilter: "blur(4px)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
             }}
           >
-            <BrandLogo variant="light" size="lg" className="h-12" />
+            <img
+              src="/brand/groupbuild-mark.png"
+              alt="GroupBuild"
+              className="w-[120px] sm:w-[170px] h-auto object-contain select-none"
+              draggable={false}
+            />
           </div>
           {signedIn ? (
             <Link
