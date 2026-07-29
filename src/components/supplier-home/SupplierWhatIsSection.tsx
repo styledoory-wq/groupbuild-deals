@@ -24,12 +24,14 @@ export function SupplierWhatIsSection() {
               "ביקוש משותף לקטגוריה שלכם",
               "לידים חמים עם כוונת רכישה",
             ].map((label, i) => (
-              <div key={label} className="flex items-center gap-2.5 text-[14px] font-bold">
-                <span className="h-7 w-7 rounded-[10px] bg-white/15 inline-flex items-center justify-center text-[12px]">
-                  {i + 1}
-                </span>
-                {label}
-              </div>
+              <Reveal key={label} delayMs={120 * i}>
+                <div className="flex items-center gap-2.5 text-[14px] font-bold">
+                  <span className="h-7 w-7 rounded-[10px] bg-white/15 inline-flex items-center justify-center text-[12px]">
+                    {i + 1}
+                  </span>
+                  {label}
+                </div>
+              </Reveal>
             ))}
             <p className="text-[12px] font-semibold text-white/80 pr-9 pt-1">
               פחות שיווק קר · יותר שיחות שנסגרות

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { MotionHover } from "@/components/motion/MotionHover";
 import { Reveal } from "@/components/resident-home/Reveal";
 
 function setSupplierIntent() {
@@ -29,21 +30,25 @@ export function SupplierHomeCta({ signedIn }: { signedIn: boolean }) {
               : "ההרשמה חינם. תוך דקות בונים פרופיל ומתחילים לקבל פניות."}
           </p>
           <div className="mt-5 space-y-2.5">
-            <Link
-              to={signedIn ? "/supplier" : "/auth/supplier?mode=signup"}
-              onClick={signedIn ? undefined : setSupplierIntent}
-              className="flex h-[52px] items-center justify-center rounded-2xl bg-white text-[#0E6B5A] font-extrabold text-[15px] shadow-[0_8px_20px_-12px_rgba(0,0,0,0.35)]"
-            >
-              {signedIn ? "לאזור הספק" : "הצטרף כספק"}
-            </Link>
-            {!signedIn && (
+            <MotionHover className="w-full">
               <Link
-                to="/auth/supplier?mode=signin"
-                onClick={setSupplierIntent}
-                className="flex h-12 items-center justify-center rounded-2xl border border-white/35 text-white font-bold text-[14px]"
+                to={signedIn ? "/supplier" : "/auth/supplier?mode=signup"}
+                onClick={signedIn ? undefined : setSupplierIntent}
+                className="flex h-[52px] items-center justify-center rounded-2xl bg-white text-[#0E6B5A] font-extrabold text-[15px] shadow-[0_8px_20px_-12px_rgba(0,0,0,0.35)]"
               >
-                כבר רשום? התחבר
+                {signedIn ? "לאזור הספק" : "הצטרף כספק"}
               </Link>
+            </MotionHover>
+            {!signedIn && (
+              <MotionHover className="w-full">
+                <Link
+                  to="/auth/supplier?mode=signin"
+                  onClick={setSupplierIntent}
+                  className="flex h-12 items-center justify-center rounded-2xl border border-white/35 text-white font-bold text-[14px]"
+                >
+                  כבר רשום? התחבר
+                </Link>
+              </MotionHover>
             )}
           </div>
         </div>
