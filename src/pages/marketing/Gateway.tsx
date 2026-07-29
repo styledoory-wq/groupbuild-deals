@@ -3,16 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Building2, Briefcase } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import { isAdminEmail } from "@/lib/auth";
-import { APP_MODE, IS_SUPPLIERS_BUILD } from "@/config/appMode";
+import { APP_MODE } from "@/config/appMode";
 import { BrandMark } from "@/components/BrandLogo";
 import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 import { cn } from "@/lib/utils";
 import { Seo } from "@/components/seo/Seo";
 
 /**
- * Public entry gateway at "/". Only ever rendered for the web build and the
- * suppliers build — the residents build routes "/" straight to
- * ResidentsHome (see PublicRoutes.tsx) and never imports this module.
+ * Public entry gateway at "/". Only ever rendered for the web build —
+ * residents build routes "/" to ResidentsHome and suppliers build routes "/"
+ * to SuppliersHome (see PublicRoutes.tsx).
  * - Anonymous visitors: choose "אני דייר" or "אני ספק".
  * - Logged-in users: auto-redirect to their dashboard (same rules as before).
  */
@@ -22,18 +22,13 @@ export default function Gateway() {
 
   useEffect(() => {
     if (!authReady) return;
-    if (!user) {
-      if (IS_SUPPLIERS_BUILD) { navigate("/auth/supplier", { replace: true }); return; }
-      return;
-    }
+    if (!user) return;
     if (isAdminEmail(user.email) && APP_MODE === "web") { navigate("/admin", { replace: true }); return; }
     if (needsOnboarding) { navigate("/onboarding", { replace: true }); return; }
-    if (IS_SUPPLIERS_BUILD) { navigate("/supplier", { replace: true }); return; }
     navigate(user.role === "supplier" ? "/supplier" : "/resident", { replace: true });
   }, [authReady, user, needsOnboarding, navigate]);
 
-  // Suppliers build redirects; while authed/loading show a blank surface.
-  if (!authReady || user || IS_SUPPLIERS_BUILD) {
+  if (!authReady || user) {
     return <div style={{ minHeight: "100dvh", background: "#F7F5F0" }} aria-hidden />;
   }
 

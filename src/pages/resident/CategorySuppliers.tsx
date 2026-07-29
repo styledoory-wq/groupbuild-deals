@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ChevronDown, MapPin, Sparkles, UserPlus, Wrench, Package } from "lucide-react";
+import { ArrowRight, ChevronDown, MapPin, UserPlus } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
@@ -82,7 +82,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
 
   const [regionId, setRegionId] = useState<string>("all");
   const [cityId, setCityId] = useState<string>("all");
-  const [kindFilter, setKindFilter] = useState<"all" | "service" | "product">("all");
+  
   const [showAreaPicker, setShowAreaPicker] = useState(false);
 
   const [supplierRegionIds, setSupplierRegionIds] = useState<Record<string, string[]>>({});
@@ -265,18 +265,10 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
       ? suppliers
       : suppliers.filter((s) => (s.categories ?? []).some((id) => relevantCategoryIds.includes(id)));
 
-    const supplierOffers = (s: DbSupplier) => ({
-      service: Boolean(s.offers_services) || s.supplier_kind === "service",
-      product: Boolean(s.offers_products) || s.supplier_kind === "product",
-    });
-    const byKind = kindFilter === "all"
-      ? byCategory
-      : byCategory.filter((s) => supplierOffers(s)[kindFilter]);
-
-    const byArea = byKind.filter(matchesArea);
+    const byArea = byCategory.filter(matchesArea);
     if (byArea.length > 0 || (regionId === "all" && cityId === "all")) return byArea;
-    return byKind.filter(isNationalSupplier);
-  }, [suppliers, activeCategoryId, relevantCategoryIds, regionId, cityId, kindFilter, supplierRegionIds, supplierCityIds, supplierCouncilIds, regions, cities]);
+    return byCategory.filter(isNationalSupplier);
+  }, [suppliers, activeCategoryId, relevantCategoryIds, regionId, cityId, supplierRegionIds, supplierCityIds, supplierCouncilIds, regions, cities]);
 
   const areaLabel =
     cityId !== "all"
@@ -284,12 +276,6 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
       : regionId !== "all"
         ? regions.find((r) => r.id === regionId)?.name_he
         : "כל הארץ";
-
-  const kinds: { v: "all" | "service" | "product"; label: string; Icon: typeof Sparkles }[] = [
-    { v: "all", label: "הכול", Icon: Sparkles },
-    { v: "service", label: "בעלי מקצוע", Icon: Wrench },
-    { v: "product", label: "ספקי מוצרים", Icon: Package },
-  ];
 
   const HeaderIcon = iconForCategory(activeCategoryId, activeCategory?.name);
 
@@ -319,7 +305,9 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                   {activeCategory?.name ?? "ספקים"}
                 </h1>
                 <p className="text-[13px] text-slate-500 mt-0.5 truncate">
-                  {filteredSuppliers.length} ספקים זמינים · {areaLabel}
+                  {childCategories.length > 0
+                    ? `${childCategories.length} תחומי משנה`
+                    : `${filteredSuppliers.length} ספקים זמינים · ${areaLabel}`}
                 </p>
               </div>
             </div>
@@ -359,28 +347,8 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
               </div>
             )}
 
-            {/* Filter chips */}
-            <nav className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-              {kinds.map(({ v, label, Icon }) => {
-                const active = kindFilter === v;
-                return (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setKindFilter(v)}
-                    className={
-                      "whitespace-nowrap px-3.5 py-1.5 rounded-full text-[12px] font-bold inline-flex items-center gap-1.5 transition-all border " +
-                      (active
-                        ? "text-white border-transparent shadow-sm"
-                        : "bg-white text-slate-600 border-slate-200")
-                    }
-                    style={active ? { background: BRAND, borderColor: BRAND } : undefined}
-                  >
-                    <Icon className="h-3 w-3" />
-                    {label}
-                  </button>
-                );
-              })}
+            {/* Area filter */}
+            <div className="flex gap-1.5 pb-1">
               <button
                 type="button"
                 onClick={() => setShowAreaPicker((v) => !v)}
@@ -395,7 +363,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
                 {areaLabel}
                 <ChevronDown className={`h-3 w-3 transition-transform ${showAreaPicker ? "rotate-180" : ""}`} />
               </button>
-            </nav>
+            </div>
 
             {showAreaPicker && (
               <div className="mt-3 bg-white border border-slate-200 rounded-2xl p-3 shadow-sm grid grid-cols-2 gap-2 animate-fade-in">
@@ -427,9 +395,16 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
             )}
           </header>
 
-          {/* Suppliers list — Style A floating cards */}
+          {/* Suppliers list — only at leaf categories (no children) */}
           <main className="mt-4 space-y-3">
-            {loading ? (
+            {childCategories.length > 0 ? (
+              <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-6 text-center">
+                <p className="text-sm font-bold text-slate-900">בחרו תחום משנה</p>
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed max-w-[260px] mx-auto">
+                  הספקים יוצגו רק לאחר בחירת קטגוריה ספציפית.
+                </p>
+              </div>
+            ) : loading ? (
               <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-10 text-center">
                 <div
                   className="h-8 w-8 rounded-full border-2 border-[rgba(14,107,90,0.2)] border-t-[#0E6B5A] animate-spin mx-auto mb-3"
