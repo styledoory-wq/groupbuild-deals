@@ -114,7 +114,7 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
             minHeight: "100%",
             scale: bgScale,
             y: bgY,
-            transformOrigin: "center center",
+            transformOrigin: "center top",
           }}
         />
       ) : (
@@ -127,17 +127,6 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
           }}
         />
       )}
-
-      {/* Soft top vignette — blends photo into the clock / status area */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 -z-[15] pointer-events-none"
-        style={{
-          height: "calc(env(safe-area-inset-top) + 88px)",
-          background:
-            "linear-gradient(180deg, rgba(10,20,18,0.55) 0%, rgba(10,20,18,0.22) 42%, transparent 100%)",
-        }}
-      />
 
       <div
         aria-hidden
