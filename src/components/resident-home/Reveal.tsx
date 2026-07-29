@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useMotionPreview } from "@/lib/motion/useMotionPreview";
+import { useLandingMotion } from "@/lib/motion/useMotionPreview";
 import { cn } from "@/lib/utils";
 
-/** Scroll-triggered reveal. Premium blur+fade in preview mode; CSS fallback otherwise. */
+/** Scroll-triggered reveal — opacity + translateY + soft blur (Framer on landings). */
 export function Reveal({
   children,
   className,
@@ -13,11 +13,11 @@ export function Reveal({
   className?: string;
   delayMs?: number;
 }) {
-  const motionPreview = useMotionPreview();
+  const landingMotion = useLandingMotion();
   const reduceMotion = useReducedMotion();
-  const useFramerReveal = motionPreview && !reduceMotion;
+  const useFramerReveal = landingMotion && !reduceMotion;
   const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
-  const blurPx = isMobile ? 3 : 6;
+  const blurPx = isMobile ? 4 : 8;
 
   const ref = useRef<HTMLDivElement>(null);
   const [on, setOn] = useState(false);
@@ -50,7 +50,7 @@ export function Reveal({
         className={cn("will-change-[transform,opacity]", className)}
         initial={{
           opacity: 0,
-          y: 18,
+          y: 28,
           filter: `blur(${blurPx}px)`,
         }}
         whileInView={{
@@ -58,9 +58,9 @@ export function Reveal({
           y: 0,
           filter: "blur(0px)",
         }}
-        viewport={{ once: true, amount: 0.14, margin: "0px 0px -4% 0px" }}
+        viewport={{ once: true, amount: 0.18, margin: "0px 0px -8% 0px" }}
         transition={{
-          duration: 0.65,
+          duration: 0.75,
           ease: [0.22, 1, 0.36, 1],
           delay: delayMs / 1000,
         }}
