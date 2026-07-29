@@ -42,6 +42,13 @@ export default function ResidentsHome() {
       />
       <PullToRefreshIndicator {...ptr} />
 
+      {/* Status-bar scrim — keeps scrolling content from appearing under the iOS clock */}
+      <div
+        aria-hidden
+        className="fixed top-0 inset-x-0 z-[100] pointer-events-none bg-[#F7F5F0]/85 backdrop-blur-md"
+        style={{ height: "env(safe-area-inset-top)" }}
+      />
+
       <div
         className="relative w-full max-w-screen-sm flex flex-col"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 28px)" }}
