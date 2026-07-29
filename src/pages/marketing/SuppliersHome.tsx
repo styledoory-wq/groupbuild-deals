@@ -1,5 +1,6 @@
 import { Seo } from "@/components/seo/Seo";
 import { useApp } from "@/store/AppStore";
+import { LandingSafeTop } from "@/components/marketing/LandingSafeTop";
 import { SupplierHomeHero } from "@/components/supplier-home/SupplierHomeHero";
 import { SupplierWhatIsSection } from "@/components/supplier-home/SupplierWhatIsSection";
 import { SupplierHowItWorksSection } from "@/components/supplier-home/SupplierHowItWorksSection";
@@ -25,6 +26,8 @@ export default function SuppliersHome() {
         description="הצטרפו לרשת הספקים של GroupBuild וקבלו פניות מדיירים וועדי בית שמתאגדים לקנייה קבוצתית."
         path="/suppliers"
       />
+
+      <LandingSafeTop />
 
       <div
         className="relative w-full max-w-screen-sm flex flex-col"

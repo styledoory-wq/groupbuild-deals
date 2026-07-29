@@ -29,9 +29,6 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
 
   const titleBlock = (
     <>
-      <div className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-white/15 backdrop-blur-md text-white text-[11px] font-extrabold mb-3 border border-white/25">
-        רשת ספקים לפרויקטי בנייה
-      </div>
       <h1
         className="text-[30px] font-extrabold text-white leading-[1.15] tracking-tight"
         style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
@@ -113,15 +110,17 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
     <section
       ref={heroRef}
       className="relative isolate overflow-hidden"
-      style={{ background: "#F7F5F0" }}
+      style={{ background: "#121A18" }}
       dir="rtl"
     >
       {motionOn ? (
         <motion.div
           aria-hidden
-          className="absolute inset-0 -z-30 bg-cover bg-[center_32%]"
+          className="absolute inset-x-0 -z-30 bg-cover bg-[center_32%]"
           style={{
             backgroundImage: `url("${HERO_BG}")`,
+            top: 0,
+            bottom: 0,
             minHeight: "100%",
             scale: bgScale,
             y: bgY,
@@ -138,6 +137,17 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
           }}
         />
       )}
+
+      {/* Soft top vignette — blends photo into the clock / status area */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 -z-[15] pointer-events-none"
+        style={{
+          height: "calc(env(safe-area-inset-top) + 88px)",
+          background:
+            "linear-gradient(180deg, rgba(10,20,18,0.55) 0%, rgba(10,20,18,0.22) 42%, transparent 100%)",
+        }}
+      />
 
       <div
         aria-hidden

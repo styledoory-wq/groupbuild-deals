@@ -7,6 +7,7 @@ import { usePublicDeals, type PublicDeal } from "@/hooks/usePublicDeals";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { HomeDealSkeletonList } from "@/components/ui/HomeDealSkeleton";
+import { LandingSafeTop } from "@/components/marketing/LandingSafeTop";
 import { ResidentHomeHero } from "@/components/resident-home/ResidentHomeHero";
 import { WhatIsSection } from "@/components/resident-home/WhatIsSection";
 import { HowItWorksSection } from "@/components/resident-home/HowItWorksSection";
@@ -42,12 +43,7 @@ export default function ResidentsHome() {
       />
       <PullToRefreshIndicator {...ptr} />
 
-      {/* Status-bar scrim — keeps scrolling content from appearing under the iOS clock */}
-      <div
-        aria-hidden
-        className="fixed top-0 inset-x-0 z-[100] pointer-events-none bg-[#F7F5F0]"
-        style={{ height: "env(safe-area-inset-top)" }}
-      />
+      <LandingSafeTop />
 
       <div
         className="relative w-full max-w-screen-sm flex flex-col"
