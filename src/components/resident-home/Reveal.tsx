@@ -15,11 +15,36 @@ export function Reveal({
 }) {
   const motionPreview = useMotionPreview();
   const reduceMotion = useReducedMotion();
+  const useFramerReveal = motionPreview && !reduceMotion;
   const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
+  const blurPx = isMobile ? 3 : 6;
 
-  if (motionPreview && !reduceMotion) {
-    const blurPx = isMobile ? 3 : 6;
+  const ref = useRef<HTMLDivElement>(null);
+  const [on, setOn] = useState(false);
 
+  useEffect(() => {
+    if (useFramerReveal) return;
+
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setOn(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setOn(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.16, rootMargin: "0px 0px -6% 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [useFramerReveal]);
+
+  if (useFramerReveal) {
     return (
       <motion.div
         className={cn("will-change-[transform,opacity]", className)}
@@ -44,29 +69,6 @@ export function Reveal({
       </motion.div>
     );
   }
-
-  const ref = useRef<HTMLDivElement>(null);
-  const [on, setOn] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setOn(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setOn(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.16, rootMargin: "0px 0px -6% 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
 
   return (
     <div
