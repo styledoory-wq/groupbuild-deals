@@ -48,7 +48,7 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
         className="mt-3 text-[14.5px] text-white/90 font-medium leading-relaxed"
         style={{ textShadow: "0 2px 12px rgba(0,0,0,0.45)" }}
       >
-        פניות מדיירים וועדים שכבר מתאגדים לקנייה — בלי שיווק קר.
+        פלטפורמה שמחברת בין ספקים מקצועיים לבין קבוצות רכישה, דיירים ופרויקטים איכותיים מכל הארץ
       </p>
     </>
   );
