@@ -68,27 +68,44 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
         />
       </svg>
 
+      {/* Brand mark (fixed at top-right; no glass/opaque background) */}
+      <div
+        className="pointer-events-none absolute z-[6] flex items-start gap-3 text-right"
+        style={{
+          top: "max(env(safe-area-inset-top), 14px)",
+          right: "max(env(safe-area-inset-right), 20px)",
+          filter: "drop-shadow(0 1px 6px rgba(0,0,0,0.18))",
+        }}
+      >
+        <img
+          src="/brand/groupbuild-mark.png"
+          alt="GroupBuild"
+          className="w-[108px] sm:w-[150px] h-auto object-contain select-none"
+          draggable={false}
+        />
+        <div className="pt-1 leading-tight">
+          <div
+            className="font-extrabold text-white tracking-tight"
+            style={{ fontSize: 14, textShadow: "0 2px 12px rgba(0,0,0,0.45)" }}
+          >
+            GroupBuild
+          </div>
+          <div
+            className="font-semibold text-white/90"
+            style={{ fontSize: 12, textShadow: "0 2px 12px rgba(0,0,0,0.35)" }}
+          >
+            בונים טוב יותר. יחד.
+          </div>
+        </div>
+      </div>
+
       <div
         className="relative z-[2] px-5 pb-28 pt-2 min-h-[560px] flex flex-col"
         style={{ paddingTop: "max(env(safe-area-inset-top), 14px)" }}
       >
         <header className="flex items-start justify-between gap-3 mb-10 mt-2 mr-1">
-          <div
-            className="inline-flex items-center rounded-2xl px-3 py-2"
-            style={{
-              background: "rgba(10,20,18,0.18)",
-              backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-            }}
-          >
-            <img
-              src="/brand/groupbuild-mark.png"
-              alt="GroupBuild"
-              className="w-[120px] sm:w-[170px] h-auto object-contain select-none"
-              draggable={false}
-            />
-          </div>
+          {/* Spacer keeps the CTA button placement stable (RTL layout) */}
+          <div className="w-[108px] sm:w-[150px]" aria-hidden="true" />
           {signedIn ? (
             <Link
               to="/supplier"
