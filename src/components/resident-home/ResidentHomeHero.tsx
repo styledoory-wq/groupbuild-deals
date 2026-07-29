@@ -81,13 +81,15 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         />
       )}
 
-      {/* Soft dark overlay ONLY on the text side (RTL right) — not whitening the photo */}
+      {/* Localized dark gradient behind text (RTL right) — photo stays vivid elsewhere */}
       <div
         aria-hidden
         className="absolute inset-0 -z-20 pointer-events-none"
         style={{
-          background:
-            "linear-gradient(270deg, rgba(11,18,32,0.52) 0%, rgba(11,18,32,0.34) 28%, rgba(11,18,32,0.12) 48%, rgba(11,18,32,0) 68%)",
+          background: [
+            "linear-gradient(270deg, rgba(10,20,18,0.62) 0%, rgba(10,20,18,0.44) 26%, rgba(10,20,18,0.18) 46%, transparent 64%)",
+            "radial-gradient(ellipse 55% 50% at 88% 32%, rgba(10,20,18,0.48) 0%, transparent 100%)",
+          ].join(", "),
         }}
       />
 
@@ -152,7 +154,7 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
               style={{
                 y: titleY,
                 opacity: titleOpacity,
-                textShadow: "0 2px 18px rgba(0,0,0,0.35)",
+                textShadow: "0 3px 18px rgba(0,0,0,0.55)",
               }}
             >
               כוח הקנייה של כולם
@@ -160,7 +162,7 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
           ) : (
             <h1
               className="text-[28px] font-extrabold text-white leading-[1.18] tracking-tight"
-              style={{ textShadow: "0 2px 18px rgba(0,0,0,0.35)" }}
+              style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
             >
               כוח הקנייה של כולם
             </h1>
@@ -168,26 +170,26 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
 
           {motionPreview && !reduceMotion ? (
             <motion.p
-              className="mt-1 text-[28px] font-extrabold text-[#7DDBB8] leading-[1.18] tracking-tight"
+              className="mt-1 text-[28px] font-extrabold text-[#5CC9A0] leading-[1.18] tracking-tight"
               style={{
                 y: titleY,
                 opacity: titleOpacity,
-                textShadow: "0 2px 18px rgba(0,0,0,0.3)",
+                textShadow: "0 3px 18px rgba(0,0,0,0.55)",
               }}
             >
               לחיסכון בבית ובבניין
             </motion.p>
           ) : (
             <p
-              className="mt-1 text-[28px] font-extrabold text-[#7DDBB8] leading-[1.18] tracking-tight"
-              style={{ textShadow: "0 2px 18px rgba(0,0,0,0.3)" }}
+              className="mt-1 text-[28px] font-extrabold text-[#5CC9A0] leading-[1.18] tracking-tight"
+              style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
             >
               לחיסכון בבית ובבניין
             </p>
           )}
           <p
             className="mt-3 text-[14.5px] text-white/90 font-medium leading-relaxed"
-            style={{ textShadow: "0 1px 10px rgba(0,0,0,0.35)" }}
+            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.45)" }}
           >
             רכישה קבוצתית עם השכנים — ספקים מאומתים ומחירים חכמים.
           </p>

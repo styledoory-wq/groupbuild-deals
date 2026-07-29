@@ -35,13 +35,15 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
         }}
       />
 
-      {/* Soft dark overlay ONLY on the text side (RTL right) — not whitening the photo */}
+      {/* Localized dark gradient behind text (RTL right) + radial around upper-center */}
       <div
         aria-hidden
         className="absolute inset-0 -z-20 pointer-events-none"
         style={{
-          background:
-            "linear-gradient(270deg, rgba(11,18,32,0.52) 0%, rgba(11,18,32,0.34) 28%, rgba(11,18,32,0.12) 48%, rgba(11,18,32,0) 68%)",
+          background: [
+            "linear-gradient(270deg, rgba(10,20,18,0.62) 0%, rgba(10,20,18,0.44) 26%, rgba(10,20,18,0.18) 46%, transparent 64%)",
+            "radial-gradient(ellipse 60% 55% at 82% 28%, rgba(10,20,18,0.48) 0%, transparent 100%)",
+          ].join(", "),
         }}
       />
 
@@ -105,19 +107,19 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
           </div>
           <h1
             className="text-[30px] font-extrabold text-white leading-[1.15] tracking-tight"
-            style={{ textShadow: "0 2px 18px rgba(0,0,0,0.35)" }}
+            style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
           >
             לידים איכותיים
           </h1>
           <p
-            className="mt-1 text-[30px] font-extrabold text-[#7DDBB8] leading-[1.15] tracking-tight"
-            style={{ textShadow: "0 2px 18px rgba(0,0,0,0.3)" }}
+            className="mt-1 text-[30px] font-extrabold text-[#5CC9A0] leading-[1.15] tracking-tight"
+            style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
           >
             מפרויקטים אמיתיים
           </p>
           <p
             className="mt-3 text-[14.5px] text-white/90 font-medium leading-relaxed"
-            style={{ textShadow: "0 1px 10px rgba(0,0,0,0.35)" }}
+            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.45)" }}
           >
             פניות מדיירים וועדים שכבר מתאגדים לקנייה — בלי שיווק קר.
           </p>
