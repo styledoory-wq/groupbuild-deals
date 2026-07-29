@@ -1,5 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { UserCircle2 } from "lucide-react";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 
@@ -27,21 +29,57 @@ function setResidentIntent() {
  * - Long bottom dissolve + organic wave into the page
  */
 export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
+  const location = useLocation();
+  const [params] = useSearchParams();
+  const motionPreview =
+    params.get("motion") === "preview" && (location.pathname === "/" || location.pathname === "/residents");
+
+  const reduceMotion = useReducedMotion();
+  const heroRef = useRef<HTMLElement | null>(null);
+  const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
+
+  // Scroll-based transforms (Preview-only).
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+
+  const bgScale = useTransform(scrollYProgress, [0, 1], isMobile ? [1.03, 1] : [1.06, 1]);
+  const bgY = useTransform(scrollYProgress, [0, 1], isMobile ? [0, -6] : [0, -14]);
+
+  const titleY = useTransform(scrollYProgress, [0, 1], isMobile ? [0, -6] : [0, -10]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 1], isMobile ? [1, 0.82] : [1, 0.75]);
+
   return (
     <section
+      ref={heroRef}
       className="relative isolate overflow-hidden"
       style={{ background: "#F7F5F0" }}
       dir="rtl"
     >
       {/* Sharp full-bleed photo — kept large and unblurred */}
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-30 bg-cover bg-[center_30%]"
-        style={{
-          backgroundImage: `url("${HERO_BG}")`,
-          minHeight: "100%",
-        }}
-      />
+      {motionPreview && !reduceMotion ? (
+        <motion.div
+          aria-hidden
+          className="absolute inset-0 -z-30 bg-cover bg-[center_30%]"
+          style={{
+            backgroundImage: `url("${HERO_BG}")`,
+            minHeight: "100%",
+            scale: bgScale,
+            y: bgY,
+            transformOrigin: "center center",
+          }}
+        />
+      ) : (
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-30 bg-cover bg-[center_30%]"
+          style={{
+            backgroundImage: `url("${HERO_BG}")`,
+            minHeight: "100%",
+          }}
+        />
+      )}
 
       {/* Soft dark overlay ONLY on the text side (RTL right) — not whitening the photo */}
       <div
@@ -108,18 +146,45 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         </header>
 
         <div className="max-w-[17.5rem] mt-2">
-          <h1
-            className="text-[28px] font-extrabold text-white leading-[1.18] tracking-tight"
-            style={{ textShadow: "0 2px 18px rgba(0,0,0,0.35)" }}
-          >
-            כוח הקנייה של כולם
-          </h1>
-          <p
-            className="mt-1 text-[28px] font-extrabold text-[#7DDBB8] leading-[1.18] tracking-tight"
-            style={{ textShadow: "0 2px 18px rgba(0,0,0,0.3)" }}
-          >
-            לחיסכון בבית ובבניין
-          </p>
+          {motionPreview && !reduceMotion ? (
+            <motion.h1
+              className="text-[28px] font-extrabold text-white leading-[1.18] tracking-tight"
+              style={{
+                y: titleY,
+                opacity: titleOpacity,
+                textShadow: "0 2px 18px rgba(0,0,0,0.35)",
+              }}
+            >
+              כוח הקנייה של כולם
+            </motion.h1>
+          ) : (
+            <h1
+              className="text-[28px] font-extrabold text-white leading-[1.18] tracking-tight"
+              style={{ textShadow: "0 2px 18px rgba(0,0,0,0.35)" }}
+            >
+              כוח הקנייה של כולם
+            </h1>
+          )}
+
+          {motionPreview && !reduceMotion ? (
+            <motion.p
+              className="mt-1 text-[28px] font-extrabold text-[#7DDBB8] leading-[1.18] tracking-tight"
+              style={{
+                y: titleY,
+                opacity: titleOpacity,
+                textShadow: "0 2px 18px rgba(0,0,0,0.3)",
+              }}
+            >
+              לחיסכון בבית ובבניין
+            </motion.p>
+          ) : (
+            <p
+              className="mt-1 text-[28px] font-extrabold text-[#7DDBB8] leading-[1.18] tracking-tight"
+              style={{ textShadow: "0 2px 18px rgba(0,0,0,0.3)" }}
+            >
+              לחיסכון בבית ובבניין
+            </p>
+          )}
           <p
             className="mt-3 text-[14.5px] text-white/90 font-medium leading-relaxed"
             style={{ textShadow: "0 1px 10px rgba(0,0,0,0.35)" }}
