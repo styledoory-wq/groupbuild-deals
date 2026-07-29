@@ -1,9 +1,11 @@
-import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { UserCircle2 } from "lucide-react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRef } from "react";
 import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 import { HeroBrandLockup } from "@/components/marketing/HeroBrandLockup";
+import { MotionHover } from "@/components/motion/MotionHover";
+import { useHeroScrollMotion } from "@/lib/motion/useHeroScrollMotion";
 
 const HERO_BG = "/marketing/resident-hero-bg.jpg";
 
@@ -29,26 +31,72 @@ function setResidentIntent() {
  * - Long bottom dissolve + organic wave into the page
  */
 export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
-  const location = useLocation();
-  const [params] = useSearchParams();
-  const motionPreview =
-    params.get("motion") === "preview" && (location.pathname === "/" || location.pathname === "/residents");
-
-  const reduceMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement | null>(null);
   const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
+  const { enabled: motionOn, bgScale, bgY, titleY, titleOpacity } = useHeroScrollMotion(heroRef, isMobile);
 
-  // Scroll-based transforms (Preview-only).
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
+  const titleBlock = (
+    <>
+      <h1
+        className="text-[28px] font-extrabold text-white leading-[1.18] tracking-tight"
+        style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
+      >
+        כוח הקנייה של כולם
+      </h1>
+      <p
+        className="mt-1 text-[28px] font-extrabold text-[#5CC9A0] leading-[1.18] tracking-tight"
+        style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
+      >
+        לחיסכון בבית ובבניין
+      </p>
+      <p
+        className="mt-3 text-[14.5px] text-white/90 font-medium leading-relaxed"
+        style={{ textShadow: "0 2px 12px rgba(0,0,0,0.45)" }}
+      >
+        רכישה קבוצתית עם השכנים — ספקים מאומתים ומחירים חכמים.
+      </p>
+    </>
+  );
 
-  const bgScale = useTransform(scrollYProgress, [0, 1], isMobile ? [1.03, 1] : [1.06, 1]);
-  const bgY = useTransform(scrollYProgress, [0, 1], isMobile ? [0, -6] : [0, -14]);
+  const loginLink = signedIn ? (
+    <MotionHover>
+      <Link
+        to="/resident"
+        className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-[12.5px] bg-white border border-white/90 shadow-md px-3.5 py-1.5 rounded-full shrink-0"
+      >
+        <UserCircle2 className="h-3.5 w-3.5" />
+        האזור האישי
+      </Link>
+    </MotionHover>
+  ) : (
+    <MotionHover>
+      <Link
+        to="/auth/resident?mode=signin"
+        onClick={setResidentIntent}
+        className="text-[#0E6B5A] font-semibold text-[12.5px] bg-white border border-white/90 shadow-md px-3.5 py-1.5 rounded-full shrink-0"
+      >
+        התחברות
+      </Link>
+    </MotionHover>
+  );
 
-  const titleY = useTransform(scrollYProgress, [0, 1], isMobile ? [0, -6] : [0, -10]);
-  const titleOpacity = useTransform(scrollYProgress, [0, 1], isMobile ? [1, 0.82] : [1, 0.75]);
+  const ctaBlock = (
+    <>
+      <GlobalSearchBar variant="hero" placeholder="איזה ספק או שירות אתם מחפשים היום?" />
+      <div className="mt-3 flex flex-wrap gap-2">
+        {QUICK_CHIPS.map((c) => (
+          <MotionHover key={c.label}>
+            <Link
+              to={`/search?q=${encodeURIComponent(c.q)}`}
+              className="inline-flex h-8 items-center justify-center px-3 rounded-full bg-white/95 border border-white text-[12px] font-bold leading-none text-[#334155] shadow-md"
+            >
+              {c.label}
+            </Link>
+          </MotionHover>
+        ))}
+      </div>
+    </>
+  );
 
   return (
     <section
@@ -57,8 +105,7 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
       style={{ background: "#F7F5F0" }}
       dir="rtl"
     >
-      {/* Sharp full-bleed photo — kept large and unblurred */}
-      {motionPreview && !reduceMotion ? (
+      {motionOn ? (
         <motion.div
           aria-hidden
           className="absolute inset-0 -z-30 bg-cover bg-[center_30%]"
@@ -81,7 +128,6 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         />
       )}
 
-      {/* Localized dark gradient behind text (RTL right) — photo stays vivid elsewhere */}
       <div
         aria-hidden
         className="absolute inset-0 -z-20 pointer-events-none"
@@ -93,7 +139,6 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         }}
       />
 
-      {/* Long bottom dissolve (~320px) — almost imperceptible */}
       <div
         aria-hidden
         className="absolute inset-x-0 bottom-0 -z-10 h-[320px] pointer-events-none"
@@ -103,7 +148,6 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
         }}
       />
 
-      {/* Organic wave — image feels continuous into the page */}
       <svg
         aria-hidden
         className="absolute bottom-0 inset-x-0 z-[1] w-full h-[72px] sm:h-[88px]"
@@ -122,89 +166,35 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
       >
         <header className="flex items-center justify-between gap-3 mb-8">
           <HeroBrandLockup />
-          {signedIn ? (
-            <Link
-              to="/resident"
-              className="flex items-center gap-1.5 text-[#0E6B5A] font-semibold text-[12.5px] bg-white border border-white/90 shadow-md px-3.5 py-1.5 rounded-full shrink-0"
-            >
-              <UserCircle2 className="h-3.5 w-3.5" />
-              האזור האישי
-            </Link>
-          ) : (
-            <Link
-              to="/auth/resident?mode=signin"
-              onClick={setResidentIntent}
-              className="text-[#0E6B5A] font-semibold text-[12.5px] bg-white border border-white/90 shadow-md px-3.5 py-1.5 rounded-full shrink-0"
-            >
-              התחברות
-            </Link>
-          )}
+          {loginLink}
         </header>
 
         <div className="max-w-[17.5rem] mt-2">
-          {motionPreview && !reduceMotion ? (
-            <motion.h1
-              className="text-[28px] font-extrabold text-white leading-[1.18] tracking-tight"
-              style={{
-                y: titleY,
-                opacity: titleOpacity,
-                textShadow: "0 3px 18px rgba(0,0,0,0.55)",
-              }}
+          {motionOn ? (
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              כוח הקנייה של כולם
-            </motion.h1>
+              <motion.div style={{ y: titleY, opacity: titleOpacity }}>{titleBlock}</motion.div>
+            </motion.div>
           ) : (
-            <h1
-              className="text-[28px] font-extrabold text-white leading-[1.18] tracking-tight"
-              style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
-            >
-              כוח הקנייה של כולם
-            </h1>
+            titleBlock
           )}
-
-          {motionPreview && !reduceMotion ? (
-            <motion.p
-              className="mt-1 text-[28px] font-extrabold text-[#5CC9A0] leading-[1.18] tracking-tight"
-              style={{
-                y: titleY,
-                opacity: titleOpacity,
-                textShadow: "0 3px 18px rgba(0,0,0,0.55)",
-              }}
-            >
-              לחיסכון בבית ובבניין
-            </motion.p>
-          ) : (
-            <p
-              className="mt-1 text-[28px] font-extrabold text-[#5CC9A0] leading-[1.18] tracking-tight"
-              style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
-            >
-              לחיסכון בבית ובבניין
-            </p>
-          )}
-          <p
-            className="mt-3 text-[14.5px] text-white/90 font-medium leading-relaxed"
-            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.45)" }}
-          >
-            רכישה קבוצתית עם השכנים — ספקים מאומתים ומחירים חכמים.
-          </p>
         </div>
 
         <div className="mt-auto pt-10 w-full max-w-md pb-2">
-          <GlobalSearchBar
-            variant="hero"
-            placeholder="איזה ספק או שירות אתם מחפשים היום?"
-          />
-          <div className="mt-3 flex flex-wrap gap-2">
-            {QUICK_CHIPS.map((c) => (
-              <Link
-                key={c.label}
-                to={`/search?q=${encodeURIComponent(c.q)}`}
-                className="inline-flex h-8 items-center justify-center px-3 rounded-full bg-white/95 border border-white text-[12px] font-bold leading-none text-[#334155] shadow-md"
-              >
-                {c.label}
-              </Link>
-            ))}
-          </div>
+          {motionOn ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.55, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {ctaBlock}
+            </motion.div>
+          ) : (
+            ctaBlock
+          )}
         </div>
       </div>
     </section>

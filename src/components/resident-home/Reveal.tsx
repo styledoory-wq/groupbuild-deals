@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useMotionPreview } from "@/lib/motion/useMotionPreview";
 import { cn } from "@/lib/utils";
 
-/** Scroll-triggered fade/slide-up. One-shot; respects reduced motion. */
+/** Scroll-triggered reveal. Premium blur+fade in preview mode; CSS fallback otherwise. */
 export function Reveal({
   children,
   className,
@@ -13,43 +13,38 @@ export function Reveal({
   className?: string;
   delayMs?: number;
 }) {
-  const location = useLocation();
-  const [params] = useSearchParams();
-  const motionPreview = params.get("motion") === "preview" && (location.pathname === "/" || location.pathname === "/residents");
-
-  // Keep reduced-motion fully static (no blur/parallax).
+  const motionPreview = useMotionPreview();
   const reduceMotion = useReducedMotion();
-
   const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
 
-  // Stage-0 preview mode: blur+scale reveal with Framer Motion.
   if (motionPreview && !reduceMotion) {
-    const blurPx = isMobile ? 4 : 10;
+    const blurPx = isMobile ? 3 : 6;
 
     return (
       <motion.div
-        className={cn("will-change-transform", className)}
+        className={cn("will-change-[transform,opacity]", className)}
         initial={{
           opacity: 0,
-          y: 12,
-          scale: 0.985,
+          y: 18,
           filter: `blur(${blurPx}px)`,
         }}
         whileInView={{
           opacity: 1,
           y: 0,
-          scale: 1,
           filter: "blur(0px)",
         }}
-        viewport={{ once: true, amount: 0.16 }}
-        transition={{ duration: 0.7, ease: "easeOut", delay: delayMs / 1000 }}
+        viewport={{ once: true, amount: 0.14, margin: "0px 0px -4% 0px" }}
+        transition={{
+          duration: 0.65,
+          ease: [0.22, 1, 0.36, 1],
+          delay: delayMs / 1000,
+        }}
       >
         {children}
       </motion.div>
     );
   }
 
-  // Default mode: keep the existing Reveal behaviour.
   const ref = useRef<HTMLDivElement>(null);
   const [on, setOn] = useState(false);
 

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { MotionHover } from "@/components/motion/MotionHover";
 import { Reveal } from "./Reveal";
 
 function setResidentIntent() {
@@ -29,20 +30,24 @@ export function ResidentHomeCta({ signedIn }: { signedIn: boolean }) {
               : "הירשמו כדייר או מצאו את הקבוצה של הפרויקט שלכם."}
           </p>
           <div className="mt-5 space-y-2.5">
-            <Link
-              to={signedIn ? "/resident" : "/auth/resident?mode=signup"}
-              onClick={signedIn ? undefined : setResidentIntent}
-              className="flex h-[52px] items-center justify-center rounded-2xl bg-white text-[#0E6B5A] font-extrabold text-[15px] shadow-[0_8px_20px_-12px_rgba(0,0,0,0.35)]"
-            >
-              {signedIn ? "לאזור האישי" : "הירשם / התחבר כדייר"}
-            </Link>
-            <Link
-              to={signedIn ? "/resident/projects" : "/auth/resident?mode=signin"}
-              onClick={signedIn ? undefined : setResidentIntent}
-              className="flex h-12 items-center justify-center rounded-2xl border border-white/35 text-white font-bold text-[14px]"
-            >
-              מצא את הקבוצה שלך
-            </Link>
+            <MotionHover className="w-full">
+              <Link
+                to={signedIn ? "/resident" : "/auth/resident?mode=signup"}
+                onClick={signedIn ? undefined : setResidentIntent}
+                className="flex h-[52px] items-center justify-center rounded-2xl bg-white text-[#0E6B5A] font-extrabold text-[15px] shadow-[0_8px_20px_-12px_rgba(0,0,0,0.35)]"
+              >
+                {signedIn ? "לאזור האישי" : "הירשם / התחבר כדייר"}
+              </Link>
+            </MotionHover>
+            <MotionHover className="w-full">
+              <Link
+                to={signedIn ? "/resident/projects" : "/auth/resident?mode=signin"}
+                onClick={signedIn ? undefined : setResidentIntent}
+                className="flex h-12 items-center justify-center rounded-2xl border border-white/35 text-white font-bold text-[14px]"
+              >
+                מצא את הקבוצה שלך
+              </Link>
+            </MotionHover>
           </div>
         </div>
         <p className="mt-4 text-center text-[12px] text-[#8B93A1]">
