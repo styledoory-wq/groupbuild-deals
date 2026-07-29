@@ -1,13 +1,13 @@
 /**
  * Compact hero brand lockup — mark + wordmark + tagline.
  * RTL: mark sits at the outer (right) edge, text to its left.
- * No glass, no opaque background — subtle drop-shadow only.
+ * White mark + wordmark for contrast on dark hero photography.
  */
 export function HeroBrandLockup() {
   return (
     <div
       className="flex items-center gap-2.5 shrink-0 min-w-0"
-      style={{ filter: "drop-shadow(0 1px 6px rgba(0,0,0,0.2))" }}
+      style={{ filter: "drop-shadow(0 2px 10px rgba(0,0,0,0.45))" }}
       aria-label="GroupBuild"
       role="img"
     >
@@ -16,6 +16,7 @@ export function HeroBrandLockup() {
         alt=""
         aria-hidden
         className="h-9 w-auto sm:h-10 object-contain select-none shrink-0"
+        style={{ filter: "brightness(0) invert(1)" }}
         draggable={false}
       />
       <div className="text-right leading-tight min-w-0">
