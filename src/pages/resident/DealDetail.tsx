@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Loader2, ArrowRight, Tag, Users, MessageCircle, Phone, CheckCircle2, Clock, Share2, CalendarDays, MapPin, Handshake, Target, PhoneCall, Wrench, BadgeCheck, ChevronLeft, ChevronRight, Link2, Pencil, Shield, Lock, TrendingDown, Sparkles } from "lucide-react";
+import { Star, Shield, Sparkles, Loader2, ArrowRight, ShieldCheck, Tag, Users, TrendingUp, TrendingDown, MessageCircle, Phone, CheckCircle2, CreditCard, Clock, Share2, Percent, PiggyBank, CalendarDays, MapPin, Layers, Store, Handshake, Target, PhoneCall, Wrench, BadgeCheck, Award, ChevronLeft, Building2, PartyPopper, Heart, Link2, Rocket, User as UserIcon, Pencil } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { SmartImg } from "@/components/ui/SmartImg";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -18,20 +18,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { PaymentInstructionsCard, type SupplierPaymentInfo } from "@/components/deals/PaymentInstructionsCard";
-import { FavoriteButton } from "@/components/deals/FavoriteButton";
-import { Reveal } from "@/components/resident-home/Reveal";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { useGuestGate } from "@/hooks/useGuestGate";
@@ -711,6 +703,13 @@ export default function DealDetail() {
     return { label: "פעילה", dot: "#10B981", fg: "#1F2937", bg: "#FFFFFF" };
   })();
 
+  const benefits: Array<{ icon: typeof Tag; title: string; subtitle: string; accent: string; tint: string }> = [
+    { icon: Tag,         title: "מחיר משופר",      subtitle: "תמחור קבוצתי שמשתפר ככל שמצטרפים", accent: "#0FB5C9", tint: "#E7F8FB" },
+    { icon: Users,       title: "כוח קנייה",        subtitle: "דיירים מהפרויקט קונים יחד",        accent: "#2F6BFF", tint: "#EAF2FF" },
+    { icon: ShieldCheck, title: "ספקים מאומתים",    subtitle: "כל ספק נבדק ומאושר ידנית",        accent: "#2EA85A", tint: "#E8F7EC" },
+    { icon: Award,       title: "תנאים בלעדיים",    subtitle: "הצעה זמינה רק לחברי הקהילה",      accent: "#B07E2E", tint: "#F8F1E4" },
+  ];
+
   const timeline: Array<{ icon: typeof Tag; title: string; subtitle: string }> = [
     { icon: Handshake, title: "משלמים פיקדון",  subtitle: "ממלאים פרטים וההצטרפות מושלמת רק אחרי תשלום" },
     { icon: Target,    title: "מגיעים ליעד",     subtitle: "הקבוצה ממלאת את מדרגת המחיר" },
@@ -729,7 +728,13 @@ export default function DealDetail() {
   const ladderFill = stepCount > 1 && activeIdx >= 0
     ? Math.round((activeIdx / (stepCount - 1)) * 100)
     : activeIdx >= 0 ? 100 : 0;
+  const bestTier = sortedTiers[sortedTiers.length - 1];
+  const bestDisplay = bestTier ? describeTier(offerType, bestTier) : null;
   const activeDisplay = activeTier ? describeTier(offerType, activeTier) : null;
+  const savingsPerPerson =
+    bestDisplay?.effectivePrice != null && activeDisplay?.effectivePrice != null
+      ? Math.max(0, activeDisplay.effectivePrice - bestDisplay.effectivePrice)
+      : null;
 
   // ----- Build a 3-slot window of tier blocks (past / active / future) -----
   // When no one has joined yet, prepend a synthetic "current state" card so the
@@ -793,6 +798,12 @@ export default function DealDetail() {
     firstTierDisplay?.effectivePrice != null && currentEffectivePrice != null
       ? Math.max(0, firstTierDisplay.effectivePrice - currentEffectivePrice) * participantCount
       : 0;
+  // Total max savings possible — from the reference (no-group) price all the way to the best tier
+  const maxPossibleSavings =
+    display.referencePrice != null && bestDisplay?.effectivePrice != null
+      ? Math.max(0, display.referencePrice - bestDisplay.effectivePrice)
+      : savingsPerPerson;
+
   const handleWhatsAppShare = () => {
     if (typeof window === "undefined") return;
     const url = window.location.href;
@@ -810,137 +821,12 @@ export default function DealDetail() {
     </h2>
   );
 
-  const heroCoverStyle =
-    heroImages.length > 0
-      ? undefined
-      : getCategoryCover({
-          categoryId: deal.category_id,
-          categoryName: category?.name,
-          categoryIcon: category?.icon,
-          seed: deal.id,
-        }).gradient;
-
-  const renderHeroMedia = (className: string, options?: { kenBurns?: boolean }) => (
-    <div
-      className={cn("relative overflow-hidden", className)}
-      style={heroImages.length === 0 ? { background: heroCoverStyle } : undefined}
-    >
-      {heroImages.length > 0 ? (
-        <div className="absolute inset-0">
-          <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-full">
-            {heroImages.map((url, i) => (
-              <SmartImg
-                key={url + i}
-                src={url}
-                size="detail"
-                alt={`${deal.title} ${i + 1}`}
-                priority={i === 0}
-                eager={i === 0}
-                className={cn(
-                  "w-full h-full object-cover shrink-0 snap-start",
-                  options?.kenBurns && i === 0 && heroImages.length === 1 && "gb-hero-drift",
-                )}
-                style={{ flex: "0 0 100%" }}
-              />
-            ))}
-          </div>
-          {heroImages.length > 1 && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/35 backdrop-blur-md px-2.5 py-1 rounded-full">
-              {heroImages.map((_, i) => (
-                <span key={i} className="w-1.5 h-1.5 rounded-full bg-white/90" />
-              ))}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <div className="text-[56px] leading-none mb-2 drop-shadow-md">{category?.icon || "✨"}</div>
-          <div className="text-white/95 text-[14px] font-extrabold drop-shadow">{category?.name || deal.title}</div>
-        </div>
-      )}
-    </div>
-  );
-
-  const joinCtaLabel = submittingInterest
-    ? null
-    : isGuest
-      ? "הצטרפו לקבוצה"
-      : depositRequired
-        ? `שמרו מקום · ${ils(Number(deal.deposit_amount))}`
-        : "שמרו את המקום שלכם";
-
-  const locationLine =
-    deal.service_areas && deal.service_areas.length > 0
-      ? deal.service_areas.slice(0, 2).join(" · ")
-      : category?.name ?? null;
-
-  const currentTierHeadline =
-    activeDisplay?.discountPercent != null
-      ? `${activeDisplay.discountPercent}% הנחה`
-      : activeDisplay?.effectivePrice != null
-        ? ils(activeDisplay.effectivePrice)
-        : currentEffectivePrice != null
-          ? ils(currentEffectivePrice)
-          : display.headline;
-
-  const dealFactCells: Array<{ icon: typeof Tag; label: string; value: string }> = [];
-  if (deal.join_deadline) {
-    dealFactCells.push({
-      icon: CalendarDays,
-      label: "הצטרפות עד",
-      value: new Date(deal.join_deadline).toLocaleDateString("he-IL", { day: "numeric", month: "short" }),
-    });
-  }
-  if (depositRequired && deal.deposit_amount) {
-    dealFactCells.push({
-      icon: Lock,
-      label: "פיקדון",
-      value: ils(Number(deal.deposit_amount)),
-    });
-  }
-  if (deal.service_areas && deal.service_areas.length > 0) {
-    dealFactCells.push({
-      icon: MapPin,
-      label: "אזור שירות",
-      value: deal.service_areas.slice(0, 2).join(" · "),
-    });
-  }
-  if (deal.appointment_required) {
-    dealFactCells.push({
-      icon: Clock,
-      label: "לפני מימוש",
-      value: "נדרשת פגישה",
-    });
-  }
-  if (daysRemaining !== null && dealFactCells.length < 4) {
-    dealFactCells.push({
-      icon: Clock,
-      label: "סגירת הצעה",
-      value: `${daysRemaining} ימים`,
-    });
-  }
-
-  const lastTier = sortedTiers.length > 0 ? sortedTiers[sortedTiers.length - 1] : null;
-  const lastTierDisplay = lastTier ? describeTier(offerType, lastTier) : null;
-  const peakSavings =
-    display.referencePrice != null && lastTierDisplay?.effectivePrice != null
-      ? Math.max(0, display.referencePrice - lastTierDisplay.effectivePrice)
-      : savingsAmount;
-  const neighborAvatarCount = Math.min(Math.max(participantCount, 0), 4);
-  const neighborAvatarGradients = [
-    "bg-gradient-to-br from-[#0E6B5A] to-[#34A88E]",
-    "bg-gradient-to-br from-[#1A7F6E] to-[#0A5447]",
-    "bg-gradient-to-br from-[#34A88E] to-[#0E6B5A]",
-    "bg-gradient-to-br from-[#0A5447] to-[#1A7F6E]",
-  ];
-
   return (
     <MobileShell>
-      {sortedTiers.length === 0 && (
-        <div className="px-2 pt-2">
-          <PageHeader title="" subtitle="" back variant="navy" />
-        </div>
-      )}
+      {/* Slim back header */}
+      <div className="px-2 pt-2">
+        <PageHeader title="" subtitle="" back variant="navy" />
+      </div>
 
       {isSupplierPreview && (
         <div className="px-4 mt-2">
@@ -963,446 +849,489 @@ export default function DealDetail() {
         </div>
       )}
 
-      {sortedTiers.length > 0 ? (
-        <>
-          {/* ===== Pro Invite — data-rich, uncluttered (app palette) ===== */}
-          <div className="px-2 mt-1">
-            <div className="relative h-[340px] rounded-[28px] overflow-hidden shadow-[0_24px_48px_-28px_rgba(11,18,32,0.4)]">
-              {renderHeroMedia("absolute inset-0", { kenBurns: true })}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1220]/85 via-[#0B1220]/35 to-[#0B1220]/25 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-br from-[#0E6B5A]/15 via-transparent to-transparent pointer-events-none mix-blend-soft-light" aria-hidden />
 
-              <div className="relative z-[2] flex items-center justify-between px-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => navigate(-1)}
-                  className="h-11 w-11 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center active:scale-95 transition-transform"
-                  aria-label="חזרה"
-                >
-                  <ChevronRight className="h-[18px] w-[18px] text-white" strokeWidth={2.2} />
-                </button>
-                <div className="flex items-center gap-2">
-                  <FavoriteButton dealId={deal.id} className="!bg-white/15 !border-white/20 backdrop-blur-md" />
-                  <ShareButton deal={deal} compact />
-                </div>
+
+      {/* ===== SECTION 1 — HERO IMAGE ===== */}
+      <div className="px-4 mt-2">
+        <div
+          className="relative rounded-[28px] overflow-hidden h-[260px]"
+          style={{
+            background:
+              heroImages.length > 0
+                ? undefined
+                : getCategoryCover({
+                    categoryId: deal.category_id,
+                    categoryName: category?.name,
+                    categoryIcon: category?.icon,
+                    seed: deal.id,
+                  }).gradient,
+          }}
+        >
+          {heroImages.length > 0 ? (
+            <div className="absolute inset-0">
+              <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-full">
+                {heroImages.map((url, i) => (
+                  <SmartImg
+                    key={url + i}
+                    src={url}
+                    size="detail"
+                    alt={`${deal.title} ${i + 1}`}
+                    priority={i === 0}
+                    eager={i === 0}
+                    className="w-full h-full object-cover shrink-0 snap-start"
+                    style={{ flex: "0 0 100%" }}
+                  />
+                ))}
               </div>
-
-              <div className="absolute top-14 right-3 z-[2] flex flex-col items-end gap-2">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-white/95 text-[#0E6B5A] shadow-sm">
-                  {deal.status !== "closed" && deal.status !== "completed" ? (
-                    <span className="gb-live-dot shrink-0 scale-75" aria-hidden />
-                  ) : (
-                    <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: statusMeta.dot }} />
-                  )}
-                  {statusMeta.label}
-                </span>
-                {peakSavings != null && peakSavings > 0 && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-[#0B1220]/55 backdrop-blur-md text-white border border-white/15 shadow-sm">
-                    <Sparkles className="w-3 h-3 text-[#34A88E]" strokeWidth={2.4} />
-                    עד {ils(peakSavings)} חיסכון
-                  </span>
-                )}
-              </div>
-
-              {nextTier && peopleNeeded > 0 && (
-                <div className="absolute top-[7.5rem] left-3 z-[2] gb-float">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold px-3 py-1.5 rounded-full bg-white/92 text-[#0A5447] shadow-[0_12px_28px_-16px_rgba(11,18,32,0.45)] border border-white/80">
-                    <Users className="w-3.5 h-3.5 text-[#0E6B5A]" strokeWidth={2.4} />
-                    עוד {peopleNeeded} שכנים ליעד
-                  </span>
+              {heroImages.length > 1 && (
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-full">
+                  {heroImages.map((_, i) => (
+                    <span key={i} className="w-1.5 h-1.5 rounded-full bg-white/90" />
+                  ))}
                 </div>
               )}
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+              <div className="text-[72px] leading-none mb-2 drop-shadow-md">
+                {category?.icon || "✨"}
+              </div>
+              <div className="text-white/95 text-[15px] font-extrabold drop-shadow">
+                {category?.name || deal.title}
+              </div>
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F7F5F0] via-transparent to-black/20 pointer-events-none" />
 
-              <div className="absolute inset-x-0 bottom-0 z-[2] p-5 pt-16 text-right text-white">
-                {locationLine && (
-                  <div className="flex items-center justify-end gap-1.5 text-[12px] font-semibold text-white/85 mb-2">
-                    <span>{locationLine}</span>
-                    <MapPin className="h-3.5 w-3.5 shrink-0 text-[#34A88E]" strokeWidth={2.4} />
-                  </div>
+
+          <span
+            className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[11px] font-extrabold px-2.5 py-1 rounded-2xl bg-white/95 backdrop-blur-md shadow-[0_2px_6px_rgba(10,31,61,0.18)] border border-white text-[#0E6B5A]"
+          >
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: statusMeta.dot }} />
+            {statusMeta.label}
+          </span>
+
+          {!isSupplierPreview && (hasCompletedJoin || hasPendingDeposit) && (
+            <div className="absolute top-4 left-4 bg-gradient-to-l from-[#1A8870] to-[#34A88E] text-[#1F2937] px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_2px_6px_rgba(10,31,61,0.18)]">
+              {hasCompletedJoin ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
+              <span className="text-[11px] font-extrabold">{hasCompletedJoin ? "הצטרפת" : "ממתין לתשלום"}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ===== SECTION 2 — HEADLINE + PRICE CARD ===== */}
+      <div className="px-4 -mt-10 relative z-10">
+        <div className="bg-white rounded-[24px] p-5 shadow-[0_12px_30px_-12px_rgba(10,31,61,0.25)]">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            {category?.name && (
+              <span className="bg-[#0E6B5A]/10 text-[#0E6B5A] px-3 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wide">
+                {category.icon ? `${category.icon} ` : ""}{category.name}
+              </span>
+            )}
+            {supplier && (
+              <div className="flex items-center gap-1 min-w-0">
+                <span className="text-[11px] font-bold text-[#6B7280] truncate">{supplier.business_name}</span>
+                {supplier.approval_status === "approved" && (
+                  <BadgeCheck className="h-3.5 w-3.5 text-[#2EA85A] shrink-0" strokeWidth={2.4} />
                 )}
-                <EditableField
-                  table="deals"
-                  id={deal.id}
-                  field="title"
-                  value={deal.title}
-                  as="h1"
-                  className="text-[26px] leading-[1.18] font-black tracking-tight text-white drop-shadow-sm max-w-[16ch] ml-auto"
-                />
-                {supplier && (
-                  <div className="flex items-center justify-end gap-1.5 mt-2.5 min-w-0">
-                    <span className="text-[12px] font-semibold text-white/80 truncate">{supplier.business_name}</span>
-                    {supplier.approval_status === "approved" && (
-                      <BadgeCheck className="h-4 w-4 text-[#34A88E] shrink-0" strokeWidth={2.4} />
-                    )}
-                  </div>
+              </div>
+            )}
+          </div>
+          <EditableField
+            table="deals"
+            id={deal.id}
+            field="title"
+            value={deal.title}
+            as="h1"
+            className="text-[22px] leading-[1.2] font-black text-[#1F2937] tracking-tight mb-3"
+          />
+          {sortedTiers.length > 0 ? null : display.effectivePrice != null ? (
+            <div className="space-y-1.5">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-[28px] font-black text-[#1F2937] gb-num leading-none">{ils(display.effectivePrice)}</span>
+                {savingsAmount ? (
+                  <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
+                    חיסכון {ils(savingsAmount)}
+                  </span>
+                ) : discountPct ? (
+                  <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#0E6B5A]/10 px-2 py-0.5 rounded-full">
+                    {discountPct}% הנחה
+                  </span>
+                ) : null}
+              </div>
+              {display.referencePrice && display.referencePrice > display.effectivePrice && (
+                <div className="text-[11px] text-[#6B7280] flex items-center gap-1.5">
+                  <span>מחיר רגיל ללא רכישה קבוצתית:</span>
+                  <span className="line-through gb-num">{ils(display.referencePrice)}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-[16px] font-black text-[#1F2937]">{display.headline}</p>
+          )}
+        </div>
+      </div>
+
+      {/* ===== SECTION 3 — GROUP BUYING CAMPAIGN ===== */}
+      {sortedTiers.length > 0 && (
+        <div className="px-4 mt-5 space-y-3">
+          {/* 3a — HERO STATUS CARD (green) — current price + community message */}
+          <div className="relative bg-gradient-to-br from-[#0E6B5A] to-[#0A5447] rounded-[24px] p-5 pt-6 shadow-[0_12px_30px_-12px_rgba(14,107,90,0.45)] overflow-hidden">
+            {/* corner ribbon */}
+            <div className="absolute -top-1 -right-1 bg-[#F5E6A8] text-[#0A5447] text-[10px] font-black px-3 py-1.5 rounded-bl-2xl rounded-tr-2xl leading-tight max-w-[120px] text-center shadow-md">
+              מחיר משתפר<br/>ככל שיותר<br/>מצטרפים!
+            </div>
+            <div className="flex items-stretch gap-3 mt-2">
+              {/* right side — current price card */}
+              <div className="bg-white rounded-2xl px-3 py-3 flex-1 min-w-0 text-center shadow-sm">
+                <div className="text-[10px] font-bold text-[#6B7280] mb-1">
+                  {hasAnyJoiners ? "המחיר שלך כרגע" : "מחיר בסיס"}
+                </div>
+                {currentEffectivePrice != null ? (
+                  <div className="text-[26px] font-black text-[#1F2937] gb-num leading-none">{ils(currentEffectivePrice)}</div>
+                ) : (
+                  <div className="text-[16px] font-black text-[#1F2937]">{display.headline}</div>
                 )}
+                <div className="text-[9px] font-medium text-[#6B7280] mt-1.5">
+                  {hasAnyJoiners ? "ללא רכישה קבוצתית" : "לפני הנחת הקבוצה"}
+                </div>
+              </div>
+              {/* left side — community message */}
+              <div className="flex-1 min-w-0 text-white flex flex-col justify-center text-right">
+                <div className="flex items-center gap-1.5 justify-end mb-1">
+                  <span className="text-[13px] font-black">יחד חוסכים יותר</span>
+                  <Users className="w-4 h-4 text-[#F5E6A8]" strokeWidth={2.4} />
+                </div>
+                <p className="text-[10.5px] leading-snug text-white/85 font-medium">
+                  כל הצטרפות מקרבת את כולנו למחיר נמוך יותר
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="px-4 -mt-8 relative z-10 space-y-4 pb-2">
-            <Reveal>
-            {/* Live group status — one card, three zones */}
-            <div className="bg-white rounded-[24px] p-3.5 shadow-[0_16px_40px_-24px_rgba(11,18,32,0.28)] border border-[#E8EBEF]/90 ring-1 ring-[#0E6B5A]/[0.07]">
-              {(neighborAvatarCount > 0 || participantCount === 0) && (
-                <div className="flex items-center justify-between gap-2 mb-3 pb-3 border-b border-[#F0F2F5]">
-                  <div className="flex items-center -space-x-2 space-x-reverse">
-                    {neighborAvatarCount > 0 ? (
-                      Array.from({ length: neighborAvatarCount }).map((_, i) => (
-                        <span
+          {/* 3b — PROGRESS CARD (white) — neighbors needed + next price */}
+          {nextTier && peopleNeeded > 0 && (
+            <div className="bg-white rounded-[24px] p-4 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
+              <div className="flex items-stretch gap-3">
+                {/* right — progress */}
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-black text-[#1F2937] mb-2 leading-tight text-right">
+                    חסרים רק <span className="text-[#0E6B5A]">{peopleNeeded}</span> שכנים לדרגה הבאה!
+                  </div>
+                  {/* avatar dots */}
+                  <div className="flex items-center gap-1.5 justify-end mb-2.5 flex-row-reverse">
+                    {Array.from({ length: Math.max(progressTarget, participantCount) }).map((_, i) => {
+                      const filled = i < participantCount;
+                      return (
+                        <div
                           key={i}
                           className={cn(
-                            "h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-black text-white shadow-sm",
-                            neighborAvatarGradients[i % neighborAvatarGradients.length],
+                            "w-7 h-7 rounded-full flex items-center justify-center shrink-0",
+                            filled
+                              ? "bg-[#0E6B5A] shadow-sm"
+                              : "border-2 border-dashed border-[#0E6B5A]/30 bg-white"
                           )}
-                          aria-hidden
                         >
-                          {String.fromCharCode(0x05d0 + (i % 4))}
-                        </span>
-                      ))
-                    ) : (
-                      <>
-                        {[0, 1, 2].map((i) => (
-                          <span
-                            key={i}
-                            className="h-8 w-8 rounded-full border-2 border-dashed border-[#CBD5E0] bg-[#F4F6FA] flex items-center justify-center text-[11px] font-bold text-[#9CA3AF]"
-                            aria-hidden
-                          >
-                            ?
-                          </span>
-                        ))}
-                      </>
-                    )}
-                    {participantCount > 4 && (
-                      <span className="h-8 min-w-[2rem] px-1.5 rounded-full border-2 border-white bg-[#E8F4F1] text-[10px] font-extrabold text-[#0A5447] flex items-center justify-center shadow-sm gb-num">
-                        +{participantCount - 4}
-                      </span>
-                    )}
+                          <UserIcon
+                            className={cn("w-3.5 h-3.5", filled ? "text-white" : "text-[#0E6B5A]/40")}
+                            strokeWidth={2.4}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
-                  <p className="text-[11px] font-bold text-[#6B7280] text-right leading-snug">
-                    {participantCount > 0
-                      ? `${participantCount} שכנים כבר בפנים`
-                      : "תהיו הראשונים בקבוצה"}
-                  </p>
-                </div>
-              )}
-              <div className="grid grid-cols-[minmax(0,88px)_1fr_minmax(0,52px)] gap-2.5 items-stretch">
-                <div className="rounded-2xl bg-gradient-to-br from-[#0E6B5A] to-[#0A5447] text-white p-2.5 flex flex-col justify-center text-center min-h-[88px]">
-                  <div className="text-[9px] font-bold text-white/75 mb-1">המחיר כרגע</div>
-                  <div className="text-[15px] font-black leading-tight gb-num">{currentTierHeadline}</div>
-                </div>
-                <div className="flex flex-col justify-center min-w-0 py-0.5">
-                  <div className="flex items-baseline justify-end gap-1.5 mb-2">
-                    <span className="text-[11px] font-bold text-[#6B7280]">מצטרפים</span>
-                    <span className="text-[22px] font-black text-[#0B1220] gb-num leading-none">{participantCount}</span>
-                    <Users className="w-4 h-4 text-[#0E6B5A] mb-0.5" strokeWidth={2.4} />
-                  </div>
-                  <div className="h-2 bg-[#EEF1F4] rounded-full overflow-hidden">
+                  {/* progress bar */}
+                  <div className="w-full bg-[#E8EBEF] h-1.5 rounded-full overflow-hidden mb-1.5">
                     <div
-                      className="h-full rounded-full transition-all duration-700 bg-gradient-to-l from-[#34A88E] to-[#0E6B5A]"
-                      style={{ width: `${Math.max(progressPct, participantCount > 0 ? 8 : 4)}%` }}
+                      className="bg-gradient-to-l from-[#0E6B5A] to-[#34A88E] h-full rounded-full transition-all duration-700"
+                      style={{ width: `${progressPct}%` }}
                     />
                   </div>
-                  <p className="text-[10.5px] font-semibold text-[#6B7280] mt-2 leading-snug text-right">
-                    {nextTier && peopleNeeded > 0
-                      ? `עוד ${peopleNeeded} שכנים ליעד הבא${
-                          nextDisplay?.discountPercent != null
-                            ? ` · ${nextDisplay.discountPercent}%`
-                            : nextDisplay?.effectivePrice != null
-                              ? ` · ${ils(nextDisplay.effectivePrice)}`
-                              : ""
-                        }`
-                      : "הגעתם למדרגת המחיר הנוכחית"}
-                  </p>
+                  <div className="text-[10px] font-bold text-[#6B7280] text-right gb-num">
+                    {participantCount} מתוך {progressTarget} הצטרפו
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleWhatsAppShare}
-                  className="rounded-2xl bg-[#F4F6FA] border border-[#E8EBEF] flex flex-col items-center justify-center gap-1 text-[#0E6B5A] active:scale-[0.97] transition-transform min-h-[88px]"
-                >
-                  <Share2 className="w-5 h-5" strokeWidth={2.2} />
-                  <span className="text-[9px] font-extrabold leading-tight text-center px-1">שתפו עם שכנים</span>
-                </button>
+
+                {/* left — next price / next discount */}
+                <div className="bg-[#F0F9F6] border border-[#0E6B5A]/15 rounded-2xl p-3 w-[120px] shrink-0 flex flex-col items-center justify-center text-center relative">
+                  <Sparkles className="absolute top-1.5 left-1.5 w-3 h-3 text-[#F5C547]" />
+                  <div className="text-[10px] font-bold text-[#0E6B5A] mb-0.5">המחיר הבא</div>
+                  {nextDisplay?.effectivePrice != null ? (
+                    <div className="text-[20px] font-black text-[#0E6B5A] gb-num leading-none">{ils(nextDisplay.effectivePrice)}</div>
+                  ) : nextDisplay?.discountPercent != null ? (
+                    <div className="text-[20px] font-black text-[#0E6B5A] gb-num leading-none">{nextDisplay.discountPercent}%<span className="text-[10px] font-bold mr-1">הנחה</span></div>
+                  ) : null}
+                  {savingsToNext && savingsToNext > 0 ? (
+                    <div className="mt-2 bg-[#FFF8E1] text-[#8A6A1E] text-[9.5px] font-black px-2 py-1 rounded-lg leading-tight">
+                      תחסכו עוד {ils(savingsToNext)} לאדם
+                    </div>
+                  ) : extraDiscountToNext && extraDiscountToNext > 0 ? (
+                    <div className="mt-2 bg-[#FFF8E1] text-[#8A6A1E] text-[9.5px] font-black px-2 py-1 rounded-lg leading-tight">
+                      +{extraDiscountToNext}% הנחה לכולם
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
-            </Reveal>
+          )}
 
-            <Reveal delayMs={90}>
-            {/* Discount ladder — full tiers, scroll if needed */}
-            <div>
-              <div className="flex items-center justify-between mb-3 px-0.5">
-                <h2 className="text-[15px] font-black text-[#0B1220]">מדרגות ההנחה</h2>
-                <button
-                  type="button"
-                  onClick={() => setHowOpen(true)}
-                  className="text-[12px] font-bold text-[#0E6B5A]"
-                >
-                  איך זה עובד?
-                </button>
-              </div>
-              <div className="overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
-                <div
-                  className="relative flex items-start justify-between gap-1 min-w-full"
-                  style={{ minWidth: `${72 + sortedTiers.length * 76}px` }}
-                >
-                  <div className="absolute top-[13px] right-6 left-6 h-px bg-[#E8EBEF]" aria-hidden />
-                  <div className="relative z-[1] flex flex-col items-center w-[68px] shrink-0 text-center">
-                    <div
-                      className={cn(
-                        "w-6 h-6 rounded-full mb-2 flex items-center justify-center text-[10px] font-black",
-                        !hasAnyJoiners
-                          ? "bg-[#0E6B5A] text-white shadow-[0_0_0_4px_rgba(14,107,90,0.15)]"
-                          : "bg-white border-2 border-[#CBD5E0] text-[#6B7280]",
+          {/* 3c — TIER TIMELINE */}
+          <div className="pt-2">
+            <h2 className="text-[14px] font-black text-[#1F2937] text-center mb-3">
+              ככל שמצטרפים — המחיר לכולם יורד
+            </h2>
+
+            {/* 3 tier cards */}
+            <div className="grid grid-cols-3 gap-2">
+              {tierWindow.map((item, idx) => {
+                const baseCard = "rounded-2xl p-3 h-[110px] flex flex-col items-center justify-center text-center relative";
+                if (item.kind === "starter") {
+                  // "Current state" — no one has joined yet. Show reference (no-group) price
+                  // or a neutral label for percentage offers without a base price.
+                  const refPrice = display.referencePrice;
+                  return (
+                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#0E6B5A] shadow-[0_4px_14px_-4px_rgba(14,107,90,0.35)]")}>
+                      <UserIcon className="w-4 h-4 text-[#0E6B5A] mb-1" strokeWidth={2.4} />
+                      <div className="text-[10px] font-bold text-[#0E6B5A] mb-0.5 gb-num">0 מצטרפים</div>
+                      {refPrice != null ? (
+                        <div className="text-[18px] font-black text-[#0E6B5A] gb-num leading-none">{ils(refPrice)}</div>
+                      ) : (
+                        <div className="text-[13px] font-black text-[#0E6B5A] leading-tight">מחיר רגיל</div>
                       )}
-                    >
-                      0
+                      <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">המצב כרגע</div>
                     </div>
-                    <span className="text-[9px] font-bold text-[#6B7280] gb-num">0</span>
-                    <span className="text-[11px] font-black text-[#0B1220] mt-0.5 leading-tight">
-                      {display.referencePrice != null ? ils(display.referencePrice) : "בסיס"}
-                    </span>
-                    {!hasAnyJoiners && (
-                      <span className="mt-1 text-[8px] font-extrabold text-white bg-[#0E6B5A] px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                        אנחנו כאן
-                      </span>
+                  );
+                }
+                const { tier, state } = item;
+                const td = describeTier(offerType, tier);
+                const tierPrice = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
+                const range = tierRange(tier);
+                const isNextTarget = nextTier && tier.minParticipants === nextTier.minParticipants;
+                if (state === "past") {
+                  return (
+                    <div key={idx} className={cn(baseCard, "bg-[#F4F6FA] border border-[#E8EBEF] opacity-60")}>
+                      <Users className="w-4 h-4 text-[#9CA3AF] mb-1" />
+                      <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">{range} מצטרפים</div>
+                      <div className="text-[16px] font-black text-[#6B7280] line-through gb-num leading-none">{tierPrice}</div>
+                    </div>
+                  );
+                }
+                if (state === "active") {
+                  return (
+                    <div key={idx} className={cn(baseCard, "bg-white border-2 border-[#0E6B5A] shadow-[0_4px_14px_-4px_rgba(14,107,90,0.35)]")}>
+                      <Users className="w-4 h-4 text-[#0E6B5A] mb-1" />
+                      <div className="text-[10px] font-bold text-[#0E6B5A] mb-0.5 gb-num">{range} מצטרפים</div>
+                      <div className="text-[18px] font-black text-[#0E6B5A] gb-num leading-none">{tierPrice}</div>
+                      <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">המחיר הנוכחי</div>
+                    </div>
+                  );
+                }
+                // future
+                return (
+                  <div key={idx} className={cn(baseCard, "bg-white border border-[#E8EBEF]")}>
+                    {isNextTarget && (
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-[#F5C547] text-[#5C3F00] text-[9px] px-2 py-0.5 rounded-full font-black shadow-sm whitespace-nowrap">
+                        יעד הבא!
+                      </div>
+                    )}
+                    <Users className="w-4 h-4 text-[#6B7280] mb-1" />
+                    <div className="text-[10px] font-bold text-[#6B7280] mb-0.5 gb-num">{range} מצטרפים</div>
+                    <div className="text-[18px] font-black text-[#1F2937] gb-num leading-none">{tierPrice}</div>
+                    {isNextTarget && savingsToNext && savingsToNext > 0 ? (
+                      <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">חיסכון של {ils(savingsToNext)} לאדם</div>
+                    ) : isNextTarget && extraDiscountToNext && extraDiscountToNext > 0 ? (
+                      <div className="text-[9px] font-bold text-[#0E6B5A] mt-1">+{extraDiscountToNext}% הנחה לכולם</div>
+                    ) : (
+                      <div className="text-[9px] font-medium text-[#6B7280] mt-1">היעד הבא</div>
                     )}
                   </div>
-                  {sortedTiers.map((tier, idx) => {
-                    const td = describeTier(offerType, tier);
-                    const priceLabel = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
-                    const isHere = hasAnyJoiners && idx === activeIdx;
-                    const isNext = nextTier && tier.minParticipants === nextTier.minParticipants;
-                    return (
-                      <div key={tier.minParticipants} className="relative z-[1] flex flex-col items-center w-[68px] shrink-0 text-center">
-                        <div
-                          className={cn(
-                            "w-6 h-6 rounded-full mb-2 flex items-center justify-center text-[10px] font-black border-2",
-                            isHere
-                              ? "bg-[#0E6B5A] border-[#0E6B5A] text-white shadow-[0_0_0_4px_rgba(14,107,90,0.15)]"
-                              : "bg-white border-[#D5DBE3] text-[#6B7280]",
-                          )}
-                        >
-                          {tier.minParticipants}
-                        </div>
-                        <span className="text-[9px] font-bold text-[#6B7280] gb-num">{tierRange(tier)}</span>
-                        <span className={cn("text-[11px] font-black mt-0.5 leading-tight gb-num", isHere ? "text-[#0E6B5A]" : "text-[#0B1220]")}>
-                          {priceLabel}
-                        </span>
-                        {isHere && (
-                          <span className="mt-1 text-[8px] font-extrabold text-white bg-[#0E6B5A] px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                            אנחנו כאן
-                          </span>
-                        )}
-                        {!isHere && isNext && (
-                          <span className="mt-1 text-[8px] font-extrabold text-[#0A5447] bg-[#E8F4F1] px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                            היעד הבא
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                );
+              })}
+            </div>
+
+            {/* horizontal stepper dots */}
+            <div className="relative mt-3 px-2 h-6 flex items-center">
+              <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 h-[3px] bg-[#E8EBEF] rounded-full" />
+              <div
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-[3px] bg-[#0E6B5A] rounded-full transition-all duration-700"
+                style={{ width: `calc(${ladderFill}% - 0px)`, maxWidth: "calc(100% - 16px)" }}
+              />
+              <div className="relative w-full flex justify-between flex-row-reverse">
+                {tierWindow.map((item, idx) => {
+                  const isActive = item.kind === "tier" && item.state === "active";
+                  const isPast = item.kind === "tier" && item.state === "past";
+                  return (
+                    <span
+                      key={idx}
+                      className={cn(
+                        "w-3.5 h-3.5 rounded-full border-2 bg-white",
+                        isActive ? "border-[#0E6B5A] bg-[#0E6B5A]" : isPast ? "border-[#0E6B5A]" : "border-[#CBD5E0]"
+                      )}
+                    />
+                  );
+                })}
               </div>
             </div>
-            </Reveal>
+          </div>
 
-            <Reveal delayMs={160}>
-            {/* WhatsApp — single focused invite */}
-            <div className="rounded-[24px] bg-[#F7F5F0] border border-[#E8EBEF] px-4 py-4 text-center">
-              <p className="text-[15px] font-extrabold text-[#0B1220] mb-3 leading-snug">רוצים להוזיל לכולם את המחיר?</p>
+          {/* 3d — FOMO BUILDING CARD */}
+          {participantCount > 0 && (
+            <div className="bg-gradient-to-l from-[#F0F9F6] to-[#F7FBFA] border border-[#0E6B5A]/15 rounded-[20px] p-4">
+              <div className="flex items-center justify-between gap-3">
+                {/* right — neighbors joined */}
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex -space-x-2 flex-row-reverse">
+                    {Array.from({ length: Math.min(3, participantCount) }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-8 h-8 rounded-full border-2 border-white bg-gradient-to-br from-[#34A88E] to-[#0E6B5A] flex items-center justify-center text-white shadow-sm"
+                      >
+                        <UserIcon className="w-4 h-4" strokeWidth={2.4} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[12px] font-black text-[#1F2937] leading-tight gb-num">
+                      {participantCount} שכנים כבר
+                    </div>
+                    <div className="text-[11px] font-bold text-[#1F2937] leading-tight">הצטרפו 🎉</div>
+                  </div>
+                </div>
+
+                {/* left — group savings (only when there's actual savings) */}
+                {groupSavings > 0 && (
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="text-left">
+                      <div className="text-[10px] font-bold text-[#6B7280] leading-tight">הקבוצה חסכה יחד</div>
+                      <div className="text-[16px] font-black text-[#0E6B5A] gb-num leading-tight mt-0.5">
+                        {ils(groupSavings)}
+                      </div>
+                      <div className="text-[9px] font-medium text-[#6B7280] leading-tight">בזכות הצטרפות שכנים</div>
+                    </div>
+                    <Building2 className="w-8 h-8 text-[#0E6B5A]/70" strokeWidth={1.8} />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 3e — DARK SHARE CARD */}
+          <div className="bg-gradient-to-br from-[#062E27] to-[#0A4438] text-white rounded-[24px] p-5 shadow-xl relative overflow-hidden">
+            <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#34A88E]/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="text-center mb-1">
+              <div className="text-[15px] font-black leading-tight">
+                <span className="inline-block animate-bounce ml-1">🚀</span>
+                הזמינו שכנים והורידו מחיר לכולם!
+              </div>
+              <p className="text-[11px] text-white/70 mt-1.5">
+                {nextTier && peopleNeeded > 0
+                  ? `חסרים רק ${peopleNeeded} שכנים לדרגה הבאה`
+                  : "כל שיתוף מחזק את הקבוצה"}
+              </p>
+            </div>
+
+            {/* 3 stats with arrows */}
+            <div className="flex items-center justify-around gap-2 my-4">
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
+                  <Share2 className="w-5 h-5 text-white/90" strokeWidth={2.2} />
+                </div>
+                <div className="text-[11px] font-bold text-white/80 leading-tight">שתפו<br/>עם שכנים</div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-white/30 shrink-0 rotate-180" />
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
+                  <TrendingDown className="w-5 h-5 text-[#F5C547]" strokeWidth={2.4} />
+                </div>
+                <div className="text-[11px] font-bold text-white/80 leading-tight">המחיר יורד<br/>לכולם</div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-white/30 shrink-0 rotate-180" />
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
+                  <Heart className="w-5 h-5 text-[#FF7A7A]" strokeWidth={2.4} fill="currentColor" />
+                </div>
+                <div className="text-[11px] font-bold text-white/80 leading-tight">כולם<br/>חוסכים יותר</div>
+              </div>
+            </div>
+
+            {/* WhatsApp pulse button */}
+            <div className="relative">
+              <span className="absolute inset-0 rounded-2xl bg-[#25D366] animate-ping opacity-20 pointer-events-none" />
               <button
                 type="button"
                 onClick={handleWhatsAppShare}
-                className="w-full h-12 rounded-2xl bg-[#0E6B5A] hover:bg-[#0A5447] text-white text-[14px] font-extrabold inline-flex items-center justify-center gap-2 shadow-[0_12px_28px_-14px_rgba(14,107,90,0.45)] active:scale-[0.98] transition-transform"
+                className="relative w-full bg-[#25D366] hover:bg-[#22c35e] text-white font-extrabold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.97] shadow-lg shadow-[#25D366]/30"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
-                שתפו בוואטסאפ
+                שתפו עכשיו בוואטסאפ
               </button>
             </div>
-            </Reveal>
 
-            <Reveal delayMs={220}>
-            {/* Why join — compact trust grid */}
-            <div>
-              <h2 className="text-[15px] font-black text-[#0B1220] mb-3 px-0.5">למה להצטרף?</h2>
-              <div className="grid grid-cols-2 gap-2.5">
-                {[
-                  {
-                    icon: Lock,
-                    title: "תשלום מאובטח",
-                    sub: depositRequired ? `פיקדון ${ils(Number(deal.deposit_amount))}` : "ללא חיוב מלא בהתחלה",
-                  },
-                  {
-                    icon: BadgeCheck,
-                    title: "ספק מאומת",
-                    sub: supplier?.approval_status === "approved" ? "נבדק בפלטפורמה" : "פרטי ספק שקופים",
-                  },
-                  { icon: TrendingDown, title: "מחיר לכולם", sub: "ככל שמצטרפים — יורד" },
-                  { icon: Shield, title: "ללא התחייבות", sub: "המחיר מתעדכן אוטומטית" },
-                ].map((item) => (
-                  <div
-                    key={item.title}
-                    className="rounded-[18px] border border-[#E8EBEF] bg-white p-3 flex gap-2.5 items-start"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-[#E8F4F1] flex items-center justify-center shrink-0">
-                      <item.icon className="w-4 h-4 text-[#0E6B5A]" strokeWidth={2.2} />
-                    </div>
-                    <div className="min-w-0 text-right">
-                      <div className="text-[12px] font-extrabold text-[#0B1220] leading-tight">{item.title}</div>
-                      <div className="text-[10px] font-medium text-[#6B7280] mt-0.5 leading-snug">{item.sub}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            </Reveal>
-
-            {dealFactCells.length > 0 && (
-            <Reveal delayMs={280}>
-              <div>
-                <h2 className="text-[15px] font-black text-[#0B1220] mb-3 px-0.5">בקצרה</h2>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {dealFactCells.slice(0, 4).map((cell) => (
-                    <div
-                      key={cell.label}
-                      className="rounded-[18px] border border-[#E8EBEF] bg-white p-3 flex gap-2.5 items-center"
-                    >
-                      <div className="w-9 h-9 rounded-xl bg-[#F4F6FA] flex items-center justify-center shrink-0">
-                        <cell.icon className="w-4 h-4 text-[#0E6B5A]" strokeWidth={2.2} />
-                      </div>
-                      <div className="min-w-0 text-right">
-                        <div className="text-[10px] font-bold text-[#6B7280]">{cell.label}</div>
-                        <div className="text-[12px] font-extrabold text-[#0B1220] truncate">{cell.value}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
-            )}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="px-3 mt-1">
-            <div
-              className="relative rounded-[28px] overflow-hidden h-[300px] shadow-[0_24px_48px_-28px_rgba(11,18,32,0.45)]"
+            {/* copy link */}
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  navigator.clipboard?.writeText(window.location.href);
+                  toast.success("הקישור הועתק");
+                }
+              }}
+              className="mt-3 w-full flex items-center justify-center gap-1.5 text-[11px] font-bold text-white/70 hover:text-white underline underline-offset-4"
             >
-              {renderHeroMedia("h-full w-full")}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1220]/55 via-[#0B1220]/10 to-black/25 pointer-events-none" />
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#F3F1EB] to-transparent pointer-events-none" />
-              <span className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[11px] font-extrabold px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-xl shadow-[0_8px_20px_-12px_rgba(10,31,61,0.45)] border border-white/80 text-[#0E6B5A]">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inset-0 rounded-full opacity-60 animate-ping" style={{ background: statusMeta.dot }} />
-                  <span className="relative h-2 w-2 rounded-full" style={{ background: statusMeta.dot }} />
-                </span>
-                {statusMeta.label}
-              </span>
-            </div>
+              <Link2 className="w-3.5 h-3.5" />
+              או העתק קישור
+            </button>
           </div>
 
-          <div className="px-4 -mt-8 relative z-10">
-            <div className="rounded-[26px] bg-white/95 backdrop-blur-sm p-5 shadow-[0_20px_50px_-28px_rgba(11,18,32,0.35)] border border-white">
-              {supplier && (
-                <div className="flex items-center gap-1.5 mb-2.5 min-w-0">
-                  <span className="text-[12px] font-semibold text-[#6B7280] truncate tracking-wide">{supplier.business_name}</span>
-                  {supplier.approval_status === "approved" && (
-                    <BadgeCheck className="h-3.5 w-3.5 text-[#2EA85A] shrink-0" strokeWidth={2.4} />
-                  )}
-                </div>
-              )}
-              <EditableField
-                table="deals"
-                id={deal.id}
-                field="title"
-                value={deal.title}
-                as="h1"
-                className="text-[24px] leading-[1.22] font-black text-[#0B1220] tracking-tight"
-              />
-              {category?.name && (
-                <div className="mt-3 text-[12px] font-bold text-[#0E6B5A]/80">
-                  {category.icon ? `${category.icon} ` : ""}
-                  {category.name}
-                </div>
-              )}
-              {display.effectivePrice != null ? (
-                <div className="space-y-1.5 mt-4 pt-4 border-t border-[#F0F2F5]">
-                  <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-[30px] font-black text-[#0B1220] gb-num leading-none tracking-tight">{ils(display.effectivePrice)}</span>
-                    {savingsAmount ? (
-                      <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#E8F4F1] px-2.5 py-1 rounded-full">חיסכון {ils(savingsAmount)}</span>
-                    ) : discountPct ? (
-                      <span className="text-[11px] font-extrabold text-[#0E6B5A] bg-[#E8F4F1] px-2.5 py-1 rounded-full">{discountPct}% הנחה</span>
-                    ) : null}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-[16px] font-black text-[#0B1220] mt-3">{display.headline}</p>
-              )}
+          {/* footnote */}
+          <p className="text-[11px] text-[#6B7280] text-center font-medium px-4">
+            ההצטרפות ללא התחייבות. המחיר מתעדכן אוטומטית לפי מספר המצטרפים.
+          </p>
+
+          {daysRemaining !== null && (
+            <div className="mt-1 flex items-center justify-center gap-2 text-[11px] font-bold text-[#6B7280]">
+              <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{daysRemaining} ימים לסגירה</span>
             </div>
-          </div>
-        </>
+          )}
+        </div>
       )}
+
+
       {/* ===== SECTION 3 — OFFER DETAILS ===== */}
       {(deal.description || (deal as { product_details?: string | null }).product_details || deal.offer_terms || deal.restrictions || (deal.service_areas && deal.service_areas.length > 0) || deal.join_deadline || deal.redemption_deadline || deal.appointment_required) && (
         <div className="px-4 mt-6">
-          <div className="flex items-center justify-between gap-2 mb-3 px-1">
-            <h2 className="text-[16px] font-extrabold text-[#1F2937] flex items-center gap-2">
-              <span className="w-1 h-5 bg-[#0E6B5A] rounded-full" />
-              פרטי ההצעה
-            </h2>
-            {sortedTiers.length === 0 && (
-              <button
-                type="button"
-                onClick={() => setHowOpen(true)}
-                className="text-[12px] font-bold text-[#0E6B5A] hover:underline underline-offset-2 shrink-0"
-              >
-                איך זה עובד?
-              </button>
-            )}
-          </div>
-          <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] space-y-1">
-            {/* Lead summary: first non-empty short block stays visible */}
+          <SectionTitle>פרטי ההצעה</SectionTitle>
+          <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)] space-y-4">
             {deal.description && (
-              <div className="pb-4">
-                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1.5">תיאור</div>
-                <p className="text-[14px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{deal.description}</p>
+              <div>
+                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">תיאור</div>
+                <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{deal.description}</p>
               </div>
             )}
             {(deal as { product_details?: string | null }).product_details && (
-              <div className={cn("pb-4", deal.description && "border-t border-[#F0F2F5] pt-4")}>
-                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1.5">פירוט מוצר</div>
-                <p className="text-[14px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{(deal as { product_details?: string | null }).product_details}</p>
+              <div>
+                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">פירוט מוצר</div>
+                <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{(deal as { product_details?: string | null }).product_details}</p>
               </div>
             )}
-
-            <Accordion type="multiple" className="w-full">
-              {deal.offer_terms && (
-                <AccordionItem value="terms" className="border-[#F0F2F5]">
-                  <AccordionTrigger className="text-[13px] font-extrabold text-[#1F2937] py-3 hover:no-underline">
-                    תנאי ההצעה
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap pb-1">{deal.offer_terms}</p>
-                  </AccordionContent>
-                </AccordionItem>
-              )}
-              {deal.restrictions && (
-                <AccordionItem value="restrictions" className="border-[#F0F2F5]">
-                  <AccordionTrigger className="text-[13px] font-extrabold text-[#1F2937] py-3 hover:no-underline">
-                    הגבלות / חריגים
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap pb-1">{deal.restrictions}</p>
-                  </AccordionContent>
-                </AccordionItem>
-              )}
-            </Accordion>
-
+            {deal.offer_terms && (
+              <div>
+                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">תנאי ההצעה</div>
+                <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{deal.offer_terms}</p>
+              </div>
+            )}
+            {deal.restrictions && (
+              <div>
+                <div className="text-[11px] font-extrabold text-[#6B7280] mb-1">הגבלות / חריגים</div>
+                <p className="text-[13px] text-[#1F2937] leading-relaxed whitespace-pre-wrap">{deal.restrictions}</p>
+              </div>
+            )}
             {deal.service_areas && deal.service_areas.length > 0 && (
-              <div className="flex items-start gap-2 pt-3 border-t border-[#F0F2F5]">
+              <div className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-[#0E6B5A] mt-0.5 shrink-0" />
                 <div>
                   <div className="text-[11px] font-extrabold text-[#6B7280] mb-0.5">אזורי שירות</div>
@@ -1411,7 +1340,7 @@ export default function DealDetail() {
               </div>
             )}
             {(deal.join_deadline || deal.redemption_deadline) && (
-              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#F0F2F5]">
+              <div className="grid grid-cols-2 gap-3 pt-1">
                 {deal.join_deadline && (
                   <div className="bg-[#F4F6FA] rounded-2xl p-3">
                     <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-[#6B7280] mb-1">
@@ -1437,7 +1366,7 @@ export default function DealDetail() {
               </div>
             )}
             {deal.appointment_required && (
-              <div className="flex items-center gap-2 bg-[#FFF8E1] rounded-xl px-3 py-2 mt-3">
+              <div className="flex items-center gap-2 bg-[#FFF8E1] rounded-xl px-3 py-2">
                 <Clock className="h-4 w-4 text-[#B07E2E] shrink-0" />
                 <span className="text-[12px] font-bold text-[#1F2937]">נדרשת קביעת פגישה לפני המימוש</span>
               </div>
@@ -1503,12 +1432,12 @@ export default function DealDetail() {
       {supplier && (
         <div className="px-4 mt-6">
           <SectionTitle>על הספק</SectionTitle>
-          <div className="bg-white rounded-[26px] p-5 shadow-[0_16px_40px_-24px_rgba(11,18,32,0.22)] border border-[#E8EBEF]/80">
+          <div className="bg-white rounded-[24px] p-5 shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
             <div className="flex items-center gap-3">
               <SupplierLogo name={supplier.business_name} logoUrl={supplier.logo_url} size="md" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <p className="text-[15px] font-extrabold text-[#0B1220] truncate">{supplier.business_name}</p>
+                  <p className="text-[15px] font-extrabold text-[#1F2937] truncate">{supplier.business_name}</p>
                   {supplier.approval_status === "approved" && (
                     <BadgeCheck className="h-4 w-4 text-[#2EA85A] shrink-0" strokeWidth={2.4} />
                   )}
@@ -1520,7 +1449,7 @@ export default function DealDetail() {
             </div>
             <Link
               to={`/suppliers/${supplier.id}`}
-              className="mt-4 flex items-center justify-center gap-1 h-11 rounded-2xl bg-[#F7F5F0] text-[#0E6B5A] text-[13px] font-bold active:scale-[0.98] transition-transform"
+              className="mt-4 flex items-center justify-center gap-1 h-11 rounded-2xl border-2 border-[#0E6B5A]/20 text-[#0E6B5A] text-[13px] font-bold active:scale-[0.98] transition-transform"
             >
               צפייה בפרופיל הספק
               <ChevronLeft className="h-4 w-4" />
@@ -1530,7 +1459,7 @@ export default function DealDetail() {
       )}
 
       {/* Spacer for sticky CTA */}
-      <div aria-hidden className="h-44" />
+      <div aria-hidden className="h-40" />
 
 
 
@@ -1540,18 +1469,19 @@ export default function DealDetail() {
         className="fixed inset-x-0 z-50 flex justify-center pointer-events-none"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 8px)" }}
       >
-        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-6 pb-2 bg-gradient-to-t from-[#F3F1EB] via-[#F3F1EB]/95 to-transparent">
+        <div className="pointer-events-auto w-full max-w-screen-sm px-4 pt-5 pb-2 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0]/95 to-transparent">
           {interested ? (
-            <div className="flex items-center gap-2.5 bg-[#0A5447] text-white p-3.5 rounded-[22px] shadow-[0_20px_44px_-18px_rgba(10,84,71,0.55)] border border-white/10">
-              <div className="w-10 h-10 bg-white/15 rounded-full flex items-center justify-center shrink-0">
+
+            <div className="flex items-center gap-2.5 bg-[#0E6B5A] text-white p-3.5 rounded-2xl shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)]">
+              <div className="w-10 h-10 bg-gradient-to-l from-[#1A8870] to-[#34A88E] rounded-full flex items-center justify-center shrink-0">
                 {hasCompletedJoin ? (
-                  <CheckCircle2 className="w-5 h-5 text-[#34A88E]" strokeWidth={2.6} />
+                  <CheckCircle2 className="w-5 h-5 text-[#1F2937]" strokeWidth={2.6} />
                 ) : (
-                  <Clock className="w-5 h-5 text-[#34A88E]" strokeWidth={2.6} />
+                  <Clock className="w-5 h-5 text-[#1F2937]" strokeWidth={2.6} />
                 )}
               </div>
               <div className="flex-1 text-right">
-                <p className="text-[14px] font-extrabold leading-tight">{hasCompletedJoin ? "המקום שלכם שמור" : "ממתין לתשלום פיקדון"}</p>
+                <p className="text-[14px] font-extrabold leading-tight">{hasCompletedJoin ? "הצטרפת בהצלחה!" : "ממתין לתשלום פיקדון"}</p>
                 <p className="text-[11px] text-white/70 leading-tight mt-0.5">
                   {interestDepositStatus === "paid"
                     ? "פיקדון שולם — המקום מובטח"
@@ -1565,7 +1495,7 @@ export default function DealDetail() {
                   type="button"
                   onClick={handleResumePayment}
                   disabled={resumingPayment}
-                  className="h-10 px-3 rounded-2xl bg-white text-[#0A5447] text-[11px] font-extrabold active:scale-[0.97] transition-transform disabled:opacity-60"
+                  className="h-10 px-3 rounded-2xl bg-white text-[#1F2937] text-[11px] font-extrabold active:scale-[0.97] transition-transform disabled:opacity-60"
                 >
                   {resumingPayment ? "..." : "לתשלום"}
                 </button>
@@ -1574,35 +1504,23 @@ export default function DealDetail() {
               )}
             </div>
           ) : (
-            <div className="rounded-[22px] bg-white/90 backdrop-blur-xl border border-white shadow-[0_20px_44px_-18px_rgba(11,18,32,0.28)] p-2.5">
-              <div className="flex items-stretch gap-2">
-                <Button
-                  onClick={handleJoinClick}
-                  disabled={submittingInterest}
-                  className={cn(
-                    "flex-1 rounded-2xl bg-gradient-to-l from-[#0A5447] to-[#0E6B5A] hover:from-[#0A5447] hover:to-[#0E6B5A] text-white font-extrabold shadow-[0_12px_28px_-12px_rgba(10,84,71,0.55)] border-0",
-                    sortedTiers.length > 0 ? "h-[54px] rounded-[18px] flex flex-col items-center justify-center gap-0 py-2 gb-cta-glow" : "h-[52px] rounded-full",
-                  )}
-                >
-                  {submittingInterest ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : sortedTiers.length > 0 ? (
-                    <>
-                      <span className="text-[15px] leading-tight">הצטרפו להצעה</span>
-                      <span className="text-[11px] font-semibold text-white/85 leading-tight">חסכו יותר, ביחד!</span>
-                    </>
-                  ) : (
-                    joinCtaLabel ?? "הצטרפו לקבוצה"
-                  )}
-                </Button>
-                <ShareButton deal={deal} />
-              </div>
-              <p className="text-center text-[10.5px] font-semibold text-[#6B7280] mt-1.5 pb-0.5">
-                ללא התחייבות
-                {nextTier && peopleNeeded > 0
-                  ? ` · עוד ${peopleNeeded} שכנים ליעד הבא`
-                  : " · המחיר יורד ככל שמצטרפים"}
-              </p>
+            <div className="flex items-stretch gap-2">
+              <Button
+                onClick={handleJoinClick}
+                disabled={submittingInterest}
+                className="flex-1 h-14 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#0E6B5A]/40"
+              >
+                {submittingInterest ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : isGuest ? (
+                  "התחבר כדי להצטרף"
+                ) : depositRequired ? (
+                  `הצטרף · ${ils(Number(deal.deposit_amount))}`
+                ) : (
+                  "הצטרף להצעה"
+                )}
+              </Button>
+              <ShareButton deal={deal} />
             </div>
           )}
         </div>
@@ -1666,7 +1584,17 @@ export default function DealDetail() {
         </div>
       )}
 
-      {/* How-it-works lives in group-goal / offer-details headers — no floating overlay */}
+      {/* Floating "How it works" button — fixed above the sticky CTA */}
+      <button
+        type="button"
+        onClick={() => setHowOpen(true)}
+        aria-label="איך זה עובד"
+        className="fixed z-50 left-3 h-10 px-3.5 rounded-full bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-8px_rgba(10,31,61,0.25)] flex items-center gap-1.5 text-[12px] font-extrabold text-[#1F2937] active:scale-[0.96] transition-transform"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 84px)" }}
+      >
+        <span className="w-5 h-5 rounded-full bg-[#1A8870] text-white text-[11px] font-black flex items-center justify-center">?</span>
+        איך זה עובד
+      </button>
 
 
 
