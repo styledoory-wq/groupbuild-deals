@@ -51,7 +51,13 @@ export const publicRoutes = (
         IS_RESIDENTS_BUILD ? <ResidentsHome /> : IS_SUPPLIERS_BUILD ? <SuppliersHome /> : <Gateway />
       }
     />
+    {/* Guest app home — never the role-split Gateway. */}
+    <Route
+      path="/home"
+      element={IS_SUPPLIERS_BUILD ? <SuppliersHome /> : <ResidentsHome />}
+    />
     <Route path="/welcome" element={<Navigate to="/" replace />} />
+
     <Route path="/site" element={<Navigate to="/" replace />} />
     <Route path="/landing" element={<Navigate to="/" replace />} />
     <Route path="/about" element={<Navigate to="/" replace />} />
