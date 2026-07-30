@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Loader2, ArrowRight, Tag, Users, MessageCircle, Phone, CheckCircle2, Clock, Share2, CalendarDays, MapPin, Handshake, Target, PhoneCall, Wrench, BadgeCheck, ChevronLeft, ChevronRight, Link2, Pencil } from "lucide-react";
+import { Loader2, ArrowRight, Tag, Users, MessageCircle, Phone, CheckCircle2, Clock, Share2, CalendarDays, MapPin, Handshake, Target, PhoneCall, Wrench, BadgeCheck, ChevronLeft, ChevronRight, Link2, Pencil, Shield, Lock, TrendingDown } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { SmartImg } from "@/components/ui/SmartImg";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -30,6 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { PaymentInstructionsCard, type SupplierPaymentInfo } from "@/components/deals/PaymentInstructionsCard";
+import { FavoriteButton } from "@/components/deals/FavoriteButton";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { useGuestGate } from "@/hooks/useGuestGate";
@@ -864,6 +865,57 @@ export default function DealDetail() {
         ? `שמרו מקום · ${ils(Number(deal.deposit_amount))}`
         : "שמרו את המקום שלכם";
 
+  const locationLine =
+    deal.service_areas && deal.service_areas.length > 0
+      ? deal.service_areas.slice(0, 2).join(" · ")
+      : category?.name ?? null;
+
+  const currentTierHeadline =
+    activeDisplay?.discountPercent != null
+      ? `${activeDisplay.discountPercent}% הנחה`
+      : activeDisplay?.effectivePrice != null
+        ? ils(activeDisplay.effectivePrice)
+        : currentEffectivePrice != null
+          ? ils(currentEffectivePrice)
+          : display.headline;
+
+  const dealFactCells: Array<{ icon: typeof Tag; label: string; value: string }> = [];
+  if (deal.join_deadline) {
+    dealFactCells.push({
+      icon: CalendarDays,
+      label: "הצטרפות עד",
+      value: new Date(deal.join_deadline).toLocaleDateString("he-IL", { day: "numeric", month: "short" }),
+    });
+  }
+  if (depositRequired && deal.deposit_amount) {
+    dealFactCells.push({
+      icon: Lock,
+      label: "פיקדון",
+      value: ils(Number(deal.deposit_amount)),
+    });
+  }
+  if (deal.service_areas && deal.service_areas.length > 0) {
+    dealFactCells.push({
+      icon: MapPin,
+      label: "אזור שירות",
+      value: deal.service_areas.slice(0, 2).join(" · "),
+    });
+  }
+  if (deal.appointment_required) {
+    dealFactCells.push({
+      icon: Clock,
+      label: "לפני מימוש",
+      value: "נדרשת פגישה",
+    });
+  }
+  if (daysRemaining !== null && dealFactCells.length < 4) {
+    dealFactCells.push({
+      icon: Clock,
+      label: "סגירת הצעה",
+      value: `${daysRemaining} ימים`,
+    });
+  }
+
   return (
     <MobileShell>
       {sortedTiers.length === 0 && (
@@ -895,59 +947,40 @@ export default function DealDetail() {
 
       {sortedTiers.length > 0 ? (
         <>
-          {/* ===== D · Concierge (app brand colors) ===== */}
-          <div className="mx-2.5 mt-1 rounded-[32px] overflow-hidden shadow-[0_28px_56px_-28px_rgba(7,31,26,0.5)]">
-            <div
-              className="relative text-white"
-              style={{
-                background:
-                  "radial-gradient(520px 280px at 15% 0%, rgba(52,168,142,0.22) 0%, transparent 55%), linear-gradient(168deg, #071F1A 0%, #0A5447 42%, #0E6B5A 72%, #06241F 100%)",
-              }}
-            >
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-[#34A88E]/20 blur-3xl"
-              />
+          {/* ===== Pro Invite — data-rich, uncluttered (app palette) ===== */}
+          <div className="px-2 mt-1">
+            <div className="relative h-[340px] rounded-[28px] overflow-hidden shadow-[0_24px_48px_-28px_rgba(11,18,32,0.4)]">
+              {renderHeroMedia("absolute inset-0")}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1220]/85 via-[#0B1220]/35 to-[#0B1220]/25 pointer-events-none" />
 
-              <div className="relative flex items-center justify-between gap-2 px-3 pt-3 pb-1">
+              <div className="relative z-[2] flex items-center justify-between px-3 pt-3">
                 <button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="h-11 w-11 rounded-full flex items-center justify-center bg-white/12 border border-white/15 backdrop-blur-md active:scale-95 transition-transform"
+                  className="h-11 w-11 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center active:scale-95 transition-transform"
                   aria-label="חזרה"
                 >
                   <ChevronRight className="h-[18px] w-[18px] text-white" strokeWidth={2.2} />
                 </button>
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-white/12 border border-white/15 backdrop-blur-md">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inset-0 rounded-full bg-[#34A88E] opacity-70 animate-ping" />
-                      <span className="relative h-1.5 w-1.5 rounded-full bg-[#34A88E]" />
-                    </span>
-                    {statusMeta.label}
-                  </span>
-                  {!isSupplierPreview && (hasCompletedJoin || hasPendingDeposit) && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-white/95 text-[#0E6B5A]">
-                      {hasCompletedJoin ? <CheckCircle2 className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-                      {hasCompletedJoin ? "הצטרפת" : "ממתין"}
-                    </span>
-                  )}
+                  <FavoriteButton dealId={deal.id} className="!bg-white/15 !border-white/20 backdrop-blur-md" />
+                  <ShareButton deal={deal} compact />
                 </div>
               </div>
 
-              <div className="px-4 pt-3 pb-1">
-                {renderHeroMedia(
-                  "h-[200px] rounded-[22px] border border-white/15 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.55)]",
-                )}
+              <div className="absolute top-14 right-3 z-[2]">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-white/95 text-[#0E6B5A] shadow-sm">
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: statusMeta.dot }} />
+                  {statusMeta.label}
+                </span>
               </div>
 
-              <div className="relative px-5 pt-5 pb-6 text-right">
-                <p className="text-[11px] font-bold tracking-[0.12em] text-white/60 uppercase mb-2">
-                  הזמנה לקבוצה
-                  {supplier?.approval_status === "approved" ? " · ספק מאומת" : ""}
-                </p>
-                {supplier && (
-                  <p className="text-[12px] font-semibold text-white/75 mb-2 truncate">{supplier.business_name}</p>
+              <div className="absolute inset-x-0 bottom-0 z-[2] p-5 pt-16 text-right text-white">
+                {locationLine && (
+                  <div className="flex items-center justify-end gap-1.5 text-[12px] font-semibold text-white/85 mb-2">
+                    <span>{locationLine}</span>
+                    <MapPin className="h-3.5 w-3.5 shrink-0 text-[#34A88E]" strokeWidth={2.4} />
+                  </div>
                 )}
                 <EditableField
                   table="deals"
@@ -955,202 +988,211 @@ export default function DealDetail() {
                   field="title"
                   value={deal.title}
                   as="h1"
-                  className="text-[22px] leading-[1.25] font-black text-white tracking-tight mb-4"
+                  className="text-[26px] leading-[1.18] font-black tracking-tight text-white drop-shadow-sm max-w-[16ch] ml-auto"
                 />
-
-                <div className="flex items-end justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="text-[11px] font-bold text-white/55 mb-1">
-                      {hasAnyJoiners ? "המחיר שלכם עכשיו" : "מחיר פתיחה"}
-                    </div>
-                    {currentEffectivePrice != null ? (
-                      <div className="text-[38px] font-black gb-num leading-none tracking-tight">{ils(currentEffectivePrice)}</div>
-                    ) : (
-                      <div className="text-[30px] font-black leading-tight">{display.headline}</div>
+                {supplier && (
+                  <div className="flex items-center justify-end gap-1.5 mt-2.5 min-w-0">
+                    <span className="text-[12px] font-semibold text-white/80 truncate">{supplier.business_name}</span>
+                    {supplier.approval_status === "approved" && (
+                      <BadgeCheck className="h-4 w-4 text-[#34A88E] shrink-0" strokeWidth={2.4} />
                     )}
                   </div>
-                  {daysRemaining !== null && (
-                    <div className="shrink-0 rounded-2xl bg-white/10 border border-white/12 px-3 py-2 text-center backdrop-blur-sm">
-                      <Clock className="h-3.5 w-3.5 mx-auto mb-0.5 text-[#34A88E]" />
-                      <div className="text-[15px] font-black leading-none gb-num">{daysRemaining}</div>
-                      <div className="text-[9px] font-bold text-white/65 mt-1">ימים</div>
-                    </div>
-                  )}
-                </div>
-
-                <div
-                  className="my-4 h-px w-full"
-                  style={{ background: "linear-gradient(90deg, transparent, rgba(52,168,142,0.55), transparent)" }}
-                  aria-hidden
-                />
-
-                <p className="text-[13.5px] font-medium text-white/80 leading-relaxed max-w-[28ch] ml-auto">
-                  {nextTier && peopleNeeded > 0
-                    ? "הצטרפו עכשיו — המקום שלכם מקרב את כולם להנחה גבוהה יותר."
-                    : participantCount > 0 && groupSavings > 0
-                      ? `הקבוצה כבר חסכה ${ils(groupSavings)} יחד. מוזמנים להצטרף.`
-                      : "רכישה משותפת עם השכנים — בלי התחייבות, עם ספק מאומת."}
-                </p>
-
-                {!interested && !isSupplierPreview && (
-                  <button
-                    type="button"
-                    onClick={handleJoinClick}
-                    disabled={submittingInterest}
-                    className="mt-5 w-full h-[50px] rounded-full bg-white text-[#0A5447] text-[15px] font-extrabold shadow-[0_16px_32px_-16px_rgba(0,0,0,0.45)] active:scale-[0.98] transition-transform disabled:opacity-70 inline-flex items-center justify-center gap-2"
-                  >
-                    {submittingInterest ? <Loader2 className="h-5 w-5 animate-spin" /> : joinCtaLabel}
-                  </button>
                 )}
-                <p className="mt-3 text-center text-[11px] font-medium text-white/55">
-                  ללא התחייבות
-                  {nextTier && peopleNeeded > 0 ? ` · עוד ${peopleNeeded} שכנים ליעד הבא` : " · המחיר מתעדכן אוטומטית"}
-                </p>
               </div>
             </div>
           </div>
 
-          {/* Cream sheet — group progress & share */}
-          <div className="relative z-[1] -mt-1 rounded-t-[28px] bg-[#F7F5F0] px-4 pt-6 pb-2 space-y-3.5">
-            <div className="bg-white rounded-[26px] p-5 shadow-[0_16px_40px_-24px_rgba(11,18,32,0.22)] border border-[#E8EBEF]/80">
-              <div className="flex items-baseline justify-between gap-2 mb-3">
-                <h2 className="text-[15px] font-black text-[#0B1220]">יעד הקבוצה</h2>
+          <div className="px-4 -mt-8 relative z-10 space-y-4 pb-2">
+            {/* Live group status — one card, three zones */}
+            <div className="bg-white rounded-[24px] p-3.5 shadow-[0_16px_40px_-24px_rgba(11,18,32,0.28)] border border-[#E8EBEF]/90">
+              <div className="grid grid-cols-[minmax(0,88px)_1fr_minmax(0,52px)] gap-2.5 items-stretch">
+                <div className="rounded-2xl bg-gradient-to-br from-[#0E6B5A] to-[#0A5447] text-white p-2.5 flex flex-col justify-center text-center min-h-[88px]">
+                  <div className="text-[9px] font-bold text-white/75 mb-1">המחיר כרגע</div>
+                  <div className="text-[15px] font-black leading-tight gb-num">{currentTierHeadline}</div>
+                </div>
+                <div className="flex flex-col justify-center min-w-0 py-0.5">
+                  <div className="flex items-baseline justify-end gap-1.5 mb-2">
+                    <span className="text-[11px] font-bold text-[#6B7280]">מצטרפים</span>
+                    <span className="text-[22px] font-black text-[#0B1220] gb-num leading-none">{participantCount}</span>
+                    <Users className="w-4 h-4 text-[#0E6B5A] mb-0.5" strokeWidth={2.4} />
+                  </div>
+                  <div className="h-2 bg-[#EEF1F4] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-700 bg-gradient-to-l from-[#34A88E] to-[#0E6B5A]"
+                      style={{ width: `${Math.max(progressPct, participantCount > 0 ? 8 : 4)}%` }}
+                    />
+                  </div>
+                  <p className="text-[10.5px] font-semibold text-[#6B7280] mt-2 leading-snug text-right">
+                    {nextTier && peopleNeeded > 0
+                      ? `עוד ${peopleNeeded} שכנים ליעד הבא${
+                          nextDisplay?.discountPercent != null
+                            ? ` · ${nextDisplay.discountPercent}%`
+                            : nextDisplay?.effectivePrice != null
+                              ? ` · ${ils(nextDisplay.effectivePrice)}`
+                              : ""
+                        }`
+                      : "הגעתם למדרגת המחיר הנוכחית"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleWhatsAppShare}
+                  className="rounded-2xl bg-[#F4F6FA] border border-[#E8EBEF] flex flex-col items-center justify-center gap-1 text-[#0E6B5A] active:scale-[0.97] transition-transform min-h-[88px]"
+                >
+                  <Share2 className="w-5 h-5" strokeWidth={2.2} />
+                  <span className="text-[9px] font-extrabold leading-tight text-center px-1">שתפו עם שכנים</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Discount ladder — full tiers, scroll if needed */}
+            <div>
+              <div className="flex items-center justify-between mb-3 px-0.5">
+                <h2 className="text-[15px] font-black text-[#0B1220]">מדרגות ההנחה</h2>
                 <button
                   type="button"
                   onClick={() => setHowOpen(true)}
-                  className="text-[12px] font-bold text-[#0E6B5A] hover:underline underline-offset-2"
+                  className="text-[12px] font-bold text-[#0E6B5A]"
                 >
                   איך זה עובד?
                 </button>
               </div>
-
-              {nextTier && peopleNeeded > 0 ? (
-                <>
-                  <p className="text-[15px] font-extrabold text-[#0B1220] leading-snug mb-3 text-right">
-                    עוד <span className="text-[#0E6B5A]">{peopleNeeded} שכנים</span>
-                    {nextDisplay?.effectivePrice != null
-                      ? ` — והמחיר יורד ל־${ils(nextDisplay.effectivePrice)}`
-                      : nextDisplay?.discountPercent != null
-                        ? ` — וכולם מקבלים ${nextDisplay.discountPercent}% הנחה`
-                        : " ליעד הבא"}
-                  </p>
-                  <div className="w-full bg-[#EEF1F4] h-2.5 rounded-full overflow-hidden mb-2">
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${Math.max(progressPct, 6)}%`,
-                        background: "linear-gradient(90deg, #34A88E 0%, #0E6B5A 100%)",
-                      }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[11px] font-bold text-[#6B7280] gb-num mb-5">
-                    <span>{participantCount} הצטרפו</span>
-                    <span>יעד: {progressTarget}</span>
-                  </div>
-                </>
-              ) : (
-                <p className="text-[14px] font-bold text-[#0B1220] mb-5 text-right leading-snug">
-                  {participantCount > 0
-                    ? `${participantCount} שכנים כבר בפנים · הגעתם למחיר הנוכחי`
-                    : "היו הראשונים — ופתחו את מדרגת המחיר לכל השכנים"}
-                </p>
-              )}
-
-              <div className="relative grid grid-cols-3 gap-1 pt-1" aria-label="מדרגות מחיר">
-                <div className="absolute top-[14px] inset-x-7 h-px bg-[#E8EBEF]" aria-hidden />
+              <div className="overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
                 <div
-                  className="absolute top-[14px] right-7 h-px bg-[#0E6B5A]/70 transition-all duration-700"
-                  style={{ width: `calc(${ladderFill}% * 0.7)` }}
-                  aria-hidden
-                />
-                {tierWindow.map((item, idx) => {
-                  if (item.kind === "starter") {
-                    const refPrice = display.referencePrice;
+                  className="relative flex items-start justify-between gap-1 min-w-full"
+                  style={{ minWidth: `${72 + sortedTiers.length * 76}px` }}
+                >
+                  <div className="absolute top-[13px] right-6 left-6 h-px bg-[#E8EBEF]" aria-hidden />
+                  <div className="relative z-[1] flex flex-col items-center w-[68px] shrink-0 text-center">
+                    <div
+                      className={cn(
+                        "w-6 h-6 rounded-full mb-2 flex items-center justify-center text-[10px] font-black",
+                        !hasAnyJoiners
+                          ? "bg-[#0E6B5A] text-white shadow-[0_0_0_4px_rgba(14,107,90,0.15)]"
+                          : "bg-white border-2 border-[#CBD5E0] text-[#6B7280]",
+                      )}
+                    >
+                      0
+                    </div>
+                    <span className="text-[9px] font-bold text-[#6B7280] gb-num">0</span>
+                    <span className="text-[11px] font-black text-[#0B1220] mt-0.5 leading-tight">
+                      {display.referencePrice != null ? ils(display.referencePrice) : "בסיס"}
+                    </span>
+                    {!hasAnyJoiners && (
+                      <span className="mt-1 text-[8px] font-extrabold text-white bg-[#0E6B5A] px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                        אנחנו כאן
+                      </span>
+                    )}
+                  </div>
+                  {sortedTiers.map((tier, idx) => {
+                    const td = describeTier(offerType, tier);
+                    const priceLabel = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
+                    const isHere = hasAnyJoiners && idx === activeIdx;
+                    const isNext = nextTier && tier.minParticipants === nextTier.minParticipants;
                     return (
-                      <div key={idx} className="relative z-[1] text-center px-1">
-                        <div className="mx-auto mb-2.5 w-6 h-6 rounded-full bg-[#0E6B5A] text-white text-[10px] font-black flex items-center justify-center shadow-[0_0_0_5px_rgba(14,107,90,0.12)]">
-                          1
+                      <div key={tier.minParticipants} className="relative z-[1] flex flex-col items-center w-[68px] shrink-0 text-center">
+                        <div
+                          className={cn(
+                            "w-6 h-6 rounded-full mb-2 flex items-center justify-center text-[10px] font-black border-2",
+                            isHere
+                              ? "bg-[#0E6B5A] border-[#0E6B5A] text-white shadow-[0_0_0_4px_rgba(14,107,90,0.15)]"
+                              : "bg-white border-[#D5DBE3] text-[#6B7280]",
+                          )}
+                        >
+                          {tier.minParticipants}
                         </div>
-                        <div className="text-[10px] font-bold text-[#6B7280] gb-num">0</div>
-                        <div className="text-[14px] font-black text-[#0E6B5A] gb-num leading-tight mt-0.5">
-                          {refPrice != null ? ils(refPrice) : "רגיל"}
-                        </div>
-                        <div className="text-[10px] font-extrabold text-[#0E6B5A] mt-1">עכשיו</div>
+                        <span className="text-[9px] font-bold text-[#6B7280] gb-num">{tierRange(tier)}</span>
+                        <span className={cn("text-[11px] font-black mt-0.5 leading-tight gb-num", isHere ? "text-[#0E6B5A]" : "text-[#0B1220]")}>
+                          {priceLabel}
+                        </span>
+                        {isHere && (
+                          <span className="mt-1 text-[8px] font-extrabold text-white bg-[#0E6B5A] px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                            אנחנו כאן
+                          </span>
+                        )}
+                        {!isHere && isNext && (
+                          <span className="mt-1 text-[8px] font-extrabold text-[#0A5447] bg-[#E8F4F1] px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                            היעד הבא
+                          </span>
+                        )}
                       </div>
                     );
-                  }
-                  const { tier, state } = item;
-                  const td = describeTier(offerType, tier);
-                  const tierPrice = td.effectivePrice != null ? ils(td.effectivePrice) : td.headline;
-                  const range = tierRange(tier);
-                  const isNextTarget = nextTier && tier.minParticipants === nextTier.minParticipants;
-                  const isCurrent = state === "active";
-                  return (
-                    <div key={idx} className="relative z-[1] text-center px-1">
-                      <div
-                        className={cn(
-                          "mx-auto mb-2.5 w-6 h-6 rounded-full text-[10px] font-black flex items-center justify-center border-2",
-                          isCurrent
-                            ? "bg-[#0E6B5A] border-[#0E6B5A] text-white shadow-[0_0_0_5px_rgba(14,107,90,0.12)]"
-                            : state === "past"
-                              ? "bg-white border-[#0E6B5A] text-[#0E6B5A]"
-                              : isNextTarget
-                                ? "bg-[#E8F4F1] border-[#34A88E] text-[#0E6B5A]"
-                                : "bg-white border-[#D5DBE3] text-[#6B7280]",
-                        )}
-                      >
-                        {idx + 1}
-                      </div>
-                      <div className="text-[10px] font-bold text-[#6B7280] gb-num">{range}</div>
-                      <div
-                        className={cn(
-                          "text-[14px] font-black gb-num leading-tight mt-0.5",
-                          state === "past" ? "text-[#9CA3AF] line-through" : isCurrent ? "text-[#0E6B5A]" : "text-[#0B1220]",
-                        )}
-                      >
-                        {tierPrice}
-                      </div>
-                      {isCurrent ? (
-                        <div className="text-[10px] font-extrabold text-[#0E6B5A] mt-1">עכשיו</div>
-                      ) : isNextTarget ? (
-                        <div className="text-[10px] font-extrabold text-[#0E6B5A] mt-1">הבא</div>
-                      ) : null}
-                    </div>
-                  );
-                })}
+                  })}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-[22px] px-4 py-3.5 bg-white border border-[#E8EBEF]/90 shadow-[0_8px_24px_-18px_rgba(11,18,32,0.12)]">
-              <p className="text-[13px] font-bold text-[#0A5447] leading-snug text-right min-w-0">
-                הזמינו שכנים — יחד מגיעים מהר יותר להנחה
-              </p>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleWhatsAppShare}
-                  className="h-11 px-3.5 rounded-xl bg-[#E8F4F1] text-[#0E6B5A] text-[12px] font-extrabold inline-flex items-center gap-1.5 active:scale-[0.97] transition-transform"
-                >
-                  <svg className="w-4 h-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
-                  שיתוף
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof window !== "undefined") {
-                      navigator.clipboard?.writeText(window.location.href);
-                      toast.success("הקישור הועתק");
-                    }
-                  }}
-                  className="h-11 w-11 rounded-xl bg-[#E8F4F1] text-[#0E6B5A] inline-flex items-center justify-center active:scale-[0.97] transition-transform"
-                  aria-label="העתק קישור"
-                >
-                  <Link2 className="w-4 h-4" />
-                </button>
+            {/* WhatsApp — single focused invite */}
+            <div className="rounded-[24px] bg-[#F7F5F0] border border-[#E8EBEF] px-4 py-4 text-center">
+              <p className="text-[15px] font-extrabold text-[#0B1220] mb-3 leading-snug">רוצים להוזיל לכולם את המחיר?</p>
+              <button
+                type="button"
+                onClick={handleWhatsAppShare}
+                className="w-full h-12 rounded-2xl bg-[#0E6B5A] hover:bg-[#0A5447] text-white text-[14px] font-extrabold inline-flex items-center justify-center gap-2 shadow-[0_12px_28px_-14px_rgba(14,107,90,0.45)] active:scale-[0.98] transition-transform"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+                שתפו בוואטסאפ
+              </button>
+            </div>
+
+            {/* Why join — compact trust grid */}
+            <div>
+              <h2 className="text-[15px] font-black text-[#0B1220] mb-3 px-0.5">למה להצטרף?</h2>
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  {
+                    icon: Lock,
+                    title: "תשלום מאובטח",
+                    sub: depositRequired ? `פיקדון ${ils(Number(deal.deposit_amount))}` : "ללא חיוב מלא בהתחלה",
+                  },
+                  {
+                    icon: BadgeCheck,
+                    title: "ספק מאומת",
+                    sub: supplier?.approval_status === "approved" ? "נבדק בפלטפורמה" : "פרטי ספק שקופים",
+                  },
+                  { icon: TrendingDown, title: "מחיר לכולם", sub: "ככל שמצטרפים — יורד" },
+                  { icon: Shield, title: "ללא התחייבות", sub: "המחיר מתעדכן אוטומטית" },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="rounded-[18px] border border-[#E8EBEF] bg-white p-3 flex gap-2.5 items-start"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-[#E8F4F1] flex items-center justify-center shrink-0">
+                      <item.icon className="w-4 h-4 text-[#0E6B5A]" strokeWidth={2.2} />
+                    </div>
+                    <div className="min-w-0 text-right">
+                      <div className="text-[12px] font-extrabold text-[#0B1220] leading-tight">{item.title}</div>
+                      <div className="text-[10px] font-medium text-[#6B7280] mt-0.5 leading-snug">{item.sub}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/* Key facts — only real deal fields */}
+            {dealFactCells.length > 0 && (
+              <div>
+                <h2 className="text-[15px] font-black text-[#0B1220] mb-3 px-0.5">בקצרה</h2>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {dealFactCells.slice(0, 4).map((cell) => (
+                    <div
+                      key={cell.label}
+                      className="rounded-[18px] border border-[#E8EBEF] bg-white p-3 flex gap-2.5 items-center"
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-[#F4F6FA] flex items-center justify-center shrink-0">
+                        <cell.icon className="w-4 h-4 text-[#0E6B5A]" strokeWidth={2.2} />
+                      </div>
+                      <div className="min-w-0 text-right">
+                        <div className="text-[10px] font-bold text-[#6B7280]">{cell.label}</div>
+                        <div className="text-[12px] font-extrabold text-[#0B1220] truncate">{cell.value}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </>
       ) : (
@@ -1448,16 +1490,20 @@ export default function DealDetail() {
                 <Button
                   onClick={handleJoinClick}
                   disabled={submittingInterest}
-                  className="flex-1 h-[52px] rounded-2xl bg-gradient-to-l from-[#0A5447] to-[#0E6B5A] hover:from-[#0A5447] hover:to-[#0E6B5A] text-white font-extrabold text-[15px] shadow-[0_12px_28px_-12px_rgba(10,84,71,0.55)] border-0"
+                  className={cn(
+                    "flex-1 rounded-2xl bg-gradient-to-l from-[#0A5447] to-[#0E6B5A] hover:from-[#0A5447] hover:to-[#0E6B5A] text-white font-extrabold shadow-[0_12px_28px_-12px_rgba(10,84,71,0.55)] border-0",
+                    sortedTiers.length > 0 ? "h-[54px] rounded-[18px] flex flex-col items-center justify-center gap-0 py-2" : "h-[52px] rounded-full",
+                  )}
                 >
                   {submittingInterest ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : isGuest ? (
-                    "הצטרפו לקבוצה"
-                  ) : depositRequired ? (
-                    `שמרו מקום · ${ils(Number(deal.deposit_amount))}`
+                  ) : sortedTiers.length > 0 ? (
+                    <>
+                      <span className="text-[15px] leading-tight">הצטרפו להצעה</span>
+                      <span className="text-[11px] font-semibold text-white/85 leading-tight">חסכו יותר, ביחד!</span>
+                    </>
                   ) : (
-                    "שמרו את המקום שלכם"
+                    joinCtaLabel ?? "הצטרפו לקבוצה"
                   )}
                 </Button>
                 <ShareButton deal={deal} />
