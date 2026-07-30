@@ -376,12 +376,54 @@
       padding: 8px 10px; white-space: nowrap;
     }
 
+    .new .lux {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      padding: 18px 16px;
+      color: #fff;
+      margin-bottom: 14px;
+      background:
+        radial-gradient(120% 90% at 100% 0%, rgba(52,168,142,0.35) 0%, transparent 55%),
+        linear-gradient(155deg, #0A5447 0%, #0E6B5A 48%, #0B3F36 100%);
+      box-shadow: 0 28px 56px -28px rgba(10,84,71,0.55);
+    }
+    .new .lux::before {
+      content: "";
+      position: absolute; left: -40px; top: -50px;
+      width: 120px; height: 120px; border-radius: 50%;
+      background: rgba(216,195,154,0.16); filter: blur(28px);
+    }
+    .new .lux .row { position: relative; display: flex; justify-content: space-between; gap: 10px; }
+    .new .lux .lbl {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 8px;
+    }
+    .new .lux .val { font-size: 32px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
+    .new .lux .hint { margin-top: 10px; font-size: 12.5px; font-weight: 500; color: rgba(255,255,255,0.82); max-width: 22ch; line-height: 1.4; }
+    .new .lux .days {
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 14px; padding: 10px 12px; text-align: center; height: fit-content;
+    }
+    .new .lux .days b { display: block; font-size: 16px; font-weight: 900; line-height: 1; }
+    .new .lux .days span { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.7); }
+    .new .lux .join {
+      position: relative; margin-top: 16px; width: 100%; border: 0;
+      height: 46px; border-radius: 14px; background: #fff; color: #0A5447;
+      font-weight: 800; font-size: 13.5px; font-family: inherit;
+      box-shadow: 0 12px 28px -14px rgba(0,0,0,0.4);
+    }
+    .new .lux .fine {
+      position: relative; margin-top: 8px; text-align: center;
+      font-size: 10.5px; font-weight: 500; color: rgba(255,255,255,0.6);
+    }
+
     .new .group {
       background: var(--surface);
-      border-radius: var(--radius);
-      padding: 16px;
-      border: 1px solid rgba(14,107,90,0.12);
-      box-shadow: 0 10px 28px -20px rgba(14,107,90,0.35);
+      border-radius: 24px;
+      padding: 18px 16px;
+      border: 1px solid rgba(232,235,239,0.9);
+      box-shadow: 0 16px 40px -24px rgba(11,18,32,0.28);
       margin-bottom: 14px;
     }
     .new .group .head {
@@ -525,18 +567,18 @@
   <div class="page">
     <header class="intro">
       <div class="eyebrow">GroupBuild · הצעת עיצוב</div>
-      <h1>מסך דיל נקי יותר: מטרה אחת בכל בלוק</h1>
+      <h1>יוקרתי, רגוע — ומזמין להצטרף</h1>
       <p>
-        הגרסה הנוכחית חוזרת על אותו מסר בכמה כרטיסים (מחיר, התקדמות, מדרגות, FOMO, שיתוף).
-        הדוגמה משמאל מפשטת: מחיר ברור → יעד קבוצה אחד → פרטי הצעה קצרים → CTA יחיד להצטרפות.
+        פחות רעש, יותר נוכחות: פאנל מחיר עמוק עם כפתור הצטרפות לבן,
+        יעד קבוצה נקי, ו־CTA תחתון עם מיקרו־קופי שמוריד חסם (״ללא התחייבות״).
       </p>
     </header>
 
     <div class="principles">
-      <div class="principle"><strong>1. היררכיה</strong><span>מחיר + יעד הבא לפני שיתוף ופרטים ארוכים</span></div>
-      <div class="principle"><strong>2. בלי כפילויות</strong><span>מסיר כרטיס FOMO, סרט צהוב, וטיימליין כפול</span></div>
-      <div class="principle"><strong>3. CTA אחד</strong><span>״הצטרף״ ראשי; וואטסאפ משני ולא פועם</span></div>
-      <div class="principle"><strong>4. טקסט סרוק</strong><span>בולטים במקום פסקאות צפופות; ״קרא עוד״ לפרטים</span></div>
+      <div class="principle"><strong>1. נוכחות</strong><span>פאנל ירוק עמוק עם אור רך — מרגיש פרימיום, לא ״מבצע״</span></div>
+      <div class="principle"><strong>2. הזמנה</strong><span>״הצטרפו לקבוצה / שמרו מקום״ במקום ״התחבר כדי…״</span></div>
+      <div class="principle"><strong>3. ביטחון</strong><span>״ללא התחייבות״ צמוד לכפתור — מוריד חיכוך</span></div>
+      <div class="principle"><strong>4. נקי</strong><span>בלי מדבקות, בלי וואטסאפ פועם, בלי כפילויות</span></div>
     </div>
 
     <div class="compare">
@@ -612,7 +654,7 @@
       <!-- AFTER -->
       <section>
         <div class="col-label">
-          <h2>אחרי — ממוקד</h2>
+          <h2>אחרי — יוקרתי ומזמין</h2>
           <span class="badge new">הצעה</span>
         </div>
         <div class="phone new">
@@ -629,13 +671,20 @@
             </div>
 
             <div class="body">
-              <div class="price-block">
-                <div class="now">
-                  <div class="lbl">מחיר בסיס · לפני הנחת קבוצה</div>
-                  <div class="val">5% הנחה</div>
-                  <div class="hint">המחיר יורד אוטומטית כשמצטרפים שכנים</div>
+              <div class="lux">
+                <div class="row">
+                  <div>
+                    <div class="lbl">מחיר פתיחה לקבוצה</div>
+                    <div class="val">5% הנחה</div>
+                    <p class="hint">הצטרפו עכשיו — כל מקום מקדם את כולם למחיר טוב יותר</p>
+                  </div>
+                  <div class="days">
+                    <b>3</b>
+                    <span>ימים לסגירה</span>
+                  </div>
                 </div>
-                <div class="deadline">3 ימים לסגירה</div>
+                <button class="join" type="button">הצטרפו לקבוצה</button>
+                <div class="fine">ללא התחייבות · המחיר מתעדכן אוטומטית</div>
               </div>
 
               <div class="group">
@@ -643,7 +692,7 @@
                   <h4>יעד הקבוצה</h4>
                   <a href="#how">איך זה עובד?</a>
                 </div>
-                <div class="goal">חסרים עוד <em>2 שכנים</em> ל־5% הנחה לכולם</div>
+                <div class="goal">עוד <em>2 שכנים</em> — וכולם מקבלים 5% הנחה</div>
                 <div class="progress" aria-hidden="true"><i></i></div>
                 <div class="progress-meta">
                   <span>0 הצטרפו</span>
@@ -671,8 +720,8 @@
               </div>
 
               <div class="invite">
-                <p>הזמינו שכנים — כל הצטרפות מורידה מחיר לכולם</p>
-                <button type="button">שיתוף בוואטסאפ</button>
+                <p>הזמינו שכנים — יחד מגיעים מהר יותר להנחה</p>
+                <button type="button">שיתוף</button>
               </div>
 
               <div class="facts">
@@ -695,9 +744,12 @@
               </div>
             </div>
 
-            <div class="sticky-cta">
-              <button class="share" type="button" aria-label="שיתוף">↗</button>
-              <button class="primary" type="button">התחבר כדי להצטרף</button>
+            <div class="sticky-cta" style="flex-direction:column;gap:6px;background:linear-gradient(180deg,transparent,#F3F1EB 30%)">
+              <div style="display:flex;gap:8px;width:100%;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-radius:18px;padding:8px;border:1px solid #fff;box-shadow:0 20px 44px -18px rgba(11,18,32,.28)">
+                <button class="share" type="button" aria-label="שיתוף">↗</button>
+                <button class="primary" type="button" style="background:linear-gradient(90deg,#0A5447,#0E6B5A)">הצטרפו לקבוצה</button>
+              </div>
+              <div style="text-align:center;font-size:10.5px;font-weight:600;color:#6B7280">ללא התחייבות · עוד 2 שכנים ליעד הבא</div>
             </div>
             <div class="nav">
               <div>בית</div><div>קטגוריות</div><div>חיפוש</div><div class="on">דילים</div>
@@ -710,15 +762,15 @@
     <section class="notes" id="how">
       <div class="note">
         <h3>מה שינינו במבנה</h3>
-        <p>הירו + כותרת על התמונה (בלי כרטיס צף). מחיר בשורה אחת. יעד קבוצה אחד שמכיל progress + מדרגות. שיתוף שקט. פרטים כבולטים.</p>
+        <p>פאנל הזמנה ירוק־עמוק עם CTA לבן, יעד קבוצה נקי, ו־sticky glass עם ״ללא התחייבות״.</p>
       </div>
       <div class="note">
         <h3>מה להסיר</h3>
-        <p>סרט צהוב, כרטיס ״שכנים כבר הצטרפו״, כפתור וואטסאפ פועם, כפתור ״איך זה עובד״ צף שמסתיר טקסט, וטיימליין כפול מתחת למדרגות.</p>
+        <p>סרט צהוב, כרטיס FOMO, וואטסאפ פועם, כפתור צף שמסתיר טקסט, וניסוח ״התחבר כדי…״ היבש.</p>
       </div>
       <div class="note">
         <h3>יישום בקוד</h3>
-        <p>השינוי מיושם ב־<code>DealDetail.tsx</code> במקטע הרכישה הקבוצתית — אותה לוגיקת מחירים/מדרגות, UI פחות רועש.</p>
+        <p>השינוי מיושם ב־<code>DealDetail.tsx</code> — אותה לוגיקה, שפה ויזואלית יוקרתית ומזמינה יותר.</p>
       </div>
     </section>
   </div>
