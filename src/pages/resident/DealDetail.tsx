@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Loader2, ArrowRight, Tag, Users, MessageCircle, Phone, CheckCircle2, Clock, Share2, CalendarDays, MapPin, Handshake, Target, PhoneCall, Wrench, BadgeCheck, ChevronLeft, ChevronRight, Link2, Pencil, Shield, Lock, TrendingDown, Sparkles } from "lucide-react";
+import { Loader2, ArrowRight, Tag, Users, MessageCircle, Phone, CheckCircle2, Clock, Share2, CalendarDays, MapPin, Handshake, Target, PhoneCall, Wrench, BadgeCheck, ChevronLeft, ChevronRight, Link2, Pencil, Shield, Lock, TrendingDown } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { SmartImg } from "@/components/ui/SmartImg";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -31,7 +31,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { PaymentInstructionsCard, type SupplierPaymentInfo } from "@/components/deals/PaymentInstructionsCard";
 import { FavoriteButton } from "@/components/deals/FavoriteButton";
-import { Reveal } from "@/components/resident-home/Reveal";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
 import { useGuestGate } from "@/hooks/useGuestGate";
@@ -820,7 +819,7 @@ export default function DealDetail() {
           seed: deal.id,
         }).gradient;
 
-  const renderHeroMedia = (className: string, options?: { kenBurns?: boolean }) => (
+  const renderHeroMedia = (className: string) => (
     <div
       className={cn("relative overflow-hidden", className)}
       style={heroImages.length === 0 ? { background: heroCoverStyle } : undefined}
@@ -836,10 +835,7 @@ export default function DealDetail() {
                 alt={`${deal.title} ${i + 1}`}
                 priority={i === 0}
                 eager={i === 0}
-                className={cn(
-                  "w-full h-full object-cover shrink-0 snap-start",
-                  options?.kenBurns && i === 0 && heroImages.length === 1 && "gb-hero-drift",
-                )}
+                className="w-full h-full object-cover shrink-0 snap-start"
                 style={{ flex: "0 0 100%" }}
               />
             ))}
@@ -920,20 +916,6 @@ export default function DealDetail() {
     });
   }
 
-  const lastTier = sortedTiers.length > 0 ? sortedTiers[sortedTiers.length - 1] : null;
-  const lastTierDisplay = lastTier ? describeTier(offerType, lastTier) : null;
-  const peakSavings =
-    display.referencePrice != null && lastTierDisplay?.effectivePrice != null
-      ? Math.max(0, display.referencePrice - lastTierDisplay.effectivePrice)
-      : savingsAmount;
-  const neighborAvatarCount = Math.min(Math.max(participantCount, 0), 4);
-  const neighborAvatarGradients = [
-    "bg-gradient-to-br from-[#0E6B5A] to-[#34A88E]",
-    "bg-gradient-to-br from-[#1A7F6E] to-[#0A5447]",
-    "bg-gradient-to-br from-[#34A88E] to-[#0E6B5A]",
-    "bg-gradient-to-br from-[#0A5447] to-[#1A7F6E]",
-  ];
-
   return (
     <MobileShell>
       {sortedTiers.length === 0 && (
@@ -968,9 +950,8 @@ export default function DealDetail() {
           {/* ===== Pro Invite — data-rich, uncluttered (app palette) ===== */}
           <div className="px-2 mt-1">
             <div className="relative h-[340px] rounded-[28px] overflow-hidden shadow-[0_24px_48px_-28px_rgba(11,18,32,0.4)]">
-              {renderHeroMedia("absolute inset-0", { kenBurns: true })}
+              {renderHeroMedia("absolute inset-0")}
               <div className="absolute inset-0 bg-gradient-to-t from-[#0B1220]/85 via-[#0B1220]/35 to-[#0B1220]/25 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-br from-[#0E6B5A]/15 via-transparent to-transparent pointer-events-none mix-blend-soft-light" aria-hidden />
 
               <div className="relative z-[2] flex items-center justify-between px-3 pt-3">
                 <button
@@ -987,31 +968,12 @@ export default function DealDetail() {
                 </div>
               </div>
 
-              <div className="absolute top-14 right-3 z-[2] flex flex-col items-end gap-2">
+              <div className="absolute top-14 right-3 z-[2]">
                 <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-white/95 text-[#0E6B5A] shadow-sm">
-                  {deal.status !== "closed" && deal.status !== "completed" ? (
-                    <span className="gb-live-dot shrink-0 scale-75" aria-hidden />
-                  ) : (
-                    <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: statusMeta.dot }} />
-                  )}
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: statusMeta.dot }} />
                   {statusMeta.label}
                 </span>
-                {peakSavings != null && peakSavings > 0 && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-[#0B1220]/55 backdrop-blur-md text-white border border-white/15 shadow-sm">
-                    <Sparkles className="w-3 h-3 text-[#34A88E]" strokeWidth={2.4} />
-                    עד {ils(peakSavings)} חיסכון
-                  </span>
-                )}
               </div>
-
-              {nextTier && peopleNeeded > 0 && (
-                <div className="absolute top-[7.5rem] left-3 z-[2] gb-float">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold px-3 py-1.5 rounded-full bg-white/92 text-[#0A5447] shadow-[0_12px_28px_-16px_rgba(11,18,32,0.45)] border border-white/80">
-                    <Users className="w-3.5 h-3.5 text-[#0E6B5A]" strokeWidth={2.4} />
-                    עוד {peopleNeeded} שכנים ליעד
-                  </span>
-                </div>
-              )}
 
               <div className="absolute inset-x-0 bottom-0 z-[2] p-5 pt-16 text-right text-white">
                 {locationLine && (
@@ -1041,51 +1003,8 @@ export default function DealDetail() {
           </div>
 
           <div className="px-4 -mt-8 relative z-10 space-y-4 pb-2">
-            <Reveal>
             {/* Live group status — one card, three zones */}
-            <div className="bg-white rounded-[24px] p-3.5 shadow-[0_16px_40px_-24px_rgba(11,18,32,0.28)] border border-[#E8EBEF]/90 ring-1 ring-[#0E6B5A]/[0.07]">
-              {(neighborAvatarCount > 0 || participantCount === 0) && (
-                <div className="flex items-center justify-between gap-2 mb-3 pb-3 border-b border-[#F0F2F5]">
-                  <div className="flex items-center -space-x-2 space-x-reverse">
-                    {neighborAvatarCount > 0 ? (
-                      Array.from({ length: neighborAvatarCount }).map((_, i) => (
-                        <span
-                          key={i}
-                          className={cn(
-                            "h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-black text-white shadow-sm",
-                            neighborAvatarGradients[i % neighborAvatarGradients.length],
-                          )}
-                          aria-hidden
-                        >
-                          {String.fromCharCode(0x05d0 + (i % 4))}
-                        </span>
-                      ))
-                    ) : (
-                      <>
-                        {[0, 1, 2].map((i) => (
-                          <span
-                            key={i}
-                            className="h-8 w-8 rounded-full border-2 border-dashed border-[#CBD5E0] bg-[#F4F6FA] flex items-center justify-center text-[11px] font-bold text-[#9CA3AF]"
-                            aria-hidden
-                          >
-                            ?
-                          </span>
-                        ))}
-                      </>
-                    )}
-                    {participantCount > 4 && (
-                      <span className="h-8 min-w-[2rem] px-1.5 rounded-full border-2 border-white bg-[#E8F4F1] text-[10px] font-extrabold text-[#0A5447] flex items-center justify-center shadow-sm gb-num">
-                        +{participantCount - 4}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] font-bold text-[#6B7280] text-right leading-snug">
-                    {participantCount > 0
-                      ? `${participantCount} שכנים כבר בפנים`
-                      : "תהיו הראשונים בקבוצה"}
-                  </p>
-                </div>
-              )}
+            <div className="bg-white rounded-[24px] p-3.5 shadow-[0_16px_40px_-24px_rgba(11,18,32,0.28)] border border-[#E8EBEF]/90">
               <div className="grid grid-cols-[minmax(0,88px)_1fr_minmax(0,52px)] gap-2.5 items-stretch">
                 <div className="rounded-2xl bg-gradient-to-br from-[#0E6B5A] to-[#0A5447] text-white p-2.5 flex flex-col justify-center text-center min-h-[88px]">
                   <div className="text-[9px] font-bold text-white/75 mb-1">המחיר כרגע</div>
@@ -1125,9 +1044,7 @@ export default function DealDetail() {
                 </button>
               </div>
             </div>
-            </Reveal>
 
-            <Reveal delayMs={90}>
             {/* Discount ladder — full tiers, scroll if needed */}
             <div>
               <div className="flex items-center justify-between mb-3 px-0.5">
@@ -1204,9 +1121,7 @@ export default function DealDetail() {
                 </div>
               </div>
             </div>
-            </Reveal>
 
-            <Reveal delayMs={160}>
             {/* WhatsApp — single focused invite */}
             <div className="rounded-[24px] bg-[#F7F5F0] border border-[#E8EBEF] px-4 py-4 text-center">
               <p className="text-[15px] font-extrabold text-[#0B1220] mb-3 leading-snug">רוצים להוזיל לכולם את המחיר?</p>
@@ -1221,9 +1136,7 @@ export default function DealDetail() {
                 שתפו בוואטסאפ
               </button>
             </div>
-            </Reveal>
 
-            <Reveal delayMs={220}>
             {/* Why join — compact trust grid */}
             <div>
               <h2 className="text-[15px] font-black text-[#0B1220] mb-3 px-0.5">למה להצטרף?</h2>
@@ -1257,10 +1170,9 @@ export default function DealDetail() {
                 ))}
               </div>
             </div>
-            </Reveal>
 
+            {/* Key facts — only real deal fields */}
             {dealFactCells.length > 0 && (
-            <Reveal delayMs={280}>
               <div>
                 <h2 className="text-[15px] font-black text-[#0B1220] mb-3 px-0.5">בקצרה</h2>
                 <div className="grid grid-cols-2 gap-2.5">
@@ -1280,7 +1192,6 @@ export default function DealDetail() {
                   ))}
                 </div>
               </div>
-            </Reveal>
             )}
           </div>
         </>
@@ -1581,7 +1492,7 @@ export default function DealDetail() {
                   disabled={submittingInterest}
                   className={cn(
                     "flex-1 rounded-2xl bg-gradient-to-l from-[#0A5447] to-[#0E6B5A] hover:from-[#0A5447] hover:to-[#0E6B5A] text-white font-extrabold shadow-[0_12px_28px_-12px_rgba(10,84,71,0.55)] border-0",
-                    sortedTiers.length > 0 ? "h-[54px] rounded-[18px] flex flex-col items-center justify-center gap-0 py-2 gb-cta-glow" : "h-[52px] rounded-full",
+                    sortedTiers.length > 0 ? "h-[54px] rounded-[18px] flex flex-col items-center justify-center gap-0 py-2" : "h-[52px] rounded-full",
                   )}
                 >
                   {submittingInterest ? (
