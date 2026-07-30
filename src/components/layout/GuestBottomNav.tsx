@@ -3,18 +3,24 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Home, LayoutGrid, Search, Tag, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { preloadRoute } from "@/lib/routePreload";
+import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 
 /**
  * Bottom navigation for anonymous / guest visitors.
  * Reduced surface: no profile, no notifications, no personal area.
  * Rendered by BottomNav when `useApp().user` is null.
  */
+// In the web build "/" is the role-split Gateway — guests should never land there
+// from the tab bar, so point home at the dedicated guest home instead.
+const HOME_PATH = IS_RESIDENTS_BUILD || IS_SUPPLIERS_BUILD ? "/" : "/home";
+
 const items: { to: string; label: string; icon: LucideIcon; match?: (path: string) => boolean }[] = [
-  { to: "/", label: "בית", icon: Home, match: (p) => p === "/" },
+  { to: HOME_PATH, label: "בית", icon: Home, match: (p) => p === "/" || p === "/home" },
   { to: "/categories", label: "קטגוריות", icon: LayoutGrid, match: (p) => p.startsWith("/categories") },
   { to: "/search", label: "חיפוש", icon: Search, match: (p) => p.startsWith("/search") },
   { to: "/deals", label: "דילים", icon: Tag, match: (p) => p.startsWith("/deals") },
 ];
+
 
 function GuestBottomNavImpl() {
   const location = useLocation();
