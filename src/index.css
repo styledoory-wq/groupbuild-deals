@@ -352,6 +352,27 @@
 .gb-particle-2 { animation: gb-particle-float 10s ease-in-out infinite 1.5s; }
 .gb-particle-3 { animation: gb-particle-float 12s ease-in-out infinite 3s; }
 @keyframes gb-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes gb-hero-drift {
+  0%, 100% { transform: scale(1.02) translate3d(0, 0, 0); }
+  50% { transform: scale(1.08) translate3d(-1.2%, -0.8%, 0); }
+}
+.gb-hero-drift {
+  animation: gb-hero-drift 24s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes gb-cta-breathe {
+  0%, 100% {
+    box-shadow:
+      0 12px 28px -12px rgba(10, 84, 71, 0.55),
+      0 0 0 0 rgba(14, 107, 90, 0.28);
+  }
+  50% {
+    box-shadow:
+      0 16px 34px -10px rgba(10, 84, 71, 0.62),
+      0 0 0 5px rgba(14, 107, 90, 0);
+  }
+}
+.gb-cta-glow { animation: gb-cta-breathe 3s ease-in-out infinite; }
 @keyframes gb-pulse-glow {
   0%, 100% { box-shadow: 0 0 0 0 hsl(167 77% 24% / 0.5); }
   50% { box-shadow: 0 0 0 12px hsl(167 77% 24% / 0); }
@@ -381,12 +402,12 @@
 
   @media (max-width: 640px) {
     .gb-card, .gb-card-flat, .gb-card-premium { animation: none; }
-    .gb-float { animation: none; }
+    .gb-float, .gb-hero-drift, .gb-cta-glow { animation: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .route-transition, .gb-card, .gb-card-flat, .gb-card-premium,
-    .gb-float, .gb-pulse-glow, .gb-shimmer,
+    .gb-float, .gb-hero-drift, .gb-cta-glow, .gb-pulse-glow, .gb-shimmer,
     .gb-particle-1, .gb-particle-2, .gb-particle-3,
     .splash-logo-frame { animation: none !important; }
   }
