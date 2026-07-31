@@ -484,6 +484,7 @@ export default function CategoriesList() {
                         title={s.title}
                         Icon={iconForStage(s.key)}
                         count={countsReady ? s.serviceCount : undefined}
+                        countUnit="קטגוריות"
                         onClick={() => openStage(s.key)}
                       />
                     ))}

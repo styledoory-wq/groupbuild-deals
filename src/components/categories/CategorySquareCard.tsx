@@ -7,7 +7,12 @@ type Props = {
   title: string;
   Icon: LucideIcon;
   count?: number;
-  /** Override the bottom line (defaults to "N ספקים" / "בקרוב") */
+  /**
+   * Noun used with `count` (defaults to "ספקים").
+   * Pass "קטגוריות" when the number is a category/service count.
+   */
+  countUnit?: string;
+  /** Override the bottom line (defaults to "N {countUnit}" / "בקרוב") */
   subtitle?: string;
   onClick?: () => void;
   className?: string;
@@ -16,12 +21,13 @@ type Props = {
 
 /**
  * Sketch-matched service tile: compact square, outline brand icon,
- * text-sm title, slate-400 supplier count.
+ * text-sm title, slate-400 count line.
  */
 export function CategorySquareCard({
   title,
   Icon,
   count,
+  countUnit = "ספקים",
   subtitle,
   onClick,
   className,
@@ -31,7 +37,7 @@ export function CategorySquareCard({
   const Comp: "button" | "div" = as === "button" ? "button" : "div";
   const bottom =
     subtitle ??
-    (typeof count === "number" ? (soon ? "בקרוב" : `${count} ספקים`) : null);
+    (typeof count === "number" ? (soon ? "בקרוב" : `${count} ${countUnit}`) : null);
 
   return (
     <Comp
