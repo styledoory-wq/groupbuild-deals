@@ -2,12 +2,13 @@ import { lazy } from "react";
 import { Navigate, Route } from "react-router-dom";
 import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 
-const Gateway = lazy(() => import("@/pages/marketing/Gateway"));
+// Entry landings are eager — lazy chunks delay hero photo paint (black flash).
+import ResidentsHome from "@/pages/marketing/ResidentsHome";
+import SuppliersHome from "@/pages/marketing/SuppliersHome";
+import Gateway from "@/pages/marketing/Gateway";
+import SuppliersLanding from "@/pages/marketing/SuppliersLanding";
+import ResidentsLanding from "@/pages/marketing/ResidentsLanding";
 
-const SuppliersLanding = lazy(() => import("@/pages/marketing/SuppliersLanding"));
-const ResidentsLanding = lazy(() => import("@/pages/marketing/ResidentsLanding"));
-const ResidentsHome = lazy(() => import("@/pages/marketing/ResidentsHome"));
-const SuppliersHome = lazy(() => import("@/pages/marketing/SuppliersHome"));
 const Auth = lazy(() => import("@/pages/Auth"));
 const Onboarding = lazy(() => import("@/pages/Onboarding"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
@@ -34,6 +35,7 @@ const MarketingMockups = lazy(() => import("@/pages/supplier/MarketingMockups"))
 const CommitteeDashboard = lazy(() => import("@/pages/committee/CommitteeDashboard"));
 const CommitteeRequest = lazy(() => import("@/pages/committee/CommitteeRequest"));
 const CommitteeQuoteRequest = lazy(() => import("@/pages/committee/CommitteeQuoteRequest"));
+
 
 /**
  * Routes available in every build (residents, suppliers, web).
