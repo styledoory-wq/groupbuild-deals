@@ -180,9 +180,9 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
         <div className="max-w-[18rem] mt-2">
           {motionOn ? (
             <motion.div
-              initial={{ opacity: 0, y: 22 }}
+              initial={{ opacity: 0.92, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             >
               <motion.div style={{ y: titleY, opacity: titleOpacity }}>{titleBlock}</motion.div>
             </motion.div>
@@ -195,9 +195,9 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
           {motionOn ? (
             <motion.div
               className="space-y-2.5"
-              initial={{ opacity: 0, scale: 0.94 }}
+              initial={{ opacity: 0.92, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.65, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
             >
               {ctaBlock}
             </motion.div>

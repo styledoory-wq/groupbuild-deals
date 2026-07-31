@@ -84,7 +84,7 @@ function ProjectTypeCircle({
       <span className="relative mx-auto mb-3.5 block h-[102px] w-[102px]">
         <span
           className={
-            "absolute inset-0 overflow-hidden rounded-full bg-slate-100 " +
+            "absolute inset-0 overflow-hidden rounded-full " +
             (selected ? "border-[3px]" : "border border-gray-200")
           }
           style={{
@@ -92,12 +92,19 @@ function ProjectTypeCircle({
             boxShadow: selected
               ? `0 0 0 1px ${BRAND}, 0 14px 28px -14px ${BRAND}88`
               : "0 8px 20px -12px rgba(15,23,42,0.16)",
+            /* CSS background so the circle never paints empty while <img> decodes */
+            backgroundColor: "#E8F0ED",
+            backgroundImage: `url("${def.img}")`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
         >
           <img
             src={def.img}
             alt=""
-            loading="lazy"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             className="h-full w-full object-cover object-center"
           />
         </span>
@@ -160,13 +167,16 @@ function CategoryHeroSearch({
     >
       {/* Clear professional photo — readable on the right */}
       <div className="absolute inset-0">
-        <img
-          src={heroAtmosphereImg}
-          alt=""
-          aria-hidden
-          className="h-full w-full object-cover"
-          style={{ objectPosition: "68% 42%" }}
-        />
+          <img
+            src={heroAtmosphereImg}
+            alt=""
+            aria-hidden
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            className="h-full w-full object-cover"
+            style={{ objectPosition: "68% 42%" }}
+          />
       </div>
 
       {/* Brand green LEFT → clear photo RIGHT */}
@@ -231,6 +241,22 @@ type CatalogHit = {
   score: number;
 };
 
+/** Instant stage list from the static catalog — no network wait for first paint. */
+function stagesFromCatalog(type: ProjectType): StageItem[] {
+  return STAGE_ORDER[type].map((key) => {
+    const m = stageMeta(type, key);
+    return { key, title: m.title, emoji: m.emoji, serviceCount: 0 };
+  });
+}
+
+function emptyStagesByType(): Record<string, StageItem[]> {
+  const out: Record<string, StageItem[]> = {};
+  (Object.keys(STAGE_ORDER) as ProjectType[]).forEach((t) => {
+    out[t] = stagesFromCatalog(t);
+  });
+  return out;
+}
+
 export default function CategoriesList() {
   const navigate = useNavigate();
 
@@ -276,8 +302,9 @@ export default function CategoriesList() {
     };
   }, [query]);
 
-  const [stagesByType, setStagesByType] = useState<Record<string, StageItem[]>>({});
-  const [loading, setLoading] = useState(true);
+  // Start with static stages so the grid never flashes empty/skeleton.
+  const [stagesByType, setStagesByType] = useState<Record<string, StageItem[]>>(emptyStagesByType);
+  const [countsReady, setCountsReady] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [refreshTick, setRefreshTick] = useState(0);
   const ptr = usePullToRefresh(async () => {
@@ -288,7 +315,6 @@ export default function CategoriesList() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setLoading(true);
       setErrorMsg(null);
       const { data, error } = await supabase
         .from("category_project_stages")
@@ -297,7 +323,7 @@ export default function CategoriesList() {
       if (cancelled) return;
       if (error) {
         setErrorMsg("שגיאה בטעינת הקטגוריות. נסה שוב.");
-        setLoading(false);
+        setCountsReady(true);
         return;
       }
       const acc: Record<string, Record<string, { count: number; minOrder: number }>> = {};
@@ -320,14 +346,14 @@ export default function CategoriesList() {
         });
       });
       setStagesByType(out);
-      setLoading(false);
+      setCountsReady(true);
     })();
     return () => {
       cancelled = true;
     };
   }, [refreshTick]);
 
-  const stages = stagesByType[selectedProject] ?? [];
+  const stages = stagesByType[selectedProject] ?? stagesFromCatalog(selectedProject);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -434,16 +460,7 @@ export default function CategoriesList() {
                   </button>
                 </div>
 
-                {loading ? (
-                  <div className="grid grid-cols-3 gap-3">
-                    {Array.from({ length: 9 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="aspect-[1/1.05] animate-pulse rounded-2xl border border-gray-100 bg-white shadow-sm"
-                      />
-                    ))}
-                  </div>
-                ) : errorMsg ? (
+                {errorMsg ? (
                   <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
                     <strong className="text-slate-800">{errorMsg}</strong>
                     <button
@@ -466,7 +483,7 @@ export default function CategoriesList() {
                         key={s.key}
                         title={s.title}
                         Icon={iconForStage(s.key)}
-                        count={s.serviceCount}
+                        count={countsReady ? s.serviceCount : undefined}
                         onClick={() => openStage(s.key)}
                       />
                     ))}
@@ -474,7 +491,7 @@ export default function CategoriesList() {
                 )}
               </section>
 
-              {!loading && !errorMsg && filtered.length > 0 && (
+              {!errorMsg && filtered.length > 0 && (
                 <aside className="mt-7 flex items-stretch overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
                   <div className="flex min-w-0 flex-1 items-start gap-2.5 p-4 text-right">
                     <span
