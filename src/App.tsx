@@ -10,6 +10,7 @@ import { AppProvider, useApp } from "@/store/AppStore";
 import { RouteTransition } from "@/components/layout/RouteTransition";
 import { SplashScreen } from "@/components/SplashScreen";
 import { preloadRoleRoutes } from "@/lib/routePreload";
+import { prefetchEntryHero, resolveEntryHeroSrc } from "@/lib/prefetchEntryHero";
 import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 import { PreviewModeBanner } from "./components/PreviewModeBanner";
 import { GuestGateProvider } from "./hooks/useGuestGate";
@@ -92,7 +93,20 @@ const PreloadImportantRoutes = () => {
 
 const AppSplash = () => {
   const { authReady } = useApp();
-  return <SplashScreen ready={authReady} />;
+  const [heroReady, setHeroReady] = useState(() => resolveEntryHeroSrc() == null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void prefetchEntryHero().then(() => {
+      if (!cancelled) setHeroReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Hold splash until auth + entry hero are ready so we never flash black→photo.
+  return <SplashScreen ready={authReady && heroReady} />;
 };
 
 const App = () => (

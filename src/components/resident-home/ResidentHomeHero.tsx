@@ -4,10 +4,10 @@ import { motion } from "framer-motion";
 import { useRef } from "react";
 import { GlobalSearchBar } from "@/components/public/GlobalSearchBar";
 import { HeroBrandLockup } from "@/components/marketing/HeroBrandLockup";
+import { HeroBackground } from "@/components/marketing/HeroBackground";
 import { MotionHover } from "@/components/motion/MotionHover";
 import { useHeroScrollMotion } from "@/lib/motion/useHeroScrollMotion";
-
-const HERO_BG = "/marketing/resident-hero-bg.jpg";
+import { RESIDENT_HERO_BG, RESIDENT_HERO_LQIP } from "@/lib/heroBackgrounds";
 
 const QUICK_CHIPS = [
   { label: "דלתות", q: "דלתות" },
@@ -102,31 +102,17 @@ export function ResidentHomeHero({ signedIn }: { signedIn: boolean }) {
     <section
       ref={heroRef}
       className="relative isolate overflow-hidden"
-      style={{ background: "#121A18" }}
+      style={{ background: "#1a2420" }}
       dir="rtl"
     >
-      {motionOn ? (
-        <motion.div
-          aria-hidden
-          className="absolute inset-0 -z-30 bg-cover bg-[center_30%]"
-          style={{
-            backgroundImage: `url("${HERO_BG}")`,
-            minHeight: "100%",
-            scale: bgScale,
-            y: bgY,
-            transformOrigin: "center top",
-          }}
-        />
-      ) : (
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-30 bg-cover bg-[center_30%]"
-          style={{
-            backgroundImage: `url("${HERO_BG}")`,
-            minHeight: "100%",
-          }}
-        />
-      )}
+      <HeroBackground
+        src={RESIDENT_HERO_BG}
+        lqip={RESIDENT_HERO_LQIP}
+        objectPosition="center 30%"
+        enabled={motionOn}
+        motionScale={bgScale}
+        motionY={bgY}
+      />
 
       <div
         aria-hidden

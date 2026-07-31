@@ -3,10 +3,10 @@ import { UserCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRef } from "react";
 import { HeroBrandLockup } from "@/components/marketing/HeroBrandLockup";
+import { HeroBackground } from "@/components/marketing/HeroBackground";
 import { MotionHover } from "@/components/motion/MotionHover";
 import { useHeroScrollMotion } from "@/lib/motion/useHeroScrollMotion";
-
-const HERO_BG = "/marketing/supplier-hero-bg.jpg";
+import { SUPPLIER_HERO_BG, SUPPLIER_HERO_LQIP } from "@/lib/heroBackgrounds";
 
 function setSupplierIntent() {
   try {
@@ -110,31 +110,17 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
     <section
       ref={heroRef}
       className="relative isolate overflow-hidden"
-      style={{ background: "#121A18" }}
+      style={{ background: "#1a2420" }}
       dir="rtl"
     >
-      {motionOn ? (
-        <motion.div
-          aria-hidden
-          className="absolute inset-0 -z-30 bg-cover bg-[center_32%]"
-          style={{
-            backgroundImage: `url("${HERO_BG}")`,
-            minHeight: "100%",
-            scale: bgScale,
-            y: bgY,
-            transformOrigin: "center top",
-          }}
-        />
-      ) : (
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-30 bg-cover bg-[center_32%]"
-          style={{
-            backgroundImage: `url("${HERO_BG}")`,
-            minHeight: "100%",
-          }}
-        />
-      )}
+      <HeroBackground
+        src={SUPPLIER_HERO_BG}
+        lqip={SUPPLIER_HERO_LQIP}
+        objectPosition="center 32%"
+        enabled={motionOn}
+        motionScale={bgScale}
+        motionY={bgY}
+      />
 
       <div
         aria-hidden
