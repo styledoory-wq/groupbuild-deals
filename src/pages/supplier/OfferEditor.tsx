@@ -9,6 +9,7 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ds";
 import { BackHeader } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { CategorySinglePicker } from "@/components/categories/CategorySinglePicker";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -110,6 +111,7 @@ export default function OfferEditor() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
+  const [supplierCategoryIds, setSupplierCategoryIds] = useState<string[]>([]);
   const [depositRequired, setDepositRequired] = useState<boolean>(false);
   const [depositAmount, setDepositAmount] = useState<string>("");
   const [supplierPaymentInstructions, setSupplierPaymentInstructions] = useState<string>("");
@@ -246,6 +248,7 @@ export default function OfferEditor() {
           min: paymentSettings?.deposit_min_amount == null ? null : Number(paymentSettings.deposit_min_amount),
           max: paymentSettings?.deposit_max_amount == null ? null : Number(paymentSettings.deposit_max_amount),
         });
+        if (s?.categories?.length) setSupplierCategoryIds(s.categories);
         if (s?.categories?.length && categories.find((c) => c.id === s!.categories![0])) setCategoryId(s.categories[0]);
         else if (categories.length) setCategoryId(categories[0].id);
 
@@ -796,13 +799,14 @@ export default function OfferEditor() {
 
               <Field label="קטגוריה" required
                 error={shouldShowError("category") ? "יש לבחור קטגוריה" : undefined}>
-                <select value={categoryId}
-                  onChange={(e) => { setCategoryId(e.target.value); markTouched("category"); }}
-                  onBlur={() => markTouched("category")}
-                  className={`h-11 w-full rounded-xl bg-white ring-1 px-3 text-[13.5px] text-[#1F2937] focus:outline-none focus:ring-[#0E6B5A]/40 ${shouldShowError("category") ? "ring-destructive/50" : "ring-black/[0.06]"}`}>
-                  <option value="">— בחר —</option>
-                  {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-                </select>
+                <CategorySinglePicker
+                  categories={categories}
+                  value={categoryId}
+                  suggestedIds={supplierCategoryIds}
+                  invalid={shouldShowError("category")}
+                  onChange={(id) => { setCategoryId(id); markTouched("category"); }}
+                />
+
               </Field>
 
               <Field label="תיאור" hint="מה כלול, למי זה מתאים">
