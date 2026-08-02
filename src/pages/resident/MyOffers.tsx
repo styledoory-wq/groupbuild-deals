@@ -417,7 +417,7 @@ export default function MyOffers() {
                         {paid && (
                           <span className="text-[10px] font-extrabold inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#10B981]/10 text-[#047857]">
                             <CheckCircle2 className="h-3 w-3" />
-                            פיקדון אושר
+                            דמי השתתפות אושרו
                           </span>
                         )}
                         {pending && (

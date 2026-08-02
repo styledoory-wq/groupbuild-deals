@@ -247,7 +247,7 @@ export default function SupplierLeads() {
         .eq("status", "pending").eq("is_deleted", false)
         .order("created_at", { ascending: false }).limit(1).maybeSingle();
       if (pErr) throw pErr;
-      if (!pending) { toast.message("אין פיקדון ממתין לאישור"); return; }
+      if (!pending) { toast.message("אין תשלום דמי השתתפות ממתין לאישור"); return; }
       const { error: uErr } = await supabase.from("deposits")
         .update({ status: "paid", paid_at: new Date().toISOString() }).eq("id", pending.id);
       if (uErr) throw uErr;
@@ -256,7 +256,7 @@ export default function SupplierLeads() {
           ? { ...i, status: "paid", lead_status: "approved", deposit_status: "paid" }
           : i
       )));
-      toast.success("הפיקדון סומן כשולם");
+      toast.success("דמי ההשתתפות סומנו כשולמו");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "עדכון נכשל");
     } finally {
@@ -274,7 +274,7 @@ export default function SupplierLeads() {
         supplier_confirmed_at: new Date().toISOString(),
         status: "paid", lead_status: "approved", deposit_status: "paid",
       } : i)));
-      toast.success("הפיקדון אושר — הדייר הצטרף לעסקה");
+      toast.success("דמי ההשתתפות אושרו — הדייר הצטרף לעסקה");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "אישור נכשל");
     } finally {
@@ -577,7 +577,7 @@ export default function SupplierLeads() {
                   {isAdmin && i.deposit_required && i.deposit_status !== "paid" && (
                     <DropdownMenuItem onClick={() => markDepositPaid(i.user_id, i.deal_id)}
                       disabled={busyKey === i.user_id + i.deal_id}>
-                      <Check className="h-3.5 w-3.5 ml-1" /> סמן פיקדון כשולם (אדמין)
+                      <Check className="h-3.5 w-3.5 ml-1" /> סמן דמי השתתפות כשולמו (אדמין)
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
