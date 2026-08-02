@@ -25,6 +25,7 @@ const CategorySuppliers = lazy(() => import("@/pages/resident/CategorySuppliers"
 const DealsList = lazy(() => import("@/pages/resident/DealsList"));
 const DealDetail = lazy(() => import("@/pages/resident/DealDetail"));
 const SharedDeal = lazy(() => import("@/pages/SharedDeal"));
+const DeepLinkRedirect = lazy(() => import("@/pages/public/DeepLinkRedirect"));
 const Browse = lazy(() => import("@/pages/Browse"));
 const SearchPage = lazy(() => import("@/pages/resident/Search"));
 const PublicPrivacy = lazy(() => import("@/pages/Privacy"));
@@ -90,6 +91,11 @@ export const publicRoutes = (
     <Route path="/deals" element={<DealsList />} />
     <Route path="/deals/:dealId" element={<DealDetail />} />
     <Route path="/share/deal/:dealId" element={<SharedDeal />} />
+    {/* Universal Link namespaces — residents: /r/*, suppliers: /b/* */}
+    {!IS_SUPPLIERS_BUILD && <Route path="/r/*" element={<DeepLinkRedirect base="resident" />} />}
+    {!IS_RESIDENTS_BUILD && <Route path="/b/*" element={<DeepLinkRedirect base="supplier" />} />}
+    {IS_SUPPLIERS_BUILD && <Route path="/r/*" element={<Navigate to="/" replace />} />}
+    {IS_RESIDENTS_BUILD && <Route path="/b/*" element={<Navigate to="/" replace />} />}
     <Route path="/browse" element={<Browse />} />
     <Route path="/search" element={<SearchPage />} />
     <Route path="/privacy" element={<PublicPrivacy />} />
