@@ -11,19 +11,27 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type Provider = "grow_make" | "grow" | "cardcom" | "stripe";
+type Provider = "cardcom" | "stripe";
 type FeeAbsorber = "resident" | "supplier" | "groupbuild";
 
+// Only providers that are actually implemented in the payment edge functions
+// may be selected. Legacy providers (Grow / Grow Make) are no longer supported.
+const PROVIDERS: Array<{ value: Provider; label: string; hint: string }> = [
+  { value: "stripe", label: "Stripe", hint: "ספק ברירת המחדל (Test + Live)" },
+  { value: "cardcom", label: "Cardcom", hint: "חלופה נתמכת" },
+];
+
 const providerSecrets: Record<Provider, string> = {
-  grow_make: "MAKE_CREATE_PAYMENT_LINK_WEBHOOK_URL, MAKE_CALLBACK_SECRET, GROW_MAKE_SUCCESS_URL, GROW_MAKE_CANCEL_URL",
-  grow: "GROW_API_KEY, GROW_PAGE_CODE, GROW_USER_ID",
-  cardcom: "CARDCOM_TERMINAL_NUMBER, CARDCOM_API_NAME",
-  stripe: "STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET",
+  cardcom:
+    "CARDCOM_TERMINAL_TEST, CARDCOM_API_NAME_TEST, CARDCOM_TERMINAL_LIVE, CARDCOM_API_NAME_LIVE",
+  stripe:
+    "STRIPE_SECRET_KEY_TEST, STRIPE_WEBHOOK_SECRET_TEST, STRIPE_SECRET_KEY_LIVE, STRIPE_WEBHOOK_SECRET_LIVE, PAYMENT_ENVIRONMENT",
 };
 
 export default function AdminPaymentSettings() {
   const [id, setId] = useState<string | null>(null);
-  const [provider, setProvider] = useState<Provider>("grow_make");
+  const [provider, setProvider] = useState<Provider>("stripe");
+
   const [depositAmount, setDepositAmount] = useState<number>(1000);
   const [depositMinAmount, setDepositMinAmount] = useState<string>("");
   const [depositMaxAmount, setDepositMaxAmount] = useState<string>("");
