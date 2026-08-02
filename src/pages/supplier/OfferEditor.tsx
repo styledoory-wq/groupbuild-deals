@@ -9,6 +9,7 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ds";
 import { BackHeader } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { CategorySinglePicker } from "@/components/categories/CategorySinglePicker";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
