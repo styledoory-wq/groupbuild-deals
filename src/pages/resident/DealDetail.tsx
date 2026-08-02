@@ -44,10 +44,11 @@ import {
 import {
   PARTICIPATION_FEE_DESCRIPTION,
   PARTICIPATION_FEE_LABEL,
-  resolvePlatformFeeRpc,
+  resolveDealParticipationFeeRpc,
   type ResolvedParticipationFee,
 } from "@/lib/platformFees";
-import { getCanonicalDealBasePrice, JOIN_BLOCKED_MESSAGE } from "@/lib/participationPricing";
+import { JOIN_BLOCKED_MESSAGE } from "@/lib/participationPricing";
+
 
 
 interface DealRow {
