@@ -249,9 +249,20 @@ export default function AdminDeposits() {
                         {prof?.name ?? dep.user_id.slice(0, 8) + "…"}
                         {prof?.phone ? ` · ${prof.phone}` : ""}
                       </p>
-                      <p className="text-fs-xs text-muted-foreground/80 mt-0.5">
-                        {stamp}{dep.payment_provider ? ` · ${dep.payment_provider}` : ""}
+                      <p className="text-fs-xs text-muted-foreground/80 mt-0.5 flex flex-wrap items-center gap-1">
+                        <span>{stamp}{dep.payment_provider ? ` · ${dep.payment_provider}` : ""}</span>
+                        {dep.payment_environment === "test" && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-[#FFF8E1] text-[#1F2937] font-bold">
+                            בדיקה
+                          </span>
+                        )}
+                        {dep.payment_kind === "participation_fee" && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold">
+                            דמי השתתפות
+                          </span>
+                        )}
                       </p>
+
                     </div>
                     <div className="text-left">
                       <div className="font-bold text-primary text-sm">{formatILS(Number(dep.gross_deposit_amount ?? dep.amount))}</div>
