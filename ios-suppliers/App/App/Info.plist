@@ -13,7 +13,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>GroupBuild</string>
+        <string>GroupBuild לעסקים</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -57,10 +57,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>il.co.groupbuild.residents</string>
+			<string>il.co.groupbuild.suppliers</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>groupbuild-residents</string>
+				<string>groupbuild-suppliers</string>
 			</array>
 		</dict>
 	</array>
