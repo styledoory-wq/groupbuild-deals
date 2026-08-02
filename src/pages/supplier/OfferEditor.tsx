@@ -247,6 +247,7 @@ export default function OfferEditor() {
           min: paymentSettings?.deposit_min_amount == null ? null : Number(paymentSettings.deposit_min_amount),
           max: paymentSettings?.deposit_max_amount == null ? null : Number(paymentSettings.deposit_max_amount),
         });
+        if (s?.categories?.length) setSupplierCategoryIds(s.categories);
         if (s?.categories?.length && categories.find((c) => c.id === s!.categories![0])) setCategoryId(s.categories[0]);
         else if (categories.length) setCategoryId(categories[0].id);
 
