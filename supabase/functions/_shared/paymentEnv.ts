@@ -60,15 +60,29 @@ export function getStripeWebhookSecrets(): Array<{ env: PaymentEnvironment; secr
   return out;
 }
 
+/**
+ * Cardcom credentials for the given environment.
+ * Test and production use completely separate terminals, so a sandbox
+ * transaction can never settle a production deposit.
+ */
 export function getCardcomCredentials(
   env: PaymentEnvironment,
-): { terminal: string; apiName: string } | null {
+): { terminal: string; apiName: string; apiPassword: string } | null {
   const suffix = env === "production" ? "_LIVE" : "_TEST";
-  const terminal = Deno.env.get(`CARDCOM_TERMINAL${suffix}`);
-  const apiName = Deno.env.get(`CARDCOM_API_NAME${suffix}`);
-  if (!terminal || !apiName) return null;
-  return { terminal, apiName };
+  const terminal = Deno.env.get(`CARDCOM_TERMINAL${suffix}`) ?? Deno.env.get("CARDCOM_TERMINAL");
+  const apiName = Deno.env.get(`CARDCOM_API_NAME${suffix}`) ?? Deno.env.get("CARDCOM_API_NAME");
+  const apiPassword = Deno.env.get(`CARDCOM_API_PASSWORD${suffix}`) ??
+    Deno.env.get("CARDCOM_API_PASSWORD");
+  if (!terminal || !apiName || !apiPassword) return null;
+  return { terminal, apiName, apiPassword };
 }
+
+/** Shared secret appended to the Cardcom webhook URL, used to reject spoofed calls. */
+export function getCardcomWebhookSecret(): string | null {
+  return Deno.env.get("CARDCOM_WEBHOOK_SECRET") ?? null;
+}
+
+export const CARDCOM_API_BASE = "https://secure.cardcom.solutions/api/v11";
 
 /** True when the configured provider has everything it needs in this environment. */
 export function providerIsReady(
