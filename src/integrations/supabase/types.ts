@@ -95,6 +95,8 @@ export type Database = {
           name: string
           name_en: string | null
           parent_id: string | null
+          participation_fee_amount: number | null
+          participation_fee_mode: string
           path: string | null
           search_keywords: string[]
           slug: string | null
@@ -119,6 +121,8 @@ export type Database = {
           name: string
           name_en?: string | null
           parent_id?: string | null
+          participation_fee_amount?: number | null
+          participation_fee_mode?: string
           path?: string | null
           search_keywords?: string[]
           slug?: string | null
@@ -143,6 +147,8 @@ export type Database = {
           name?: string
           name_en?: string | null
           parent_id?: string | null
+          participation_fee_amount?: number | null
+          participation_fee_mode?: string
           path?: string | null
           search_keywords?: string[]
           slug?: string | null
@@ -743,6 +749,7 @@ export type Database = {
           participation_fee_base_price: number | null
           participation_fee_locked_at: string | null
           participation_fee_rule_id: string | null
+          participation_fee_source: string | null
           product_details: string | null
           project_id: string | null
           redemption_deadline: string | null
@@ -791,6 +798,7 @@ export type Database = {
           participation_fee_base_price?: number | null
           participation_fee_locked_at?: string | null
           participation_fee_rule_id?: string | null
+          participation_fee_source?: string | null
           product_details?: string | null
           project_id?: string | null
           redemption_deadline?: string | null
@@ -839,6 +847,7 @@ export type Database = {
           participation_fee_base_price?: number | null
           participation_fee_locked_at?: string | null
           participation_fee_rule_id?: string | null
+          participation_fee_source?: string | null
           product_details?: string | null
           project_id?: string | null
           redemption_deadline?: string | null
@@ -3649,21 +3658,39 @@ export type Database = {
           slug: string
         }[]
       }
-      lock_deal_participation_fee: {
-        Args: {
-          _base_price: number
-          _deal_id: string
-          _fee_amount: number
-          _rule_id: string
-        }
-        Returns: {
-          base_price: number
-          fee_amount: number
-          locked_at: string
-          rule_id: string
-          was_already_locked: boolean
-        }[]
-      }
+      lock_deal_participation_fee:
+        | {
+            Args: {
+              _base_price: number
+              _deal_id: string
+              _fee_amount: number
+              _rule_id: string
+            }
+            Returns: {
+              base_price: number
+              fee_amount: number
+              locked_at: string
+              rule_id: string
+              was_already_locked: boolean
+            }[]
+          }
+        | {
+            Args: {
+              _base_price: number
+              _deal_id: string
+              _fee_amount: number
+              _rule_id: string
+              _source?: string
+            }
+            Returns: {
+              base_price: number
+              fee_amount: number
+              locked_at: string
+              rule_id: string
+              source: string
+              was_already_locked: boolean
+            }[]
+          }
       lookup_voucher_for_supplier: { Args: { _code: string }; Returns: Json }
       match_suppliers_for_demand: {
         Args: { _demand_id: string }
@@ -3730,6 +3757,17 @@ export type Database = {
       resident_mark_deposit_paid: {
         Args: { _interest_id: string }
         Returns: undefined
+      }
+      resolve_deal_participation_fee: {
+        Args: { _deal_id: string }
+        Returns: {
+          base_price: number
+          currency: string
+          fee_amount: number
+          reason: string
+          rule_id: string
+          source: string
+        }[]
       }
       resolve_platform_fee: {
         Args: {
