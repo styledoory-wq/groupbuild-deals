@@ -3,6 +3,9 @@ project_id = "jelgyosxolwngdiykswr"
 [functions]
   [functions.auth-email-hook]
     verify_jwt = false
+  [functions.cardcom-webhook]
+    verify_jwt = false
+
   [functions.delete-account]
     verify_jwt = true
   [functions.handle-email-suppression]
