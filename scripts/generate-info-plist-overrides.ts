@@ -77,13 +77,10 @@ console.log(`  · Version ${p.version} (build ${p.buildNumber})`);
 console.log(`  · Scheme: ${p.scheme ?? "(none)"}`);
 
 // --- App.entitlements ------------------------------------------------------
-// NOTE: We deliberately do NOT write `aps-environment` here. Xcode's
-// "Push Notifications" capability toggle sets it automatically to match the
-// active provisioning profile (development for Debug, production for
-// Distribution). Hardcoding it here would conflict with Xcode's management
-// and can cause signing errors like
-// "Provisioning profile ... doesn't include the aps-environment entitlement".
-// The user enables Push Notifications once in Signing & Capabilities per app.
+// `aps-environment` is written as `development`. Xcode automatically promotes
+// it to `production` when exporting a Distribution/TestFlight build, so the
+// key being present here guarantees the Push Notifications capability exists
+// in every profile's project without manual Xcode work.
 const entitlementsPath = p.apple.entitlementsPath;
 mkdirSync(dirname(entitlementsPath), { recursive: true });
 
@@ -91,16 +88,21 @@ const applinks = p.universalLinks?.host
   ? `\t<key>com.apple.developer.associated-domains</key>\n\t<array>\n\t\t<string>applinks:${p.universalLinks.host}</string>\n\t</array>\n`
   : "";
 
+const aps = p.apple.apsEnvironment
+  ? `\t<key>aps-environment</key>\n\t<string>${p.apple.apsEnvironment}</string>\n`
+  : "";
+
 const entitlements = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-${applinks}</dict>
+${aps}${applinks}</dict>
 </plist>
 `;
 writeFileSync(entitlementsPath, entitlements);
 console.log(`[entitlements] Wrote ${entitlementsPath}`);
 console.log(`  · Associated Domains: applinks:${p.universalLinks.host}`);
-console.log(`  · aps-environment: managed by Xcode Push Notifications capability`);
+console.log(`  · aps-environment: ${p.apple.apsEnvironment ?? "(not set)"}`);
 
 console.log(`\n✓ Info.plist + entitlements ready for profile "${p.id}"`);
+
