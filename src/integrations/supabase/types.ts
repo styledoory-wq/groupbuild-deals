@@ -1190,7 +1190,6 @@ export type Database = {
           created_at: string
           currency: string
           deal_id: string
-          deal_price_snapshot: number | null
           declared_paid_at: string | null
           declared_payment_method: string | null
           deleted_at: string | null
@@ -1205,12 +1204,9 @@ export type Database = {
           net_deposit_amount: number
           paid_at: string | null
           payment_fee_absorber: string
-          payment_kind: string
           payment_processing_fee_amount: number | null
           payment_processing_fee_status: string
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
-          platform_fee_amount: number | null
-          platform_fee_rule_id: string | null
           project_id: string | null
           provider_payment_url: string | null
           provider_transaction_id: string | null
@@ -1227,7 +1223,6 @@ export type Database = {
           created_at?: string
           currency?: string
           deal_id: string
-          deal_price_snapshot?: number | null
           declared_paid_at?: string | null
           declared_payment_method?: string | null
           deleted_at?: string | null
@@ -1242,12 +1237,9 @@ export type Database = {
           net_deposit_amount: number
           paid_at?: string | null
           payment_fee_absorber?: string
-          payment_kind?: string
           payment_processing_fee_amount?: number | null
           payment_processing_fee_status?: string
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
-          platform_fee_amount?: number | null
-          platform_fee_rule_id?: string | null
           project_id?: string | null
           provider_payment_url?: string | null
           provider_transaction_id?: string | null
@@ -1264,7 +1256,6 @@ export type Database = {
           created_at?: string
           currency?: string
           deal_id?: string
-          deal_price_snapshot?: number | null
           declared_paid_at?: string | null
           declared_payment_method?: string | null
           deleted_at?: string | null
@@ -1279,12 +1270,9 @@ export type Database = {
           net_deposit_amount?: number
           paid_at?: string | null
           payment_fee_absorber?: string
-          payment_kind?: string
           payment_processing_fee_amount?: number | null
           payment_processing_fee_status?: string
           payment_provider?: Database["public"]["Enums"]["payment_provider_enum"]
-          platform_fee_amount?: number | null
-          platform_fee_rule_id?: string | null
           project_id?: string | null
           provider_payment_url?: string | null
           provider_transaction_id?: string | null
@@ -1861,71 +1849,6 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "user_projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      platform_fees: {
-        Row: {
-          id: string
-          name: string | null
-          fee_type: string
-          min_deal_price: number
-          max_deal_price: number | null
-          fee_amount: number
-          currency: string
-          is_active: boolean
-          category_id: string | null
-          offer_type: string | null
-          listing_type: string | null
-          priority: number
-          sort_order: number
-          conditions: Json
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name?: string | null
-          fee_type?: string
-          min_deal_price?: number
-          max_deal_price?: number | null
-          fee_amount: number
-          currency?: string
-          is_active?: boolean
-          category_id?: string | null
-          offer_type?: string | null
-          listing_type?: string | null
-          priority?: number
-          sort_order?: number
-          conditions?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string | null
-          fee_type?: string
-          min_deal_price?: number
-          max_deal_price?: number | null
-          fee_amount?: number
-          currency?: string
-          is_active?: boolean
-          category_id?: string | null
-          offer_type?: string | null
-          listing_type?: string | null
-          priority?: number
-          sort_order?: number
-          conditions?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "platform_fees_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
         ]
@@ -3474,23 +3397,6 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
-      }
-      resolve_platform_fee: {
-        Args: {
-          _deal_price: number
-          _fee_type?: string
-          _category_id?: string
-          _offer_type?: string
-          _listing_type?: string
-        }
-        Returns: {
-          rule_id: string
-          fee_amount: number
-          min_deal_price: number
-          max_deal_price: number | null
-          currency: string
-          name: string | null
-        }[]
       }
       hebrew_to_slug: { Args: { _input: string }; Returns: string }
       is_committee_for_project: {
