@@ -107,61 +107,50 @@ Deno.serve(async (req) => {
     // ---------------------------------------------------------------
     let basePrice: number;
     let feeAmount: number;
-    let ruleId: string;
+    let ruleId: string | null;
     let currency = "ILS";
+    let feeSource = "price_band";
 
     if (deal.participation_fee_locked_at && Number(deal.participation_fee_amount) > 0) {
-      basePrice = Number(deal.participation_fee_base_price);
+      basePrice = Number(deal.participation_fee_base_price ?? 0);
       feeAmount = Number(deal.participation_fee_amount);
-      ruleId = String(deal.participation_fee_rule_id);
+      ruleId = deal.participation_fee_rule_id ? String(deal.participation_fee_rule_id) : null;
     } else {
-      const canonical = getCanonicalDealBasePrice({
-        offer_type: deal.offer_type,
-        base_price: deal.base_price,
-        discounted_price: deal.discounted_price,
-        original_price: deal.original_price,
-        tiers: Array.isArray(deal.tiers) ? deal.tiers : [],
-      });
-      if (!canonical.valid || !canonical.price) {
-        console.error("[create-deposit] canonical price invalid", {
+      // The system decides automatically: admin price bands when the deal has an
+      // unambiguous final price, otherwise the category's fixed amount.
+      // The supplier has no influence on the amount.
+      const { data: feeRows, error: feeErr } = await admin.rpc(
+        "resolve_deal_participation_fee",
+        { _deal_id: deal.id },
+      );
+      if (feeErr) {
+        console.error("[create-deposit] resolve_deal_participation_fee failed", feeErr);
+        return json({ error: "fee_resolution_failed", message: BLOCKED_MESSAGE }, 503);
+      }
+      const row = Array.isArray(feeRows) && feeRows.length > 0 ? feeRows[0] : null;
+      const resolvedFee = Number(row?.fee_amount ?? 0);
+      if (!row || !Number.isFinite(resolvedFee) || resolvedFee <= 0) {
+        console.error("[create-deposit] no participation fee configured", {
           deal_id: deal.id,
-          reason: canonical.reason,
+          reason: row?.reason,
         });
         return json(
-          { error: "deal_price_invalid", reason: canonical.reason, message: BLOCKED_MESSAGE },
+          { error: "fee_not_configured", reason: row?.reason ?? null, message: BLOCKED_MESSAGE },
           409,
         );
       }
-
-      const { data: rpcRows, error: rpcErr } = await admin.rpc("resolve_platform_fee", {
-        _deal_price: canonical.price,
-        _fee_type: "participation",
-        _category_id: deal.category_id ?? null,
-        _offer_type: deal.offer_type ?? null,
-        _listing_type: listingType,
-      });
-      if (rpcErr) {
-        console.error("[create-deposit] resolve_platform_fee failed", rpcErr);
-        return json({ error: "fee_resolution_failed", message: BLOCKED_MESSAGE }, 503);
-      }
-      const row = Array.isArray(rpcRows) && rpcRows.length > 0 ? rpcRows[0] : null;
-      const resolvedFee = Number(row?.fee_amount ?? 0);
-      if (!row?.rule_id || !Number.isFinite(resolvedFee) || resolvedFee <= 0) {
-        console.error("[create-deposit] no fee rule matched", {
-          deal_id: deal.id,
-          price: canonical.price,
-        });
-        return json({ error: "fee_not_configured", message: BLOCKED_MESSAGE }, 409);
-      }
+      const resolvedSource = String(row.source ?? "price_band");
+      const resolvedBase = row.base_price == null ? null : Number(row.base_price);
 
       // Atomic lock — first checkout wins, concurrent callers get the same values.
       const { data: lockRows, error: lockErr } = await admin.rpc(
         "lock_deal_participation_fee",
         {
           _deal_id: deal.id,
-          _base_price: canonical.price,
-          _rule_id: row.rule_id,
+          _base_price: resolvedBase,
+          _rule_id: row.rule_id ?? null,
           _fee_amount: resolvedFee,
+          _source: resolvedSource,
         },
       );
       if (lockErr) {
@@ -172,11 +161,13 @@ Deno.serve(async (req) => {
       if (!locked || !(Number(locked.fee_amount) > 0)) {
         return json({ error: "fee_lock_failed", message: BLOCKED_MESSAGE }, 503);
       }
-      basePrice = Number(locked.base_price);
+      basePrice = Number(locked.base_price ?? 0);
       feeAmount = Number(locked.fee_amount);
-      ruleId = String(locked.rule_id);
+      ruleId = locked.rule_id ? String(locked.rule_id) : null;
+      feeSource = String(locked.source ?? resolvedSource);
       currency = row.currency ?? "ILS";
     }
+
 
     if (!Number.isFinite(feeAmount) || feeAmount <= 0) {
       return json({ error: "fee_not_configured", message: BLOCKED_MESSAGE }, 409);
