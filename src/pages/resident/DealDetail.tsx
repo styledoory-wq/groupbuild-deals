@@ -788,6 +788,9 @@ export default function DealDetail() {
   const feeAmount = Number(participationFee?.feeAmount ?? 0);
   const dealPriceForFee = Number(participationFee?.dealPrice ?? display.effectivePrice ?? 0);
   const depositRequired = !isRegularListing && feeAmount > 0;
+  // Fail closed: a group-buy join is blocked whenever the fee is unresolved.
+  const joinBlocked = !isRegularListing && (feeLoading || !!feeError || feeAmount <= 0);
+
   const hasCompletedJoin = interested && (
     !depositRequired ||
     interestDepositStatus === "paid" ||
