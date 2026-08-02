@@ -1,5 +1,16 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { getCanonicalDealBasePrice } from "../_shared/participationPricing.ts";
+import {
+  getCardcomCredentials,
+  getPaymentEnvironment,
+  getSiteOrigin,
+  getStripeSecretKey,
+  providerIsReady,
+  SUPPORTED_PROVIDERS,
+  type PaymentEnvironment,
+  type SupportedProvider,
+} from "../_shared/paymentEnv.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -171,11 +182,48 @@ Deno.serve(async (req) => {
     const amount = feeAmount;
 
     // ---------------------------------------------------------------
-    // Deposit (payment intent). Reuse an open one for this user + deal.
+    // Provider + environment. SINGLE source of truth, no fallback.
+    // ---------------------------------------------------------------
+    const environment = getPaymentEnvironment();
+
+    const { data: settings } = await admin
+      .from("system_settings")
+      .select("active_payment_provider")
+      .limit(1)
+      .maybeSingle();
+    const configuredProvider = String(settings?.active_payment_provider ?? "");
+
+    if (!SUPPORTED_PROVIDERS.includes(configuredProvider as SupportedProvider)) {
+      console.error("[create-deposit] unsupported active_payment_provider", {
+        configuredProvider,
+      });
+      return json(
+        { error: "payment_provider_unsupported", provider: configuredProvider, message: BLOCKED_MESSAGE },
+        503,
+      );
+    }
+    const paymentProvider = configuredProvider as SupportedProvider;
+
+    // Fail closed: the configured provider must be fully credentialed for THIS
+    // environment. We never silently switch to another provider.
+    if (!providerIsReady(paymentProvider, environment)) {
+      console.error("[create-deposit] provider not credentialed", {
+        paymentProvider,
+        environment,
+      });
+      return json(
+        { error: "payment_provider_unavailable", provider: paymentProvider, environment, message: BLOCKED_MESSAGE },
+        503,
+      );
+    }
+
+    // ---------------------------------------------------------------
+    // Deposit (payment intent). Reuse an open one for this user + deal,
+    // but only within the SAME payment environment.
     // ---------------------------------------------------------------
     const { data: existingDeposit } = await admin
       .from("deposits")
-      .select("id,status,amount,provider_payment_url,payment_provider")
+      .select("id,status,amount,provider_payment_url,payment_provider,payment_environment")
       .eq("user_id", userId)
       .eq("deal_id", deal.id)
       .eq("is_deleted", false)
@@ -191,34 +239,17 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { data: settings } = await admin
-      .from("system_settings")
-      .select("active_payment_provider")
-      .limit(1)
-      .maybeSingle();
-    const configuredProvider = (settings?.active_payment_provider ?? "manual") as string;
-    let paymentProvider: string | null = null;
-    if (configuredProvider === "stripe" && Deno.env.get("STRIPE_SECRET_KEY")) {
-      paymentProvider = "stripe";
-    } else if (configuredProvider === "cardcom" && Deno.env.get("CARDCOM_TERMINAL")) {
-      paymentProvider = "cardcom";
-    } else if (Deno.env.get("STRIPE_SECRET_KEY")) {
-      paymentProvider = "stripe";
-    } else if (Deno.env.get("CARDCOM_TERMINAL")) {
-      paymentProvider = "cardcom";
-    }
-
-    // Fail closed: without a working provider there is no way to charge, so no join.
-    if (!paymentProvider) {
-      console.error("[create-deposit] no payment provider configured");
-      return json({ error: "payment_provider_unavailable", message: BLOCKED_MESSAGE }, 503);
-    }
+    const reusable = existingDeposit &&
+        existingDeposit.payment_environment === environment &&
+        existingDeposit.payment_provider === paymentProvider
+      ? existingDeposit
+      : null;
 
     // Join details are stored on the deposit; the webhook materialises the
     // deal_interest only after the payment is confirmed.
     const joinPayload = sanitizeJoinPayload(body.join_payload);
 
-    let depositId = existingDeposit?.id ?? null;
+    let depositId = reusable?.id ?? null;
     if (!depositId) {
       const { data: inserted, error: insErr } = await admin
         .from("deposits")
@@ -235,11 +266,13 @@ Deno.serve(async (req) => {
           payment_processing_fee_status: "unknown",
           currency,
           payment_provider: paymentProvider,
+          payment_environment: environment,
           status: "pending",
           payment_kind: "participation_fee",
           platform_fee_rule_id: ruleId,
           platform_fee_amount: amount,
           deal_price_snapshot: basePrice,
+
           metadata: {
             source: "create_deposit_participation_fee",
             deal_title: deal.title ?? null,
@@ -274,8 +307,8 @@ Deno.serve(async (req) => {
     }
 
     let paymentUrl: string | null =
-      typeof existingDeposit?.provider_payment_url === "string"
-        ? existingDeposit.provider_payment_url
+      typeof reusable?.provider_payment_url === "string"
+        ? reusable.provider_payment_url
         : null;
 
     if (!paymentUrl && paymentProvider === "stripe") {
@@ -287,24 +320,41 @@ Deno.serve(async (req) => {
         depositId: depositId!,
         userId,
         userEmail: userData.user.email ?? undefined,
+        environment,
       });
     } else if (!paymentUrl && paymentProvider === "cardcom") {
       paymentUrl = await createCardcomCheckout({
         amount,
         dealId: deal.id,
         dealTitle: deal.title ?? "דמי שירות GroupBuild",
+        depositId: depositId!,
+        environment,
       });
     }
 
     if (!paymentUrl) {
-      console.error("[create-deposit] checkout creation failed", { provider: paymentProvider });
+      console.error("[create-deposit] checkout creation failed", {
+        provider: paymentProvider,
+        environment,
+      });
       return json({ error: "checkout_failed", message: BLOCKED_MESSAGE }, 503);
     }
 
     await admin
       .from("deposits")
-      .update({ provider_payment_url: paymentUrl, payment_provider: paymentProvider })
+      .update({
+        provider_payment_url: paymentUrl,
+        payment_provider: paymentProvider,
+        payment_environment: environment,
+      })
       .eq("id", depositId!);
+
+    console.log("[create-deposit] checkout ready", {
+      deposit_id: depositId,
+      provider: paymentProvider,
+      environment,
+      amount,
+    });
 
     return json({
       ok: true,
@@ -316,8 +366,10 @@ Deno.serve(async (req) => {
       fee_rule_id: ruleId,
       currency,
       payment_provider: paymentProvider,
+      payment_environment: environment,
       payment_url: paymentUrl,
     });
+
   } catch (e) {
     console.error("[create-deposit] error", e);
     return json({ error: "internal_error", message: BLOCKED_MESSAGE }, 500);
@@ -361,24 +413,31 @@ async function createStripeCheckout(opts: {
   depositId: string;
   userId: string;
   userEmail?: string;
+  environment: PaymentEnvironment;
 }): Promise<string | null> {
-  const key = Deno.env.get("STRIPE_SECRET_KEY");
+  const key = getStripeSecretKey(opts.environment);
   if (!key) return null;
-  const origin = Deno.env.get("PUBLIC_SITE_URL") ?? "https://groupbuild.co.il";
+  const origin = getSiteOrigin(opts.environment);
   const unitAmount = Math.round(opts.amount * 100); // ILS → agorot
   if (unitAmount <= 0) return null;
 
   const params = new URLSearchParams();
   params.set("mode", "payment");
+  params.set("expires_at", String(Math.floor(Date.now() / 1000) + 60 * 60)); // 60 min
   params.set(
     "success_url",
-    `${origin}/payment/success?deal_id=${opts.dealId}&deposit_id=${opts.depositId}`,
+    `${origin}/payment/success?deal_id=${opts.dealId}&deposit_id=${opts.depositId}&env=${opts.environment}`,
   );
-  params.set("cancel_url", `${origin}/payment/cancel?deal_id=${opts.dealId}`);
+  params.set(
+    "cancel_url",
+    `${origin}/payment/cancel?deal_id=${opts.dealId}&deposit_id=${opts.depositId}&env=${opts.environment}`,
+  );
   params.set("client_reference_id", opts.depositId);
   params.set("metadata[deposit_id]", opts.depositId);
   params.set("metadata[deal_id]", opts.dealId);
   params.set("metadata[user_id]", opts.userId);
+  params.set("metadata[payment_environment]", opts.environment);
+
   if (opts.userEmail) params.set("customer_email", opts.userEmail);
   params.set("line_items[0][quantity]", "1");
   params.set("line_items[0][price_data][currency]", (opts.currency || "ILS").toLowerCase());
@@ -417,21 +476,25 @@ async function createCardcomCheckout(opts: {
   amount: number;
   dealId: string;
   dealTitle: string;
+  depositId: string;
+  environment: PaymentEnvironment;
 }): Promise<string | null> {
-  const terminal = Deno.env.get("CARDCOM_TERMINAL");
-  const apiName = Deno.env.get("CARDCOM_API_NAME");
-  if (!terminal || !apiName) return null;
-  const origin = Deno.env.get("PUBLIC_SITE_URL") ?? "https://groupbuild.co.il";
+  const creds = getCardcomCredentials(opts.environment);
+  if (!creds) return null;
+  const origin = getSiteOrigin(opts.environment);
   try {
     const res = await fetch("https://secure.cardcom.solutions/api/v11/LowProfile/Create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        TerminalNumber: Number(terminal),
-        ApiName: apiName,
+        TerminalNumber: Number(creds.terminal),
+        ApiName: creds.apiName,
         Amount: opts.amount,
-        SuccessRedirectUrl: `${origin}/payment/success?deal_id=${opts.dealId}`,
-        FailedRedirectUrl: `${origin}/payment/cancel?deal_id=${opts.dealId}`,
+        ReturnValue: opts.depositId,
+        SuccessRedirectUrl:
+          `${origin}/payment/success?deal_id=${opts.dealId}&deposit_id=${opts.depositId}&env=${opts.environment}`,
+        FailedRedirectUrl:
+          `${origin}/payment/cancel?deal_id=${opts.dealId}&deposit_id=${opts.depositId}&env=${opts.environment}`,
         ProductName: `דמי שירות עבור הצטרפות ורישום לעסקה: ${opts.dealTitle}`,
         Operation: "ChargeOnly",
       }),
@@ -443,6 +506,7 @@ async function createCardcomCheckout(opts: {
     return null;
   }
 }
+
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {

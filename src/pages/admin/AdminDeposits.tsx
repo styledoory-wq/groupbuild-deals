@@ -22,6 +22,9 @@ type DbDeposit = {
   payment_fee_absorber: string;
   status: string;
   payment_provider: string | null;
+  payment_kind: string | null;
+  payment_environment: string | null;
+
   created_at: string;
   paid_at: string | null;
   refunded_at: string | null;
@@ -36,8 +39,11 @@ const STATUS_META: Record<string, { label: string; cls: string }> = {
   paid: { label: "שולם", cls: "bg-success/10 text-success" },
   refunded: { label: "הוחזר", cls: "bg-muted text-muted-foreground" },
   cancelled: { label: "בוטל", cls: "bg-muted text-muted-foreground" },
+  expired: { label: "פג תוקף", cls: "bg-muted text-muted-foreground" },
   failed: { label: "נכשל", cls: "bg-destructive/10 text-destructive" },
+  awaiting_confirmation: { label: "ממתין לאישור", cls: "bg-[#FFF8E1] text-[#1F2937]" },
 };
+
 
 const VIEW_FILTERS: Array<{ key: string; label: string }> = [
   { key: "active", label: "פעילים" },
@@ -60,7 +66,7 @@ export default function AdminDeposits() {
     try {
       const { data, error } = await supabase
         .from("deposits")
-        .select("id,user_id,deal_id,amount,gross_deposit_amount,payment_processing_fee_amount,payment_processing_fee_status,net_deposit_amount,supplier_deduction_amount,supplier_deduction_basis,payment_fee_absorber,status,payment_provider,created_at,paid_at,refunded_at,is_hidden")
+        .select("id,user_id,deal_id,amount,gross_deposit_amount,payment_processing_fee_amount,payment_processing_fee_status,net_deposit_amount,supplier_deduction_amount,supplier_deduction_basis,payment_fee_absorber,status,payment_provider,payment_kind,payment_environment,created_at,paid_at,refunded_at,is_hidden")
         .eq("is_deleted", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -99,12 +105,36 @@ export default function AdminDeposits() {
   useEffect(() => { void load(); }, []);
 
   const updateStatus = async (id: string, status: "paid" | "refunded") => {
+    const dep = deposits.find((d) => d.id === id);
+    const isParticipation = dep?.payment_kind === "participation_fee";
+
+    // Participation fees may never be flipped to "paid" by hand — only the
+    // secure payment flow, or an audited admin override with a reason.
+    let reason: string | null = null;
+    if (isParticipation && status === "paid") {
+      reason = window.prompt(
+        "סימון ידני של דמי השתתפות כשולמו נרשם ביומן ביקורת. פרטו את הסיבה (10 תווים לפחות):",
+      );
+      if (!reason || reason.trim().length < 10) {
+        if (reason !== null) toast.error("נדרשת סיבה מפורטת (10 תווים לפחות)");
+        return;
+      }
+    }
+
     setBusyId(id);
     try {
-      const nowIso = new Date().toISOString();
-      const patch = status === "paid" ? { status, paid_at: nowIso } : { status, refunded_at: nowIso };
-      const { error } = await supabase.from("deposits").update(patch).eq("id", id);
-      if (error) throw error;
+      if (isParticipation && status === "paid") {
+        const { error } = await supabase.rpc("admin_override_participation_payment", {
+          _deposit_id: id,
+          _reason: reason!.trim(),
+        });
+        if (error) throw error;
+      } else {
+        const nowIso = new Date().toISOString();
+        const patch = status === "paid" ? { status, paid_at: nowIso } : { status, refunded_at: nowIso };
+        const { error } = await supabase.from("deposits").update(patch).eq("id", id);
+        if (error) throw error;
+      }
       toast.success(status === "paid" ? "דמי ההשתתפות סומנו כשולמו" : "דמי ההשתתפות הוחזרו");
       await load();
     } catch (err) {
@@ -113,6 +143,7 @@ export default function AdminDeposits() {
       setBusyId(null);
     }
   };
+
 
   const toggleHidden = async (id: string, currentlyHidden: boolean) => {
     setBusyId(id);
@@ -218,9 +249,20 @@ export default function AdminDeposits() {
                         {prof?.name ?? dep.user_id.slice(0, 8) + "…"}
                         {prof?.phone ? ` · ${prof.phone}` : ""}
                       </p>
-                      <p className="text-fs-xs text-muted-foreground/80 mt-0.5">
-                        {stamp}{dep.payment_provider ? ` · ${dep.payment_provider}` : ""}
+                      <p className="text-fs-xs text-muted-foreground/80 mt-0.5 flex flex-wrap items-center gap-1">
+                        <span>{stamp}{dep.payment_provider ? ` · ${dep.payment_provider}` : ""}</span>
+                        {dep.payment_environment === "test" && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-[#FFF8E1] text-[#1F2937] font-bold">
+                            בדיקה
+                          </span>
+                        )}
+                        {dep.payment_kind === "participation_fee" && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold">
+                            דמי השתתפות
+                          </span>
+                        )}
                       </p>
+
                     </div>
                     <div className="text-left">
                       <div className="font-bold text-primary text-sm">{formatILS(Number(dep.gross_deposit_amount ?? dep.amount))}</div>
