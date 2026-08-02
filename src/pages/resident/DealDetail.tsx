@@ -1649,25 +1649,35 @@ export default function DealDetail() {
               )}
             </div>
           ) : (
-            <div className="flex items-stretch gap-2">
-              <Button
-                onClick={handleJoinClick}
-                disabled={submittingInterest}
-                className="flex-1 h-14 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#0E6B5A]/40"
-              >
-                {submittingInterest ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : isGuest ? (
-                  "התחבר כדי להצטרף"
-                ) : depositRequired ? (
-                  `הצטרף · ${ils(feeAmount)}`
-                ) : (
-                  "הצטרף להצעה"
-                )}
-              </Button>
-              <ShareButton deal={deal} />
+            <div className="flex flex-col gap-2">
+              <div className="flex items-stretch gap-2">
+                <Button
+                  onClick={handleJoinClick}
+                  disabled={submittingInterest || joinBlocked}
+                  className="flex-1 h-14 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold text-[15px] shadow-[0_12px_28px_-10px_rgba(10,31,61,0.6)] border border-[#0E6B5A]/40 disabled:opacity-60"
+                >
+                  {submittingInterest || feeLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : isGuest ? (
+                    "התחבר כדי להצטרף"
+                  ) : feeError ? (
+                    "ההצטרפות אינה זמינה"
+                  ) : depositRequired ? (
+                    `הצטרף · ${ils(feeAmount)}`
+                  ) : (
+                    "הצטרף להצעה"
+                  )}
+                </Button>
+                <ShareButton deal={deal} />
+              </div>
+              {feeError && (
+                <p className="text-[11.5px] text-muted-foreground text-center leading-relaxed">
+                  {feeError}
+                </p>
+              )}
             </div>
           )}
+
         </div>
       </div>
       )}
