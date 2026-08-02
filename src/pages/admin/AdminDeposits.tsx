@@ -129,6 +129,13 @@ export default function AdminDeposits() {
           _reason: reason!.trim(),
         });
         if (error) throw error;
+      } else if (status === "refunded" && dep?.payment_provider === "cardcom" && dep.status === "paid") {
+        // Real money moves first: refund at Cardcom, then flip the record.
+        const { data, error } = await supabase.functions.invoke("cardcom-refund", {
+          body: { deposit_id: id },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(String(data.description ?? data.error));
       } else {
         const nowIso = new Date().toISOString();
         const patch = status === "paid" ? { status, paid_at: nowIso } : { status, refunded_at: nowIso };

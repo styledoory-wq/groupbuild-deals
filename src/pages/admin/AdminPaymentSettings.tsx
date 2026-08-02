@@ -17,20 +17,20 @@ type FeeAbsorber = "resident" | "supplier" | "groupbuild";
 // Only providers that are actually implemented in the payment edge functions
 // may be selected. Legacy providers (Grow / Grow Make) are no longer supported.
 const PROVIDERS: Array<{ value: Provider; label: string; hint: string }> = [
-  { value: "stripe", label: "Stripe", hint: "ספק ברירת המחדל (Test + Live)" },
-  { value: "cardcom", label: "Cardcom", hint: "חלופה נתמכת" },
+  { value: "cardcom", label: "Cardcom", hint: "ספק הסליקה הפעיל (Test + Live)" },
+  { value: "stripe", label: "Stripe", hint: "מוכן לשימוש עתידי — אינו פעיל" },
 ];
 
 const providerSecrets: Record<Provider, string> = {
   cardcom:
-    "CARDCOM_TERMINAL_TEST, CARDCOM_API_NAME_TEST, CARDCOM_TERMINAL_LIVE, CARDCOM_API_NAME_LIVE",
+    "CARDCOM_TERMINAL_TEST, CARDCOM_API_NAME_TEST, CARDCOM_API_PASSWORD_TEST, CARDCOM_TERMINAL_LIVE, CARDCOM_API_NAME_LIVE, CARDCOM_API_PASSWORD_LIVE, CARDCOM_WEBHOOK_SECRET, PAYMENT_ENVIRONMENT",
   stripe:
     "STRIPE_SECRET_KEY_TEST, STRIPE_WEBHOOK_SECRET_TEST, STRIPE_SECRET_KEY_LIVE, STRIPE_WEBHOOK_SECRET_LIVE, PAYMENT_ENVIRONMENT",
 };
 
 export default function AdminPaymentSettings() {
   const [id, setId] = useState<string | null>(null);
-  const [provider, setProvider] = useState<Provider>("stripe");
+  const [provider, setProvider] = useState<Provider>("cardcom");
 
   const [depositAmount, setDepositAmount] = useState<number>(1000);
   const [depositMinAmount, setDepositMinAmount] = useState<string>("");
@@ -51,7 +51,7 @@ export default function AdminPaymentSettings() {
       if (data) {
         setId(data.id);
         const saved = data.active_payment_provider as string | null;
-        setProvider(saved === "cardcom" ? "cardcom" : "stripe");
+        setProvider(saved === "stripe" ? "stripe" : "cardcom");
 
         setDepositAmount(Number(data.deposit_default_amount));
         setDepositMinAmount(data.deposit_min_amount == null ? "" : String(data.deposit_min_amount));
@@ -127,7 +127,7 @@ export default function AdminPaymentSettings() {
                 ))}
               </div>
               <p className="text-fs-xs text-muted-foreground mt-3 leading-relaxed">
-                ספקים ישנים (Grow / Grow Make) אינם נתמכים יותר. אם אין מפתחות לספק הפעיל,
+                Cardcom הוא ספק הסליקה הפעיל. ספקים ישנים (Grow / Grow Make) אינם נתמכים יותר. אם אין מפתחות לספק הפעיל,
                 ההצטרפות לעסקאות נחסמת אוטומטית ולא נגבה תשלום.
               </p>
               <p className="text-fs-xs text-muted-foreground mt-2 leading-relaxed">
