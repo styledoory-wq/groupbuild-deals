@@ -425,7 +425,17 @@ export default function DealDetail() {
       } catch (e) {
         console.warn("[DealDetail] fee resolve failed", e);
         if (!cancelled) {
-          const dealPrice = getDealPriceForFee(deal, participantCount);
+          const dealPrice = getDealPriceForFee(
+            {
+              offer_type: (deal.offer_type ?? "percentage") as OfferType,
+              original_price: deal.original_price,
+              discounted_price: deal.discounted_price,
+              discount_percentage: deal.discount_percentage,
+              base_price: deal.base_price,
+              tiers: Array.isArray(deal.tiers) ? deal.tiers : [],
+            },
+            participantCount,
+          );
           setParticipationFee({
             dealPrice,
             feeAmount: 0,
