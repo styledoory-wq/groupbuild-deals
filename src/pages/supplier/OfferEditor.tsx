@@ -380,9 +380,6 @@ export default function OfferEditor() {
       if (cleanDepositAmount <= 0) { toast.error("סכום דמי ההשתתפות חייב להיות גדול מ-0"); return null; }
       if (depositLimits.min !== null && cleanDepositAmount < depositLimits.min) { toast.error(`מינימום דמי השתתפות: ${depositLimits.min}`); return null; }
       if (depositLimits.max !== null && cleanDepositAmount > depositLimits.max) { toast.error(`מקסימום דמי השתתפות: ${depositLimits.max}`); return null; }
-      const link = supplierPaymentLink.trim();
-      if (!link) { toast.error("קישור תשלום הוא שדה חובה כאשר נדרש תשלום"); return null; }
-      if (!URL_RE.test(link)) { toast.error("קישור תשלום חייב להתחיל ב-https://"); return null; }
     }
 
     const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
