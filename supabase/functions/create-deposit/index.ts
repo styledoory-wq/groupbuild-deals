@@ -1,24 +1,45 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import {
-  getDealPriceForFee,
-  matchPlatformFeeRule,
-  type PlatformFeeRule,
-} from "../_shared/platformFees.ts";
+import { getCanonicalDealBasePrice } from "../_shared/participationPricing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+/**
+ * create-deposit — participation fee checkout.
+ *
+ * Guarantees:
+ *  1. FAIL CLOSED — any failure to resolve a positive fee blocks the join.
+ *     There is no fee = 0 path and no "free join" fallback.
+ *  2. NO deal_interest is created here. The join record is created only by the
+ *     payment webhook, after the payment is confirmed.
+ *  3. The fee is LOCKED ATOMICALLY on the deal at the first checkout, so every
+ *     participant of a deal pays exactly the same amount.
+ *  4. When PARTICIPATION_FEES_ENFORCED is off, joining is BLOCKED (never free).
+ */
+
 interface CreateDepositBody {
   deal_id?: string;
-  interest_id?: string;
   participant_count?: number;
+  join_payload?: Record<string, unknown>;
+}
+
+const BLOCKED_MESSAGE = "ההצטרפות לעסקה אינה זמינה כרגע. נסו שוב מאוחר יותר.";
+
+function enforcementEnabled(): boolean {
+  const raw = (Deno.env.get("PARTICIPATION_FEES_ENFORCED") ?? "1").trim().toLowerCase();
+  return !["0", "false", "off", "no"].includes(raw);
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    if (!enforcementEnabled()) {
+      // Kill-switch: block joining entirely. Never fall back to a free join.
+      return json({ error: "joining_disabled", message: BLOCKED_MESSAGE }, 503);
+    }
+
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return json({ error: "unauthorized", message: "יש להתחבר כדי להצטרף" }, 401);
@@ -36,7 +57,7 @@ Deno.serve(async (req) => {
     const userId = userData.user.id;
 
     const body = (await req.json().catch(() => ({}))) as CreateDepositBody;
-    if (!body?.deal_id) {
+    if (!body?.deal_id || typeof body.deal_id !== "string") {
       return json({ error: "invalid_request", message: "מזהה עסקה חסר" }, 400);
     }
 
@@ -48,7 +69,8 @@ Deno.serve(async (req) => {
     const { data: deal, error: dealErr } = await admin
       .from("deals")
       .select(
-        "id,title,status,is_deleted,supplier_id,category_id,listing_type,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,deposit_required,deposit_amount",
+        "id,title,status,is_deleted,supplier_id,category_id,listing_type,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers," +
+          "participation_fee_base_price,participation_fee_rule_id,participation_fee_amount,participation_fee_locked_at",
       )
       .eq("id", body.deal_id)
       .eq("is_deleted", false)
@@ -67,80 +89,95 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Participant count for tiered pricing (best-effort)
-    let participants = Number(body.participant_count ?? 0);
-    if (!Number.isFinite(participants) || participants < 0) participants = 0;
-    if (!participants) {
-      const { data: paidCount } = await admin.rpc("get_deal_paid_count", { _deal_id: deal.id });
-      if (typeof paidCount === "number") participants = paidCount;
-    }
-
-    const dealPrice = getDealPriceForFee(
-      {
-        offer_type: deal.offer_type,
-        original_price: deal.original_price,
-        discounted_price: deal.discounted_price,
-        discount_percentage: deal.discount_percentage,
-        base_price: deal.base_price,
-        tiers: Array.isArray(deal.tiers) ? deal.tiers : [],
-      },
-      participants,
-    );
-
-    // Prefer RPC; fall back to table read + matcher
-    let feeAmount = 0;
-    let ruleId: string | null = null;
-    let ruleName: string | null = null;
+    // ---------------------------------------------------------------
+    // Resolve or reuse the LOCKED fee for this deal
+    // ---------------------------------------------------------------
+    let basePrice: number;
+    let feeAmount: number;
+    let ruleId: string;
     let currency = "ILS";
 
-    const { data: rpcRows, error: rpcErr } = await admin.rpc("resolve_platform_fee", {
-      _deal_price: dealPrice,
-      _fee_type: "participation",
-      _category_id: deal.category_id ?? null,
-      _offer_type: deal.offer_type ?? null,
-      _listing_type: listingType,
-    });
-    if (!rpcErr && Array.isArray(rpcRows) && rpcRows.length > 0) {
-      feeAmount = Number(rpcRows[0].fee_amount ?? 0);
-      ruleId = rpcRows[0].rule_id ?? null;
-      ruleName = rpcRows[0].name ?? null;
-      currency = rpcRows[0].currency ?? "ILS";
+    if (deal.participation_fee_locked_at && Number(deal.participation_fee_amount) > 0) {
+      basePrice = Number(deal.participation_fee_base_price);
+      feeAmount = Number(deal.participation_fee_amount);
+      ruleId = String(deal.participation_fee_rule_id);
     } else {
-      const { data: rules } = await admin
-        .from("platform_fees")
-        .select(
-          "id,name,fee_type,min_deal_price,max_deal_price,fee_amount,currency,is_active,category_id,offer_type,listing_type,priority,sort_order",
-        )
-        .eq("is_active", true)
-        .eq("fee_type", "participation");
-      const matched = matchPlatformFeeRule((rules ?? []) as PlatformFeeRule[], {
-        dealPrice,
-        categoryId: deal.category_id,
-        offerType: deal.offer_type,
-        listingType,
+      const canonical = getCanonicalDealBasePrice({
+        offer_type: deal.offer_type,
+        base_price: deal.base_price,
+        discounted_price: deal.discounted_price,
+        original_price: deal.original_price,
+        tiers: Array.isArray(deal.tiers) ? deal.tiers : [],
       });
-      if (matched) {
-        feeAmount = Number(matched.fee_amount);
-        ruleId = matched.id;
-        ruleName = matched.name;
-        currency = matched.currency ?? "ILS";
+      if (!canonical.valid || !canonical.price) {
+        console.error("[create-deposit] canonical price invalid", {
+          deal_id: deal.id,
+          reason: canonical.reason,
+        });
+        return json(
+          { error: "deal_price_invalid", reason: canonical.reason, message: BLOCKED_MESSAGE },
+          409,
+        );
       }
+
+      const { data: rpcRows, error: rpcErr } = await admin.rpc("resolve_platform_fee", {
+        _deal_price: canonical.price,
+        _fee_type: "participation",
+        _category_id: deal.category_id ?? null,
+        _offer_type: deal.offer_type ?? null,
+        _listing_type: listingType,
+      });
+      if (rpcErr) {
+        console.error("[create-deposit] resolve_platform_fee failed", rpcErr);
+        return json({ error: "fee_resolution_failed", message: BLOCKED_MESSAGE }, 503);
+      }
+      const row = Array.isArray(rpcRows) && rpcRows.length > 0 ? rpcRows[0] : null;
+      const resolvedFee = Number(row?.fee_amount ?? 0);
+      if (!row?.rule_id || !Number.isFinite(resolvedFee) || resolvedFee <= 0) {
+        console.error("[create-deposit] no fee rule matched", {
+          deal_id: deal.id,
+          price: canonical.price,
+        });
+        return json({ error: "fee_not_configured", message: BLOCKED_MESSAGE }, 409);
+      }
+
+      // Atomic lock — first checkout wins, concurrent callers get the same values.
+      const { data: lockRows, error: lockErr } = await admin.rpc(
+        "lock_deal_participation_fee",
+        {
+          _deal_id: deal.id,
+          _base_price: canonical.price,
+          _rule_id: row.rule_id,
+          _fee_amount: resolvedFee,
+        },
+      );
+      if (lockErr) {
+        console.error("[create-deposit] fee lock failed", lockErr);
+        return json({ error: "fee_lock_failed", message: BLOCKED_MESSAGE }, 503);
+      }
+      const locked = Array.isArray(lockRows) && lockRows.length > 0 ? lockRows[0] : null;
+      if (!locked || !(Number(locked.fee_amount) > 0)) {
+        return json({ error: "fee_lock_failed", message: BLOCKED_MESSAGE }, 503);
+      }
+      basePrice = Number(locked.base_price);
+      feeAmount = Number(locked.fee_amount);
+      ruleId = String(locked.rule_id);
+      currency = row.currency ?? "ILS";
     }
 
     if (!Number.isFinite(feeAmount) || feeAmount <= 0) {
-      return json(
-        { error: "fee_not_configured", message: "לא הוגדרו דמי השתתפות למחיר עסקה זה" },
-        409,
-      );
+      return json({ error: "fee_not_configured", message: BLOCKED_MESSAGE }, 409);
     }
-
     const amount = feeAmount;
 
+    // ---------------------------------------------------------------
+    // Deposit (payment intent). Reuse an open one for this user + deal.
+    // ---------------------------------------------------------------
     const { data: existingDeposit } = await admin
       .from("deposits")
       .select("id,status,amount,provider_payment_url,payment_provider")
       .eq("user_id", userId)
-      .eq("deal_id", body.deal_id)
+      .eq("deal_id", deal.id)
       .eq("is_deleted", false)
       .in("status", ["pending", "awaiting_confirmation", "paid"])
       .order("created_at", { ascending: false })
@@ -149,23 +186,18 @@ Deno.serve(async (req) => {
 
     if (existingDeposit?.status === "paid") {
       return json(
-        {
-          error: "already_paid",
-          message: "כבר הצטרפת לעסקה זו",
-          deposit_id: existingDeposit.id,
-        },
+        { error: "already_paid", message: "כבר הצטרפת לעסקה זו", deposit_id: existingDeposit.id },
         409,
       );
     }
 
-    // Active payment provider (stripe preferred when configured)
     const { data: settings } = await admin
       .from("system_settings")
       .select("active_payment_provider")
       .limit(1)
       .maybeSingle();
     const configuredProvider = (settings?.active_payment_provider ?? "manual") as string;
-    let paymentProvider = "manual";
+    let paymentProvider: string | null = null;
     if (configuredProvider === "stripe" && Deno.env.get("STRIPE_SECRET_KEY")) {
       paymentProvider = "stripe";
     } else if (configuredProvider === "cardcom" && Deno.env.get("CARDCOM_TERMINAL")) {
@@ -176,13 +208,23 @@ Deno.serve(async (req) => {
       paymentProvider = "cardcom";
     }
 
+    // Fail closed: without a working provider there is no way to charge, so no join.
+    if (!paymentProvider) {
+      console.error("[create-deposit] no payment provider configured");
+      return json({ error: "payment_provider_unavailable", message: BLOCKED_MESSAGE }, 503);
+    }
+
+    // Join details are stored on the deposit; the webhook materialises the
+    // deal_interest only after the payment is confirmed.
+    const joinPayload = sanitizeJoinPayload(body.join_payload);
+
     let depositId = existingDeposit?.id ?? null;
     if (!depositId) {
       const { data: inserted, error: insErr } = await admin
         .from("deposits")
         .insert({
           user_id: userId,
-          deal_id: body.deal_id,
+          deal_id: deal.id,
           supplier_id: deal.supplier_id,
           amount,
           gross_deposit_amount: amount,
@@ -197,25 +239,40 @@ Deno.serve(async (req) => {
           payment_kind: "participation_fee",
           platform_fee_rule_id: ruleId,
           platform_fee_amount: amount,
-          deal_price_snapshot: dealPrice,
+          deal_price_snapshot: basePrice,
           metadata: {
             source: "create_deposit_participation_fee",
             deal_title: deal.title ?? null,
-            interest_id: body.interest_id ?? null,
             participation_fee: amount,
-            deal_price: dealPrice,
+            deal_price: basePrice,
             fee_rule_id: ruleId,
-            fee_rule_name: ruleName,
-            total_charged_amount: amount,
+            join_payload: joinPayload,
           },
         })
         .select("id")
         .single();
       if (insErr) throw insErr;
       depositId = inserted.id;
+    } else if (joinPayload) {
+      await admin
+        .from("deposits")
+        .update({
+          amount,
+          platform_fee_amount: amount,
+          platform_fee_rule_id: ruleId,
+          deal_price_snapshot: basePrice,
+          metadata: {
+            source: "create_deposit_participation_fee",
+            deal_title: deal.title ?? null,
+            participation_fee: amount,
+            deal_price: basePrice,
+            fee_rule_id: ruleId,
+            join_payload: joinPayload,
+          },
+        })
+        .eq("id", depositId);
     }
 
-    // Try to create a hosted checkout URL for Stripe / Cardcom
     let paymentUrl: string | null =
       typeof existingDeposit?.provider_payment_url === "string"
         ? existingDeposit.provider_payment_url
@@ -226,7 +283,7 @@ Deno.serve(async (req) => {
         amount,
         currency,
         dealId: deal.id,
-        dealTitle: deal.title ?? "דמי השתתפות GroupBuild",
+        dealTitle: deal.title ?? "דמי שירות GroupBuild",
         depositId: depositId!,
         userId,
         userEmail: userData.user.email ?? undefined,
@@ -235,40 +292,66 @@ Deno.serve(async (req) => {
       paymentUrl = await createCardcomCheckout({
         amount,
         dealId: deal.id,
-        dealTitle: deal.title ?? "דמי השתתפות GroupBuild",
+        dealTitle: deal.title ?? "דמי שירות GroupBuild",
       });
     }
 
-    if (paymentUrl && depositId) {
-      await admin
-        .from("deposits")
-        .update({
-          provider_payment_url: paymentUrl,
-          payment_provider: paymentProvider,
-        })
-        .eq("id", depositId);
+    if (!paymentUrl) {
+      console.error("[create-deposit] checkout creation failed", { provider: paymentProvider });
+      return json({ error: "checkout_failed", message: BLOCKED_MESSAGE }, 503);
     }
+
+    await admin
+      .from("deposits")
+      .update({ provider_payment_url: paymentUrl, payment_provider: paymentProvider })
+      .eq("id", depositId!);
 
     return json({
       ok: true,
       deposit_id: depositId,
       amount,
-      deal_price: dealPrice,
+      deal_price: basePrice,
       participation_fee: amount,
       total_due: amount,
       fee_rule_id: ruleId,
-      fee_rule_name: ruleName,
       currency,
       payment_provider: paymentProvider,
       payment_url: paymentUrl,
-      // Kept for backward-compatible UI that still reads supplier_payment_info
-      supplier_payment_info: null,
     });
   } catch (e) {
     console.error("[create-deposit] error", e);
-    return json({ error: "internal_error", message: "אירעה שגיאה לא צפויה" }, 500);
+    return json({ error: "internal_error", message: BLOCKED_MESSAGE }, 500);
   }
 });
+
+const JOIN_FIELDS = [
+  "full_name",
+  "phone",
+  "city",
+  "project_name",
+  "notes",
+  "estimated_quantity",
+  "join_condition",
+  "min_tier_locked",
+  "terms_accepted_at",
+] as const;
+
+function sanitizeJoinPayload(
+  raw: Record<string, unknown> | undefined,
+): Record<string, unknown> | null {
+  if (!raw || typeof raw !== "object") return null;
+  const out: Record<string, unknown> = {};
+  for (const key of JOIN_FIELDS) {
+    const v = raw[key];
+    if (v === undefined || v === null) continue;
+    if (typeof v === "string") {
+      out[key] = v.slice(0, 500);
+    } else if (typeof v === "number" && Number.isFinite(v)) {
+      out[key] = v;
+    }
+  }
+  return Object.keys(out).length ? out : null;
+}
 
 async function createStripeCheckout(opts: {
   amount: number;
@@ -287,33 +370,47 @@ async function createStripeCheckout(opts: {
 
   const params = new URLSearchParams();
   params.set("mode", "payment");
-  params.set("success_url", `${origin}/payment/success?deal_id=${opts.dealId}&deposit_id=${opts.depositId}`);
-  params.set("cancel_url", `${origin}/payment/cancel?deal_id=${opts.dealId}&deposit_id=${opts.depositId}`);
+  params.set(
+    "success_url",
+    `${origin}/payment/success?deal_id=${opts.dealId}&deposit_id=${opts.depositId}`,
+  );
+  params.set("cancel_url", `${origin}/payment/cancel?deal_id=${opts.dealId}`);
   params.set("client_reference_id", opts.depositId);
   params.set("metadata[deposit_id]", opts.depositId);
   params.set("metadata[deal_id]", opts.dealId);
   params.set("metadata[user_id]", opts.userId);
-  params.set("metadata[payment_kind]", "participation_fee");
+  if (opts.userEmail) params.set("customer_email", opts.userEmail);
   params.set("line_items[0][quantity]", "1");
   params.set("line_items[0][price_data][currency]", (opts.currency || "ILS").toLowerCase());
   params.set("line_items[0][price_data][unit_amount]", String(unitAmount));
-  params.set("line_items[0][price_data][product_data][name]", `דמי השתתפות · ${opts.dealTitle}`);
-  if (opts.userEmail) params.set("customer_email", opts.userEmail);
+  params.set(
+    "line_items[0][price_data][product_data][name]",
+    `דמי שירות עבור הצטרפות ורישום לעסקה: ${opts.dealTitle}`,
+  );
+  params.set(
+    "line_items[0][price_data][product_data][description]",
+    "דמי שירות עבור הצטרפות ורישום לעסקה לרכישת המוצר או השירות מהספק. המוצר או השירות מסופקים על ידי הספק מחוץ לאפליקציה.",
+  );
 
-  const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: params.toString(),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    console.error("[create-deposit] stripe error", data);
+  try {
+    const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params.toString(),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      console.error("[create-deposit] stripe error", data);
+      return null;
+    }
+    return typeof data.url === "string" ? data.url : null;
+  } catch (e) {
+    console.error("[create-deposit] stripe request failed", e);
     return null;
   }
-  return typeof data.url === "string" ? data.url : null;
 }
 
 async function createCardcomCheckout(opts: {
@@ -323,38 +420,28 @@ async function createCardcomCheckout(opts: {
 }): Promise<string | null> {
   const terminal = Deno.env.get("CARDCOM_TERMINAL");
   const apiName = Deno.env.get("CARDCOM_API_NAME");
-  const apiPassword = Deno.env.get("CARDCOM_API_PASSWORD");
-  if (!terminal || !apiName || !apiPassword) return null;
-
+  if (!terminal || !apiName) return null;
   const origin = Deno.env.get("PUBLIC_SITE_URL") ?? "https://groupbuild.co.il";
-  const cardcomRes = await fetch("https://secure.cardcom.solutions/api/v11/LowProfile/Create", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      TerminalNumber: terminal,
-      ApiName: apiName,
-      ApiPassword: apiPassword,
-      Amount: opts.amount,
-      CoinID: 1,
-      MaxPayments: 1,
-      Language: "he",
-      SuccessRedirectUrl: `${origin}/payment/success?deal_id=${opts.dealId}`,
-      FailedRedirectUrl: `${origin}/payment/cancel?deal_id=${opts.dealId}`,
-      ProductName: `דמי השתתפות · ${opts.dealTitle}`,
-    }),
-  });
-  const responseJson = await cardcomRes.json().catch(() => ({}));
-  const responseCode = Number(responseJson.ResponseCode ?? responseJson.responseCode ?? -1);
-  if (responseCode !== 0) {
-    console.error("[create-deposit] cardcom error", responseJson);
+  try {
+    const res = await fetch("https://secure.cardcom.solutions/api/v11/LowProfile/Create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        TerminalNumber: Number(terminal),
+        ApiName: apiName,
+        Amount: opts.amount,
+        SuccessRedirectUrl: `${origin}/payment/success?deal_id=${opts.dealId}`,
+        FailedRedirectUrl: `${origin}/payment/cancel?deal_id=${opts.dealId}`,
+        ProductName: `דמי שירות עבור הצטרפות ורישום לעסקה: ${opts.dealTitle}`,
+        Operation: "ChargeOnly",
+      }),
+    });
+    const data = await res.json();
+    return typeof data?.Url === "string" ? data.Url : null;
+  } catch (e) {
+    console.error("[create-deposit] cardcom request failed", e);
     return null;
   }
-  return (
-    (responseJson.url as string) ??
-    (responseJson.Url as string) ??
-    (responseJson.LowProfileUrl as string) ??
-    null
-  );
 }
 
 function json(body: unknown, status = 200) {

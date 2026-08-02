@@ -276,7 +276,12 @@ export default function OfferEditor() {
               })));
               setEditingTier(null);
               const firstWithPrice = rawTiers.find((t) => t.original_price != null);
-              if (firstWithPrice?.original_price != null) setUnitPrice(String(firstWithPrice.original_price));
+              const loadedBase =
+                (deal as { base_price?: number | null }).base_price ??
+                firstWithPrice?.original_price ??
+                (deal.original_price && Number(deal.original_price) > 0 ? deal.original_price : null);
+              if (loadedBase != null) setUnitPrice(String(loadedBase));
+
             }
             setCoverImage(deal.cover_image_url ?? null);
             setGalleryImages((deal.gallery_images as string[] | null) ?? []);
@@ -385,10 +390,13 @@ export default function OfferEditor() {
     if (listingType === "regular") {
       unitPriceVal = num(unitPrice);
       if (!Number.isFinite(unitPriceVal) || (unitPriceVal as number) <= 0) { toast.error("יש להזין מחיר תקין"); return null; }
-    } else if (offerType === "price_comparison") {
+    } else {
+      // Group buy: a base (published) price is mandatory for BOTH offer types —
+      // it is the canonical price used to calculate the platform service fee.
       unitPriceVal = num(unitPrice);
-      if (!Number.isFinite(unitPriceVal) || (unitPriceVal as number) <= 0) { toast.error("יש להזין מחיר יחידה תקין"); return null; }
+      if (!Number.isFinite(unitPriceVal) || (unitPriceVal as number) <= 0) { toast.error("יש להזין מחיר מקורי תקין"); return null; }
     }
+
 
     const cleanTiers: OfferTier[] = [];
     if (listingType === "group_buy") {
@@ -474,9 +482,10 @@ export default function OfferEditor() {
     } else if (offerType === "percentage") {
       const pct = firstTier?.discount_percentage ?? null;
       payload.discount_percentage = pct != null && pct >= 1 && pct <= 100 ? pct : null;
-      payload.base_price = null;
-      payload.original_price = 0;
+      payload.base_price = unitPriceVal ?? null;
+      payload.original_price = unitPriceVal ?? 0;
       payload.discounted_price = null;
+
     } else {
       payload.original_price = firstTier?.original_price ?? 0;
       payload.discounted_price = firstTier?.discounted_price ?? null;
@@ -486,7 +495,8 @@ export default function OfferEditor() {
           : null;
       // DB check constraint requires 1-100 or NULL. Clamp/drop out-of-range values (e.g. 0% when prices are equal).
       payload.discount_percentage = rawPct != null && rawPct >= 1 && rawPct <= 100 ? rawPct : null;
-      payload.base_price = null;
+      payload.base_price = unitPriceVal ?? null;
+
     }
     return payload;
   };
@@ -583,10 +593,9 @@ export default function OfferEditor() {
         const up = Number(unitPrice);
         if (!Number.isFinite(up) || up <= 0) miss.push({ key: "unitPrice", label: "מחיר" });
       } else {
-        if (offerType === "price_comparison") {
-          const up = Number(unitPrice);
-          if (!Number.isFinite(up) || up <= 0) miss.push({ key: "unitPrice", label: "מחיר בסיס" });
-        }
+        const up = Number(unitPrice);
+        if (!Number.isFinite(up) || up <= 0) miss.push({ key: "unitPrice", label: "מחיר בסיס" });
+
         const t0 = tiers[0];
         if (!t0 || !t0.minParticipants || (offerType === "percentage" ? !t0.discount_percentage : !t0.discounted_price)) {
           miss.push({ key: "tier0", label: "מדרגת מחיר ראשונה" });
@@ -845,18 +854,24 @@ export default function OfferEditor() {
                     <PillBtn active={offerType === "percentage"} onClick={() => switchOfferType("percentage")}>אחוז הנחה</PillBtn>
                     <PillBtn active={offerType === "price_comparison"} onClick={() => switchOfferType("price_comparison")}>לפני / אחרי</PillBtn>
                   </div>
-                  {offerType === "price_comparison" && (
-                    <div className="mt-3">
-                      <Field label="מחיר רגיל (לפני הנחה, ₪)" required
-                        error={shouldShowError("unitPrice") ? "יש להזין מחיר בסיס" : undefined}>
-                        <Input type="number" inputMode="numeric" min={1} value={unitPrice}
-                          onChange={(e) => setUnitPrice(e.target.value)}
-                          onBlur={() => markTouched("unitPrice")}
-                          className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("unitPrice") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
-                          placeholder="הזן מחיר בסיס" />
-                      </Field>
-                    </div>
-                  )}
+                  <div className="mt-3">
+                    <Field
+                      label={offerType === "percentage" ? "מחיר מקורי (לפני הנחה, ₪)" : "מחיר רגיל (לפני הנחה, ₪)"}
+                      required
+                      error={shouldShowError("unitPrice") ? "יש להזין מחיר בסיס" : undefined}>
+                      <Input type="number" inputMode="numeric" min={1} value={unitPrice}
+                        onChange={(e) => setUnitPrice(e.target.value)}
+                        onBlur={() => markTouched("unitPrice")}
+                        className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("unitPrice") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
+                        placeholder="הזן מחיר בסיס" />
+                    </Field>
+                    {offerType === "percentage" && (
+                      <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
+                        המחיר המקורי משמש להצגת החיסכון למצטרפים ולחישוב דמי השירות של הפלטפורמה.
+                      </p>
+                    )}
+                  </div>
+
                 </Section>
 
                 <Section

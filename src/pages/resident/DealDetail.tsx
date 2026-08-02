@@ -44,10 +44,11 @@ import {
 import {
   PARTICIPATION_FEE_DESCRIPTION,
   PARTICIPATION_FEE_LABEL,
-  getDealPriceForFee,
   resolvePlatformFeeRpc,
   type ResolvedParticipationFee,
 } from "@/lib/platformFees";
+import { getCanonicalDealBasePrice, JOIN_BLOCKED_MESSAGE } from "@/lib/participationPricing";
+
 
 interface DealRow {
   id: string;
@@ -113,6 +114,9 @@ export default function DealDetail() {
   const [pendingDepositAmount, setPendingDepositAmount] = useState<number>(0);
   const [supplierPaymentInfo, setSupplierPaymentInfo] = useState<SupplierPaymentInfo | null>(null);
   const [participationFee, setParticipationFee] = useState<ResolvedParticipationFee | null>(null);
+  const [feeLoading, setFeeLoading] = useState(true);
+  const [feeError, setFeeError] = useState<string | null>(null);
+
 
   const openPaymentInstructions = (
     depositId: string,
@@ -391,65 +395,71 @@ export default function DealDetail() {
     return () => { void supabase.removeChannel(channel); };
   }, [dealId]);
 
-  // Resolve participation fee from admin-managed platform_fees bands.
+  // Resolve the participation fee from the admin-managed platform_fees bands.
+  // FAIL CLOSED: if the fee cannot be resolved to a positive amount, joining is
+  // blocked. There is no "0 ₪ / free join" fallback.
   useEffect(() => {
     if (!deal) {
       setParticipationFee(null);
+      setFeeError(null);
       return;
     }
     if ((deal.listing_type ?? "group_buy") === "regular") {
       setParticipationFee(null);
+      setFeeError(null);
+      setFeeLoading(false);
       return;
     }
     let cancelled = false;
+    setFeeLoading(true);
+    setFeeError(null);
     (async () => {
       try {
-        const dealPrice = getDealPriceForFee(
-          {
-            offer_type: deal.offer_type as OfferType | null,
-            original_price: deal.original_price,
-            discounted_price: deal.discounted_price,
-            discount_percentage: deal.discount_percentage,
-            base_price: deal.base_price,
-            tiers: Array.isArray(deal.tiers) ? deal.tiers : [],
-          },
-          participantCount,
-        );
+        // Canonical price = the price the supplier published (identical for all
+        // participants), NOT the dynamic tier price.
+        const canonical = getCanonicalDealBasePrice({
+          offer_type: deal.offer_type,
+          base_price: deal.base_price,
+          discounted_price: deal.discounted_price,
+          original_price: deal.original_price,
+          tiers: Array.isArray(deal.tiers) ? deal.tiers : [],
+        });
+        if (!canonical.valid || !canonical.price) {
+          if (!cancelled) {
+            setParticipationFee(null);
+            setFeeError(JOIN_BLOCKED_MESSAGE);
+          }
+          return;
+        }
         const resolved = await resolvePlatformFeeRpc({
-          dealPrice,
+          dealPrice: canonical.price,
           categoryId: deal.category_id,
           offerType: deal.offer_type,
           listingType: deal.listing_type ?? "group_buy",
         });
-        if (!cancelled) setParticipationFee(resolved);
-      } catch (e) {
-        console.warn("[DealDetail] fee resolve failed", e);
-        if (!cancelled) {
-          const dealPrice = getDealPriceForFee(
-            {
-              offer_type: (deal.offer_type ?? "percentage") as OfferType,
-              original_price: deal.original_price,
-              discounted_price: deal.discounted_price,
-              discount_percentage: deal.discount_percentage,
-              base_price: deal.base_price,
-              tiers: Array.isArray(deal.tiers) ? deal.tiers : [],
-            },
-            participantCount,
-          );
-          setParticipationFee({
-            dealPrice,
-            feeAmount: 0,
-            totalDueNow: 0,
-            rule: null,
-            currency: "ILS",
-          });
+        if (cancelled) return;
+        if (!resolved.rule || !(Number(resolved.feeAmount) > 0)) {
+          setParticipationFee(null);
+          setFeeError(JOIN_BLOCKED_MESSAGE);
+          return;
         }
+        setParticipationFee(resolved);
+        setFeeError(null);
+      } catch (e) {
+        console.error("[DealDetail] fee resolve failed", e);
+        if (!cancelled) {
+          setParticipationFee(null);
+          setFeeError(JOIN_BLOCKED_MESSAGE);
+        }
+      } finally {
+        if (!cancelled) setFeeLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [deal, participantCount]);
+  }, [deal]);
+
 
   const { requireAuth } = useGuestGate();
 
@@ -503,34 +513,118 @@ export default function DealDetail() {
       toast.error("יש להתחבר כדי להצטרף להצעה");
       return;
     }
-    const feeRequired =
-      (deal.listing_type ?? "group_buy") !== "regular" &&
-      Number(participationFee?.feeAmount ?? 0) > 0;
+    const isRegularNow = (deal.listing_type ?? "group_buy") === "regular";
     const tiersNow = Array.isArray(deal.tiers) ? deal.tiers : [];
     const activeTierNow = tiersNow.length > 0 ? getActiveTier(tiersNow, participantCount) : null;
+    const qtyRaw = joinForm.estimated_quantity.trim() ? Number(joinForm.estimated_quantity) : null;
+    const qty = qtyRaw != null && !Number.isNaN(qtyRaw) ? qtyRaw : null;
+
+    // ------------------------------------------------------------------
+    // Group buy → payment first. FAIL CLOSED, and NO deal_interest is
+    // created here: the join record is created by the payment webhook only
+    // after the participation fee has actually been paid.
+    // ------------------------------------------------------------------
+    if (!isRegularNow) {
+      const feeAmountNow = Number(participationFee?.feeAmount ?? 0);
+      if (feeLoading || feeError || !participationFee || !(feeAmountNow > 0)) {
+        toast.error(feeError ?? JOIN_BLOCKED_MESSAGE);
+        return;
+      }
+      setSubmittingInterest(true);
+      try {
+        const { data: paymentResponse, error: paymentErr } = await supabase.functions.invoke(
+          "create-deposit",
+          {
+            body: {
+              deal_id: deal.id,
+              participant_count: participantCount,
+              join_payload: {
+                full_name: joinForm.full_name.trim(),
+                phone: joinForm.phone.trim(),
+                city: joinForm.city.trim() || null,
+                project_name: joinForm.project_name.trim() || null,
+                notes: joinForm.notes.trim() || null,
+                estimated_quantity: qty,
+                join_condition: joinCondition,
+                min_tier_locked:
+                  joinCondition === "conditional" && activeTierNow
+                    ? activeTierNow.minParticipants
+                    : null,
+                terms_accepted_at: new Date().toISOString(),
+              },
+            },
+          },
+        );
+        if (paymentErr || !paymentResponse || paymentResponse.error) {
+          console.error("[create_deposit_failed]", paymentErr ?? paymentResponse);
+          if (paymentResponse?.error === "already_paid") {
+            toast.success("כבר הצטרפת לעסקה זו");
+            setInterested(true);
+            setShowJoinModal(false);
+            return;
+          }
+          toast.error(paymentResponse?.message ?? JOIN_BLOCKED_MESSAGE);
+          return;
+        }
+        const paymentUrl =
+          typeof paymentResponse.payment_url === "string" ? paymentResponse.payment_url : null;
+        if (!paymentUrl) {
+          toast.error(JOIN_BLOCKED_MESSAGE);
+          return;
+        }
+
+        supabase.functions
+          .invoke("notify-admin", {
+            body: {
+              event: "deal_checkout_started",
+              title: "התחלת תשלום דמי שירות להצטרפות",
+              details: {
+                deal_id: deal.id,
+                deal_title: deal.title,
+                participation_fee: feeAmountNow,
+                user_id: session.session.user.id,
+                user_email: session.session.user.email,
+                full_name: joinForm.full_name.trim(),
+                phone: joinForm.phone.trim(),
+              },
+            },
+          })
+          .catch(() => {});
+
+        setShowJoinModal(false);
+        setPendingPaymentUrl(paymentUrl);
+        toast.success("מעבירים למסך התשלום…");
+        window.location.href = paymentUrl;
+      } catch (err) {
+        console.error("[submitJoin] group buy failed", err);
+        toast.error(JOIN_BLOCKED_MESSAGE);
+      } finally {
+        setSubmittingInterest(false);
+      }
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Regular (non group-buy) listing → plain lead, no participation fee.
+    // ------------------------------------------------------------------
     setSubmittingInterest(true);
     try {
-      const qty = joinForm.estimated_quantity.trim()
-        ? Number(joinForm.estimated_quantity)
-        : null;
-      const feeAmountNow = Number(participationFee?.feeAmount ?? 0);
       const payload = {
         user_id: session.session.user.id,
         deal_id: deal.id,
-        status: feeRequired ? "pending_deposit" : "interested",
-        deposit_required: feeRequired,
-        deposit_amount: feeRequired ? feeAmountNow : 0,
-        deposit_status: feeRequired ? "pending" : "none",
+        status: "interested",
+        deposit_required: false,
+        deposit_amount: 0,
+        deposit_status: "none",
         full_name: joinForm.full_name.trim(),
         phone: joinForm.phone.trim(),
         city: joinForm.city.trim() || null,
         project_name: joinForm.project_name.trim() || null,
         notes: joinForm.notes.trim() || null,
-        estimated_quantity: qty && !Number.isNaN(qty) ? qty : null,
+        estimated_quantity: qty,
         terms_accepted_at: new Date().toISOString(),
         lead_status: "new",
         join_condition: joinCondition,
-        min_tier_locked: joinCondition === "conditional" && activeTierNow ? activeTierNow.minParticipants : null,
         conditional_status: "ok",
       };
       let interestId: string | null = null;
@@ -541,80 +635,26 @@ export default function DealDetail() {
         .single();
       if (insErr) {
         if (!insErr.message.toLowerCase().includes("duplicate")) throw insErr;
-        const { data: existingInterest, error: existingInterestErr } = await supabase
+        const { data: existingInterest } = await supabase
           .from("deal_interests")
           .select("id")
           .eq("user_id", session.session.user.id)
           .eq("deal_id", deal.id)
           .eq("is_deleted", false)
           .maybeSingle();
-        if (existingInterestErr) throw existingInterestErr;
         interestId = existingInterest?.id ?? null;
       } else {
         interestId = insertedInterest?.id ?? null;
       }
 
-      let depositId: string | null = null;
-      let depositAmount: number = feeAmountNow;
-      let paymentInfo: SupplierPaymentInfo | null = null;
-      let paymentUrl: string | null = null;
-      if (feeRequired) {
-        const { data: paymentResponse, error: paymentErr } = await supabase.functions.invoke("create-deposit", {
-          body: {
-            deal_id: deal.id,
-            user_id: session.session.user.id,
-            interest_id: interestId ?? undefined,
-            participant_count: participantCount,
-          },
-        });
-        if (paymentErr) {
-          console.error("[create_deposit_failed]", paymentErr);
-          toast.error("יצירת תשלום דמי ההשתתפות נכשלה, נסה שנית");
-          return;
-        }
-        if (paymentResponse?.error) {
-          console.error("[create_deposit_error_response]", paymentResponse);
-          toast.error(paymentResponse.message ?? "יצירת תשלום דמי ההשתתפות נכשלה");
-          return;
-        }
-        depositId = typeof paymentResponse?.deposit_id === "string" ? paymentResponse.deposit_id : null;
-        if (typeof paymentResponse?.amount === "number") depositAmount = paymentResponse.amount;
-        paymentInfo = (paymentResponse?.supplier_payment_info ?? null) as SupplierPaymentInfo | null;
-        paymentUrl = typeof paymentResponse?.payment_url === "string" ? paymentResponse.payment_url : null;
-        if (!depositId) {
-          toast.error("שגיאה ביצירת תשלום דמי ההשתתפות — פנה לתמיכה");
-          return;
-        }
-      }
+      setInterested(true);
+      setInterestStatus("interested");
+      setInterestDepositStatus("none");
+      setPendingPaymentUrl(null);
+      setShowJoinModal(false);
+      toast.success("נרשמת בהצלחה! הספק יצור איתך קשר בהקדם.");
+      await loadParticipantCount(deal.id);
 
-
-      if (feeRequired) {
-        setInterested(true);
-        setInterestStatus("pending_deposit");
-        setInterestDepositStatus("pending");
-        setPendingPaymentUrl(paymentUrl);
-        setShowJoinModal(false);
-        if (paymentUrl) {
-          toast.success("מעבירים למסך התשלום…");
-          window.location.href = paymentUrl;
-          return;
-        }
-        toast.success("פרטי הבקשה נשמרו — השלימו את תשלום דמי ההשתתפות להשלמת ההצטרפות");
-        if (depositId) {
-          openPaymentInstructions(depositId, depositAmount, paymentInfo);
-          return;
-        }
-      } else {
-        setInterested(true);
-        setInterestStatus("interested");
-        setInterestDepositStatus("none");
-        setPendingPaymentUrl(null);
-        setShowJoinModal(false);
-        toast.success("נרשמת בהצלחה! הספק יצור איתך קשר בהקדם.");
-        await loadParticipantCount(deal.id);
-      }
-
-      // In-app notification to the supplier (best-effort, don't break the flow).
       try {
         const { data: supRow } = await supabase
           .from("suppliers")
@@ -622,12 +662,9 @@ export default function DealDetail() {
           .eq("id", deal.supplier_id)
           .maybeSingle();
         if (supRow?.user_id) {
-          const detailsLine = [
-            payload.full_name,
-            payload.phone,
-            payload.city,
-            payload.project_name,
-          ].filter(Boolean).join(" · ");
+          const detailsLine = [payload.full_name, payload.phone, payload.city, payload.project_name]
+            .filter(Boolean)
+            .join(" · ");
           await supabase.from("notifications").insert({
             user_id: supRow.user_id,
             type: "lead",
@@ -654,13 +691,11 @@ export default function DealDetail() {
         .invoke("notify-admin", {
           body: {
             event: "deal_interest",
-            title: feeRequired ? "הצטרפות להצעה (ממתין לדמי השתתפות)" : "מתעניין חדש בעסקה",
+            title: "מתעניין חדש בעסקה",
             details: {
               deal_id: deal.id,
               deal_title: deal.title,
-              deposit_required: feeRequired,
-              deposit_amount: feeRequired ? feeAmountNow : 0,
-              participation_fee: feeRequired ? feeAmountNow : 0,
+              deposit_required: false,
               user_id: session.session.user.id,
               user_email: session.session.user.email,
               full_name: payload.full_name,
@@ -672,19 +707,12 @@ export default function DealDetail() {
         })
         .catch(() => {});
 
-      // Send Resend email to supplier about new lead
       if (deal.supplier_id && interestId) {
         supabase.functions
-          .invoke("send-email", {
-            body: {
-              type: "new_lead",
-              interest_id: interestId,
-            },
-          })
+          .invoke("send-email", { body: { type: "new_lead", interest_id: interestId } })
           .catch((e) => console.warn("[email] new_lead failed", e));
       }
 
-      // Confirmation email to resident is sent immediately only when no deposit is required.
       supabase.functions
         .invoke("send-email", {
           body: {
@@ -695,25 +723,13 @@ export default function DealDetail() {
           },
         })
         .catch((e) => console.warn("[email] deal_joined failed", e));
-
-      // Check if joining pushed the deal to a new price tier
-      if (tiersNow.length > 0) {
-        const { data: newCount } = await supabase.rpc("get_deal_paid_count", { _deal_id: deal.id });
-        const newCountNum = typeof newCount === "number" ? newCount : 0;
-        const activeTierAfter = getActiveTier(tiersNow, newCountNum);
-        if (activeTierAfter && activeTierNow && activeTierAfter.minParticipants !== activeTierNow.minParticipants) {
-          supabase.functions
-            .invoke("send-email", { body: { type: "tier_unlocked", deal_id: deal.id } })
-            .catch((e) => console.warn("[email] tier_unlocked failed", e));
-        }
-      }
-
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שמירה נכשלה");
     } finally {
       setSubmittingInterest(false);
     }
   };
+
 
   if (loading) {
     return (

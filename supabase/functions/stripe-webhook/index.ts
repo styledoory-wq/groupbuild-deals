@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
 
     const { data: dep, error: depErr } = await admin
       .from("deposits")
-      .select("id,user_id,deal_id,status,metadata,payment_kind")
+      .select("id,user_id,deal_id,status,metadata,payment_kind,amount,platform_fee_amount")
       .eq("id", depositId)
       .maybeSingle();
     if (depErr) throw depErr;
@@ -72,28 +72,57 @@ Deno.serve(async (req) => {
       .eq("id", depositId);
     if (upErr) throw upErr;
 
-    // Complete deal interest join
-    const interestId =
-      (dep.metadata as { interest_id?: string } | null)?.interest_id ?? null;
-    if (interestId) {
-      await admin
+    // The join record is created ONLY here, after the payment is confirmed.
+    // Idempotent: a duplicate webhook updates the existing row instead of
+    // creating a second participation.
+    if (dep.user_id && dep.deal_id) {
+      const meta = (dep.metadata ?? {}) as {
+        join_payload?: Record<string, unknown>;
+        interest_id?: string;
+      };
+      const join = meta.join_payload ?? {};
+      const feeAmount = Number(dep.platform_fee_amount ?? dep.amount ?? 0);
+
+      const { data: existing } = await admin
         .from("deal_interests")
-        .update({
-          status: "paid",
-          deposit_status: "paid",
-        })
-        .eq("id", interestId);
-    } else if (dep.user_id && dep.deal_id) {
-      await admin
-        .from("deal_interests")
-        .update({
-          status: "paid",
-          deposit_status: "paid",
-        })
+        .select("id")
         .eq("user_id", dep.user_id)
         .eq("deal_id", dep.deal_id)
-        .eq("is_deleted", false);
+        .eq("is_deleted", false)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const common = {
+        status: "paid",
+        deposit_status: "paid",
+        participation_status: "paid",
+        deposit_required: true,
+        deposit_amount: feeAmount,
+      };
+
+      if (existing?.id) {
+        await admin.from("deal_interests").update(common).eq("id", existing.id);
+      } else {
+        await admin.from("deal_interests").insert({
+          user_id: dep.user_id,
+          deal_id: dep.deal_id,
+          ...common,
+          full_name: (join.full_name as string) ?? null,
+          phone: (join.phone as string) ?? null,
+          city: (join.city as string) ?? null,
+          project_name: (join.project_name as string) ?? null,
+          notes: (join.notes as string) ?? null,
+          estimated_quantity: (join.estimated_quantity as number) ?? null,
+          terms_accepted_at: (join.terms_accepted_at as string) ?? nowIso,
+          join_condition: (join.join_condition as string) ?? null,
+          min_tier_locked: (join.min_tier_locked as number) ?? null,
+          conditional_status: "ok",
+          lead_status: "new",
+        });
+      }
     }
+
 
     return json({ ok: true, deposit_id: depositId });
   } catch (e) {

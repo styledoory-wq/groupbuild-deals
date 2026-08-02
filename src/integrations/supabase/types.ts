@@ -508,6 +508,7 @@ export type Database = {
           lead_status: string
           min_tier_locked: number | null
           notes: string | null
+          participation_status: string | null
           phone: string | null
           project_id: string | null
           project_name: string | null
@@ -543,6 +544,7 @@ export type Database = {
           lead_status?: string
           min_tier_locked?: number | null
           notes?: string | null
+          participation_status?: string | null
           phone?: string | null
           project_id?: string | null
           project_name?: string | null
@@ -578,6 +580,7 @@ export type Database = {
           lead_status?: string
           min_tier_locked?: number | null
           notes?: string | null
+          participation_status?: string | null
           phone?: string | null
           project_id?: string | null
           project_name?: string | null
@@ -736,6 +739,10 @@ export type Database = {
           offer_terms: string | null
           offer_type: string
           original_price: number
+          participation_fee_amount: number | null
+          participation_fee_base_price: number | null
+          participation_fee_locked_at: string | null
+          participation_fee_rule_id: string | null
           product_details: string | null
           project_id: string | null
           redemption_deadline: string | null
@@ -780,6 +787,10 @@ export type Database = {
           offer_terms?: string | null
           offer_type?: string
           original_price?: number
+          participation_fee_amount?: number | null
+          participation_fee_base_price?: number | null
+          participation_fee_locked_at?: string | null
+          participation_fee_rule_id?: string | null
           product_details?: string | null
           project_id?: string | null
           redemption_deadline?: string | null
@@ -824,6 +835,10 @@ export type Database = {
           offer_terms?: string | null
           offer_type?: string
           original_price?: number
+          participation_fee_amount?: number | null
+          participation_fee_base_price?: number | null
+          participation_fee_locked_at?: string | null
+          participation_fee_rule_id?: string | null
           product_details?: string | null
           project_id?: string | null
           redemption_deadline?: string | null
@@ -844,6 +859,13 @@ export type Database = {
           visibility_type?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "deals_participation_fee_rule_id_fkey"
+            columns: ["participation_fee_rule_id"]
+            isOneToOne: false
+            referencedRelation: "platform_fees"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deals_supplier_id_fkey"
             columns: ["supplier_id"]
@@ -1190,6 +1212,7 @@ export type Database = {
           created_at: string
           currency: string
           deal_id: string
+          deal_price_snapshot: number | null
           declared_paid_at: string | null
           declared_payment_method: string | null
           deleted_at: string | null
@@ -1204,9 +1227,12 @@ export type Database = {
           net_deposit_amount: number
           paid_at: string | null
           payment_fee_absorber: string
+          payment_kind: string
           payment_processing_fee_amount: number | null
           payment_processing_fee_status: string
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
+          platform_fee_amount: number | null
+          platform_fee_rule_id: string | null
           project_id: string | null
           provider_payment_url: string | null
           provider_transaction_id: string | null
@@ -1223,6 +1249,7 @@ export type Database = {
           created_at?: string
           currency?: string
           deal_id: string
+          deal_price_snapshot?: number | null
           declared_paid_at?: string | null
           declared_payment_method?: string | null
           deleted_at?: string | null
@@ -1237,9 +1264,12 @@ export type Database = {
           net_deposit_amount: number
           paid_at?: string | null
           payment_fee_absorber?: string
+          payment_kind?: string
           payment_processing_fee_amount?: number | null
           payment_processing_fee_status?: string
           payment_provider: Database["public"]["Enums"]["payment_provider_enum"]
+          platform_fee_amount?: number | null
+          platform_fee_rule_id?: string | null
           project_id?: string | null
           provider_payment_url?: string | null
           provider_transaction_id?: string | null
@@ -1256,6 +1286,7 @@ export type Database = {
           created_at?: string
           currency?: string
           deal_id?: string
+          deal_price_snapshot?: number | null
           declared_paid_at?: string | null
           declared_payment_method?: string | null
           deleted_at?: string | null
@@ -1270,9 +1301,12 @@ export type Database = {
           net_deposit_amount?: number
           paid_at?: string | null
           payment_fee_absorber?: string
+          payment_kind?: string
           payment_processing_fee_amount?: number | null
           payment_processing_fee_status?: string
           payment_provider?: Database["public"]["Enums"]["payment_provider_enum"]
+          platform_fee_amount?: number | null
+          platform_fee_rule_id?: string | null
           project_id?: string | null
           provider_payment_url?: string | null
           provider_transaction_id?: string | null
@@ -1284,6 +1318,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "deposits_platform_fee_rule_id_fkey"
+            columns: ["platform_fee_rule_id"]
+            isOneToOne: false
+            referencedRelation: "platform_fees"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deposits_project_id_fkey"
             columns: ["project_id"]
@@ -1849,6 +1890,101 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_fee_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          fee_id: string | null
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          fee_id?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          fee_id?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+        }
+        Relationships: []
+      }
+      platform_fees: {
+        Row: {
+          category_id: string | null
+          conditions: Json
+          created_at: string
+          currency: string
+          fee_amount: number
+          fee_type: string
+          id: string
+          is_active: boolean
+          listing_type: string | null
+          max_deal_price: number | null
+          min_deal_price: number
+          name: string | null
+          offer_type: string | null
+          priority: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          conditions?: Json
+          created_at?: string
+          currency?: string
+          fee_amount: number
+          fee_type?: string
+          id?: string
+          is_active?: boolean
+          listing_type?: string | null
+          max_deal_price?: number | null
+          min_deal_price?: number
+          name?: string | null
+          offer_type?: string | null
+          priority?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          conditions?: Json
+          created_at?: string
+          currency?: string
+          fee_amount?: number
+          fee_type?: string
+          id?: string
+          is_active?: boolean
+          listing_type?: string | null
+          max_deal_price?: number | null
+          min_deal_price?: number
+          name?: string | null
+          offer_type?: string | null
+          priority?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_fees_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
         ]
@@ -3205,7 +3341,78 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      participation_fee_revenue: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          deal_id: string | null
+          deal_price_snapshot: number | null
+          deposit_id: string | null
+          paid_at: string | null
+          payment_provider:
+            | Database["public"]["Enums"]["payment_provider_enum"]
+            | null
+          platform_fee_amount: number | null
+          platform_fee_rule_id: string | null
+          refunded_at: string | null
+          revenue_month: string | null
+          status: Database["public"]["Enums"]["deposit_status"] | null
+          supplier_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          deal_id?: string | null
+          deal_price_snapshot?: number | null
+          deposit_id?: string | null
+          paid_at?: string | null
+          payment_provider?:
+            | Database["public"]["Enums"]["payment_provider_enum"]
+            | null
+          platform_fee_amount?: never
+          platform_fee_rule_id?: string | null
+          refunded_at?: string | null
+          revenue_month?: never
+          status?: Database["public"]["Enums"]["deposit_status"] | null
+          supplier_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          deal_id?: string | null
+          deal_price_snapshot?: number | null
+          deposit_id?: string | null
+          paid_at?: string | null
+          payment_provider?:
+            | Database["public"]["Enums"]["payment_provider_enum"]
+            | null
+          platform_fee_amount?: never
+          platform_fee_rule_id?: string | null
+          refunded_at?: string | null
+          revenue_month?: never
+          status?: Database["public"]["Enums"]["deposit_status"] | null
+          supplier_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposits_platform_fee_rule_id_fkey"
+            columns: ["platform_fee_rule_id"]
+            isOneToOne: false
+            referencedRelation: "platform_fees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_user_project_invitation: {
@@ -3431,6 +3638,21 @@ export type Database = {
           slug: string
         }[]
       }
+      lock_deal_participation_fee: {
+        Args: {
+          _base_price: number
+          _deal_id: string
+          _fee_amount: number
+          _rule_id: string
+        }
+        Returns: {
+          base_price: number
+          fee_amount: number
+          locked_at: string
+          rule_id: string
+          was_already_locked: boolean
+        }[]
+      }
       lookup_voucher_for_supplier: { Args: { _code: string }; Returns: Json }
       match_suppliers_for_demand: {
         Args: { _demand_id: string }
@@ -3497,6 +3719,23 @@ export type Database = {
       resident_mark_deposit_paid: {
         Args: { _interest_id: string }
         Returns: undefined
+      }
+      resolve_platform_fee: {
+        Args: {
+          _category_id?: string
+          _deal_price: number
+          _fee_type?: string
+          _listing_type?: string
+          _offer_type?: string
+        }
+        Returns: {
+          currency: string
+          fee_amount: number
+          max_deal_price: number
+          min_deal_price: number
+          name: string
+          rule_id: string
+        }[]
       }
       rollback_supplier_categories_migration: { Args: never; Returns: number }
       save_supplier_onboarding: {
