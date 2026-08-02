@@ -112,7 +112,6 @@ export default function OfferEditor() {
   const [categoryId, setCategoryId] = useState<string>("");
   const [depositRequired, setDepositRequired] = useState<boolean>(false);
   const [depositAmount, setDepositAmount] = useState<string>("");
-  const [supplierPaymentLink, setSupplierPaymentLink] = useState<string>("");
   const [supplierPaymentInstructions, setSupplierPaymentInstructions] = useState<string>("");
   const [depositLimits, setDepositLimits] = useState<DepositLimits>({ min: null, max: null });
   const [saving, setSaving] = useState(false);
@@ -262,7 +261,6 @@ export default function OfferEditor() {
             if (deal.category_id) setCategoryId(deal.category_id);
             setDepositRequired(!!deal.deposit_required);
             if (deal.deposit_amount != null && Number(deal.deposit_amount) > 0) setDepositAmount(String(deal.deposit_amount));
-            if (deal.supplier_payment_link) setSupplierPaymentLink(String(deal.supplier_payment_link));
             if (deal.supplier_payment_instructions) setSupplierPaymentInstructions(String(deal.supplier_payment_instructions));
             const rawType = (deal.offer_type ?? "percentage") as OfferType;
             setOfferType(rawType);
@@ -611,7 +609,7 @@ export default function OfferEditor() {
 
   const stepMissing = useMemo(() => missingForStep(step), // eslint-disable-line react-hooks/exhaustive-deps
     [step, title, categoryId, listingType, unitPrice, offerType, tiers, depositRequired, depositAmount,
-      supplierPaymentLink, visibilityType, visibilityProjectId, visibilityRegions, commitmentAccepted]);
+      visibilityType, visibilityProjectId, visibilityRegions, commitmentAccepted]);
   const missingKeys = useMemo(() => new Set(stepMissing.map((m) => m.key)), [stepMissing]);
 
   if (bootLoading) {
