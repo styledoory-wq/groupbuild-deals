@@ -63,7 +63,7 @@ export default function AdminDeposits() {
     try {
       const { data, error } = await supabase
         .from("deposits")
-        .select("id,user_id,deal_id,amount,gross_deposit_amount,payment_processing_fee_amount,payment_processing_fee_status,net_deposit_amount,supplier_deduction_amount,supplier_deduction_basis,payment_fee_absorber,status,payment_provider,created_at,paid_at,refunded_at,is_hidden")
+        .select("id,user_id,deal_id,amount,gross_deposit_amount,payment_processing_fee_amount,payment_processing_fee_status,net_deposit_amount,supplier_deduction_amount,supplier_deduction_basis,payment_fee_absorber,status,payment_provider,payment_kind,payment_environment,created_at,paid_at,refunded_at,is_hidden")
         .eq("is_deleted", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
