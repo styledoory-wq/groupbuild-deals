@@ -114,7 +114,7 @@ export default function SupplierOfferMarketingEdit() {
           <div className="text-fs-sm leading-relaxed">
             <div className="font-bold text-[#1F2937] mb-0.5">עריכה בטוחה</div>
             <p className="text-[#6B7280]">
-              ניתן לעדכן את הטקסט השיווקי, הכותרת והתיאור — נתוני פיקדון, מדרגות ותנאים נעולים לשמירה על ההוגנות לדיירים.
+              ניתן לעדכן את הטקסט השיווקי, הכותרת והתיאור — נתוני תמחור, מדרגות ותנאים נעולים לשמירה על ההוגנות לדיירים.
             </p>
           </div>
         </div>

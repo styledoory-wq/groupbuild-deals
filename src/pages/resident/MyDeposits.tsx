@@ -114,7 +114,7 @@ export default function MyDeposits() {
     const meta =
       status === "paid" ? { label: "שולם", cls: "text-success bg-success/10" }
       : status === "pending" ? { label: "ממתין", cls: "text-primary bg-gold/15" }
-      : status === "refunded" ? { label: "פיקדון הוחזר", cls: "text-muted-foreground bg-muted" }
+      : status === "refunded" ? { label: "דמי השתתפות הוחזרו", cls: "text-muted-foreground bg-muted" }
       : status === "cancelled" ? { label: "בוטל", cls: "text-muted-foreground bg-muted" }
       : status === "failed" ? { label: "נכשל", cls: "text-destructive bg-destructive/10" }
       : { label: status, cls: "text-muted-foreground bg-muted" };
@@ -143,7 +143,7 @@ export default function MyDeposits() {
           <div className="flex-1 min-w-0">
             <div className={"font-bold text-sm truncate " + (dealMissing ? "text-muted-foreground italic" : "")}>{dealTitle}</div>
             <div className="text-fs-xs text-muted-foreground">
-              פיקדון {formatILS(Number(dep.amount))} · {stampDate}
+              דמי השתתפות {formatILS(Number(dep.amount))} · {stampDate}
               {status === "refunded" && dep.refunded_at ? " · הוחזר" : ""}
             </div>
           </div>
@@ -170,13 +170,13 @@ export default function MyDeposits() {
 
   return (
     <MobileShell>
-      <BackHeader title="הפיקדונות שלי" subtitle="ריכוז כל הפיקדונות שלך" />
+      <BackHeader title="דמי ההשתתפות שלי" subtitle="ריכוז כל תשלומי דמי ההשתתפות שלך" />
 
       <section className="px-5 mt-4 mb-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
             <History className="h-4 w-4 text-gold" />
-            פיקדונות פעילים
+            דמי השתתפות פעילים
           </h2>
           {hiddenCount > 0 && (
             <button onClick={() => setShowHidden((v) => !v)} className="text-fs-xs text-muted-foreground hover:text-primary">
@@ -190,8 +190,8 @@ export default function MyDeposits() {
           ) : activeDeposits.length === 0 ? (
             <EmptyState
               icon={<History className="h-7 w-7 text-[#9CA3AF]" />}
-              title="אין פיקדונות פעילים"
-              description="הפיקדונות שלך יופיעו כאן לאחר שתצטרף לעסקה."
+              title="אין דמי השתתפות פעילים"
+              description="תשלומי דמי ההשתתפות שלך יופיעו כאן לאחר שתצטרף לעסקה."
             />
           ) : activeDeposits.map(renderItem)}
         </div>
@@ -201,7 +201,7 @@ export default function MyDeposits() {
         <section className="px-5 mb-5">
           <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
             <History className="h-4 w-4 text-muted-foreground" />
-            היסטוריית פיקדונות
+            היסטוריית דמי השתתפות
           </h2>
           <div className="space-y-2">{historyDeposits.map(renderItem)}</div>
         </section>
@@ -211,7 +211,7 @@ export default function MyDeposits() {
         <section className="px-5 mb-5">
           <h2 className="text-sm font-bold text-muted-foreground mb-3 flex items-center gap-2">
             <History className="h-4 w-4" />
-            פיקדונות לא רלוונטיים
+            תשלומים לא רלוונטיים
           </h2>
           <div className="space-y-2 opacity-80">{irrelevantDeposits.map(renderItem)}</div>
         </section>
@@ -220,9 +220,9 @@ export default function MyDeposits() {
       <AlertDialog open={!!confirmDeleteId} onOpenChange={(o) => !o && setConfirmDeleteId(null)}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
-            <AlertDialogTitle>למחוק את הפיקדון מההיסטוריה?</AlertDialogTitle>
+            <AlertDialogTitle>למחוק את התשלום מההיסטוריה?</AlertDialogTitle>
             <AlertDialogDescription>
-              הפיקדון יוסתר מהתצוגה שלך. הנתונים נשמרים במערכת לצורך תיעוד ואפשר לשחזר דרך מנהל המערכת.
+              התשלום יוסתר מהתצוגה שלך. הנתונים נשמרים במערכת לצורך תיעוד ואפשר לשחזר דרך מנהל המערכת.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Copy, Check, Smartphone, Building2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PARTICIPATION_FEE_DESCRIPTION, PARTICIPATION_FEE_LABEL } from "@/lib/platformFees";
 
 export interface SupplierPaymentInfo {
   business_name?: string | null;
@@ -32,6 +32,7 @@ export function PaymentInstructionsCard({ depositId, amount, supplierPaymentInfo
       supplierPaymentInfo?.bank_name ||
       supplierPaymentInfo?.bank_account_holder,
   );
+  const hasSupplierPay = hasBit || hasBank;
   const [method, setMethod] = useState<"bit" | "bank">(hasBit ? "bit" : "bank");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -54,10 +55,10 @@ export function PaymentInstructionsCard({ depositId, amount, supplierPaymentInfo
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase.rpc as any)("declare_deposit_paid", {
         _deposit_id: depositId,
-        _method: method,
+        _method: hasSupplierPay ? method : "manual",
       });
       if (error) throw error;
-      toast.success("הפיקדון סומן כשולם — ממתין לאישור הספק");
+      toast.success("דמי ההשתתפות סומנו כשולמו — ממתין לאישור");
       onDeclared?.();
     } catch (e) {
       console.error("[declare_deposit_paid]", e);
@@ -68,16 +69,26 @@ export function PaymentInstructionsCard({ depositId, amount, supplierPaymentInfo
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" dir="rtl">
       <div className="rounded-2xl bg-[#EAF2FF] p-4 text-right">
-        <div className="text-[11px] font-semibold text-[#0E6B5A]">סכום להעברה</div>
+        <div className="text-[11px] font-semibold text-[#0E6B5A]">{PARTICIPATION_FEE_LABEL}</div>
         <div className="text-[26px] font-extrabold text-[#0F172A] mt-0.5">{ils(amount)}</div>
-        {supplierPaymentInfo?.business_name && (
+        <p className="text-[12px] text-muted-foreground mt-2 leading-relaxed">
+          {PARTICIPATION_FEE_DESCRIPTION}
+        </p>
+        {supplierPaymentInfo?.business_name && hasSupplierPay && (
           <div className="text-[12px] text-muted-foreground mt-1">לטובת: {supplierPaymentInfo.business_name}</div>
         )}
       </div>
 
-      {(hasBit || hasBank) && (
+      {!hasSupplierPay && (
+        <div className="rounded-2xl border border-border bg-muted/40 p-4 text-[13px] leading-relaxed text-foreground">
+          התשלום מתבצע דרך מסך הסליקה של הפלטפורמה (Stripe). אם לא נפתח מסך תשלום —
+          נסו שוב מ״המשך לתשלום״ בעמוד העסקה, או פנו לתמיכה.
+        </div>
+      )}
+
+      {hasSupplierPay && (
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -112,48 +123,53 @@ export function PaymentInstructionsCard({ depositId, amount, supplierPaymentInfo
         </div>
       )}
 
-      <div className="rounded-2xl bg-white border border-border p-4 space-y-2 text-right">
-        {method === "bit" && hasBit && (
-          <Row
-            label="מספר טלפון לביט"
-            value={supplierPaymentInfo?.bit_phone}
-            copiedKey={copiedKey}
-            keyName="bit_phone"
-            onCopy={copy}
-            ltr
-          />
-        )}
-        {method === "bank" && hasBank && (
-          <>
-            <Row label="ע״ש" value={supplierPaymentInfo?.bank_account_holder} copiedKey={copiedKey} keyName="holder" onCopy={copy} />
-            <Row label="בנק" value={supplierPaymentInfo?.bank_name} copiedKey={copiedKey} keyName="bank" onCopy={copy} />
-            <Row label="סניף" value={supplierPaymentInfo?.bank_branch} copiedKey={copiedKey} keyName="branch" onCopy={copy} ltr />
-            <Row label="חשבון" value={supplierPaymentInfo?.bank_account_number} copiedKey={copiedKey} keyName="account" onCopy={copy} ltr />
-          </>
-        )}
-        {!hasBit && !hasBank && (
-          <p className="text-[13px] text-muted-foreground">
-            הספק לא הזין עדיין פרטי תשלום. אנא צור קשר עם הספק.
-          </p>
-        )}
-        {supplierPaymentInfo?.note && (
-          <div className="pt-2 mt-2 border-t border-border">
-            <div className="text-[11px] font-bold text-muted-foreground mb-1">הערות מהספק</div>
-            <Textarea value={supplierPaymentInfo.note} readOnly rows={2} className="text-[12px] rounded-xl resize-none" />
+      {hasSupplierPay && method === "bit" && hasBit && (
+        <div className="rounded-2xl border border-border p-4 space-y-2">
+          <div className="text-[12px] font-bold">מספר ביט לתשלום</div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-extrabold text-[16px] gb-num" dir="ltr">
+              {supplierPaymentInfo?.bit_phone}
+            </span>
+            <button
+              type="button"
+              onClick={() => void copy("bit", supplierPaymentInfo?.bit_phone)}
+              className="h-9 px-3 rounded-xl bg-muted text-xs font-bold flex items-center gap-1"
+            >
+              {copiedKey === "bit" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              העתק
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {hasSupplierPay && method === "bank" && hasBank && (
+        <div className="rounded-2xl border border-border p-4 space-y-2 text-[13px]">
+          {supplierPaymentInfo?.bank_account_holder && (
+            <Row label="שם בעל החשבון" value={supplierPaymentInfo.bank_account_holder} onCopy={() => void copy("holder", supplierPaymentInfo.bank_account_holder)} copied={copiedKey === "holder"} />
+          )}
+          {supplierPaymentInfo?.bank_name && (
+            <Row label="בנק" value={supplierPaymentInfo.bank_name} onCopy={() => void copy("bank", supplierPaymentInfo.bank_name)} copied={copiedKey === "bank"} />
+          )}
+          {supplierPaymentInfo?.bank_branch && (
+            <Row label="סניף" value={supplierPaymentInfo.bank_branch} onCopy={() => void copy("branch", supplierPaymentInfo.bank_branch)} copied={copiedKey === "branch"} />
+          )}
+          {supplierPaymentInfo?.bank_account_number && (
+            <Row label="מספר חשבון" value={supplierPaymentInfo.bank_account_number} onCopy={() => void copy("account", supplierPaymentInfo.bank_account_number)} copied={copiedKey === "account"} />
+          )}
+          {supplierPaymentInfo?.note && (
+            <p className="text-[12px] text-muted-foreground pt-1">{supplierPaymentInfo.note}</p>
+          )}
+        </div>
+      )}
 
       <Button
-        onClick={handleDeclare}
+        type="button"
+        onClick={() => void handleDeclare()}
         disabled={submitting}
-        className="w-full h-12 rounded-2xl bg-[#0E6B5A] hover:bg-[#0E6B5A]/95 text-white font-extrabold text-[14px]"
+        className="w-full h-12 rounded-2xl bg-[#0E6B5A] font-extrabold"
       >
-        {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "סימנתי שהעברתי"}
+        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "סימנתי ששילמתי"}
       </Button>
-      <p className="text-[11px] text-center text-muted-foreground leading-tight">
-        אחרי שתסמן, הספק יקבל התראה ויאשר את הקבלה. רק לאחר אישורו ההצטרפות שלך תושלם.
-      </p>
     </div>
   );
 }
@@ -161,35 +177,28 @@ export function PaymentInstructionsCard({ depositId, amount, supplierPaymentInfo
 function Row({
   label,
   value,
-  copiedKey,
-  keyName,
   onCopy,
-  ltr,
+  copied,
 }: {
   label: string;
-  value: string | null | undefined;
-  copiedKey: string | null;
-  keyName: string;
-  onCopy: (k: string, v: string | null | undefined) => void;
-  ltr?: boolean;
+  value: string;
+  onCopy: () => void;
+  copied: boolean;
 }) {
-  if (!value) return null;
   return (
     <div className="flex items-center justify-between gap-2">
+      <div>
+        <div className="text-[11px] text-muted-foreground">{label}</div>
+        <div className="font-bold">{value}</div>
+      </div>
       <button
         type="button"
-        onClick={() => onCopy(keyName, value)}
-        className="h-7 w-7 rounded-full bg-[#F4F6FA] flex items-center justify-center text-[#0E6B5A] shrink-0"
-        aria-label="העתק"
+        onClick={onCopy}
+        className="h-8 px-2.5 rounded-lg bg-muted text-[11px] font-bold flex items-center gap-1"
       >
-        {copiedKey === keyName ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+        העתק
       </button>
-      <div className="flex-1 min-w-0 text-right">
-        <div className="text-[10px] font-semibold text-muted-foreground">{label}</div>
-        <div className={"text-[14px] font-bold text-[#0F172A] truncate " + (ltr ? "ltr text-left" : "")} dir={ltr ? "ltr" : undefined}>
-          {value}
-        </div>
-      </div>
     </div>
   );
 }

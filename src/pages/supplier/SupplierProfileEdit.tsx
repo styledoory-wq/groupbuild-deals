@@ -524,7 +524,7 @@ export default function SupplierProfileEdit() {
           )}
 
           {activeSection === "payment" && (
-            <Section title="פרטי תשלום" subtitle="יוצגו לדיירים להעברת פיקדון">
+            <Section title="פרטי תשלום" subtitle="יוצגו לדיירים להעברת תשלום">
               <Field label="טלפון לביט">
                 <Input dir="ltr" value={bitPhone} onChange={(e) => setBitPhone(e.target.value)} maxLength={20} placeholder="050-0000000" className="h-11 rounded-xl" />
               </Field>

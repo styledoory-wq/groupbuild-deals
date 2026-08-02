@@ -74,7 +74,7 @@ const EVENTS: Array<{
   pushKey: keyof Settings;
 }> = [
   { label: "אישור חשבון", desc: "כשהאדמין מאשר את החשבון שלך.", emailKey: "approval_email_enabled", pushKey: "approval_push_enabled" },
-  { label: "אישור פיקדון", desc: "כשתשלום או פיקדון מתקבל.", emailKey: "deposit_email_enabled", pushKey: "deposit_push_enabled" },
+  { label: "אישור דמי השתתפות", desc: "כשתשלום דמי השתתפות מתקבל.", emailKey: "deposit_email_enabled", pushKey: "deposit_push_enabled" },
   { label: "ליד חדש (ספקים)", desc: "כשדייר מתעניין בהצעה שלך.", emailKey: "new_lead_email_enabled", pushKey: "new_lead_push_enabled" },
   { label: "ביקושים חדשים באזור שלי", desc: "כשדייר מבקש שירות בקטגוריה ובאזור שלך.", emailKey: "demand_invitation_email_enabled", pushKey: "demand_invitation_push_enabled" },
   { label: "הצעה חדשה", desc: "כשספק מפרסם הצעה רלוונטית.", emailKey: "new_offer_email_enabled", pushKey: "new_offer_push_enabled" },

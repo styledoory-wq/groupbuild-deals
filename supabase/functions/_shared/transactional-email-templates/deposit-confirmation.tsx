@@ -12,9 +12,9 @@ interface Props {
 }
 
 const Email = ({ name, dealTitle = 'העסקה שלך', amount, currency = '₪', reference, receiptUrl = 'https://groupbuild.co.il/my-deposits' }: Props) => (
-  <EmailLayout preview={`אישור פיקדון עבור ${dealTitle}`}>
-    <H1>{name ? `${name}, הפיקדון התקבל ✅` : 'הפיקדון התקבל'}</H1>
-    <P>קיבלנו את הפיקדון שלך והמקום שלך בעסקה נשמר.</P>
+  <EmailLayout preview={`אישור דמי השתתפות עבור ${dealTitle}`}>
+    <H1>{name ? `${name}, דמי ההשתתפות התקבלו ✅` : 'דמי ההשתתפות התקבלו'}</H1>
+    <P>קיבלנו את דמי ההשתתפות שלך והמקום שלך בעסקה נשמר.</P>
     <InfoCard>
       <KeyValue label="עסקה" value={dealTitle} />
       {amount !== undefined ? <KeyValue label="סכום" value={`${currency}${amount}`} /> : null}
@@ -22,13 +22,13 @@ const Email = ({ name, dealTitle = 'העסקה שלך', amount, currency = '₪'
     </InfoCard>
     <CTAButton href={receiptUrl}>צפייה בקבלה</CTAButton>
     <Divider />
-    <Muted>הפיקדון מוחזק בנאמנות עד למימוש העסקה. פרטים מלאים באזור האישי.</Muted>
+    <Muted>דמי ההשתתפות הם תשלום לפלטפורמה עבור ניהול הקבוצה ושמירת המקום. פרטים מלאים באזור האישי.</Muted>
   </EmailLayout>
 )
 
 export const template = {
   component: Email,
-  subject: (d: Props) => `אישור פיקדון · ${d?.dealTitle || 'העסקה שלך'}`,
-  displayName: 'אישור פיקדון',
-  previewData: { name: 'דנה', dealTitle: 'ניקיון לובי', amount: 150, currency: '₪', reference: 'DEP-00123', receiptUrl: 'https://groupbuild.co.il/my-deposits' },
+  subject: (d: Props) => `אישור דמי השתתפות · ${d?.dealTitle || 'העסקה שלך'}`,
+  displayName: 'אישור דמי השתתפות',
+  previewData: { name: 'דנה', dealTitle: 'ניקיון לובי', amount: 49, currency: '₪', reference: 'FEE-00123', receiptUrl: 'https://groupbuild.co.il/my-deposits' },
 } satisfies TemplateEntry

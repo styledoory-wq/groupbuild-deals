@@ -13,6 +13,8 @@ const AdminCatalog = lazy(() => import("@/pages/admin/AdminCatalog"));
 const AdminProjectStages = lazy(() => import("@/pages/admin/AdminProjectStages"));
 const AdminDeals = lazy(() => import("@/pages/admin/AdminDeals"));
 const AdminDeposits = lazy(() => import("@/pages/admin/AdminDeposits"));
+const AdminPlatformFees = lazy(() => import("@/pages/admin/AdminPlatformFees"));
+const AdminFeeRevenue = lazy(() => import("@/pages/admin/AdminFeeRevenue"));
 const AdminPaymentSettings = lazy(() => import("@/pages/admin/AdminPaymentSettings"));
 const AdminRegions = lazy(() => import("@/pages/admin/AdminRegions"));
 const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"));
@@ -51,6 +53,8 @@ export const adminRoutes = (
     <Route path="/admin/project-stages" element={g(<AdminProjectStages />)} />
     <Route path="/admin/deals" element={g(<AdminDeals />)} />
     <Route path="/admin/deposits" element={g(<AdminDeposits />)} />
+    <Route path="/admin/platform-fees" element={g(<AdminPlatformFees />)} />
+    <Route path="/admin/fee-revenue" element={g(<AdminFeeRevenue />)} />
     <Route path="/admin/payment-settings" element={g(<AdminPaymentSettings />)} />
     <Route path="/admin/regions" element={g(<AdminRegions />)} />
     <Route path="/admin/users" element={g(<AdminUsers />)} />

@@ -30,6 +30,8 @@ const SearchPage = lazy(() => import("@/pages/resident/Search"));
 const PublicPrivacy = lazy(() => import("@/pages/Privacy"));
 const PublicSupport = lazy(() => import("@/pages/Support"));
 const NotificationSettings = lazy(() => import("@/pages/NotificationSettings"));
+const PaymentSuccess = lazy(() => import("@/pages/PaymentSuccess"));
+const PaymentCancel = lazy(() => import("@/pages/PaymentCancel"));
 const MarketingTemplatesPreview = lazy(() => import("@/pages/supplier/MarketingTemplatesPreview"));
 const MarketingMockups = lazy(() => import("@/pages/supplier/MarketingMockups"));
 const CommitteeDashboard = lazy(() => import("@/pages/committee/CommitteeDashboard"));
@@ -92,6 +94,8 @@ export const publicRoutes = (
     <Route path="/search" element={<SearchPage />} />
     <Route path="/privacy" element={<PublicPrivacy />} />
     <Route path="/support" element={<PublicSupport />} />
+    <Route path="/payment/success" element={<PaymentSuccess />} />
+    <Route path="/payment/cancel" element={<PaymentCancel />} />
     <Route path="/settings/notifications" element={<NotificationSettings />} />
     <Route path="/marketing-templates-preview" element={<MarketingTemplatesPreview />} />
     <Route path="/marketing-mockups" element={<MarketingMockups />} />

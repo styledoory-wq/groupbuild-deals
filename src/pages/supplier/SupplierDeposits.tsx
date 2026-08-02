@@ -82,7 +82,7 @@ export default function SupplierDeposits() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase.rpc as any)("confirm_deposit_received", { _deposit_id: id });
       if (error) throw error;
-      toast.success("הפיקדון אושר");
+      toast.success("דמי ההשתתפות אושרו");
       setRows((rs) => rs.filter((r) => r.id !== id));
     } catch (e) {
       console.error("[confirm_deposit_received]", e);

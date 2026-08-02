@@ -235,7 +235,7 @@ export default function SupplierRevenue() {
               <p className="text-[13px] text-[#64748B] mt-1.5 leading-relaxed text-right">
                 {isSupplierLocked(approvalStatus)
                   ? "אחרי האישור תוכלו לפרסם הצעות ולקבל פיקדונות. המסך הזה יציג סיכום חודשי ועסקאות."
-                  : "כשלקוח מממש קופון או משלם פיקדון — העסקה תופיע כאן עם סכום ותאריך."}
+                  : "כשלקוח מממש קופון או משלם דמי השתתפות — העסקה תופיע כאן עם סכום ותאריך."}
               </p>
               <div className="mt-4 space-y-2">
                 {!isSupplierLocked(approvalStatus) && (
