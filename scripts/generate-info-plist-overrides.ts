@@ -43,10 +43,21 @@ function removeKey(key: string) {
   plist = plist.replace(re, "");
 }
 
+function upsertBool(key: string, value: boolean) {
+  const tag = value ? "<true/>" : "<false/>";
+  const re = new RegExp(`(<key>${key}</key>\\s*)(<true/>|<false/>)`);
+  if (re.test(plist)) plist = plist.replace(re, `$1${tag}`);
+  else plist = plist.replace(/<dict>/, `<dict>\n\t<key>${key}</key>\n\t${tag}`);
+}
+
 // Identity + versioning
 upsertString("CFBundleDisplayName", p.appName);
 upsertString("CFBundleShortVersionString", p.version);
 upsertString("CFBundleVersion", p.buildNumber);
+
+// Export compliance — required by App Store Connect for every upload.
+upsertBool("ITSAppUsesNonExemptEncryption", false);
+
 
 // Usage descriptions — write only what's declared; strip the rest.
 const usageMap: Record<keyof NonNullable<typeof p.iosUsageDescriptions>, string> = {
