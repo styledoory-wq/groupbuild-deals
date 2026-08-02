@@ -90,5 +90,8 @@ export function providerIsReady(
   env: PaymentEnvironment,
 ): boolean {
   if (provider === "stripe") return !!getStripeSecretKey(env);
-  return !!getCardcomCredentials(env);
+  // Cardcom also needs the webhook secret: without it no payment can be
+  // verified, so we must not open a checkout at all (fail closed).
+  return !!getCardcomCredentials(env) && !!getCardcomWebhookSecret();
 }
+
