@@ -57,6 +57,8 @@ export const adminRoutes = (
     <Route path="/admin/deposits" element={g(<AdminDeposits />)} />
     <Route path="/admin/platform-fees" element={g(<AdminPlatformFees />)} />
     <Route path="/admin/fee-revenue" element={g(<AdminFeeRevenue />)} />
+    <Route path="/admin/offer-pricing-fixes" element={g(<AdminOfferPricingFixes />)} />
+
     <Route path="/admin/payment-settings" element={g(<AdminPaymentSettings />)} />
     <Route path="/admin/regions" element={g(<AdminRegions />)} />
     <Route path="/admin/users" element={g(<AdminUsers />)} />
