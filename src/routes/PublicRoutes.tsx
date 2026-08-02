@@ -25,6 +25,7 @@ const CategorySuppliers = lazy(() => import("@/pages/resident/CategorySuppliers"
 const DealsList = lazy(() => import("@/pages/resident/DealsList"));
 const DealDetail = lazy(() => import("@/pages/resident/DealDetail"));
 const SharedDeal = lazy(() => import("@/pages/SharedDeal"));
+const DeepLinkRedirect = lazy(() => import("@/pages/public/DeepLinkRedirect"));
 const Browse = lazy(() => import("@/pages/Browse"));
 const SearchPage = lazy(() => import("@/pages/resident/Search"));
 const PublicPrivacy = lazy(() => import("@/pages/Privacy"));
