@@ -798,13 +798,14 @@ export default function OfferEditor() {
 
               <Field label="קטגוריה" required
                 error={shouldShowError("category") ? "יש לבחור קטגוריה" : undefined}>
-                <select value={categoryId}
-                  onChange={(e) => { setCategoryId(e.target.value); markTouched("category"); }}
-                  onBlur={() => markTouched("category")}
-                  className={`h-11 w-full rounded-xl bg-white ring-1 px-3 text-[13.5px] text-[#1F2937] focus:outline-none focus:ring-[#0E6B5A]/40 ${shouldShowError("category") ? "ring-destructive/50" : "ring-black/[0.06]"}`}>
-                  <option value="">— בחר —</option>
-                  {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-                </select>
+                <CategorySinglePicker
+                  categories={categories}
+                  value={categoryId}
+                  suggestedIds={supplierCategoryIds}
+                  invalid={shouldShowError("category")}
+                  onChange={(id) => { setCategoryId(id); markTouched("category"); }}
+                />
+
               </Field>
 
               <Field label="תיאור" hint="מה כלול, למי זה מתאים">
