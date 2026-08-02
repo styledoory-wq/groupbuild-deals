@@ -595,7 +595,7 @@ export default function OfferEditor() {
         }
         if (depositRequired) {
           if (!depositAmount.trim()) miss.push({ key: "depositAmount", label: "סכום דמי השתתפות" });
-          if (!supplierPaymentLink.trim()) miss.push({ key: "paymentLink", label: "קישור תשלום" });
+          
         }
       }
       if (visibilityType === "project_only" && !visibilityProjectId) miss.push({ key: "project", label: "פרויקט יעד" });
