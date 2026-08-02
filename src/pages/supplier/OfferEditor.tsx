@@ -446,7 +446,7 @@ export default function OfferEditor() {
       offer_type: offerType,
       deposit_required: isRegular ? false : depositRequired,
       deposit_amount: !isRegular && depositRequired ? cleanDepositAmount : 0,
-      supplier_payment_link: !isRegular && depositRequired ? (supplierPaymentLink.trim() || null) : null,
+      supplier_payment_link: null,
       supplier_payment_instructions: !isRegular && depositRequired ? (supplierPaymentInstructions.trim() || null) : null,
       tiers: cleanTiers as unknown as Json,
       highlights: [] as unknown as Json,
