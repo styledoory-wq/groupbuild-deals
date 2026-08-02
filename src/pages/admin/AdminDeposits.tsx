@@ -22,6 +22,9 @@ type DbDeposit = {
   payment_fee_absorber: string;
   status: string;
   payment_provider: string | null;
+  payment_kind: string | null;
+  payment_environment: string | null;
+
   created_at: string;
   paid_at: string | null;
   refunded_at: string | null;

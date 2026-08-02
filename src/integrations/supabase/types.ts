@@ -1226,6 +1226,7 @@ export type Database = {
           metadata: Json | null
           net_deposit_amount: number
           paid_at: string | null
+          payment_environment: string | null
           payment_fee_absorber: string
           payment_kind: string
           payment_processing_fee_amount: number | null
@@ -1263,6 +1264,7 @@ export type Database = {
           metadata?: Json | null
           net_deposit_amount: number
           paid_at?: string | null
+          payment_environment?: string | null
           payment_fee_absorber?: string
           payment_kind?: string
           payment_processing_fee_amount?: number | null
@@ -1300,6 +1302,7 @@ export type Database = {
           metadata?: Json | null
           net_deposit_amount?: number
           paid_at?: string | null
+          payment_environment?: string | null
           payment_fee_absorber?: string
           payment_kind?: string
           payment_processing_fee_amount?: number | null
@@ -3462,6 +3465,10 @@ export type Database = {
         Args: { _body: string; _demand_id: string; _subject: string }
         Returns: number
       }
+      admin_override_participation_payment: {
+        Args: { _deposit_id: string; _reason: string }
+        Returns: undefined
+      }
       admin_revoke_committee_role: {
         Args: { _project_id?: string; _reason?: string; _user_id: string }
         Returns: undefined
@@ -3529,6 +3536,10 @@ export type Database = {
       evaluate_conditional_joiners: {
         Args: { _deal_id: string }
         Returns: undefined
+      }
+      expire_stale_pending_deposits: {
+        Args: { _older_than_minutes?: number }
+        Returns: number
       }
       get_admin_demand_kpis: { Args: never; Returns: Json }
       get_committee_dashboard: { Args: { _project_id?: string }; Returns: Json }
@@ -3893,6 +3904,7 @@ export type Database = {
         | "cancelled"
         | "refunded"
         | "awaiting_confirmation"
+        | "expired"
       payment_provider_enum:
         | "grow"
         | "cardcom"
@@ -4036,6 +4048,7 @@ export const Constants = {
         "cancelled",
         "refunded",
         "awaiting_confirmation",
+        "expired",
       ],
       payment_provider_enum: [
         "grow",
