@@ -235,10 +235,10 @@ Deno.serve(async (req) => {
       if (!(await prefAllows(body.user_id, "deposit"))) return json({ success: true, skipped: "user_pref" });
       const detail = body.deal_title ? ` עבור <b>${escapeHtml(body.deal_title)}</b>` : "";
       const amount = body.amount ? ` בסך ${escapeHtml(body.amount)} ₪` : "";
-      const html = wrap("הפיקדון שלך אושר ✅",
-        `<p>שלום ${escapeHtml(name)},</p><p>הפיקדון שלך${amount}${detail} התקבל בהצלחה.</p>`,
-        "https://groupbuild.co.il/resident/my-deposits", "צפייה בפיקדונות שלי");
-      await sendResend(email, "אישור פיקדון — GroupBuild", html);
+      const html = wrap("דמי ההשתתפות שלך אושרו ✅",
+        `<p>שלום ${escapeHtml(name)},</p><p>דמי ההשתתפות שלך${amount}${detail} התקבלו בהצלחה.</p>`,
+        "https://groupbuild.co.il/resident/deposits", "צפייה בדמי ההשתתפות שלי");
+      await sendResend(email, "אישור דמי השתתפות — GroupBuild", html);
       return json({ success: true });
     }
 

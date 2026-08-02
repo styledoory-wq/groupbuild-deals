@@ -90,7 +90,7 @@ export default function AdminDeposits() {
       setProfiles(profMap);
     } catch (err) {
       console.error("[AdminDeposits] load failed", err);
-      toast.error(err instanceof Error ? err.message : "טעינת הפיקדונות נכשלה");
+      toast.error(err instanceof Error ? err.message : "טעינת דמי ההשתתפות נכשלה");
     } finally {
       setLoading(false);
     }
@@ -105,7 +105,7 @@ export default function AdminDeposits() {
       const patch = status === "paid" ? { status, paid_at: nowIso } : { status, refunded_at: nowIso };
       const { error } = await supabase.from("deposits").update(patch).eq("id", id);
       if (error) throw error;
-      toast.success(status === "paid" ? "הפיקדון סומן כשולם" : "הפיקדון הוחזר");
+      toast.success(status === "paid" ? "דמי ההשתתפות סומנו כשולמו" : "דמי ההשתתפות הוחזרו");
       await load();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "עדכון נכשל");
@@ -122,7 +122,7 @@ export default function AdminDeposits() {
         .update({ is_hidden: !currentlyHidden })
         .eq("id", id);
       if (error) throw error;
-      toast.success(currentlyHidden ? "הפיקדון הוחזר לתצוגה" : "הפיקדון הוסתר מהתצוגה");
+      toast.success(currentlyHidden ? "התשלום הוחזר לתצוגה" : "התשלום הוסתר מהתצוגה");
       await load();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "פעולה נכשלה");
@@ -156,7 +156,7 @@ export default function AdminDeposits() {
 
   return (
     <MobileShell>
-      <PageHeader title="מעקב פיקדונות" subtitle={`${activeCount} פיקדונות פעילים · ברוטו ${formatILS(activeTotal)} · נטו ${formatILS(activeNetTotal)}`} />
+      <PageHeader title="מעקב דמי השתתפות" subtitle={`${activeCount} תשלומים פעילים · ברוטו ${formatILS(activeTotal)} · נטו ${formatILS(activeNetTotal)}`} />
 
       <div className="px-5 -mt-4 relative z-10 space-y-3">
         <div className="gb-card p-3">
@@ -190,7 +190,7 @@ export default function AdminDeposits() {
         ) : (
           <div className="space-y-2">
             {filtered.length === 0 && (
-              <div className="gb-card p-8 text-center text-sm text-muted-foreground">אין פיקדונות תואמים</div>
+              <div className="gb-card p-8 text-center text-sm text-muted-foreground">אין תשלומים תואמים</div>
             )}
             {filtered.map((dep) => {
               const dealMissing = !deals[dep.deal_id];

@@ -132,7 +132,7 @@ export default function AdminPaymentSettings() {
                 ברירות מחדל
               </h2>
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold">סכום פיקדון ברירת מחדל (₪)</Label>
+                <Label className="text-xs font-bold">סכום דמי השתתפות ברירת מחדל (₪) — מיושן; השתמשו במדרגות</Label>
                 <Input
                   type="number"
                   value={depositAmount}
@@ -143,7 +143,7 @@ export default function AdminPaymentSettings() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold">מינימום פיקדון אופציונלי</Label>
+                  <Label className="text-xs font-bold">מינימום דמי השתתפות אופציונלי</Label>
                   <Input
                     type="number"
                     value={depositMinAmount}
@@ -155,7 +155,7 @@ export default function AdminPaymentSettings() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold">מקסימום פיקדון אופציונלי</Label>
+                  <Label className="text-xs font-bold">מקסימום דמי השתתפות אופציונלי</Label>
                   <Input
                     type="number"
                     value={depositMaxAmount}
@@ -204,9 +204,9 @@ export default function AdminPaymentSettings() {
                   ))}
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3 text-fs-xs text-muted-foreground leading-relaxed">
-                  {feeAbsorber === "resident" && "הדייר משלם את הפיקדון בתוספת עמלת הסליקה. הספק מקבל זיכוי/ניכוי לפי סכום הפיקדון נטו אחרי עמלה."}
-                  {feeAbsorber === "supplier" && "הדייר משלם את סכום הפיקדון בלבד. עמלת הסליקה מקטינה את סכום הזיכוי/ניכוי של הספק."}
-                  {feeAbsorber === "groupbuild" && "הדייר משלם את סכום הפיקדון בלבד. הספק מקבל זיכוי/ניכוי לפי ברוטו, ו-GroupBuild סופגת את עמלת הסליקה."}
+                  {feeAbsorber === "resident" && "הדייר משלם את דמי ההשתתפות בתוספת עמלת הסליקה."}
+                  {feeAbsorber === "supplier" && "הדייר משלם את דמי ההשתתפות בלבד. עמלת הסליקה עלולה להקטין זיכויים קשורים."}
+                  {feeAbsorber === "groupbuild" && "הדייר משלם את דמי ההשתתפות בלבד, ו-GroupBuild סופגת את עמלת הסליקה."}
                 </div>
               </div>
             </section>

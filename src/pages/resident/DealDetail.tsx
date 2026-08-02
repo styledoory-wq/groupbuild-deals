@@ -41,6 +41,13 @@ import {
   type OfferTier,
   type OfferType,
 } from "@/lib/offerPricing";
+import {
+  PARTICIPATION_FEE_DESCRIPTION,
+  PARTICIPATION_FEE_LABEL,
+  getDealPriceForFee,
+  resolvePlatformFeeRpc,
+  type ResolvedParticipationFee,
+} from "@/lib/platformFees";
 
 interface DealRow {
   id: string;
@@ -105,6 +112,7 @@ export default function DealDetail() {
   const [pendingDepositId, setPendingDepositId] = useState<string | null>(null);
   const [pendingDepositAmount, setPendingDepositAmount] = useState<number>(0);
   const [supplierPaymentInfo, setSupplierPaymentInfo] = useState<SupplierPaymentInfo | null>(null);
+  const [participationFee, setParticipationFee] = useState<ResolvedParticipationFee | null>(null);
 
   const openPaymentInstructions = (
     depositId: string,
@@ -126,7 +134,7 @@ export default function DealDetail() {
       if (!uid) return;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: dep } = await (supabase.from("deposits") as any)
-        .select("id,amount,status")
+        .select("id,amount,status,provider_payment_url")
         .eq("user_id", uid)
         .eq("deal_id", deal.id)
         .eq("is_deleted", false)
@@ -134,13 +142,32 @@ export default function DealDetail() {
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: supRows } = await (supabase as any).rpc("get_deal_supplier_payment_info", { _deal_id: deal.id });
-      const sup = Array.isArray(supRows) && supRows.length > 0 ? supRows[0] : null;
+      if (dep?.provider_payment_url) {
+        window.location.href = dep.provider_payment_url as string;
+        return;
+      }
+      // Re-create checkout if needed
+      const { data: paymentResponse } = await supabase.functions.invoke("create-deposit", {
+        body: { deal_id: deal.id, participant_count: participantCount },
+      });
+      if (typeof paymentResponse?.payment_url === "string" && paymentResponse.payment_url) {
+        window.location.href = paymentResponse.payment_url;
+        return;
+      }
       if (dep) {
-        openPaymentInstructions(dep.id as string, Number(dep.amount ?? deal.deposit_amount ?? 0), (sup ?? null) as SupplierPaymentInfo | null);
+        openPaymentInstructions(
+          dep.id as string,
+          Number(dep.amount ?? paymentResponse?.amount ?? participationFee?.feeAmount ?? 0),
+          null,
+        );
+      } else if (paymentResponse?.deposit_id) {
+        openPaymentInstructions(
+          paymentResponse.deposit_id as string,
+          Number(paymentResponse.amount ?? 0),
+          null,
+        );
       } else {
-        toast.error("לא נמצא פיקדון פעיל");
+        toast.error("לא נמצא תשלום דמי השתתפות פעיל");
       }
     } finally {
       setResumingPayment(false);
@@ -364,6 +391,56 @@ export default function DealDetail() {
     return () => { void supabase.removeChannel(channel); };
   }, [dealId]);
 
+  // Resolve participation fee from admin-managed platform_fees bands.
+  useEffect(() => {
+    if (!deal) {
+      setParticipationFee(null);
+      return;
+    }
+    if ((deal.listing_type ?? "group_buy") === "regular") {
+      setParticipationFee(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const dealPrice = getDealPriceForFee(
+          {
+            offer_type: deal.offer_type as OfferType | null,
+            original_price: deal.original_price,
+            discounted_price: deal.discounted_price,
+            discount_percentage: deal.discount_percentage,
+            base_price: deal.base_price,
+            tiers: Array.isArray(deal.tiers) ? deal.tiers : [],
+          },
+          participantCount,
+        );
+        const resolved = await resolvePlatformFeeRpc({
+          dealPrice,
+          categoryId: deal.category_id,
+          offerType: deal.offer_type,
+          listingType: deal.listing_type ?? "group_buy",
+        });
+        if (!cancelled) setParticipationFee(resolved);
+      } catch (e) {
+        console.warn("[DealDetail] fee resolve failed", e);
+        if (!cancelled) {
+          const dealPrice = getDealPriceForFee(deal, participantCount);
+          setParticipationFee({
+            dealPrice,
+            feeAmount: 0,
+            totalDueNow: 0,
+            rule: null,
+            currency: "ILS",
+          });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [deal, participantCount]);
+
   const { requireAuth } = useGuestGate();
 
   const handleJoinClick = () => {
@@ -416,7 +493,9 @@ export default function DealDetail() {
       toast.error("יש להתחבר כדי להצטרף להצעה");
       return;
     }
-    const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
+    const feeRequired =
+      (deal.listing_type ?? "group_buy") !== "regular" &&
+      Number(participationFee?.feeAmount ?? 0) > 0;
     const tiersNow = Array.isArray(deal.tiers) ? deal.tiers : [];
     const activeTierNow = tiersNow.length > 0 ? getActiveTier(tiersNow, participantCount) : null;
     setSubmittingInterest(true);
@@ -424,13 +503,14 @@ export default function DealDetail() {
       const qty = joinForm.estimated_quantity.trim()
         ? Number(joinForm.estimated_quantity)
         : null;
+      const feeAmountNow = Number(participationFee?.feeAmount ?? 0);
       const payload = {
         user_id: session.session.user.id,
         deal_id: deal.id,
-        status: depositRequired ? "pending_deposit" : "interested",
-        deposit_required: depositRequired,
-        deposit_amount: depositRequired ? Number(deal.deposit_amount ?? 0) : 0,
-        deposit_status: depositRequired ? "pending" : "none",
+        status: feeRequired ? "pending_deposit" : "interested",
+        deposit_required: feeRequired,
+        deposit_amount: feeRequired ? feeAmountNow : 0,
+        deposit_status: feeRequired ? "pending" : "none",
         full_name: joinForm.full_name.trim(),
         phone: joinForm.phone.trim(),
         city: joinForm.city.trim() || null,
@@ -465,39 +545,51 @@ export default function DealDetail() {
       }
 
       let depositId: string | null = null;
-      let depositAmount: number = Number(deal.deposit_amount ?? 0);
+      let depositAmount: number = feeAmountNow;
       let paymentInfo: SupplierPaymentInfo | null = null;
-      if (depositRequired) {
+      let paymentUrl: string | null = null;
+      if (feeRequired) {
         const { data: paymentResponse, error: paymentErr } = await supabase.functions.invoke("create-deposit", {
-          body: { deal_id: deal.id, user_id: session.session.user.id, interest_id: interestId ?? undefined },
+          body: {
+            deal_id: deal.id,
+            user_id: session.session.user.id,
+            interest_id: interestId ?? undefined,
+            participant_count: participantCount,
+          },
         });
         if (paymentErr) {
           console.error("[create_deposit_failed]", paymentErr);
-          toast.error("יצירת הפיקדון נכשלה, נסה שנית");
+          toast.error("יצירת תשלום דמי ההשתתפות נכשלה, נסה שנית");
           return;
         }
         if (paymentResponse?.error) {
           console.error("[create_deposit_error_response]", paymentResponse);
-          toast.error(paymentResponse.message ?? "יצירת הפיקדון נכשלה");
+          toast.error(paymentResponse.message ?? "יצירת תשלום דמי ההשתתפות נכשלה");
           return;
         }
         depositId = typeof paymentResponse?.deposit_id === "string" ? paymentResponse.deposit_id : null;
         if (typeof paymentResponse?.amount === "number") depositAmount = paymentResponse.amount;
         paymentInfo = (paymentResponse?.supplier_payment_info ?? null) as SupplierPaymentInfo | null;
+        paymentUrl = typeof paymentResponse?.payment_url === "string" ? paymentResponse.payment_url : null;
         if (!depositId) {
-          toast.error("שגיאה ביצירת הפיקדון — פנה לתמיכה");
+          toast.error("שגיאה ביצירת תשלום דמי ההשתתפות — פנה לתמיכה");
           return;
         }
       }
 
 
-      if (depositRequired) {
+      if (feeRequired) {
         setInterested(true);
         setInterestStatus("pending_deposit");
         setInterestDepositStatus("pending");
-        setPendingPaymentUrl(null);
+        setPendingPaymentUrl(paymentUrl);
         setShowJoinModal(false);
-        toast.success("פרטי הבקשה נשמרו — סיים את ההעברה לספק להשלמת ההצטרפות");
+        if (paymentUrl) {
+          toast.success("מעבירים למסך התשלום…");
+          window.location.href = paymentUrl;
+          return;
+        }
+        toast.success("פרטי הבקשה נשמרו — השלימו את תשלום דמי ההשתתפות להשלמת ההצטרפות");
         if (depositId) {
           openPaymentInstructions(depositId, depositAmount, paymentInfo);
           return;
@@ -552,12 +644,13 @@ export default function DealDetail() {
         .invoke("notify-admin", {
           body: {
             event: "deal_interest",
-            title: depositRequired ? "הצטרפות להצעה (ממתין לפיקדון)" : "מתעניין חדש בעסקה",
+            title: feeRequired ? "הצטרפות להצעה (ממתין לדמי השתתפות)" : "מתעניין חדש בעסקה",
             details: {
               deal_id: deal.id,
               deal_title: deal.title,
-              deposit_required: depositRequired,
-              deposit_amount: depositRequired ? Number(deal.deposit_amount ?? 0) : 0,
+              deposit_required: feeRequired,
+              deposit_amount: feeRequired ? feeAmountNow : 0,
+              participation_fee: feeRequired ? feeAmountNow : 0,
               user_id: session.session.user.id,
               user_email: session.session.user.email,
               full_name: payload.full_name,
@@ -666,7 +759,9 @@ export default function DealDetail() {
       ? Math.max(...tiers.map((t) => t.minParticipants))
       : 0;
   const category = categories.find((c) => c.id === deal.category_id);
-  const depositRequired = !!deal.deposit_required && Number(deal.deposit_amount ?? 0) > 0;
+  const feeAmount = Number(participationFee?.feeAmount ?? 0);
+  const dealPriceForFee = Number(participationFee?.dealPrice ?? display.effectivePrice ?? 0);
+  const depositRequired = !isRegularListing && feeAmount > 0;
   const hasCompletedJoin = interested && (
     !depositRequired ||
     interestDepositStatus === "paid" ||
@@ -711,7 +806,7 @@ export default function DealDetail() {
   ];
 
   const timeline: Array<{ icon: typeof Tag; title: string; subtitle: string }> = [
-    { icon: Handshake, title: "משלמים פיקדון",  subtitle: "ממלאים פרטים וההצטרפות מושלמת רק אחרי תשלום" },
+    { icon: Handshake, title: "משלמים דמי השתתפות",  subtitle: "ממלאים פרטים וההצטרפות מושלמת רק אחרי תשלום" },
     { icon: Target,    title: "מגיעים ליעד",     subtitle: "הקבוצה ממלאת את מדרגת המחיר" },
     { icon: PhoneCall, title: "הספק יוצר קשר",   subtitle: "תיאום פרטים והצעת מחיר אישית" },
     { icon: Wrench,    title: "ביצוע והתקנה",    subtitle: "הספק מבצע את העבודה אצלכם" },
@@ -1408,7 +1503,7 @@ export default function DealDetail() {
       <Dialog open={showPaymentInstructions} onOpenChange={setShowPaymentInstructions}>
         <DialogContent className="max-w-sm rounded-3xl p-5" dir="rtl">
           <DialogHeader>
-            <DialogTitle className="text-right text-[17px] font-black text-[#1F2937]">השלמת הפיקדון</DialogTitle>
+            <DialogTitle className="text-right text-[17px] font-black text-[#1F2937]">תשלום דמי השתתפות</DialogTitle>
             <DialogDescription className="text-right text-[12px] text-muted-foreground">
               העבר/י לספק בביט או בהעברה בנקאית, ואז סמן/י שביצעת.
             </DialogDescription>
@@ -1458,6 +1553,30 @@ export default function DealDetail() {
         </div>
       )}
 
+      {/* Participation fee breakdown */}
+      {!isSupplierPreview && !isRegularListing && depositRequired && (
+        <div className="px-5 mt-2 mb-2">
+          <div className="rounded-[20px] border border-[#0E6B5A]/15 bg-white p-4 space-y-2" dir="rtl">
+            <div className="text-[13px] font-extrabold text-[#0F172A]">{PARTICIPATION_FEE_LABEL}</div>
+            <div className="flex justify-between text-[13px]">
+              <span className="text-muted-foreground">מחיר העסקה</span>
+              <span className="font-bold">{dealPriceForFee > 0 ? ils(dealPriceForFee) : "לפי הצעה"}</span>
+            </div>
+            <div className="flex justify-between text-[13px]">
+              <span className="text-muted-foreground">דמי השתתפות</span>
+              <span className="font-bold text-[#0E6B5A]">{ils(feeAmount)}</span>
+            </div>
+            <div className="flex justify-between text-[14px] pt-2 border-t border-[#ECEEF2]">
+              <span className="font-extrabold">סה״כ לתשלום כעת</span>
+              <span className="font-extrabold">{ils(feeAmount)}</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed pt-1">
+              {PARTICIPATION_FEE_DESCRIPTION}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Spacer for sticky CTA */}
       <div aria-hidden className="h-40" />
 
@@ -1481,10 +1600,10 @@ export default function DealDetail() {
                 )}
               </div>
               <div className="flex-1 text-right">
-                <p className="text-[14px] font-extrabold leading-tight">{hasCompletedJoin ? "הצטרפת בהצלחה!" : "ממתין לתשלום פיקדון"}</p>
+                <p className="text-[14px] font-extrabold leading-tight">{hasCompletedJoin ? "הצטרפת בהצלחה!" : "ממתין לתשלום דמי השתתפות"}</p>
                 <p className="text-[11px] text-white/70 leading-tight mt-0.5">
                   {interestDepositStatus === "paid"
-                    ? "פיקדון שולם — המקום מובטח"
+                    ? "דמי השתתפות שולמו — המקום מובטח"
                     : interestStatus === "pending_deposit"
                       ? "ההצטרפות תושלם אוטומטית אחרי התשלום"
                       : "הספק יצור קשר בהקדם"}
@@ -1515,7 +1634,7 @@ export default function DealDetail() {
                 ) : isGuest ? (
                   "התחבר כדי להצטרף"
                 ) : depositRequired ? (
-                  `הצטרף · ${ils(Number(deal.deposit_amount))}`
+                  `הצטרף · ${ils(feeAmount)}`
                 ) : (
                   "הצטרף להצעה"
                 )}
@@ -1710,10 +1829,21 @@ export default function DealDetail() {
             </div>
 
             {depositRequired && (
-              <div className="rounded-xl border border-gold/40 bg-gold/5 px-3 py-2 text-fs-xs text-foreground">
-                <div className="font-bold mb-0.5">פיקדון נדרש: {ils(Number(deal.deposit_amount ?? 0))}</div>
-                <div className="text-muted-foreground">
-                  ההצטרפות תושלם אוטומטית רק לאחר תשלום הפיקדון בפועל.
+              <div className="rounded-xl border border-[#0E6B5A]/25 bg-[#E7F5F0]/60 px-3 py-3 text-fs-xs text-foreground space-y-1.5">
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">מחיר העסקה</span>
+                  <span className="font-bold">{dealPriceForFee > 0 ? ils(dealPriceForFee) : "לפי הצעה"}</span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">{PARTICIPATION_FEE_LABEL}</span>
+                  <span className="font-bold text-[#0E6B5A]">{ils(feeAmount)}</span>
+                </div>
+                <div className="flex justify-between gap-2 pt-1 border-t border-[#0E6B5A]/15">
+                  <span className="font-extrabold">סה״כ לתשלום כעת</span>
+                  <span className="font-extrabold">{ils(feeAmount)}</span>
+                </div>
+                <div className="text-muted-foreground leading-relaxed pt-1">
+                  {PARTICIPATION_FEE_DESCRIPTION}
                 </div>
               </div>
             )}
@@ -1794,7 +1924,7 @@ export default function DealDetail() {
               {submittingInterest ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : depositRequired ? (
-                "המשך לתשלום פיקדון"
+                "המשך לתשלום דמי השתתפות"
               ) : (
                 "אשר הצטרפות"
               )}

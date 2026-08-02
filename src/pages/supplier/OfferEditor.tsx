@@ -375,13 +375,13 @@ export default function OfferEditor() {
     let cleanDepositAmount = 0;
     if (listingType === "group_buy" && depositRequired) {
       const raw = depositAmount.trim();
-      if (!DEPOSIT_AMOUNT_RE.test(raw)) { toast.error("סכום הפיקדון חייב להיות מספר חיובי"); return null; }
+      if (!DEPOSIT_AMOUNT_RE.test(raw)) { toast.error("סכום דמי ההשתתפות חייב להיות מספר חיובי"); return null; }
       cleanDepositAmount = Number(raw);
-      if (cleanDepositAmount <= 0) { toast.error("סכום הפיקדון חייב להיות גדול מ-0"); return null; }
-      if (depositLimits.min !== null && cleanDepositAmount < depositLimits.min) { toast.error(`מינימום פיקדון: ${depositLimits.min}`); return null; }
-      if (depositLimits.max !== null && cleanDepositAmount > depositLimits.max) { toast.error(`מקסימום פיקדון: ${depositLimits.max}`); return null; }
+      if (cleanDepositAmount <= 0) { toast.error("סכום דמי ההשתתפות חייב להיות גדול מ-0"); return null; }
+      if (depositLimits.min !== null && cleanDepositAmount < depositLimits.min) { toast.error(`מינימום דמי השתתפות: ${depositLimits.min}`); return null; }
+      if (depositLimits.max !== null && cleanDepositAmount > depositLimits.max) { toast.error(`מקסימום דמי השתתפות: ${depositLimits.max}`); return null; }
       const link = supplierPaymentLink.trim();
-      if (!link) { toast.error("קישור תשלום הוא שדה חובה כאשר נדרש פיקדון"); return null; }
+      if (!link) { toast.error("קישור תשלום הוא שדה חובה כאשר נדרש תשלום"); return null; }
       if (!URL_RE.test(link)) { toast.error("קישור תשלום חייב להתחיל ב-https://"); return null; }
     }
 
@@ -597,7 +597,7 @@ export default function OfferEditor() {
           miss.push({ key: "tier0", label: "מדרגת מחיר ראשונה" });
         }
         if (depositRequired) {
-          if (!depositAmount.trim()) miss.push({ key: "depositAmount", label: "סכום הפיקדון" });
+          if (!depositAmount.trim()) miss.push({ key: "depositAmount", label: "סכום דמי השתתפות" });
           if (!supplierPaymentLink.trim()) miss.push({ key: "paymentLink", label: "קישור תשלום" });
         }
       }
@@ -1028,11 +1028,11 @@ export default function OfferEditor() {
                         <input type="checkbox" checked={depositRequired}
                           onChange={(e) => setDepositRequired(e.target.checked)}
                           className="h-4 w-4 accent-[#0E6B5A]" />
-                        <span className="text-[13px] font-medium text-[#1F2937]">דורש פיקדון להצטרפות</span>
+                        <span className="text-[13px] font-medium text-[#1F2937]">דורש תשלום להצטרפות (דמי השתתפות מנוהלים בפלטפורמה)</span>
                       </label>
                       {depositRequired && (
                         <div className="space-y-3 mt-3">
-                          <Field label="סכום הפיקדון (₪)" required
+                          <Field label="סכום לתצוגה (₪) — דמי השתתפות נקבעים אוטומטית לפי מחיר העסקה" required
                             error={shouldShowError("depositAmount") ? "הזן סכום" : undefined}>
                             <Input type="number" inputMode="numeric" min={1} step="0.01"
                               value={depositAmount}
@@ -1376,7 +1376,7 @@ function LivePreview({
 
         {depositRequired && (
         <div className="text-[11.5px] bg-[#F4F6FA] text-[#374151] rounded-lg px-2.5 py-1.5 font-medium">
-          נדרש פיקדון: ₪{depositAmount || "—"}
+          דמי השתתפות: לפי מדרגות הפלטפורמה (מחיר עסקה)
         </div>
         )}
       </div>

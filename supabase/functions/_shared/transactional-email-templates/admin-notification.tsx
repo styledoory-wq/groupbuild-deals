@@ -16,7 +16,7 @@ const labelFor = (t?: string) =>
   : t === 'waitlist_lead' ? 'הרשמה לרשימת המתנה'
   : t === 'new_demand' ? 'ביקוש חדש'
   : t === 'new_lead' ? 'ליד חדש'
-  : t === 'new_deposit' ? 'פיקדון חדש'
+  : t === 'new_deposit' ? 'דמי השתתפות חדשים'
   : 'אירוע חדש במערכת'
 
 const Email = ({ eventTitle = 'התקבלה פעולה חדשה', eventType, summary, details }: Props) => (

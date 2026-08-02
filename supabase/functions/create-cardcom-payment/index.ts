@@ -55,13 +55,23 @@ Deno.serve(async (req) => {
     if (!deal) {
       return json({ error: "deal_not_found", message: "העסקה לא נמצאה" }, 404);
     }
-    if (!deal.deposit_required || Number(deal.deposit_amount ?? 0) <= 0) {
-      return json({ error: "deposit_not_required", message: "לעסקה זו לא נדרש פיקדון" }, 409);
+    // Prefer participation fee from platform_fees via RPC; fall back to legacy deposit_amount
+    let amount = 0;
+    const { data: feeRows } = await admin.rpc("resolve_platform_fee", {
+      _deal_price: Number(deal.deposit_amount ?? 0),
+      _fee_type: "participation",
+    });
+    if (Array.isArray(feeRows) && feeRows.length > 0) {
+      amount = Number(feeRows[0].fee_amount ?? 0);
     }
-
-    const amount = Number(deal.deposit_amount);
     if (!Number.isFinite(amount) || amount <= 0) {
-      return json({ error: "invalid_amount", message: "סכום הפיקדון אינו תקין" }, 409);
+      if (!deal.deposit_required || Number(deal.deposit_amount ?? 0) <= 0) {
+        return json({ error: "fee_not_required", message: "לעסקה זו לא נדרשים דמי השתתפות" }, 409);
+      }
+      amount = Number(deal.deposit_amount);
+    }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return json({ error: "invalid_amount", message: "סכום דמי ההשתתפות אינו תקין" }, 409);
     }
 
     // Cardcom credentials from env
@@ -85,7 +95,7 @@ Deno.serve(async (req) => {
       Language: "he",
       SuccessRedirectUrl: `${SUCCESS_URL}?deal_id=${body.deal_id}`,
       FailedRedirectUrl: `${FAILURE_URL}?deal_id=${body.deal_id}`,
-      ProductName: deal.title ?? "פיקדון GroupBuild",
+      ProductName: deal.title ? `דמי השתתפות · ${deal.title}` : "דמי השתתפות GroupBuild",
     };
 
     console.log("[create-cardcom-payment] calling Cardcom", {
