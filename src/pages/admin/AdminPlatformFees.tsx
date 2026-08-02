@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { formatILS } from "@/store/AppStore";
 import { formatFeeBandLabel, type PlatformFeeRule } from "@/lib/platformFees";
+import { CategoryParticipationFees } from "@/components/admin/CategoryParticipationFees";
+
 import { toast } from "sonner";
 
 type Draft = {
@@ -177,7 +179,10 @@ export default function AdminPlatformFees() {
       />
 
       <div className="px-5 lg:px-8 py-4 space-y-4 max-w-3xl" dir="rtl">
+        <CategoryParticipationFees />
+
         <div className="bg-white border border-[#ECEEF2] rounded-[14px] p-4 space-y-3">
+
           <div className="flex items-center gap-2 font-extrabold text-[15px] text-[#0F172A]">
             <Plus className="h-4 w-4 text-[#0E6B5A]" />
             מדרגה חדשה

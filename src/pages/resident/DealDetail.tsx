@@ -44,10 +44,11 @@ import {
 import {
   PARTICIPATION_FEE_DESCRIPTION,
   PARTICIPATION_FEE_LABEL,
-  resolvePlatformFeeRpc,
+  resolveDealParticipationFeeRpc,
   type ResolvedParticipationFee,
 } from "@/lib/platformFees";
-import { getCanonicalDealBasePrice, JOIN_BLOCKED_MESSAGE } from "@/lib/participationPricing";
+import { JOIN_BLOCKED_MESSAGE } from "@/lib/participationPricing";
+
 
 
 interface DealRow {
@@ -395,9 +396,9 @@ export default function DealDetail() {
     return () => { void supabase.removeChannel(channel); };
   }, [dealId]);
 
-  // Resolve the participation fee from the admin-managed platform_fees bands.
-  // FAIL CLOSED: if the fee cannot be resolved to a positive amount, joining is
-  // blocked. There is no "0 ₪ / free join" fallback.
+  // Participation fee is decided automatically by the system:
+  // price bands when the deal has an unambiguous price, otherwise the fixed
+  // amount configured for the deal's category. FAIL CLOSED on any failure.
   useEffect(() => {
     if (!deal) {
       setParticipationFee(null);
@@ -415,30 +416,9 @@ export default function DealDetail() {
     setFeeError(null);
     (async () => {
       try {
-        // Canonical price = the price the supplier published (identical for all
-        // participants), NOT the dynamic tier price.
-        const canonical = getCanonicalDealBasePrice({
-          offer_type: deal.offer_type,
-          base_price: deal.base_price,
-          discounted_price: deal.discounted_price,
-          original_price: deal.original_price,
-          tiers: Array.isArray(deal.tiers) ? deal.tiers : [],
-        });
-        if (!canonical.valid || !canonical.price) {
-          if (!cancelled) {
-            setParticipationFee(null);
-            setFeeError(JOIN_BLOCKED_MESSAGE);
-          }
-          return;
-        }
-        const resolved = await resolvePlatformFeeRpc({
-          dealPrice: canonical.price,
-          categoryId: deal.category_id,
-          offerType: deal.offer_type,
-          listingType: deal.listing_type ?? "group_buy",
-        });
+        const resolved = await resolveDealParticipationFeeRpc(deal.id);
         if (cancelled) return;
-        if (!resolved.rule || !(Number(resolved.feeAmount) > 0)) {
+        if (!(Number(resolved.feeAmount) > 0)) {
           setParticipationFee(null);
           setFeeError(JOIN_BLOCKED_MESSAGE);
           return;
@@ -459,6 +439,7 @@ export default function DealDetail() {
       cancelled = true;
     };
   }, [deal]);
+
 
 
   const { requireAuth } = useGuestGate();

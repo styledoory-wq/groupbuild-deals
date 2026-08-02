@@ -49,13 +49,43 @@ export type FeeMatchContext = {
   listingType?: string | null;
 };
 
+export type ParticipationFeeSource = "price_band" | "category_fixed";
+
 export type ResolvedParticipationFee = {
   dealPrice: number;
   feeAmount: number;
   totalDueNow: number;
   rule: PlatformFeeRule | null;
   currency: string;
+  source?: ParticipationFeeSource | null;
 };
+
+/**
+ * Automatic, system-decided participation fee for a deal.
+ * Price bands when the deal has an unambiguous final price, otherwise the
+ * category's fixed amount. Suppliers have no influence on either.
+ */
+export async function resolveDealParticipationFeeRpc(
+  dealId: string,
+): Promise<ResolvedParticipationFee & { reason: string }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)("resolve_deal_participation_fee", {
+    _deal_id: dealId,
+  });
+  if (error) throw error;
+  const row = Array.isArray(data) && data.length > 0 ? data[0] : null;
+  const feeAmount = Number(row?.fee_amount ?? 0);
+  return {
+    dealPrice: Number(row?.base_price ?? 0),
+    feeAmount: Number.isFinite(feeAmount) ? feeAmount : 0,
+    totalDueNow: Number.isFinite(feeAmount) ? feeAmount : 0,
+    rule: null,
+    currency: row?.currency ?? "ILS",
+    source: (row?.source ?? null) as ParticipationFeeSource | null,
+    reason: String(row?.reason ?? "fee_not_configured"),
+  };
+}
+
 
 /** Extract the numeric deal price used for fee-band matching. */
 export function getDealPriceForFee(
