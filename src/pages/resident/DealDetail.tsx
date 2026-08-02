@@ -1957,17 +1957,20 @@ export default function DealDetail() {
             </Button>
             <Button
               onClick={submitJoin}
-              disabled={!acceptedTerms || submittingInterest}
-              className="rounded-xl bg-[#0E6B5A] text-white font-bold"
+              disabled={!acceptedTerms || submittingInterest || joinBlocked}
+              className="rounded-xl bg-[#0E6B5A] text-white font-bold disabled:opacity-60"
             >
               {submittingInterest ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
+              ) : feeError ? (
+                "ההצטרפות אינה זמינה"
               ) : depositRequired ? (
-                "המשך לתשלום דמי השתתפות"
+                `המשך לתשלום · ${ils(feeAmount)}`
               ) : (
                 "אשר הצטרפות"
               )}
             </Button>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>
