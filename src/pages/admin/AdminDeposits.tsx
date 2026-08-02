@@ -39,8 +39,11 @@ const STATUS_META: Record<string, { label: string; cls: string }> = {
   paid: { label: "שולם", cls: "bg-success/10 text-success" },
   refunded: { label: "הוחזר", cls: "bg-muted text-muted-foreground" },
   cancelled: { label: "בוטל", cls: "bg-muted text-muted-foreground" },
+  expired: { label: "פג תוקף", cls: "bg-muted text-muted-foreground" },
   failed: { label: "נכשל", cls: "bg-destructive/10 text-destructive" },
+  awaiting_confirmation: { label: "ממתין לאישור", cls: "bg-[#FFF8E1] text-[#1F2937]" },
 };
+
 
 const VIEW_FILTERS: Array<{ key: string; label: string }> = [
   { key: "active", label: "פעילים" },
