@@ -15,6 +15,8 @@ const AdminDeals = lazy(() => import("@/pages/admin/AdminDeals"));
 const AdminDeposits = lazy(() => import("@/pages/admin/AdminDeposits"));
 const AdminPlatformFees = lazy(() => import("@/pages/admin/AdminPlatformFees"));
 const AdminFeeRevenue = lazy(() => import("@/pages/admin/AdminFeeRevenue"));
+const AdminOfferPricingFixes = lazy(() => import("@/pages/admin/AdminOfferPricingFixes"));
+
 const AdminPaymentSettings = lazy(() => import("@/pages/admin/AdminPaymentSettings"));
 const AdminRegions = lazy(() => import("@/pages/admin/AdminRegions"));
 const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"));
