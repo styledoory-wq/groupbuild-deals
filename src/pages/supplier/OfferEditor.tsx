@@ -112,7 +112,6 @@ export default function OfferEditor() {
   const [categoryId, setCategoryId] = useState<string>("");
   const [depositRequired, setDepositRequired] = useState<boolean>(false);
   const [depositAmount, setDepositAmount] = useState<string>("");
-  const [supplierPaymentLink, setSupplierPaymentLink] = useState<string>("");
   const [supplierPaymentInstructions, setSupplierPaymentInstructions] = useState<string>("");
   const [depositLimits, setDepositLimits] = useState<DepositLimits>({ min: null, max: null });
   const [saving, setSaving] = useState(false);
@@ -262,7 +261,6 @@ export default function OfferEditor() {
             if (deal.category_id) setCategoryId(deal.category_id);
             setDepositRequired(!!deal.deposit_required);
             if (deal.deposit_amount != null && Number(deal.deposit_amount) > 0) setDepositAmount(String(deal.deposit_amount));
-            if (deal.supplier_payment_link) setSupplierPaymentLink(String(deal.supplier_payment_link));
             if (deal.supplier_payment_instructions) setSupplierPaymentInstructions(String(deal.supplier_payment_instructions));
             const rawType = (deal.offer_type ?? "percentage") as OfferType;
             setOfferType(rawType);
@@ -380,9 +378,6 @@ export default function OfferEditor() {
       if (cleanDepositAmount <= 0) { toast.error("סכום דמי ההשתתפות חייב להיות גדול מ-0"); return null; }
       if (depositLimits.min !== null && cleanDepositAmount < depositLimits.min) { toast.error(`מינימום דמי השתתפות: ${depositLimits.min}`); return null; }
       if (depositLimits.max !== null && cleanDepositAmount > depositLimits.max) { toast.error(`מקסימום דמי השתתפות: ${depositLimits.max}`); return null; }
-      const link = supplierPaymentLink.trim();
-      if (!link) { toast.error("קישור תשלום הוא שדה חובה כאשר נדרש תשלום"); return null; }
-      if (!URL_RE.test(link)) { toast.error("קישור תשלום חייב להתחיל ב-https://"); return null; }
     }
 
     const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
@@ -449,7 +444,7 @@ export default function OfferEditor() {
       offer_type: offerType,
       deposit_required: isRegular ? false : depositRequired,
       deposit_amount: !isRegular && depositRequired ? cleanDepositAmount : 0,
-      supplier_payment_link: !isRegular && depositRequired ? (supplierPaymentLink.trim() || null) : null,
+      supplier_payment_link: null,
       supplier_payment_instructions: !isRegular && depositRequired ? (supplierPaymentInstructions.trim() || null) : null,
       tiers: cleanTiers as unknown as Json,
       highlights: [] as unknown as Json,
@@ -598,7 +593,7 @@ export default function OfferEditor() {
         }
         if (depositRequired) {
           if (!depositAmount.trim()) miss.push({ key: "depositAmount", label: "סכום דמי השתתפות" });
-          if (!supplierPaymentLink.trim()) miss.push({ key: "paymentLink", label: "קישור תשלום" });
+          
         }
       }
       if (visibilityType === "project_only" && !visibilityProjectId) miss.push({ key: "project", label: "פרויקט יעד" });
@@ -614,7 +609,7 @@ export default function OfferEditor() {
 
   const stepMissing = useMemo(() => missingForStep(step), // eslint-disable-line react-hooks/exhaustive-deps
     [step, title, categoryId, listingType, unitPrice, offerType, tiers, depositRequired, depositAmount,
-      supplierPaymentLink, visibilityType, visibilityProjectId, visibilityRegions, commitmentAccepted]);
+      visibilityType, visibilityProjectId, visibilityRegions, commitmentAccepted]);
   const missingKeys = useMemo(() => new Set(stepMissing.map((m) => m.key)), [stepMissing]);
 
   if (bootLoading) {
@@ -1041,21 +1036,16 @@ export default function OfferEditor() {
                               className={`h-11 rounded-xl shadow-none ring-1 bg-white ${shouldShowError("depositAmount") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
                               placeholder="הזן סכום" />
                           </Field>
-                          <Field label="קישור תשלום" required hint="Bit / PayBox / העברה"
-                            error={shouldShowError("paymentLink") ? "הזן קישור תקין" : undefined}>
-                            <Input type="url" placeholder="https://..."
-                              value={supplierPaymentLink}
-                              onChange={(e) => setSupplierPaymentLink(e.target.value)}
-                              onBlur={() => markTouched("paymentLink")}
-                              className={`h-11 rounded-xl shadow-none ring-1 bg-white ${shouldShowError("paymentLink") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
-                              dir="ltr" />
-                          </Field>
+                          <p className="text-[11.5px] leading-relaxed text-[#6B7280] bg-[#F4F6FA] rounded-xl px-3 py-2">
+                            דמי ההשתתפות נגבים ישירות דרך GroupBuild ומועברים אליכם לאחר סגירת העסקה — אין צורך בקישור תשלום פרטי.
+                          </p>
                           <Field label="הוראות נוספות (אופציונלי)">
-                            <Textarea placeholder='למשל: "Bit ל-050-1234567"'
+                            <Textarea placeholder="למשל: מה כולל התשלום"
                               value={supplierPaymentInstructions}
                               onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
                               className="rounded-xl min-h-[60px] shadow-none ring-1 ring-black/[0.06] text-[13px] bg-white" />
                           </Field>
+
                         </div>
                       )}
                     </div>
