@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { getCanonicalDealBasePrice } from "../_shared/participationPricing.ts";
 import {
   CARDCOM_API_BASE,
   getCardcomCredentials,
@@ -264,14 +263,15 @@ Deno.serve(async (req) => {
           payment_kind: "participation_fee",
           platform_fee_rule_id: ruleId,
           platform_fee_amount: amount,
-          deal_price_snapshot: basePrice,
+          deal_price_snapshot: basePrice > 0 ? basePrice : null,
 
           metadata: {
             source: "create_deposit_participation_fee",
             deal_title: deal.title ?? null,
             participation_fee: amount,
-            deal_price: basePrice,
+            deal_price: basePrice > 0 ? basePrice : null,
             fee_rule_id: ruleId,
+            fee_source: feeSource,
             join_payload: joinPayload,
           },
         })
@@ -286,13 +286,14 @@ Deno.serve(async (req) => {
           amount,
           platform_fee_amount: amount,
           platform_fee_rule_id: ruleId,
-          deal_price_snapshot: basePrice,
+          deal_price_snapshot: basePrice > 0 ? basePrice : null,
           metadata: {
             source: "create_deposit_participation_fee",
             deal_title: deal.title ?? null,
             participation_fee: amount,
-            deal_price: basePrice,
+            deal_price: basePrice > 0 ? basePrice : null,
             fee_rule_id: ruleId,
+            fee_source: feeSource,
             join_payload: joinPayload,
           },
         })
