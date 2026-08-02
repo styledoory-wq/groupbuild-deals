@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AlertTriangle, ArrowLeft, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { BackHeader } from "@/components/layout/BackHeader";
+import { BackHeader } from "@/components/ds/BackHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
