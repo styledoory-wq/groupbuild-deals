@@ -1,7 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { getCanonicalDealBasePrice } from "../_shared/participationPricing.ts";
 import {
+  CARDCOM_API_BASE,
   getCardcomCredentials,
+  getCardcomWebhookSecret,
   getPaymentEnvironment,
   getSiteOrigin,
   getStripeSecretKey,
@@ -328,6 +330,7 @@ Deno.serve(async (req) => {
         dealId: deal.id,
         dealTitle: deal.title ?? "דמי שירות GroupBuild",
         depositId: depositId!,
+        userEmail: userData.user.email ?? undefined,
         environment,
       });
     }
