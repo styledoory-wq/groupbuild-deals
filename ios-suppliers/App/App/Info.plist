@@ -2,12 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>שמירת שוברים ותעודות מהאפליקציה לגלריה</string>
+	<string>שמירת הצעות מחיר ותעודות מהאפליקציה לגלריה</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>העלאת תמונות ומסמכים לפרופיל, לפרויקטים ולהצעות מחיר</string>
+	<string>העלאת תמונות של פרויקטים ועבודות לפרופיל הספק</string>
 	<key>NSCameraUsageDescription</key>
-	<string>צילום מסמכים והעלאת תמונות פרופיל</string>
+	<string>סריקת שוברי הטבה של דיירים בבית העסק</string>
     <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>

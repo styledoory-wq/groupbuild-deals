@@ -1,0 +1,35 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "TEAMID.il.co.groupbuild.residents"
+        ],
+        "components": [
+          {
+            "/": "/r/*"
+          },
+          {
+            "/": "/share/deal/*"
+          }
+        ]
+      },
+      {
+        "appIDs": [
+          "TEAMID.il.co.groupbuild.suppliers"
+        ],
+        "components": [
+          {
+            "/": "/b/*"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAMID.il.co.groupbuild.residents",
+      "TEAMID.il.co.groupbuild.suppliers"
+    ]
+  }
+}
