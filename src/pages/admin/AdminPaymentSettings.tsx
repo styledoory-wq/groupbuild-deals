@@ -50,7 +50,9 @@ export default function AdminPaymentSettings() {
       if (error) toast.error(error.message);
       if (data) {
         setId(data.id);
-        setProvider((data.active_payment_provider as Provider) ?? "grow_make");
+        const saved = data.active_payment_provider as string | null;
+        setProvider(saved === "cardcom" ? "cardcom" : "stripe");
+
         setDepositAmount(Number(data.deposit_default_amount));
         setDepositMinAmount(data.deposit_min_amount == null ? "" : String(data.deposit_min_amount));
         setDepositMaxAmount(data.deposit_max_amount == null ? "" : String(data.deposit_max_amount));
