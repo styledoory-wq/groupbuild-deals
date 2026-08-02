@@ -110,31 +110,31 @@ export default function AdminPaymentSettings() {
                 ספק סליקה פעיל
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {(["grow_make", "grow", "cardcom", "stripe"] as Provider[]).map((p) => (
+                {PROVIDERS.map((p) => (
                   <button
-                    key={p}
-                    onClick={() => setProvider(p)}
+                    key={p.value}
+                    onClick={() => setProvider(p.value)}
                     className={cn(
                       "p-4 rounded-2xl border-2 transition-smooth text-center",
-                      provider === p
+                      provider === p.value
                         ? "border-[#1F2937] bg-[#F4F6FA]"
                         : "border-border bg-card"
                     )}
                   >
-                    <div className="text-base font-bold">
-                      {p === "grow_make" ? "Grow Make" : p === "grow" ? "Grow API" : p === "cardcom" ? "Cardcom" : "Stripe"}
-                    </div>
-                    <div className="text-fs-xs text-muted-foreground mt-1">
-                      {p === "grow_make" ? "Make.com + Grow" : p === "grow" ? "Direct API disabled" : p === "cardcom" ? "Cardcom disabled" : "Stripe disabled"}
-                    </div>
+                    <div className="text-base font-bold">{p.label}</div>
+                    <div className="text-fs-xs text-muted-foreground mt-1">{p.hint}</div>
                   </button>
                 ))}
               </div>
               <p className="text-fs-xs text-muted-foreground mt-3 leading-relaxed">
-                לאחר בחירת הספק, הוסיפו את מפתחות ה-API המתאימים בהגדרות הסודות של Lovable Cloud
-                ({providerSecrets[provider]}).
+                ספקים ישנים (Grow / Grow Make) אינם נתמכים יותר. אם אין מפתחות לספק הפעיל,
+                ההצטרפות לעסקאות נחסמת אוטומטית ולא נגבה תשלום.
+              </p>
+              <p className="text-fs-xs text-muted-foreground mt-2 leading-relaxed">
+                סודות נדרשים: {providerSecrets[provider]}
               </p>
             </section>
+
 
             <section className="gb-card p-5 space-y-4">
               <h2 className="text-sm font-bold flex items-center gap-2">
