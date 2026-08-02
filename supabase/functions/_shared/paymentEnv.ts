@@ -69,10 +69,12 @@ export function getCardcomCredentials(
   env: PaymentEnvironment,
 ): { terminal: string; apiName: string; apiPassword: string } | null {
   const suffix = env === "production" ? "_LIVE" : "_TEST";
-  const terminal = Deno.env.get(`CARDCOM_TERMINAL${suffix}`) ?? Deno.env.get("CARDCOM_TERMINAL");
-  const apiName = Deno.env.get(`CARDCOM_API_NAME${suffix}`) ?? Deno.env.get("CARDCOM_API_NAME");
-  const apiPassword = Deno.env.get(`CARDCOM_API_PASSWORD${suffix}`) ??
-    Deno.env.get("CARDCOM_API_PASSWORD");
+  // No unsuffixed fallback on purpose: a credential must be explicitly tagged
+  // _TEST or _LIVE, so a live terminal can never be picked up during QA.
+  const terminal = Deno.env.get(`CARDCOM_TERMINAL${suffix}`);
+  const apiName = Deno.env.get(`CARDCOM_API_NAME${suffix}`);
+  const apiPassword = Deno.env.get(`CARDCOM_API_PASSWORD${suffix}`);
+
   if (!terminal || !apiName || !apiPassword) return null;
   return { terminal, apiName, apiPassword };
 }
