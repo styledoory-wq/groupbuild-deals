@@ -1038,21 +1038,16 @@ export default function OfferEditor() {
                               className={`h-11 rounded-xl shadow-none ring-1 bg-white ${shouldShowError("depositAmount") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
                               placeholder="הזן סכום" />
                           </Field>
-                          <Field label="קישור תשלום" required hint="Bit / PayBox / העברה"
-                            error={shouldShowError("paymentLink") ? "הזן קישור תקין" : undefined}>
-                            <Input type="url" placeholder="https://..."
-                              value={supplierPaymentLink}
-                              onChange={(e) => setSupplierPaymentLink(e.target.value)}
-                              onBlur={() => markTouched("paymentLink")}
-                              className={`h-11 rounded-xl shadow-none ring-1 bg-white ${shouldShowError("paymentLink") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
-                              dir="ltr" />
-                          </Field>
+                          <p className="text-[11.5px] leading-relaxed text-[#6B7280] bg-[#F4F6FA] rounded-xl px-3 py-2">
+                            דמי ההשתתפות נגבים ישירות דרך GroupBuild ומועברים אליכם לאחר סגירת העסקה — אין צורך בקישור תשלום פרטי.
+                          </p>
                           <Field label="הוראות נוספות (אופציונלי)">
-                            <Textarea placeholder='למשל: "Bit ל-050-1234567"'
+                            <Textarea placeholder="למשל: מה כולל התשלום"
                               value={supplierPaymentInstructions}
                               onChange={(e) => setSupplierPaymentInstructions(e.target.value)}
                               className="rounded-xl min-h-[60px] shadow-none ring-1 ring-black/[0.06] text-[13px] bg-white" />
                           </Field>
+
                         </div>
                       )}
                     </div>
