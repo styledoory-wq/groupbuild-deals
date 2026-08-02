@@ -477,35 +477,64 @@ async function createCardcomCheckout(opts: {
   dealId: string;
   dealTitle: string;
   depositId: string;
+  userEmail?: string;
   environment: PaymentEnvironment;
 }): Promise<string | null> {
   const creds = getCardcomCredentials(opts.environment);
   if (!creds) return null;
   const origin = getSiteOrigin(opts.environment);
+  const webhookSecret = getCardcomWebhookSecret();
+  if (!webhookSecret) {
+    console.error("[create-deposit] CARDCOM_WEBHOOK_SECRET missing — refusing to create checkout");
+    return null;
+  }
+  const projectUrl = Deno.env.get("SUPABASE_URL")!;
+  const webhookUrl =
+    `${projectUrl}/functions/v1/cardcom-webhook?secret=${encodeURIComponent(webhookSecret)}`;
+
+  const query = `deal_id=${opts.dealId}&deposit_id=${opts.depositId}&env=${opts.environment}`;
+
   try {
-    const res = await fetch("https://secure.cardcom.solutions/api/v11/LowProfile/Create", {
+    const res = await fetch(`${CARDCOM_API_BASE}/LowProfile/Create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         TerminalNumber: Number(creds.terminal),
         ApiName: creds.apiName,
-        Amount: opts.amount,
-        ReturnValue: opts.depositId,
-        SuccessRedirectUrl:
-          `${origin}/payment/success?deal_id=${opts.dealId}&deposit_id=${opts.depositId}&env=${opts.environment}`,
-        FailedRedirectUrl:
-          `${origin}/payment/cancel?deal_id=${opts.dealId}&deposit_id=${opts.depositId}&env=${opts.environment}`,
-        ProductName: `דמי שירות עבור הצטרפות ורישום לעסקה: ${opts.dealTitle}`,
+        ApiPassword: creds.apiPassword,
         Operation: "ChargeOnly",
+        Amount: opts.amount,
+        CoinID: 1, // ILS
+        MaxPayments: 1,
+        Language: "he",
+        // ReturnValue travels back on the webhook and is our deposit id.
+        ReturnValue: opts.depositId,
+        SuccessRedirectUrl: `${origin}/payment/success?${query}`,
+        FailedRedirectUrl: `${origin}/payment/cancel?${query}`,
+        WebHookUrl: webhookUrl,
+        ProductName: `דמי שירות עבור הצטרפות ורישום לעסקה: ${opts.dealTitle}`,
+        ISOCoinId: 1,
+        Document: opts.userEmail
+          ? { Email: opts.userEmail, IsSendByEmail: true, Name: "לקוח GroupBuild" }
+          : undefined,
       }),
     });
-    const data = await res.json();
-    return typeof data?.Url === "string" ? data.Url : null;
+    const data = await res.json().catch(() => null) as Record<string, unknown> | null;
+    if (!res.ok || !data || Number(data.ResponseCode ?? -1) !== 0) {
+      console.error("[create-deposit] cardcom create failed", {
+        http: res.status,
+        code: data?.ResponseCode,
+        description: data?.Description,
+      });
+      return null;
+    }
+    return typeof data.Url === "string" ? data.Url : null;
   } catch (e) {
     console.error("[create-deposit] cardcom request failed", e);
     return null;
   }
 }
+
 
 
 function json(body: unknown, status = 200) {
