@@ -102,12 +102,36 @@ export default function AdminDeposits() {
   useEffect(() => { void load(); }, []);
 
   const updateStatus = async (id: string, status: "paid" | "refunded") => {
+    const dep = deposits.find((d) => d.id === id);
+    const isParticipation = dep?.payment_kind === "participation_fee";
+
+    // Participation fees may never be flipped to "paid" by hand — only the
+    // secure payment flow, or an audited admin override with a reason.
+    let reason: string | null = null;
+    if (isParticipation && status === "paid") {
+      reason = window.prompt(
+        "סימון ידני של דמי השתתפות כשולמו נרשם ביומן ביקורת. פרטו את הסיבה (10 תווים לפחות):",
+      );
+      if (!reason || reason.trim().length < 10) {
+        if (reason !== null) toast.error("נדרשת סיבה מפורטת (10 תווים לפחות)");
+        return;
+      }
+    }
+
     setBusyId(id);
     try {
-      const nowIso = new Date().toISOString();
-      const patch = status === "paid" ? { status, paid_at: nowIso } : { status, refunded_at: nowIso };
-      const { error } = await supabase.from("deposits").update(patch).eq("id", id);
-      if (error) throw error;
+      if (isParticipation && status === "paid") {
+        const { error } = await supabase.rpc("admin_override_participation_payment", {
+          _deposit_id: id,
+          _reason: reason!.trim(),
+        });
+        if (error) throw error;
+      } else {
+        const nowIso = new Date().toISOString();
+        const patch = status === "paid" ? { status, paid_at: nowIso } : { status, refunded_at: nowIso };
+        const { error } = await supabase.from("deposits").update(patch).eq("id", id);
+        if (error) throw error;
+      }
       toast.success(status === "paid" ? "דמי ההשתתפות סומנו כשולמו" : "דמי ההשתתפות הוחזרו");
       await load();
     } catch (err) {
@@ -116,6 +140,7 @@ export default function AdminDeposits() {
       setBusyId(null);
     }
   };
+
 
   const toggleHidden = async (id: string, currentlyHidden: boolean) => {
     setBusyId(id);
