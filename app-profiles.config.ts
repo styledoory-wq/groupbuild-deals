@@ -69,6 +69,8 @@ export type AppProfile = {
   apple: {
     teamId?: string;
     entitlementsPath: string;
+    /** `development` — Xcode promotes to `production` on Distribution export. */
+    apsEnvironment?: "development" | "production";
     provisioningProfileName?: string;
   };
 
@@ -130,13 +132,13 @@ export const APP_PROFILES: AppProfile[] = [
     },
     apple: {
       entitlementsPath: "ios-residents/App/App/App.entitlements",
+      apsEnvironment: "development",
     },
     privacyManifest: {
       collectedDataTypes: [
         "EmailAddress",
         "PhoneNumber",
         "Name",
-        "PreciseLocation",
         "PhotosorVideos",
       ],
       accessedAPITypes: [
@@ -199,6 +201,7 @@ export const APP_PROFILES: AppProfile[] = [
     },
     apple: {
       entitlementsPath: "ios-suppliers/App/App/App.entitlements",
+      apsEnvironment: "development",
     },
     privacyManifest: {
       collectedDataTypes: [
