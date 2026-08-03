@@ -12,6 +12,7 @@ import {
   settleDepositPaid,
   settleDepositUnpaid,
 } from "../_shared/settleDeposit.ts";
+import { sendJoinConfirmationEmail } from "../_shared/afterPayment.ts";
 
 /**
  * Cardcom webhook — the ONLY path that can mark a participation-fee deposit as
@@ -133,12 +134,18 @@ Deno.serve(async (req) => {
       auditMetadata: { low_profile_id: lowProfileId },
     });
 
+    // Join confirmation email. Idempotent by design (claims join_email_sent_at),
+    // so a replayed webhook never mails twice, and a mail failure never undoes
+    // the payment or the join.
+    const emailResult = await sendJoinConfirmationEmail(admin, deposit.id);
+
     return json({
       ok: true,
       deposit_id: deposit.id,
       environment,
       first_time: result.firstTime,
       skipped: result.skipped,
+      join_email: emailResult,
     });
   } catch (e) {
     console.error("[cardcom-webhook] error", e);
