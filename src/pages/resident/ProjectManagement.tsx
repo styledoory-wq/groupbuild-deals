@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Share2, Pencil, Calendar, Clock, User, Check, TrendingUp,
   Star, ChevronLeft, Sparkles, Zap, X, Plus, Trash2, RefreshCw, ChevronDown, MapPin,
+  Building2, Building, Hammer, PlusSquare, ShieldCheck, Wrench, PlusSquare as PlusSquareIcon,
+  type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -25,6 +27,7 @@ import {
 import { useProjectCloudSync, useMyProject } from "@/lib/projectClient";
 import { ProjectMembersCard } from "@/components/project/ProjectMembersCard";
 import { ProjectStagesStepper } from "@/components/project/ProjectStagesStepper";
+import { CategoryIcon, StageIcon } from "@/components/ds/CategoryIcon";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
@@ -79,13 +82,13 @@ const DEFAULT_INFO: ProjectInfo = {
   groupSavings: 0,
 };
 
-const PROJECT_TYPES: { key: ProjectType; label: string; emoji: string; desc: string }[] = [
-  { key: "new_build",     label: "בנייה חדשה", desc: "וילה / בית פרטי מהיסוד" },
-  { key: "renovation",    label: "שיפוץ", desc: "שיפוץ דירה / בית קיים" },
-  { key: "extension",     label: "תוספת בנייה", desc: "חדר, קומה או הרחבה" },
-  { key: "mamad",         label: "ממ״ד", desc: "בנייה או שדרוג ממ״ד" },
-  { key: "committee",     label: "ועד בית / בניין משותף", desc: "רכישות ושירותים לבניין" },
-  { key: "point_service", label: "שירות נקודתי", desc: "שירות/מוצר בודד" },
+const PROJECT_TYPES: { key: ProjectType; label: string; icon: LucideIcon; desc: string }[] = [
+  { key: "new_build", icon: Building2,     label: "בנייה חדשה", desc: "וילה / בית פרטי מהיסוד" },
+  { key: "renovation", icon: Hammer,    label: "שיפוץ", desc: "שיפוץ דירה / בית קיים" },
+  { key: "extension", icon: PlusSquare,     label: "תוספת בנייה", desc: "חדר, קומה או הרחבה" },
+  { key: "mamad", icon: ShieldCheck,         label: "ממ״ד", desc: "בנייה או שדרוג ממ״ד" },
+  { key: "committee", icon: Building,     label: "ועד בית / בניין משותף", desc: "רכישות ושירותים לבניין" },
+  { key: "point_service", icon: Wrench, label: "שירות נקודתי", desc: "שירות/מוצר בודד" },
 ];
 
 const RENOVATION_SCOPE_OPTS = [
@@ -119,10 +122,9 @@ type Stage = {
   num: number;
   title: string;
   short: string;
-  emoji: string;
   catIds: string[];
   tasks: string[];
-  recommendations: { title: string; subtitle: string; emoji: string }[];
+  recommendations: { title: string; subtitle: string; catId?: string }[];
 };
 
 const NEW_BUILD_STAGES: Stage[] = [
@@ -961,7 +963,7 @@ export default function ProjectManagement() {
             onClick={() => setScheduleOpen(true)}
             className="text-[11px] font-bold text-[#0E6B5A] bg-white border border-[#0E6B5A]/20 px-2.5 py-1.5 rounded-full whitespace-nowrap active:scale-95"
           >
-            📅 לוח זמנים
+            <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" strokeWidth={1.9} /> לוח זמנים</span>
           </button>
         </div>
 
@@ -969,7 +971,9 @@ export default function ProjectManagement() {
         <div className="mt-6 bg-white rounded-3xl p-4 border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-[20px]" aria-hidden>{current.emoji}</span>
+              <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#F0F9F6" }}>
+                <StageIcon stageKey={current.key} size={20} />
+              </span>
               <div>
                 <div className="text-[15px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
                   השלב הנוכחי: {current.title}
@@ -1091,7 +1095,7 @@ export default function ProjectManagement() {
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-[20px] mb-2"
                 style={{ background: "#F0F9F6" }}
               >
-                <span aria-hidden>{r.emoji}</span>
+                <CategoryIcon categoryId={r.catId} label={r.title} size={20} />
               </div>
               <div className="text-[12.5px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
                 {r.title}
@@ -1278,11 +1282,11 @@ function EditInfoModal({
                 }}
               >
                 <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center text-[22px] shrink-0"
+                  className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
                   style={{ background: sel ? "#FFFFFF" : "#FAFAF7" }}
                   aria-hidden
                 >
-                  {pt.emoji}
+                  <pt.icon size={20} strokeWidth={1.75} className="text-[#0E6B5A]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[13.5px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
@@ -1331,7 +1335,7 @@ function EditInfoModal({
                     color: sel ? "#FFFFFF" : "#374151",
                   }}
                 >
-                  <span aria-hidden>{pt.emoji}</span>
+                  <pt.icon size={14} strokeWidth={1.9} aria-hidden />
                   <span>{pt.label}</span>
                 </button>
               );
@@ -1658,7 +1662,7 @@ function ScheduleModal({
         {stages.map((s) => (
           <div key={s.key} className="bg-[#FAFAF7] rounded-2xl p-3 border border-gray-100">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[16px]" aria-hidden>{s.emoji}</span>
+              <StageIcon stageKey={s.key} size={16} />
               <div className="text-[13px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
                 {s.num}. {s.title}
               </div>

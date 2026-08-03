@@ -2,6 +2,8 @@ import {
   AppWindow,
   Building2,
   ClipboardList,
+  Circle,
+  CircleDashed,
   Compass,
   DoorOpen,
   Droplets,
@@ -175,6 +177,9 @@ const KEYWORD_ICONS: Array<{ match: RegExp; Icon: LucideIcon }> = [
   { match: /תכנון|אדריכל|מהנדס|היתר/i, Icon: Ruler },
   { match: /ניק|אחזק/i, Icon: Sparkles },
 ];
+
+/** Uniform neutral icon for items with no category link. Never an emoji. */
+export const NEUTRAL_ICON: LucideIcon = CircleDashed;
 
 export function iconForStage(stageKey: string): LucideIcon {
   return STAGE_ICONS[stageKey] ?? Sparkles;
