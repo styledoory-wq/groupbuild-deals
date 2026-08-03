@@ -1,105 +1,85 @@
-# Residents App — QA + Premium Polish Sprint
+# שליטת אדמין במודל דמי ההשתתפות + תשתית חוזית לשינוי עסקי עתידי
 
-**Scope lock:** אפליקציית הדיירים בלבד. אפס נגיעה בקוד ספקים/אדמין או ב־Backend/סכמה.
-כל השינויים מאחורי `includesResidentRoutes` / `VITE_APP_MODE=residents` או ב־components/hooks שמשמשים רק את זרם הדיירים.
+לא משנים סכומי מדרגות, לא נוגעים בזרימת Cardcom עצמה. מוסיפים "מתג" מצב מעליה, ותשתית גרסאות הסכם לספקים.
 
----
+## 1. מה נבנה
 
-## Phase 1 — Critical Bug Fixes (QA sweep)
+### א. מצב דמי השתתפות (`participation_fee_mode`)
+שלושה מצבים בהגדרות המערכת:
+- `enabled` — כרגיל: חישוב דמי השתתפות → deposit → Cardcom → webhook יוצר deal_interest.
+- `disabled` — הצטרפות חינם: לא נוצר deposit, לא נפתח Cardcom, נוצר `deal_interest` מאושר ישירות. במסך העסקה לא מוצגים דמי השתתפות.
+- `maintenance` — הצטרפות חסומה עם ההודעה: "ההצטרפות לעסקאות אינה זמינה כרגע. נסו שוב מאוחר יותר."
 
-מטרה: לאפס באגים חוסמים לפני שנוגעים בעיצוב.
+כללי ברזל:
+- חל על **הצטרפויות חדשות בלבד**. deposit קיים לא משתנה, אין ביטול/החזר אוטומטי בעקבות שינוי מצב, ועסקה עם עמלה נעולה שומרת על הנתונים ההיסטוריים.
+- ברירת מחדל `enabled`.
+- **Fail Closed**: כשל בקריאת ההגדרה = חסימת הצטרפות, לעולם לא נפילה למצב חינמי.
+- אכיפה בשרת (Edge Function + RPC), לא רק ב-UI.
 
-1. **Safe Area בכל מסך iPhone**
-   - לעבור על `MobileShell`, `GuestShell`, `ResidentShell`, headers של כל מסכי `/resident/*` + מסכי guest.
-   - לוודא `padding-top: env(safe-area-inset-top)` יעיל בפועל (כרגע יש `pt-[env(safe-area-inset-top)]` ב־MobileShell — לבדוק כפילויות ו־headers שדורסים אותו עם `pt-0`).
-   - להוסיף safe area גם ל־sticky headers, modals, sheets, ולמסך ההתחברות.
+### ב. תצוגת אדמין
+כרטיס חדש ב"הגדרות תשלום": "כיצד מתבצעת הצטרפות לעסקאות?" עם שלוש אפשרויות בעברית, באנר מצב נוכחי ("דמי השתתפות כבויים" / "הצטרפות מושבתת זמנית"), ודיאלוג אישור שמסביר את ההשפעה **ומחייב הזנת סיבה** לפני שמירה.
 
-2. **קטגוריה → ספקים של אותה קטגוריה בלבד**
-   - `CategoriesList` / `CategoryStages` / `CategorySuppliers`: לוודא ש־query מסנן לפי `categoryId` (כולל צאצאים אם צריך) ולא מחזיר את כל הספקים. לתקן route params + hook.
+### ג. תשתית גרסאות הסכם לספקים
+שדות חדשים לספק: `terms_version`, `accepted_terms_version`, `accepted_terms_at`, `accepted_terms_metadata` (IP/UA), `requires_reacceptance`.
+בשלב זה: רק תשתית + מסך אישור מחדש שנפתח כשהדגל דלוק, וחוסם **יצירת הצעה חדשה** בלבד — לא חוסם טיפול בהתחייבויות קיימות ללקוחות.
 
-3. **כפתור "התחברות" → Sign In, לא Sign Up**
-   - ב־`MobileShell` (הדסקטופ) וב־Gateway/GuestShell: לינק ל־`/auth/resident?mode=signin` (או ה־equivalent) במקום default signup.
-   - לוודא ש־`Auth.tsx` מכבד את ה־mode ופותח את הטאב הנכון.
+### ד. סעיף חוזי חדש
+"שינויים במודל השירות והתשלום" — הנוסח המלא מופיע בהמשך.
 
-4. **Navigation audit**
-   - לעבור כפתור־כפתור ב־BottomNav, GuestBottomNav, כל CTA במסכי בית/קטגוריה/עסקה/פרופיל.
-   - לוודא `returnUrl` נשמר בכל gated action ומחזיר לאותו מקום אחרי login.
-   - Back button (native + web) — בדיקה בכל flow.
+## 2. מיגרציות DB
 
-5. **Auth flows**
-   - הרשמה, התחברות (email + Google), logout, session persistence אחרי reload, reset password.
-   - `SignupPromptSheet` — לוודא שהוא נסגר נכון ומעביר ל־auth עם returnUrl.
+1. `system_settings`: עמודה `participation_fee_mode text NOT NULL DEFAULT 'enabled'` + CHECK על שלושת הערכים.
+2. טבלה `participation_mode_audit_log` (מי, מתי, מצב קודם, מצב חדש, סיבה חובה) + GRANT + RLS: קריאה לאדמין בלבד, כתיבה דרך RPC בלבד.
+3. RPC `admin_set_participation_fee_mode(_mode, _reason)` — SECURITY DEFINER, בודקת `has_role(auth.uid(),'admin')`, מחייבת סיבה לא ריקה, מעדכנת ורושמת ל-Audit.
+4. RPC `get_participation_fee_mode()` — קריאה בלבד ל-authenticated; ללא ערך תקין מחזירה שגיאה (fail closed בצד הקורא).
+5. RPC `join_deal_free(_deal_id, _payload)` — SECURITY DEFINER; **קוראת בעצמה** את המצב ומאשרת רק אם הוא `disabled`, יוצרת `deal_interest` יחיד (idempotent לפי user+deal).
+6. `suppliers`: הוספת חמשת שדות ההסכם + backfill ל-`accepted_terms_version` מהגרסה הנוכחית לספקים קיימים (ללא `requires_reacceptance`).
 
-6. **Search / Filters / Share**
-   - `GlobalSearchBar`, `Search.tsx`, סינוני קטגוריה/אזור — לתקן overflow ו־empty results.
-   - Share של Deal (`SharedDeal`) — לוודא meta tags וקישור עובד.
+## 3. קבצים שישתנו
 
-7. **Layout hygiene**
-   - Overflow-x horizontal בכל מסך, gutters אחידים, scroll ב־sheets/modals, keyboard-open behavior.
+| קובץ | שינוי |
+|---|---|
+| `src/lib/participationMode.ts` (חדש) | טעינת מצב + טיפוסים + הודעות עברית, fail-closed |
+| `src/pages/admin/AdminPaymentSettings.tsx` | כרטיס מצב + דיאלוג אישור עם סיבה + באנר חיווי |
+| `src/pages/resident/DealDetail.tsx` | לפי המצב: תשלום / הצטרפות חינם / חסימה; הסתרת תצוגת דמי השתתפות ב-`disabled` |
+| `supabase/functions/create-deposit/index.ts` | דחייה מוקדמת אם המצב אינו `enabled` (שגיאה מפורשת) |
+| `src/lib/terms.ts` + `src/components/terms/TermsContent.tsx` | הסעיף החוזי החדש + העלאת `CURRENT_TERMS_VERSION` ל-`v4` |
+| `src/lib/supplierTerms.ts` (חדש) + מסך אישור מחדש | קריאה/כתיבה של גרסת ההסכם המאושרת |
+| `src/pages/supplier/OfferEditor.tsx` | חסימת יצירת הצעה חדשה כש-`requires_reacceptance` דלוק |
 
-**Deliverable:** דוח QA קצר + כל התיקונים בקומיטים לוגיים.
+## 4. השפעה על תשלום והצטרפות
 
----
+- `enabled` — אין שינוי התנהגותי כלל מול היום.
+- `disabled` — אין deposit ואין קריאה ל-Cardcom; ה-`deal_interest` נוצר ב-RPC ולא ב-webhook.
+- `maintenance` — כפתור ההצטרפות חסום ו-`create-deposit` מחזירה שגיאה גם אם עוקפים את ה-UI.
+- תשלומים והחזרים קיימים: אין נגיעה. `process-deal-refunds` ו-`cardcom-webhook` ממשיכים לעבוד על deposits קיימים ללא תלות במצב.
 
-## Phase 2 — Unified Design System
+## 5. סיכוני רגרסיה ואיך מנוטרלים
 
-מרכיב הכל ל־tokens מרכזיים ב־`src/index.css` + `tailwind.config.ts` + `src/lib/designSystem.ts`. כל מסכי הדיירים ישתמשו רק ב־tokens.
+| סיכון | נטרול |
+|---|---|
+| קריאת מצב שנכשלת מפילה הצטרפות תקינה | ההודעה זהה להודעת ה-Fail Closed הקיימת; קריאה יחידה עם retry קצר |
+| הצטרפות כפולה חינמית | ה-RPC idempotent לפי (user, deal) |
+| עקיפת UI ישירות מול Edge Function | אכיפה כפולה בשרת |
+| webhook מאוחר של תשלום שבוצע לפני כיבוי המצב | ה-webhook לא בודק מצב — ממשיך להשלים כרגיל |
+| שינוי `CURRENT_TERMS_VERSION` יציף אישור מחדש לכולם | `requires_reacceptance` נשלט ידנית; העלאת גרסה לבדה לא חוסמת אף אחד |
 
-- **Radius:** `--radius-sm/md/lg/xl` + `--radius-card`, `--radius-chip`, `--radius-button`.
-- **Shadows:** להשתמש רק ב־`--shadow-soft/card/elevated/floating` הקיימים. להסיר `boxShadow` ידניים.
-- **Spacing scale:** להשתמש רק ב־Tailwind scale + `--pad-x`. לאסור magic numbers ב־resident components.
-- **Typography:** להצמיד לכל resident screen את `text-fs-*` הקיים; להגדיר `H1/H2/H3/Body/Caption` primitives ב־`components/ds/`.
-- **Buttons/Chips:** לעבור על `Button` variants ו־chip components לוודא סט אחיד (primary, secondary, ghost, danger + sizes sm/md/lg).
-- **Icons:** רק `lucide-react`, stroke=1.9, size 20/24 סטנדרט.
-- **Colors:** להסיר כל `text-white`/`bg-[#...]` ב־`src/pages/resident/**` ו־guest shells → semantic tokens.
-- **Empty / Loading / Skeleton:** `EmptyState` הקיים + `SkeletonCard`, `SkeletonList`, `SkeletonDetail` חדשים ב־`components/ds/`.
-- **Motion:** `MOTION` tokens כבר קיימים — להשתמש דרך `transition-[all]` + duration/ease אחיד; להוסיף `fade-up`, `scale-in` על כל page mount.
+## 6. נוסח הסעיף החוזי הסופי (בהסכם הספקים)
 
----
+**שינויים במודל השירות והתשלום**
 
-## Phase 3 — Premium Polish (screen-by-screen)
+GroupBuild רשאית לעדכן מעת לעת את מבנה השירותים המוצעים לספקים ואת מודל התשלום בגינם, לרבות מעבר למסלול מנוי, דמי שימוש, תשלום עבור פרסום או קידום, עמלת הפניה, עמלת הצלחה או עמלה הנגזרת משווי עסקה, מכירה או שירות שבוצעו באמצעות הפלטפורמה.
 
-עוברים על כל מסך דיירים לפי הרשימה, ומיישמים: white space, hierarchy, כרטיסים עם עומק, טיפוגרפיה נקייה, יחס תמונות אחיד (16:10 לכרטיס, 4:5 להירו), micro-interactions, haptics (`Haptics.impact` מ־Capacitor במסכי native).
+כל שינוי מהותי בתנאים הכספיים יחול מכאן ולהבא בלבד, לאחר מסירת הודעה מוקדמת לספק באמצעי הקשר הרשומים במערכת ו/או באמצעות הודעה בולטת באפליקציה.
 
-מסכים: `ResidentsHome`, `CategoriesList`, `CategoryStages`, `CategorySuppliers`, `Search`, `SupplierProfile`, `DealDetail`, `DealsList`, `ResidentDashboard`, `ResidentProfile`/`Edit`, `Favorites`, `MyDeals/Vouchers/Documents/Offers/Demands/Deposits`, `Notifications`, `Auth`, `Onboarding`, `Welcome`, `Gateway`, `SharedDeal`, `NotFound`.
+השינוי לא יחול רטרואקטיבית על עסקאות, התחייבויות או תשלומים שהושלמו לפני מועד כניסתו לתוקף, אלא אם הספק הסכים לכך במפורש.
 
-לכל מסך: לפני/אחרי screenshot ב־Playwright (390×844) + הערות שינויים.
+ספק שאינו מסכים לשינוי מהותי יהיה רשאי להפסיק להשתמש בשירותים המושפעים ולבקש את סגירת חשבונו לפני כניסת השינוי לתוקף, בכפוף להשלמת התחייבויות קיימות כלפי משתמשים ו-GroupBuild.
 
----
+המשך שימוש בשירותים המושפעים לאחר כניסת השינוי לתוקף יהווה הסכמה לתנאים המעודכנים, ובלבד שנמסרה לספק הודעה ברורה מראש.
 
-## Phase 4 — UX Review (First-time user lens)
+## 7. בדיקות שיבוצעו בסיום
 
-לעבור על אותה רשימת מסכים ולוודא לכל אחד:
-- תוך 3 שניות ברור מה עושים במסך?
-- Primary action בולט וייחודי?
-- אין רעש/כפילויות/עומס?
-- תחושה בגובה Apple/Airbnb/Linear/Stripe?
+`enabled` → זרימת Cardcom מלאה · `disabled` → הצטרפות ללא deposit · `maintenance` → חסימה · תשלום קיים לא מושפע · דייר/ספק אינם יכולים לשנות מצב (RPC דוחה) · כשל קריאה אינו מייצר הצטרפות חינמית · Audit Log נשמר עם סיבה.
 
-לתעד ממצאים ולתקן במקום.
-
----
-
-## Phase 5 — WOW Factor
-
-- Page transitions ב־`RouteTransition` — fade+slide עדין.
-- Skeleton מדויק שמחקה את ה־layout האמיתי.
-- Empty states עם איור/אייקון גדול + CTA.
-- כרטיסי Deal/Supplier עם gradient overlay + hover/press states.
-- Pull-to-refresh (`usePullToRefresh` קיים) בכל רשימה רלוונטית.
-- Haptics עדין ב־CTA ראשיים ב־native.
-- Splash → Home crossfade חלק.
-
----
-
-## Technical Guardrails
-
-- לא נוגעים ב־`src/pages/supplier/**`, `src/routes/SupplierRoutes.tsx`, `SupplierRoutes` gating, אדמין, Backend, migrations, edge functions.
-- כל resident screen עובר build + Playwright smoke (390×844 + iPhone 14 Pro viewport).
-- אין hardcoded colors ב־`src/pages/resident/**` בסוף Phase 2.
-- Bundle size לא גדל ביותר מ־5%.
-
-## Execution Order
-
-Phase 1 → אישור → Phase 2 → אישור → Phases 3+4+5 מסך־מסך (batched, ~5 מסכים לכל סבב) → QA סופי → Ready לגרסה יציבה.
-
-אאשר איתך אחרי Phase 1 לפני שממשיך.
+לא מופעל בשלב זה: מנוי, עמלת ספק או אחוז ממכירה — רק תשתית.
