@@ -352,9 +352,17 @@ export async function refundParticipationDeposit(
       reason: opts.reason,
       trigger: opts.trigger,
       provider_refund_id: refundId,
+      // When Cardcom returns no dedicated refund identifier, the original
+      // transaction id + refunded_at timestamp are the reconciliation key.
+      refund_reference: refundId ?? dep.provider_transaction_id,
+      refund_reference_source: refundId ? "cardcom_refund_id" : "original_transaction_id",
       transaction_id: dep.provider_transaction_id,
+      refunded_at: nowIso,
+      response_code: code,
+      description,
     },
   });
+
 
   await notifyResidentRefund(admin, dep, { amount, reason: opts.reason, refundedAt: nowIso });
 
