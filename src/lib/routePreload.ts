@@ -3,32 +3,52 @@ import { includesAdminRoutes, includesResidentRoutes, includesSupplierRoutes } f
 
 type PreloadFn = () => Promise<unknown>;
 
+// Inline literal checks (not the imported flags) so Rollup can statically drop
+// the `import()` calls of route groups that this build does not ship.
+const MODE = import.meta.env.VITE_APP_MODE;
+const WANTS_RESIDENT = MODE !== "suppliers";
+const WANTS_SUPPLIER = MODE !== "residents";
+const WANTS_ADMIN = MODE !== "residents" && MODE !== "suppliers";
+
 const routePreloads: Record<string, PreloadFn> = {
-  "/resident": () => Promise.resolve(),
-  "/resident/deals": () => import("@/pages/resident/DealsList"),
-  "/resident/search": () => import("@/pages/resident/Search"),
-  "/resident/my-offers": () => import("@/pages/resident/MyOffers"),
-  "/resident/profile": () => import("@/pages/resident/ResidentProfile"),
-  "/resident/categories": () => import("@/pages/resident/CategoriesList"),
-  "/resident/projects": () => import("@/pages/resident/ProjectsList"),
-  "/resident/deposits": () => import("@/pages/resident/MyDeposits"),
-  "/resident/documents": () => import("@/pages/resident/MyDocuments"),
-  "/resident/my-vouchers": () => import("@/pages/resident/MyVouchers"),
-  "/resident/notifications": () => import("@/pages/resident/Notifications"),
+  ...(WANTS_RESIDENT
+    ? {
+        "/resident": () => Promise.resolve(),
+        "/resident/deals": () => import("@/pages/resident/DealsList"),
+        "/resident/search": () => import("@/pages/resident/Search"),
+        "/resident/my-offers": () => import("@/pages/resident/MyOffers"),
+        "/resident/profile": () => import("@/pages/resident/ResidentProfile"),
+        "/resident/categories": () => import("@/pages/resident/CategoriesList"),
+        "/resident/projects": () => import("@/pages/resident/ProjectsList"),
+        "/resident/deposits": () => import("@/pages/resident/MyDeposits"),
+        "/resident/documents": () => import("@/pages/resident/MyDocuments"),
+        "/resident/my-vouchers": () => import("@/pages/resident/MyVouchers"),
+        "/resident/notifications": () => import("@/pages/resident/Notifications"),
+      }
+    : {}),
 
-  "/supplier": () => import("@/pages/supplier/SupplierDashboard"),
-  "/supplier/offers": () => import("@/pages/supplier/SupplierOffers"),
-  "/supplier/scan": () => import("@/pages/supplier/SupplierScan"),
-  "/supplier/redemptions": () => import("@/pages/supplier/SupplierRedemptions"),
-  "/supplier/leads": () => import("@/pages/supplier/SupplierLeads"),
-  "/supplier/reviews": () => import("@/pages/supplier/SupplierReviews"),
+  ...(WANTS_SUPPLIER
+    ? {
+        "/supplier": () => import("@/pages/supplier/SupplierDashboard"),
+        "/supplier/offers": () => import("@/pages/supplier/SupplierOffers"),
+        "/supplier/scan": () => import("@/pages/supplier/SupplierScan"),
+        "/supplier/redemptions": () => import("@/pages/supplier/SupplierRedemptions"),
+        "/supplier/leads": () => import("@/pages/supplier/SupplierLeads"),
+        "/supplier/reviews": () => import("@/pages/supplier/SupplierReviews"),
+      }
+    : {}),
 
-  "/admin": () => import("@/pages/admin/AdminDashboard"),
-  "/admin/projects": () => import("@/pages/admin/AdminProjects"),
-  "/admin/suppliers": () => import("@/pages/admin/AdminDbSuppliers"),
-  "/admin/deals": () => import("@/pages/admin/AdminDeals"),
-  "/admin/stats": () => import("@/pages/admin/AdminStats"),
+  ...(WANTS_ADMIN
+    ? {
+        "/admin": () => import("@/pages/admin/AdminDashboard"),
+        "/admin/projects": () => import("@/pages/admin/AdminProjects"),
+        "/admin/suppliers": () => import("@/pages/admin/AdminDbSuppliers"),
+        "/admin/deals": () => import("@/pages/admin/AdminDeals"),
+        "/admin/stats": () => import("@/pages/admin/AdminStats"),
+      }
+    : {}),
 };
+
 
 const roleRoutes: Record<Role, string[]> = {
   resident: [
