@@ -8,18 +8,16 @@ interface EmptyStateProps {
   action?: ReactNode;
 }
 
-/** Unified empty state — illustration + title + description + action. */
+/** Unified empty state — icon medallion + title + description + CTA. */
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center text-center px-6 py-10">
-      <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18)]">
-        {icon ?? <Inbox className="h-7 w-7 text-[#9CA3AF]" strokeWidth={2} />}
+    <div className="flex flex-col items-center text-center px-6 py-10 animate-fade-in">
+      <div className="h-16 w-16 rounded-full bg-card flex items-center justify-center shadow-[var(--shadow-soft)] [&_svg]:h-7 [&_svg]:w-7 [&_svg]:text-muted-foreground">
+        {icon ?? <Inbox strokeWidth={2} />}
       </div>
-      <h3 className="mt-4 text-[16px] font-extrabold text-[#1F2937] tracking-tight">
-        {title}
-      </h3>
+      <h3 className="mt-4 text-[16px] font-extrabold text-foreground tracking-tight">{title}</h3>
       {description && (
-        <p className="mt-1.5 text-[13px] font-medium text-[#6B7280] max-w-[280px]">
+        <p className="mt-1.5 text-[13px] font-medium text-muted-foreground max-w-[280px] leading-relaxed">
           {description}
         </p>
       )}
