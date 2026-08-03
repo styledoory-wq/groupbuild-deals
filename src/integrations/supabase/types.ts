@@ -3486,6 +3486,17 @@ export type Database = {
           monthly_subscription: number
         }[]
       }
+      admin_get_supplier_payment_info: {
+        Args: { _supplier_id: string }
+        Returns: {
+          bank_account_holder: string
+          bank_account_number: string
+          bank_branch: string
+          bank_name: string
+          bit_phone: string
+          payment_instructions_note: string
+        }[]
+      }
       admin_invite_suppliers_to_demand: {
         Args: { _demand_id: string; _supplier_ids: string[] }
         Returns: number
@@ -3511,6 +3522,18 @@ export type Database = {
       admin_revoke_committee_role: {
         Args: { _project_id?: string; _reason?: string; _user_id: string }
         Returns: undefined
+      }
+      admin_update_supplier_payment_info: {
+        Args: {
+          _bank_account_holder?: string
+          _bank_account_number?: string
+          _bank_branch?: string
+          _bank_name?: string
+          _bit_phone?: string
+          _payment_instructions_note?: string
+          _supplier_id: string
+        }
+        Returns: boolean
       }
       approve_lead_and_deposit: {
         Args: { _interest_id: string; _lead_status: string }
