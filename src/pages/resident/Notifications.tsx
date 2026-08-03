@@ -1,14 +1,20 @@
 import { useEffect } from "react";
 import { Bell, Tag, Wallet, Info } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { ScreenHeader, EmptyState } from "@/components/ds";
+import { ScreenHeader, EmptyState, ErrorState, SkeletonList } from "@/components/ds";
 import { MOTION } from "@/lib/designSystem";
 import { useApp } from "@/store/AppStore";
 
 const iconFor = { deal: Tag, deposit: Wallet, system: Info } as const;
 
 export default function Notifications() {
-  const { notifications, refreshNotifications, markNotificationsRead } = useApp();
+  const {
+    notifications,
+    notificationsLoading,
+    notificationsError,
+    refreshNotifications,
+    markNotificationsRead,
+  } = useApp();
 
   useEffect(() => {
     void refreshNotifications();
@@ -26,13 +32,24 @@ export default function Notifications() {
         <ScreenHeader title="התראות" subtitle="עדכונים חמים על העסקאות שלך" />
 
         <div className="px-5 mt-2 space-y-2.5">
-          {notifications.length === 0 && (
+          {notificationsLoading && notifications.length === 0 && (
+            <SkeletonList count={4} itemClassName="h-[84px]" />
+          )}
+          {!notificationsLoading && notificationsError && (
+            <ErrorState
+              title="לא הצלחנו לטעון את ההתראות"
+              description="בדקו את החיבור לרשת ונסו שוב."
+              onRetry={() => void refreshNotifications()}
+            />
+          )}
+          {!notificationsLoading && !notificationsError && notifications.length === 0 && (
             <EmptyState
               icon={<Bell className="h-8 w-8 text-[#9CA3AF]" />}
               title="אין התראות חדשות"
               description="כאן יופיעו עדכונים על הצעות, פיקדונות ומידע חשוב."
             />
           )}
+
           {notifications.map((n) => {
             const Icon = iconFor[n.type] ?? Info;
             const unread = n.unread;
