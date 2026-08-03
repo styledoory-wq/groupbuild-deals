@@ -861,9 +861,15 @@ export default function DealDetail() {
   const category = categories.find((c) => c.id === deal.category_id);
   const feeAmount = Number(participationFee?.feeAmount ?? 0);
   const dealPriceForFee = Number(participationFee?.dealPrice ?? display.effectivePrice ?? 0);
-  const depositRequired = !isRegularListing && feeAmount > 0;
-  // Fail closed: a group-buy join is blocked whenever the fee is unresolved.
-  const joinBlocked = !isRegularListing && (feeLoading || !!feeError || feeAmount <= 0);
+  const depositRequired = !isRegularListing && feeMode === "enabled" && feeAmount > 0;
+  // Fail closed: blocked when the fee is unresolved, the mode is unknown,
+  // or the platform is in maintenance mode.
+  const joinBlocked =
+    !isRegularListing &&
+    (feeMode === null ||
+      feeMode === "unavailable" ||
+      feeMode === "maintenance" ||
+      (feeMode === "enabled" && (feeLoading || !!feeError || feeAmount <= 0)));
 
   const hasCompletedJoin = interested && (
     !depositRequired ||
