@@ -1,11 +1,13 @@
-import { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { ReactNode, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Bell, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScanFAB } from "@/components/supplier/ScanFAB";
+import { IS_SUPPLIERS_BUILD } from "@/config/appMode";
 
 
 import { useApp } from "@/store/AppStore";
+
 
 /**
  * Adaptive shell.
