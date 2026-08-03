@@ -552,6 +552,48 @@ export default function DealDetail() {
     const qty = qtyRaw != null && !Number.isNaN(qtyRaw) ? qtyRaw : null;
 
     // ------------------------------------------------------------------
+    // Admin-controlled join mode (fail closed). Only affects NEW joins.
+    // ------------------------------------------------------------------
+    if (!isRegularNow) {
+      if (feeMode === null || feeMode === "unavailable") {
+        toast.error(JOIN_BLOCKED_MESSAGE);
+        return;
+      }
+      if (feeMode === "maintenance") {
+        toast.error(MAINTENANCE_JOIN_MESSAGE);
+        return;
+      }
+      if (feeMode === "disabled") {
+        // Free join — no deposit, no checkout. The RPC re-validates the mode.
+        setSubmittingInterest(true);
+        try {
+          await joinDealFree(deal.id, {
+            full_name: joinForm.full_name.trim(),
+            phone: joinForm.phone.trim(),
+            city: joinForm.city.trim() || null,
+            project_name: joinForm.project_name.trim() || null,
+            notes: joinForm.notes.trim() || null,
+            estimated_quantity: qty != null ? String(qty) : null,
+            join_condition: joinCondition,
+          });
+          setInterested(true);
+          setInterestStatus("interested");
+          setInterestDepositStatus("none");
+          setPendingPaymentUrl(null);
+          setShowJoinModal(false);
+          toast.success("הצטרפת בהצלחה! הספק יצור איתך קשר בהקדם.");
+          await loadParticipantCount(deal.id);
+        } catch (err) {
+          console.error("[submitJoin] free join failed", err);
+          toast.error(JOIN_BLOCKED_MESSAGE);
+        } finally {
+          setSubmittingInterest(false);
+        }
+        return;
+      }
+    }
+
+    // ------------------------------------------------------------------
     // Group buy → payment first. FAIL CLOSED, and NO deal_interest is
     // created here: the join record is created by the payment webhook only
     // after the participation fee has actually been paid.
