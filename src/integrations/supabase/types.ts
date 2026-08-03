@@ -1936,6 +1936,36 @@ export type Database = {
           },
         ]
       }
+      participation_mode_audit_log: {
+        Row: {
+          changed_by: string | null
+          changed_by_email: string | null
+          created_at: string
+          id: string
+          new_mode: string
+          previous_mode: string | null
+          reason: string
+        }
+        Insert: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          id?: string
+          new_mode: string
+          previous_mode?: string | null
+          reason: string
+        }
+        Update: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          id?: string
+          new_mode?: string
+          previous_mode?: string | null
+          reason?: string
+        }
+        Relationships: []
+      }
       platform_fee_audit_log: {
         Row: {
           action: string
@@ -2731,6 +2761,9 @@ export type Database = {
       }
       suppliers: {
         Row: {
+          accepted_terms_at: string | null
+          accepted_terms_metadata: Json | null
+          accepted_terms_version: string | null
           approval_status: string
           avg_response_time_hours: number | null
           bank_account_holder: string | null
@@ -2771,6 +2804,7 @@ export type Database = {
           payment_methods: string[]
           phone: string | null
           profile_reminder_sent_at: string | null
+          requires_reacceptance: boolean
           serves_all_country: boolean
           service_areas: string[]
           short_description: string | null
@@ -2779,6 +2813,7 @@ export type Database = {
           success_fee_type: string
           successful_redemptions: number
           supplier_kind: string | null
+          terms_version: string | null
           trust_score: number
           updated_at: string
           user_id: string | null
@@ -2790,6 +2825,9 @@ export type Database = {
           years_experience: number | null
         }
         Insert: {
+          accepted_terms_at?: string | null
+          accepted_terms_metadata?: Json | null
+          accepted_terms_version?: string | null
           approval_status?: string
           avg_response_time_hours?: number | null
           bank_account_holder?: string | null
@@ -2830,6 +2868,7 @@ export type Database = {
           payment_methods?: string[]
           phone?: string | null
           profile_reminder_sent_at?: string | null
+          requires_reacceptance?: boolean
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
@@ -2838,6 +2877,7 @@ export type Database = {
           success_fee_type?: string
           successful_redemptions?: number
           supplier_kind?: string | null
+          terms_version?: string | null
           trust_score?: number
           updated_at?: string
           user_id?: string | null
@@ -2849,6 +2889,9 @@ export type Database = {
           years_experience?: number | null
         }
         Update: {
+          accepted_terms_at?: string | null
+          accepted_terms_metadata?: Json | null
+          accepted_terms_version?: string | null
           approval_status?: string
           avg_response_time_hours?: number | null
           bank_account_holder?: string | null
@@ -2889,6 +2932,7 @@ export type Database = {
           payment_methods?: string[]
           phone?: string | null
           profile_reminder_sent_at?: string | null
+          requires_reacceptance?: boolean
           serves_all_country?: boolean
           service_areas?: string[]
           short_description?: string | null
@@ -2897,6 +2941,7 @@ export type Database = {
           success_fee_type?: string
           successful_redemptions?: number
           supplier_kind?: string | null
+          terms_version?: string | null
           trust_score?: number
           updated_at?: string
           user_id?: string | null
@@ -3028,6 +3073,7 @@ export type Database = {
           deposit_max_amount: number | null
           deposit_min_amount: number | null
           id: string
+          participation_fee_mode: string
           payment_fee_absorber: string
           support_whatsapp: string | null
           updated_at: string
@@ -3040,6 +3086,7 @@ export type Database = {
           deposit_max_amount?: number | null
           deposit_min_amount?: number | null
           id?: string
+          participation_fee_mode?: string
           payment_fee_absorber?: string
           support_whatsapp?: string | null
           updated_at?: string
@@ -3052,6 +3099,7 @@ export type Database = {
           deposit_max_amount?: number | null
           deposit_min_amount?: number | null
           id?: string
+          participation_fee_mode?: string
           payment_fee_absorber?: string
           support_whatsapp?: string | null
           updated_at?: string
@@ -3457,6 +3505,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_supplier_terms: {
+        Args: { _metadata?: Json; _version: string }
+        Returns: boolean
+      }
       accept_user_project_invitation: {
         Args: { _token: string }
         Returns: string
@@ -3522,6 +3574,10 @@ export type Database = {
       admin_revoke_committee_role: {
         Args: { _project_id?: string; _reason?: string; _user_id: string }
         Returns: undefined
+      }
+      admin_set_participation_fee_mode: {
+        Args: { _mode: string; _reason: string }
+        Returns: string
       }
       admin_update_supplier_payment_info: {
         Args: {
@@ -3656,6 +3712,7 @@ export type Database = {
           payment_instructions_note: string
         }[]
       }
+      get_participation_fee_mode: { Args: never; Returns: string }
       get_supplier_rating: {
         Args: { _supplier_id: string }
         Returns: {
@@ -3704,6 +3761,10 @@ export type Database = {
         Returns: boolean
       }
       issue_vouchers_for_deal: { Args: { _deal_id: string }; Returns: number }
+      join_deal_free: {
+        Args: { _deal_id: string; _payload: Json }
+        Returns: string
+      }
       list_public_cities: {
         Args: never
         Returns: {

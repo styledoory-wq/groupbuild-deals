@@ -48,6 +48,12 @@ import {
   type ResolvedParticipationFee,
 } from "@/lib/platformFees";
 import { JOIN_BLOCKED_MESSAGE } from "@/lib/participationPricing";
+import {
+  fetchParticipationFeeMode,
+  joinDealFree,
+  MAINTENANCE_JOIN_MESSAGE,
+  type ParticipationFeeMode,
+} from "@/lib/participationMode";
 
 
 
@@ -117,6 +123,24 @@ export default function DealDetail() {
   const [participationFee, setParticipationFee] = useState<ResolvedParticipationFee | null>(null);
   const [feeLoading, setFeeLoading] = useState(true);
   const [feeError, setFeeError] = useState<string | null>(null);
+  // System-wide join mode. `null` = still loading, "unavailable" = fail closed.
+  const [feeMode, setFeeMode] = useState<ParticipationFeeMode | "unavailable" | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const mode = await fetchParticipationFeeMode();
+        if (!cancelled) setFeeMode(mode);
+      } catch (e) {
+        console.error("[DealDetail] participation mode unavailable", e);
+        if (!cancelled) setFeeMode("unavailable");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
 
   const openPaymentInstructions = (
@@ -411,6 +435,29 @@ export default function DealDetail() {
       setFeeLoading(false);
       return;
     }
+    // Join mode gates the whole fee flow (admin-controlled, fail closed).
+    if (feeMode === null) {
+      setFeeLoading(true);
+      return;
+    }
+    if (feeMode === "disabled") {
+      setParticipationFee(null);
+      setFeeError(null);
+      setFeeLoading(false);
+      return;
+    }
+    if (feeMode === "maintenance") {
+      setParticipationFee(null);
+      setFeeError(MAINTENANCE_JOIN_MESSAGE);
+      setFeeLoading(false);
+      return;
+    }
+    if (feeMode === "unavailable") {
+      setParticipationFee(null);
+      setFeeError(JOIN_BLOCKED_MESSAGE);
+      setFeeLoading(false);
+      return;
+    }
     let cancelled = false;
     setFeeLoading(true);
     setFeeError(null);
@@ -438,7 +485,7 @@ export default function DealDetail() {
     return () => {
       cancelled = true;
     };
-  }, [deal]);
+  }, [deal, feeMode]);
 
 
 
@@ -503,6 +550,48 @@ export default function DealDetail() {
     const activeTierNow = tiersNow.length > 0 ? getActiveTier(tiersNow, participantCount) : null;
     const qtyRaw = joinForm.estimated_quantity.trim() ? Number(joinForm.estimated_quantity) : null;
     const qty = qtyRaw != null && !Number.isNaN(qtyRaw) ? qtyRaw : null;
+
+    // ------------------------------------------------------------------
+    // Admin-controlled join mode (fail closed). Only affects NEW joins.
+    // ------------------------------------------------------------------
+    if (!isRegularNow) {
+      if (feeMode === null || feeMode === "unavailable") {
+        toast.error(JOIN_BLOCKED_MESSAGE);
+        return;
+      }
+      if (feeMode === "maintenance") {
+        toast.error(MAINTENANCE_JOIN_MESSAGE);
+        return;
+      }
+      if (feeMode === "disabled") {
+        // Free join — no deposit, no checkout. The RPC re-validates the mode.
+        setSubmittingInterest(true);
+        try {
+          await joinDealFree(deal.id, {
+            full_name: joinForm.full_name.trim(),
+            phone: joinForm.phone.trim(),
+            city: joinForm.city.trim() || null,
+            project_name: joinForm.project_name.trim() || null,
+            notes: joinForm.notes.trim() || null,
+            estimated_quantity: qty != null ? String(qty) : null,
+            join_condition: joinCondition,
+          });
+          setInterested(true);
+          setInterestStatus("interested");
+          setInterestDepositStatus("none");
+          setPendingPaymentUrl(null);
+          setShowJoinModal(false);
+          toast.success("הצטרפת בהצלחה! הספק יצור איתך קשר בהקדם.");
+          await loadParticipantCount(deal.id);
+        } catch (err) {
+          console.error("[submitJoin] free join failed", err);
+          toast.error(JOIN_BLOCKED_MESSAGE);
+        } finally {
+          setSubmittingInterest(false);
+        }
+        return;
+      }
+    }
 
     // ------------------------------------------------------------------
     // Group buy → payment first. FAIL CLOSED, and NO deal_interest is
@@ -772,9 +861,15 @@ export default function DealDetail() {
   const category = categories.find((c) => c.id === deal.category_id);
   const feeAmount = Number(participationFee?.feeAmount ?? 0);
   const dealPriceForFee = Number(participationFee?.dealPrice ?? display.effectivePrice ?? 0);
-  const depositRequired = !isRegularListing && feeAmount > 0;
-  // Fail closed: a group-buy join is blocked whenever the fee is unresolved.
-  const joinBlocked = !isRegularListing && (feeLoading || !!feeError || feeAmount <= 0);
+  const depositRequired = !isRegularListing && feeMode === "enabled" && feeAmount > 0;
+  // Fail closed: blocked when the fee is unresolved, the mode is unknown,
+  // or the platform is in maintenance mode.
+  const joinBlocked =
+    !isRegularListing &&
+    (feeMode === null ||
+      feeMode === "unavailable" ||
+      feeMode === "maintenance" ||
+      (feeMode === "enabled" && (feeLoading || !!feeError || feeAmount <= 0)));
 
   const hasCompletedJoin = interested && (
     !depositRequired ||

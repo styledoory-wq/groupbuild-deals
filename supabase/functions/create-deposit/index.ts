@@ -78,6 +78,32 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    // ---------------------------------------------------------------
+    // System-wide participation fee mode. Server-side enforcement so the
+    // UI cannot be bypassed. FAIL CLOSED when the mode cannot be read.
+    // ---------------------------------------------------------------
+    const { data: modeData, error: modeErr } = await admin.rpc("get_participation_fee_mode");
+    if (modeErr || typeof modeData !== "string") {
+      console.error("[create-deposit] participation mode unavailable", modeErr);
+      return json({ error: "mode_unavailable", message: BLOCKED_MESSAGE }, 503);
+    }
+    if (modeData === "maintenance") {
+      return json({
+        error: "joining_maintenance",
+        message: "ההצטרפות לעסקאות אינה זמינה כרגע. נסו שוב מאוחר יותר.",
+      }, 503);
+    }
+    if (modeData === "disabled") {
+      // Free-join mode: no deposit may be created at all.
+      return json({
+        error: "participation_fee_disabled",
+        message: "ההצטרפות לעסקאות אינה כרוכה כרגע בתשלום.",
+      }, 409);
+    }
+    if (modeData !== "enabled") {
+      return json({ error: "mode_unavailable", message: BLOCKED_MESSAGE }, 503);
+    }
+
     const { data: deal, error: dealErr } = await admin
       .from("deals")
       .select(

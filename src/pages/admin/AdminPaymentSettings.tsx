@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CreditCard, Wallet, Percent, Save } from "lucide-react";
+import { CreditCard, Wallet, Percent, Save, Users, AlertTriangle } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { LoadingState } from "@/components/ds";
@@ -7,9 +7,25 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  fetchParticipationFeeMode,
+  setParticipationFeeMode,
+  PARTICIPATION_MODE_LABEL,
+  PARTICIPATION_MODE_DESCRIPTION,
+  type ParticipationFeeMode,
+} from "@/lib/participationMode";
 
 type Provider = "cardcom" | "stripe";
 type FeeAbsorber = "resident" | "supplier" | "groupbuild";
@@ -42,6 +58,46 @@ export default function AdminPaymentSettings() {
   const [commission, setCommission] = useState<number>(0);
   const [feeAbsorber, setFeeAbsorber] = useState<FeeAbsorber>("groupbuild");
   const [loading, setLoading] = useState(true);
+
+  // Participation fee mode (system-wide join behaviour)
+  const [mode, setMode] = useState<ParticipationFeeMode | null>(null);
+  const [modeError, setModeError] = useState(false);
+  const [pendingMode, setPendingMode] = useState<ParticipationFeeMode | null>(null);
+  const [modeReason, setModeReason] = useState("");
+  const [savingMode, setSavingMode] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setMode(await fetchParticipationFeeMode());
+        setModeError(false);
+      } catch {
+        setMode(null);
+        setModeError(true);
+      }
+    })();
+  }, []);
+
+  const confirmModeChange = async () => {
+    if (!pendingMode) return;
+    if (modeReason.trim().length < 5) {
+      toast.error("יש לפרט סיבה לשינוי (לפחות 5 תווים)");
+      return;
+    }
+    setSavingMode(true);
+    try {
+      await setParticipationFeeMode(pendingMode, modeReason.trim());
+      setMode(pendingMode);
+      setModeError(false);
+      setPendingMode(null);
+      setModeReason("");
+      toast.success("מצב ההצטרפות עודכן");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "עדכון המצב נכשל");
+    } finally {
+      setSavingMode(false);
+    }
+  };
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -108,6 +164,44 @@ export default function AdminPaymentSettings() {
           <LoadingState fullHeight={false} />
         ) : (
           <>
+            <section className="gb-card p-5">
+              <h2 className="text-sm font-bold mb-1 flex items-center gap-2">
+                <Users className="h-4 w-4 gb-gold-text" />
+                מצב הצטרפות לעסקאות
+              </h2>
+              <p className="text-fs-xs text-muted-foreground mb-3 leading-relaxed">
+                שולט על כלל המערכת. שינוי דורש סיבה ונרשם ביומן שינויים.
+              </p>
+              {modeError && (
+                <div className="mb-3 rounded-xl bg-[#FEF2F2] border border-[#FECACA] p-3 text-fs-xs text-[#991B1B] flex gap-2">
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                  לא ניתן לקרוא את מצב ההצטרפות. עד לפתרון, ההצטרפות חסומה אוטומטית.
+                </div>
+              )}
+              <div className="grid grid-cols-1 gap-2">
+                {(["enabled", "disabled", "maintenance"] as ParticipationFeeMode[]).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => {
+                      if (m === mode) return;
+                      setPendingMode(m);
+                      setModeReason("");
+                    }}
+                    className={cn(
+                      "p-4 rounded-2xl border-2 transition-smooth text-right",
+                      mode === m ? "border-[#0E6B5A] bg-[#F0F7F5]" : "border-border bg-card",
+                    )}
+                  >
+                    <div className="text-sm font-bold">{PARTICIPATION_MODE_LABEL[m]}</div>
+                    <div className="text-fs-xs text-muted-foreground mt-1 leading-relaxed">
+                      {PARTICIPATION_MODE_DESCRIPTION[m]}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+
             <section className="gb-card p-5">
               <h2 className="text-sm font-bold mb-3 flex items-center gap-2">
                 <CreditCard className="h-4 w-4 gb-gold-text" />
@@ -236,7 +330,38 @@ export default function AdminPaymentSettings() {
           </>
         )}
       </div>
+
+      <Dialog open={!!pendingMode} onOpenChange={(o) => !o && setPendingMode(null)}>
+        <DialogContent dir="rtl" className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-right">שינוי מצב הצטרפות</DialogTitle>
+            <DialogDescription className="text-right leading-relaxed">
+              {pendingMode ? PARTICIPATION_MODE_DESCRIPTION[pendingMode] : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold">סיבת השינוי (חובה)</Label>
+            <Textarea
+              value={modeReason}
+              onChange={(e) => setModeReason(e.target.value)}
+              rows={3}
+              className="rounded-2xl"
+              placeholder="לדוגמה: תקופת השקה ללא דמי השתתפות"
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" className="rounded-xl" onClick={() => setPendingMode(null)} disabled={savingMode}>
+              ביטול
+            </Button>
+            <Button className="rounded-xl font-bold" onClick={confirmModeChange} disabled={savingMode}>
+              {savingMode ? "מעדכן…" : "אישור השינוי"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <BottomNav role="admin" />
+
     </MobileShell>
   );
 }
