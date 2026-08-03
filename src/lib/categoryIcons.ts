@@ -176,6 +176,13 @@ const KEYWORD_ICONS: Array<{ match: RegExp; Icon: LucideIcon }> = [
   { match: /שלד|בני|קבלן/i, Icon: Building2 },
   { match: /תכנון|אדריכל|מהנדס|היתר/i, Icon: Ruler },
   { match: /ניק|אחזק/i, Icon: Sparkles },
+  { match: /קונסטרוקצ|יועץ|מדיד|היתר|פיקוח|מפרט/i, Icon: ClipboardList },
+  { match: /איטום|רטיבות|מים|ביוב/i, Icon: Droplets },
+  { match: /שלד|יציק|בטון|טיט|לבנ|חיפוי חוץ/i, Icon: Building2 },
+  { match: /מעלית/i, Icon: Building2 },
+  { match: /דוד|סולארי|אנרגי/i, Icon: SunMedium },
+  { match: /מסירה|אכלוס|טופס|מפתח/i, Icon: KeyRound },
+  { match: /הובל|ריהוט/i, Icon: Sofa },
 ];
 
 /** Uniform neutral icon for items with no category link. Never an emoji. */
