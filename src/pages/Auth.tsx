@@ -245,6 +245,36 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
     }
   };
 
+  const handleAppleSignIn = async () => {
+    setLoading(true);
+    try {
+      if (lockedRole === "supplier" || lockedRole === "resident") {
+        try { sessionStorage.setItem("gb_intent", lockedRole); } catch { /* ignore */ }
+      }
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData.session) await supabase.auth.signOut();
+      } catch { /* ignore */ }
+      // Managed Apple provider. Apple returns the name only on first authorization;
+      // it is persisted to the profile by backfillOAuthProfileName on the auth-state event.
+      const { lovable } = await import("@/integrations/lovable/index");
+      const result = await lovable.auth.signInWithOAuth("apple", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error(translateAuthError(result.error.message ?? "ההתחברות עם Apple נכשלה"));
+        setLoading(false);
+        return;
+      }
+      if (result.redirected) return;
+
+    } catch (err) {
+      toast.error(err instanceof Error ? translateAuthError(err.message) : "ההתחברות עם Apple נכשלה");
+      setLoading(false);
+    }
+  };
+
+
   const getSiteOrigin = () => {
     const host = window.location.hostname;
     // Always send confirmation links to the production custom domain,
@@ -760,6 +790,19 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
             </svg>
             התחבר עם Google
           </button>
+
+          <button
+            type="button"
+            onClick={handleAppleSignIn}
+            disabled={loading}
+            className="w-full h-[56px] rounded-[14px] bg-white text-[#1F2937] text-[15px] font-semibold flex items-center justify-center gap-3 border border-[#E0E4E8] shadow-[0_2px_10px_-4px_rgba(10,31,61,0.12)] hover:shadow-[0_4px_14px_-4px_rgba(10,31,61,0.18)] transition-all active:scale-[0.99] disabled:opacity-60"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M16.36 12.78c.02 2.5 2.19 3.33 2.21 3.34-.02.06-.35 1.19-1.14 2.36-.69 1.01-1.4 2.02-2.53 2.04-1.11.02-1.46-.66-2.73-.66-1.27 0-1.66.64-2.71.68-1.09.04-1.92-1.09-2.61-2.1-1.42-2.05-2.5-5.8-1.05-8.34.72-1.26 2.01-2.06 3.41-2.08 1.07-.02 2.08.72 2.73.72.65 0 1.88-.89 3.17-.76.54.02 2.05.22 3.02 1.64-.08.05-1.8 1.05-1.78 3.16M14.3 5.2c.58-.7.97-1.67.86-2.64-.83.03-1.84.55-2.44 1.25-.53.62-1 1.61-.87 2.56.93.07 1.87-.47 2.45-1.17"/>
+            </svg>
+            התחבר עם Apple
+          </button>
+
 
 
 

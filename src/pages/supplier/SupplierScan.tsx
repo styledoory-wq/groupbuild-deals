@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, XCircle, ScanLine, Keyboard } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
 import { Capacitor } from "@capacitor/core";
-import { BarcodeScanner, BarcodeFormat } from "@capacitor-mlkit/barcode-scanning";
+// Loaded lazily: on a native build where the MLKit plugin is not linked,
+// the import must not crash the screen — we fall back to manual entry instead.
+
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { BackHeader } from "@/components/ds";
@@ -49,14 +51,27 @@ export default function SupplierScan() {
     if (Capacitor.isNativePlatform()) {
       let cancelled = false;
       (async () => {
+        let mod: typeof import("@capacitor-mlkit/barcode-scanning") | null = null;
         try {
-          const perm = await BarcodeScanner.requestPermissions();
+          mod = await import("@capacitor-mlkit/barcode-scanning");
+          const supported = await mod.BarcodeScanner.isSupported().catch(() => ({ supported: false }));
+          if (!supported.supported) throw new Error("unsupported");
+        } catch {
+          // Plugin not linked in this native build — degrade to manual entry, never crash.
+          if (!cancelled) {
+            toast.error("סריקה אינה זמינה במכשיר זה. הזן קוד ידנית.");
+            setMode("manual");
+          }
+          return;
+        }
+        try {
+          const perm = await mod.BarcodeScanner.requestPermissions();
           if (perm.camera !== "granted" && perm.camera !== "limited") {
             toast.error("נדרשת הרשאת מצלמה. עבור לקוד ידני.");
             setMode("manual");
             return;
           }
-          const { barcodes } = await BarcodeScanner.scan({ formats: [BarcodeFormat.QrCode] });
+          const { barcodes } = await mod.BarcodeScanner.scan({ formats: [mod.BarcodeFormat.QrCode] });
           if (cancelled) return;
           const raw = barcodes[0]?.rawValue;
           if (raw) {
@@ -71,6 +86,7 @@ export default function SupplierScan() {
           }
         }
       })();
+
       return () => { cancelled = true; };
     }
 

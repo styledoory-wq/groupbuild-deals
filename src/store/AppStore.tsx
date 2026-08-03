@@ -207,6 +207,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
       void hydrate(session.user.id, session.user.email ?? "");
+      // Apple/Google only expose the display name on first authorization — persist it once.
+      void import("@/lib/appleIdentity").then((m) =>
+        m.backfillOAuthProfileName(session.user.id)
+      ).catch(() => { /* ignore */ });
       // Register push token (native only, safe no-op on web).
       void import("@/lib/pushNotifications").then((m) =>
         m.registerPushNotifications(session.user.id)
