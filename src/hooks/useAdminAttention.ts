@@ -41,11 +41,23 @@ async function fetchAttention(): Promise<AttentionCounts> {
   return { ...counts, total };
 }
 
+/**
+ * Admin-only. Fires ZERO network requests unless:
+ *   1. this build ships admin routes at all (web build only — the iOS
+ *      Residents/Suppliers bundles alias AdminRoutes to an empty stub), and
+ *   2. auth has resolved and the signed-in user's verified role is "admin".
+ * Guests and residents therefore never touch admin tables on app start.
+ */
 export function useAdminAttention() {
+  const { user, authReady } = useApp();
+  const enabled = includesAdminRoutes && authReady && user?.role === "admin";
+
   return useQuery({
     queryKey: ["admin-attention"],
     queryFn: fetchAttention,
+    enabled,
     staleTime: 60_000,
     refetchOnWindowFocus: true,
   });
 }
+
