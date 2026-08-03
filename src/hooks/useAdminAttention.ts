@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { includesAdminRoutes } from "@/config/appMode";
+import { useApp } from "@/store/AppStore";
+
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
