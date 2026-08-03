@@ -41,7 +41,7 @@ export function PageHeader({
   const large = size === "large";
 
   return (
-    <header className={cn("px-5 pt-4", large ? "pb-2" : "pb-3")}>
+    <header className={cn("px-5 pt-4 animate-fade-in", large ? "pb-2" : "pb-3")}>
       <div className={cn("flex items-center justify-between", large ? "mb-3" : "mb-2")}>
         {back ? (
           <button
