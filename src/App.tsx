@@ -119,12 +119,12 @@ const App = () => (
         <Sonner position="top-center" dir="rtl" />
         <HelmetProvider>
           <BrowserRouter>
-            <AppSplash />
-            <PreviewModeBanner />
-            <PreloadImportantRoutes />
-            <TermsAcceptanceGate>
-              <GuestGateProvider>
-                <ConfirmDialogProvider>
+            <ConfirmDialogProvider>
+              <AppSplash />
+              <PreviewModeBanner />
+              <PreloadImportantRoutes />
+              <TermsAcceptanceGate>
+                <GuestGateProvider>
                   <RouteTransition>
                     <Suspense fallback={<SuspenseFallback />}>
                       <Routes>
@@ -136,11 +136,11 @@ const App = () => (
                       </Routes>
                     </Suspense>
                   </RouteTransition>
-                </ConfirmDialogProvider>
-              </GuestGateProvider>
-
-            </TermsAcceptanceGate>
+                </GuestGateProvider>
+              </TermsAcceptanceGate>
+            </ConfirmDialogProvider>
           </BrowserRouter>
+
         </HelmetProvider>
       </TooltipProvider>
     </AppProvider>
