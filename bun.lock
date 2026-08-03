@@ -8,7 +8,6 @@
         "@capacitor-mlkit/barcode-scanning": "^8.1.0",
         "@capacitor/android": "^8.4.1",
         "@capacitor/core": "^8.4.1",
-        "@capacitor/geolocation": "^8.2.0",
         "@capacitor/ios": "^8.4.1",
         "@capacitor/keyboard": "^8.0.3",
         "@capacitor/push-notifications": "^8.1.1",
@@ -119,15 +118,11 @@
 
     "@capacitor/core": ["@capacitor/core@8.4.1", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/core/-/core-8.4.1.tgz", { "dependencies": { "tslib": "^2.1.0" } }, "sha512-xqhOGLbTAYeOWK+IDUNSjQJAPapQjRHrIcgk9PYp52or9zFTaaMko31uNi16N6W+CRJ8VrRram6fOYILkBG2Hg=="],
 
-    "@capacitor/geolocation": ["@capacitor/geolocation@8.2.0", "", { "dependencies": { "@capacitor/synapse": "^1.0.4" }, "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-N29QcoIPmme0xSxRkm7+3hjoHp6mBAOarxecvtCCZKyOBeKiJsFUq981cezg2XWBa6fhCXJMCCjQPngKK/dIag=="],
-
     "@capacitor/ios": ["@capacitor/ios@8.4.1", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/ios/-/ios-8.4.1.tgz", { "peerDependencies": { "@capacitor/core": "^8.4.0" } }, "sha512-EgcAk7NYheHMTyP3CUrA65qKs4D2UEAKgw44HI6Uk3dTw6KjLQkdLOQWvbeRncHaZ2gklfOojUoc5DlSw2lhYg=="],
 
     "@capacitor/keyboard": ["@capacitor/keyboard@8.0.3", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-27Bv5/2w1Ss2njguBgTS98O0Bb8DRJhAARyzXYib0JlT/n6BrJw/EZ0CokM4C8GFUjFDjJnEKF1Ie01buTMEXQ=="],
 
     "@capacitor/push-notifications": ["@capacitor/push-notifications@8.1.1", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/push-notifications/-/push-notifications-8.1.1.tgz", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-WqzjPKIbYbARMN+GC0XMAJcxJpUUzqgzS/Ny8RODLrro38pQhm3GXYwX2Mwd+LZlLY39rGImkCkrKyQSNfuikA=="],
-
-    "@capacitor/synapse": ["@capacitor/synapse@1.0.4", "", {}, "sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw=="],
 
     "@emnapi/runtime": ["@emnapi/runtime@1.11.2", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@emnapi/runtime/-/runtime-1.11.2.tgz", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-kyOl3X0DuTiT1h2ft8r2fYO8JYtU9a9Xis/zBSiGArNaagCOWx90N1k2wxp18czFDH+OgcWGb5ZP/XMt3dcyPA=="],
 
