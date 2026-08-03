@@ -1355,6 +1355,7 @@ export type Database = {
       }
       device_tokens: {
         Row: {
+          app_profile: string
           created_at: string
           device_info: Json | null
           id: string
@@ -1365,6 +1366,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          app_profile?: string
           created_at?: string
           device_info?: Json | null
           id?: string
@@ -1375,6 +1377,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          app_profile?: string
           created_at?: string
           device_info?: Json | null
           id?: string
