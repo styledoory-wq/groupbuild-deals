@@ -510,7 +510,18 @@ async function createCardcomCheckout(opts: {
         ProductName: `דמי שירות עבור הצטרפות ורישום לעסקה: ${opts.dealTitle}`,
         ISOCoinId: 1,
         Document: opts.userEmail
-          ? { Email: opts.userEmail, IsSendByEmail: true, Name: "לקוח GroupBuild" }
+          ? {
+            Email: opts.userEmail,
+            IsSendByEmail: true,
+            Name: "לקוח GroupBuild",
+            Products: [
+              {
+                Description: `דמי שירות עבור הצטרפות לעסקה: ${opts.dealTitle}`,
+                UnitCost: opts.amount,
+                Quantity: 1,
+              },
+            ],
+          }
           : undefined,
       }),
     });
