@@ -42,10 +42,16 @@ export default {
         "safe-bottom": "env(safe-area-inset-bottom)",
         "nav-h": "var(--nav-h)",
         "pad-x": "var(--pad-x)",
+        // Half-step icon sizes used across the app (h-4.5 = 18px, h-5.5 = 22px)
+        "4.5": "1.125rem",
+        "5.5": "1.375rem",
       },
       minHeight: {
         touch: "44px",
+        dvh: "100dvh",
+        screen: "100dvh",
       },
+
       minWidth: {
         touch: "44px",
       },
