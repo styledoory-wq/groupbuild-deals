@@ -32,7 +32,11 @@ export function SearchInput({
           strokeWidth={2}
         />
         <input
-          type="text"
+          type="search"
+          inputMode="search"
+          enterKeyHint="search"
+          autoComplete="off"
+          aria-label={placeholder}
           dir="rtl"
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -43,7 +47,8 @@ export function SearchInput({
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-[#F4F6FA] flex items-center justify-center"
+            aria-label="נקה חיפוש"
+            className="tap-target absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-[#F4F6FA] flex items-center justify-center"
           >
             <X className="h-4 w-4 text-[#6B7280]" />
           </button>
