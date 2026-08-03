@@ -33,7 +33,9 @@ export const AppCard = forwardRef<HTMLElement, AppCardProps>(function AppCard(
   };
 
   const cls = `relative rounded-[var(--radius)] ${padded ? "p-4" : ""} ${
-    to && !dim ? "active:scale-[0.98]" : ""
+    to && !dim
+      ? "block touch-manipulation active:scale-[0.98] hover:shadow-[var(--shadow-elevated)]"
+      : ""
   } ${className}`;
 
   if (to && !dim) {

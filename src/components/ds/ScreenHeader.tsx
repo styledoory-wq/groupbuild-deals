@@ -7,18 +7,21 @@ interface ScreenHeaderProps {
 }
 
 /**
- * Unified screen header. Large title + small subtitle below.
- * Use at the top of every screen for consistent hierarchy.
+ * Unified screen header (no back button — top-level screens).
+ * Shares the exact metrics of PageHeader / BackHeader:
+ * px-5, pt-4, pb-3, 24px extrabold title, 13px muted subtitle.
  */
 export function ScreenHeader({ title, subtitle, action }: ScreenHeaderProps) {
   return (
-    <header className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+    <header className="px-5 pt-4 pb-3 flex items-start justify-between gap-3 animate-fade-in">
       <div className="min-w-0">
-        <h1 className="text-[24px] font-extrabold text-[#1F2937] tracking-tight leading-tight">
+        <h1 className="text-[24px] font-extrabold text-foreground tracking-tight leading-tight">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-1 text-[13px] font-medium text-[#6B7280]">{subtitle}</p>
+          <p className="mt-1 text-[13px] font-medium text-muted-foreground leading-relaxed">
+            {subtitle}
+          </p>
         )}
       </div>
       {action && <div className="shrink-0">{action}</div>}
