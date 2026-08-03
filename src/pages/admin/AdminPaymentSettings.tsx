@@ -330,7 +330,38 @@ export default function AdminPaymentSettings() {
           </>
         )}
       </div>
+
+      <Dialog open={!!pendingMode} onOpenChange={(o) => !o && setPendingMode(null)}>
+        <DialogContent dir="rtl" className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-right">שינוי מצב הצטרפות</DialogTitle>
+            <DialogDescription className="text-right leading-relaxed">
+              {pendingMode ? PARTICIPATION_MODE_DESCRIPTION[pendingMode] : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold">סיבת השינוי (חובה)</Label>
+            <Textarea
+              value={modeReason}
+              onChange={(e) => setModeReason(e.target.value)}
+              rows={3}
+              className="rounded-2xl"
+              placeholder="לדוגמה: תקופת השקה ללא דמי השתתפות"
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" className="rounded-xl" onClick={() => setPendingMode(null)} disabled={savingMode}>
+              ביטול
+            </Button>
+            <Button className="rounded-xl font-bold" onClick={confirmModeChange} disabled={savingMode}>
+              {savingMode ? "מעדכן…" : "אישור השינוי"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <BottomNav role="admin" />
+
     </MobileShell>
   );
 }
