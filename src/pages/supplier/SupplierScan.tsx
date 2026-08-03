@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, XCircle, ScanLine, Keyboard } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
 import { Capacitor } from "@capacitor/core";
-import { BarcodeScanner, BarcodeFormat } from "@capacitor-mlkit/barcode-scanning";
+// Loaded lazily: on a native build where the MLKit plugin is not linked,
+// the import must not crash the screen — we fall back to manual entry instead.
+
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { BackHeader } from "@/components/ds";
