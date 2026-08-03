@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Share2, Pencil, Calendar, Clock, User, Check, TrendingUp,
   Star, ChevronLeft, Sparkles, Zap, X, Plus, Trash2, RefreshCw, ChevronDown, MapPin,
+  Building2, Building, Hammer, Eye, Home, Wallet, PartyPopper, Settings, PlusSquare, ShieldCheck, Wrench,
+  type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
@@ -25,6 +27,7 @@ import {
 import { useProjectCloudSync, useMyProject } from "@/lib/projectClient";
 import { ProjectMembersCard } from "@/components/project/ProjectMembersCard";
 import { ProjectStagesStepper } from "@/components/project/ProjectStagesStepper";
+import { CategoryIcon, StageIcon } from "@/components/ds/CategoryIcon";
 
 const URBANIST = "'Urbanist', system-ui, sans-serif";
 const EPILOGUE = "'Epilogue', system-ui, sans-serif";
@@ -79,13 +82,13 @@ const DEFAULT_INFO: ProjectInfo = {
   groupSavings: 0,
 };
 
-const PROJECT_TYPES: { key: ProjectType; label: string; emoji: string; desc: string }[] = [
-  { key: "new_build",     label: "בנייה חדשה",           emoji: "🏗️", desc: "וילה / בית פרטי מהיסוד" },
-  { key: "renovation",    label: "שיפוץ",                emoji: "🔨", desc: "שיפוץ דירה / בית קיים" },
-  { key: "extension",     label: "תוספת בנייה",          emoji: "➕", desc: "חדר, קומה או הרחבה" },
-  { key: "mamad",         label: "ממ״ד",                 emoji: "🛡️", desc: "בנייה או שדרוג ממ״ד" },
-  { key: "committee",     label: "ועד בית / בניין משותף", emoji: "🏢", desc: "רכישות ושירותים לבניין" },
-  { key: "point_service", label: "שירות נקודתי",         emoji: "🧰", desc: "שירות/מוצר בודד" },
+const PROJECT_TYPES: { key: ProjectType; label: string; icon: LucideIcon; desc: string }[] = [
+  { key: "new_build", icon: Building2,     label: "בנייה חדשה", desc: "וילה / בית פרטי מהיסוד" },
+  { key: "renovation", icon: Hammer,    label: "שיפוץ", desc: "שיפוץ דירה / בית קיים" },
+  { key: "extension", icon: PlusSquare,     label: "תוספת בנייה", desc: "חדר, קומה או הרחבה" },
+  { key: "mamad", icon: ShieldCheck,         label: "ממ״ד", desc: "בנייה או שדרוג ממ״ד" },
+  { key: "committee", icon: Building,     label: "ועד בית / בניין משותף", desc: "רכישות ושירותים לבניין" },
+  { key: "point_service", icon: Wrench, label: "שירות נקודתי", desc: "שירות/מוצר בודד" },
 ];
 
 const RENOVATION_SCOPE_OPTS = [
@@ -119,314 +122,313 @@ type Stage = {
   num: number;
   title: string;
   short: string;
-  emoji: string;
   catIds: string[];
   tasks: string[];
-  recommendations: { title: string; subtitle: string; emoji: string }[];
+  recommendations: { title: string; subtitle: string; catId?: string }[];
 };
 
 const NEW_BUILD_STAGES: Stage[] = [
-  { key: "planning", num: 1, title: "תכנון והיתרים", short: "תכנון", emoji: "📐",
+  { key: "planning", num: 1, title: "תכנון והיתרים", short: "תכנון",
     catIds: ["architect", "interior-designer", "consultant"],
     tasks: ["מדידות ראשוניות", "תכנון אדריכלי", "הגשת היתר בנייה", "אישור ועדה מקומית"],
     recommendations: [
-      { title: "אדריכל מומלץ", subtitle: "תכנון פנים ומבנה", emoji: "📐" },
-      { title: "יועץ קונסטרוקציה", subtitle: "ליווי מקצועי", emoji: "📊" },
-      { title: "ביטוח תכנון", subtitle: "כיסוי שלב התכנון", emoji: "🛡️" },
+      { title: "אדריכל מומלץ", subtitle: "תכנון פנים ומבנה" },
+      { title: "יועץ קונסטרוקציה", subtitle: "ליווי מקצועי" },
+      { title: "ביטוח תכנון", subtitle: "כיסוי שלב התכנון" },
     ],
   },
-  { key: "structure", num: 2, title: "שלד וביסוס", short: "שלד", emoji: "🏗️",
+  { key: "structure", num: 2, title: "שלד וביסוס", short: "שלד",
     catIds: ["contractor", "skeleton"],
     tasks: ["חפירות וביסוס", "יציקת רצפה", "שלד קומה א'", "שלד קומה ב'"],
     recommendations: [
-      { title: "קבלן שלד מומלץ", subtitle: "שירות מעולה ומחיר הוגן", emoji: "🏗️" },
-      { title: "ביטוח עבודות בנייה", subtitle: "השוואת מחירים משתלמת", emoji: "🛡️" },
-      { title: "ספק בטון", subtitle: "אספקה מהירה לאתר", emoji: "🧱" },
+      { title: "קבלן שלד מומלץ", subtitle: "שירות מעולה ומחיר הוגן" },
+      { title: "ביטוח עבודות בנייה", subtitle: "השוואת מחירים משתלמת" },
+      { title: "ספק בטון", subtitle: "אספקה מהירה לאתר" },
     ],
   },
-  { key: "envelope", num: 3, title: "מעטפת הבית", short: "מעטפת", emoji: "🧱",
+  { key: "envelope", num: 3, title: "מעטפת הבית", short: "מעטפת",
     catIds: ["cladding", "windows"],
     tasks: ["איטום גגות", "התקנת חלונות", "חיפוי חיצוני", "סיוד חוץ"],
     recommendations: [
-      { title: "חברת חיפוי", subtitle: "אבן וטיח חוץ", emoji: "🧱" },
-      { title: "חלונות אלומיניום", subtitle: "בידוד תרמי משופר", emoji: "🪟" },
-      { title: "איטום מקצועי", subtitle: "אחריות ל-10 שנים", emoji: "💧" },
+      { title: "חברת חיפוי", subtitle: "אבן וטיח חוץ" },
+      { title: "חלונות אלומיניום", subtitle: "בידוד תרמי משופר" },
+      { title: "איטום מקצועי", subtitle: "אחריות ל-10 שנים" },
     ],
   },
-  { key: "systems", num: 4, title: "מערכות", short: "מערכות", emoji: "⚡",
+  { key: "systems", num: 4, title: "מערכות", short: "מערכות",
     catIds: ["electric", "plumbing", "ac", "smart-home"],
     tasks: ["הכנת תשתיות חשמל", "תשתיות אינסטלציה", "התקנת צנרת מיזוג", "התקנת קופסאות ופנלים", "מערכת חכמה", "תאורה ראשונית", "בדיקות מערכת"],
     recommendations: [
-      { title: "חשמלאי מוסמך", subtitle: "מערכות חכמות", emoji: "⚡" },
-      { title: "מצלמות אבטחה", subtitle: "התקנה מקצועית", emoji: "📹" },
-      { title: "מיזוג מרכזי", subtitle: "חיסכון אנרגיה", emoji: "❄️" },
+      { title: "חשמלאי מוסמך", subtitle: "מערכות חכמות" },
+      { title: "מצלמות אבטחה", subtitle: "התקנה מקצועית" },
+      { title: "מיזוג מרכזי", subtitle: "חיסכון אנרגיה" },
     ],
   },
-  { key: "finishes", num: 5, title: "גמרים", short: "גמרים", emoji: "🎨",
+  { key: "finishes", num: 5, title: "גמרים", short: "גמרים",
     catIds: ["painting", "flooring", "carpentry", "kitchen", "bath"],
     tasks: ["ריצוף וחיפוי", "צביעה פנימית", "מטבח ואמבטיה", "נגרות ודלתות"],
     recommendations: [
-      { title: "צבעים מומלצים", subtitle: "מתאים לשלב הבא", emoji: "🎨" },
-      { title: "ריצוף איכותי", subtitle: "אחריות יצרן", emoji: "🟫" },
-      { title: "מטבח בהתאמה", subtitle: "תכנון אישי", emoji: "🍳" },
+      { title: "צבעים מומלצים", subtitle: "מתאים לשלב הבא" },
+      { title: "ריצוף איכותי", subtitle: "אחריות יצרן" },
+      { title: "מטבח בהתאמה", subtitle: "תכנון אישי" },
     ],
   },
-  { key: "outdoor", num: 6, title: "פיתוח חוץ", short: "פיתוח", emoji: "🌳",
+  { key: "outdoor", num: 6, title: "פיתוח חוץ", short: "פיתוח",
     catIds: ["garden", "pergola"],
     tasks: ["הכשרת חצר", "גינון", "התקנת פרגולה", "תאורת חוץ"],
     recommendations: [
-      { title: "גנן מומלץ", subtitle: "תכנון נוף", emoji: "🌿" },
-      { title: "פרגולה מעוצבת", subtitle: "התאמה אישית", emoji: "🪵" },
-      { title: "תאורת גינה", subtitle: "חיסכון בחשמל", emoji: "💡" },
+      { title: "גנן מומלץ", subtitle: "תכנון נוף" },
+      { title: "פרגולה מעוצבת", subtitle: "התאמה אישית" },
+      { title: "תאורת גינה", subtitle: "חיסכון בחשמל" },
     ],
   },
-  { key: "qa", num: 7, title: "בדק ואיכלוס", short: "בדק", emoji: "🔍",
+  { key: "qa", num: 7, title: "בדק ואיכלוס", short: "בדק",
     catIds: [],
     tasks: ["בדיקת קבלן", "תיקוני ליקויים", "ניקיון יסודי", "מסירה רשמית"],
     recommendations: [
-      { title: "בדק בית", subtitle: "אינדקס ליקויים", emoji: "📋" },
-      { title: "חברת ניקיון", subtitle: "ניקיון פוסט-בנייה", emoji: "🧽" },
-      { title: "ביטוח דירה", subtitle: "השוואת מחירים", emoji: "🛡️" },
+      { title: "בדק בית", subtitle: "אינדקס ליקויים" },
+      { title: "חברת ניקיון", subtitle: "ניקיון פוסט-בנייה" },
+      { title: "ביטוח דירה", subtitle: "השוואת מחירים" },
     ],
   },
-  { key: "done", num: 8, title: "סיום", short: "סיום", emoji: "🎉",
+  { key: "done", num: 8, title: "סיום", short: "סיום",
     catIds: [],
     tasks: ["קבלת מפתח", "חיבור חברות תשתית", "מעבר דירה", "סיום פרויקט"],
     recommendations: [
-      { title: "חברת הובלות", subtitle: "מומלצת בקבוצה", emoji: "📦" },
-      { title: "מערכת סולארית", subtitle: "חיסכון לשנים", emoji: "☀️" },
-      { title: "אזעקה ומצלמות", subtitle: "אבטחה לבית", emoji: "🔔" },
+      { title: "חברת הובלות", subtitle: "מומלצת בקבוצה" },
+      { title: "מערכת סולארית", subtitle: "חיסכון לשנים" },
+      { title: "אזעקה ומצלמות", subtitle: "אבטחה לבית" },
     ],
   },
 ];
 
 const RENOVATION_STAGES: Stage[] = [
-  { key: "reno-plan", num: 1, title: "תכנון ואפיון", short: "תכנון", emoji: "📐",
+  { key: "reno-plan", num: 1, title: "תכנון ואפיון", short: "תכנון",
     catIds: ["interior-designer", "architect"],
     tasks: ["הגדרת היקף השיפוץ", "תכנון פנים", "הכנת כתב כמויות", "בחירת ספקים"],
     recommendations: [
-      { title: "מעצב פנים", subtitle: "תכנון חכם לחלל", emoji: "🎨" },
-      { title: "יועץ תאורה", subtitle: "אווירה ותפקוד", emoji: "💡" },
-      { title: "מנהל שיפוץ", subtitle: "ליווי צמוד", emoji: "📋" },
+      { title: "מעצב פנים", subtitle: "תכנון חכם לחלל" },
+      { title: "יועץ תאורה", subtitle: "אווירה ותפקוד" },
+      { title: "מנהל שיפוץ", subtitle: "ליווי צמוד" },
     ],
   },
-  { key: "reno-demo", num: 2, title: "פירוקים והכנות", short: "פירוקים", emoji: "🔨",
+  { key: "reno-demo", num: 2, title: "פירוקים והכנות", short: "פירוקים",
     catIds: ["contractor"],
     tasks: ["פינוי תכולה", "פירוק ריצוף וקירות", "פינוי פסולת", "הכנת השטח"],
     recommendations: [
-      { title: "פינוי פסולת", subtitle: "מכולה + פינוי", emoji: "🚛" },
-      { title: "אחסון תכולה", subtitle: "פתרון זמני", emoji: "📦" },
-      { title: "הגנה על רהיטים", subtitle: "כיסויים ויריעות", emoji: "🛡️" },
+      { title: "פינוי פסולת", subtitle: "מכולה + פינוי" },
+      { title: "אחסון תכולה", subtitle: "פתרון זמני" },
+      { title: "הגנה על רהיטים", subtitle: "כיסויים ויריעות" },
     ],
   },
-  { key: "reno-systems", num: 3, title: "מערכות ותשתיות", short: "מערכות", emoji: "⚡",
+  { key: "reno-systems", num: 3, title: "מערכות ותשתיות", short: "מערכות",
     catIds: ["electric", "plumbing", "ac"],
     tasks: ["החלפת חשמל", "החלפת אינסטלציה", "התקנת מיזוג", "בדיקות תקינות"],
     recommendations: [
-      { title: "חשמלאי מוסמך", subtitle: "החלפת לוח וקווים", emoji: "⚡" },
-      { title: "אינסטלטור מומחה", subtitle: "צנרת חדשה", emoji: "🔧" },
-      { title: "מיזוג מיני-מרכזי", subtitle: "התקנה מקצועית", emoji: "❄️" },
+      { title: "חשמלאי מוסמך", subtitle: "החלפת לוח וקווים" },
+      { title: "אינסטלטור מומחה", subtitle: "צנרת חדשה" },
+      { title: "מיזוג מיני-מרכזי", subtitle: "התקנה מקצועית" },
     ],
   },
-  { key: "reno-kitchen-bath", num: 4, title: "מטבח ואמבטיה", short: "מטבח", emoji: "🚿",
+  { key: "reno-kitchen-bath", num: 4, title: "מטבח ואמבטיה", short: "מטבח",
     catIds: ["kitchen", "bath"],
     tasks: ["התקנת מטבח", "חיפוי אמבטיה", "התקנת כלים סניטריים", "חיבור מים וחשמל"],
     recommendations: [
-      { title: "יצרן מטבחים", subtitle: "התאמה אישית", emoji: "🍳" },
-      { title: "כלים סניטריים", subtitle: "מבחר איכותי", emoji: "🚿" },
-      { title: "אריחים ופסיפס", subtitle: "עיצוב יוקרתי", emoji: "🟦" },
+      { title: "יצרן מטבחים", subtitle: "התאמה אישית" },
+      { title: "כלים סניטריים", subtitle: "מבחר איכותי" },
+      { title: "אריחים ופסיפס", subtitle: "עיצוב יוקרתי" },
     ],
   },
-  { key: "reno-floor-paint", num: 5, title: "ריצוף וצבע", short: "גמרים", emoji: "🎨",
+  { key: "reno-floor-paint", num: 5, title: "ריצוף וצבע", short: "גמרים",
     catIds: ["flooring", "painting", "carpentry"],
     tasks: ["ריצוף וחיפוי", "צביעה וגבס", "התקנת דלתות פנים", "נגרות פנים"],
     recommendations: [
-      { title: "צבעים איכותיים", subtitle: "גימור מושלם", emoji: "🎨" },
-      { title: "ריצוף פורצלן", subtitle: "עמידות ויופי", emoji: "🟫" },
-      { title: "נגר פנים", subtitle: "ארונות בהתאמה", emoji: "🪵" },
+      { title: "צבעים איכותיים", subtitle: "גימור מושלם" },
+      { title: "ריצוף פורצלן", subtitle: "עמידות ויופי" },
+      { title: "נגר פנים", subtitle: "ארונות בהתאמה" },
     ],
   },
-  { key: "reno-handoff", num: 6, title: "סיום ומסירה", short: "מסירה", emoji: "✨",
+  { key: "reno-handoff", num: 6, title: "סיום ומסירה", short: "מסירה",
     catIds: [],
     tasks: ["ניקיון פוסט-שיפוץ", "בדיקת ליקויים", "תיקונים אחרונים", "החזרת תכולה"],
     recommendations: [
-      { title: "ניקיון יסודי", subtitle: "פוסט-שיפוץ", emoji: "🧽" },
-      { title: "בדק ליקויים", subtitle: "דו״ח מקצועי", emoji: "📋" },
-      { title: "הובלה פנימית", subtitle: "החזרת רהיטים", emoji: "📦" },
+      { title: "ניקיון יסודי", subtitle: "פוסט-שיפוץ" },
+      { title: "בדק ליקויים", subtitle: "דו״ח מקצועי" },
+      { title: "הובלה פנימית", subtitle: "החזרת רהיטים" },
     ],
   },
 ];
 
 const EXTENSION_STAGES: Stage[] = [
-  { key: "ext-plan", num: 1, title: "תכנון והיתרים", short: "תכנון", emoji: "📐",
+  { key: "ext-plan", num: 1, title: "תכנון והיתרים", short: "תכנון",
     catIds: ["architect", "consultant"],
     tasks: ["תכנון תוספת", "בדיקת התכנות", "הגשת היתר", "אישור שכנים"],
     recommendations: [
-      { title: "אדריכל תוספות", subtitle: "התמחות בהרחבות", emoji: "📐" },
-      { title: "יועץ קרקע", subtitle: "בדיקות מקדימות", emoji: "🌍" },
-      { title: "עורך דין מקרקעין", subtitle: "אישור שכנים", emoji: "⚖️" },
+      { title: "אדריכל תוספות", subtitle: "התמחות בהרחבות" },
+      { title: "יועץ קרקע", subtitle: "בדיקות מקדימות" },
+      { title: "עורך דין מקרקעין", subtitle: "אישור שכנים" },
     ],
   },
-  { key: "ext-structure", num: 2, title: "שלד וחיזוקים", short: "שלד", emoji: "🏗️",
+  { key: "ext-structure", num: 2, title: "שלד וחיזוקים", short: "שלד",
     catIds: ["contractor", "skeleton"],
     tasks: ["חיזוק שלד קיים", "יציקת יסודות תוספת", "בניית שלד חדש", "חיבור למבנה"],
     recommendations: [
-      { title: "קבלן שלד מנוסה", subtitle: "עבודות תוספת", emoji: "🏗️" },
-      { title: "חיזוק קונסטרוקטיבי", subtitle: "עבודות ברזל", emoji: "🔩" },
-      { title: "ביטוח עבודות", subtitle: "כיסוי מלא", emoji: "🛡️" },
+      { title: "קבלן שלד מנוסה", subtitle: "עבודות תוספת" },
+      { title: "חיזוק קונסטרוקטיבי", subtitle: "עבודות ברזל" },
+      { title: "ביטוח עבודות", subtitle: "כיסוי מלא" },
     ],
   },
-  { key: "ext-envelope", num: 3, title: "מעטפת ואיטום", short: "מעטפת", emoji: "🧱",
+  { key: "ext-envelope", num: 3, title: "מעטפת ואיטום", short: "מעטפת",
     catIds: ["cladding", "windows"],
     tasks: ["איטום גג ותפרים", "התקנת חלונות", "חיפוי חיצוני", "התאמה לחזית"],
     recommendations: [
-      { title: "איטום מקצועי", subtitle: "תפרי חיבור", emoji: "💧" },
-      { title: "חלונות מבודדים", subtitle: "בידוד תרמי", emoji: "🪟" },
-      { title: "חיפוי תואם", subtitle: "התאמה למבנה קיים", emoji: "🧱" },
+      { title: "איטום מקצועי", subtitle: "תפרי חיבור" },
+      { title: "חלונות מבודדים", subtitle: "בידוד תרמי" },
+      { title: "חיפוי תואם", subtitle: "התאמה למבנה קיים" },
     ],
   },
-  { key: "ext-systems", num: 4, title: "מערכות וגמרים", short: "גמרים", emoji: "🎨",
+  { key: "ext-systems", num: 4, title: "מערכות וגמרים", short: "גמרים",
     catIds: ["electric", "plumbing", "flooring", "painting"],
     tasks: ["הרחבת חשמל", "הרחבת אינסטלציה", "ריצוף וצבע", "התאמה לחלל הקיים"],
     recommendations: [
-      { title: "חשמלאי", subtitle: "הרחבת לוח", emoji: "⚡" },
-      { title: "ריצוף מותאם", subtitle: "המשכיות עיצובית", emoji: "🟫" },
-      { title: "צבע וגמרים", subtitle: "התאמה למבנה", emoji: "🎨" },
+      { title: "חשמלאי", subtitle: "הרחבת לוח" },
+      { title: "ריצוף מותאם", subtitle: "המשכיות עיצובית" },
+      { title: "צבע וגמרים", subtitle: "התאמה למבנה" },
     ],
   },
-  { key: "ext-handoff", num: 5, title: "מסירה ואיכלוס", short: "מסירה", emoji: "🎉",
+  { key: "ext-handoff", num: 5, title: "מסירה ואיכלוס", short: "מסירה",
     catIds: [],
     tasks: ["בדיקת ליקויים", "ניקיון סופי", "קבלת טופס 4", "איכלוס"],
     recommendations: [
-      { title: "בדק בית", subtitle: "אינדקס ליקויים", emoji: "📋" },
-      { title: "ניקיון פוסט-בנייה", subtitle: "מקצועי", emoji: "🧽" },
-      { title: "ריהוט תוספת", subtitle: "התאמה אישית", emoji: "🛋️" },
+      { title: "בדק בית", subtitle: "אינדקס ליקויים" },
+      { title: "ניקיון פוסט-בנייה", subtitle: "מקצועי" },
+      { title: "ריהוט תוספת", subtitle: "התאמה אישית" },
     ],
   },
 ];
 
 const MAMAD_STAGES: Stage[] = [
-  { key: "mamad-plan", num: 1, title: "תכנון ואישורים", short: "תכנון", emoji: "📐",
+  { key: "mamad-plan", num: 1, title: "תכנון ואישורים", short: "תכנון",
     catIds: ["architect", "consultant"],
     tasks: ["תכנון לפי תקן פיקוד העורף", "הגשת בקשה להיתר", "אישור מהנדס", "אישור פיקוד העורף"],
     recommendations: [
-      { title: "מהנדס מומחה ממ״ד", subtitle: "תקני פיקוד העורף", emoji: "🛡️" },
-      { title: "אדריכל ממ״ד", subtitle: "שילוב בדירה", emoji: "📐" },
-      { title: "יועץ בטיחות", subtitle: "אישורים ותקנים", emoji: "✅" },
+      { title: "מהנדס מומחה ממ״ד", subtitle: "תקני פיקוד העורף" },
+      { title: "אדריכל ממ״ד", subtitle: "שילוב בדירה" },
+      { title: "יועץ בטיחות", subtitle: "אישורים ותקנים" },
     ],
   },
-  { key: "mamad-structure", num: 2, title: "בנייה ויציקה", short: "יציקה", emoji: "🏗️",
+  { key: "mamad-structure", num: 2, title: "בנייה ויציקה", short: "יציקה",
     catIds: ["contractor", "skeleton"],
     tasks: ["חפירה וביסוס", "יציקת רצפה מזוינת", "יציקת קירות בטון", "יציקת תקרה"],
     recommendations: [
-      { title: "קבלן ממ״ד מוסמך", subtitle: "ניסיון מוכח", emoji: "🏗️" },
-      { title: "ברזל בנייה", subtitle: "אספקה לאתר", emoji: "🔩" },
-      { title: "בטון מזוין", subtitle: "משאבות בטון", emoji: "🧱" },
+      { title: "קבלן ממ״ד מוסמך", subtitle: "ניסיון מוכח" },
+      { title: "ברזל בנייה", subtitle: "אספקה לאתר" },
+      { title: "בטון מזוין", subtitle: "משאבות בטון" },
     ],
   },
-  { key: "mamad-door", num: 3, title: "דלת וחלון ממ״ד", short: "דלת", emoji: "🚪",
+  { key: "mamad-door", num: 3, title: "דלת וחלון ממ״ד", short: "דלת",
     catIds: ["windows"],
     tasks: ["התקנת דלת ממ״ד תקנית", "התקנת חלון אטום", "מערכת סינון אוויר", "בדיקת אטימות"],
     recommendations: [
-      { title: "יבואן דלתות ממ״ד", subtitle: "תקן ישראלי", emoji: "🚪" },
-      { title: "חלון ממ״ד", subtitle: "אטום ומזוין", emoji: "🪟" },
-      { title: "מערכת סינון", subtitle: "NBC filter", emoji: "🌬️" },
+      { title: "יבואן דלתות ממ״ד", subtitle: "תקן ישראלי" },
+      { title: "חלון ממ״ד", subtitle: "אטום ומזוין" },
+      { title: "מערכת סינון", subtitle: "NBC filter" },
     ],
   },
-  { key: "mamad-finish", num: 4, title: "גמרים ואישור", short: "אישור", emoji: "✅",
+  { key: "mamad-finish", num: 4, title: "גמרים ואישור", short: "אישור",
     catIds: ["electric", "painting", "flooring"],
     tasks: ["חשמל ותאורה", "ריצוף וצבע", "בדיקת פיקוד העורף", "קבלת אישור סופי"],
     recommendations: [
-      { title: "חשמלאי מוסמך", subtitle: "תקן ממ״ד", emoji: "⚡" },
-      { title: "ריצוף וצבע", subtitle: "גימור פנים", emoji: "🎨" },
-      { title: "בדיקת קבלה", subtitle: "אישור רשמי", emoji: "📋" },
+      { title: "חשמלאי מוסמך", subtitle: "תקן ממ״ד" },
+      { title: "ריצוף וצבע", subtitle: "גימור פנים" },
+      { title: "בדיקת קבלה", subtitle: "אישור רשמי" },
     ],
   },
 ];
 
 const COMMITTEE_STAGES: Stage[] = [
-  { key: "com-needs", num: 1, title: "אפיון צרכים", short: "אפיון", emoji: "📋",
+  { key: "com-needs", num: 1, title: "אפיון צרכים", short: "אפיון",
     catIds: [],
     tasks: ["איסוף פניות דיירים", "קביעת סדרי עדיפויות", "אישור אסיפת דיירים", "הגדרת תקציב"],
     recommendations: [
-      { title: "יועץ ועד בית", subtitle: "ליווי מקצועי", emoji: "🏢" },
-      { title: "עורך דין ועדים", subtitle: "החלטות חוקיות", emoji: "⚖️" },
-      { title: "מערכת ניהול", subtitle: "דיגיטלית לוועד", emoji: "📱" },
+      { title: "יועץ ועד בית", subtitle: "ליווי מקצועי" },
+      { title: "עורך דין ועדים", subtitle: "החלטות חוקיות" },
+      { title: "מערכת ניהול", subtitle: "דיגיטלית לוועד" },
     ],
   },
-  { key: "com-quotes", num: 2, title: "בקשת הצעות", short: "הצעות", emoji: "💼",
+  { key: "com-quotes", num: 2, title: "בקשת הצעות", short: "הצעות",
     catIds: [],
     tasks: ["פנייה לספקים", "השוואת הצעות", "בדיקת המלצות", "הצגה לדיירים"],
     recommendations: [
-      { title: "השוואת מחירים", subtitle: "רכישה קבוצתית", emoji: "💰" },
-      { title: "בדיקת ספקים", subtitle: "ביקורות ואמינות", emoji: "⭐" },
-      { title: "מכרז דיגיטלי", subtitle: "פלטפורמה שקופה", emoji: "📊" },
+      { title: "השוואת מחירים", subtitle: "רכישה קבוצתית" },
+      { title: "בדיקת ספקים", subtitle: "ביקורות ואמינות" },
+      { title: "מכרז דיגיטלי", subtitle: "פלטפורמה שקופה" },
     ],
   },
-  { key: "com-select", num: 3, title: "בחירת ספק וחוזה", short: "חוזה", emoji: "✍️",
+  { key: "com-select", num: 3, title: "בחירת ספק וחוזה", short: "חוזה",
     catIds: [],
     tasks: ["הצבעת דיירים", "משא ומתן על תנאים", "חתימה על הסכם", "גיבוש לוח זמנים"],
     recommendations: [
-      { title: "הסכם משפטי", subtitle: "בדיקת עו״ד", emoji: "📄" },
-      { title: "ביטוח עבודות", subtitle: "כיסוי לרכוש המשותף", emoji: "🛡️" },
-      { title: "גובה תשלומים", subtitle: "מערכת גבייה", emoji: "💳" },
+      { title: "הסכם משפטי", subtitle: "בדיקת עו״ד" },
+      { title: "ביטוח עבודות", subtitle: "כיסוי לרכוש המשותף" },
+      { title: "גובה תשלומים", subtitle: "מערכת גבייה" },
     ],
   },
-  { key: "com-exec", num: 4, title: "ביצוע ופיקוח", short: "ביצוע", emoji: "🔧",
+  { key: "com-exec", num: 4, title: "ביצוע ופיקוח", short: "ביצוע",
     catIds: [],
     tasks: ["התחלת עבודות", "פיקוח שוטף", "עדכון דיירים", "אישור אבני דרך"],
     recommendations: [
-      { title: "מפקח בנייה", subtitle: "פיקוח שוטף", emoji: "👷" },
-      { title: "עדכוני דיירים", subtitle: "וואטסאפ ועד", emoji: "📱" },
-      { title: "תיעוד עבודות", subtitle: "תמונות ודוחות", emoji: "📸" },
+      { title: "מפקח בנייה", subtitle: "פיקוח שוטף" },
+      { title: "עדכוני דיירים", subtitle: "וואטסאפ ועד" },
+      { title: "תיעוד עבודות", subtitle: "תמונות ודוחות" },
     ],
   },
-  { key: "com-handoff", num: 5, title: "מסירה וסיכום", short: "סיכום", emoji: "✅",
+  { key: "com-handoff", num: 5, title: "מסירה וסיכום", short: "סיכום",
     catIds: [],
     tasks: ["בדיקת עבודות", "אישור סיום", "תשלום סופי", "הפצת דו״ח לדיירים"],
     recommendations: [
-      { title: "בדק סופי", subtitle: "בדיקת ליקויים", emoji: "📋" },
-      { title: "אחריות ספק", subtitle: "מסמך אחריות", emoji: "🛡️" },
-      { title: "דו״ח סיכום", subtitle: "שקיפות מלאה", emoji: "📊" },
+      { title: "בדק סופי", subtitle: "בדיקת ליקויים" },
+      { title: "אחריות ספק", subtitle: "מסמך אחריות" },
+      { title: "דו״ח סיכום", subtitle: "שקיפות מלאה" },
     ],
   },
 ];
 
 const POINT_SERVICE_STAGES: Stage[] = [
-  { key: "ps-request", num: 1, title: "הגדרת השירות", short: "הגדרה", emoji: "📝",
+  { key: "ps-request", num: 1, title: "הגדרת השירות", short: "הגדרה",
     catIds: [],
     tasks: ["פירוט הצורך", "בחירת קטגוריה", "הגדרת לוח זמנים", "קביעת תקציב"],
     recommendations: [
-      { title: "יועץ מקצועי", subtitle: "התאמת השירות", emoji: "💡" },
-      { title: "בדיקת דחיפות", subtitle: "שירותי חירום", emoji: "⏰" },
-      { title: "מחירון שוק", subtitle: "טווח מחירים", emoji: "💰" },
+      { title: "יועץ מקצועי", subtitle: "התאמת השירות" },
+      { title: "בדיקת דחיפות", subtitle: "שירותי חירום" },
+      { title: "מחירון שוק", subtitle: "טווח מחירים" },
     ],
   },
-  { key: "ps-quotes", num: 2, title: "הצעות מחיר", short: "הצעות", emoji: "💼",
+  { key: "ps-quotes", num: 2, title: "הצעות מחיר", short: "הצעות",
     catIds: [],
     tasks: ["פנייה ל-3 ספקים", "השוואת הצעות", "בדיקת ביקורות", "בחירת ספק"],
     recommendations: [
-      { title: "השוואת ספקים", subtitle: "מחיר וזמינות", emoji: "📊" },
-      { title: "ביקורות אמת", subtitle: "לקוחות אחרונים", emoji: "⭐" },
-      { title: "אחריות בכתב", subtitle: "הגנה משפטית", emoji: "📄" },
+      { title: "השוואת ספקים", subtitle: "מחיר וזמינות" },
+      { title: "ביקורות אמת", subtitle: "לקוחות אחרונים" },
+      { title: "אחריות בכתב", subtitle: "הגנה משפטית" },
     ],
   },
-  { key: "ps-exec", num: 3, title: "ביצוע השירות", short: "ביצוע", emoji: "🔧",
+  { key: "ps-exec", num: 3, title: "ביצוע השירות", short: "ביצוע",
     catIds: [],
     tasks: ["תיאום מועד", "ביצוע העבודה", "בדיקה בזמן אמת", "אישור השלמה"],
     recommendations: [
-      { title: "תיעוד לפני/אחרי", subtitle: "תמונות ובידקה", emoji: "📸" },
-      { title: "בדיקת איכות", subtitle: "לפני התשלום", emoji: "✅" },
-      { title: "אחריות שירות", subtitle: "מסמך רשמי", emoji: "🛡️" },
+      { title: "תיעוד לפני/אחרי", subtitle: "תמונות ובידקה" },
+      { title: "בדיקת איכות", subtitle: "לפני התשלום" },
+      { title: "אחריות שירות", subtitle: "מסמך רשמי" },
     ],
   },
-  { key: "ps-done", num: 4, title: "תשלום וסיום", short: "סיום", emoji: "✅",
+  { key: "ps-done", num: 4, title: "תשלום וסיום", short: "סיום",
     catIds: [],
     tasks: ["קבלת חשבונית", "ביצוע תשלום", "כתיבת ביקורת", "שמירת מסמכים"],
     recommendations: [
-      { title: "תשלום מאובטח", subtitle: "אמצעי דיגיטלי", emoji: "💳" },
-      { title: "ביקורת ללקוחות", subtitle: "עזרה לקהילה", emoji: "⭐" },
-      { title: "ארכיון דיגיטלי", subtitle: "שמירת חשבוניות", emoji: "📁" },
+      { title: "תשלום מאובטח", subtitle: "אמצעי דיגיטלי" },
+      { title: "ביקורת ללקוחות", subtitle: "עזרה לקהילה" },
+      { title: "ארכיון דיגיטלי", subtitle: "שמירת חשבוניות" },
     ],
   },
 ];
@@ -762,7 +764,7 @@ export default function ProjectManagement() {
 
         {isViewer && (
           <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] font-semibold text-amber-900 flex items-center gap-2">
-            <span className="text-lg">👁️</span>
+            <Eye className="h-4.5 w-4.5" strokeWidth={1.9} aria-hidden />
             <span>מצב צפייה בלבד — כחבר Viewer בפרויקט תוכל לראות אך לא לערוך.</span>
           </div>
         )}
@@ -772,7 +774,7 @@ export default function ProjectManagement() {
         {!info.name && !info.manager && !info.targetDate ? (
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-center">
             <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-[36px]" style={{ background: "linear-gradient(135deg,#0E6B5A 0%,#3aa089 100%)" }}>
-              🏡
+              <Home className="h-6 w-6" strokeWidth={1.75} aria-hidden />
             </div>
             <h2 className="text-[16px] font-extrabold text-[#1A1A1A] mt-4" style={{ fontFamily: URBANIST }}>
               פרטי הפרויקט
@@ -802,7 +804,7 @@ export default function ProjectManagement() {
                 className="w-20 h-20 rounded-2xl shrink-0 bg-cover bg-center"
                 style={{ backgroundImage: "linear-gradient(135deg,#0E6B5A 0%,#3aa089 100%)" }}
               >
-                <div className="w-full h-full flex items-center justify-center text-[36px]">🏡</div>
+                <div className="w-full h-full flex items-center justify-center"><Home className="h-9 w-9 text-[#0E6B5A]" strokeWidth={1.5} aria-hidden /></div>
               </div>
               <div className="flex-1 min-w-0 pl-8">
                 <h2 className="text-[16px] font-extrabold text-[#1A1A1A] break-words" style={{ fontFamily: URBANIST }}>
@@ -857,7 +859,7 @@ export default function ProjectManagement() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <h3 className="text-[14.5px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
-                💰 ניהול תקציב
+                <span className="inline-flex items-center gap-1"><Wallet className="h-4 w-4" strokeWidth={1.9} aria-hidden /> ניהול תקציב</span>
               </h3>
               <span className="text-[9.5px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-1.5 py-0.5 rounded-full">
                 {overPct === 0 ? "בתקציב" : `${overPct}% חריגה`}
@@ -908,7 +910,7 @@ export default function ProjectManagement() {
               style={{ background: "linear-gradient(135deg,#EEF4FF 0%,#F5F3FF 100%)" }}
               aria-hidden
             >
-              🤖
+              <Sparkles className="h-5 w-5" strokeWidth={1.8} aria-hidden />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
@@ -949,7 +951,7 @@ export default function ProjectManagement() {
         {/* Progress banner */}
         <div className="mt-3 bg-[#F0F9F6] border border-[#0E6B5A]/15 rounded-2xl p-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-[18px]" aria-hidden>🎉</span>
+            <PartyPopper className="h-5 w-5 text-[#0E6B5A]" strokeWidth={1.8} aria-hidden />
             <div className="leading-tight">
               <div className="text-[12.5px] font-extrabold text-[#0A5447]" style={{ fontFamily: URBANIST }}>
                 {stagesDone} מתוך {stages.length} שלבים הושלמו
@@ -961,7 +963,7 @@ export default function ProjectManagement() {
             onClick={() => setScheduleOpen(true)}
             className="text-[11px] font-bold text-[#0E6B5A] bg-white border border-[#0E6B5A]/20 px-2.5 py-1.5 rounded-full whitespace-nowrap active:scale-95"
           >
-            📅 לוח זמנים
+            <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" strokeWidth={1.9} /> לוח זמנים</span>
           </button>
         </div>
 
@@ -969,7 +971,9 @@ export default function ProjectManagement() {
         <div className="mt-6 bg-white rounded-3xl p-4 border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-[20px]" aria-hidden>{current.emoji}</span>
+              <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#F0F9F6" }}>
+                <StageIcon stageKey={current.key} size={20} />
+              </span>
               <div>
                 <div className="text-[15px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
                   השלב הנוכחי: {current.title}
@@ -1091,7 +1095,7 @@ export default function ProjectManagement() {
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-[20px] mb-2"
                 style={{ background: "#F0F9F6" }}
               >
-                <span aria-hidden>{r.emoji}</span>
+                <CategoryIcon categoryId={r.catId} label={r.title} size={20} />
               </div>
               <div className="text-[12.5px] font-extrabold text-[#1A1A1A] leading-tight" style={{ fontFamily: URBANIST }}>
                 {r.title}
@@ -1278,11 +1282,11 @@ function EditInfoModal({
                 }}
               >
                 <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center text-[22px] shrink-0"
+                  className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
                   style={{ background: sel ? "#FFFFFF" : "#FAFAF7" }}
                   aria-hidden
                 >
-                  {pt.emoji}
+                  <pt.icon size={20} strokeWidth={1.75} className="text-[#0E6B5A]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[13.5px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
@@ -1331,7 +1335,7 @@ function EditInfoModal({
                     color: sel ? "#FFFFFF" : "#374151",
                   }}
                 >
-                  <span aria-hidden>{pt.emoji}</span>
+                  <pt.icon size={14} strokeWidth={1.9} aria-hidden />
                   <span>{pt.label}</span>
                 </button>
               );
@@ -1373,7 +1377,7 @@ function EditInfoModal({
             style={{ fontFamily: URBANIST }}
           >
             <span className="flex items-center gap-1.5">
-              <span aria-hidden>⚙️</span>
+              <Settings className="h-4 w-4" strokeWidth={1.9} aria-hidden />
               פרטים נוספים
             </span>
             <ChevronDown
@@ -1575,7 +1579,7 @@ function EditInfoModal({
             className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-[13px] font-bold text-red-600 bg-red-50 border border-red-100 active:scale-[0.98]"
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            🔄 איפוס פרויקט
+            <span className="inline-flex items-center gap-1"><RefreshCw className="h-4 w-4" strokeWidth={1.9} aria-hidden /> איפוס פרויקט</span>
           </button>
         </>
       )}
@@ -1598,7 +1602,7 @@ function EditInfoModal({
             className="w-full sm:max-w-sm bg-white rounded-3xl p-5 shadow-2xl my-auto max-h-full overflow-y-auto"
           >
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[22px]" aria-hidden>🔄</span>
+              <RefreshCw className="h-5 w-5 text-[#0E6B5A]" strokeWidth={1.8} aria-hidden />
               <h4 className="text-[15px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
                 איפוס פרויקט
               </h4>
@@ -1658,7 +1662,7 @@ function ScheduleModal({
         {stages.map((s) => (
           <div key={s.key} className="bg-[#FAFAF7] rounded-2xl p-3 border border-gray-100">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[16px]" aria-hidden>{s.emoji}</span>
+              <StageIcon stageKey={s.key} size={16} />
               <div className="text-[13px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
                 {s.num}. {s.title}
               </div>

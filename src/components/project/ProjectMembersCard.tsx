@@ -68,7 +68,7 @@ export function ProjectMembersCard({
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-[14.5px] font-extrabold text-[#1A1A1A]">
-            👥 חברי הפרויקט
+            <span className="inline-flex items-center gap-1"><Users className="h-4 w-4" strokeWidth={1.9} aria-hidden /> חברי הפרויקט</span>
           </h3>
           <p className="text-[11.5px] text-gray-500 mt-1 leading-snug truncate">{subtitle}</p>
         </div>

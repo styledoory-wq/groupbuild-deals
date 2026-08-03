@@ -2,6 +2,8 @@ import {
   AppWindow,
   Building2,
   ClipboardList,
+  Circle,
+  CircleDashed,
   Compass,
   DoorOpen,
   Droplets,
@@ -66,7 +68,35 @@ const STAGE_ICONS: Record<string, LucideIcon> = {
   build: Hammer,
   plants: Trees,
   water: Droplets,
+  /* --- project-management stage keys (single source of truth) --- */
+  structure: Building2,
+  qa: ClipboardList,
+  done: KeyRound,
+  "reno-plan": Ruler,
+  "reno-systems": Zap,
+  "reno-kitchen-bath": Droplets,
+  "reno-floor-paint": PaintRoller,
+  "reno-handoff": KeyRound,
+  "ext-plan": Ruler,
+  "ext-structure": Building2,
+  "ext-envelope": Layers,
+  "ext-systems": Zap,
+  "ext-handoff": KeyRound,
+  "mamad-plan": Ruler,
+  "mamad-structure": Building2,
+  "mamad-door": DoorOpen,
+  "mamad-finish": ShieldCheck,
+  "com-needs": ClipboardList,
+  "com-quotes": ClipboardList,
+  "com-select": ClipboardList,
+  "com-exec": Wrench,
+  "com-handoff": KeyRound,
+  "ps-request": ClipboardList,
+  "ps-quotes": ClipboardList,
+  "ps-exec": Wrench,
+  "ps-done": KeyRound,
 };
+
 
 /** Exact category id → icon */
 const CATEGORY_ID_ICONS: Record<string, LucideIcon> = {
@@ -146,7 +176,17 @@ const KEYWORD_ICONS: Array<{ match: RegExp; Icon: LucideIcon }> = [
   { match: /שלד|בני|קבלן/i, Icon: Building2 },
   { match: /תכנון|אדריכל|מהנדס|היתר/i, Icon: Ruler },
   { match: /ניק|אחזק/i, Icon: Sparkles },
+  { match: /קונסטרוקצ|יועץ|מדיד|היתר|פיקוח|מפרט/i, Icon: ClipboardList },
+  { match: /איטום|רטיבות|מים|ביוב/i, Icon: Droplets },
+  { match: /שלד|יציק|בטון|טיט|לבנ|חיפוי חוץ/i, Icon: Building2 },
+  { match: /מעלית/i, Icon: Building2 },
+  { match: /דוד|סולארי|אנרגי/i, Icon: SunMedium },
+  { match: /מסירה|אכלוס|טופס|מפתח/i, Icon: KeyRound },
+  { match: /הובל|ריהוט/i, Icon: Sofa },
 ];
+
+/** Uniform neutral icon for items with no category link. Never an emoji. */
+export const NEUTRAL_ICON: LucideIcon = CircleDashed;
 
 export function iconForStage(stageKey: string): LucideIcon {
   return STAGE_ICONS[stageKey] ?? Sparkles;
