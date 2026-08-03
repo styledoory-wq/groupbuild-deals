@@ -165,6 +165,44 @@ export default function AdminPaymentSettings() {
         ) : (
           <>
             <section className="gb-card p-5">
+              <h2 className="text-sm font-bold mb-1 flex items-center gap-2">
+                <Users className="h-4 w-4 gb-gold-text" />
+                מצב הצטרפות לעסקאות
+              </h2>
+              <p className="text-fs-xs text-muted-foreground mb-3 leading-relaxed">
+                שולט על כלל המערכת. שינוי דורש סיבה ונרשם ביומן שינויים.
+              </p>
+              {modeError && (
+                <div className="mb-3 rounded-xl bg-[#FEF2F2] border border-[#FECACA] p-3 text-fs-xs text-[#991B1B] flex gap-2">
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                  לא ניתן לקרוא את מצב ההצטרפות. עד לפתרון, ההצטרפות חסומה אוטומטית.
+                </div>
+              )}
+              <div className="grid grid-cols-1 gap-2">
+                {(["enabled", "disabled", "maintenance"] as ParticipationFeeMode[]).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => {
+                      if (m === mode) return;
+                      setPendingMode(m);
+                      setModeReason("");
+                    }}
+                    className={cn(
+                      "p-4 rounded-2xl border-2 transition-smooth text-right",
+                      mode === m ? "border-[#0E6B5A] bg-[#F0F7F5]" : "border-border bg-card",
+                    )}
+                  >
+                    <div className="text-sm font-bold">{PARTICIPATION_MODE_LABEL[m]}</div>
+                    <div className="text-fs-xs text-muted-foreground mt-1 leading-relaxed">
+                      {PARTICIPATION_MODE_DESCRIPTION[m]}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="gb-card p-5">
               <h2 className="text-sm font-bold mb-3 flex items-center gap-2">
                 <CreditCard className="h-4 w-4 gb-gold-text" />
                 ספק סליקה פעיל
