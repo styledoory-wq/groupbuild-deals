@@ -1,0 +1,38 @@
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: *
+Allow: /
+# Public directory pages are indexable at /supplier/:slug and /category/:slug
+# Block private dashboards and account areas:
+Disallow: /admin
+Disallow: /admin/
+Disallow: /resident/
+Disallow: /supplier/onboarding
+Disallow: /supplier/profile
+Disallow: /supplier/offers
+Disallow: /supplier/leads
+Disallow: /supplier/demand-inbox
+Disallow: /supplier/reviews
+Disallow: /supplier/scan
+Disallow: /supplier/redemptions
+Disallow: /supplier/revenue
+Disallow: /supplier/account
+Disallow: /supplier/deposits
+Disallow: /supplier/delete-account
+Disallow: /supplier/marketing-templates-preview
+Disallow: /reset-password
+Disallow: /unsubscribe
+Disallow: /auth
+Disallow: /onboarding
+
+Sitemap: https://groupbuild.co.il/sitemap.xml

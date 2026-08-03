@@ -1,0 +1,1 @@
+import{j as c}from"./vendor-query-dc2B2w_G.js";import{u as i,N as p}from"./vendor-react-BmrdJ4ux.js";function $({base:t}){const{pathname:r,search:s,hash:o}=i(),a=t==="resident"?"/r":"/b",e=r.slice(a.length).replace(/^\/+/,""),n=e?`/${t}/${e}`:`/${t}`;return c.jsx(p,{to:`${n}${s}${o}`,replace:!0})}export{$ as default};
