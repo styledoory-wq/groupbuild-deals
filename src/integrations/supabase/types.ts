@@ -1232,6 +1232,8 @@ export type Database = {
           is_deleted: boolean
           is_demo: boolean
           is_hidden: boolean
+          join_email_sent_at: string | null
+          last_refund_attempt_at: string | null
           metadata: Json | null
           net_deposit_amount: number
           paid_at: string | null
@@ -1245,7 +1247,14 @@ export type Database = {
           platform_fee_rule_id: string | null
           project_id: string | null
           provider_payment_url: string | null
+          provider_refund_id: string | null
           provider_transaction_id: string | null
+          refund_attempts: number
+          refund_email_sent_at: string | null
+          refund_error_code: string | null
+          refund_error_description: string | null
+          refund_reason: string | null
+          refund_status: string | null
           refunded_at: string | null
           status: Database["public"]["Enums"]["deposit_status"]
           supplier_deduction_amount: number
@@ -1270,6 +1279,8 @@ export type Database = {
           is_deleted?: boolean
           is_demo?: boolean
           is_hidden?: boolean
+          join_email_sent_at?: string | null
+          last_refund_attempt_at?: string | null
           metadata?: Json | null
           net_deposit_amount: number
           paid_at?: string | null
@@ -1283,7 +1294,14 @@ export type Database = {
           platform_fee_rule_id?: string | null
           project_id?: string | null
           provider_payment_url?: string | null
+          provider_refund_id?: string | null
           provider_transaction_id?: string | null
+          refund_attempts?: number
+          refund_email_sent_at?: string | null
+          refund_error_code?: string | null
+          refund_error_description?: string | null
+          refund_reason?: string | null
+          refund_status?: string | null
           refunded_at?: string | null
           status?: Database["public"]["Enums"]["deposit_status"]
           supplier_deduction_amount: number
@@ -1308,6 +1326,8 @@ export type Database = {
           is_deleted?: boolean
           is_demo?: boolean
           is_hidden?: boolean
+          join_email_sent_at?: string | null
+          last_refund_attempt_at?: string | null
           metadata?: Json | null
           net_deposit_amount?: number
           paid_at?: string | null
@@ -1321,7 +1341,14 @@ export type Database = {
           platform_fee_rule_id?: string | null
           project_id?: string | null
           provider_payment_url?: string | null
+          provider_refund_id?: string | null
           provider_transaction_id?: string | null
+          refund_attempts?: number
+          refund_email_sent_at?: string | null
+          refund_error_code?: string | null
+          refund_error_description?: string | null
+          refund_reason?: string | null
+          refund_status?: string | null
           refunded_at?: string | null
           status?: Database["public"]["Enums"]["deposit_status"]
           supplier_deduction_amount?: number

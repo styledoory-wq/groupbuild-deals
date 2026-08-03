@@ -28,6 +28,11 @@ type DbDeposit = {
   created_at: string;
   paid_at: string | null;
   refunded_at: string | null;
+  refund_status: string | null;
+  refund_error_code: string | null;
+  refund_error_description: string | null;
+  refund_attempts: number | null;
+  refund_reason: string | null;
   is_hidden: boolean;
 };
 
@@ -48,6 +53,7 @@ const STATUS_META: Record<string, { label: string; cls: string }> = {
 const VIEW_FILTERS: Array<{ key: string; label: string }> = [
   { key: "active", label: "פעילים" },
   { key: "refunded", label: "מוחזרים" },
+  { key: "refund_failed", label: "כשלי החזר" },
   { key: "hidden", label: "מוסתרים" },
   { key: "all", label: "הכול" },
 ];
@@ -66,7 +72,7 @@ export default function AdminDeposits() {
     try {
       const { data, error } = await supabase
         .from("deposits")
-        .select("id,user_id,deal_id,amount,gross_deposit_amount,payment_processing_fee_amount,payment_processing_fee_status,net_deposit_amount,supplier_deduction_amount,supplier_deduction_basis,payment_fee_absorber,status,payment_provider,payment_kind,payment_environment,created_at,paid_at,refunded_at,is_hidden")
+        .select("id,user_id,deal_id,amount,gross_deposit_amount,payment_processing_fee_amount,payment_processing_fee_status,net_deposit_amount,supplier_deduction_amount,supplier_deduction_basis,payment_fee_absorber,status,payment_provider,payment_kind,payment_environment,created_at,paid_at,refunded_at,refund_status,refund_error_code,refund_error_description,refund_attempts,refund_reason,is_hidden")
         .eq("is_deleted", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -132,7 +138,7 @@ export default function AdminDeposits() {
       } else if (status === "refunded" && dep?.payment_provider === "cardcom" && dep.status === "paid") {
         // Real money moves first: refund at Cardcom, then flip the record.
         const { data, error } = await supabase.functions.invoke("cardcom-refund", {
-          body: { deposit_id: id },
+          body: { deposit_id: id, retry: dep.refund_status === "failed" },
         });
         if (error) throw error;
         if (data?.error) throw new Error(String(data.description ?? data.error));
@@ -174,6 +180,7 @@ export default function AdminDeposits() {
     return deposits.filter((d) => {
       if (view === "active" && (d.is_hidden || d.status === "refunded" || d.status === "cancelled" || d.status === "failed")) return false;
       if (view === "refunded" && (d.is_hidden || d.status !== "refunded")) return false;
+      if (view === "refund_failed" && d.refund_status !== "failed") return false;
       if (view === "hidden" && !d.is_hidden) return false;
       // "all" → no filter
       if (!q) return true;
@@ -321,6 +328,20 @@ export default function AdminDeposits() {
                       </button>
                     </div>
                   )}
+                  {dep.refund_status && dep.refund_status !== "refunded" && (
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <div className={"inline-block text-fs-xs font-bold px-2 py-0.5 rounded-full " + (dep.refund_status === "failed" ? "bg-destructive/10 text-destructive" : "bg-[#FFF8E1] text-[#1F2937]")}>
+                        {dep.refund_status === "failed" ? "החזר נכשל" : "החזר בתהליך"}
+                      </div>
+                      {dep.refund_status === "failed" && (
+                        <p className="text-fs-xs text-muted-foreground mt-1">
+                          שגיאה {dep.refund_error_code ?? "לא ידועה"}
+                          {dep.refund_error_description ? ` · ${dep.refund_error_description}` : ""}
+                          {dep.refund_attempts ? ` · ניסיונות: ${dep.refund_attempts}` : ""}
+                        </p>
+                      )}
+                    </div>
+                  )}
                   {isPaid && (
                     <div className="grid grid-cols-1 gap-2 mt-3 pt-3 border-t border-border">
                       <button
@@ -328,7 +349,8 @@ export default function AdminDeposits() {
                         disabled={busyId === dep.id}
                         className="h-9 rounded-xl bg-muted text-foreground text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
                       >
-                        <RefreshCw className="h-3.5 w-3.5" /> סמן כהוחזר
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        {dep.refund_status === "failed" ? "נסה החזר שוב" : "בצע החזר"}
                       </button>
                     </div>
                   )}
