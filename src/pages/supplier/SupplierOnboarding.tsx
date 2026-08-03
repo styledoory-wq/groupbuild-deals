@@ -15,6 +15,7 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/AreasCombobox";
 import { CategoryMultiPicker } from "@/components/categories/CategoryMultiPicker";
 import { supabase } from "@/integrations/supabase/client";
+import { acceptSupplierTerms } from "@/lib/supplierTerms";
 import { useApp } from "@/store/AppStore";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
 import { uploadSupplierLogo } from "@/lib/supplierUploads";
@@ -414,6 +415,8 @@ export default function SupplierOnboarding() {
       } as never);
       if (error) throw new Error(`שמירת פרופיל הספק נכשלה: ${error.message}`);
       if (typeof sid === "string") setSupplierId(sid);
+      // New suppliers are recorded as accepting the current agreement version (v4).
+      try { await acceptSupplierTerms(); } catch (e) { console.warn("[onboarding] terms record failed", e); }
       setUser({
         id: userId,
         role: "supplier",
