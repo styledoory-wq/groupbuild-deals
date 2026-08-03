@@ -58,6 +58,25 @@ upsertString("CFBundleVersion", p.buildNumber);
 // Export compliance — required by App Store Connect for every upload.
 upsertBool("ITSAppUsesNonExemptEncryption", false);
 
+// --- Orientation / device family -------------------------------------------
+// Phase 1 ships iPhone-only, portrait-only. iPad support will be added after a
+// dedicated UI pass. We do NOT use UIRequiresFullScreen as a workaround —
+// TARGETED_DEVICE_FAMILY = 1 in project.pbxproj is the real gate.
+function replaceArray(key: string, values: string[]) {
+  const block = `\t<key>${key}</key>\n\t<array>\n${values
+    .map((v) => `\t\t<string>${v}</string>`)
+    .join("\n")}\n\t</array>`;
+  const re = new RegExp(`\\t?<key>${key}</key>\\s*<array>[\\s\\S]*?</array>`);
+  if (re.test(plist)) plist = plist.replace(re, block);
+  else plist = plist.replace(/<dict>/, `<dict>\n${block}`);
+}
+function removeArrayKey(key: string) {
+  const re = new RegExp(`\\s*<key>${key}</key>\\s*<array>[\\s\\S]*?</array>`, "g");
+  plist = plist.replace(re, "");
+}
+replaceArray("UISupportedInterfaceOrientations", ["UIInterfaceOrientationPortrait"]);
+removeArrayKey("UISupportedInterfaceOrientations~ipad");
+
 
 // Usage descriptions — write only what's declared; strip the rest.
 const usageMap: Record<keyof NonNullable<typeof p.iosUsageDescriptions>, string> = {
@@ -84,7 +103,8 @@ if (p.scheme) {
 writeFileSync(infoPlistPath, plist);
 console.log(`[info-plist] Wrote ${infoPlistPath}`);
 console.log(`  · CFBundleDisplayName = ${p.appName}`);
-console.log(`  · Version ${p.version} (build ${p.buildNumber})`);
+console.log(`  · Version ${p.version} (build ${p.buildNumber}) — single source: app-profiles.config.ts`);
+console.log(`  · Orientation: Portrait only (iPhone-only build)`);
 console.log(`  · Scheme: ${p.scheme ?? "(none)"}`);
 
 // --- App.entitlements ------------------------------------------------------
