@@ -10,7 +10,7 @@ import { APP_PROFILES } from "./app-profiles.config";
  *   isolated per profile so `cap sync` can NEVER overwrite another profile's
  *   native folder.
  * - When APP_PROFILE is NOT set (Lovable hot-reload / dev), the legacy config
- *   is used unchanged (appId com.groupbuild.app, webDir dist, ios/ folder).
+ *   is used unchanged (webDir dist, web-only; no native folder).
  *   This preserves the current Lovable preview behavior exactly.
  */
 
@@ -60,8 +60,10 @@ const buildProfileConfig = (): CapacitorConfig => {
   };
 };
 
+// Web-only dev fallback (Lovable preview / hot-reload) when APP_PROFILE is unset.
+// No native folder is referenced here — native builds must set APP_PROFILE.
 const legacyDevConfig: CapacitorConfig = {
-  appId: "com.groupbuild.app",
+  appId: "il.co.groupbuild.residents",
   appName: "GroupBuild",
   webDir: "dist",
   ios: {
