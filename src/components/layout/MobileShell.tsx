@@ -59,7 +59,7 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
                 enterKeyHint="search"
                 aria-label="חיפוש באתר"
                 placeholder="חיפוש..."
-                className="w-full h-9 rounded-full bg-[#F4F6F9] border border-transparent pr-9 pl-4 text-[13px] text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#0E6B5A] focus:bg-white transition"
+                className="[&::-webkit-search-cancel-button]:appearance-none w-full h-9 rounded-full bg-[#F4F6F9] border border-transparent pr-9 pl-4 text-[13px] text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#0E6B5A] focus:bg-white transition"
               />
             </div>
             <button type="submit" className="sr-only">חפש</button>

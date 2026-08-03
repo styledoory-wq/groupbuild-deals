@@ -117,7 +117,7 @@ export default function SearchPage() {
               autoComplete="off"
               aria-label="חיפוש ספקים, קטגוריות ושירותים"
               placeholder="חפש: דלתות, מזגן, סולארי, חשמלאי..."
-              className="w-full h-14 rounded-[20px] bg-white border border-[#ECEEF2] pr-12 pl-12 text-[15px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#0E6B5A] focus:ring-[3px] focus:ring-[#0E6B5A]/15 shadow-[0_4px_16px_-6px_rgba(10,31,61,0.08)] transition"
+              className="[&::-webkit-search-cancel-button]:appearance-none w-full h-14 rounded-[20px] bg-white border border-[#ECEEF2] pr-12 pl-12 text-[15px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#0E6B5A] focus:ring-[3px] focus:ring-[#0E6B5A]/15 shadow-[0_4px_16px_-6px_rgba(10,31,61,0.08)] transition"
               dir="rtl"
             />
             {q && (
