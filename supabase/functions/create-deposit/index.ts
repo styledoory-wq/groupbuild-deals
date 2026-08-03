@@ -509,20 +509,9 @@ async function createCardcomCheckout(opts: {
         WebHookUrl: webhookUrl,
         ProductName: `דמי שירות עבור הצטרפות ורישום לעסקה: ${opts.dealTitle}`,
         ISOCoinId: 1,
-        Document: opts.userEmail
-          ? {
-            Email: opts.userEmail,
-            IsSendByEmail: true,
-            Name: "לקוח GroupBuild",
-            Products: [
-              {
-                Description: `דמי שירות עבור הצטרפות לעסקה: ${opts.dealTitle}`,
-                UnitCost: opts.amount,
-                Quantity: 1,
-              },
-            ],
-          }
-          : undefined,
+        // Invoice/document creation is handled by the terminal settings.
+        // Sending a partial Document object makes Cardcom reject the request
+        // ("No InvoiceLines data was send"), so we omit it entirely.
       }),
     });
     const data = await res.json().catch(() => null) as Record<string, unknown> | null;
