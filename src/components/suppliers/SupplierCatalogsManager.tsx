@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadSupplierCatalog } from "@/lib/supplierUploads";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 export type CatalogKind = "pdf" | "link";
 
@@ -28,6 +29,7 @@ type Props = {
 const isValidHttpUrl = (s: string) => /^https?:\/\/\S+/i.test(s.trim());
 
 export function SupplierCatalogsManager({ supplierId }: Props) {
+  const askConfirm = useConfirm();
   const [rows, setRows] = useState<CatalogRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -148,7 +150,7 @@ export function SupplierCatalogsManager({ supplierId }: Props) {
   };
 
   const removeRow = async (id: string) => {
-    if (!confirm("למחוק את הקטלוג?")) return;
+    if (!(await askConfirm({ title: "למחוק את הקטלוג?", confirmLabel: "מחיקה", destructive: true }))) return;
     const { error } = await supabase.from("supplier_catalogs").delete().eq("id", id);
     if (error) { toast.error("מחיקה נכשלה"); return; }
     toast.success("הקטלוג נמחק");

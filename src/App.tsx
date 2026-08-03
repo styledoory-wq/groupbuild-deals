@@ -14,6 +14,8 @@ import { prefetchEntryHero, resolveEntryHeroSrc } from "@/lib/prefetchEntryHero"
 import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 import { PreviewModeBanner } from "./components/PreviewModeBanner";
 import { GuestGateProvider } from "./hooks/useGuestGate";
+import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
+
 import { publicRoutes } from "@/routes/PublicRoutes";
 import { residentRoutes } from "@/routes/ResidentRoutes";
 import { supplierRoutes } from "@/routes/SupplierRoutes";
@@ -117,25 +119,28 @@ const App = () => (
         <Sonner position="top-center" dir="rtl" />
         <HelmetProvider>
           <BrowserRouter>
-            <AppSplash />
-            <PreviewModeBanner />
-            <PreloadImportantRoutes />
-            <TermsAcceptanceGate>
-              <GuestGateProvider>
-                <RouteTransition>
-                  <Suspense fallback={<SuspenseFallback />}>
-                    <Routes>
-                      {publicRoutes}
-                      {includesResidentRoutes && residentRoutes}
-                      {includesSupplierRoutes && supplierRoutes}
-                      {includesAdminRoutes && adminRoutes}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </RouteTransition>
-              </GuestGateProvider>
-            </TermsAcceptanceGate>
+            <ConfirmDialogProvider>
+              <AppSplash />
+              <PreviewModeBanner />
+              <PreloadImportantRoutes />
+              <TermsAcceptanceGate>
+                <GuestGateProvider>
+                  <RouteTransition>
+                    <Suspense fallback={<SuspenseFallback />}>
+                      <Routes>
+                        {publicRoutes}
+                        {includesResidentRoutes && residentRoutes}
+                        {includesSupplierRoutes && supplierRoutes}
+                        {includesAdminRoutes && adminRoutes}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </RouteTransition>
+                </GuestGateProvider>
+              </TermsAcceptanceGate>
+            </ConfirmDialogProvider>
           </BrowserRouter>
+
         </HelmetProvider>
       </TooltipProvider>
     </AppProvider>

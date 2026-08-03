@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type Resident = {
   id: string;
@@ -36,6 +37,7 @@ type Resident = {
 };
 
 export default function AdminResidents() {
+  const askConfirm = useConfirm();
   const { projects, setProjects } = useApp();
   const [residents, setResidents] = useState<Resident[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,7 +137,7 @@ export default function AdminResidents() {
 
   const handleDelete = async () => {
     if (!editing) return;
-    if (!confirm(`למחוק את ${editing.full_name || editing.email}? פעולה זו אינה הפיכה.`)) return;
+    if (!(await askConfirm({ title: "מחיקת דייר", description: `למחוק את ${editing.full_name || editing.email}? פעולה זו אינה הפיכה.`, confirmLabel: "מחיקה", destructive: true }))) return;
     setSaving(true);
     try {
       const { error } = await supabase.from("profiles").delete().eq("id", editing.id);
@@ -396,13 +398,15 @@ export default function AdminResidents() {
                 {(() => {
                   const welcomeSentAt = getWhatsappSentAt(editing.id, "resident_welcome");
                   const reminderSentAt = getWhatsappSentAt(editing.id, "resident_completion");
-                  const sendWA = (kind: "resident_welcome" | "resident_completion") => {
+                  const sendWA = async (kind: "resident_welcome" | "resident_completion") => {
                     const sentAt = getWhatsappSentAt(editing.id, kind);
                     if (sentAt) {
                       const label = kind === "resident_welcome" ? "הודעת ברוך הבא" : "תזכורת השלמת פרטים";
-                      const ok = window.confirm(
-                        `${label} כבר נשלחה בתאריך ${formatSentAt(sentAt)}.\nלשלוח שוב?`,
-                      );
+                      const ok = await askConfirm({
+                        title: "שליחה חוזרת",
+                        description: `${label} כבר נשלחה בתאריך ${formatSentAt(sentAt)}. לשלוח שוב?`,
+                        confirmLabel: "שלח שוב",
+                      });
                       if (!ok) return;
                     }
                     const name = eName || editing.email || "";

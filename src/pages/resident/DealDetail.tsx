@@ -26,7 +26,7 @@ import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { PaymentInstructionsCard, type SupplierPaymentInfo } from "@/components/deals/PaymentInstructionsCard";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
-import { useGuestGate } from "@/hooks/useGuestGate";
+import { useGuestGate, useResumeAction } from "@/hooks/useGuestGate";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
 import { getCategoryCover } from "@/lib/categoryCover";
@@ -446,13 +446,17 @@ export default function DealDetail() {
 
   const handleJoinClick = () => {
     if (!deal) return;
-    requireAuth("להצטרף להצעות קבוצתיות", () => setShowJoinModal(true));
+    requireAuth("להצטרף להצעות קבוצתיות", () => setShowJoinModal(true), { resumeKey: "join-deal" });
   };
 
   const handleRequestGroupBuy = () => {
     if (!deal) return;
-    requireAuth("לבקש קבוצת רכישה", () => setShowRequestGroupBuy(true));
+    requireAuth("לבקש קבוצת רכישה", () => setShowRequestGroupBuy(true), { resumeKey: "request-group-buy" });
   };
+
+  // Guest tapped an action, signed in, and came back here → re-open it.
+  useResumeAction("join-deal", () => setShowJoinModal(true));
+  useResumeAction("request-group-buy", () => setShowRequestGroupBuy(true));
 
 
   const submitRequestGroupBuy = async () => {

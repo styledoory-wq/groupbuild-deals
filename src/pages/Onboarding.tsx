@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BrandMark } from "@/components/BrandLogo";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms";
+import { consumePendingReturnUrl } from "@/lib/returnUrl";
 
 type Role = "resident" | "supplier";
 
@@ -166,7 +167,7 @@ export default function Onboarding() {
           </p>
           <div className="mt-5 space-y-2.5">
             <Button
-              onClick={() => { clearIntent(); navigate("/resident"); }}
+              onClick={() => { clearIntent(); navigate(consumePendingReturnUrl() ?? "/resident"); }}
               className="w-full h-[52px] rounded-[14px] text-[15px] font-bold bg-[#0E6B5A] hover:bg-[#0a5447] text-white"
             >
               כן, קח אותי לאזור הדיירים
@@ -212,7 +213,7 @@ export default function Onboarding() {
           </p>
           <div className="mt-5 space-y-2.5">
             <Button
-              onClick={() => { clearIntent(); navigate("/supplier"); }}
+              onClick={() => { clearIntent(); navigate(consumePendingReturnUrl() ?? "/supplier"); }}
               className="w-full h-[52px] rounded-[14px] text-[15px] font-bold bg-[#0E6B5A] hover:bg-[#0a5447] text-white"
             >
               כן, קח אותי לאזור הספקים

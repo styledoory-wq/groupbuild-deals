@@ -12,6 +12,7 @@ import { formatFeeBandLabel, type PlatformFeeRule } from "@/lib/platformFees";
 import { CategoryParticipationFees } from "@/components/admin/CategoryParticipationFees";
 
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type Draft = {
   id?: string;
@@ -35,6 +36,7 @@ const emptyDraft = (): Draft => ({
 });
 
 export default function AdminPlatformFees() {
+  const askConfirm = useConfirm();
   const [rules, setRules] = useState<PlatformFeeRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -154,7 +156,7 @@ export default function AdminPlatformFees() {
   };
 
   const removeRule = async (id: string) => {
-    if (!confirm("למחוק את המדרגה? פעולה זו אינה משנה חיובים קיימים.")) return;
+    if (!(await askConfirm({ title: "מחיקת מדרגה", description: "למחוק את המדרגה? פעולה זו אינה משנה חיובים קיימים.", confirmLabel: "מחיקה", destructive: true }))) return;
     setBusyId(id);
     try {
       const { error } = await supabase

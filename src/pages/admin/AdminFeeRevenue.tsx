@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { formatILS } from "@/store/AppStore";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type FeeRow = {
   id: string;
@@ -28,6 +29,7 @@ type DealMap = Record<string, { title: string; supplier_id: string | null }>;
 type SupplierMap = Record<string, { business_name: string }>;
 
 export default function AdminFeeRevenue() {
+  const askConfirm = useConfirm();
   const [rows, setRows] = useState<FeeRow[]>([]);
   const [deals, setDeals] = useState<DealMap>({});
   const [suppliers, setSuppliers] = useState<SupplierMap>({});
@@ -142,7 +144,7 @@ export default function AdminFeeRevenue() {
   }, [paidRows]);
 
   const refund = async (id: string) => {
-    if (!confirm("להחזיר את דמי ההשתתפות? הסטטוס יסומן כהוחזר.")) return;
+    if (!(await askConfirm({ title: "החזר דמי השתתפות", description: "להחזיר את דמי ההשתתפות? הסטטוס יסומן כהוחזר.", confirmLabel: "בצע החזר", destructive: true }))) return;
     setBusyId(id);
     try {
       const { error } = await supabase

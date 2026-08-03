@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSmartBack } from "@/lib/backNavigation";
 import { ArrowRight } from "lucide-react";
 
 interface BackHeaderProps {
@@ -7,8 +7,10 @@ interface BackHeaderProps {
   subtitle?: string;
   /** Optional element rendered on the left side of the header (icons, buttons). */
   right?: ReactNode;
-  /** Custom back handler. Defaults to navigate(-1). Pass `false` to hide the back button. */
+  /** Custom back handler. Defaults to smart back. Pass `false` to hide the back button. */
   onBack?: (() => void) | false;
+  /** Route to land on when there is no history (deep link / push / share entry). */
+  backTo?: string;
 }
 
 /**
@@ -19,11 +21,11 @@ interface BackHeaderProps {
  * For rich top-level dashboards (Resident/Supplier home) keep the custom
  * headers that include greeting + avatar — they're intentional.
  */
-export function BackHeader({ title, subtitle, right, onBack }: BackHeaderProps) {
-  const navigate = useNavigate();
+export function BackHeader({ title, subtitle, right, onBack, backTo }: BackHeaderProps) {
+  const smartBack = useSmartBack(backTo);
   const handleBack = () => {
     if (typeof onBack === "function") onBack();
-    else navigate(-1);
+    else smartBack();
   };
   return (
     <header

@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Send, MessageCircle, Mail, X, Search } from "lucide-react";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type Audience = "supplier" | "resident" | "committee" | "all";
 type Template = {
@@ -25,6 +26,7 @@ const AUDIENCE_LABEL: Record<Audience, string> = {
 };
 
 export default function AdminMessageTemplates() {
+  const askConfirm = useConfirm();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Audience | "any">("any");
@@ -71,7 +73,7 @@ export default function AdminMessageTemplates() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("למחוק את התבנית?")) return;
+    if (!(await askConfirm({ title: "למחוק את התבנית?", confirmLabel: "מחיקה", destructive: true }))) return;
     const { error } = await supabase.from("admin_message_templates").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("נמחק");
@@ -206,6 +208,7 @@ function EditorSheet({
 }
 
 function SendSheet({ template, onClose }: { template: Template; onClose: () => void }) {
+  const askConfirm = useConfirm();
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -275,10 +278,10 @@ function SendSheet({ template, onClose }: { template: Template; onClose: () => v
 
   const renderBody = (name: string) => template.body.replace(/\{\{name\}\}/g, name || "");
 
-  const sendWhatsapp = () => {
+  const sendWhatsapp = async () => {
     const withPhone = selectedList.filter((r) => normalizeWhatsappUrl(r.phone));
     if (!withPhone.length) return toast.error("אין נמענים עם וואטסאפ");
-    if (withPhone.length > 5 && !confirm(`ייפתחו ${withPhone.length} טאבים של וואטסאפ. להמשיך?`)) return;
+    if (withPhone.length > 5 && !(await askConfirm({ title: "פתיחת וואטסאפ", description: `ייפתחו ${withPhone.length} טאבים של וואטסאפ. להמשיך?`, confirmLabel: "המשך" }))) return;
     withPhone.forEach((r) => {
       const url = normalizeWhatsappUrl(r.phone);
       if (!url) return;

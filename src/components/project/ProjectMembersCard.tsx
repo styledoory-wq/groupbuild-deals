@@ -7,6 +7,7 @@ import {
   useProjectMembers, createInvitation, inviteLinkFor, removeMember,
   useMyProjectRole, type MemberRole,
 } from "@/lib/projectClient";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 const BRAND = "#0E6B5A";
 
@@ -114,6 +115,7 @@ function MembersSheet({
   membersError: Error | null;
   onRetry: () => void;
 }) {
+  const askConfirm = useConfirm();
   const [inviteRole, setInviteRole] = useState<MemberRole>("partner");
   const [creating, setCreating] = useState(false);
   const [link, setLink] = useState<string | null>(null);
@@ -272,7 +274,13 @@ function MembersSheet({
                   {canRemove && (
                     <button
                       onClick={async () => {
-                        if (!confirm(isMe ? "לעזוב את הפרויקט?" : `להסיר את ${m.full_name || m.email || "החבר"}?`)) return;
+                        const ok = await askConfirm({
+                          title: isMe ? "לעזוב את הפרויקט?" : "הסרת חבר",
+                          description: isMe ? undefined : `להסיר את ${m.full_name || m.email || "החבר"}?`,
+                          confirmLabel: isMe ? "עזוב" : "הסר",
+                          destructive: true,
+                        });
+                        if (!ok) return;
                         await removeMember(m.id);
                       }}
                       className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0"

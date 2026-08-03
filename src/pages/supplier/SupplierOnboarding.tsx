@@ -29,6 +29,7 @@ import {
 } from "@/lib/supplierOnboardingDraft";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { consumePendingReturnUrl } from "@/lib/returnUrl";
 
 type StepKey = SupplierOnboardingStep;
 
@@ -453,7 +454,7 @@ export default function SupplierOnboarding() {
       await save({ silent: true });
       if (userId) clearSupplierDraft(userId);
       toast.success("הפרופיל הושלם! ההרשמה בבדיקת אדמין");
-      navigate("/supplier");
+      navigate(consumePendingReturnUrl() ?? "/supplier");
     } catch {
       /* toast handled in save() */
     }

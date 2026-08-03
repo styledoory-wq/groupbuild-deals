@@ -355,7 +355,10 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       // If Supabase returned a live session (auto-confirm on) → go straight in.
       if (data.session) {
         toast.success("נרשמת בהצלחה!");
-        navigate(role === "supplier" ? "/supplier/onboarding" : "/resident");
+        // Residents keep their pre-auth destination (deal page, supplier page…);
+        // suppliers must finish onboarding first — the returnUrl stays stored.
+        const pending = role === "supplier" ? null : consumePendingReturnUrl();
+        navigate(pending ?? (role === "supplier" ? "/supplier/onboarding" : "/resident"));
         return;
       }
 
