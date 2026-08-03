@@ -128,7 +128,7 @@ export default function MyDocuments() {
   };
 
   const handleDelete = async (doc: DocRow) => {
-    if (!confirm(`למחוק את "${doc.file_name}"?`)) return;
+    if (!(await askConfirm({ title: "מחיקת מסמך", description: `למחוק את "${doc.file_name}"?`, confirmLabel: "מחיקה", destructive: true }))) return;
     try {
       const { error } = await supabase
         .from("documents")

@@ -148,7 +148,7 @@ export function SupplierCatalogsManager({ supplierId }: Props) {
   };
 
   const removeRow = async (id: string) => {
-    if (!confirm("למחוק את הקטלוג?")) return;
+    if (!(await askConfirm({ title: "למחוק את הקטלוג?", confirmLabel: "מחיקה", destructive: true }))) return;
     const { error } = await supabase.from("supplier_catalogs").delete().eq("id", id);
     if (error) { toast.error("מחיקה נכשלה"); return; }
     toast.success("הקטלוג נמחק");

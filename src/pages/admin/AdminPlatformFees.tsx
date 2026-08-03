@@ -154,7 +154,7 @@ export default function AdminPlatformFees() {
   };
 
   const removeRule = async (id: string) => {
-    if (!confirm("למחוק את המדרגה? פעולה זו אינה משנה חיובים קיימים.")) return;
+    if (!(await askConfirm({ title: "מחיקת מדרגה", description: "למחוק את המדרגה? פעולה זו אינה משנה חיובים קיימים.", confirmLabel: "מחיקה", destructive: true }))) return;
     setBusyId(id);
     try {
       const { error } = await supabase

@@ -71,7 +71,7 @@ export default function AdminMessageTemplates() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("למחוק את התבנית?")) return;
+    if (!(await askConfirm({ title: "למחוק את התבנית?", confirmLabel: "מחיקה", destructive: true }))) return;
     const { error } = await supabase.from("admin_message_templates").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("נמחק");
@@ -275,10 +275,10 @@ function SendSheet({ template, onClose }: { template: Template; onClose: () => v
 
   const renderBody = (name: string) => template.body.replace(/\{\{name\}\}/g, name || "");
 
-  const sendWhatsapp = () => {
+  const sendWhatsapp = async () => {
     const withPhone = selectedList.filter((r) => normalizeWhatsappUrl(r.phone));
     if (!withPhone.length) return toast.error("אין נמענים עם וואטסאפ");
-    if (withPhone.length > 5 && !confirm(`ייפתחו ${withPhone.length} טאבים של וואטסאפ. להמשיך?`)) return;
+    if (withPhone.length > 5 && !(await askConfirm({ title: "פתיחת וואטסאפ", description: `ייפתחו ${withPhone.length} טאבים של וואטסאפ. להמשיך?`, confirmLabel: "המשך" }))) return;
     withPhone.forEach((r) => {
       const url = normalizeWhatsappUrl(r.phone);
       if (!url) return;

@@ -142,7 +142,7 @@ export default function AdminFeeRevenue() {
   }, [paidRows]);
 
   const refund = async (id: string) => {
-    if (!confirm("להחזיר את דמי ההשתתפות? הסטטוס יסומן כהוחזר.")) return;
+    if (!(await askConfirm({ title: "החזר דמי השתתפות", description: "להחזיר את דמי ההשתתפות? הסטטוס יסומן כהוחזר.", confirmLabel: "בצע החזר", destructive: true }))) return;
     setBusyId(id);
     try {
       const { error } = await supabase

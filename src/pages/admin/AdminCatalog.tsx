@@ -188,7 +188,7 @@ export default function AdminCatalog() {
   };
 
   const softDelete = async (c: Cat) => {
-    if (!confirm(`למחוק את "${c.name}"? הפריט וכל תת־הפריטים יסומנו כמחוקים ויוסתרו.`)) return;
+    if (!(await askConfirm({ title: "מחיקת פריט", description: `למחוק את "${c.name}"? הפריט וכל תת־הפריטים יסומנו כמחוקים ויוסתרו.`, confirmLabel: "מחיקה", destructive: true }))) return;
     setBusy(true);
     try {
       // collect descendants
