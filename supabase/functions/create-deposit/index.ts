@@ -489,41 +489,64 @@ async function createCardcomCheckout(opts: {
 
   const query = `deal_id=${opts.dealId}&deposit_id=${opts.depositId}&env=${opts.environment}`;
 
+  const buildPayload = (docType: string | null) => ({
+    TerminalNumber: Number(creds.terminal),
+    ApiName: creds.apiName,
+    ApiPassword: creds.apiPassword,
+    Operation: "ChargeOnly",
+    Amount: opts.amount,
+    CoinID: 1, // ILS
+    MaxPayments: 1,
+    Language: "he",
+    // ReturnValue travels back on the webhook and is our deposit id.
+    ReturnValue: opts.depositId,
+    SuccessRedirectUrl: `${origin}/payment/success?${query}`,
+    FailedRedirectUrl: `${origin}/payment/cancel?${query}`,
+    WebHookUrl: webhookUrl,
+    ProductName: `דמי שירות עבור הצטרפות ורישום לעסקה: ${opts.dealTitle}`,
+    ISOCoinId: 1,
+    // The terminal issues a document, so Cardcom requires a full Document
+    // object with a document type + product lines.
+    Document: docType
+      ? {
+        DocumentTypeToCreate: docType,
+        Name: "לקוח GroupBuild",
+        Email: opts.userEmail ?? undefined,
+        IsSendByEmail: Boolean(opts.userEmail),
+        Products: [
+          {
+            Description: `דמי שירות עבור הצטרפות לעסקה: ${opts.dealTitle}`,
+            Quantity: 1,
+            UnitCost: opts.amount,
+            IsVatFree: false,
+          },
+        ],
+      }
+      : undefined,
+  });
+
+  const attempts: (string | null)[] = ["TaxInvoiceAndReceipt", "Order", null];
+
   try {
-    const res = await fetch(`${CARDCOM_API_BASE}/LowProfile/Create`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        TerminalNumber: Number(creds.terminal),
-        ApiName: creds.apiName,
-        ApiPassword: creds.apiPassword,
-        Operation: "ChargeOnly",
-        Amount: opts.amount,
-        CoinID: 1, // ILS
-        MaxPayments: 1,
-        Language: "he",
-        // ReturnValue travels back on the webhook and is our deposit id.
-        ReturnValue: opts.depositId,
-        SuccessRedirectUrl: `${origin}/payment/success?${query}`,
-        FailedRedirectUrl: `${origin}/payment/cancel?${query}`,
-        WebHookUrl: webhookUrl,
-        ProductName: `דמי שירות עבור הצטרפות ורישום לעסקה: ${opts.dealTitle}`,
-        ISOCoinId: 1,
-        Document: opts.userEmail
-          ? { Email: opts.userEmail, IsSendByEmail: true, Name: "לקוח GroupBuild" }
-          : undefined,
-      }),
-    });
-    const data = await res.json().catch(() => null) as Record<string, unknown> | null;
-    if (!res.ok || !data || Number(data.ResponseCode ?? -1) !== 0) {
-      console.error("[create-deposit] cardcom create failed", {
+    for (const docType of attempts) {
+      const res = await fetch(`${CARDCOM_API_BASE}/LowProfile/Create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload(docType)),
+      });
+      const data = await res.json().catch(() => null) as Record<string, unknown> | null;
+      if (res.ok && data && Number(data.ResponseCode ?? -1) === 0) {
+        console.log("[create-deposit] cardcom checkout created", { docType });
+        return typeof data.Url === "string" ? data.Url : null;
+      }
+      console.error("[create-deposit] cardcom create failed (v2)", {
+        docType,
         http: res.status,
         code: data?.ResponseCode,
         description: data?.Description,
       });
-      return null;
     }
-    return typeof data.Url === "string" ? data.Url : null;
+    return null;
   } catch (e) {
     console.error("[create-deposit] cardcom request failed", e);
     return null;
