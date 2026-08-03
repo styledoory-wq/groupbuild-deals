@@ -1160,7 +1160,14 @@ export default function OfferEditor() {
       </div>
 
       <BottomNav role="supplier" />
+
+      <SupplierTermsReacceptDialog
+        open={!isEditing && needsTermsAccept}
+        onAccepted={() => setNeedsTermsAccept(false)}
+        onCancel={() => navigate("/supplier/offers")}
+      />
     </MobileShell>
+
   );
 }
 
