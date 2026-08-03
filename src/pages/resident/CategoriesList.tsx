@@ -13,7 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { ErrorState } from "@/components/ds";
+import { ErrorState, EmptyState } from "@/components/ds";
 import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
@@ -465,7 +465,11 @@ export default function CategoriesList() {
                   <ErrorState
                     title="לא הצלחנו לטעון את הקטגוריות"
                     description="ייתכן שהחיבור לרשת נקטע. אפשר לנסות שוב."
-                    onRetry={() => setRefreshTick((n) => n + 1)}
+                    onRetry={() => {
+                      setErrorMsg(null);
+                      setCountsReady(false);
+                      setRefreshTick((n) => n + 1);
+                    }}
                   />
                 ) : !countsReady ? (
                   <div className="grid grid-cols-3 gap-3">
@@ -475,10 +479,15 @@ export default function CategoriesList() {
                   </div>
                 ) : filtered.length === 0 ? (
 
-                  <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
-                    <Search size={28} />
-                    <strong className="text-slate-800">בקרוב נוסיף שלבים למסלול זה</strong>
-                  </div>
+                  <EmptyState
+                    icon={<Search size={26} className="text-[#9CA3AF]" />}
+                    title={query.trim() ? "לא נמצאו קטגוריות" : "אין עדיין קטגוריות במסלול זה"}
+                    description={
+                      query.trim()
+                        ? "נסו לחפש במילים אחרות או לנקות את החיפוש."
+                        : "אנחנו מוסיפים קטגוריות חדשות כל הזמן — חזרו לבדוק בקרוב."
+                    }
+                  />
                 ) : (
                   <div className="grid grid-cols-3 gap-3">
                     {filtered.map((s) => (

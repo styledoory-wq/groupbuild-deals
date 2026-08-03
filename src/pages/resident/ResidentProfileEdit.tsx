@@ -168,13 +168,13 @@ export default function ResidentProfileEdit() {
         <section className="gb-card p-4 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">פרטים אישיים</h3>
           <Field label="שם מלא" icon={UserIcon}>
-            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={60} required className="h-11 rounded-xl" />
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={60} autoComplete="name" enterKeyHint="next" required className="h-11 rounded-xl" />
           </Field>
           <Field label="טלפון" icon={Phone}>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} dir="ltr" className="h-11 rounded-xl" />
+            <Input type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="next" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} dir="ltr" className="h-11 rounded-xl" />
           </Field>
           <Field label="אימייל" icon={Mail}>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-11 rounded-xl" />
+            <Input type="email" inputMode="email" autoComplete="email" enterKeyHint="next" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-11 rounded-xl" />
             {email.trim().toLowerCase() !== originalEmail.toLowerCase() && (
               <p className="text-fs-xs text-gold mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
             )}
@@ -214,7 +214,7 @@ export default function ResidentProfileEdit() {
             </datalist>
           </Field>
           <Field label="כתובת (אופציונלי)" icon={MapPin}>
-            <Input value={address} onChange={(e) => setAddress(e.target.value)} maxLength={120} className="h-11 rounded-xl" />
+            <Input value={address} onChange={(e) => setAddress(e.target.value)} maxLength={120} autoComplete="street-address" enterKeyHint="done" className="h-11 rounded-xl" />
           </Field>
           <Field label="פרויקט מגורים" icon={Building2}>
             <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="flex h-11 w-full rounded-xl border border-border bg-card px-3 text-sm">

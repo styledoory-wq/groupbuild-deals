@@ -10,6 +10,7 @@ import { useApp } from "@/store/AppStore";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { resizeToPreset } from "@/lib/imageResize";
+import { ErrorState, EmptyState, LoadingState } from "@/components/ds";
 
 export default function ResidentProfile() {
   const navigate = useNavigate();
@@ -18,15 +19,27 @@ export default function ResidentProfile() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isCommittee, setIsCommittee] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState(false);
+  const [reloadTick, setReloadTick] = useState(0);
 
   useEffect(() => {
     if (!user?.id) return;
     const cacheKey = `avatar:${user.id}`;
     const cached = sessionStorage.getItem(cacheKey);
-    if (cached) { setAvatarUrl(cached); return; }
     let cancelled = false;
+    setProfileLoading(true);
+    setProfileError(false);
     (async () => {
-      const { data } = await supabase.from("profiles").select("avatar_url").eq("id", user.id).maybeSingle();
+      const { data, error } = await supabase.from("profiles").select("avatar_url").eq("id", user.id).maybeSingle();
+      if (cancelled) return;
+      if (error) {
+        setProfileError(true);
+        setProfileLoading(false);
+        return;
+      }
+      setProfileLoading(false);
+      if (cached) { setAvatarUrl(cached); return; }
       const path = (data as { avatar_url?: string | null } | null)?.avatar_url;
       if (!path) return;
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 3600);
@@ -36,7 +49,7 @@ export default function ResidentProfile() {
       }
     })();
     return () => { cancelled = true; };
-  }, [user?.id]);
+  }, [user?.id, reloadTick]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -97,6 +110,41 @@ export default function ResidentProfile() {
     { label: "התראות", icon: Bell, onClick: () => navigate("/resident/notifications") },
     { label: "מדיניות פרטיות", icon: Shield, onClick: () => navigate("/resident/privacy") },
   ];
+
+  const shell = (content: React.ReactNode) => (
+    <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>
+      <div
+        className="mx-auto w-full max-w-[var(--app-max-w)] pt-[env(safe-area-inset-top)] flex items-center justify-center"
+        style={{ minHeight: "60dvh", paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
+      >
+        {content}
+      </div>
+      <BottomNav role="resident" />
+    </div>
+  );
+
+  if (profileError) {
+    return shell(
+      <ErrorState
+        title="לא הצלחנו לטעון את הפרופיל"
+        description="ייתכן שהחיבור לרשת נקטע. אפשר לנסות שוב."
+        onRetry={() => setReloadTick((n) => n + 1)}
+      />,
+    );
+  }
+
+  if (profileLoading) {
+    return shell(<LoadingState label="טוען את הפרופיל..." />);
+  }
+
+  if (!user) {
+    return shell(
+      <EmptyState
+        title="אין פרופיל להצגה"
+        description="התחברו כדי לצפות בפרטים האישיים שלכם."
+      />,
+    );
+  }
 
   return (
     <div dir="rtl" className="min-h-screen min-h-[100dvh] w-full" style={{ background: "#F7F5F0" }}>

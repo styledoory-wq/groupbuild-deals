@@ -841,7 +841,7 @@ export default function OfferEditor() {
               <Section title="מחיר">
                 <Field label="מחיר (₪)" required
                   error={shouldShowError("unitPrice") ? "יש להזין מחיר" : undefined}>
-                  <Input type="number" inputMode="numeric" min={1} value={unitPrice}
+                  <Input type="number" inputMode="decimal" min={1} value={unitPrice}
                     onChange={(e) => setUnitPrice(e.target.value)}
                     onBlur={() => markTouched("unitPrice")}
                     className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("unitPrice") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
@@ -863,7 +863,7 @@ export default function OfferEditor() {
                       label={offerType === "percentage" ? "מחיר מקורי (לפני הנחה, ₪)" : "מחיר רגיל (לפני הנחה, ₪)"}
                       required
                       error={shouldShowError("unitPrice") ? "יש להזין מחיר בסיס" : undefined}>
-                      <Input type="number" inputMode="numeric" min={1} value={unitPrice}
+                      <Input type="number" inputMode="decimal" min={1} value={unitPrice}
                         onChange={(e) => setUnitPrice(e.target.value)}
                         onBlur={() => markTouched("unitPrice")}
                         className={`h-11 rounded-xl shadow-none ring-1 ${shouldShowError("unitPrice") ? "ring-destructive/50" : "ring-black/[0.06]"}`}
@@ -1048,7 +1048,7 @@ export default function OfferEditor() {
                         <div className="space-y-3 mt-3">
                           <Field label="סכום לתצוגה (₪) — דמי השתתפות נקבעים אוטומטית לפי מחיר העסקה" required
                             error={shouldShowError("depositAmount") ? "הזן סכום" : undefined}>
-                            <Input type="number" inputMode="numeric" min={1} step="0.01"
+                            <Input type="number" inputMode="decimal" min={1} step="0.01"
                               value={depositAmount}
                               onChange={(e) => setDepositAmount(e.target.value)}
                               onBlur={() => markTouched("depositAmount")}
@@ -1274,7 +1274,7 @@ function TierCard({
           ) : (
             <label className="block">
               <span className="text-[10.5px] font-semibold text-[#6B7280] mb-1 block">מחיר אחרי הנחה (₪)</span>
-              <Input type="number" inputMode="numeric" value={tier.discounted_price}
+              <Input type="number" inputMode="decimal" value={tier.discounted_price}
                 onChange={(e) => onChange({ discounted_price: e.target.value })}
                 className="h-9 rounded-lg text-[13px] shadow-none ring-1 ring-black/[0.06] bg-white" placeholder="הזן מחיר" />
             </label>
