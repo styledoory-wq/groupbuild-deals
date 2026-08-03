@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { ErrorState } from "@/components/ds";
 import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
