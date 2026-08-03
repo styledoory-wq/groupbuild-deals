@@ -51,6 +51,15 @@ export default {
         dvh: "100dvh",
         screen: "100dvh",
       },
+      // iOS-safe viewport units: `h-screen` / `max-h-screen` resolve to dynamic
+      // viewport height so Safari's collapsing toolbar never clips content.
+      height: {
+        screen: "100dvh",
+        dvh: "100dvh",
+      },
+      maxHeight: {
+        screen: "100dvh",
+      },
 
       minWidth: {
         touch: "44px",
