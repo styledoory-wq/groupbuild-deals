@@ -48,6 +48,12 @@ import {
   type ResolvedParticipationFee,
 } from "@/lib/platformFees";
 import { JOIN_BLOCKED_MESSAGE } from "@/lib/participationPricing";
+import {
+  fetchParticipationFeeMode,
+  joinDealFree,
+  MAINTENANCE_JOIN_MESSAGE,
+  type ParticipationFeeMode,
+} from "@/lib/participationMode";
 
 
 
