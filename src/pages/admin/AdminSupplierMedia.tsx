@@ -40,7 +40,11 @@ export default function AdminSupplierMedia() {
     if (!supplierId) return;
     (async () => {
       const [{ data: s }, { data: g }] = await Promise.all([
-        supabase.from("suppliers").select("*").eq("id", supplierId).maybeSingle(),
+        supabase
+          .from("suppliers")
+          .select("business_name,short_description,description,logo_url,website_url,whatsapp_url,instagram_url,facebook_url")
+          .eq("id", supplierId)
+          .maybeSingle(),
         supabase.from("supplier_gallery").select("id,image_url,caption,display_order").eq("supplier_id", supplierId).order("display_order"),
       ]);
       if (s) {
