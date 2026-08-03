@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CreditCard, Wallet, Percent, Save } from "lucide-react";
+import { CreditCard, Wallet, Percent, Save, Users, AlertTriangle } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { LoadingState } from "@/components/ds";
@@ -7,9 +7,25 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  fetchParticipationFeeMode,
+  setParticipationFeeMode,
+  PARTICIPATION_MODE_LABEL,
+  PARTICIPATION_MODE_DESCRIPTION,
+  type ParticipationFeeMode,
+} from "@/lib/participationMode";
 
 type Provider = "cardcom" | "stripe";
 type FeeAbsorber = "resident" | "supplier" | "groupbuild";
