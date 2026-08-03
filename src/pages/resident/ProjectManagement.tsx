@@ -8,6 +8,7 @@ import {
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { useApp } from "@/store/AppStore";
+import { ErrorState, LoadingState } from "@/components/ds";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 import { useFeatureFlag } from "@/lib/featureFlags";
@@ -702,6 +703,32 @@ export default function ProjectManagement() {
 
   // Feature flag — AI cost estimate is admin-controlled and hidden by default.
   const aiEstimateEnabled = useFeatureFlag("aiCostEstimate");
+
+  if (projectLoading || projectError) {
+    return (
+      <div
+        dir="rtl"
+        className="min-h-screen min-h-[100dvh] w-full"
+        style={{ background: "#FBF8F3", fontFamily: EPILOGUE, color: "#2D2D2D" }}
+      >
+        <div
+          className="mx-auto w-full max-w-[var(--app-max-w)] px-5 pt-[calc(env(safe-area-inset-top)+18px)] flex items-center justify-center"
+          style={{ minHeight: "60dvh", paddingBottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 24px)" }}
+        >
+          {projectError ? (
+            <ErrorState
+              title="לא הצלחנו לטעון את הפרויקט"
+              description="ייתכן שהחיבור לרשת נקטע. אפשר לנסות שוב."
+              onRetry={retryProjectLoad}
+            />
+          ) : (
+            <LoadingState label="טוען את הפרויקט..." />
+          )}
+        </div>
+        <BottomNav role="resident" />
+      </div>
+    );
+  }
 
   return (
     <div
