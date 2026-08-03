@@ -3,7 +3,7 @@
     "details": [
       {
         "appIDs": [
-          "TEAMID.il.co.groupbuild.residents"
+          "2N86W3KYFJ.il.co.groupbuild.residents"
         ],
         "components": [
           {
@@ -16,7 +16,7 @@
       },
       {
         "appIDs": [
-          "TEAMID.il.co.groupbuild.suppliers"
+          "2N86W3KYFJ.il.co.groupbuild.suppliers"
         ],
         "components": [
           {
@@ -28,8 +28,8 @@
   },
   "webcredentials": {
     "apps": [
-      "TEAMID.il.co.groupbuild.residents",
-      "TEAMID.il.co.groupbuild.suppliers"
+      "2N86W3KYFJ.il.co.groupbuild.residents",
+      "2N86W3KYFJ.il.co.groupbuild.suppliers"
     ]
   }
 }

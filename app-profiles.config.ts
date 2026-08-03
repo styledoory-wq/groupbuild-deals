@@ -131,6 +131,7 @@ export const APP_PROFILES: AppProfile[] = [
       fcmConfigPath: "resources/residents/google-services.json",
     },
     apple: {
+      teamId: "2N86W3KYFJ",
       entitlementsPath: "ios-residents/App/App/App.entitlements",
       apsEnvironment: "development",
     },
@@ -200,6 +201,7 @@ export const APP_PROFILES: AppProfile[] = [
       fcmConfigPath: "resources/suppliers/google-services.json",
     },
     apple: {
+      teamId: "2N86W3KYFJ",
       entitlementsPath: "ios-suppliers/App/App/App.entitlements",
       apsEnvironment: "development",
     },
