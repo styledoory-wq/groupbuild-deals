@@ -485,7 +485,7 @@ export default function DealDetail() {
     return () => {
       cancelled = true;
     };
-  }, [deal]);
+  }, [deal, feeMode]);
 
 
 
