@@ -58,6 +58,46 @@ export default function AdminPaymentSettings() {
   const [commission, setCommission] = useState<number>(0);
   const [feeAbsorber, setFeeAbsorber] = useState<FeeAbsorber>("groupbuild");
   const [loading, setLoading] = useState(true);
+
+  // Participation fee mode (system-wide join behaviour)
+  const [mode, setMode] = useState<ParticipationFeeMode | null>(null);
+  const [modeError, setModeError] = useState(false);
+  const [pendingMode, setPendingMode] = useState<ParticipationFeeMode | null>(null);
+  const [modeReason, setModeReason] = useState("");
+  const [savingMode, setSavingMode] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setMode(await fetchParticipationFeeMode());
+        setModeError(false);
+      } catch {
+        setMode(null);
+        setModeError(true);
+      }
+    })();
+  }, []);
+
+  const confirmModeChange = async () => {
+    if (!pendingMode) return;
+    if (modeReason.trim().length < 5) {
+      toast.error("יש לפרט סיבה לשינוי (לפחות 5 תווים)");
+      return;
+    }
+    setSavingMode(true);
+    try {
+      await setParticipationFeeMode(pendingMode, modeReason.trim());
+      setMode(pendingMode);
+      setModeError(false);
+      setPendingMode(null);
+      setModeReason("");
+      toast.success("מצב ההצטרפות עודכן");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "עדכון המצב נכשל");
+    } finally {
+      setSavingMode(false);
+    }
+  };
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
