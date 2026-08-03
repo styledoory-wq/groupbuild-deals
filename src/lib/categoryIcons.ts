@@ -66,7 +66,35 @@ const STAGE_ICONS: Record<string, LucideIcon> = {
   build: Hammer,
   plants: Trees,
   water: Droplets,
+  /* --- project-management stage keys (single source of truth) --- */
+  structure: Building2,
+  qa: ClipboardList,
+  done: KeyRound,
+  "reno-plan": Ruler,
+  "reno-systems": Zap,
+  "reno-kitchen-bath": Droplets,
+  "reno-floor-paint": PaintRoller,
+  "reno-handoff": KeyRound,
+  "ext-plan": Ruler,
+  "ext-structure": Building2,
+  "ext-envelope": Layers,
+  "ext-systems": Zap,
+  "ext-handoff": KeyRound,
+  "mamad-plan": Ruler,
+  "mamad-structure": Building2,
+  "mamad-door": DoorOpen,
+  "mamad-finish": ShieldCheck,
+  "com-needs": ClipboardList,
+  "com-quotes": ClipboardList,
+  "com-select": ClipboardList,
+  "com-exec": Wrench,
+  "com-handoff": KeyRound,
+  "ps-request": ClipboardList,
+  "ps-quotes": ClipboardList,
+  "ps-exec": Wrench,
+  "ps-done": KeyRound,
 };
+
 
 /** Exact category id → icon */
 const CATEGORY_ID_ICONS: Record<string, LucideIcon> = {
