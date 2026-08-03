@@ -72,6 +72,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
   const { categoryId: routeCategoryId } = useParams();
   const categoryId = initialCategoryId ?? routeCategoryId;
   const navigate = useNavigate();
+  const smartBack = useSmartBack();
   const { categories } = useApp();
   const { regions, cities } = useRegions();
 

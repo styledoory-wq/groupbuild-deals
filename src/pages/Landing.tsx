@@ -12,6 +12,7 @@ import { Seo } from "@/components/seo/Seo";
  */
 export default function Landing() {
   const navigate = useNavigate();
+  const smartBack = useSmartBack();
 
   return (
     <div dir="rtl" className="min-h-[100dvh] w-full" style={{ backgroundColor: "#F7F5F0" }}>
