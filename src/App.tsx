@@ -124,18 +124,21 @@ const App = () => (
             <PreloadImportantRoutes />
             <TermsAcceptanceGate>
               <GuestGateProvider>
-                <RouteTransition>
-                  <Suspense fallback={<SuspenseFallback />}>
-                    <Routes>
-                      {publicRoutes}
-                      {includesResidentRoutes && residentRoutes}
-                      {includesSupplierRoutes && supplierRoutes}
-                      {includesAdminRoutes && adminRoutes}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </RouteTransition>
+                <ConfirmDialogProvider>
+                  <RouteTransition>
+                    <Suspense fallback={<SuspenseFallback />}>
+                      <Routes>
+                        {publicRoutes}
+                        {includesResidentRoutes && residentRoutes}
+                        {includesSupplierRoutes && supplierRoutes}
+                        {includesAdminRoutes && adminRoutes}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </RouteTransition>
+                </ConfirmDialogProvider>
               </GuestGateProvider>
+
             </TermsAcceptanceGate>
           </BrowserRouter>
         </HelmetProvider>
