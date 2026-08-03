@@ -4,10 +4,10 @@ import { toast } from "sonner";
 import { Users, Plus, Copy, Check, X, Trash2, MessageCircle, Mail, Crown, Eye, Shield } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import {
-import { useConfirm } from "@/components/ui/confirm-dialog";
   useProjectMembers, createInvitation, inviteLinkFor, removeMember,
   useMyProjectRole, type MemberRole,
 } from "@/lib/projectClient";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 const BRAND = "#0E6B5A";
 

@@ -27,7 +27,6 @@ import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { computeCompleteness } from "@/lib/supplierCompleteness";
 import {
-import { useConfirm } from "@/components/ui/confirm-dialog";
   clearWhatsappSent,
   formatSentAt,
   getWhatsappSentAt,
@@ -36,6 +35,7 @@ import { useConfirm } from "@/components/ui/confirm-dialog";
   supplierCompletionReminderMessage,
   supplierWelcomeMessage,
 } from "@/lib/whatsappMessages";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 interface EditForm {
   business_name: string;
