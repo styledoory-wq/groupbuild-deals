@@ -306,7 +306,7 @@ function FeeRuleCard({
           type="button"
           onClick={onToggle}
           disabled={busy}
-          className="flex items-center gap-1 text-[12px] font-bold text-[#0E6B5A] disabled:opacity-50"
+          className="tap-target flex items-center gap-1 text-[12px] font-bold text-[#0E6B5A] disabled:opacity-50"
         >
           {rule.is_active ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
           {rule.is_active ? "פעיל" : "כבוי"}

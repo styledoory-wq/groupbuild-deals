@@ -79,7 +79,7 @@ function ProjectTypeCircle({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="flex min-w-0 flex-1 flex-col items-center gap-2.5 active:scale-[0.97] transition-transform"
+      className="tap-target flex min-w-0 flex-1 flex-col items-center gap-2.5 active:scale-[0.97] transition-transform"
     >
       <span className="relative mx-auto mb-3.5 block h-[102px] w-[102px]">
         <span

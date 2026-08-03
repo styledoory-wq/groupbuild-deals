@@ -166,7 +166,7 @@ function EditorSheet({
       <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl p-5 space-y-3 max-h-[90dvh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h2 className="font-extrabold text-[16px]">{value.id ? "עריכת תבנית" : "תבנית חדשה"}</h2>
-          <button onClick={onClose}><X className="h-5 w-5" /></button>
+          <button className="tap-target" onClick={onClose}><X className="h-5 w-5" /></button>
         </div>
         <label className="block text-[12px] font-bold">קהל יעד</label>
         <select
@@ -322,7 +322,7 @@ function SendSheet({ template, onClose }: { template: Template; onClose: () => v
             <div className="text-[11px] font-extrabold text-[#0E6B5A]">{AUDIENCE_LABEL[template.audience]}</div>
             <h2 className="font-extrabold text-[16px]">{template.title}</h2>
           </div>
-          <button onClick={onClose}><X className="h-5 w-5" /></button>
+          <button className="tap-target" onClick={onClose}><X className="h-5 w-5" /></button>
         </div>
 
         <div className="bg-[#F8FAFC] border border-[#ECEEF2] rounded-xl p-3 text-[13px] text-[#334155] whitespace-pre-wrap">
@@ -340,7 +340,7 @@ function SendSheet({ template, onClose }: { template: Template; onClose: () => v
         </div>
 
         <div className="flex items-center justify-between text-[12px]">
-          <button onClick={toggleAll} className="text-[#0E6B5A] font-bold">
+          <button onClick={toggleAll} className="tap-target text-[#0E6B5A] font-bold">
             {selectedList.length === filtered.length && filtered.length ? "בטל הכל" : "בחר הכל"}
           </button>
           <span className="text-[#6B7280]">נבחרו {selectedList.length} מתוך {filtered.length}</span>

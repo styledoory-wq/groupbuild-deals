@@ -101,7 +101,7 @@ export default function AdminSupport() {
               type="button"
               onClick={save}
               disabled={saving || loading}
-              className="h-10 px-5 rounded-[10px] bg-[#0E6B5A] text-white text-[13px] font-extrabold disabled:opacity-50"
+              className="tap-target h-10 px-5 rounded-[10px] bg-[#0E6B5A] text-white text-[13px] font-extrabold disabled:opacity-50"
             >
               {saving ? "שומר..." : "שמור"}
             </button>

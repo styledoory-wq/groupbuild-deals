@@ -88,7 +88,7 @@ export function PreviewModeBanner() {
 
         <button
           onClick={toggleEdit}
-          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold active:scale-95 transition-transform ${
+          className={`tap-target flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold active:scale-95 transition-transform ${
             editMode ? "bg-white text-[#1F2937] border border-[#1F2937]" : "bg-[#0E6B5A] text-white"
           }`}
         >

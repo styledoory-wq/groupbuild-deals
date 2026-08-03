@@ -175,7 +175,7 @@ export function SupplierCatalogsManager({ supplierId }: Props) {
         <div className="rounded-xl border border-gold/30 bg-card p-3 space-y-2">
           <div className="flex items-center justify-between">
             <div className="text-xs font-bold">קטלוג חדש</div>
-            <button type="button" onClick={resetAdd} className="text-muted-foreground" aria-label="סגירה">
+            <button type="button" onClick={resetAdd} className="tap-target text-muted-foreground" aria-label="סגירה">
               <X className="h-4 w-4" />
             </button>
           </div>

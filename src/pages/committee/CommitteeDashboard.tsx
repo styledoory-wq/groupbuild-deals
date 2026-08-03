@@ -291,7 +291,7 @@ function ActionTile({ icon: Icon, title, desc, onClick }: { icon: typeof Search;
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-2xl border border-[#EDEAE3] p-4 text-right hover:bg-[#FBFAF6] active:scale-[0.99] transition"
+      className="tap-target bg-white rounded-2xl border border-[#EDEAE3] p-4 text-right hover:bg-[#FBFAF6] active:scale-[0.99] transition"
     >
       <div className="w-9 h-9 rounded-xl bg-[#E8F1EE] flex items-center justify-center mb-2">
         <Icon className="w-4 h-4 text-[#0E6B5A]" />
@@ -370,7 +370,7 @@ ${url}`,
             <h2 className="text-base font-semibold text-[#1F1F1F]">הזמנת דיירים בוואטסאפ</h2>
             <p className="text-[11px] text-[#6B6B6B] mt-0.5">בחר הודעה מוכנה — שלח או העתק</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-[#F0EEE7]" aria-label="סגור">
+          <button onClick={onClose} className="tap-target p-2 rounded-full hover:bg-[#F0EEE7]" aria-label="סגור">
             <X className="w-4 h-4 text-[#1F1F1F]" />
           </button>
         </div>

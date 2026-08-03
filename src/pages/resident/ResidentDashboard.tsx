@@ -577,7 +577,7 @@ function MyProjectCard({ onOpen }: { onOpen: () => void }) {
           </div>
         )}
 
-        <button onClick={onOpen} className="w-full text-right active:scale-[0.99] transition">
+        <button onClick={onOpen} className="tap-target w-full text-right active:scale-[0.99] transition">
           <div className="mt-3 grid grid-cols-3 gap-2">
             <MiniInfo label="יעד" value={target} />
             <MiniInfo
@@ -647,7 +647,7 @@ function QuickAction({ icon: Icon, label, onClick }: { icon: typeof Calculator; 
   return (
     <button
       onClick={onClick}
-      className="bg-white border border-[#E5E5EA] rounded-3xl p-4 flex flex-col items-center gap-2 shadow-sm active:scale-95 transition"
+      className="tap-target bg-white border border-[#E5E5EA] rounded-3xl p-4 flex flex-col items-center gap-2 shadow-sm active:scale-95 transition"
     >
       <div className="h-10 w-10 rounded-2xl bg-[#F7F5F0] flex items-center justify-center">
         <Icon className="h-[18px] w-[18px] text-[#1C1C1E]" strokeWidth={2} />

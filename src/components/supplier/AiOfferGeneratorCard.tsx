@@ -134,7 +134,7 @@ export function AiOfferGeneratorCard({ categories, onDraftReady, disabled }: Pro
           type="button"
           onClick={generate}
           disabled={loading || disabled}
-          className="h-9 px-4 rounded-lg bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[12.5px] font-semibold inline-flex items-center gap-1.5 disabled:opacity-50 transition-colors"
+          className="tap-target h-9 px-4 rounded-lg bg-[#0E6B5A] hover:bg-[#0A5446] text-white text-[12.5px] font-semibold inline-flex items-center gap-1.5 disabled:opacity-50 transition-colors"
         >
           {loading ? (
             <><Loader2 className="h-3.5 w-3.5 animate-spin" /> יוצר…</>

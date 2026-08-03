@@ -103,7 +103,7 @@ export function ShareBusinessSheet({ open, onOpenChange, supplierId, businessNam
           <button
             type="button"
             onClick={copy}
-            className="flex flex-col items-center gap-1.5 active:scale-[0.95] transition-transform"
+            className="tap-target flex flex-col items-center gap-1.5 active:scale-[0.95] transition-transform"
           >
             <span className="h-12 w-12 rounded-full flex items-center justify-center bg-[#F4F6FA] text-[#1F2937] shadow-[0_3px_10px_-3px_rgba(10,31,61,0.15)]">
               {copied ? <Check className="h-5 w-5 text-[#0E6B5A]" /> : <Copy className="h-5 w-5" />}

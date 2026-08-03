@@ -1837,7 +1837,7 @@ function AddExpenseSheet({
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:scale-95"
+            className="tap-target w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:scale-95"
             aria-label="סגירה"
           >
             <X className="h-4 w-4 text-gray-600" />
@@ -1946,7 +1946,7 @@ function ModalShell({
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:scale-95"
+            className="tap-target w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:scale-95"
             aria-label="סגירה"
           >
             <X className="h-4 w-4 text-gray-600" />

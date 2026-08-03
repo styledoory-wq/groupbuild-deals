@@ -493,7 +493,7 @@ function SupplierTile({
           />
         </div>
 
-        <button onClick={onOpen} className="w-full text-center p-4 pt-5 flex flex-col items-center gap-2">
+        <button onClick={onOpen} className="tap-target w-full text-center p-4 pt-5 flex flex-col items-center gap-2">
           <SupplierLogo name={row.business_name} logoUrl={row.logo_url} size="lg" />
           <h3 className="mt-1 font-bold text-[13.5px] text-[#0F172A] leading-tight line-clamp-2 min-h-[2.2em] px-1">
             {row.business_name}
@@ -592,7 +592,7 @@ function SupplierRow({
         )}
 
         <div className="p-3.5 flex items-center gap-3">
-          <button onClick={onOpen} className="shrink-0" aria-label={`פתח ${row.business_name}`}>
+          <button onClick={onOpen} className="tap-target shrink-0" aria-label={`פתח ${row.business_name}`}>
             <SupplierLogo name={row.business_name} logoUrl={row.logo_url} size="md" />
           </button>
 
@@ -635,14 +635,14 @@ function SupplierRow({
               <button
                 onClick={onApprove}
                 aria-label="אישור"
-                className="h-9 w-9 rounded-xl bg-[#0E6B5A] text-white inline-flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(14,107,90,0.4)] active:scale-95 transition-transform"
+                className="tap-target h-9 w-9 rounded-xl bg-[#0E6B5A] text-white inline-flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(14,107,90,0.4)] active:scale-95 transition-transform"
               >
                 <Check className="h-4 w-4" />
               </button>
               <button
                 onClick={onReject}
                 aria-label="דחייה"
-                className="h-9 w-9 rounded-xl bg-white border border-[#EEF0F4] text-[#6B7280] inline-flex items-center justify-center hover:text-red-600 hover:border-red-200 transition"
+                className="tap-target h-9 w-9 rounded-xl bg-white border border-[#EEF0F4] text-[#6B7280] inline-flex items-center justify-center hover:text-red-600 hover:border-red-200 transition"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -687,7 +687,7 @@ function RowMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="h-8 w-8 shrink-0 rounded-lg text-[#8B94A3] hover:bg-[#F4F6FA] hover:text-[#0F172A] transition inline-flex items-center justify-center"
+          className="tap-target h-8 w-8 shrink-0 rounded-lg text-[#8B94A3] hover:bg-[#F4F6FA] hover:text-[#0F172A] transition inline-flex items-center justify-center"
           aria-label="פעולות"
         >
           <MoreHorizontal className="h-4 w-4" />

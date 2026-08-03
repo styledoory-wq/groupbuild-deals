@@ -154,7 +154,7 @@ export default function SupplierAccount() {
               const Icon = r.icon;
               const onClick = r.onClick ?? (r.to ? () => navigate(r.to!) : undefined);
               return (
-                <button
+                <button className="tap-target"
                   key={r.label}
                   type="button"
                   onClick={onClick}
