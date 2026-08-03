@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Share2, Pencil, Calendar, Clock, User, Check, TrendingUp,
   Star, ChevronLeft, Sparkles, Zap, X, Plus, Trash2, RefreshCw, ChevronDown, MapPin,
-  Building2, Building, Hammer, PlusSquare, ShieldCheck, Wrench, PlusSquare as PlusSquareIcon,
+  Building2, Building, Hammer, PlusSquare, ShieldCheck, Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
