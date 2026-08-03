@@ -274,7 +274,31 @@ export async function refundParticipationDeposit(
     const data = (await res.json().catch(() => null)) as Record<string, unknown> | null;
     code = Number(data?.ResponseCode ?? -1);
     description = typeof data?.Description === "string" ? data.Description : null;
-    refundId = data?.TranzactionId != null ? String(data.TranzactionId) : null;
+    // Cardcom is inconsistent about the refund identifier field name across
+    // terminals/versions, so probe every documented alias. Only field NAMES are
+    // logged (never values) so nothing sensitive reaches the logs.
+    const refundIdKeys = [
+      "TranzactionId",
+      "TransactionId",
+      "NewTranzactionId",
+      "NewTransactionId",
+      "InternalDealNumber",
+      "RefundTranzactionId",
+      "RefundTransactionId",
+    ];
+    for (const k of refundIdKeys) {
+      const v = data?.[k];
+      if (v != null && String(v).length > 0 && String(v) !== "0") {
+        refundId = String(v);
+        break;
+      }
+    }
+    if (!refundId && data) {
+      console.log("[afterPayment] refund response had no known refund id field", {
+        deposit: dep.id,
+        keys: Object.keys(data),
+      });
+    }
     if (!res.ok || code !== 0) {
       return await markRefundFailed(admin, dep, opts, {
         code: String(code),
@@ -282,6 +306,7 @@ export async function refundParticipationDeposit(
         environment,
       });
     }
+
   } catch (e) {
     return await markRefundFailed(admin, dep, opts, {
       code: "network_error",
@@ -327,9 +352,17 @@ export async function refundParticipationDeposit(
       reason: opts.reason,
       trigger: opts.trigger,
       provider_refund_id: refundId,
+      // When Cardcom returns no dedicated refund identifier, the original
+      // transaction id + refunded_at timestamp are the reconciliation key.
+      refund_reference: refundId ?? dep.provider_transaction_id,
+      refund_reference_source: refundId ? "cardcom_refund_id" : "original_transaction_id",
       transaction_id: dep.provider_transaction_id,
+      refunded_at: nowIso,
+      response_code: code,
+      description,
     },
   });
+
 
   await notifyResidentRefund(admin, dep, { amount, reason: opts.reason, refundedAt: nowIso });
 
