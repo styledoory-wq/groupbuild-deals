@@ -9,7 +9,7 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>העלאת תמונות ומסמכים לפרופיל, לפרויקטים ולהצעות מחיר</string>
 	<key>NSCameraUsageDescription</key>
-	<string>צילום מסמכים והעלאת תמונות פרופיל</string>
+	<string>צילום תמונת פרופיל ומסמכים ישירות מהאפליקציה</string>
     <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
