@@ -19,7 +19,13 @@
     "app:add-android": "npx tsx scripts/build-app.ts --add-android",
     "app:aasa": "npx tsx scripts/generate-aasa.ts",
     "app:store-metadata": "npx tsx scripts/generate-store-metadata.ts",
-    "app:env": "npx tsx scripts/generate-env.ts"
+    "app:env": "npx tsx scripts/generate-env.ts",
+    "app:residents:build": "APP_PROFILE=residents npx tsx scripts/build-app.ts",
+    "app:residents:sync": "APP_PROFILE=residents npx tsx scripts/build-app.ts --sync",
+    "app:residents:open": "APP_PROFILE=residents npx tsx scripts/build-app.ts --open",
+    "app:suppliers:build": "APP_PROFILE=suppliers npx tsx scripts/build-app.ts",
+    "app:suppliers:sync": "APP_PROFILE=suppliers npx tsx scripts/build-app.ts --sync",
+    "app:suppliers:open": "APP_PROFILE=suppliers npx tsx scripts/build-app.ts --open"
   },
   "dependencies": {
     "@capacitor-mlkit/barcode-scanning": "^8.1.0",
