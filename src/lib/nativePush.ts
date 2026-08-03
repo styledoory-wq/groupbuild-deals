@@ -1,5 +1,6 @@
 // Native push (iOS/Android) helper for manual permission flow from the UI.
 import { supabase } from "@/integrations/supabase/client";
+import { APP_MODE } from "@/config/appMode";
 
 export type NativePushStatus =
   | "unsupported" // not a native platform
@@ -57,6 +58,8 @@ export async function enableNativePush(userId: string): Promise<EnableNativePush
           user_id: userId,
           token: tok.value,
           platform,
+          // Which app this token belongs to — decides the APNs topic server-side.
+          app_profile: APP_MODE,
           last_active_at: new Date().toISOString(),
         },
         { onConflict: "user_id,token" }
