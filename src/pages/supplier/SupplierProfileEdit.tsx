@@ -376,7 +376,7 @@ export default function SupplierProfileEdit() {
           {activeSection === "details" && (
             <Section title="פרטי העסק" subtitle="שם, קשר ותיאור שיופיעו בכרטיס">
               <Field label="שם העסק">
-                <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} required className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
+                <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} maxLength={80} autoComplete="organization" enterKeyHint="next" required className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
               </Field>
 
               <div className="space-y-1.5">
@@ -413,13 +413,13 @@ export default function SupplierProfileEdit() {
 
               <div className="grid grid-cols-1 gap-4">
                 <Field label="שם איש קשר">
-                  <Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={60} className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
+                  <Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={60} autoComplete="name" enterKeyHint="next" className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
                 </Field>
                 <Field label="טלפון">
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} dir="ltr" className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
+                  <Input type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="next" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} dir="ltr" className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
                 </Field>
                 <Field label="אימייל">
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
+                  <Input type="email" inputMode="email" autoComplete="email" enterKeyHint="next" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} dir="ltr" required className="h-12 rounded-2xl bg-white border-[#D5DED9]" />
                   {email.trim().toLowerCase() !== originalEmail.toLowerCase() && (
                     <p className="text-[12px] text-[#0A5446] mt-1">בלחיצה על שמירה יישלח מייל אימות לכתובת החדשה</p>
                   )}
@@ -478,10 +478,10 @@ export default function SupplierProfileEdit() {
 
               <div className="space-y-2 pt-3 border-t border-[#F1F5F9]">
                 <Label className="text-[12px] font-semibold text-[#334155]">קישורים</Label>
-                <Input dir="ltr" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="אתר — https://..." className="h-10 rounded-xl text-sm" maxLength={500} />
-                <Input dir="ltr" value={whatsappUrl} onChange={(e) => setWhatsappUrl(e.target.value)} placeholder="WhatsApp — https://wa.me/..." className="h-10 rounded-xl text-sm" maxLength={500} />
-                <Input dir="ltr" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="Instagram" className="h-10 rounded-xl text-sm" maxLength={500} />
-                <Input dir="ltr" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="Facebook" className="h-10 rounded-xl text-sm" maxLength={500} />
+                <Input type="url" inputMode="url" autoComplete="url" dir="ltr" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="אתר — https://..." className="h-10 rounded-xl text-sm" maxLength={500} />
+                <Input type="url" inputMode="url" dir="ltr" value={whatsappUrl} onChange={(e) => setWhatsappUrl(e.target.value)} placeholder="WhatsApp — https://wa.me/..." className="h-10 rounded-xl text-sm" maxLength={500} />
+                <Input type="url" inputMode="url" dir="ltr" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="Instagram" className="h-10 rounded-xl text-sm" maxLength={500} />
+                <Input type="url" inputMode="url" dir="ltr" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)} placeholder="Facebook" className="h-10 rounded-xl text-sm" maxLength={500} />
               </div>
 
               <div className="space-y-2 pt-3 border-t border-[#F1F5F9]">
@@ -526,24 +526,24 @@ export default function SupplierProfileEdit() {
           {activeSection === "payment" && (
             <Section title="פרטי תשלום" subtitle="יוצגו לדיירים להעברת תשלום">
               <Field label="טלפון לביט">
-                <Input dir="ltr" value={bitPhone} onChange={(e) => setBitPhone(e.target.value)} maxLength={20} placeholder="050-0000000" className="h-11 rounded-xl" />
+                <Input type="tel" inputMode="tel" autoComplete="tel" dir="ltr" value={bitPhone} onChange={(e) => setBitPhone(e.target.value)} maxLength={20} placeholder="050-0000000" className="h-11 rounded-xl" />
               </Field>
 
               <div className="pt-1 space-y-3">
                 <p className="text-[12px] font-semibold text-[#334155]">חשבון בנק</p>
                 <Field label="שם בעל החשבון">
-                  <Input value={bankAccountHolder} onChange={(e) => setBankAccountHolder(e.target.value)} maxLength={80} className="h-11 rounded-xl" />
+                  <Input value={bankAccountHolder} onChange={(e) => setBankAccountHolder(e.target.value)} maxLength={80} autoComplete="name" className="h-11 rounded-xl" />
                 </Field>
                 <div className="grid grid-cols-2 gap-2">
                   <Field label="בנק">
                     <Input value={bankName} onChange={(e) => setBankName(e.target.value)} maxLength={40} className="h-11 rounded-xl" />
                   </Field>
                   <Field label="סניף">
-                    <Input dir="ltr" value={bankBranch} onChange={(e) => setBankBranch(e.target.value)} maxLength={10} className="h-11 rounded-xl" />
+                    <Input inputMode="numeric" dir="ltr" value={bankBranch} onChange={(e) => setBankBranch(e.target.value)} maxLength={10} className="h-11 rounded-xl" />
                   </Field>
                 </div>
                 <Field label="מספר חשבון">
-                  <Input dir="ltr" value={bankAccountNumber} onChange={(e) => setBankAccountNumber(e.target.value)} maxLength={20} className="h-11 rounded-xl" />
+                  <Input inputMode="numeric" dir="ltr" value={bankAccountNumber} onChange={(e) => setBankAccountNumber(e.target.value)} maxLength={20} className="h-11 rounded-xl" />
                 </Field>
               </div>
 
