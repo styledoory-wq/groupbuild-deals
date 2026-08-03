@@ -245,6 +245,36 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
     }
   };
 
+  const handleAppleSignIn = async () => {
+    setLoading(true);
+    try {
+      if (lockedRole === "supplier" || lockedRole === "resident") {
+        try { sessionStorage.setItem("gb_intent", lockedRole); } catch { /* ignore */ }
+      }
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData.session) await supabase.auth.signOut();
+      } catch { /* ignore */ }
+      // Apple returns name/email only on first authorization; scopes must be requested explicitly.
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "apple",
+        options: {
+          redirectTo: window.location.origin,
+          scopes: "name email",
+        },
+      });
+      if (error) {
+        toast.error(translateAuthError(error.message ?? "ההתחברות עם Apple נכשלה"));
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? translateAuthError(err.message) : "ההתחברות עם Apple נכשלה");
+      setLoading(false);
+    }
+  };
+
+
   const getSiteOrigin = () => {
     const host = window.location.hostname;
     // Always send confirmation links to the production custom domain,
