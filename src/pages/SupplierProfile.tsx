@@ -287,7 +287,7 @@ export default function SupplierProfile() {
   const handleInterest = () => {
     if (!supplier) return;
     void trackSupplierEvent(supplier.id, "open_project");
-    requireAuth("פתיחת פרויקט וקבלת הצעות דורשת חשבון קצר", submitInterest);
+    requireAuth("פתיחת פרויקט וקבלת הצעות דורשת חשבון קצר", submitInterest, { resumeKey: "supplier-interest" });
   };
 
   const handleShare = () => {
