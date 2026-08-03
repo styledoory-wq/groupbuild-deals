@@ -32,7 +32,7 @@ After each command, the sync scripts write:
 - `App.entitlements` — Associated Domains + `aps-environment=production`
 - Icon/splash sources copied into the profile's `resources/` (see step 2)
 
-The pre-existing `ios/` folder is not touched.
+The legacy `ios/` folder was removed; only `ios-residents/` and `ios-suppliers/` exist.
 
 ---
 
