@@ -18,7 +18,7 @@ import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricin
 import { getFriendlyLoadError, withTimeout } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
 import { trackSupplierEvent } from "@/lib/analytics";
-import { useGuestGate } from "@/hooks/useGuestGate";
+import { useGuestGate, useResumeAction } from "@/hooks/useGuestGate";
 import { ShareBusinessSheet } from "@/components/public/ShareBusinessSheet";
 import { iconForCategory } from "@/lib/categoryIcons";
 
@@ -289,6 +289,10 @@ export default function SupplierProfile() {
     void trackSupplierEvent(supplier.id, "open_project");
     requireAuth("פתיחת פרויקט וקבלת הצעות דורשת חשבון קצר", submitInterest, { resumeKey: "supplier-interest" });
   };
+
+  useResumeAction("supplier-interest", () => {
+    if (supplier) void submitInterest();
+  });
 
   const handleShare = () => {
     if (!supplier) return;

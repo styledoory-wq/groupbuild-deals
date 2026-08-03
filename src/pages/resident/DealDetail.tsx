@@ -454,6 +454,10 @@ export default function DealDetail() {
     requireAuth("לבקש קבוצת רכישה", () => setShowRequestGroupBuy(true), { resumeKey: "request-group-buy" });
   };
 
+  // Guest tapped an action, signed in, and came back here → re-open it.
+  useResumeAction("join-deal", () => setShowJoinModal(true));
+  useResumeAction("request-group-buy", () => setShowRequestGroupBuy(true));
+
 
   const submitRequestGroupBuy = async () => {
     if (!deal) return;
