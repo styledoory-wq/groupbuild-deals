@@ -435,6 +435,29 @@ export default function DealDetail() {
       setFeeLoading(false);
       return;
     }
+    // Join mode gates the whole fee flow (admin-controlled, fail closed).
+    if (feeMode === null) {
+      setFeeLoading(true);
+      return;
+    }
+    if (feeMode === "disabled") {
+      setParticipationFee(null);
+      setFeeError(null);
+      setFeeLoading(false);
+      return;
+    }
+    if (feeMode === "maintenance") {
+      setParticipationFee(null);
+      setFeeError(MAINTENANCE_JOIN_MESSAGE);
+      setFeeLoading(false);
+      return;
+    }
+    if (feeMode === "unavailable") {
+      setParticipationFee(null);
+      setFeeError(JOIN_BLOCKED_MESSAGE);
+      setFeeLoading(false);
+      return;
+    }
     let cancelled = false;
     setFeeLoading(true);
     setFeeError(null);
