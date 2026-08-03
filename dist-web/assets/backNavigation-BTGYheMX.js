@@ -1,0 +1,1 @@
+import{d as o,u as a,r as i}from"./vendor-react-BmrdJ4ux.js";function u(){return"/"}function s(){return typeof window>"u"?!1:window.history.length<=1}function f(t){const e=o(),n=a();return i.useCallback(()=>{const r=t??u();if(s()||n.key==="default"){e(r,{replace:!0});return}e(-1)},[t,n.key,e])}export{u as p,f as u};
