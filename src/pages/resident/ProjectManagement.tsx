@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Share2, Pencil, Calendar, Clock, User, Check, TrendingUp,
   Star, ChevronLeft, Sparkles, Zap, X, Plus, Trash2, RefreshCw, ChevronDown, MapPin,
-  Building2, Building, Hammer, PlusSquare, ShieldCheck, Wrench,
+  Building2, Building, Hammer, Eye, Home, Wallet, PartyPopper, Settings, Calendar, PlusSquare, ShieldCheck, Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -764,7 +764,7 @@ export default function ProjectManagement() {
 
         {isViewer && (
           <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] font-semibold text-amber-900 flex items-center gap-2">
-            <span className="text-lg">👁️</span>
+            <Eye className="h-4.5 w-4.5" strokeWidth={1.9} aria-hidden />
             <span>מצב צפייה בלבד — כחבר Viewer בפרויקט תוכל לראות אך לא לערוך.</span>
           </div>
         )}
@@ -774,7 +774,7 @@ export default function ProjectManagement() {
         {!info.name && !info.manager && !info.targetDate ? (
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_8px_24px_-12px_rgba(14,107,90,0.18)] text-center">
             <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-[36px]" style={{ background: "linear-gradient(135deg,#0E6B5A 0%,#3aa089 100%)" }}>
-              🏡
+              <Home className="h-6 w-6" strokeWidth={1.75} aria-hidden />
             </div>
             <h2 className="text-[16px] font-extrabold text-[#1A1A1A] mt-4" style={{ fontFamily: URBANIST }}>
               פרטי הפרויקט
@@ -804,7 +804,7 @@ export default function ProjectManagement() {
                 className="w-20 h-20 rounded-2xl shrink-0 bg-cover bg-center"
                 style={{ backgroundImage: "linear-gradient(135deg,#0E6B5A 0%,#3aa089 100%)" }}
               >
-                <div className="w-full h-full flex items-center justify-center text-[36px]">🏡</div>
+                <div className="w-full h-full flex items-center justify-center"><Home className="h-9 w-9 text-[#0E6B5A]" strokeWidth={1.5} aria-hidden /></div>
               </div>
               <div className="flex-1 min-w-0 pl-8">
                 <h2 className="text-[16px] font-extrabold text-[#1A1A1A] break-words" style={{ fontFamily: URBANIST }}>
@@ -859,7 +859,7 @@ export default function ProjectManagement() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <h3 className="text-[14.5px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
-                💰 ניהול תקציב
+                <span className="inline-flex items-center gap-1"><Wallet className="h-4 w-4" strokeWidth={1.9} aria-hidden /> ניהול תקציב</span>
               </h3>
               <span className="text-[9.5px] font-bold text-[#0E6B5A] bg-[#0E6B5A]/10 px-1.5 py-0.5 rounded-full">
                 {overPct === 0 ? "בתקציב" : `${overPct}% חריגה`}
@@ -910,7 +910,7 @@ export default function ProjectManagement() {
               style={{ background: "linear-gradient(135deg,#EEF4FF 0%,#F5F3FF 100%)" }}
               aria-hidden
             >
-              🤖
+              <Sparkles className="h-5 w-5" strokeWidth={1.8} aria-hidden />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
@@ -951,7 +951,7 @@ export default function ProjectManagement() {
         {/* Progress banner */}
         <div className="mt-3 bg-[#F0F9F6] border border-[#0E6B5A]/15 rounded-2xl p-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-[18px]" aria-hidden>🎉</span>
+            <PartyPopper className="h-5 w-5 text-[#0E6B5A]" strokeWidth={1.8} aria-hidden />
             <div className="leading-tight">
               <div className="text-[12.5px] font-extrabold text-[#0A5447]" style={{ fontFamily: URBANIST }}>
                 {stagesDone} מתוך {stages.length} שלבים הושלמו
@@ -1377,7 +1377,7 @@ function EditInfoModal({
             style={{ fontFamily: URBANIST }}
           >
             <span className="flex items-center gap-1.5">
-              <span aria-hidden>⚙️</span>
+              <Settings className="h-4 w-4" strokeWidth={1.9} aria-hidden />
               פרטים נוספים
             </span>
             <ChevronDown
@@ -1579,7 +1579,7 @@ function EditInfoModal({
             className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-[13px] font-bold text-red-600 bg-red-50 border border-red-100 active:scale-[0.98]"
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            🔄 איפוס פרויקט
+            <span className="inline-flex items-center gap-1"><RefreshCw className="h-4 w-4" strokeWidth={1.9} aria-hidden /> איפוס פרויקט</span>
           </button>
         </>
       )}
@@ -1602,7 +1602,7 @@ function EditInfoModal({
             className="w-full sm:max-w-sm bg-white rounded-3xl p-5 shadow-2xl my-auto max-h-full overflow-y-auto"
           >
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[22px]" aria-hidden>🔄</span>
+              <RefreshCw className="h-5 w-5 text-[#0E6B5A]" strokeWidth={1.8} aria-hidden />
               <h4 className="text-[15px] font-extrabold text-[#1A1A1A]" style={{ fontFamily: URBANIST }}>
                 איפוס פרויקט
               </h4>
