@@ -208,7 +208,7 @@ function LeadCard({ title, subtitle, badge, meta, date, busy, onDelete }: {
         <button
           onClick={onDelete}
           disabled={busy}
-          className="h-9 w-9 rounded-[10px] bg-[#FEE2E2] flex items-center justify-center shrink-0 active:scale-95 transition-transform disabled:opacity-50"
+          className="tap-target h-9 w-9 rounded-[10px] bg-[#FEE2E2] flex items-center justify-center shrink-0 active:scale-95 transition-transform disabled:opacity-50"
           aria-label="מחק ליד"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin text-[#DC2626]" /> : <Trash2 className="h-4 w-4 text-[#DC2626]" />}

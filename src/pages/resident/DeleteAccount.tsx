@@ -91,7 +91,7 @@ export default function DeleteAccount() {
             <button
               onClick={handleDelete}
               disabled={!canDelete}
-              className="mt-5 w-full h-[52px] rounded-2xl flex items-center justify-center gap-2 bg-[#DC2626] text-white font-bold text-[15px] tracking-tight active:scale-[0.99] transition-transform disabled:opacity-40 disabled:active:scale-100"
+              className="tap-target mt-5 w-full h-[52px] rounded-2xl flex items-center justify-center gap-2 bg-[#DC2626] text-white font-bold text-[15px] tracking-tight active:scale-[0.99] transition-transform disabled:opacity-40 disabled:active:scale-100"
             >
               {loading ? (
                 <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

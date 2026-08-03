@@ -149,7 +149,7 @@ export function OnboardingFlow({
             <button
               onClick={finish}
               aria-label="סגור"
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F3F4F6] text-[#6B7280]"
+              className="tap-target w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F3F4F6] text-[#6B7280]"
             >
               <X size={18} />
             </button>
@@ -324,7 +324,7 @@ function TourOverlay({
           <button
             onClick={onFinish}
             aria-label="סגור"
-            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-[#F3F4F6] text-[#6B7280] -mt-1 -ml-1"
+            className="tap-target w-7 h-7 rounded-full flex items-center justify-center hover:bg-[#F3F4F6] text-[#6B7280] -mt-1 -ml-1"
           >
             <X size={16} />
           </button>

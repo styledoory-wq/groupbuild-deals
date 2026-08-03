@@ -202,7 +202,7 @@ function MembersSheet({
         {/* header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100">
           <h2 className="text-[17px] font-extrabold text-[#1A1A1A]">חברי הפרויקט</h2>
-          <button onClick={onClose} className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
+          <button onClick={onClose} className="tap-target w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
             <X className="h-4 w-4 text-gray-600" />
           </button>
         </div>
@@ -325,7 +325,7 @@ function MembersSheet({
                 <button
                   onClick={handleCreate}
                   disabled={creating}
-                  className="w-full py-3 rounded-xl bg-[#0E6B5A] text-white font-bold text-[13.5px] active:scale-[0.99] transition-transform disabled:opacity-60"
+                  className="tap-target w-full py-3 rounded-xl bg-[#0E6B5A] text-white font-bold text-[13.5px] active:scale-[0.99] transition-transform disabled:opacity-60"
                 >
                   {creating ? "יוצר קישור..." : "צור קישור הזמנה"}
                 </button>
@@ -337,7 +337,7 @@ function MembersSheet({
                     </div>
                     <button
                       onClick={handleCopy}
-                      className="px-3 rounded-xl bg-white border border-gray-200 flex items-center justify-center"
+                      className="tap-target px-3 rounded-xl bg-white border border-gray-200 flex items-center justify-center"
                       aria-label="העתק"
                     >
                       {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4 text-gray-600" />}

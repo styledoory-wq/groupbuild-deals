@@ -371,6 +371,20 @@
   .safe-top-plus { padding-top: calc(env(safe-area-inset-top) + 0.5rem); }
   .route-transition { min-height: 100svh; min-height: 100dvh; }
 
+  /* Expands the hit area of small icon-only controls to at least 44x44pt
+     without changing their visual size, alignment or layout density. */
+  .tap-target { position: relative; }
+  .tap-target::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+  }
+
+
   @keyframes gb-card-enter {
     from { opacity: 0; transform: translateY(4px); }
     to   { opacity: 1; transform: translateY(0); }

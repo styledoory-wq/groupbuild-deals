@@ -1,11 +1,13 @@
-import { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { ReactNode, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Bell, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScanFAB } from "@/components/supplier/ScanFAB";
+import { IS_SUPPLIERS_BUILD } from "@/config/appMode";
 
 
 import { useApp } from "@/store/AppStore";
+
 
 /**
  * Adaptive shell.
@@ -22,6 +24,17 @@ import { useApp } from "@/store/AppStore";
  */
 export function MobileShell({ children, className }: { children: ReactNode; className?: string }) {
   const { user } = useApp();
+  const navigate = useNavigate();
+  const [headerQuery, setHeaderQuery] = useState("");
+  const searchPath = IS_SUPPLIERS_BUILD ? "/search" : "/resident/search";
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const term = headerQuery.trim();
+    if (!term) return;
+    navigate(`${searchPath}?q=${encodeURIComponent(term)}`);
+  };
+
   return (
     <div
       className="min-h-screen min-h-[100dvh] relative"
@@ -35,24 +48,31 @@ export function MobileShell({ children, className }: { children: ReactNode; clas
           className="hidden lg:flex fixed top-0 left-0 h-14 bg-white border-b border-[#ECEEF2] z-[70] items-center px-6 gap-6"
           style={{ right: 248 }}
         >
-          <div className="flex-1 max-w-xl">
+          <form className="flex-1 max-w-xl" role="search" onSubmit={submitSearch}>
             <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280] pointer-events-none" />
               <input
                 type="search"
+                dir="rtl"
+                value={headerQuery}
+                onChange={(e) => setHeaderQuery(e.target.value)}
+                enterKeyHint="search"
+                aria-label="חיפוש באתר"
                 placeholder="חיפוש..."
-                className="w-full h-9 rounded-full bg-[#F4F6F9] border border-transparent pr-9 pl-4 text-[13px] text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#0E6B5A] focus:bg-white transition"
+                className="[&::-webkit-search-cancel-button]:appearance-none w-full h-9 rounded-full bg-[#F4F6F9] border border-transparent pr-9 pl-4 text-[13px] text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#0E6B5A] focus:bg-white transition"
               />
             </div>
-          </div>
+            <button type="submit" className="sr-only">חפש</button>
+          </form>
           <div className="flex items-center gap-3">
             <Link
               to="/resident/notifications"
-              className="h-9 w-9 rounded-full hover:bg-[#F4F6F9] flex items-center justify-center text-[#1F2937]"
+              className="h-11 w-11 rounded-full hover:bg-[#F4F6F9] flex items-center justify-center text-[#1F2937]"
               aria-label="התראות"
             >
-              <Bell className="h-4.5 w-4.5" />
+              <Bell className="h-[18px] w-[18px]" />
             </Link>
+
             <div className="h-9 w-9 rounded-full bg-[#0E6B5A] text-white flex items-center justify-center text-[12px] font-bold">
               {(user?.name ?? "?").slice(0, 1)}
             </div>

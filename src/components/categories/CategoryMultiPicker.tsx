@@ -320,7 +320,7 @@ function LeafChip({ c, active, onClick }: { c: Category; active: boolean; onClic
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`inline-flex items-center gap-2 rounded-lg border px-3.5 py-2.5 text-right text-[13px] font-medium leading-snug transition-smooth ${
+      className={`tap-target inline-flex items-center gap-2 rounded-lg border px-3.5 py-2.5 text-right text-[13px] font-medium leading-snug transition-smooth ${
         active
           ? "bg-[#F1FAF7] text-[#0B5F50] border-[#BFDCD4] shadow-[0_1px_2px_rgba(14,107,90,0.08)]"
           : "bg-white border-[#E2E8F0] text-[#1F2937] hover:border-[#0E6B5A]/35 hover:bg-[#F8FCFB]"

@@ -175,7 +175,7 @@ function KpiCard({ icon: Icon, label, value, sub, onClick, loading }: {
   return (
     <button
       onClick={onClick}
-      className="text-right rounded-[16px] bg-white border border-[#EEF0F4] p-5 hover:border-[#D9DEE6] hover:shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition-all duration-200 ease-out group"
+      className="tap-target text-right rounded-[16px] bg-white border border-[#EEF0F4] p-5 hover:border-[#D9DEE6] hover:shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition-all duration-200 ease-out group"
     >
       <div className="flex items-start justify-between mb-3">
         <span className="h-8 w-8 rounded-[10px] bg-[#F4F6FA] flex items-center justify-center">

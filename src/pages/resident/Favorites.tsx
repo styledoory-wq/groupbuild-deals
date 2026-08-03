@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, Sparkles } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { BackHeader, EmptyState } from "@/components/ds";
+import { BackHeader, EmptyState, ErrorState } from "@/components/ds";
 import { supabase } from "@/integrations/supabase/client";
 import { RealDealCard, type RealDealCardData } from "@/components/deals/RealDealCard";
 import type { OfferTier } from "@/lib/offerPricing";
@@ -12,27 +12,35 @@ import { resolveMyProjectId } from "@/lib/projectClient";
 
 export default function Favorites() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadTick, setReloadTick] = useState(0);
   const [deals, setDeals] = useState<RealDealCardData[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [favIds, setFavIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(false);
     (async () => {
+      try {
       const { data: session } = await supabase.auth.getSession();
       if (!session.session) { setLoading(false); return; }
       const uid = session.session.user.id;
       const pid = await resolveMyProjectId(uid);
       const favQ = supabase.from("favorites").select("deal_id");
-      const { data: favs } = await (pid ? favQ.eq("project_id", pid) : favQ.eq("user_id", uid));
+      const { data: favs, error: favError } = await (pid ? favQ.eq("project_id", pid) : favQ.eq("user_id", uid));
+      if (favError) throw favError;
       const ids = (favs ?? []).map((r) => r.deal_id as string);
       setFavIds(new Set(ids));
       if (!ids.length) { setLoading(false); return; }
-      const { data } = await supabase
+      const { data, error: dealsError } = await supabase
         .from("deals")
         .select(
           "id,title,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,cover_image_url,gallery_images,visibility_type,visibility_project_id,target_participants,join_deadline,redemption_deadline,auto_closed_at,suppliers(business_name,logo_url)",
         )
         .in("id", ids);
+      if (dealsError) throw dealsError;
       const rows = (data ?? []) as Array<Record<string, unknown>>;
       const mapped: RealDealCardData[] = rows.map((r) => {
         const s = r.suppliers as { business_name?: string; logo_url?: string | null } | null;
@@ -61,11 +69,17 @@ export default function Favorites() {
           auto_closed_at: (r.auto_closed_at as string | null) ?? null,
         };
       });
+      if (cancelled) return;
       setDeals(mapped);
       if (mapped.length) setCounts(await fetchDealJoinerCounts(mapped.map((d) => d.id)));
       setLoading(false);
+      } catch (err) {
+        console.error("favorites load failed", err);
+        if (!cancelled) { setError(true); setLoading(false); }
+      }
     })();
-  }, []);
+    return () => { cancelled = true; };
+  }, [reloadTick]);
 
   return (
     <MobileShell>
@@ -77,6 +91,12 @@ export default function Favorites() {
               <div key={i} className="aspect-[3/4] rounded-[20px] bg-white animate-pulse border border-[#ECEEF2]" />
             ))}
           </div>
+        ) : error ? (
+          <ErrorState
+            title="לא הצלחנו לטעון את המועדפים"
+            description="בדקו את החיבור לרשת ונסו שוב."
+            onRetry={() => setReloadTick((n) => n + 1)}
+          />
         ) : deals.length === 0 ? (
           <EmptyState
             icon={<Heart className="h-7 w-7 text-[#E11D48]" strokeWidth={2} />}

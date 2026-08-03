@@ -25,6 +25,10 @@ interface AppState {
 
   notifications: AppNotification[];
   unreadCount: number;
+  /** True while the first/next notifications fetch is in flight. */
+  notificationsLoading: boolean;
+  /** True when the last notifications fetch failed (network/permission). */
+  notificationsError: boolean;
   refreshNotifications: () => Promise<void>;
   markNotificationsRead: () => Promise<void>;
 }
@@ -109,6 +113,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>(() => projectsCache?.data ?? []);
   const [categories, setCategories] = useState<Category[]>(() => categoriesCache?.data ?? []);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(true);
+  const [notificationsError, setNotificationsError] = useState(false);
 
 
   const logout = async () => {
@@ -239,15 +245,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Load notifications for current authenticated user (and refresh on auth change)
   const refreshNotifications = useCallback(async () => {
+    setNotificationsLoading(true);
+    setNotificationsError(false);
     try {
       const uid = user?.id;
       if (!uid) {
         setNotifications([]);
+        setNotificationsLoading(false);
         return;
       }
       const cached = notificationsCache[uid];
       if (cached && Date.now() - cached.at < 45_000) {
         setNotifications(cached.data);
+        setNotificationsLoading(false);
         return;
       }
       const { resolveMyProjectId } = await import("@/lib/projectClient");
@@ -264,6 +274,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       );
       if (error) {
         console.error("[AppStore] notifications load failed", error);
+        setNotificationsError(true);
+        setNotificationsLoading(false);
         return;
       }
       const mapped = ((data ?? []) as DbNotificationRow[]).map((n) => ({
@@ -276,8 +288,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }));
       notificationsCache[uid] = { data: mapped, at: Date.now() };
       setNotifications(mapped);
+      setNotificationsLoading(false);
     } catch (error) {
       console.error("[AppStore] notifications load failed", error);
+      setNotificationsError(true);
+      setNotificationsLoading(false);
     }
   }, [user?.id]);
 
@@ -314,9 +329,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       user, setUser, logout, authReady, needsOnboarding,
       projects, setProjects,
       categories, setCategories,
-      notifications, unreadCount, refreshNotifications, markNotificationsRead,
+      notifications, unreadCount, notificationsLoading, notificationsError,
+      refreshNotifications, markNotificationsRead,
     }),
-    [user, authReady, needsOnboarding, projects, categories, notifications, unreadCount]
+    [user, authReady, needsOnboarding, projects, categories, notifications, unreadCount,
+     notificationsLoading, notificationsError, refreshNotifications]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

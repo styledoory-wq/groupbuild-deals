@@ -171,7 +171,7 @@ export function BudgetAIChat({ result }: { result: BudgetResult }) {
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="h-10 w-10 rounded-xl flex items-center justify-center text-white shrink-0 disabled:opacity-40 active:scale-95 transition"
+            className="tap-target h-10 w-10 rounded-xl flex items-center justify-center text-white shrink-0 disabled:opacity-40 active:scale-95 transition"
             style={{
               background: "linear-gradient(135deg, #0E6B5A 0%, #E2BD45 100%)",
               boxShadow: "0 6px 14px -6px rgba(14,107,90,0.6)",

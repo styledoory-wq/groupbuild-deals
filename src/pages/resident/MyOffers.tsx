@@ -382,7 +382,7 @@ export default function MyOffers() {
                     </Link>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="h-8 w-8 rounded-full hover:bg-[#F4F6FA] flex items-center justify-center" aria-label="פעולות">
+                        <button className="tap-target h-8 w-8 rounded-full hover:bg-[#F4F6FA] flex items-center justify-center" aria-label="פעולות">
                           <MoreVertical className="h-4 w-4 text-[#6B7280]" />
                         </button>
                       </DropdownMenuTrigger>

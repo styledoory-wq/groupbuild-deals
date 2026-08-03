@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ChevronRight, ChevronLeft, Check, Home, Building2, Users2, Map, PencilLine, ClipboardList, MapPin, Loader2 } from "lucide-react";
@@ -18,6 +18,28 @@ const PROJECT_TYPE_ICONS: Record<string, typeof Home> = {
   neighborhood: Map,
 };
 
+const DRAFT_KEY = "gb:create-demand:draft:v1";
+
+type Draft = {
+  step: number;
+  projectType: string;
+  categoryId: string;
+  subTopic: string;
+  regionId: string;
+  cityId: string;
+  address: string;
+  description: string;
+  participants: string;
+};
+
+function readDraft(): Partial<Draft> {
+  try {
+    return JSON.parse(localStorage.getItem(DRAFT_KEY) || "{}") as Partial<Draft>;
+  } catch {
+    return {};
+  }
+}
+
 const STEPS = [
   { id: 1, label: "סוג פרויקט" },
   { id: 2, label: "תחום" },
@@ -30,26 +52,38 @@ export default function CreateDemand() {
   const navigate = useNavigate();
   const { user, authReady } = useApp();
   const { regions, cities, loading: areasLoading } = useRegions();
-  const [step, setStep] = useState(1);
+  const draft = useRef<Partial<Draft>>(readDraft()).current;
+  const [step, setStep] = useState(draft.step ?? 1);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const submitted = useRef(false);
 
-  // Form
-  const [projectType, setProjectType] = useState<string>("");
-  const [categoryId, setCategoryId] = useState<string>("");
-  const [subTopic, setSubTopic] = useState<string>("");
-  const [regionId, setRegionId] = useState<string>("");
-  const [cityId, setCityId] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [participants, setParticipants] = useState<string>("1");
+  // Form — restored from the local draft so a refresh, an app switch or a
+  // temporary bounce to sign-in never loses what the user typed.
+  const [projectType, setProjectType] = useState<string>(draft.projectType ?? "");
+  const [categoryId, setCategoryId] = useState<string>(draft.categoryId ?? "");
+  const [subTopic, setSubTopic] = useState<string>(draft.subTopic ?? "");
+  const [regionId, setRegionId] = useState<string>(draft.regionId ?? "");
+  const [cityId, setCityId] = useState<string>(draft.cityId ?? "");
+  const [address, setAddress] = useState<string>(draft.address ?? "");
+  const [description, setDescription] = useState<string>(draft.description ?? "");
+  const [participants, setParticipants] = useState<string>(draft.participants ?? "1");
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [userProjectId, setUserProjectId] = useState<string | null>(null);
 
+  // Persist the draft on every change (skipped once the request was sent).
   useEffect(() => {
+    if (submitted.current) return;
+    const payload: Draft = { step, projectType, categoryId, subTopic, regionId, cityId, address, description, participants };
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(payload)); } catch { /* quota / private mode */ }
+  }, [step, projectType, categoryId, subTopic, regionId, cityId, address, description, participants]);
+
+  useEffect(() => {
+    // Access control lives in RequireRole — this screen must never navigate
+    // away on its own while auth is still hydrating (it would drop the form).
     if (!authReady) return;
-    if (!user?.id) { navigate("/auth/resident"); return; }
+    if (!user?.id) { setLoading(false); return; }
     (async () => {
       const [{ data: cats }, { data: prof }] = await Promise.all([
         supabase.from("categories").select("id,name").eq("is_active", true).order("display_order").order("name"),
@@ -58,11 +92,12 @@ export default function CreateDemand() {
       setCategories((cats ?? []) as Category[]);
       const p = prof as { project_id?: string | null; region_id?: string | null; city_id?: string | null } | null;
       if (p?.project_id) setUserProjectId(p.project_id);
-      if (p?.region_id) setRegionId(p.region_id);
-      if (p?.city_id) setCityId(p.city_id);
+      if (p?.region_id && !draft.regionId) setRegionId(p.region_id);
+      if (p?.city_id && !draft.cityId) setCityId(p.city_id);
       setLoading(false);
     })();
-  }, [authReady, user, navigate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authReady, user?.id]);
 
   const filteredCities = useMemo(
     () => regionId ? cities.filter((c) => c.region_id === regionId) : cities,
@@ -120,6 +155,8 @@ export default function CreateDemand() {
         payload: { project_type: projectType, category_id: categoryId },
       }).then(() => { /* noop */ }, () => { /* noop */ });
 
+      submitted.current = true;
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
       toast.success("הבקשה נשלחה בהצלחה!");
       navigate("/resident/demands?created=1", { replace: true });
     } catch (err) {
@@ -141,7 +178,7 @@ export default function CreateDemand() {
 
   return (
     <div className="min-h-screen bg-[#F7F6F2] pb-32" dir="rtl">
-      <BackHeader title="בקשת רכישה קבוצתית" onBack={() => navigate("/resident")} />
+      <BackHeader title="בקשת רכישה קבוצתית" backTo="/resident" />
 
       {/* Progress */}
       <div className="px-5 pt-4">
@@ -218,6 +255,7 @@ export default function CreateDemand() {
               <input
                 value={subTopic}
                 onChange={(e) => setSubTopic(e.target.value)}
+                enterKeyHint="next"
                 placeholder="לדוגמה: ריצוף גרניט פורצלן"
                 className="w-full h-11 px-3 rounded-xl border border-[#E5E5EA] bg-white text-[14px]"
                 maxLength={100}
@@ -259,6 +297,8 @@ export default function CreateDemand() {
               <input
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
+                autoComplete="street-address"
+                enterKeyHint="next"
                 placeholder="רחוב, מספר בית"
                 className="w-full h-11 px-3 rounded-xl border border-[#E5E5EA] bg-white text-[14px]"
                 maxLength={150}
@@ -275,6 +315,7 @@ export default function CreateDemand() {
             <label className="block mb-4">
               <span className="text-[13px] font-medium text-[#1C1C1E] mb-1.5 block">תיאור הבקשה</span>
               <textarea
+                enterKeyHint="enter"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="לדוגמה: אנחנו 12 דיירים בבניין מחפשים חברת ניקיון לחדר מדרגות, פעם בשבוע..."
@@ -288,6 +329,8 @@ export default function CreateDemand() {
               <span className="text-[13px] font-medium text-[#1C1C1E] mb-1.5 block">מספר משתתפים משוער</span>
               <input
                 type="number"
+                inputMode="numeric"
+                enterKeyHint="done"
                 min={1}
                 value={participants}
                 onChange={(e) => setParticipants(e.target.value)}
@@ -328,7 +371,7 @@ export default function CreateDemand() {
       </div>
 
       {/* Sticky footer */}
-      <div className="fixed bottom-0 inset-x-0 bg-white border-t border-[#E5E5EA] p-3 flex gap-2" dir="rtl">
+      <div className="fixed bottom-0 inset-x-0 bg-white border-t border-[#E5E5EA] p-3 flex gap-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]" dir="rtl">
         {step > 1 && (
           <button
             onClick={prevStep}

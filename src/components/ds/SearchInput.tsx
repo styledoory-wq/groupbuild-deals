@@ -32,18 +32,23 @@ export function SearchInput({
           strokeWidth={2}
         />
         <input
-          type="text"
+          type="search"
+          inputMode="search"
+          enterKeyHint="search"
+          autoComplete="off"
+          aria-label={placeholder}
           dir="rtl"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full h-12 pr-11 pl-10 rounded-[16px] bg-white text-[14px] font-medium text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#0E6B5A]/40 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]"
+          className="[&::-webkit-search-cancel-button]:appearance-none w-full h-12 pr-11 pl-10 rounded-[16px] bg-white text-[14px] font-medium text-[#1F2937] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#0E6B5A]/40 shadow-[0_2px_10px_-4px_rgba(10,31,61,0.08)]"
         />
         {value && (
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-[#F4F6FA] flex items-center justify-center"
+            aria-label="נקה חיפוש"
+            className="tap-target absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-[#F4F6FA] flex items-center justify-center"
           >
             <X className="h-4 w-4 text-[#6B7280]" />
           </button>

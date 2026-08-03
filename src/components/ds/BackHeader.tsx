@@ -36,7 +36,7 @@ export function BackHeader({ title, subtitle, right, onBack, backTo }: BackHeade
         {onBack !== false ? (
           <button
             onClick={handleBack}
-            className="p-2 -mr-2 rounded-full hover:bg-[#F0EEE7] active:scale-95 transition"
+            className="tap-target p-2 -mr-2 rounded-full hover:bg-[#F0EEE7] active:scale-95 transition"
             aria-label="חזרה"
           >
             <ArrowRight className="w-5 h-5 text-[#1F1F1F]" />

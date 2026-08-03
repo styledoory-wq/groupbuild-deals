@@ -1628,7 +1628,7 @@ export default function DealDetail() {
                   type="button"
                   onClick={handleResumePayment}
                   disabled={resumingPayment}
-                  className="h-10 px-3 rounded-2xl bg-white text-[#1F2937] text-[11px] font-extrabold active:scale-[0.97] transition-transform disabled:opacity-60"
+                  className="tap-target h-10 px-3 rounded-2xl bg-white text-[#1F2937] text-[11px] font-extrabold active:scale-[0.97] transition-transform disabled:opacity-60"
                 >
                   {resumingPayment ? "..." : "לתשלום"}
                 </button>
@@ -2036,7 +2036,7 @@ function ShareButton({ deal, compact = false }: { deal: { id: string; title: str
         type="button"
         onClick={handleShare}
         aria-label="שתפו את ההצעה"
-        className={cn(
+        className={cn("tap-target", 
           "rounded-2xl bg-white text-[#1F2937] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-transform shadow-[0_4px_12px_-6px_rgba(10,31,61,0.18)]",
           compact ? "h-10 w-10" : "h-14 w-14",
         )}

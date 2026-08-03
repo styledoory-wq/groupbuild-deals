@@ -1196,7 +1196,7 @@ function Field({
 function PillBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button type="button" onClick={onClick}
-      className={`h-10 rounded-xl text-[12.5px] font-semibold transition-colors ${
+      className={`tap-target h-10 rounded-xl text-[12.5px] font-semibold transition-colors ${
         active
           ? "bg-[#1F2937] text-white"
           : "bg-white text-[#6B7280] ring-1 ring-black/[0.06] hover:text-[#1F2937]"

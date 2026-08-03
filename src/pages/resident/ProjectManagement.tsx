@@ -587,9 +587,13 @@ export default function ProjectManagement() {
   // Suppliers
   const cached = getCachedValue<SupplierLite[]>("categories:suppliers:v2", 5 * 60_000);
   const [suppliers, setSuppliers] = useState<SupplierLite[]>(() => cached ?? []);
+  const [suppliersError, setSuppliersError] = useState(false);
+  const [suppliersTick, setSuppliersTick] = useState(0);
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      setSuppliersError(false);
+      try {
       const data = await cachedQuery<SupplierLite[]>("categories:suppliers:v2", async () => {
         const { data } = await supabase
           .from("suppliers")
@@ -612,9 +616,12 @@ export default function ProjectManagement() {
         }));
       }, 5 * 60_000);
       if (!cancelled) setSuppliers(data);
+      } catch {
+        if (!cancelled) setSuppliersError(true);
+      }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [suppliersTick]);
 
   const stageSuppliers = useMemo(() => {
     if (!current.catIds.length) return [];
@@ -981,6 +988,17 @@ export default function ProjectManagement() {
           </div>
 
           {/* Suppliers in this stage */}
+          {suppliersError && suppliers.length === 0 && (
+            <div className="rounded-2xl bg-white border border-[#EDEAE3] p-4 text-center">
+              <p className="text-[13px] font-semibold text-[#1F2937]">לא הצלחנו לטעון ספקים לשלב זה</p>
+              <button
+                onClick={() => setSuppliersTick((t) => t + 1)}
+                className="mt-3 h-10 px-5 rounded-xl bg-[#0E6B5A] text-white text-[13px] font-bold active:scale-95 transition"
+              >
+                נסו שוב
+              </button>
+            </div>
+          )}
           {stageSuppliers.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -1837,7 +1855,7 @@ function AddExpenseSheet({
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:scale-95"
+            className="tap-target w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:scale-95"
             aria-label="סגירה"
           >
             <X className="h-4 w-4 text-gray-600" />
@@ -1946,7 +1964,7 @@ function ModalShell({
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:scale-95"
+            className="tap-target w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:scale-95"
             aria-label="סגירה"
           >
             <X className="h-4 w-4 text-gray-600" />

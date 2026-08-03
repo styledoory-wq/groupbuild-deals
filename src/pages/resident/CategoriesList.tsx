@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { ErrorState } from "@/components/ds";
 import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
@@ -79,7 +80,7 @@ function ProjectTypeCircle({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="flex min-w-0 flex-1 flex-col items-center gap-2.5 active:scale-[0.97] transition-transform"
+      className="tap-target flex min-w-0 flex-1 flex-col items-center gap-2.5 active:scale-[0.97] transition-transform"
     >
       <span className="relative mx-auto mb-3.5 block h-[102px] w-[102px]">
         <span
@@ -461,17 +462,19 @@ export default function CategoriesList() {
                 </div>
 
                 {errorMsg ? (
-                  <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
-                    <strong className="text-slate-800">{errorMsg}</strong>
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="text-[12px] font-bold underline"
-                      style={{ color: BRAND }}
-                    >
-                      רענן
-                    </button>
+                  <ErrorState
+                    title="לא הצלחנו לטעון את הקטגוריות"
+                    description="ייתכן שהחיבור לרשת נקטע. אפשר לנסות שוב."
+                    onRetry={() => setRefreshTick((n) => n + 1)}
+                  />
+                ) : !countsReady ? (
+                  <div className="grid grid-cols-3 gap-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="aspect-square rounded-2xl bg-white border border-gray-100 animate-pulse" />
+                    ))}
                   </div>
                 ) : filtered.length === 0 ? (
+
                   <div className="grid min-h-[160px] place-items-center gap-2 text-center text-slate-400">
                     <Search size={28} />
                     <strong className="text-slate-800">בקרוב נוסיף שלבים למסלול זה</strong>

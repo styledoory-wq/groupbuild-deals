@@ -574,7 +574,7 @@ function ActionRow({
   label, count, accent, onClick,
 }: { label: string; count: number; accent: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="w-full flex items-center justify-between py-3.5 px-3.5 text-right active:bg-white/70 transition">
+    <button type="button" onClick={onClick} className="tap-target w-full flex items-center justify-between py-3.5 px-3.5 text-right active:bg-white/70 transition">
       <div className="font-bold text-[15px] tabular-nums" style={{ color: count > 0 ? accent : "#94A3B8" }}>
         {count}
       </div>

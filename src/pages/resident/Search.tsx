@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Search as SearchIcon, Store, X, ChevronLeft } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { BackHeader, SkeletonList, EmptyState } from "@/components/ds";
@@ -38,11 +38,22 @@ function catalogHref(hit: CatalogHit) {
 }
 
 export default function SearchPage() {
-  const [q, setQ] = useState("");
+  const [params, setParams] = useSearchParams();
+  const [q, setQ] = useState(() => params.get("q") ?? "");
   const [suppliers, setSuppliers] = useState<SupplierRow[]>([]);
   const [catalog, setCatalog] = useState<CatalogHit[]>([]);
   const [loading, setLoading] = useState(false);
   const term = q.trim();
+
+  // Keep the URL in sync so the query survives refresh, share and back/forward.
+  useEffect(() => {
+    const current = params.get("q") ?? "";
+    if (current === term) return;
+    const next = new URLSearchParams(params);
+    if (term) next.set("q", term); else next.delete("q");
+    setParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [term]);
   const ptr = usePullToRefresh(async () => {
     setQ((s) => s); // re-trigger effect trivially
     await new Promise((r) => setTimeout(r, 300));
@@ -100,14 +111,19 @@ export default function SearchPage() {
               autoFocus
               value={q}
               onChange={(e) => setQ(e.target.value)}
+              type="search"
+              inputMode="search"
+              enterKeyHint="search"
+              autoComplete="off"
+              aria-label="חיפוש ספקים, קטגוריות ושירותים"
               placeholder="חפש: דלתות, מזגן, סולארי, חשמלאי..."
-              className="w-full h-14 rounded-[20px] bg-white border border-[#ECEEF2] pr-12 pl-12 text-[15px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#0E6B5A] focus:ring-[3px] focus:ring-[#0E6B5A]/15 shadow-[0_4px_16px_-6px_rgba(10,31,61,0.08)] transition"
+              className="[&::-webkit-search-cancel-button]:appearance-none w-full h-14 rounded-[20px] bg-white border border-[#ECEEF2] pr-12 pl-12 text-[15px] font-medium text-[#1F2937] placeholder:text-[#6B7280] focus:outline-none focus:border-[#0E6B5A] focus:ring-[3px] focus:ring-[#0E6B5A]/15 shadow-[0_4px_16px_-6px_rgba(10,31,61,0.08)] transition"
               dir="rtl"
             />
             {q && (
               <button
                 onClick={() => setQ("")}
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-[#F7F5F0] flex items-center justify-center active:scale-90 transition-transform"
+                className="tap-target absolute left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-[#F7F5F0] flex items-center justify-center active:scale-90 transition-transform"
                 aria-label="נקה"
               >
                 <X className="h-4 w-4 text-[#6B7280]" strokeWidth={2.4} />

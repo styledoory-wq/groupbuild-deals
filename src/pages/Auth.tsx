@@ -492,6 +492,9 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                 <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                 <Input
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  enterKeyHint="next"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="כתובת מייל"
@@ -504,6 +507,8 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                 <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  enterKeyHint="done"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="סיסמה"
@@ -515,7 +520,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#1F2937] transition-colors"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 h-11 w-11 grid place-items-center rounded-full text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F0EEE7] active:scale-95 transition"
                 >
                   {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
@@ -636,6 +641,8 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                     <Input
                       type="tel"
                       inputMode="tel"
+                      autoComplete="tel"
+                      enterKeyHint="next"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="טלפון ליצירת קשר"
@@ -652,6 +659,9 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                 <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                 <Input
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  enterKeyHint="next"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="כתובת מייל"
@@ -665,6 +675,8 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                 <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-[#0E6B5A] pointer-events-none" />
                 <Input
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  enterKeyHint="done"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="סיסמה"
@@ -676,7 +688,7 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#1F2937] transition-colors"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 h-11 w-11 grid place-items-center rounded-full text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F0EEE7] active:scale-95 transition"
                 >
                   {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>

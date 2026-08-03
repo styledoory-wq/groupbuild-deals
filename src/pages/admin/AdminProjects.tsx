@@ -464,7 +464,7 @@ export default function AdminProjects() {
             </div>
             <DialogFooter className="mt-4 gap-2 sm:gap-2">
               <button onClick={() => setOpen(false)} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#F4F6FA] text-[#1F2937] text-sm font-bold flex-1 disabled:opacity-50">ביטול</button>
-              <button onClick={save} disabled={saving} className="h-10 px-4 rounded-[12px] bg-[#0E6B5A] text-white text-sm font-bold flex-1 disabled:opacity-50">
+              <button onClick={save} disabled={saving} className="tap-target h-10 px-4 rounded-[12px] bg-[#0E6B5A] text-white text-sm font-bold flex-1 disabled:opacity-50">
                 {saving ? "שומר…" : form.id ? "שמירה" : "הוספה"}
               </button>
             </DialogFooter>
@@ -497,7 +497,7 @@ function ProjectMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="h-8 w-8 rounded-lg bg-white/85 backdrop-blur border border-white/60 text-[#0F172A] hover:bg-white transition inline-flex items-center justify-center shadow-sm"
+          className="tap-target h-8 w-8 rounded-lg bg-white/85 backdrop-blur border border-white/60 text-[#0F172A] hover:bg-white transition inline-flex items-center justify-center shadow-sm"
           aria-label="פעולות"
         >
           <MoreHorizontal className="h-4 w-4" />

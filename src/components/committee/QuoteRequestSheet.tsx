@@ -81,7 +81,7 @@ export function QuoteRequestSheet({ projectName, projectId, categories, supplier
             <h2 className="text-base font-semibold text-[#1F1F1F]">בקשת הצעת מחיר קבוצתית</h2>
             <p className="text-[11px] text-[#6B6B6B] mt-0.5">{projectName || "הקהילה שלנו"}</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-[#F0EEE7]" aria-label="סגור">
+          <button onClick={onClose} className="tap-target p-2 rounded-full hover:bg-[#F0EEE7]" aria-label="סגור">
             <X className="w-4 h-4 text-[#1F1F1F]" />
           </button>
         </div>
