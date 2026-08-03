@@ -60,8 +60,10 @@ const buildProfileConfig = (): CapacitorConfig => {
   };
 };
 
+// Web-only dev fallback (Lovable preview / hot-reload) when APP_PROFILE is unset.
+// No native folder is referenced here — native builds must set APP_PROFILE.
 const legacyDevConfig: CapacitorConfig = {
-  appId: "com.groupbuild.app",
+  appId: "il.co.groupbuild.residents",
   appName: "GroupBuild",
   webDir: "dist",
   ios: {
