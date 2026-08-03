@@ -14,6 +14,8 @@ import { prefetchEntryHero, resolveEntryHeroSrc } from "@/lib/prefetchEntryHero"
 import { TermsAcceptanceGate } from "./components/terms/TermsAcceptanceGate";
 import { PreviewModeBanner } from "./components/PreviewModeBanner";
 import { GuestGateProvider } from "./hooks/useGuestGate";
+import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
+
 import { publicRoutes } from "@/routes/PublicRoutes";
 import { residentRoutes } from "@/routes/ResidentRoutes";
 import { supplierRoutes } from "@/routes/SupplierRoutes";
