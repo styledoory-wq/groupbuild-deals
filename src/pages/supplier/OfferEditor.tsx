@@ -223,9 +223,16 @@ export default function OfferEditor() {
           }
         }
 
+        // Supplier agreement re-acceptance: blocks NEW offers only.
+        if (!adminTargetSupplierId && !isEditing) {
+          const termsStatus = await loadSupplierTermsStatus(session.user.id);
+          if (!cancelled) setNeedsTermsAccept(termsStatus.blocksNewActivity);
+        }
+
         const { data: paymentSettings } = await supabase.from("system_settings")
           .select("deposit_default_amount,deposit_min_amount,deposit_max_amount")
           .limit(1).maybeSingle();
+
 
         if (cancelled) return;
         setSupplier(s);
