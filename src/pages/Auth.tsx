@@ -255,19 +255,19 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session) await supabase.auth.signOut();
       } catch { /* ignore */ }
-      // Apple returns name/email only on first authorization; scopes must be requested explicitly.
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "apple",
-        options: {
-          redirectTo: window.location.origin,
-          scopes: "name email",
-        },
+      // Managed Apple provider. Apple returns the name only on first authorization;
+      // it is persisted to the profile by backfillOAuthProfileName on the auth-state event.
+      const { lovable } = await import("@/integrations/lovable/index");
+      const result = await lovable.auth.signInWithOAuth("apple", {
+        redirect_uri: window.location.origin,
       });
-      if (error) {
-        toast.error(translateAuthError(error.message ?? "ההתחברות עם Apple נכשלה"));
+      if (result.error) {
+        toast.error(translateAuthError(result.error.message ?? "ההתחברות עם Apple נכשלה"));
         setLoading(false);
         return;
       }
+      if (result.redirected) return;
+
     } catch (err) {
       toast.error(err instanceof Error ? translateAuthError(err.message) : "ההתחברות עם Apple נכשלה");
       setLoading(false);
