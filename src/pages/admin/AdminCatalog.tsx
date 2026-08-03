@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
 import { iconForCategory } from "@/lib/categoryIcons";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type Cat = {
   id: string;
@@ -72,6 +73,7 @@ async function logHistory(category_id: string, action: string, before: any, afte
 }
 
 export default function AdminCatalog() {
+  const askConfirm = useConfirm();
   const [all, setAll] = useState<Cat[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);

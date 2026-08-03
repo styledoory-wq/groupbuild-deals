@@ -5,6 +5,7 @@ import { BackHeader, LoadingState, EmptyState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 const CATEGORIES = [
   { value: "plans", label: "תוכניות בנייה", icon: "📐" },
@@ -42,6 +43,7 @@ const CHIP_ACTIVE = "bg-[#0E6B5A] text-white border-[#0E6B5A]";
 const CHIP_IDLE = "bg-white border-[#ECEEF2] text-[#6B7280]";
 
 export default function MyDocuments() {
+  const askConfirm = useConfirm();
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);

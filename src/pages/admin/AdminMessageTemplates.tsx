@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Send, MessageCircle, Mail, X, Search } from "lucide-react";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type Audience = "supplier" | "resident" | "committee" | "all";
 type Template = {
@@ -25,6 +26,7 @@ const AUDIENCE_LABEL: Record<Audience, string> = {
 };
 
 export default function AdminMessageTemplates() {
+  const askConfirm = useConfirm();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Audience | "any">("any");
@@ -206,6 +208,7 @@ function EditorSheet({
 }
 
 function SendSheet({ template, onClose }: { template: Template; onClose: () => void }) {
+  const askConfirm = useConfirm();
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

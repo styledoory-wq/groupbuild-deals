@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadSupplierCatalog } from "@/lib/supplierUploads";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 export type CatalogKind = "pdf" | "link";
 
@@ -28,6 +29,7 @@ type Props = {
 const isValidHttpUrl = (s: string) => /^https?:\/\/\S+/i.test(s.trim());
 
 export function SupplierCatalogsManager({ supplierId }: Props) {
+  const askConfirm = useConfirm();
   const [rows, setRows] = useState<CatalogRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
