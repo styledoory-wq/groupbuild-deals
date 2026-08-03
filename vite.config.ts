@@ -99,7 +99,7 @@ export default defineConfig(({ mode }) => {
         overlay: false,
       },
     },
-    plugins: [react(), heroPreloadPlugin(appMode), mode === "development" && componentTagger()].filter(Boolean),
+    plugins: [react(), heroPreloadPlugin(appMode), stripNativeAssetsPlugin(appMode), mode === "development" && componentTagger()].filter(Boolean),
     build: {
       rollupOptions: {
         output: {
