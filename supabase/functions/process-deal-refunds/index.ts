@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get("Authorization") ?? "";
   const token = authHeader.replace("Bearer ", "");
   let actorId: string | null = null;
-  const isServiceRole = token && token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const isServiceRole = !!token && await isServiceRoleToken(token);
   if (!isServiceRole) {
     if (!token) return json({ error: "unauthorized" }, 401);
     const { data: userData } = await admin.auth.getUser(token);
@@ -158,6 +158,30 @@ Deno.serve(async (req) => {
     return json({ error: "internal_error", message: String(e) }, 500);
   }
 });
+
+/**
+ * Accepts either the function's own service-role key or any valid service-role
+ * key issued for this project (the cron job reads one from Vault). Validity is
+ * proven against PostgREST — a rotated or forged key cannot pass.
+ */
+async function isServiceRoleToken(token: string): Promise<boolean> {
+  if (token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) return true;
+  const parts = token.split(".");
+  if (parts.length !== 3) return false;
+  try {
+    const payload = JSON.parse(
+      atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")),
+    ) as { role?: string };
+    if (payload.role !== "service_role") return false;
+    const res = await fetch(
+      `${Deno.env.get("SUPABASE_URL")}/rest/v1/user_roles?select=user_id&limit=1`,
+      { headers: { apikey: token, Authorization: `Bearer ${token}` } },
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
