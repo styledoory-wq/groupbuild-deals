@@ -1,5 +1,6 @@
 import { ChevronRight, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSmartBack } from "@/lib/backNavigation";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/store/AppStore";
 import { ReactNode } from "react";
@@ -14,6 +15,10 @@ interface Props {
   /** Accepted for backward compatibility — visual variant is no longer used. */
   variant?: "navy" | "cream";
   rightSlot?: ReactNode;
+  /** Route to land on when there is no history (deep link / push / share entry). */
+  backTo?: string;
+  /** Full override of the back button behaviour. */
+  onBack?: () => void;
 }
 
 /**
@@ -27,8 +32,11 @@ export function PageHeader({
   showBell = false,
   size = "default",
   rightSlot,
+  backTo,
+  onBack,
 }: Props) {
   const navigate = useNavigate();
+  const smartBack = useSmartBack(backTo);
   const { unreadCount } = useApp();
   const large = size === "large";
 
@@ -37,7 +45,7 @@ export function PageHeader({
       <div className={cn("flex items-center justify-between", large ? "mb-3" : "mb-2")}>
         {back ? (
           <button
-            onClick={() => navigate(-1)}
+            onClick={onBack ?? smartBack}
             className={cn(
               "h-11 w-11 rounded-full flex items-center justify-center bg-card",
               "shadow-[var(--shadow-soft)] active:scale-95 transition-transform",
