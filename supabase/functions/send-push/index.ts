@@ -72,7 +72,20 @@ function hasFcm(): boolean {
 const APNS_P8_KEY = Deno.env.get("APNS_P8_KEY") || "";
 const APNS_TEAM_ID = Deno.env.get("APNS_TEAM_ID") || "";
 const APNS_KEY_ID = Deno.env.get("APNS_KEY_ID") || "";
-const APNS_BUNDLE_ID = Deno.env.get("APNS_BUNDLE_ID") || "";
+// Per-app APNs topics. A Residents device token is only ever addressed with
+// the Residents bundle id and vice versa — APNs rejects cross-topic sends with
+// `DeviceTokenNotForTopic`, so keeping them separate is mandatory.
+const APNS_BUNDLE_IDS: Record<string, string> = {
+  residents:
+    Deno.env.get("APNS_BUNDLE_ID_RESIDENTS") || "il.co.groupbuild.residents",
+  suppliers:
+    Deno.env.get("APNS_BUNDLE_ID_SUPPLIERS") || "il.co.groupbuild.suppliers",
+};
+
+function bundleIdFor(appProfile: string | null | undefined): string | null {
+  if (!appProfile) return null;
+  return APNS_BUNDLE_IDS[appProfile] ?? null;
+}
 // Use sandbox for TestFlight / dev builds when set to "true"
 const APNS_USE_SANDBOX = (Deno.env.get("APNS_USE_SANDBOX") || "false").toLowerCase() === "true";
 const APNS_HOST = APNS_USE_SANDBOX
@@ -80,7 +93,7 @@ const APNS_HOST = APNS_USE_SANDBOX
   : "https://api.push.apple.com";
 
 function hasApns(): boolean {
-  return !!(APNS_P8_KEY && APNS_TEAM_ID && APNS_KEY_ID && APNS_BUNDLE_ID);
+  return !!(APNS_P8_KEY && APNS_TEAM_ID && APNS_KEY_ID);
 }
 
 function b64urlEncode(bytes: Uint8Array | string): string {
@@ -141,6 +154,7 @@ async function sendApns(
   deviceToken: string,
   body: Payload,
   url: string,
+  bundleId: string,
 ): Promise<ApnsResult> {
   try {
     const jwt = await getApnsJwt();
@@ -157,7 +171,7 @@ async function sendApns(
       method: "POST",
       headers: {
         authorization: `bearer ${jwt}`,
-        "apns-topic": APNS_BUNDLE_ID,
+        "apns-topic": bundleId,
         "apns-push-type": "alert",
         "apns-priority": "10",
         "content-type": "application/json",
@@ -226,7 +240,7 @@ Deno.serve(async (req) => {
     // Load device tokens (web subscriptions + native tokens)
     const { data: tokens } = await admin
       .from("device_tokens")
-      .select("id, token, platform, device_info")
+      .select("id, token, platform, device_info, app_profile")
       .eq("user_id", body.user_id);
 
     if (!tokens || tokens.length === 0)
@@ -286,7 +300,19 @@ Deno.serve(async (req) => {
           results.push({ platform: "ios", status: "skipped_no_apns" });
           continue;
         }
-        const r = await sendApns(t.token, body, iosUrl);
+        // Route strictly by the app the token was registered from.
+        const bundleId = bundleIdFor(
+          (t as { app_profile?: string | null }).app_profile,
+        );
+        if (!bundleId) {
+          results.push({
+            platform: "ios",
+            status: "skipped_unknown_app_profile",
+            detail: String((t as { app_profile?: string | null }).app_profile ?? "null"),
+          });
+          continue;
+        }
+        const r = await sendApns(t.token, body, iosUrl, bundleId);
         if (r.status === "expired_removed") {
           await admin.from("device_tokens").delete().eq("id", t.id);
         }
