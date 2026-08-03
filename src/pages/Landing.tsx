@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useSmartBack } from "@/lib/backNavigation";
 import { ArrowLeft, Home, Building2, Users, ShieldCheck, Clock, Eye, ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ export default function Landing() {
         {/* Header */}
         <div className="px-5 pt-2 pb-1 flex items-center justify-between">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => smartBack()}
             className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-white shadow-[0_2px_8px_-4px_rgba(10,31,61,0.12)] text-[#1F2937] active:scale-95 transition"
             aria-label="חזרה"
           >

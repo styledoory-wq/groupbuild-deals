@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useSmartBack } from "@/lib/backNavigation";
 import { Helmet } from "react-helmet-async";
 import { ExternalLink, FileText, Globe, Instagram, Facebook, MapPin, Phone, Share2, Navigation, Star, ArrowRight, Tag, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
@@ -322,7 +323,7 @@ export default function SupplierProfile() {
         <div className="bg-slate-50 min-h-screen px-4 pt-4" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }} dir="rtl">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => smartBack()}
             className="inline-flex items-center gap-1 text-[13px] font-semibold text-slate-500 mb-4"
           >
             <ArrowRight className="h-4 w-4" />
@@ -338,7 +339,7 @@ export default function SupplierProfile() {
           </p>
           <div className="flex gap-2">
             <Button onClick={() => navigate("/categories")} className="flex-1">חזרה לקטגוריות</Button>
-            <Button onClick={() => navigate(-1)} variant="outline" className="flex-1">
+            <Button onClick={() => smartBack()} variant="outline" className="flex-1">
               <ArrowRight className="h-4 w-4 ml-2" /> חזרה
             </Button>
           </div>
@@ -389,7 +390,7 @@ export default function SupplierProfile() {
         <div className="px-4 pb-3" style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}>
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => smartBack()}
             className="inline-flex items-center gap-1 text-[13px] font-semibold text-slate-500 mb-3 active:opacity-70"
           >
             <ArrowRight className="h-4 w-4" />

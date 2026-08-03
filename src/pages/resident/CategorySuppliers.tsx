@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useSmartBack } from "@/lib/backNavigation";
 import { ArrowRight, ChevronDown, MapPin, UserPlus } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -286,7 +287,7 @@ export default function CategorySuppliers({ initialCategoryId }: { initialCatego
           {/* Sticky Header — offset for iPhone Dynamic Island / status bar */}
           <header className="sticky z-20 bg-slate-50/92 backdrop-blur-md pb-3 pt-2 -mx-4 px-4" style={{ top: "env(safe-area-inset-top)" }}>
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => smartBack()}
               className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-[#0E6B5A] transition mb-2"
             >
               <ArrowRight className="h-3.5 w-3.5" />
