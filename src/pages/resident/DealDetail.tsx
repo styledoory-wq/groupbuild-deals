@@ -117,6 +117,24 @@ export default function DealDetail() {
   const [participationFee, setParticipationFee] = useState<ResolvedParticipationFee | null>(null);
   const [feeLoading, setFeeLoading] = useState(true);
   const [feeError, setFeeError] = useState<string | null>(null);
+  // System-wide join mode. `null` = still loading, "unavailable" = fail closed.
+  const [feeMode, setFeeMode] = useState<ParticipationFeeMode | "unavailable" | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const mode = await fetchParticipationFeeMode();
+        if (!cancelled) setFeeMode(mode);
+      } catch (e) {
+        console.error("[DealDetail] participation mode unavailable", e);
+        if (!cancelled) setFeeMode("unavailable");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
 
   const openPaymentInstructions = (
