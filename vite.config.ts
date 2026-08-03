@@ -30,6 +30,7 @@ function heroPreloadPlugin(appMode: string) {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const appMode = (env.VITE_APP_MODE || "").toLowerCase();
+  const emptyRoutes = path.resolve(__dirname, "./src/routes/EmptyRoutes.tsx");
 
   return {
     server: {
@@ -62,6 +63,14 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
+        // Build-time route exclusion: the excluded groups resolve to an empty
+        // stub, so Admin code never reaches an iOS bundle and each app only
+        // ships its own screens.
+        ...(appMode === "residents" || appMode === "suppliers"
+          ? { "@/routes/AdminRoutes": emptyRoutes }
+          : {}),
+        ...(appMode === "residents" ? { "@/routes/SupplierRoutes": emptyRoutes } : {}),
+        ...(appMode === "suppliers" ? { "@/routes/ResidentRoutes": emptyRoutes } : {}),
         "@": path.resolve(__dirname, "./src"),
       },
       dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
