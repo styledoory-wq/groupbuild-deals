@@ -17,16 +17,20 @@ type FeeAbsorber = "resident" | "supplier" | "groupbuild";
 // Only providers that are actually implemented in the payment edge functions
 // may be selected. Legacy providers (Grow / Grow Make) are no longer supported.
 const PROVIDERS: Array<{ value: Provider; label: string; hint: string }> = [
-  { value: "cardcom", label: "Cardcom", hint: "ספק הסליקה הפעיל (Test + Live)" },
+  { value: "cardcom", label: "Cardcom", hint: "ספק הסליקה הפעיל (מסוף LIVE)" },
   { value: "stripe", label: "Stripe", hint: "מוכן לשימוש עתידי — אינו פעיל" },
 ];
 
+// Only the secrets required for the CURRENTLY configured PAYMENT_ENVIRONMENT
+// are needed. GroupBuild runs Cardcom in production (LIVE terminal only) —
+// there is no Cardcom sandbox terminal, so the *_TEST variables are not used.
 const providerSecrets: Record<Provider, string> = {
   cardcom:
-    "CARDCOM_TERMINAL_TEST, CARDCOM_API_NAME_TEST, CARDCOM_API_PASSWORD_TEST, CARDCOM_TERMINAL_LIVE, CARDCOM_API_NAME_LIVE, CARDCOM_API_PASSWORD_LIVE, CARDCOM_WEBHOOK_SECRET, PAYMENT_ENVIRONMENT",
+    "PAYMENT_ENVIRONMENT=production, CARDCOM_TERMINAL_LIVE, CARDCOM_API_NAME_LIVE, CARDCOM_API_PASSWORD_LIVE, CARDCOM_WEBHOOK_SECRET",
   stripe:
-    "STRIPE_SECRET_KEY_TEST, STRIPE_WEBHOOK_SECRET_TEST, STRIPE_SECRET_KEY_LIVE, STRIPE_WEBHOOK_SECRET_LIVE, PAYMENT_ENVIRONMENT",
+    "PAYMENT_ENVIRONMENT, STRIPE_SECRET_KEY_TEST, STRIPE_WEBHOOK_SECRET_TEST, STRIPE_SECRET_KEY_LIVE, STRIPE_WEBHOOK_SECRET_LIVE",
 };
+
 
 export default function AdminPaymentSettings() {
   const [id, setId] = useState<string | null>(null);
