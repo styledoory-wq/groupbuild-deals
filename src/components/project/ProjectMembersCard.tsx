@@ -100,7 +100,6 @@ export function ProjectMembersCard({
 }
 
 function MembersSheet({
-  const askConfirm = useConfirm();
   projectId, myUserId, myRole, canInvite, onClose, members, loading,
   projectLoading, projectError, membersError, onRetry,
 }: {
@@ -116,6 +115,7 @@ function MembersSheet({
   membersError: Error | null;
   onRetry: () => void;
 }) {
+  const askConfirm = useConfirm();
   const [inviteRole, setInviteRole] = useState<MemberRole>("partner");
   const [creating, setCreating] = useState(false);
   const [link, setLink] = useState<string | null>(null);
