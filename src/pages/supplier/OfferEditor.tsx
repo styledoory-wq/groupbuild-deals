@@ -22,6 +22,8 @@ import { AreasCombobox, type AreasComboboxValue } from "@/components/areas/Areas
 import { useRegions } from "@/hooks/useRegions";
 import { AiOfferGeneratorCard, type AiOfferDraft } from "@/components/supplier/AiOfferGeneratorCard";
 import { loadSupplierCompletenessForUser, type SupplierCompleteness } from "@/lib/supplierCompleteness";
+import { loadSupplierTermsStatus } from "@/lib/supplierTerms";
+import { SupplierTermsReacceptDialog } from "@/components/terms/SupplierTermsReacceptDialog";
 
 type SupplierLite = {
   id: string;
@@ -89,6 +91,7 @@ export default function OfferEditor() {
   const navigate = useNavigate();
   const { dealId } = useParams<{ dealId: string }>();
   const isEditing = !!dealId;
+  const [needsTermsAccept, setNeedsTermsAccept] = useState(false);
   const [searchParams] = useSearchParams();
   const adminTargetSupplierId = searchParams.get("supplierId");
   const { categories, projects } = useApp();
@@ -513,6 +516,10 @@ export default function OfferEditor() {
 
   const persist = async (status: "active" | "draft") => {
     if (saving || savingDraft) return;
+    if (!isEditing && needsTermsAccept) {
+      toast.error("יש לאשר את הסכם הספקים המעודכן לפני יצירת הצעה חדשה");
+      return;
+    }
     if (status === "active" && !commitmentAccepted) {
       toast.error("יש לסמן את התחייבות הספק כדי לפרסם");
       return;
