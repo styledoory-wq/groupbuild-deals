@@ -10,8 +10,10 @@ import {
   usePendingCount,
 } from "@/lib/editMode";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 export function PreviewModeBanner() {
+  const askConfirm = useConfirm();
   const role = usePreviewRole();
   const navigate = useNavigate();
   const editMode = useEditMode();
@@ -28,9 +30,15 @@ export function PreviewModeBanner() {
     navigate("/admin", { replace: true });
   };
 
-  const toggleEdit = () => {
+  const toggleEdit = async () => {
     if (editMode && pendingCount > 0) {
-      if (!window.confirm("יש שינויים שלא נשמרו. לבטל אותם?")) return;
+      const ok = await askConfirm({
+        title: "ביטול שינויים",
+        description: "יש שינויים שלא נשמרו. לבטל אותם?",
+        confirmLabel: "בטל שינויים",
+        destructive: true,
+      });
+      if (!ok) return;
       clearAllPending();
     }
     setEditMode(!editMode);

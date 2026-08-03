@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Users, Plus, Copy, Check, X, Trash2, MessageCircle, Mail, Crown, Eye, Shield } from "lucide-react";
 import { useApp } from "@/store/AppStore";
 import {
+import { useConfirm } from "@/components/ui/confirm-dialog";
   useProjectMembers, createInvitation, inviteLinkFor, removeMember,
   useMyProjectRole, type MemberRole,
 } from "@/lib/projectClient";
@@ -99,6 +100,7 @@ export function ProjectMembersCard({
 }
 
 function MembersSheet({
+  const askConfirm = useConfirm();
   projectId, myUserId, myRole, canInvite, onClose, members, loading,
   projectLoading, projectError, membersError, onRetry,
 }: {
@@ -272,7 +274,13 @@ function MembersSheet({
                   {canRemove && (
                     <button
                       onClick={async () => {
-                        if (!confirm(isMe ? "לעזוב את הפרויקט?" : `להסיר את ${m.full_name || m.email || "החבר"}?`)) return;
+                        const ok = await askConfirm({
+                          title: isMe ? "לעזוב את הפרויקט?" : "הסרת חבר",
+                          description: isMe ? undefined : `להסיר את ${m.full_name || m.email || "החבר"}?`,
+                          confirmLabel: isMe ? "עזוב" : "הסר",
+                          destructive: true,
+                        });
+                        if (!ok) return;
                         await removeMember(m.id);
                       }}
                       className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0"

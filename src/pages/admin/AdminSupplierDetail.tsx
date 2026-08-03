@@ -27,6 +27,7 @@ import { useApp } from "@/store/AppStore";
 import { useRegions } from "@/hooks/useRegions";
 import { computeCompleteness } from "@/lib/supplierCompleteness";
 import {
+import { useConfirm } from "@/components/ui/confirm-dialog";
   clearWhatsappSent,
   formatSentAt,
   getWhatsappSentAt,
@@ -78,6 +79,7 @@ const empty: EditForm = {
 };
 
 export default function AdminSupplierDetail() {
+  const askConfirm = useConfirm();
   const { supplierId } = useParams<{ supplierId: string }>();
   const navigate = useNavigate();
   const { categories } = useApp();
@@ -100,14 +102,16 @@ export default function AdminSupplierDetail() {
   const reminderSentAt = supplierId ? getWhatsappSentAt(supplierId, "supplier_completion") : null;
   void waSentTick;
 
-  const sendWhatsapp = (kind: "supplier_welcome" | "supplier_completion") => {
+  const sendWhatsapp = async (kind: "supplier_welcome" | "supplier_completion") => {
     if (!supplierId) return;
     const sentAt = getWhatsappSentAt(supplierId, kind);
     if (sentAt) {
       const label = kind === "supplier_welcome" ? "הודעת ברוך הבא" : "תזכורת השלמת פרטים";
-      const ok = window.confirm(
-        `${label} כבר נשלחה בתאריך ${formatSentAt(sentAt)}.\nלשלוח שוב?`,
-      );
+      const ok = await askConfirm({
+        title: "שליחה חוזרת",
+        description: `${label} כבר נשלחה בתאריך ${formatSentAt(sentAt)}. לשלוח שוב?`,
+        confirmLabel: "שלח שוב",
+      });
       if (!ok) return;
     }
     const name = form.contact_name || form.business_name || "";
@@ -283,9 +287,11 @@ export default function AdminSupplierDetail() {
         missing.push("אזור שירות");
       }
       if (missing.length > 0) {
-        const ok = window.confirm(
-          `⚠️ לספק חסרים פרטים חיוניים:\n\n• ${missing.join("\n• ")}\n\nהוא לא יופיע לדיירים ולא יקבל לידים עד להשלמת הפרטים.\nלאשר בכל זאת?`
-        );
+        const ok = await askConfirm({
+          title: "לספק חסרים פרטים חיוניים",
+          description: `${missing.join(", ")} — הספק לא יופיע לדיירים ולא יקבל לידים עד להשלמת הפרטים. לאשר בכל זאת?`,
+          confirmLabel: "אשר בכל זאת",
+        });
         if (!ok) return;
       }
     }
