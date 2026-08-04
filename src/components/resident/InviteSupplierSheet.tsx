@@ -16,22 +16,46 @@ type Props = {
 export function InviteSupplierSheet({ open, onOpenChange }: Props) {
   const [info, setInfo] = useState<ReferralInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const data = await getOrCreateReferralCode();
+      setInfo(data);
+      if (!data.referral_code || !data.referral_link) {
+        setLoadError(true);
+      }
+    } catch (e) {
+      console.warn("[InviteSupplierSheet] load failed", e);
+      setInfo(null);
+      setLoadError(true);
+      toast.error("לא הצלחנו לטעון את קישור ההפניה");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
-    setLoading(true);
     (async () => {
+      setLoading(true);
+      setLoadError(false);
       try {
         const data = await getOrCreateReferralCode();
-        if (!cancelled) setInfo(data);
+        if (cancelled) return;
+        setInfo(data);
+        if (!data.referral_code || !data.referral_link) setLoadError(true);
       } catch (e) {
         console.warn("[InviteSupplierSheet] load failed", e);
         if (!cancelled) {
-          toast.error("לא הצלחנו לטעון את קוד ההפניה");
           setInfo(null);
+          setLoadError(true);
+          toast.error("לא הצלחנו לטעון את קישור ההפניה");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -71,13 +95,17 @@ export function InviteSupplierSheet({ open, onOpenChange }: Props) {
   };
 
   const nativeShare = async () => {
-    if (!link || !navigator.share) return;
+    if (!link) return;
     try {
-      await navigator.share({
-        title: "הזמנה ל־GroupBuild",
-        text: shareText,
-        url: link,
-      });
+      if (navigator.share) {
+        await navigator.share({
+          title: "הזמנה ל־GroupBuild",
+          text: shareText,
+          url: link,
+        });
+      } else {
+        await copyLink();
+      }
     } catch {
       /* cancelled */
     }
@@ -103,27 +131,65 @@ export function InviteSupplierSheet({ open, onOpenChange }: Props) {
           <div className="flex items-center justify-center py-12 text-[#0E6B5A]">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
+        ) : loadError && !code ? (
+          <div className="mt-6 text-center space-y-3">
+            <p className="text-sm text-[#6B7280]">לא הצלחנו לטעון את קישור ההפניה.</p>
+            <button
+              type="button"
+              onClick={() => void load()}
+              className="h-10 px-5 rounded-2xl bg-[#0E6B5A] text-white text-sm font-bold"
+            >
+              נסו שוב
+            </button>
+          </div>
         ) : (
           <>
-            <div className="mt-5 rounded-2xl bg-[#F7F5F0] border border-[#E5E5EA] px-4 py-3 text-right">
-              <div className="text-[11px] font-medium text-[#8E8E93] mb-1">קוד ההפניה שלי</div>
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[18px] font-bold tracking-[0.12em] text-[#0E6B5A] tabular-nums font-mono">
-                  {code || "—"}
-                </span>
-                <button
-                  type="button"
-                  onClick={copyCode}
-                  disabled={!code}
-                  className="h-9 w-9 rounded-full bg-white border border-[#E5E5EA] flex items-center justify-center active:scale-95 transition disabled:opacity-40"
-                  aria-label="העתק קוד"
-                >
-                  {copiedCode ? (
-                    <Check className="h-4 w-4 text-[#0E6B5A]" />
-                  ) : (
-                    <Copy className="h-4 w-4 text-[#1F2937]" />
-                  )}
-                </button>
+            <div className="mt-5 rounded-2xl bg-[#F7F5F0] border border-[#E5E5EA] px-4 py-3 text-right space-y-3">
+              <div>
+                <div className="text-[11px] font-medium text-[#8E8E93] mb-1">קוד ההפניה שלי</div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[18px] font-bold tracking-[0.12em] text-[#0E6B5A] tabular-nums font-mono">
+                    {code || "—"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={copyCode}
+                    disabled={!code}
+                    className="h-9 w-9 rounded-full bg-white border border-[#E5E5EA] flex items-center justify-center active:scale-95 transition disabled:opacity-40"
+                    aria-label="העתק קוד"
+                  >
+                    {copiedCode ? (
+                      <Check className="h-4 w-4 text-[#0E6B5A]" />
+                    ) : (
+                      <Copy className="h-4 w-4 text-[#1F2937]" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-[#E5E5EA]">
+                <div className="text-[11px] font-medium text-[#8E8E93] mb-1">קישור אישי</div>
+                <div className="flex items-start justify-between gap-2">
+                  <p
+                    className="text-[12px] text-[#1F2937] break-all leading-relaxed flex-1 text-left"
+                    dir="ltr"
+                  >
+                    {link || "—"}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={copyLink}
+                    disabled={!link}
+                    className="h-9 w-9 shrink-0 rounded-full bg-white border border-[#E5E5EA] flex items-center justify-center active:scale-95 transition disabled:opacity-40"
+                    aria-label="העתק קישור"
+                  >
+                    {copiedLink ? (
+                      <Check className="h-4 w-4 text-[#0E6B5A]" />
+                    ) : (
+                      <Link2 className="h-4 w-4 text-[#1F2937]" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -163,36 +229,27 @@ export function InviteSupplierSheet({ open, onOpenChange }: Props) {
                 </span>
               </button>
 
-              {typeof navigator !== "undefined" && "share" in navigator ? (
-                <button
-                  type="button"
-                  onClick={nativeShare}
-                  disabled={!link}
-                  className="tap-target flex flex-col items-center gap-1.5 active:scale-[0.95] transition-transform disabled:opacity-40"
-                >
-                  <span className="h-12 w-12 rounded-full flex items-center justify-center bg-[#0E6B5A] text-white shadow-[0_3px_10px_-3px_rgba(14,107,90,0.35)]">
-                    <Share2 className="h-5 w-5" />
-                  </span>
-                  <span className="text-[11px] font-bold text-[#1F2937]">שיתוף</span>
-                </button>
-              ) : (
-                <div className="flex flex-col items-center gap-1.5 opacity-0 pointer-events-none" aria-hidden>
-                  <span className="h-12 w-12" />
-                  <span className="text-[11px]">.</span>
-                </div>
-              )}
-            </div>
-
-            {typeof navigator !== "undefined" && "share" in navigator && (
               <button
                 type="button"
                 onClick={nativeShare}
                 disabled={!link}
-                className="mt-6 w-full h-11 rounded-2xl bg-[#0E6B5A] text-white text-sm font-extrabold inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
+                className="tap-target flex flex-col items-center gap-1.5 active:scale-[0.95] transition-transform disabled:opacity-40"
               >
-                <Share2 className="h-4 w-4" /> שיתוף מהמכשיר
+                <span className="h-12 w-12 rounded-full flex items-center justify-center bg-[#0E6B5A] text-white shadow-[0_3px_10px_-3px_rgba(14,107,90,0.35)]">
+                  <Share2 className="h-5 w-5" />
+                </span>
+                <span className="text-[11px] font-bold text-[#1F2937]">שיתוף</span>
               </button>
-            )}
+            </div>
+
+            <button
+              type="button"
+              onClick={nativeShare}
+              disabled={!link}
+              className="mt-6 w-full h-11 rounded-2xl bg-[#0E6B5A] text-white text-sm font-extrabold inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
+            >
+              <Share2 className="h-4 w-4" /> שיתוף מהמכשיר
+            </button>
           </>
         )}
       </SheetContent>

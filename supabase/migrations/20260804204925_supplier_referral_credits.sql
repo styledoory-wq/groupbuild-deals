@@ -377,9 +377,16 @@ BEGIN
     RAISE EXCEPTION 'not_authenticated';
   END IF;
 
-  IF NOT public.has_role(v_user, 'resident')
-     AND NOT public.has_role(v_user, 'committee')
-     AND NOT public.has_role(v_user, 'admin') THEN
+  -- Allow resident/committee via roles OR profiles.user_type (legacy path).
+  IF NOT (
+    public.has_role(v_user, 'resident')
+    OR public.has_role(v_user, 'committee')
+    OR public.has_role(v_user, 'admin')
+    OR EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE id = v_user AND lower(coalesce(user_type, '')) IN ('resident', 'committee')
+    )
+  ) THEN
     RAISE EXCEPTION 'not_authorized';
   END IF;
 
@@ -528,6 +535,30 @@ BEGIN
   FROM public.profiles
   WHERE referral_code = v_code
   LIMIT 1;
+
+  -- Provisional client codes: GB + first 8 hex of user id (no dashes).
+  IF v_referrer IS NULL AND v_code ~ '^GB[0-9A-F]{8}$' THEN
+    SELECT id INTO v_referrer
+    FROM public.profiles
+    WHERE upper(replace(id::text, '-', '')) LIKE substring(v_code from 3 for 8) || '%'
+    LIMIT 1;
+  END IF;
+
+  -- Raw uuid / uuid-without-dashes as ref.
+  IF v_referrer IS NULL THEN
+    BEGIN
+      IF v_code ~ '^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$' THEN
+        SELECT id INTO v_referrer FROM public.profiles WHERE id = v_code::uuid LIMIT 1;
+      ELSIF v_code ~ '^[0-9A-F]{32}$' THEN
+        SELECT id INTO v_referrer
+        FROM public.profiles
+        WHERE replace(id::text, '-', '') = lower(v_code)
+        LIMIT 1;
+      END IF;
+    EXCEPTION WHEN others THEN
+      v_referrer := NULL;
+    END;
+  END IF;
 
   IF v_referrer IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'error', 'invalid_code');
