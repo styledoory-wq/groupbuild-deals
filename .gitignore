@@ -12,6 +12,9 @@ dist
 dist-ssr
 dist-residents
 dist-suppliers
+# Legacy Capacitor defaults — never commit; native apps live in ios-<profile>/
+ios/
+android/
 resources/*/.icon-source.png
 resources/*/.splash-source.png
 *.local
