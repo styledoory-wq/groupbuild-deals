@@ -11,6 +11,9 @@
           },
           {
             "/": "/share/deal/*"
+          },
+          {
+            "/": "/auth/native-callback*"
           }
         ]
       },
@@ -21,6 +24,9 @@
         "components": [
           {
             "/": "/b/*"
+          },
+          {
+            "/": "/auth/native-callback*"
           }
         ]
       }
