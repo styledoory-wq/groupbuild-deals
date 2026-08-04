@@ -1,5 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
+import { IS_SUPPLIERS_BUILD } from "@/config/appMode";
 
 /**
  * Native "Sign in with Apple" for the Capacitor builds (iOS).
@@ -59,7 +60,7 @@ export async function signInWithAppleNative(): Promise<NativeAppleResult> {
   let fullName = "";
   try {
     const res = await mod.SignInWithApple.authorize({
-      clientId: "il.co.groupbuild.residents",
+      clientId: IS_SUPPLIERS_BUILD ? "il.co.groupbuild.suppliers" : "il.co.groupbuild.residents",
       redirectURI: "https://www.groupbuild.co.il/auth",
       scopes: "name email",
       state: rawNonce.slice(0, 16),
