@@ -131,19 +131,94 @@ export function computeCreditSplit(
 }
 
 async function rpcJson<T>(fn: string, args?: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.rpc(fn as never, (args ?? {}) as never);
+  const { data, error } = await supabase.rpc(
+    fn as never,
+    (args && Object.keys(args).length ? args : undefined) as never,
+  );
   if (error) throw error;
+  // Some PostgREST setups return jsonb as a parsed object; others as a string.
+  if (typeof data === "string") {
+    try {
+      return JSON.parse(data) as T;
+    } catch {
+      return data as T;
+    }
+  }
   return data as T;
 }
 
-export async function getOrCreateReferralCode(): Promise<ReferralInfo> {
-  const data = await rpcJson<ReferralInfo>("get_or_create_referral_code");
+/** Stable provisional code derived from user id — works even before migration. */
+export function provisionalReferralCode(userId: string): string {
+  const hex = userId.replace(/-/g, "").toUpperCase();
+  return `GB${hex.slice(0, 8)}`;
+}
+
+function siteOrigin(): string {
+  if (typeof window !== "undefined" && window.location?.origin) {
+    // Prefer production domain for share links when running on app hosts
+    const host = window.location.hostname;
+    if (host.includes("groupbuild.co.il") || host === "localhost" || host.endsWith(".lovable.app") || host.endsWith(".lovableproject.com")) {
+      return "https://groupbuild.co.il";
+    }
+  }
+  return "https://groupbuild.co.il";
+}
+
+export function buildReferralLink(code: string): string {
+  return `${siteOrigin()}/auth/supplier?mode=signup&ref=${encodeURIComponent(code)}`;
+}
+
+async function fallbackReferralInfo(): Promise<ReferralInfo> {
+  const { data: session } = await supabase.auth.getSession();
+  const userId = session.session?.user?.id;
+  if (!userId) throw new Error("not_authenticated");
+
+  // Prefer an already-persisted code if the column exists.
+  try {
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("referral_code")
+      .eq("id", userId)
+      .maybeSingle();
+    const existing = (prof as { referral_code?: string | null } | null)?.referral_code;
+    if (existing && existing.trim()) {
+      const code = existing.trim().toUpperCase();
+      return {
+        referral_code: code,
+        referral_link: buildReferralLink(code),
+        program_enabled: true,
+        reward_amount: 100,
+      };
+    }
+  } catch {
+    /* column may not exist yet */
+  }
+
+  const code = provisionalReferralCode(userId);
   return {
-    referral_code: String(data?.referral_code ?? ""),
-    referral_link: String(data?.referral_link ?? ""),
-    program_enabled: data?.program_enabled !== false,
-    reward_amount: Number(data?.reward_amount ?? 100),
+    referral_code: code,
+    referral_link: buildReferralLink(code),
+    program_enabled: true,
+    reward_amount: 100,
   };
+}
+
+export async function getOrCreateReferralCode(): Promise<ReferralInfo> {
+  try {
+    const data = await rpcJson<ReferralInfo>("get_or_create_referral_code");
+    const code = String(data?.referral_code ?? "").trim().toUpperCase();
+    if (code) {
+      return {
+        referral_code: code,
+        referral_link: String(data?.referral_link ?? buildReferralLink(code)),
+        program_enabled: data?.program_enabled !== false,
+        reward_amount: Number(data?.reward_amount ?? 100),
+      };
+    }
+  } catch (e) {
+    console.warn("[referral] get_or_create_referral_code failed, using fallback", e);
+  }
+  return fallbackReferralInfo();
 }
 
 export async function getCreditSummary(): Promise<CreditSummary> {

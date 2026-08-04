@@ -25,6 +25,13 @@ describe("supplier referral — share + status", () => {
     expect(statusLabel("rejected")).toBe("ההפניה נדחתה");
     expect(Object.keys(REFERRAL_STATUS_LABELS)).toHaveLength(8);
   });
+
+  it("builds a stable provisional code from user id", async () => {
+    const { provisionalReferralCode, buildReferralLink } = await import("@/lib/supplierReferral");
+    const code = provisionalReferralCode("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
+    expect(code).toBe("GBA1B2C3D4");
+    expect(buildReferralLink(code)).toContain(`ref=${code}`);
+  });
 });
 
 describe("credit split math", () => {
