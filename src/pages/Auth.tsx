@@ -224,6 +224,18 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
           await supabase.auth.signOut();
         }
       } catch { /* ignore */ }
+
+      // Native builds: open Google in the system in-app browser sheet and return
+      // to the app via Universal Link — never navigate the app WebView to a website.
+      const { shouldUseNativeGoogleSignIn, signInWithGoogleNative } = await import("@/lib/nativeGoogleAuth");
+      if (shouldUseNativeGoogleSignIn()) {
+        const res = await signInWithGoogleNative();
+        if (res.ok) return; // onAuthStateChange handles routing
+        if (!res.cancelled) toast.error(translateAuthError(res.message ?? "ההתחברות עם Google נכשלה"));
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

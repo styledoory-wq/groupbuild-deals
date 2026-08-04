@@ -70,6 +70,8 @@ export const publicRoutes = (
     {!IS_RESIDENTS_BUILD && <Route path="/suppliers" element={<SuppliersLanding />} />}
     {!IS_SUPPLIERS_BUILD && <Route path="/residents" element={<ResidentsLanding />} />}
     <Route path="/auth" element={<Auth />} />
+    {/* OAuth return target for the native (Capacitor) in-app browser flow. */}
+    <Route path="/auth/native-callback" element={<Auth />} />
     {!IS_RESIDENTS_BUILD && <Route path="/auth/supplier" element={<Auth lockedRole="supplier" />} />}
     {!IS_SUPPLIERS_BUILD && <Route path="/auth/resident" element={<Auth lockedRole="resident" />} />}
     {IS_RESIDENTS_BUILD && <Route path="/suppliers" element={<Navigate to="/" replace />} />}
