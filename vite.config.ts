@@ -91,6 +91,11 @@ export default defineConfig(({ mode }) => {
   const appMode = (env.VITE_APP_MODE || "").toLowerCase();
   const emptyRoutes = path.resolve(__dirname, "./src/routes/EmptyRoutes.tsx");
 
+  // Profile builds always land in dist-<id>, never the web `dist/` folder —
+  // even if a caller forgets `--outDir` on the CLI.
+  const profileOutDir =
+    appMode === "residents" ? "dist-residents" : appMode === "suppliers" ? "dist-suppliers" : "dist";
+
   return {
     server: {
       host: "::",
@@ -101,6 +106,8 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [react(), heroPreloadPlugin(appMode), stripNativeAssetsPlugin(appMode), mode === "development" && componentTagger()].filter(Boolean),
     build: {
+      outDir: profileOutDir,
+      emptyOutDir: true,
       rollupOptions: {
         output: {
           manualChunks: {
