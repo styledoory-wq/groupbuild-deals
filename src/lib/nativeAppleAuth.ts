@@ -41,9 +41,7 @@ export function shouldUseNativeAppleSignIn(): boolean {
   }
 }
 
-export type NativeAppleResult =
-  | { ok: true }
-  | { ok: false; cancelled?: boolean; message?: string };
+export type NativeAppleResult = { ok: boolean; cancelled?: boolean; message?: string };
 
 export async function signInWithAppleNative(): Promise<NativeAppleResult> {
   let mod: typeof import("@capacitor-community/apple-sign-in");
