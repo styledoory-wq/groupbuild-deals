@@ -28,6 +28,7 @@
     "app:suppliers:open": "APP_PROFILE=suppliers npx tsx scripts/build-app.ts --open"
   },
   "dependencies": {
+    "@capacitor-community/apple-sign-in": "^7.1.0",
     "@capacitor/android": "^8.4.1",
     "@capacitor/core": "^8.4.1",
     "@capacitor/ios": "^8.4.1",
