@@ -1,9 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, XCircle, ScanLine, Keyboard } from "lucide-react";
-import { Html5Qrcode } from "html5-qrcode";
-import { Capacitor } from "@capacitor/core";
-// Loaded lazily: on a native build where the MLKit plugin is not linked,
-// the import must not crash the screen — we fall back to manual entry instead.
+import { useState } from "react";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -27,112 +23,15 @@ type VoucherInfo = {
   profiles?: { full_name: string | null; project_id: string | null } | null;
 };
 
-type RawVoucherInfo = Omit<VoucherInfo, "deals">;
-
-function parseScan(raw: string): string {
-  try {
-    const obj = JSON.parse(raw);
-    if (obj && typeof obj.c === "string") return obj.c.toUpperCase();
-  } catch { /* not JSON */ }
-  return raw.trim().toUpperCase();
-}
-
 export default function SupplierScan() {
-  const [mode, setMode] = useState<"scan" | "manual">("scan");
   const [manualCode, setManualCode] = useState("");
   const [result, setResult] = useState<Result>({ kind: "idle" });
   const [submitting, setSubmitting] = useState(false);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
-
-  useEffect(() => {
-    if (mode !== "scan" || result.kind !== "idle") return;
-
-    // Native (iOS/Android) path: use MLKit BarcodeScanner one-shot scan().
-    if (Capacitor.isNativePlatform()) {
-      let cancelled = false;
-      (async () => {
-        let mod: typeof import("@capacitor-mlkit/barcode-scanning") | null = null;
-        try {
-          mod = await import("@capacitor-mlkit/barcode-scanning");
-          const supported = await mod.BarcodeScanner.isSupported().catch(() => ({ supported: false }));
-          if (!supported.supported) throw new Error("unsupported");
-        } catch {
-          // Plugin not linked in this native build — degrade to manual entry, never crash.
-          if (!cancelled) {
-            toast.error("סריקה אינה זמינה במכשיר זה. הזן קוד ידנית.");
-            setMode("manual");
-          }
-          return;
-        }
-        try {
-          const perm = await mod.BarcodeScanner.requestPermissions();
-          if (perm.camera !== "granted" && perm.camera !== "limited") {
-            toast.error("נדרשת הרשאת מצלמה. עבור לקוד ידני.");
-            setMode("manual");
-            return;
-          }
-          const { barcodes } = await mod.BarcodeScanner.scan({ formats: [mod.BarcodeFormat.QrCode] });
-          if (cancelled) return;
-          const raw = barcodes[0]?.rawValue;
-          if (raw) {
-            await lookup(parseScan(raw));
-          } else {
-            setMode("manual");
-          }
-        } catch {
-          if (!cancelled) {
-            toast.error("לא ניתן להפעיל מצלמה. השתמש בקוד ידני.");
-            setMode("manual");
-          }
-        }
-      })();
-
-      return () => { cancelled = true; };
-    }
-
-    // Web fallback: html5-qrcode using getUserMedia.
-    const elId = "supplier-scan-region";
-    const el = document.getElementById(elId);
-    if (!el) return;
-    const scanner = new Html5Qrcode(elId, { verbose: false });
-    scannerRef.current = scanner;
-    let stopped = false;
-
-    scanner
-      .start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 240, height: 240 } },
-        async (decoded) => {
-          if (stopped) return;
-          stopped = true;
-          try { await scanner.stop(); } catch { /* noop */ }
-          await lookup(parseScan(decoded));
-        },
-        () => { /* ignore scan errors per frame */ }
-      )
-      .catch(() => {
-        toast.error("לא ניתן להפעיל מצלמה. השתמש בקוד ידני.");
-        setMode("manual");
-      });
-
-    return () => {
-      stopped = true;
-      (async () => {
-        try {
-          const s = scanner as unknown as { getState?: () => number };
-          const state = typeof s.getState === "function" ? s.getState() : 2;
-          if (state === 2 /* SCANNING */ || state === 3 /* PAUSED */) {
-            await scanner.stop();
-          }
-        } catch { /* noop */ }
-        try { scanner.clear(); } catch { /* noop */ }
-      })();
-    };
-  }, [mode, result.kind]);
 
   async function lookup(code: string) {
-    setResult({ kind: "looking-up", code });
-    const { data, error } = await supabase.rpc("lookup_voucher_for_supplier", { _code: code });
+    const normalized = code.trim().toUpperCase();
+    setResult({ kind: "looking-up", code: normalized });
+    const { data, error } = await supabase.rpc("lookup_voucher_for_supplier", { _code: normalized });
     if (error) { setResult({ kind: "error", message: "שגיאה בבדיקת השובר" }); return; }
     const res = data as { ok: boolean; error?: string; voucher?: {
       id: string; code: string; reference_number: string; status: string; deal_id: string;
@@ -183,32 +82,9 @@ export default function SupplierScan() {
 
   return (
     <MobileShell>
-      <BackHeader title="סריקת שובר" subtitle="סרוק QR או הזן קוד ידני" />
+      <BackHeader title="מימוש שובר" subtitle="הזן את קוד השובר של הדייר" />
       <div className="px-5 pb-28 space-y-5">
-        <div className="flex gap-2">
-          <Button
-            variant={mode === "scan" ? "default" : "outline"}
-            className="flex-1"
-            onClick={() => { setResult({ kind: "idle" }); setMode("scan"); }}
-          >
-            <ScanLine className="h-4 w-4 ml-2" /> סריקה
-          </Button>
-          <Button
-            variant={mode === "manual" ? "default" : "outline"}
-            className="flex-1"
-            onClick={() => { setResult({ kind: "idle" }); setMode("manual"); }}
-          >
-            <Keyboard className="h-4 w-4 ml-2" /> קוד ידני
-          </Button>
-        </div>
-
-        {result.kind === "idle" && mode === "scan" && (
-          <div className="rounded-[20px] bg-white overflow-hidden shadow-[0_8px_20px_-10px_rgba(10,31,61,0.18),0_2px_4px_-2px_rgba(10,31,61,0.05)]">
-            <div id="supplier-scan-region" className="w-full aspect-square bg-black" />
-          </div>
-        )}
-
-        {result.kind === "idle" && mode === "manual" && (
+        {result.kind === "idle" && (
           <div className="gb-card p-5 space-y-3">
             <label className="text-sm font-bold text-[#1F2937]">קוד שובר</label>
             <Input
@@ -217,8 +93,11 @@ export default function SupplierScan() {
               placeholder="לדוגמה: A1B2C3D4"
               className="font-mono tracking-wider text-center text-lg"
               maxLength={20}
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
             />
-            <Button className="w-full" disabled={manualCode.length < 4} onClick={() => lookup(manualCode)}>
+            <Button className="w-full" disabled={manualCode.trim().length < 4} onClick={() => lookup(manualCode)}>
               בדוק זכאות
             </Button>
           </div>
