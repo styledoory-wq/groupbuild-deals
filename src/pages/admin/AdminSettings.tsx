@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, LayoutGrid, MapPin, Users, MessageSquare, UserCheck, ShieldCheck, Building2, BarChart3, ArrowLeft, LifeBuoy, FlaskConical, Send, Inbox, type LucideIcon } from "lucide-react";
+import { Bell, LayoutGrid, MapPin, Users, MessageSquare, UserCheck, ShieldCheck, Building2, BarChart3, ArrowLeft, LifeBuoy, FlaskConical, Send, Inbox, Gift, Coins, type LucideIcon } from "lucide-react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
@@ -35,6 +35,8 @@ const SECTIONS: { title: string; items: Item[] }[] = [
       { to: "/admin/message-templates", icon: Send, title: "הודעות מוכנות", desc: "תבניות לספקים, דיירים וועדים" },
       { to: "/admin/stats", icon: BarChart3, title: "סטטיסטיקות", desc: "אנליטיקה מלאה ומחזור" },
       { to: "/admin/supplier-trust", icon: ShieldCheck, title: "אמון ספקים", desc: "דירוגי אמון ואישורים" },
+      { to: "/admin/referrals", icon: Gift, title: "הפניות ספקים", desc: "מעקב הזמנות ותגמולי קרדיט" },
+      { to: "/admin/referral-settings", icon: Coins, title: "הגדרות קרדיט הפניות", desc: "הפעלה, סכום תגמול וחלון זמן" },
     ],
   },
 ];

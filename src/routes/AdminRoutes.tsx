@@ -21,6 +21,8 @@ const AdminPaymentSettings = lazy(() => import("@/pages/admin/AdminPaymentSettin
 const AdminRegions = lazy(() => import("@/pages/admin/AdminRegions"));
 const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"));
 const AdminSettings = lazy(() => import("@/pages/admin/AdminSettings"));
+const AdminReferrals = lazy(() => import("@/pages/admin/AdminReferrals"));
+const AdminReferralSettings = lazy(() => import("@/pages/admin/AdminReferralSettings"));
 const AdminPayments = lazy(() => import("@/pages/admin/AdminPayments"));
 const AdminNotifications = lazy(() => import("@/pages/admin/AdminNotifications"));
 const AdminSupport = lazy(() => import("@/pages/admin/AdminSupport"));
@@ -63,6 +65,8 @@ export const adminRoutes = (
     <Route path="/admin/regions" element={g(<AdminRegions />)} />
     <Route path="/admin/users" element={g(<AdminUsers />)} />
     <Route path="/admin/settings" element={g(<AdminSettings />)} />
+    <Route path="/admin/referrals" element={g(<AdminReferrals />)} />
+    <Route path="/admin/referral-settings" element={g(<AdminReferralSettings />)} />
     <Route path="/admin/payments" element={g(<AdminPayments />)} />
     <Route path="/admin/control" element={<Navigate to="/admin" replace />} />
     <Route path="/admin/notifications" element={g(<AdminNotifications />)} />

@@ -20,6 +20,7 @@ const Notifications = lazy(() => import("@/pages/resident/Notifications"));
 const MyOffers = lazy(() => import("@/pages/resident/MyOffers"));
 const MyDocuments = lazy(() => import("@/pages/resident/MyDocuments"));
 const MyDeposits = lazy(() => import("@/pages/resident/MyDeposits"));
+const MyCredits = lazy(() => import("@/pages/resident/MyCredits"));
 const MyVouchers = lazy(() => import("@/pages/resident/MyVouchers"));
 const CreateDemand = lazy(() => import("@/pages/resident/CreateDemand"));
 const MyDemands = lazy(() => import("@/pages/resident/MyDemands"));
@@ -49,6 +50,7 @@ export const residentRoutes = (
     <Route path="/resident/my-offers" element={r(<MyOffers />)} />
     <Route path="/resident/documents" element={r(<MyDocuments />)} />
     <Route path="/resident/deposits" element={r(<MyDeposits />)} />
+    <Route path="/resident/credits" element={r(<MyCredits />)} />
     <Route path="/resident/my-vouchers" element={r(<MyVouchers />)} />
     <Route path="/my-offers" element={<Navigate to="/resident/my-offers" replace />} />
     <Route path="/my-vouchers" element={<Navigate to="/resident/my-vouchers" replace />} />

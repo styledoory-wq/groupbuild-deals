@@ -109,8 +109,12 @@ Deno.serve(async (req) => {
       return json({ ok: true, deposit_id: deposit.id, status: "failed", environment });
     }
 
-    // Amount integrity: never settle a deposit for less than it asks for.
-    const expectedAmount = Number(deposit.amount ?? 0);
+    // Amount integrity: compare against the CARD portion when credit was applied.
+    // Legacy deposits without card_amount fall back to full amount.
+    const creditAmt = Number(deposit.credit_amount ?? 0);
+    const expectedAmount = creditAmt > 0 && deposit.card_amount != null
+      ? Number(deposit.card_amount)
+      : Number(deposit.amount ?? 0);
     if (
       verified.amount !== null && expectedAmount > 0 &&
       Math.abs(verified.amount - expectedAmount) > 0.01
@@ -118,11 +122,17 @@ Deno.serve(async (req) => {
       console.error("[cardcom-webhook] amount mismatch", {
         expected: expectedAmount,
         charged: verified.amount,
+        credit_amount: creditAmt,
       });
       await admin.from("deposit_audit_log").insert({
         deposit_id: deposit.id,
         action: "amount_mismatch",
-        metadata: { expected: expectedAmount, charged: verified.amount, environment },
+        metadata: {
+          expected: expectedAmount,
+          charged: verified.amount,
+          credit_amount: creditAmt,
+          environment,
+        },
       });
       return json({ error: "amount_mismatch" }, 409);
     }

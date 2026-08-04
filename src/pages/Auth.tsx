@@ -23,6 +23,11 @@ import { Seo } from "@/components/seo/Seo";
 import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 import { consumePendingReturnUrl, isSafeReturnUrl, peekPendingReturnUrl } from "@/lib/returnUrl";
 import { ArrowRight } from "lucide-react";
+import {
+  attachReferralCode,
+  readStoredReferralCode,
+  saveReferralCodeFromUrl,
+} from "@/lib/supplierReferral";
 
 
 type Mode = "signin" | "signup";
@@ -56,12 +61,25 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
   const [phone, setPhone] = useState("");
   const [projectId, setProjectId] = useState<string>("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
 
 
   useLayoutEffect(() => {
     document.body.classList.add("auth-fullscreen");
     return () => document.body.classList.remove("auth-fullscreen");
   }, []);
+
+  // Persist ?ref= supplier referral code for signup attach
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) {
+      saveReferralCodeFromUrl(ref);
+      setReferralCode((prev) => prev || ref.trim().toUpperCase());
+    } else {
+      const stored = readStoredReferralCode();
+      if (stored) setReferralCode((prev) => prev || stored);
+    }
+  }, [searchParams]);
 
 
   // If already logged in → redirect by role
@@ -408,6 +426,16 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
         },
       }).catch((e) => console.warn("[signup] welcome email failed", e));
 
+      // Attach supplier referral code (fire-and-forget; never block signup)
+      if (role === "supplier") {
+        const code = (referralCode || readStoredReferralCode() || "").trim();
+        if (code) {
+          void attachReferralCode(code).catch(() => {
+            /* swallow */
+          });
+        }
+      }
+
       // If Supabase returned a live session (auto-confirm on) → go straight in.
       if (data.session) {
         toast.success("נרשמת בהצלחה!");
@@ -706,6 +734,17 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
                       dir="ltr"
                       maxLength={20}
                       className={cn(fieldInput, "text-left")}
+                    />
+                  </div>
+                  <div className={fieldWrap}>
+                    <Input
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                      placeholder="קוד הפניה (אופציונלי)"
+                      maxLength={32}
+                      dir="ltr"
+                      autoComplete="off"
+                      className={cn(fieldInput, "text-left pr-4")}
                     />
                   </div>
                 </>

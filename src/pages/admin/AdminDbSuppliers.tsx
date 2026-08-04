@@ -186,18 +186,28 @@ export default function AdminDbSuppliers() {
   const doApprove = async (r: Row) => {
     const prev = { approval_status: r.approval_status, is_active: r.is_active };
     patchRow(r.id, { approval_status: "approved", is_active: true });
-    const { error } = await supabase.from("suppliers")
-      .update({ approval_status: "approved", is_active: true }).eq("id", r.id);
-    if (error) { patchRow(r.id, prev); toast.error("אישור נכשל"); }
-    else toast.success(`${r.business_name} אושר`);
+    try {
+      const { adminApproveSupplier } = await import("@/lib/supplierReferral");
+      await adminApproveSupplier(r.id, true);
+      supabase.functions.invoke("send-email", { body: { type: "supplier_approved", supplier_id: r.id } })
+        .catch(() => {});
+      toast.success(`${r.business_name} אושר`);
+    } catch {
+      patchRow(r.id, prev);
+      toast.error("אישור נכשל");
+    }
   };
   const doReject = async (r: Row) => {
     const prev = { approval_status: r.approval_status };
     patchRow(r.id, { approval_status: "rejected" });
-    const { error } = await supabase.from("suppliers")
-      .update({ approval_status: "rejected" }).eq("id", r.id);
-    if (error) { patchRow(r.id, prev); toast.error("דחייה נכשלה"); }
-    else toast.success(`${r.business_name} נדחה`);
+    try {
+      const { adminApproveSupplier } = await import("@/lib/supplierReferral");
+      await adminApproveSupplier(r.id, false);
+      toast.success(`${r.business_name} נדחה`);
+    } catch {
+      patchRow(r.id, prev);
+      toast.error("דחייה נכשלה");
+    }
   };
   const doSuspend = async (r: Row) => {
     const prev = { is_active: r.is_active };

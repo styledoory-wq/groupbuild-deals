@@ -12,6 +12,7 @@ import { template as newOffer } from './new-offer.tsx'
 import { template as voucherCreated } from './voucher-created.tsx'
 import { template as joinConfirmation } from './join-confirmation.tsx'
 import { template as refundNotice } from './refund-notice.tsx'
+import { template as referralReward } from './referral-reward.tsx'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -35,4 +36,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'voucher-created': voucherCreated,
   'join-confirmation': joinConfirmation,
   'refund-notice': refundNotice,
+  'referral-reward': referralReward,
 }

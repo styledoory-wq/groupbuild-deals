@@ -47,6 +47,7 @@ import {
   resolveDealParticipationFeeRpc,
   type ResolvedParticipationFee,
 } from "@/lib/platformFees";
+import { computeCreditSplit, getCreditSummary } from "@/lib/supplierReferral";
 import { JOIN_BLOCKED_MESSAGE } from "@/lib/participationPricing";
 import {
   fetchParticipationFeeMode,
@@ -205,6 +206,8 @@ export default function DealDetail() {
 
   // Join modal state
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const [creditAvailable, setCreditAvailable] = useState(0);
+  const [applyCredit, setApplyCredit] = useState(true);
   const [howOpen, setHowOpen] = useState(false);
   const [showRequestGroupBuy, setShowRequestGroupBuy] = useState(false);
   const [submittingGroupBuyRequest, setSubmittingGroupBuyRequest] = useState(false);
@@ -493,7 +496,15 @@ export default function DealDetail() {
 
   const handleJoinClick = () => {
     if (!deal) return;
-    requireAuth("להצטרף להצעות קבוצתיות", () => setShowJoinModal(true), { resumeKey: "join-deal" });
+    requireAuth("להצטרף להצעות קבוצתיות", () => {
+      setShowJoinModal(true);
+      void getCreditSummary()
+        .then((s) => {
+          setCreditAvailable(Number(s.available_balance ?? 0));
+          setApplyCredit(Number(s.available_balance ?? 0) > 0);
+        })
+        .catch(() => setCreditAvailable(0));
+    }, { resumeKey: "join-deal" });
   };
 
   const handleRequestGroupBuy = () => {
@@ -606,12 +617,16 @@ export default function DealDetail() {
       }
       setSubmittingInterest(true);
       try {
+        const split = applyCredit
+          ? computeCreditSplit(feeAmountNow, creditAvailable)
+          : { creditApplied: 0, cardAmount: feeAmountNow, fullyCovered: false };
         const { data: paymentResponse, error: paymentErr } = await supabase.functions.invoke(
           "create-deposit",
           {
             body: {
               deal_id: deal.id,
               participant_count: participantCount,
+              credit_to_apply: split.creditApplied,
               join_payload: {
                 full_name: joinForm.full_name.trim(),
                 phone: joinForm.phone.trim(),
@@ -640,6 +655,19 @@ export default function DealDetail() {
           toast.error(paymentResponse?.message ?? JOIN_BLOCKED_MESSAGE);
           return;
         }
+
+        // Full credit payment — already settled server-side.
+        if (paymentResponse.paid_with_credit) {
+          setInterested(true);
+          setInterestStatus("paid");
+          setInterestDepositStatus("paid");
+          setShowJoinModal(false);
+          setPendingPaymentUrl(null);
+          toast.success("הצטרפת בהצלחה עם קרדיט!");
+          await loadParticipantCount(deal.id);
+          return;
+        }
+
         const paymentUrl =
           typeof paymentResponse.payment_url === "string" ? paymentResponse.payment_url : null;
         if (!paymentUrl) {
@@ -656,6 +684,8 @@ export default function DealDetail() {
                 deal_id: deal.id,
                 deal_title: deal.title,
                 participation_fee: feeAmountNow,
+                credit_amount: split.creditApplied,
+                card_amount: split.cardAmount,
                 user_id: session.session.user.id,
                 user_email: session.session.user.email,
                 full_name: joinForm.full_name.trim(),
@@ -1957,12 +1987,51 @@ export default function DealDetail() {
                   <span className="text-muted-foreground">{PARTICIPATION_FEE_LABEL}</span>
                   <span className="font-bold text-[#0E6B5A]">{ils(feeAmount)}</span>
                 </div>
-                <div className="flex justify-between gap-2 pt-1 border-t border-[#0E6B5A]/15">
-                  <span className="font-extrabold">סה״כ לתשלום כעת</span>
-                  <span className="font-extrabold">{ils(feeAmount)}</span>
-                </div>
+                {creditAvailable > 0 && (
+                  <>
+                    <div className="flex justify-between gap-2">
+                      <span className="text-muted-foreground">יתרת קרדיט</span>
+                      <span className="font-bold">{ils(creditAvailable)}</span>
+                    </div>
+                    <label className="flex items-center gap-2 pt-1 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="accent-[#0E6B5A]"
+                        checked={applyCredit}
+                        onChange={(e) => setApplyCredit(e.target.checked)}
+                      />
+                      <span className="text-muted-foreground">שימוש בקרדיט לתשלום</span>
+                    </label>
+                    {applyCredit && (() => {
+                      const split = computeCreditSplit(feeAmount, creditAvailable);
+                      return (
+                        <>
+                          <div className="flex justify-between gap-2">
+                            <span className="text-muted-foreground">יורד מהקרדיט</span>
+                            <span className="font-bold text-[#0E6B5A]">−{ils(split.creditApplied)}</span>
+                          </div>
+                          <div className="flex justify-between gap-2 pt-1 border-t border-[#0E6B5A]/15">
+                            <span className="font-extrabold">
+                              {split.fullyCovered ? "לתשלום באשראי" : "נותר לתשלום באשראי"}
+                            </span>
+                            <span className="font-extrabold">{ils(split.cardAmount)}</span>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </>
+                )}
+                {!(creditAvailable > 0 && applyCredit) && (
+                  <div className="flex justify-between gap-2 pt-1 border-t border-[#0E6B5A]/15">
+                    <span className="font-extrabold">סה״כ לתשלום כעת</span>
+                    <span className="font-extrabold">{ils(feeAmount)}</span>
+                  </div>
+                )}
                 <div className="text-muted-foreground leading-relaxed pt-1">
                   {PARTICIPATION_FEE_DESCRIPTION}
+                  {creditAvailable > 0 && applyCredit
+                    ? " הקרדיט אינו ניתן למשיכה או להעברה — לשימוש בדמי השתתפות בלבד."
+                    : ""}
                 </div>
               </div>
             )}
@@ -2045,7 +2114,16 @@ export default function DealDetail() {
               ) : feeError ? (
                 "ההצטרפות אינה זמינה"
               ) : depositRequired ? (
-                `המשך לתשלום · ${ils(feeAmount)}`
+                (() => {
+                  const split = applyCredit
+                    ? computeCreditSplit(feeAmount, creditAvailable)
+                    : { creditApplied: 0, cardAmount: feeAmount, fullyCovered: false };
+                  if (split.fullyCovered) return `שלם עם קרדיט · ${ils(feeAmount)}`;
+                  if (split.creditApplied > 0) {
+                    return `המשך לתשלום · ${ils(split.cardAmount)}`;
+                  }
+                  return `המשך לתשלום · ${ils(feeAmount)}`;
+                })()
               ) : (
                 "אשר הצטרפות"
               )}

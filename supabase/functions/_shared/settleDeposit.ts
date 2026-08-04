@@ -20,10 +20,12 @@ export type DepositRow = {
   amount: number | null;
   platform_fee_amount: number | null;
   payment_environment: string | null;
+  credit_amount?: number | null;
+  card_amount?: number | null;
 };
 
 export const DEPOSIT_SELECT =
-  "id,user_id,deal_id,status,metadata,payment_kind,amount,platform_fee_amount,payment_environment";
+  "id,user_id,deal_id,status,metadata,payment_kind,amount,platform_fee_amount,payment_environment,credit_amount,card_amount";
 
 /** Marks a deposit as paid (idempotently) and creates/updates the join. */
 export async function settleDepositPaid(
@@ -105,6 +107,15 @@ export async function settleDepositPaid(
     }
   }
 
+  // Finalize any pending credit reservation for this deposit.
+  if (firstTime && Number(dep.credit_amount ?? 0) > 0) {
+    try {
+      await admin.rpc("finalize_credit_for_deposit", { _deposit_id: dep.id });
+    } catch (e) {
+      console.error("[settleDeposit] finalize credit failed", e);
+    }
+  }
+
   if (firstTime) {
     await admin.from("deposit_audit_log").insert({
       deposit_id: dep.id,
@@ -114,6 +125,8 @@ export async function settleDepositPaid(
         environment: opts.environment,
         transaction_id: opts.transactionId,
         amount: dep.amount,
+        credit_amount: dep.credit_amount ?? 0,
+        card_amount: dep.card_amount ?? null,
         ...(opts.auditMetadata ?? {}),
       },
     });
@@ -139,6 +152,16 @@ export async function settleDepositUnpaid(
     .update({ status: opts.status, provider_payment_url: null })
     .eq("id", dep.id)
     .in("status", ["pending", "awaiting_confirmation"]);
+
+  // Release any reserved credit so the resident can use it again.
+  if (Number(dep.credit_amount ?? 0) > 0) {
+    try {
+      await admin.rpc("release_credit_reservation", { _deposit_id: dep.id });
+    } catch (e) {
+      console.error("[settleDeposit] release credit failed", e);
+    }
+  }
+
   await admin.from("deposit_audit_log").insert({
     deposit_id: dep.id,
     action: opts.status === "expired" ? "checkout_expired" : "checkout_failed",
