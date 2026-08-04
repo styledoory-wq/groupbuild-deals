@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
-  X, ChevronRight, ChevronLeft, Sparkles, Users, Tag, ScanLine,
+  X, ChevronRight, ChevronLeft, Sparkles, Users, Tag, TicketCheck,
   CheckSquare, Briefcase, HelpCircle, type LucideIcon,
 } from "lucide-react";
 
@@ -41,7 +41,7 @@ const RESIDENT_SLIDES: Slide[] = [
   {
     icon: CheckSquare,
     title: "הצטרפות פשוטה",
-    body: "בוחרים הצעה, מצטרפים ומשלמים דמי רצינות. כשהקבוצה מגיעה ליעד — מקבלים שובר מימוש לסריקה אצל הספק.",
+    body: "בוחרים הצעה, מצטרפים ומשלמים דמי רצינות. כשהקבוצה מגיעה ליעד — מקבלים קוד שובר למימוש אצל הספק.",
   },
 ];
 
@@ -62,9 +62,9 @@ const SUPPLIER_SLIDES: Slide[] = [
     body: "כל ליד שמגיע כולל שם, טלפון וההצעה שעניינה אותו. חיוג, וואטסאפ והערות פנימיות במסך אחד.",
   },
   {
-    icon: ScanLine,
-    title: "סריקה תמיד בהישג יד",
-    body: "כפתור הסריקה הצף נמצא בכל מסך. סורקים QR של הלקוח, מאשרים מימוש — וההכנסה נרשמת אוטומטית.",
+    icon: TicketCheck,
+    title: "מימוש שוברים בלחיצה",
+    body: "כפתור המימוש הצף נמצא בכל מסך. מזינים את קוד השובר של הלקוח, מאשרים מימוש — וההכנסה נרשמת אוטומטית.",
   },
 ];
 
@@ -82,7 +82,7 @@ const SUPPLIER_TOUR: TourStep[] = [
   { selector: '[data-tour="nav-offers"]', title: "הצעות", body: "ניהול ההצעות — יצירה, עריכה, הפעלה והשהיה. מחיר מדורג לפי כמות מצטרפים." },
   { selector: '[data-tour="nav-revenue"]', title: "הכנסות", body: "כל ההכנסות והמימושים במקום אחד, כולל גרף חודשי והיסטוריית עסקאות." },
   { selector: '[data-tour="nav-account"]', title: "חשבון", body: "פרטי העסק, מנוי, התראות, תמיכה ויציאה." },
-  { selector: '[data-tour="fab-scan"]', title: "סריקת QR", body: "הכפתור הצף הזה מלווה אתכם בכל מסך — סורקים שובר לקוח ומאשרים מימוש בלחיצה." },
+  { selector: '[data-tour="fab-scan"]', title: "מימוש שובר", body: "הכפתור הצף הזה מלווה אתכם בכל מסך — מזינים את קוד השובר של הלקוח ומאשרים מימוש בלחיצה." },
 ];
 
 const storageKey = (role: Role) => `gb_onboarded_${role}_v1`;
