@@ -255,12 +255,27 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session) await supabase.auth.signOut();
       } catch { /* ignore */ }
+
+      // Native iOS: the managed broker path (/~oauth/initiate) does not exist
+      // inside the app bundle, so use Apple's native sign-in sheet instead.
+      const { shouldUseNativeAppleSignIn, signInWithAppleNative } = await import("@/lib/nativeAppleAuth");
+      if (shouldUseNativeAppleSignIn()) {
+        const res = await signInWithAppleNative();
+        if (!res.ok) {
+          if (!res.cancelled) toast.error(translateAuthError(res.message ?? "ההתחברות עם Apple נכשלה"));
+          setLoading(false);
+          return;
+        }
+        return; // onAuthStateChange handles routing
+      }
+
       // Managed Apple provider. Apple returns the name only on first authorization;
       // it is persisted to the profile by backfillOAuthProfileName on the auth-state event.
       const { lovable } = await import("@/integrations/lovable/index");
       const result = await lovable.auth.signInWithOAuth("apple", {
         redirect_uri: window.location.origin,
       });
+
       if (result.error) {
         toast.error(translateAuthError(result.error.message ?? "ההתחברות עם Apple נכשלה"));
         setLoading(false);
