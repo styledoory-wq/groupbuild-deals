@@ -178,7 +178,7 @@ export const APP_PROFILES: AppProfile[] = [
     version: "1.0.0",
     buildNumber: "1",
     iosUsageDescriptions: {
-      camera: "סריקת שוברי הטבה של דיירים בבית העסק",
+      camera: "צילום תמונות של עבודות ומסמכים להעלאה לפרופיל העסק",
       photoLibrary: "העלאת תמונות של פרויקטים ועבודות לפרופיל הספק",
       photoLibraryAdd: "שמירת הצעות מחיר ותעודות מהאפליקציה לגלריה",
     },
