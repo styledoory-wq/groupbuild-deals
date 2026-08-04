@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { ScanLine } from "lucide-react";
+import { TicketCheck } from "lucide-react";
+
 import { useApp } from "@/store/AppStore";
 
 /**
