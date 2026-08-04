@@ -261,13 +261,12 @@ export default function Auth({ lockedRole }: { lockedRole?: Exclude<Role, "admin
       const { shouldUseNativeAppleSignIn, signInWithAppleNative } = await import("@/lib/nativeAppleAuth");
       if (shouldUseNativeAppleSignIn()) {
         const res = await signInWithAppleNative();
-        if (!res.ok) {
-          if (!res.cancelled) toast.error(translateAuthError(res.message ?? "ההתחברות עם Apple נכשלה"));
-          setLoading(false);
-          return;
-        }
-        return; // onAuthStateChange handles routing
+        if (res.ok) return; // onAuthStateChange handles routing
+        if (!res.cancelled) toast.error(translateAuthError(res.message ?? "ההתחברות עם Apple נכשלה"));
+        setLoading(false);
+        return;
       }
+
 
       // Managed Apple provider. Apple returns the name only on first authorization;
       // it is persisted to the profile by backfillOAuthProfileName on the auth-state event.
