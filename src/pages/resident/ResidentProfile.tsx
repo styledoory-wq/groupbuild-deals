@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LogOut, Building2, Phone, Mail, Pencil, FileText, Wallet,
-  ChevronLeft, Bell, Shield, Ticket, Camera, Trash2,
+  ChevronLeft, Bell, Shield, Ticket, Camera, Trash2, Coins,
 } from "lucide-react";
 
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -105,6 +105,7 @@ export default function ResidentProfile() {
       ? { label: "ניהול ועד הבית", icon: Building2, onClick: () => navigate("/committee") }
       : { label: "בקשת הרשאת ועד בית", icon: Building2, onClick: () => navigate("/committee/request") },
     { label: "הפיקדונות שלי", icon: Wallet, onClick: () => navigate("/resident/deposits") },
+    { label: "הקרדיטים שלי", icon: Coins, onClick: () => navigate("/resident/credits") },
     { label: "ההטבה שלי", icon: Ticket, onClick: () => navigate("/resident/my-vouchers") },
     { label: "המסמכים שלי", icon: FileText, onClick: () => navigate("/resident/documents") },
     { label: "התראות", icon: Bell, onClick: () => navigate("/resident/notifications") },

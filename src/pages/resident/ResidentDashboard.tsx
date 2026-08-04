@@ -21,6 +21,9 @@ import { SmartImg } from "@/components/ui/SmartImg";
 import { ProjectStagesStepper } from "@/components/project/ProjectStagesStepper";
 import { getStagesLite } from "@/lib/projectStagesLite";
 import { CURRENT_IDX_KEY } from "@/lib/projectStore";
+import { InviteSupplierCard } from "@/components/resident/InviteSupplierCard";
+import { InviteSupplierSheet } from "@/components/resident/InviteSupplierSheet";
+import { getCreditSummary } from "@/lib/supplierReferral";
 
 const STAGES: { id: StageId; title: string; description: string; icon: typeof PencilRuler; dbStage?: string }[] = [
   { id: "planning",     title: "תכנון ועיצוב",       description: "אדריכלות ועיצוב פנים",            icon: PencilRuler, dbStage: "planning" },
@@ -68,6 +71,9 @@ export default function ResidentDashboard() {
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [suppliers, setSuppliers] = useState<{ id: string; business_name: string; categories?: string[] | null }[]>([]);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [showInviteCard, setShowInviteCard] = useState(true);
+  const [inviteRewardAmount, setInviteRewardAmount] = useState(100);
 
   useEffect(() => {
     if (!authReady || !user?.id) return;
@@ -259,6 +265,23 @@ export default function ResidentDashboard() {
     return () => { cancelled = true; };
   }, [authReady, user?.id]);
 
+  // Referral program: fail-open (show card) if fetch fails
+  useEffect(() => {
+    if (!authReady || !user?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const summary = await getCreditSummary();
+        if (cancelled) return;
+        setShowInviteCard(summary.program_enabled !== false);
+        setInviteRewardAmount(Number(summary.reward_amount) || 100);
+      } catch {
+        if (!cancelled) setShowInviteCard(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [authReady, user?.id]);
+
   // Load categories & suppliers when quote sheet opens
   useEffect(() => {
     if (!quoteOpen) return;
@@ -360,6 +383,13 @@ export default function ResidentDashboard() {
           <Kpi label="פעילות" value={areaDeals.length.toString()} accent />
           <Kpi label="ספקים" value={areaSuppliersCount.toString()} />
         </section>
+
+        {showInviteCard && (
+          <InviteSupplierCard
+            rewardAmount={inviteRewardAmount}
+            onInvite={() => setInviteOpen(true)}
+          />
+        )}
 
         {/* (Project management is now the main quick-action tile below) */}
 
@@ -518,6 +548,8 @@ export default function ResidentDashboard() {
           onClose={() => setQuoteOpen(false)}
         />
       )}
+
+      <InviteSupplierSheet open={inviteOpen} onOpenChange={setInviteOpen} />
     </div>
   );
 }

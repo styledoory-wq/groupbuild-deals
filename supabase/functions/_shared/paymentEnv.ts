@@ -12,7 +12,7 @@
  */
 
 export type PaymentEnvironment = "test" | "production";
-export type SupportedProvider = "stripe" | "cardcom";
+export type SupportedProvider = "stripe" | "cardcom" | "credit";
 
 export const SUPPORTED_PROVIDERS: SupportedProvider[] = ["stripe", "cardcom"];
 

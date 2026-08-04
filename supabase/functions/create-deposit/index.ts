@@ -35,6 +35,8 @@ interface CreateDepositBody {
   deal_id?: string;
   participant_count?: number;
   join_payload?: Record<string, unknown>;
+  /** Optional: how much credit the client wants to apply. Server caps by balance + fee. */
+  credit_to_apply?: number;
 }
 
 const BLOCKED_MESSAGE = "ההצטרפות לעסקה אינה זמינה כרגע. נסו שוב מאוחר יותר.";
@@ -200,39 +202,69 @@ Deno.serve(async (req) => {
     const amount = feeAmount;
 
     // ---------------------------------------------------------------
+    // Credit split (server-authoritative). Client may suggest an amount;
+    // we never trust it beyond capping by wallet balance and fee.
+    // ---------------------------------------------------------------
+    let requestedCredit = Number(body.credit_to_apply ?? 0);
+    if (!Number.isFinite(requestedCredit) || requestedCredit < 0) requestedCredit = 0;
+    requestedCredit = Math.min(requestedCredit, amount);
+
+    let creditAmount = 0;
+    if (requestedCredit > 0) {
+      const { data: wallet } = await admin
+        .from("resident_credit_wallets")
+        .select("available_balance,allow_negative")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const available = Number(wallet?.available_balance ?? 0);
+      const allowNeg = Boolean(wallet?.allow_negative);
+      creditAmount = allowNeg
+        ? requestedCredit
+        : Math.min(requestedCredit, Math.max(0, available));
+      // Round to 2 decimals (agorot)
+      creditAmount = Math.round(creditAmount * 100) / 100;
+    }
+    const cardAmount = Math.round((amount - creditAmount) * 100) / 100;
+    const fullyCoveredByCredit = cardAmount <= 0.001;
+
+    // ---------------------------------------------------------------
     // Provider + environment. SINGLE source of truth, no fallback.
+    // For full-credit payments we skip Cardcom entirely.
     // ---------------------------------------------------------------
     const environment = getPaymentEnvironment();
 
-    const { data: settings } = await admin
-      .from("system_settings")
-      .select("active_payment_provider")
-      .limit(1)
-      .maybeSingle();
-    const configuredProvider = String(settings?.active_payment_provider ?? "");
+    let paymentProvider: SupportedProvider | "credit" = "cardcom";
+    if (!fullyCoveredByCredit) {
+      const { data: settings } = await admin
+        .from("system_settings")
+        .select("active_payment_provider")
+        .limit(1)
+        .maybeSingle();
+      const configuredProvider = String(settings?.active_payment_provider ?? "");
 
-    if (!SUPPORTED_PROVIDERS.includes(configuredProvider as SupportedProvider)) {
-      console.error("[create-deposit] unsupported active_payment_provider", {
-        configuredProvider,
-      });
-      return json(
-        { error: "payment_provider_unsupported", provider: configuredProvider, message: BLOCKED_MESSAGE },
-        503,
-      );
-    }
-    const paymentProvider = configuredProvider as SupportedProvider;
+      if (!SUPPORTED_PROVIDERS.includes(configuredProvider as SupportedProvider)) {
+        console.error("[create-deposit] unsupported active_payment_provider", {
+          configuredProvider,
+        });
+        return json(
+          { error: "payment_provider_unsupported", provider: configuredProvider, message: BLOCKED_MESSAGE },
+          503,
+        );
+      }
+      paymentProvider = configuredProvider as SupportedProvider;
 
-    // Fail closed: the configured provider must be fully credentialed for THIS
-    // environment. We never silently switch to another provider.
-    if (!providerIsReady(paymentProvider, environment)) {
-      console.error("[create-deposit] provider not credentialed", {
-        paymentProvider,
-        environment,
-      });
-      return json(
-        { error: "payment_provider_unavailable", provider: paymentProvider, environment, message: BLOCKED_MESSAGE },
-        503,
-      );
+      if (!providerIsReady(paymentProvider, environment)) {
+        console.error("[create-deposit] provider not credentialed", {
+          paymentProvider,
+          environment,
+        });
+        return json(
+          { error: "payment_provider_unavailable", provider: paymentProvider, environment, message: BLOCKED_MESSAGE },
+          503,
+        );
+      }
+    } else {
+      paymentProvider = "credit";
     }
 
     // ---------------------------------------------------------------
@@ -241,7 +273,7 @@ Deno.serve(async (req) => {
     // ---------------------------------------------------------------
     const { data: existingDeposit } = await admin
       .from("deposits")
-      .select("id,status,amount,provider_payment_url,payment_provider,payment_environment")
+      .select("id,status,amount,credit_amount,card_amount,provider_payment_url,payment_provider,payment_environment")
       .eq("user_id", userId)
       .eq("deal_id", deal.id)
       .eq("is_deleted", false)
@@ -259,7 +291,8 @@ Deno.serve(async (req) => {
 
     const reusable = existingDeposit &&
         existingDeposit.payment_environment === environment &&
-        existingDeposit.payment_provider === paymentProvider
+        (existingDeposit.payment_provider === paymentProvider ||
+          (fullyCoveredByCredit && existingDeposit.payment_provider === "credit"))
       ? existingDeposit
       : null;
 
@@ -276,6 +309,8 @@ Deno.serve(async (req) => {
           deal_id: deal.id,
           supplier_id: deal.supplier_id,
           amount,
+          credit_amount: creditAmount,
+          card_amount: cardAmount,
           gross_deposit_amount: amount,
           net_deposit_amount: amount,
           supplier_deduction_amount: 0,
@@ -290,7 +325,6 @@ Deno.serve(async (req) => {
           platform_fee_rule_id: ruleId,
           platform_fee_amount: amount,
           deal_price_snapshot: basePrice > 0 ? basePrice : null,
-
           metadata: {
             source: "create_deposit_participation_fee",
             deal_title: deal.title ?? null,
@@ -298,6 +332,8 @@ Deno.serve(async (req) => {
             deal_price: basePrice > 0 ? basePrice : null,
             fee_rule_id: ruleId,
             fee_source: feeSource,
+            credit_amount: creditAmount,
+            card_amount: cardAmount,
             join_payload: joinPayload,
           },
         })
@@ -305,14 +341,17 @@ Deno.serve(async (req) => {
         .single();
       if (insErr) throw insErr;
       depositId = inserted.id;
-    } else if (joinPayload) {
+    } else {
       await admin
         .from("deposits")
         .update({
           amount,
+          credit_amount: creditAmount,
+          card_amount: cardAmount,
           platform_fee_amount: amount,
           platform_fee_rule_id: ruleId,
           deal_price_snapshot: basePrice > 0 ? basePrice : null,
+          payment_provider: paymentProvider,
           metadata: {
             source: "create_deposit_participation_fee",
             deal_title: deal.title ?? null,
@@ -320,10 +359,77 @@ Deno.serve(async (req) => {
             deal_price: basePrice > 0 ? basePrice : null,
             fee_rule_id: ruleId,
             fee_source: feeSource,
+            credit_amount: creditAmount,
+            card_amount: cardAmount,
             join_payload: joinPayload,
           },
         })
         .eq("id", depositId);
+    }
+
+    // Reserve credit atomically before charging the card / settling.
+    // If reusing a deposit, release any prior reservation first so the
+    // amount can be recalculated against the current wallet balance.
+    if (reusable?.id && Number(reusable.credit_amount ?? 0) > 0) {
+      await admin.rpc("release_credit_reservation", { _deposit_id: depositId });
+    }
+    if (creditAmount > 0) {
+      const { data: reserveResult, error: reserveErr } = await admin.rpc(
+        "reserve_credit_for_deposit",
+        {
+          _user_id: userId,
+          _deal_id: deal.id,
+          _deposit_id: depositId,
+          _amount: creditAmount,
+        },
+      );
+      if (reserveErr || !reserveResult || reserveResult.ok === false) {
+        console.error("[create-deposit] credit reserve failed", reserveErr ?? reserveResult);
+        return json({
+          error: "credit_reserve_failed",
+          message: "לא הצלחנו לשמור את הקרדיט. בדקו את היתרה ונסו שוב.",
+        }, 409);
+      }
+      creditAmount = Number(reserveResult.credit_amount ?? creditAmount);
+    }
+
+    // Full credit → settle immediately, no Cardcom.
+    if (fullyCoveredByCredit) {
+      const { settleDepositPaid } = await import("../_shared/settleDeposit.ts");
+      const { data: depRow } = await admin
+        .from("deposits")
+        .select("id,user_id,deal_id,status,metadata,payment_kind,amount,platform_fee_amount,payment_environment,credit_amount,card_amount")
+        .eq("id", depositId!)
+        .single();
+      if (!depRow) {
+        return json({ error: "deposit_missing", message: BLOCKED_MESSAGE }, 500);
+      }
+      await settleDepositPaid(admin, depRow, {
+        provider: "credit" as SupportedProvider,
+        environment,
+        transactionId: `credit:${depositId}`,
+        auditMetadata: { credit_amount: creditAmount, card_amount: 0 },
+      });
+      await admin.rpc("finalize_credit_for_deposit", { _deposit_id: depositId });
+      const { sendJoinConfirmationEmail } = await import("../_shared/afterPayment.ts");
+      await sendJoinConfirmationEmail(admin, depositId!);
+
+      return json({
+        ok: true,
+        deposit_id: depositId,
+        amount,
+        credit_amount: creditAmount,
+        card_amount: 0,
+        deal_price: basePrice,
+        participation_fee: amount,
+        total_due: amount,
+        fee_rule_id: ruleId,
+        currency,
+        payment_provider: "credit",
+        payment_environment: environment,
+        payment_url: null,
+        paid_with_credit: true,
+      });
     }
 
     let paymentUrl: string | null =
@@ -331,9 +437,12 @@ Deno.serve(async (req) => {
         ? reusable.provider_payment_url
         : null;
 
+    // For split payments, Cardcom must charge only the card portion.
+    const chargeAmount = cardAmount;
+
     if (!paymentUrl && paymentProvider === "stripe") {
       paymentUrl = await createStripeCheckout({
-        amount,
+        amount: chargeAmount,
         currency,
         dealId: deal.id,
         dealTitle: deal.title ?? "דמי שירות GroupBuild",
@@ -344,7 +453,7 @@ Deno.serve(async (req) => {
       });
     } else if (!paymentUrl && paymentProvider === "cardcom") {
       paymentUrl = await createCardcomCheckout({
-        amount,
+        amount: chargeAmount,
         dealId: deal.id,
         dealTitle: deal.title ?? "דמי שירות GroupBuild",
         depositId: depositId!,
@@ -354,6 +463,10 @@ Deno.serve(async (req) => {
     }
 
     if (!paymentUrl) {
+      // Release reserved credit if checkout creation failed.
+      if (creditAmount > 0) {
+        await admin.rpc("release_credit_reservation", { _deposit_id: depositId });
+      }
       console.error("[create-deposit] checkout creation failed", {
         provider: paymentProvider,
         environment,
@@ -367,6 +480,8 @@ Deno.serve(async (req) => {
         provider_payment_url: paymentUrl,
         payment_provider: paymentProvider,
         payment_environment: environment,
+        credit_amount: creditAmount,
+        card_amount: cardAmount,
       })
       .eq("id", depositId!);
 
@@ -375,12 +490,16 @@ Deno.serve(async (req) => {
       provider: paymentProvider,
       environment,
       amount,
+      credit_amount: creditAmount,
+      card_amount: cardAmount,
     });
 
     return json({
       ok: true,
       deposit_id: depositId,
       amount,
+      credit_amount: creditAmount,
+      card_amount: cardAmount,
       deal_price: basePrice,
       participation_fee: amount,
       total_due: amount,
@@ -389,6 +508,7 @@ Deno.serve(async (req) => {
       payment_provider: paymentProvider,
       payment_environment: environment,
       payment_url: paymentUrl,
+      paid_with_credit: false,
     });
 
   } catch (e) {

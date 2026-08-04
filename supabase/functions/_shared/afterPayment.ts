@@ -35,11 +35,14 @@ export type FullDepositRow = {
   refund_status: string | null;
   join_email_sent_at: string | null;
   refund_email_sent_at: string | null;
+  credit_amount?: number | null;
+  card_amount?: number | null;
 };
 
 export const FULL_DEPOSIT_SELECT =
   "id,user_id,deal_id,status,amount,platform_fee_amount,payment_kind,payment_provider," +
-  "payment_environment,provider_transaction_id,paid_at,refund_status,join_email_sent_at,refund_email_sent_at";
+  "payment_environment,provider_transaction_id,paid_at,refund_status,join_email_sent_at,refund_email_sent_at," +
+  "credit_amount,card_amount";
 
 type DealInfo = { id: string; title: string; supplierName: string | null };
 
@@ -221,11 +224,19 @@ export async function refundParticipationDeposit(
   if (dep.status !== "paid") {
     return { deposit_id: depositId, status: "skipped", reason: "not_paid" };
   }
-  if (dep.payment_provider !== "cardcom") {
-    return { deposit_id: depositId, status: "skipped", reason: "provider_mismatch" };
-  }
-  if (!dep.provider_transaction_id) {
+
+  const creditAmount = Number(dep.credit_amount ?? 0);
+  const cardAmount = dep.card_amount != null
+    ? Number(dep.card_amount)
+    : (creditAmount > 0 ? Math.max(0, Number(dep.amount ?? 0) - creditAmount) : Number(dep.amount ?? dep.platform_fee_amount ?? 0));
+  const isCreditOnly = dep.payment_provider === "credit" || (creditAmount > 0 && cardAmount <= 0.001);
+  const needsCardcom = !isCreditOnly && dep.payment_provider === "cardcom" && cardAmount > 0.001;
+
+  if (needsCardcom && !dep.provider_transaction_id) {
     return { deposit_id: depositId, status: "skipped", reason: "missing_transaction_id" };
+  }
+  if (!isCreditOnly && !needsCardcom && dep.payment_provider !== "credit") {
+    return { deposit_id: depositId, status: "skipped", reason: "provider_mismatch" };
   }
 
   // Atomic claim — a second cron run or a double click cannot enter here.
@@ -245,78 +256,99 @@ export async function refundParticipationDeposit(
   }
 
   const environment = (dep.payment_environment as PaymentEnvironment) ?? getPaymentEnvironment();
-  const creds = getCardcomCredentials(environment);
-  const amount = Number(dep.amount ?? dep.platform_fee_amount ?? 0);
-
-  if (!creds) {
-    return await markRefundFailed(admin, dep, opts, {
-      code: "provider_not_configured",
-      description: "Cardcom credentials missing",
-      environment,
-    });
-  }
-
-  let code = -1;
+  let code = 0;
   let description: string | null = null;
   let refundId: string | null = null;
-  try {
-    const res = await fetch(`${CARDCOM_API_BASE}/Transactions/RefundByTransactionId`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ApiName: creds.apiName,
-        ApiPassword: creds.apiPassword,
-        TerminalNumber: Number(creds.terminal),
-        TransactionId: Number(dep.provider_transaction_id),
-        PartialSum: amount,
-      }),
-    });
-    const data = (await res.json().catch(() => null)) as Record<string, unknown> | null;
-    code = Number(data?.ResponseCode ?? -1);
-    description = typeof data?.Description === "string" ? data.Description : null;
-    // Cardcom is inconsistent about the refund identifier field name across
-    // terminals/versions, so probe every documented alias. Only field NAMES are
-    // logged (never values) so nothing sensitive reaches the logs.
-    const refundIdKeys = [
-      "TranzactionId",
-      "TransactionId",
-      "NewTranzactionId",
-      "NewTransactionId",
-      "InternalDealNumber",
-      "RefundTranzactionId",
-      "RefundTransactionId",
-    ];
-    for (const k of refundIdKeys) {
-      const v = data?.[k];
-      if (v != null && String(v).length > 0 && String(v) !== "0") {
-        refundId = String(v);
-        break;
-      }
-    }
-    if (!refundId && data) {
-      console.log("[afterPayment] refund response had no known refund id field", {
-        deposit: dep.id,
-        keys: Object.keys(data),
-      });
-    }
-    if (!res.ok || code !== 0) {
+
+  // 1) Refund Cardcom card portion (if any)
+  if (needsCardcom) {
+    const creds = getCardcomCredentials(environment);
+    if (!creds) {
       return await markRefundFailed(admin, dep, opts, {
-        code: String(code),
-        description: description ?? `HTTP ${res.status}`,
+        code: "provider_not_configured",
+        description: "Cardcom credentials missing",
         environment,
       });
     }
 
-  } catch (e) {
-    return await markRefundFailed(admin, dep, opts, {
-      code: "network_error",
-      description: String(e),
-      environment,
-    });
+    try {
+      const res = await fetch(`${CARDCOM_API_BASE}/Transactions/RefundByTransactionId`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ApiName: creds.apiName,
+          ApiPassword: creds.apiPassword,
+          TerminalNumber: Number(creds.terminal),
+          TransactionId: Number(dep.provider_transaction_id),
+          PartialSum: cardAmount,
+        }),
+      });
+      const data = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+      code = Number(data?.ResponseCode ?? -1);
+      description = typeof data?.Description === "string" ? data.Description : null;
+      const refundIdKeys = [
+        "TranzactionId",
+        "TransactionId",
+        "NewTranzactionId",
+        "NewTransactionId",
+        "InternalDealNumber",
+        "RefundTranzactionId",
+        "RefundTransactionId",
+      ];
+      for (const k of refundIdKeys) {
+        const v = data?.[k];
+        if (v != null && String(v).length > 0 && String(v) !== "0") {
+          refundId = String(v);
+          break;
+        }
+      }
+      if (!refundId && data) {
+        console.log("[afterPayment] refund response had no known refund id field", {
+          deposit: dep.id,
+          keys: Object.keys(data),
+        });
+      }
+      if (!res.ok || code !== 0) {
+        return await markRefundFailed(admin, dep, opts, {
+          code: String(code),
+          description: description ?? `HTTP ${res.status}`,
+          environment,
+        });
+      }
+    } catch (e) {
+      return await markRefundFailed(admin, dep, opts, {
+        code: "network_error",
+        description: String(e),
+        environment,
+      });
+    }
+  }
+
+  // 2) Refund credit portion back to wallet (idempotent RPC)
+  if (creditAmount > 0) {
+    try {
+      const { error: creditErr } = await admin.rpc("refund_credit_for_deposit", {
+        _deposit_id: dep.id,
+      });
+      if (creditErr) {
+        console.error("[afterPayment] credit refund failed", creditErr);
+        // If Cardcom already refunded, we still mark carefully — admin alert.
+        await admin.rpc("notify_admins", {
+          _title: "כשל בהחזרת קרדיט",
+          _body: `החזר Cardcom הצליח אך החזרת הקרדיט נכשלה. נדרש טיפול ידני.`,
+          _type: "system",
+          _link: "/admin/deposits",
+          _metadata: { deposit_id: dep.id, severity: "critical" },
+        }).catch(() => {});
+      }
+    } catch (e) {
+      console.error("[afterPayment] credit refund exception", e);
+    }
   }
 
   // Provider confirmed — only now does the record change.
   const nowIso = new Date().toISOString();
+  const totalRefunded = (needsCardcom ? cardAmount : 0) + (creditAmount > 0 ? creditAmount : 0);
   await admin
     .from("deposits")
     .update({
@@ -348,14 +380,16 @@ export async function refundParticipationDeposit(
     user_id: opts.actorId ?? null,
     metadata: {
       environment,
-      amount,
+      amount: totalRefunded,
+      card_amount: cardAmount,
+      credit_amount: creditAmount,
       reason: opts.reason,
       trigger: opts.trigger,
       provider_refund_id: refundId,
-      // When Cardcom returns no dedicated refund identifier, the original
-      // transaction id + refunded_at timestamp are the reconciliation key.
       refund_reference: refundId ?? dep.provider_transaction_id,
-      refund_reference_source: refundId ? "cardcom_refund_id" : "original_transaction_id",
+      refund_reference_source: refundId
+        ? "cardcom_refund_id"
+        : (isCreditOnly ? "credit_only" : "original_transaction_id"),
       transaction_id: dep.provider_transaction_id,
       refunded_at: nowIso,
       response_code: code,
@@ -363,13 +397,18 @@ export async function refundParticipationDeposit(
     },
   });
 
-
-  await notifyResidentRefund(admin, dep, { amount, reason: opts.reason, refundedAt: nowIso });
+  await notifyResidentRefund(admin, dep, {
+    amount: totalRefunded,
+    creditAmount,
+    cardAmount: needsCardcom ? cardAmount : 0,
+    reason: opts.reason,
+    refundedAt: nowIso,
+  });
 
   return {
     deposit_id: dep.id,
     status: "refunded",
-    amount,
+    amount: totalRefunded,
     provider_refund_id: refundId,
   };
 }
@@ -439,14 +478,29 @@ async function markRefundFailed(
 async function notifyResidentRefund(
   admin: SupabaseClient,
   dep: FullDepositRow,
-  info: { amount: number; reason: string; refundedAt: string },
+  info: {
+    amount: number;
+    creditAmount?: number;
+    cardAmount?: number;
+    reason: string;
+    refundedAt: string;
+  },
 ) {
   try {
     const deal = await loadDeal(admin, dep.deal_id);
     const dealTitle = deal?.title ?? "העסקה";
     const title = "בוצע החזר כספי";
-    const body =
-      `העסקה "${dealTitle}" לא יצאה לפועל ולכן הוחזרו לך ₪${info.amount}. הזיכוי בוצע לכרטיס שבו שילמת.`;
+    const creditAmt = Number(info.creditAmount ?? 0);
+    const cardAmt = Number(info.cardAmount ?? 0);
+    let body =
+      `העסקה "${dealTitle}" לא יצאה לפועל ולכן הוחזרו לך ₪${info.amount}.`;
+    if (creditAmt > 0 && cardAmt > 0) {
+      body += ` ₪${creditAmt} הוחזרו לקרדיט ו־₪${cardAmt} לכרטיס האשראי.`;
+    } else if (creditAmt > 0) {
+      body += ` הזיכוי הוחזר לארנק הקרדיטים שלך.`;
+    } else {
+      body += ` הזיכוי בוצע לכרטיס שבו שילמת.`;
+    }
 
     // In-app notification
     if (dep.user_id) {
@@ -460,6 +514,8 @@ async function notifyResidentRefund(
           deposit_id: dep.id,
           deal_id: dep.deal_id,
           amount: info.amount,
+          credit_amount: creditAmt,
+          card_amount: cardAmt,
           reason: info.reason,
           kind: "refund",
         },

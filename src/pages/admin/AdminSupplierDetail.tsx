@@ -265,6 +265,13 @@ export default function AdminSupplierDetail() {
       }
       toast.success("הספק עודכן בהצלחה");
       if (prevApproval !== "approved" && form.approval_status === "approved") {
+        try {
+          const { adminApproveSupplier } = await import("@/lib/supplierReferral");
+          // Ensure referral reward path runs even when approved via the edit form.
+          await adminApproveSupplier(supplierId, true);
+        } catch (e) {
+          console.warn("[referral] approve hook failed", e);
+        }
         supabase.functions.invoke("send-email", { body: { type: "supplier_approved", supplier_id: supplierId } })
           .catch((e) => console.warn("[email] supplier_approved failed", e));
       }
@@ -296,10 +303,8 @@ export default function AdminSupplierDetail() {
       }
     }
     try {
-      const payload: { approval_status: "approved" | "rejected"; is_active?: boolean } = { approval_status: next };
-      if (next === "approved") payload.is_active = true;
-      const { error } = await supabase.from("suppliers").update(payload).eq("id", supplierId);
-      if (error) throw error;
+      const { adminApproveSupplier } = await import("@/lib/supplierReferral");
+      await adminApproveSupplier(supplierId, next === "approved");
       if (next === "approved") {
         supabase.functions.invoke("send-email", { body: { type: "supplier_approved", supplier_id: supplierId } })
           .catch((e) => console.warn("[email] supplier_approved failed", e));
