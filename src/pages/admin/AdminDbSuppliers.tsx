@@ -111,9 +111,18 @@ export default function AdminDbSuppliers() {
     }
     const base = (data as Row[]) ?? [];
 
+    // Resolve category names directly from the catalog table so archived /
+    // inactive categories still display a name instead of "ללא תחום".
+    const allCatIds = [...new Set(base.flatMap((r) => r.categories ?? []))];
+    const { data: catRows } = allCatIds.length
+      ? await supabase.from("categories").select("id,name").in("id", allCatIds)
+      : { data: [] as { id: string; name: string }[] };
+    const catNameById = new Map((catRows ?? []).map((c) => [c.id, c.name]));
+
     const [{ data: regs }, { data: cits }] = await Promise.all([
       supabase.from("supplier_regions").select("supplier_id"),
       supabase.from("supplier_cities").select("supplier_id"),
+
     ]);
     const regionsBySupplier = new Map<string, number>();
     (regs ?? []).forEach((r: { supplier_id: string }) => {
