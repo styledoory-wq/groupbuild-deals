@@ -44,6 +44,7 @@ interface Row {
   short_description: string | null;
   description: string | null;
   created_at: string | null;
+  category_name?: string | null;
   completeness?: SupplierCompleteness;
 }
 
