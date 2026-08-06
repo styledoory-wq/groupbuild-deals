@@ -2764,6 +2764,7 @@ export type Database = {
           accepted_terms_at: string | null
           accepted_terms_metadata: Json | null
           accepted_terms_version: string | null
+          admin_notified_at: string | null
           approval_status: string
           avg_response_time_hours: number | null
           bank_account_holder: string | null
@@ -2800,6 +2801,7 @@ export type Database = {
           monthly_subscription: number
           offers_products: boolean
           offers_services: boolean
+          onboarding_completed_at: string | null
           payment_instructions_note: string | null
           payment_methods: string[]
           phone: string | null
@@ -2828,6 +2830,7 @@ export type Database = {
           accepted_terms_at?: string | null
           accepted_terms_metadata?: Json | null
           accepted_terms_version?: string | null
+          admin_notified_at?: string | null
           approval_status?: string
           avg_response_time_hours?: number | null
           bank_account_holder?: string | null
@@ -2864,6 +2867,7 @@ export type Database = {
           monthly_subscription?: number
           offers_products?: boolean
           offers_services?: boolean
+          onboarding_completed_at?: string | null
           payment_instructions_note?: string | null
           payment_methods?: string[]
           phone?: string | null
@@ -2892,6 +2896,7 @@ export type Database = {
           accepted_terms_at?: string | null
           accepted_terms_metadata?: Json | null
           accepted_terms_version?: string | null
+          admin_notified_at?: string | null
           approval_status?: string
           avg_response_time_hours?: number | null
           bank_account_holder?: string | null
@@ -2928,6 +2933,7 @@ export type Database = {
           monthly_subscription?: number
           offers_products?: boolean
           offers_services?: boolean
+          onboarding_completed_at?: string | null
           payment_instructions_note?: string | null
           payment_methods?: string[]
           phone?: string | null
@@ -3901,21 +3907,38 @@ export type Database = {
         }[]
       }
       rollback_supplier_categories_migration: { Args: never; Returns: number }
-      save_supplier_onboarding: {
-        Args: {
-          _business_name: string
-          _category_ids?: string[]
-          _city_ids?: string[]
-          _contact_name?: string
-          _email?: string
-          _logo_url?: string
-          _phone?: string
-          _region_ids?: string[]
-          _serves_all_country?: boolean
-          _short_description?: string
-        }
-        Returns: string
-      }
+      save_supplier_onboarding:
+        | {
+            Args: {
+              _business_name: string
+              _category_ids?: string[]
+              _city_ids?: string[]
+              _contact_name?: string
+              _email?: string
+              _logo_url?: string
+              _phone?: string
+              _region_ids?: string[]
+              _serves_all_country?: boolean
+              _short_description?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _business_name: string
+              _category_ids?: string[]
+              _city_ids?: string[]
+              _completed?: boolean
+              _contact_name?: string
+              _email?: string
+              _logo_url?: string
+              _phone?: string
+              _region_ids?: string[]
+              _serves_all_country?: boolean
+              _short_description?: string
+            }
+            Returns: string
+          }
       search_catalog: {
         Args: { _q: string }
         Returns: {

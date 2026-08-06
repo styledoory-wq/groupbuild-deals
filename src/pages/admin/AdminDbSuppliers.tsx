@@ -44,6 +44,7 @@ interface Row {
   short_description: string | null;
   description: string | null;
   created_at: string | null;
+  onboarding_completed_at?: string | null;
   completeness?: SupplierCompleteness;
 }
 
@@ -64,8 +65,10 @@ const emptyForm: NewForm = {
   approval_status: "pending", is_active: true,
 };
 
-type TabKey = "all" | "active" | "pending" | "rejected" | "new";
-const VALID_TABS: TabKey[] = ["all", "active", "pending", "rejected", "new"];
+type TabKey = "all" | "active" | "pending" | "rejected" | "new" | "drafts";
+const VALID_TABS: TabKey[] = ["all", "active", "pending", "rejected", "new", "drafts"];
+/** A supplier that never finished onboarding. */
+const isDraft = (r: { approval_status: string }) => r.approval_status === "draft";
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export default function AdminDbSuppliers() {
@@ -98,7 +101,7 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,contact_name,phone,email,categories,short_description,description,created_at")
+      .select("id,business_name,approval_status,is_active,onboarding_completed_at,logo_url,serves_all_country,service_areas,contact_name,phone,email,categories,short_description,description,created_at")
       .order("created_at", { ascending: false });
     if (error) toast.error("שגיאה בטעינת ספקים");
     const base = (data as Row[]) ?? [];
@@ -120,6 +123,8 @@ export default function AdminDbSuppliers() {
       ...r,
       completeness: computeCompleteness({
         business_name: r.business_name,
+        contact_name: r.contact_name,
+        logo_url: r.logo_url,
         phone: r.phone,
         email: r.email,
         categories: r.categories,
@@ -229,18 +234,19 @@ export default function AdminDbSuppliers() {
   const counts = useMemo(() => {
     const now = Date.now();
     return {
-      all: rows.length,
+      all: rows.filter((r) => !isDraft(r)).length,
+      drafts: rows.filter(isDraft).length,
       active: rows.filter((r) => r.is_active && r.approval_status === "approved").length,
       pending: rows.filter((r) => r.approval_status === "pending").length,
       rejected: rows.filter((r) => r.approval_status === "rejected").length,
-      new: rows.filter((r) => r.created_at && new Date(r.created_at).getTime() >= now - WEEK_MS).length,
+      new: rows.filter((r) => !isDraft(r) && r.created_at && new Date(r.created_at).getTime() >= now - WEEK_MS).length,
     };
   }, [rows]);
 
   const filteredRows = useMemo(() => {
     const q = supplierSearch.trim().toLowerCase();
     const now = Date.now();
-    let res = rows;
+    let res = activeTab === "drafts" ? rows.filter(isDraft) : rows.filter((r) => !isDraft(r));
     if (activeTab === "active") res = res.filter((r) => r.is_active && r.approval_status === "approved");
     else if (activeTab === "pending") res = res.filter((r) => r.approval_status === "pending");
     else if (activeTab === "rejected") res = res.filter((r) => r.approval_status === "rejected");
@@ -260,6 +266,7 @@ export default function AdminDbSuppliers() {
     { key: "pending", label: "ממתינים", count: counts.pending },
     { key: "rejected", label: "נדחו", count: counts.rejected },
     { key: "new", label: "חדשים", count: counts.new },
+    { key: "drafts", label: "טיוטות", count: counts.drafts },
   ];
 
   const emptyLabel: Record<TabKey, string> = {
@@ -268,6 +275,7 @@ export default function AdminDbSuppliers() {
     pending: "אין ספקים הממתינים לאישור.",
     rejected: "אין ספקים שנדחו.",
     new: "לא נוספו ספקים חדשים השבוע.",
+    drafts: "אין הרשמות שלא הושלמו.",
   };
 
   return (
