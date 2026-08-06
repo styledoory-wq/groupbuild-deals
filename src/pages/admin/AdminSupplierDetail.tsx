@@ -460,7 +460,7 @@ export default function AdminSupplierDetail() {
     : { emoji: "⚪", label: "לא פעיל", cls: "bg-muted text-muted-foreground border-border" };
 
   const categoryNames = form.categoryIds
-    .map((cid) => categories.find((c) => c.id === cid)?.name)
+    .map((cid) => catNameById.get(cid) ?? categories.find((c) => c.id === cid)?.name)
     .filter(Boolean) as string[];
 
   const areaSummary = areas.servesAllCountry
