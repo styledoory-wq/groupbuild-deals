@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 type Row = { key: keyof ReturnType<typeof useAdminAttention>["data"] & string; icon: LucideIcon; label: string; to: string; severe?: boolean };
 
 const ROWS: Row[] = [
-  { key: "pendingSuppliers", icon: ShieldCheck, label: "ספקים ממתינים לאישור", to: "/admin/suppliers?filter=pending" },
+  { key: "pendingSuppliers", icon: ShieldCheck, label: "ספקים ממתינים לאישור", to: "/admin/suppliers?tab=pending" },
   { key: "openComplaints", icon: MessageSquare, label: "תלונות פתוחות", to: "/admin/complaints", severe: true },
   { key: "failedPayments", icon: CreditCard, label: "תשלומים שנכשלו", to: "/admin/payments", severe: true },
   { key: "openLeads", icon: Inbox, label: "לידים ללא מענה", to: "/admin/leads" },
