@@ -353,7 +353,7 @@ export default function SupplierOnboarding() {
     }
 
     try {
-      await save({ silent: true, completed: true });
+      await save({ silent: true });
     } catch {
       /* toast in save — still allow navigation if draft exists */
     }
