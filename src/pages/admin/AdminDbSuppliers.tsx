@@ -135,6 +135,8 @@ export default function AdminDbSuppliers() {
 
     setRows(base.map((r) => ({
       ...r,
+      category_name:
+        (r.categories ?? []).map((cid) => catNameById.get(cid)).find(Boolean) ?? null,
       completeness: computeCompleteness({
         business_name: r.business_name,
         contact_name: r.contact_name,
