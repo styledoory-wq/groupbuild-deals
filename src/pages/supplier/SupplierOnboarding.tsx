@@ -353,7 +353,7 @@ export default function SupplierOnboarding() {
     }
 
     try {
-      await save({ silent: true });
+      await save({ silent: true, completed: true });
     } catch {
       /* toast in save — still allow navigation if draft exists */
     }
@@ -385,7 +385,7 @@ export default function SupplierOnboarding() {
     }
   };
 
-  const save = async (opts: { silent?: boolean } = {}) => {
+  const save = async (opts: { silent?: boolean; completed?: boolean } = {}) => {
     if (!userId) {
       toast.error("החיבור למערכת אבד — התחבר מחדש כדי לשמור");
       return;
@@ -412,6 +412,7 @@ export default function SupplierOnboarding() {
         _region_ids: areas.servesAllCountry ? [] : areas.regionIds,
         _city_ids: areas.servesAllCountry ? [] : areas.cityIds,
         _logo_url: logoUrl,
+        _completed: opts.completed === true,
       } as never);
       if (error) throw new Error(`שמירת פרופיל הספק נכשלה: ${error.message}`);
       if (typeof sid === "string") setSupplierId(sid);
@@ -454,7 +455,7 @@ export default function SupplierOnboarding() {
       return;
     }
     try {
-      await save({ silent: true });
+      await save({ silent: true, completed: true });
       if (userId) clearSupplierDraft(userId);
       toast.success("הפרופיל הושלם! ההרשמה בבדיקת אדמין");
       navigate(consumePendingReturnUrl() ?? "/supplier");
