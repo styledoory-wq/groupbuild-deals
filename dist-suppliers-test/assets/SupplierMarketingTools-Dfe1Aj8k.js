@@ -1,1 +1,0 @@
-import{i as a,d as s,r as t}from"./vendor-react-BIJyGCAk.js";function i(){const{dealId:e}=a(),r=s();return t.useEffect(()=>{e?r(`/supplier/offers/${e}/marketing`,{replace:!0}):r("/supplier/offers",{replace:!0})},[e,r]),null}export{i as default};

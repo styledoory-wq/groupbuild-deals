@@ -1,1 +1,0 @@
-import{d as o,u as a,r as i}from"./vendor-react-BIJyGCAk.js";import{I as s}from"./index-pBvVSdP7.js";function u(){return s?"/supplier":"/"}function c(){return typeof window>"u"?!1:window.history.length<=1}function l(t){const e=o(),r=a();return i.useCallback(()=>{const n=t??u();if(c()||r.key==="default"){e(n,{replace:!0});return}e(-1)},[t,r.key,e])}export{u as p,l as u};
