@@ -140,6 +140,7 @@ export default function AdminSupplierDetail() {
   const [residentSearch, setResidentSearch] = useState("");
   const [selectedResident, setSelectedResident] = useState<MatchProfile | null>(null);
   const [matchResult, setMatchResult] = useState<{ visible: boolean; reasons: string[] } | null>(null);
+  const [catNameById, setCatNameById] = useState<Map<string, string>>(new Map());
 
   const load = async () => {
     if (!supplierId) return;
