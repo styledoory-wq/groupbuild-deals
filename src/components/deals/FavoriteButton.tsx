@@ -10,11 +10,13 @@ export function FavoriteButton({
   dealId,
   initial = false,
   className,
+  style,
   onChange,
 }: {
   dealId: string;
   initial?: boolean;
   className?: string;
+  style?: React.CSSProperties;
   onChange?: (isFavorite: boolean) => void;
 }) {
   const [on, setOn] = useState(initial);
@@ -68,6 +70,7 @@ export function FavoriteButton({
     <button
       type="button"
       onClick={handle}
+      style={style}
       aria-label={on ? "הסר ממועדפים" : "הוסף למועדפים"}
       className={cn("tap-target", 
         "h-9 w-9 rounded-full bg-white/90 backdrop-blur border border-[#ECEEF2] flex items-center justify-center shadow-[0_2px_8px_rgba(10,31,61,0.08)] hover:scale-105 transition-transform",
