@@ -67,6 +67,8 @@ export const publicRoutes = (
     <Route path="/landing" element={<Navigate to="/" replace />} />
     <Route path="/about" element={<Navigate to="/" replace />} />
     <Route path="/index" element={<Navigate to="/" replace />} />
+    <Route path="/index.html" element={<Navigate to="/" replace />} />
+
     {!IS_RESIDENTS_BUILD && <Route path="/suppliers" element={<SuppliersLanding />} />}
     {!IS_SUPPLIERS_BUILD && <Route path="/residents" element={<ResidentsLanding />} />}
     <Route path="/auth" element={<Auth />} />

@@ -7,9 +7,14 @@ import { setPendingReturnUrl, isSafeReturnUrl } from "@/lib/returnUrl";
 import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
 
 const roleHome = (role: "resident" | "supplier" | "admin") => {
+  // Role homes that don't exist in a single-role build would render the 404
+  // screen (e.g. an admin tapping a supplier CTA inside the suppliers app).
+  if (IS_SUPPLIERS_BUILD) return role === "supplier" ? "/supplier" : "/";
+  if (IS_RESIDENTS_BUILD) return role === "resident" ? "/resident" : "/";
   if (role === "admin") return "/admin";
   return role === "supplier" ? "/supplier" : "/resident";
 };
+
 
 const authRouteFor = (role: "resident" | "supplier"): string => {
   if (IS_RESIDENTS_BUILD) return "/auth/resident";
@@ -53,8 +58,11 @@ export function RequireRole({
   const previewRole = getPreviewRole();
   if (isAdminEmail(user.email) || user.role === "admin") {
     if (previewRole === role) return <>{children}</>;
+    // Single-role app builds have no /admin route — keep admins inside the app.
+    if (IS_SUPPLIERS_BUILD || IS_RESIDENTS_BUILD) return <>{children}</>;
     return <Navigate to="/admin" replace />;
   }
+
   if (user.role !== role) return <Navigate to={roleHome(user.role)} replace />;
   return <>{children}</>;
 }
