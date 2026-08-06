@@ -44,7 +44,6 @@ interface Row {
   short_description: string | null;
   description: string | null;
   created_at: string | null;
-  onboarding_completed_at?: string | null;
   completeness?: SupplierCompleteness;
 }
 
@@ -101,9 +100,14 @@ export default function AdminDbSuppliers() {
   const load = async () => {
     const { data, error } = await supabase
       .from("suppliers")
-      .select("id,business_name,approval_status,is_active,onboarding_completed_at,logo_url,serves_all_country,service_areas,contact_name,phone,email,categories,short_description,description,created_at")
+      .select("id,business_name,approval_status,is_active,logo_url,serves_all_country,service_areas,contact_name,phone,email,categories,short_description,description,created_at")
       .order("created_at", { ascending: false });
-    if (error) toast.error("שגיאה בטעינת ספקים");
+    if (error) {
+      toast.error("שגיאה בטעינת ספקים");
+      setRows([]);
+      setLoading(false);
+      return;
+    }
     const base = (data as Row[]) ?? [];
 
     const [{ data: regs }, { data: cits }] = await Promise.all([
