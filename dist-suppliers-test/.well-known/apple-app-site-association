@@ -1,0 +1,41 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "2N86W3KYFJ.il.co.groupbuild.residents"
+        ],
+        "components": [
+          {
+            "/": "/r/*"
+          },
+          {
+            "/": "/share/deal/*"
+          },
+          {
+            "/": "/auth/native-callback*"
+          }
+        ]
+      },
+      {
+        "appIDs": [
+          "2N86W3KYFJ.il.co.groupbuild.suppliers"
+        ],
+        "components": [
+          {
+            "/": "/b/*"
+          },
+          {
+            "/": "/auth/native-callback*"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "2N86W3KYFJ.il.co.groupbuild.residents",
+      "2N86W3KYFJ.il.co.groupbuild.suppliers"
+    ]
+  }
+}
