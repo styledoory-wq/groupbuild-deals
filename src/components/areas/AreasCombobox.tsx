@@ -115,11 +115,14 @@ export function AreasCombobox({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[var(--radix-popover-trigger-width)] p-0 z-50 bg-popover max-h-[60vh] overflow-hidden"
+          className="w-[var(--radix-popover-trigger-width)] p-0 z-50 bg-popover overflow-hidden"
           align="start"
           dir="rtl"
+          avoidCollisions
+          collisionPadding={{ top: 12, bottom: 120, left: 8, right: 8 }}
+          style={{ maxHeight: "min(60vh, var(--radix-popover-content-available-height))" }}
         >
-          <div className="flex flex-col max-h-[60vh]">
+          <div className="flex flex-col" style={{ maxHeight: "min(60vh, var(--radix-popover-content-available-height))" }}>
             <div className="flex items-center gap-2 px-3 py-2 border-b border-[#ECEEF2] bg-white sticky top-0">
               <Search className="h-4 w-4 text-muted-foreground shrink-0" />
               <input
