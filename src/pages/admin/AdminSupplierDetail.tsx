@@ -177,6 +177,16 @@ export default function AdminSupplierDetail() {
         regionIds: (sregs ?? []).map((r) => r.region_id as string),
         cityIds: (scits ?? []).map((c) => c.city_id as string),
       });
+      // Resolve names straight from the catalog so archived categories
+      // still render a label instead of disappearing.
+      const ids = (s.categories ?? []) as string[];
+      if (ids.length) {
+        const { data: catRows } = await supabase.from("categories").select("id,name").in("id", ids);
+        setCatNameById(new Map((catRows ?? []).map((c) => [c.id as string, c.name as string])));
+      } else {
+        setCatNameById(new Map());
+      }
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "טעינת הספק נכשלה");
       navigate("/admin/suppliers");
