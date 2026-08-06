@@ -465,6 +465,8 @@ export default function AdminSupplierDetail() {
 
   const completeness = computeCompleteness({
     business_name: form.business_name,
+    contact_name: form.contact_name,
+    logo_url: form.logo_url,
     phone: form.phone,
     email: form.email,
     categories: form.categoryIds,
@@ -474,6 +476,7 @@ export default function AdminSupplierDetail() {
     short_description: form.short_description,
     description: form.description,
   });
+
 
   return (
     <MobileShell>
