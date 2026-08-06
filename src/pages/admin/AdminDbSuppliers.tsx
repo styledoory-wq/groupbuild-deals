@@ -44,6 +44,7 @@ interface Row {
   short_description: string | null;
   description: string | null;
   created_at: string | null;
+  category_name?: string | null;
   completeness?: SupplierCompleteness;
 }
 
@@ -110,9 +111,18 @@ export default function AdminDbSuppliers() {
     }
     const base = (data as Row[]) ?? [];
 
+    // Resolve category names directly from the catalog table so archived /
+    // inactive categories still display a name instead of "ללא תחום".
+    const allCatIds = [...new Set(base.flatMap((r) => r.categories ?? []))];
+    const { data: catRows } = allCatIds.length
+      ? await supabase.from("categories").select("id,name").in("id", allCatIds)
+      : { data: [] as { id: string; name: string }[] };
+    const catNameById = new Map((catRows ?? []).map((c) => [c.id, c.name]));
+
     const [{ data: regs }, { data: cits }] = await Promise.all([
       supabase.from("supplier_regions").select("supplier_id"),
       supabase.from("supplier_cities").select("supplier_id"),
+
     ]);
     const regionsBySupplier = new Map<string, number>();
     (regs ?? []).forEach((r: { supplier_id: string }) => {
@@ -125,6 +135,8 @@ export default function AdminDbSuppliers() {
 
     setRows(base.map((r) => ({
       ...r,
+      category_name:
+        (r.categories ?? []).map((cid) => catNameById.get(cid)).find(Boolean) ?? null,
       completeness: computeCompleteness({
         business_name: r.business_name,
         contact_name: r.contact_name,
@@ -475,9 +487,10 @@ function SupplierTile({
   const isBlocked = !row.is_active && row.approval_status !== "rejected";
   const isNational = row.serves_all_country || row.service_areas?.includes("כל הארץ");
 
-  const primaryCategory = row.categories?.[0]
-    ? categories.find((c) => c.id === row.categories[0])?.name ?? null
-    : null;
+  const primaryCategory =
+    row.category_name ??
+    (row.categories ?? []).map((cid) => categories.find((c) => c.id === cid)?.name).find(Boolean) ??
+    null;
   const areaLabel = isNational ? "כל הארץ" : row.service_areas?.[0] ?? "—";
 
   const statusPill = isRejected
@@ -580,9 +593,10 @@ function SupplierRow({
   const isBlocked = !row.is_active && row.approval_status !== "rejected";
   const isNational = row.serves_all_country || row.service_areas?.includes("כל הארץ");
 
-  const primaryCategory = row.categories?.[0]
-    ? categories.find((c) => c.id === row.categories[0])?.name ?? null
-    : null;
+  const primaryCategory =
+    row.category_name ??
+    (row.categories ?? []).map((cid) => categories.find((c) => c.id === cid)?.name).find(Boolean) ??
+    null;
   const areaLabel = isNational ? "כל הארץ" : row.service_areas?.[0] ?? "—";
   const created = row.created_at ? new Date(row.created_at) : null;
   const joinLabel = created

@@ -140,6 +140,7 @@ export default function AdminSupplierDetail() {
   const [residentSearch, setResidentSearch] = useState("");
   const [selectedResident, setSelectedResident] = useState<MatchProfile | null>(null);
   const [matchResult, setMatchResult] = useState<{ visible: boolean; reasons: string[] } | null>(null);
+  const [catNameById, setCatNameById] = useState<Map<string, string>>(new Map());
 
   const load = async () => {
     if (!supplierId) return;
@@ -177,6 +178,16 @@ export default function AdminSupplierDetail() {
         regionIds: (sregs ?? []).map((r) => r.region_id as string),
         cityIds: (scits ?? []).map((c) => c.city_id as string),
       });
+      // Resolve names straight from the catalog so archived categories
+      // still render a label instead of disappearing.
+      const ids = (s.categories ?? []) as string[];
+      if (ids.length) {
+        const { data: catRows } = await supabase.from("categories").select("id,name").in("id", ids);
+        setCatNameById(new Map((catRows ?? []).map((c) => [c.id as string, c.name as string])));
+      } else {
+        setCatNameById(new Map());
+      }
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "טעינת הספק נכשלה");
       navigate("/admin/suppliers");
@@ -449,7 +460,7 @@ export default function AdminSupplierDetail() {
     : { emoji: "⚪", label: "לא פעיל", cls: "bg-muted text-muted-foreground border-border" };
 
   const categoryNames = form.categoryIds
-    .map((cid) => categories.find((c) => c.id === cid)?.name)
+    .map((cid) => catNameById.get(cid) ?? categories.find((c) => c.id === cid)?.name)
     .filter(Boolean) as string[];
 
   const areaSummary = areas.servesAllCountry
@@ -465,6 +476,8 @@ export default function AdminSupplierDetail() {
 
   const completeness = computeCompleteness({
     business_name: form.business_name,
+    contact_name: form.contact_name,
+    logo_url: form.logo_url,
     phone: form.phone,
     email: form.email,
     categories: form.categoryIds,
@@ -474,6 +487,7 @@ export default function AdminSupplierDetail() {
     short_description: form.short_description,
     description: form.description,
   });
+
 
   return (
     <MobileShell>
