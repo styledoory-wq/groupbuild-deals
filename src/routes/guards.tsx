@@ -58,8 +58,11 @@ export function RequireRole({
   const previewRole = getPreviewRole();
   if (isAdminEmail(user.email) || user.role === "admin") {
     if (previewRole === role) return <>{children}</>;
+    // Single-role app builds have no /admin route — keep admins inside the app.
+    if (IS_SUPPLIERS_BUILD || IS_RESIDENTS_BUILD) return <>{children}</>;
     return <Navigate to="/admin" replace />;
   }
+
   if (user.role !== role) return <Navigate to={roleHome(user.role)} replace />;
   return <>{children}</>;
 }
