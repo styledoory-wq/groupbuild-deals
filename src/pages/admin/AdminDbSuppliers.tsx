@@ -487,9 +487,10 @@ function SupplierTile({
   const isBlocked = !row.is_active && row.approval_status !== "rejected";
   const isNational = row.serves_all_country || row.service_areas?.includes("כל הארץ");
 
-  const primaryCategory = row.categories?.[0]
-    ? categories.find((c) => c.id === row.categories[0])?.name ?? null
-    : null;
+  const primaryCategory =
+    row.category_name ??
+    (row.categories ?? []).map((cid) => categories.find((c) => c.id === cid)?.name).find(Boolean) ??
+    null;
   const areaLabel = isNational ? "כל הארץ" : row.service_areas?.[0] ?? "—";
 
   const statusPill = isRejected
@@ -592,9 +593,10 @@ function SupplierRow({
   const isBlocked = !row.is_active && row.approval_status !== "rejected";
   const isNational = row.serves_all_country || row.service_areas?.includes("כל הארץ");
 
-  const primaryCategory = row.categories?.[0]
-    ? categories.find((c) => c.id === row.categories[0])?.name ?? null
-    : null;
+  const primaryCategory =
+    row.category_name ??
+    (row.categories ?? []).map((cid) => categories.find((c) => c.id === cid)?.name).find(Boolean) ??
+    null;
   const areaLabel = isNational ? "כל הארץ" : row.service_areas?.[0] ?? "—";
   const created = row.created_at ? new Date(row.created_at) : null;
   const joinLabel = created
