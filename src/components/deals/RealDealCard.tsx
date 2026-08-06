@@ -138,7 +138,7 @@ function RealDealCardImpl({
 
 
           {/* Badges row */}
-          <div className="absolute top-2 right-2 flex flex-wrap items-center gap-1.5 max-w-[calc(100%-56px)]">
+          <div className="absolute top-2 flex flex-wrap items-center gap-1.5 max-w-[calc(100%-58px)]" style={{ right: 8, left: "auto" }}>
             <span
               className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-[0_2px_6px_-2px_rgba(10,31,61,0.35)] ${
                 isRegular ? "bg-white text-[#1F2937] border border-[#ECEEF2]" : "bg-[#FFF8E1] text-[#8A6A1E] border border-[#F5C547]/50"
@@ -161,7 +161,7 @@ function RealDealCardImpl({
 
           {/* Favorite */}
           {!hideFavorite && (
-            <FavoriteButton dealId={deal.id} initial={isFavorite} onChange={onFavoriteChange} className="absolute top-2 left-2 h-8 w-8" />
+            <FavoriteButton dealId={deal.id} initial={isFavorite} onChange={onFavoriteChange} className="absolute top-2 h-8 w-8" style={{ left: 8, right: "auto" }} />
           )}
 
           {galleryCount > 0 && (
