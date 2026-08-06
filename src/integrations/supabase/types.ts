@@ -3519,6 +3519,10 @@ export type Database = {
         Args: { _token: string }
         Returns: string
       }
+      admin_approve_supplier: {
+        Args: { _approve?: boolean; _supplier_id: string }
+        Returns: Json
+      }
       admin_change_demand_status: {
         Args: { _demand_id: string; _new_status: string; _note?: string }
         Returns: undefined
