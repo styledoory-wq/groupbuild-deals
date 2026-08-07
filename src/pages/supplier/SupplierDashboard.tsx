@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { LoadingState, ErrorState } from "@/components/ds";
 import { useApp } from "@/store/AppStore";
 import { supabase } from "@/integrations/supabase/client";
+import { isShowcase, SHOWCASE_SUPPLIER, SHOWCASE_SUPPLIER_DEALS, SHOWCASE_SUPPLIER_DEAL_COUNTS, SHOWCASE_WEEK_STATS } from "@/lib/showcase";
 import { toast } from "sonner";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { resolveSupplierForUser } from "@/lib/supplierAuth";
@@ -101,6 +102,15 @@ export default function SupplierDashboard() {
     let cancelled = false;
     const safety = window.setTimeout(() => { if (!cancelled) setLoading(false); }, 8000);
 
+    if (isShowcase()) {
+      setDbSupplier(SHOWCASE_SUPPLIER as unknown as DbSupplier);
+      setMyDeals(SHOWCASE_SUPPLIER_DEALS as unknown as DbDeal[]);
+      setCounts(SHOWCASE_SUPPLIER_DEAL_COUNTS);
+      setWeekStats({ leads: SHOWCASE_WEEK_STATS.leads, favs: SHOWCASE_WEEK_STATS.views, paid: 18, revenue: 128400 });
+      setLoading(false);
+      window.clearTimeout(safety);
+      return () => { cancelled = true; window.clearTimeout(safety); };
+    }
     (async () => {
       try {
         const { data: sessionData } = await supabase.auth.getSession();

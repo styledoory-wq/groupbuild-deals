@@ -5,6 +5,7 @@ import { getPreviewRole } from "@/lib/previewMode";
 import { isAdminEmail } from "@/lib/auth";
 import { setPendingReturnUrl, isSafeReturnUrl } from "@/lib/returnUrl";
 import { IS_RESIDENTS_BUILD, IS_SUPPLIERS_BUILD } from "@/config/appMode";
+import { isShowcase } from "@/lib/showcase";
 
 const roleHome = (role: "resident" | "supplier" | "admin") => {
   // Role homes that don't exist in a single-role build would render the 404
@@ -53,6 +54,8 @@ export function RequireRole({
   const { user, authReady } = useApp();
   const notSignedIn = authReady && !user;
   useCaptureReturnUrl(notSignedIn);
+  // Showcase (App Store screenshots) — render demo screens without a session.
+  if (isShowcase()) return <>{children}</>;
   if (!authReady) return <AuthPending />;
   if (!user) return <Navigate to={authRouteFor(role)} replace />;
   const previewRole = getPreviewRole();
@@ -71,6 +74,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, authReady } = useApp();
   const notSignedIn = authReady && !user;
   useCaptureReturnUrl(notSignedIn);
+  if (isShowcase()) return <>{children}</>;
   if (!authReady) return <AuthPending />;
   if (!user) return <Navigate to={IS_SUPPLIERS_BUILD ? "/auth/supplier" : "/auth/resident"} replace />;
   return <>{children}</>;

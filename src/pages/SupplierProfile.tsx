@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { SupplierLogo } from "@/components/suppliers/SupplierLogo";
 import { SmartImg } from "@/components/ui/SmartImg";
 import { supabase } from "@/integrations/supabase/client";
+import { isShowcase, SHOWCASE_SUPPLIER, SHOWCASE_SUPPLIER_DEALS, SHOWCASE_IMAGES } from "@/lib/showcase";
 import { toast } from "sonner";
 import { SupplierRatingBadge } from "@/components/reviews/SupplierRatingBadge";
 import { useApp } from "@/store/AppStore";
@@ -146,6 +147,24 @@ export default function SupplierProfile() {
         setLoading(false);
       }
     }, 12000);
+    if (isShowcase()) {
+      setSupplier(SHOWCASE_SUPPLIER as unknown as DbSupplier);
+      setSupplierCategoryIds(["sc-kitchen", "sc-carpentry", "sc-interior"]);
+      setServiceAreas(SHOWCASE_SUPPLIER.service_areas);
+      setGallery([
+        { id: "g1", image_url: SHOWCASE_IMAGES.kitchen, caption: "מטבח בהתאמה אישית" },
+        { id: "g2", image_url: SHOWCASE_IMAGES.flooring, caption: "פרויקט גמרים" },
+      ] as unknown as GalleryItem[]);
+      setDeals(SHOWCASE_SUPPLIER_DEALS as unknown as RealDealCardData[]);
+      setReviews([
+        { id: "r1", rating: 5, comment: "שירות מעולה, עמדו בלוח הזמנים והתוצאה מדהימה.", created_at: new Date().toISOString(), user_id: "u1", reviewer_name: "נועה ב." },
+        { id: "r2", rating: 5, comment: "ליווי מקצועי מהתכנון ועד ההתקנה. ממליץ בחום.", created_at: new Date().toISOString(), user_id: "u2", reviewer_name: "אורי כ." },
+        { id: "r3", rating: 4, comment: "איכות גבוהה ומחיר הוגן בזכות הרכישה הקבוצתית.", created_at: new Date().toISOString(), user_id: "u3", reviewer_name: "מיכל א." },
+      ] as unknown as ReviewItem[]);
+      setLoading(false);
+      window.clearTimeout(safety);
+      return () => { cancelled = true; window.clearTimeout(safety); };
+    }
     (async () => {
       try {
         setLoadError(null);
