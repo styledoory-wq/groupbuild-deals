@@ -4,6 +4,7 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { ScreenHeader, LoadingState, ErrorState, EmptyState } from "@/components/ds";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
+import { isShowcase, SHOWCASE_REVIEWS, SHOWCASE_SUPPLIER } from "@/lib/showcase";
 
 type ReviewRow = {
   id: string;
@@ -24,6 +25,15 @@ export default function SupplierReviews() {
     let cancelled = false;
     (async () => {
       try {
+        if (isShowcase()) {
+          if (!cancelled) {
+            setSupplierId(SHOWCASE_SUPPLIER.id);
+            setReviews(SHOWCASE_REVIEWS.map(({ reviewer, ...r }) => r));
+            setReviewerNames(Object.fromEntries(SHOWCASE_REVIEWS.map((r) => [r.user_id, r.reviewer])));
+            setLoading(false);
+          }
+          return;
+        }
         const { data: sessionData } = await supabase.auth.getSession();
         const session = sessionData.session;
         if (!session) {

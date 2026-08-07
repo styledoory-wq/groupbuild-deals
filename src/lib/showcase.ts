@@ -609,13 +609,22 @@ const SHOWCASE_PROJECT_INFO = {
   standard: "standard",
 };
 
-const SHOWCASE_BUDGET = {
-  "sc-kitchen": 34400,
-  "sc-floor": 21000,
-  "sc-paint": 5600,
-  "sc-climate": 9300,
-  "sc-elec": 12500,
-};
+const SHOWCASE_BUDGET = [
+  { id: "sc-kitchen", label: "מטבח והתקנה", planned: 38000, actual: 34400 },
+  { id: "sc-floor", label: "ריצוף וחיפויים", planned: 24000, actual: 21000 },
+  { id: "sc-paint", label: "צבע וגמרים", planned: 6000, actual: 5600 },
+  { id: "sc-climate", label: "מיזוג אוויר", planned: 11000, actual: 9300 },
+  { id: "sc-elec", label: "חשמל ותאורה", planned: 14000, actual: 12500 },
+];
+
+/** Reviews shown on the supplier reviews screen in demo mode. */
+export const SHOWCASE_REVIEWS = [
+  { id: "sc-rev-1", rating: 5, comment: "מטבח מושלם, עמדו בלוח הזמנים ובתקציב. ליווי צמוד מהתכנון ועד ההתקנה.", created_at: agoHours(30), user_id: "sc-u1", reviewer: "נועה ברק" },
+  { id: "sc-rev-2", rating: 5, comment: "שירות מקצועי ואדיב, איכות הנגרות מעולה. ממליצה בחום.", created_at: agoHours(96), user_id: "sc-u2", reviewer: "אורי כהן" },
+  { id: "sc-rev-3", rating: 5, comment: "הצטרפנו לרכישה קבוצתית וחסכנו כמעט 9,000 ₪. תהליך פשוט ומסודר.", created_at: agoHours(180), user_id: "sc-u3", reviewer: "מיכל אדרי" },
+  { id: "sc-rev-4", rating: 4, comment: "תוצאה יפה מאוד, ההתקנה התעכבה ביומיים אבל הכול נפתר יפה.", created_at: agoHours(320), user_id: "sc-u4", reviewer: "יואב שמש" },
+  { id: "sc-rev-5", rating: 5, comment: "יחס אישי, הקשיבו לכל בקשה. הבית נראה אחרת לגמרי.", created_at: agoHours(520), user_id: "sc-u5", reviewer: "דנה לוי" },
+];
 
 /** Seed the local (device-only) project data used by the project screen. */
 export function seedShowcaseProject() {
@@ -627,3 +636,4 @@ export function seedShowcaseProject() {
     /* ignore */
   }
 }
+
