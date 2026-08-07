@@ -30,19 +30,19 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
   const titleBlock = (
     <>
       <h1
-        className="text-[30px] font-extrabold text-white leading-[1.15] tracking-tight"
+        className="text-[30px] md:text-[42px] lg:text-[54px] font-extrabold text-white leading-[1.15] tracking-tight"
         style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
       >
         לידים איכותיים
       </h1>
       <p
-        className="mt-1 text-[30px] font-extrabold text-[#5CC9A0] leading-[1.15] tracking-tight"
+        className="mt-1 text-[30px] md:text-[42px] lg:text-[54px] font-extrabold text-[#5CC9A0] leading-[1.15] tracking-tight"
         style={{ textShadow: "0 3px 18px rgba(0,0,0,0.55)" }}
       >
         מפרויקטים אמיתיים
       </p>
       <p
-        className="mt-3 text-[14.5px] text-white/90 font-medium leading-relaxed"
+        className="mt-3 text-[14.5px] md:text-[17px] lg:text-[19px] text-white/90 font-medium leading-relaxed"
         style={{ textShadow: "0 2px 12px rgba(0,0,0,0.45)" }}
       >
         פלטפורמה שמחברת בין ספקים מקצועיים לבין קבוצות רכישה, דיירים ופרויקטים איכותיים מכל הארץ
@@ -76,7 +76,7 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
     <MotionHover>
       <Link
         to="/supplier"
-        className="flex h-14 items-center justify-center rounded-2xl bg-white text-[#0E6B5A] text-[15px] font-extrabold shadow-[0_12px_28px_-12px_rgba(0,0,0,0.35)]"
+        className="flex h-14 items-center justify-center rounded-2xl px-10 bg-white text-[#0E6B5A] text-[15px] font-extrabold shadow-[0_12px_28px_-12px_rgba(0,0,0,0.35)]"
       >
         כניסה למרחב הספק
       </Link>
@@ -87,7 +87,7 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
         <Link
           to="/auth/supplier?mode=signup"
           onClick={setSupplierIntent}
-          className="flex h-14 items-center justify-center rounded-2xl text-white text-[15px] font-extrabold shadow-[0_12px_28px_-10px_rgba(14,107,90,0.55)]"
+          className="flex h-14 items-center justify-center rounded-2xl px-10 text-white text-[15px] font-extrabold shadow-[0_12px_28px_-10px_rgba(14,107,90,0.55)]"
           style={{ background: "linear-gradient(135deg, #0E6B5A 0%, #1A8870 100%)" }}
         >
           הצטרף כספק
@@ -155,7 +155,7 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
       </svg>
 
       <div
-        className="relative z-[2] px-5 pb-28 pt-2 min-h-[560px] flex flex-col"
+        className="relative z-[2] px-5 md:px-10 lg:px-14 pb-28 pt-2 min-h-[560px] md:min-h-[620px] lg:min-h-[680px] flex flex-col"
         style={{ paddingTop: "max(env(safe-area-inset-top), 14px)" }}
       >
         <header className="flex items-center justify-between gap-3 mb-8">
@@ -163,7 +163,7 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
           {loginLink}
         </header>
 
-        <div className="max-w-[18rem] mt-2">
+        <div className="max-w-[18rem] md:max-w-[30rem] lg:max-w-[38rem] mt-2">
           {motionOn ? (
             <motion.div
               initial={{ opacity: 0.92, y: 10 }}
@@ -177,10 +177,10 @@ export function SupplierHomeHero({ signedIn }: { signedIn: boolean }) {
           )}
         </div>
 
-        <div className="mt-auto pt-10 mx-auto w-full max-w-sm space-y-2.5 pb-2">
+        <div className="mt-auto pt-10 mx-auto md:mx-0 w-full max-w-sm md:max-w-none md:w-auto md:flex md:items-center md:gap-4 space-y-2.5 md:space-y-0 pb-2">
           {motionOn ? (
             <motion.div
-              className="space-y-2.5"
+              className="space-y-2.5 md:space-y-0 md:flex md:items-center md:gap-4"
               initial={{ opacity: 0.92, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}

@@ -20,7 +20,7 @@ const STEPS = [
 
 export function SupplierHowItWorksSection() {
   return (
-    <section className="px-6 mt-9">
+    <section className="px-6 mt-9 lg:mt-16">
       <Reveal>
         <div className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-[#E8F5F1] text-[#0E6B5A] text-[11px] font-extrabold mb-2.5">
           3 צעדים
@@ -33,7 +33,7 @@ export function SupplierHowItWorksSection() {
         </p>
       </Reveal>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
         {STEPS.map((s, i) => (
           <Reveal key={s.n} delayMs={80 * (i + 1)}>
             <article className="grid grid-cols-[44px_1fr] gap-3 p-3.5 rounded-[20px] bg-white border border-[#E4DFD4] shadow-[0_10px_30px_-16px_rgba(11,18,32,0.14)]">

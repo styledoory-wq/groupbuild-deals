@@ -30,7 +30,7 @@ export default function SuppliersHome() {
       <LandingSafeTop />
 
       <div
-        className="relative w-full max-w-screen-sm flex flex-col"
+        className="relative w-full max-w-screen-sm md:max-w-3xl lg:max-w-6xl flex flex-col"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 28px)" }}
       >
         <SupplierHomeHero signedIn={signedIn} />
