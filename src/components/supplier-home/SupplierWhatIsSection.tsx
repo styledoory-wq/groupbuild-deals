@@ -17,7 +17,7 @@ export function SupplierWhatIsSection() {
           </p>
 
           <div
-            className="mt-4 rounded-[22px] p-4 text-white space-y-2.5 shadow-[0_12px_28px_-16px_rgba(14,107,90,0.45)]"
+            className="mt-4 rounded-[22px] p-4 lg:p-6 text-white space-y-2.5 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4 shadow-[0_12px_28px_-16px_rgba(14,107,90,0.45)]"
             style={{ background: "linear-gradient(135deg, #0E6B5A 0%, #1A8870 55%, #34A88E 100%)" }}
           >
             {[
@@ -32,7 +32,7 @@ export function SupplierWhatIsSection() {
                 {label}
               </div>
             ))}
-            <p className="text-[12px] font-semibold text-white/80 pr-9 pt-1">
+            <p className="text-[12px] font-semibold text-white/80 pr-9 pt-1 lg:col-span-3 lg:pr-0 lg:pt-3">
               פחות שיווק קר · יותר שיחות שנסגרות
             </p>
           </div>
