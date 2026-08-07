@@ -130,6 +130,10 @@ export default function DealDetail() {
 
   useEffect(() => {
     let cancelled = false;
+    if (isShowcase()) {
+      setFeeMode("enabled");
+      return;
+    }
     (async () => {
       try {
         const mode = await fetchParticipationFeeMode();
