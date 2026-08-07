@@ -451,9 +451,9 @@ export const SHOWCASE_SUPPLIER_DEAL_COUNTS: Record<
   string,
   { interests: number; paid: number; favorites: number }
 > = {
-  "showcase-deal-kitchen": { interests: 23, paid: 18, favorites: 64 },
+  "showcase-deal-kitchen": { interests: 34, paid: 26, favorites: 128 },
   "showcase-deal-solar": { interests: 12, paid: 9, favorites: 38 },
-  "showcase-deal-flooring": { interests: 31, paid: 24, favorites: 91 },
+  "showcase-deal-flooring": { interests: 23, paid: 17, favorites: 91 },
   "showcase-deal-ac": { interests: 27, paid: 21, favorites: 55 },
 };
 

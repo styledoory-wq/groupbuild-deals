@@ -107,6 +107,10 @@ export default function SupplierDashboard() {
       setMyDeals(SHOWCASE_SUPPLIER_DEALS as unknown as DbDeal[]);
       setCounts(SHOWCASE_SUPPLIER_DEAL_COUNTS);
       setWeekStats({ leads: SHOWCASE_WEEK_STATS.leads, favs: SHOWCASE_WEEK_STATS.views, paid: 18, revenue: 128400 });
+      setPendingLeads(4);
+      setUnrespondedLeads(2);
+      setEndingSoonOffers(1);
+      setPendingOffers(1);
       setLoading(false);
       window.clearTimeout(safety);
       return () => { cancelled = true; window.clearTimeout(safety); };
