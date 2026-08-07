@@ -115,7 +115,14 @@ export default function AdminSupplierDetail() {
       if (!ok) return;
     }
     const name = form.contact_name || form.business_name || "";
-    const onboardingUrl = `${window.location.origin}/supplier/onboarding`;
+    // Always send suppliers to the supplier entry point on the production
+    // domain — using window.location.origin sent preview/admin hosts and the
+    // resident sign-in screen instead.
+    const returnUrl = encodeURIComponent("/supplier/onboarding");
+    const onboardingUrl =
+      kind === "supplier_welcome"
+        ? `https://groupbuild.co.il/auth/supplier?mode=signup&returnUrl=${returnUrl}`
+        : `https://groupbuild.co.il/auth/supplier?returnUrl=${returnUrl}`;
     const msg =
       kind === "supplier_welcome"
         ? supplierWelcomeMessage(name, onboardingUrl)
