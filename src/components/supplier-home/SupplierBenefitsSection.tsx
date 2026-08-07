@@ -30,7 +30,7 @@ const BENEFITS = [
 
 export function SupplierBenefitsSection() {
   return (
-    <section className="px-6 mt-9">
+    <section className="px-6 mt-9 lg:mt-16">
       <Reveal>
         <div className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-[#E8F5F1] text-[#0E6B5A] text-[11px] font-extrabold mb-2.5">
           יתרונות
@@ -43,7 +43,7 @@ export function SupplierBenefitsSection() {
         </p>
       </Reveal>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
         {BENEFITS.map((b, i) => {
           const Icon = b.icon;
           return (

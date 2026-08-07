@@ -12,16 +12,16 @@ function setSupplierIntent() {
 
 export function SupplierHomeCta({ signedIn }: { signedIn: boolean }) {
   return (
-    <section className="px-6 mt-9 mb-8">
+    <section className="px-6 mt-9 lg:mt-16 mb-8 lg:mb-16">
       <Reveal>
         <div
-          className="rounded-[28px] p-5 text-center text-white shadow-[0_18px_40px_-18px_rgba(14,107,90,0.55)]"
+          className="rounded-[28px] p-5 lg:p-10 text-center text-white shadow-[0_18px_40px_-18px_rgba(14,107,90,0.55)]"
           style={{
             background:
               "linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)), linear-gradient(135deg, #0E6B5A 0%, #1A8870 55%, #0A5446 100%)",
           }}
         >
-          <h2 className="text-[22px] font-extrabold tracking-tight">
+          <h2 className="text-[22px] lg:text-[30px] font-extrabold tracking-tight">
             מוכנים לקבל לידים?
           </h2>
           <p className="mt-2 text-[14px] text-white/90 leading-relaxed max-w-[28ch] mx-auto">
@@ -29,8 +29,8 @@ export function SupplierHomeCta({ signedIn }: { signedIn: boolean }) {
               ? "עברו למרחב הספק — פרסמו הצעה והתחילו לקבל פניות."
               : "ההרשמה חינם. תוך דקות בונים פרופיל ומתחילים לקבל פניות."}
           </p>
-          <div className="mt-5 space-y-2.5">
-            <MotionHover className="w-full">
+          <div className="mt-5 space-y-2.5 sm:space-y-0 sm:flex sm:justify-center sm:gap-3 sm:max-w-lg sm:mx-auto">
+            <MotionHover className="w-full sm:flex-1">
               <Link
                 to={signedIn ? "/supplier" : "/auth/supplier?mode=signup"}
                 onClick={signedIn ? undefined : setSupplierIntent}
@@ -40,7 +40,7 @@ export function SupplierHomeCta({ signedIn }: { signedIn: boolean }) {
               </Link>
             </MotionHover>
             {!signedIn && (
-              <MotionHover className="w-full">
+              <MotionHover className="w-full sm:flex-1">
                 <Link
                   to="/auth/supplier?mode=signin"
                   onClick={setSupplierIntent}

@@ -5,11 +5,11 @@ export function SupplierWhatIsSection() {
     <section className="relative z-20 px-5 -mt-[72px] sm:-mt-[88px]">
       {/* eager: card overlaps the hero and must be sharp on first paint */}
       <Reveal eager>
-        <div className="rounded-[28px] bg-white border border-[#E8EEEB] shadow-[0_18px_40px_-18px_rgba(15,23,42,0.22)] p-5">
+        <div className="rounded-[28px] bg-white border border-[#E8EEEB] shadow-[0_18px_40px_-18px_rgba(15,23,42,0.22)] p-5 lg:p-9">
           <div className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-[#E8F5F1] text-[#0E6B5A] text-[11px] font-extrabold mb-2.5">
             למה זה משתלם לספקים
           </div>
-          <h2 className="text-[22px] font-extrabold text-[#0B1220] tracking-tight leading-snug">
+          <h2 className="text-[22px] lg:text-[30px] font-extrabold text-[#0B1220] tracking-tight leading-snug">
             מה זה GroupBuild בשבילכם?
           </h2>
           <p className="mt-2 text-[14px] text-[#5B6573] leading-relaxed">
