@@ -412,8 +412,8 @@ export default function AdminResidents() {
                     const name = eName || editing.email || "";
                     const url =
                       kind === "resident_welcome"
-                        ? `${window.location.origin}/resident`
-                        : `${window.location.origin}/resident/profile/edit`;
+                        ? `https://groupbuild.co.il/resident`
+                        : `https://groupbuild.co.il/resident/profile/edit`;
                     const msg =
                       kind === "resident_welcome"
                         ? residentWelcomeMessage(name, url)
