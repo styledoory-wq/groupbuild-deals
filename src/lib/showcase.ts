@@ -568,10 +568,12 @@ export const SHOWCASE_LEADS = [
 
 export const SHOWCASE_ANALYTICS = {
   summary: [
-    { event_type: "profile_view", current_count: 1284, previous_count: 1042 },
-    { event_type: "deal_view", current_count: 866, previous_count: 705 },
-    { event_type: "whatsapp_click", current_count: 52, previous_count: 39 },
-    { event_type: "call_click", current_count: 21, previous_count: 18 },
+    { event_type: "view", current_count: 1284, previous_count: 1042 },
+    { event_type: "whatsapp", current_count: 96, previous_count: 71 },
+    { event_type: "call", current_count: 54, previous_count: 46 },
+    { event_type: "share", current_count: 38, previous_count: 25 },
+    { event_type: "open_project", current_count: 63, previous_count: 44 },
+    { event_type: "navigate", current_count: 17, previous_count: 12 },
   ],
   series: Array.from({ length: 30 }, (_, i) => {
     const day = new Date(Date.now() - (29 - i) * 86400_000).toISOString().slice(0, 10);
@@ -579,10 +581,10 @@ export const SHOWCASE_ANALYTICS = {
     return { day, views: base + 12, calls: Math.max(0, Math.round(base / 9)), whatsapp: Math.max(1, Math.round(base / 5)) };
   }),
   sources: [
-    { source: "חיפוש באפליקציה", count: 512 },
-    { source: "עמוד קטגוריה", count: 348 },
-    { source: "שיתוף בוואטסאפ", count: 231 },
-    { source: "עמוד הבית", count: 193 },
+    { source: "internal_search", count: 512 },
+    { source: "category", count: 348 },
+    { source: "share", count: 231 },
+    { source: "direct", count: 193 },
   ],
   terms: [
     { query: "מטבחים", count: 143 },
