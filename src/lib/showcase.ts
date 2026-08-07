@@ -171,7 +171,7 @@ export const SHOWCASE_DEALS: ShowcaseDeal[] = [
     restrictions: "ההצעה תקפה לדירות בגוש דן והשרון בלבד.",
     appointment_required: true,
     product_details: "חזיתות אקריל · משטח קוורץ 20 מ\"מ · צירי בלו-מושן · אחריות 10 שנים",
-    joiners: 23,
+    joiners: 27,
   },
   {
     id: "showcase-deal-solar",
