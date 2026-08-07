@@ -9,6 +9,7 @@ import { Seo } from "@/components/seo/Seo";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { iconForCategory } from "@/lib/categoryIcons";
+import { isShowcase, SHOWCASE_SUPPLIERS_LIST, SHOWCASE_CATALOG, SHOWCASE_SEARCH_QUERY } from "@/lib/showcase";
 
 type SupplierRow = {
   id: string;
@@ -39,7 +40,7 @@ function catalogHref(hit: CatalogHit) {
 
 export default function SearchPage() {
   const [params, setParams] = useSearchParams();
-  const [q, setQ] = useState(() => params.get("q") ?? "");
+  const [q, setQ] = useState(() => params.get("q") ?? (isShowcase() ? SHOWCASE_SEARCH_QUERY : ""));
   const [suppliers, setSuppliers] = useState<SupplierRow[]>([]);
   const [catalog, setCatalog] = useState<CatalogHit[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,6 +62,17 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (!term) { setSuppliers([]); setCatalog([]); return; }
+    if (isShowcase()) {
+      setCatalog(
+        SHOWCASE_CATALOG.map((c, i) => ({
+          id: c.id, name: c.name, icon: null, level: 3, parent_id: null,
+          path: c.parent_name, supplier_count: 12 - i * 2, score: 1,
+        })) as CatalogHit[],
+      );
+      setSuppliers(SHOWCASE_SUPPLIERS_LIST as unknown as SupplierRow[]);
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     const t = setTimeout(async () => {
       setLoading(true);

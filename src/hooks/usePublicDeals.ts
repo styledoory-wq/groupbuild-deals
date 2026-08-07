@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { isShowcase, showcasePublicDeals } from "@/lib/showcase";
 
 export type PublicDeal = {
   id: string;
@@ -25,6 +26,7 @@ export function usePublicDeals(limit = 6) {
   return useQuery<PublicDeal[]>({
     queryKey: ["public-deals", "home", limit],
     queryFn: async () => {
+      if (isShowcase()) return showcasePublicDeals(limit);
       const nowIso = new Date().toISOString();
       const { data, error } = await supabase
         .from("deals")

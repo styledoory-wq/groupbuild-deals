@@ -1,3 +1,4 @@
+import { isShowcase } from "@/lib/showcase";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -88,6 +89,7 @@ const SUPPLIER_TOUR: TourStep[] = [
 const storageKey = (role: Role) => `gb_onboarded_${role}_v1`;
 
 export function shouldShowOnboarding(role: Role) {
+  if (isShowcase()) return false; // App Store screenshots: no tour overlays
   try { return !localStorage.getItem(storageKey(role)); } catch { return false; }
 }
 

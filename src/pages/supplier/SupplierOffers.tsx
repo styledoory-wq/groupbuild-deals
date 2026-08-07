@@ -9,6 +9,7 @@ import { ScreenHeader, LoadingState, ErrorState, EmptyState } from "@/components
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { isShowcase, SHOWCASE_SUPPLIER, SHOWCASE_SUPPLIER_DEALS, SHOWCASE_SUPPLIER_DEAL_COUNTS } from "@/lib/showcase";
 import { getCurrentSupplier } from "@/lib/supplierAuth";
 import { describeOffer, type OfferTier, type OfferType } from "@/lib/offerPricing";
 import { DealActionsMenu } from "@/components/deals/DealActionsMenu";
@@ -144,6 +145,19 @@ export default function SupplierOffers() {
 
   useEffect(() => {
     let cancelled = false;
+    if (isShowcase()) {
+      setSupplierId(SHOWCASE_SUPPLIER.id);
+      setApprovalStatus("approved");
+      setDeals(SHOWCASE_SUPPLIER_DEALS as unknown as DealRow[]);
+      setParticipantsByDeal(
+        Object.fromEntries(Object.entries(SHOWCASE_SUPPLIER_DEAL_COUNTS).map(([k, v]) => [k, v.interests])),
+      );
+      setSavesByDeal(
+        Object.fromEntries(Object.entries(SHOWCASE_SUPPLIER_DEAL_COUNTS).map(([k, v]) => [k, v.favorites])),
+      );
+      setLoading(false);
+      return;
+    }
     (async () => {
       try {
         const { session, supplier } = await getCurrentSupplier<{ id: string; approval_status: string }>("id, approval_status");

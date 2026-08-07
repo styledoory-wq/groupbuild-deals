@@ -30,6 +30,7 @@ import { useGuestGate, useResumeAction } from "@/hooks/useGuestGate";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { EditableField } from "@/components/admin/EditableField";
 import { getCategoryCover } from "@/lib/categoryCover";
+import { isShowcase, showcaseDealById, SHOWCASE_SUPPLIER, SHOWCASE_DEAL_COUNTS } from "@/lib/showcase";
 import {
   describeOffer,
   describeTier,
@@ -129,6 +130,10 @@ export default function DealDetail() {
 
   useEffect(() => {
     let cancelled = false;
+    if (isShowcase()) {
+      setFeeMode("enabled");
+      return;
+    }
     (async () => {
       try {
         const mode = await fetchParticipationFeeMode();
@@ -248,6 +253,18 @@ export default function DealDetail() {
     (async () => {
       setLoading(true);
       setError(null);
+      if (isShowcase()) {
+        const demo = showcaseDealById(dealId);
+        if (demo) {
+          setDeal(demo as unknown as DealRow);
+          setSupplier(SHOWCASE_SUPPLIER as unknown as SupplierRow);
+          setParticipantCount(SHOWCASE_DEAL_COUNTS[demo.id] ?? 0);
+          setIsGuest(false);
+          setLoading(false);
+          window.clearTimeout(safety);
+          return;
+        }
+      }
       try {
         const { data: dealData, error: dErr } = await supabase
           .from("deals")
@@ -430,6 +447,13 @@ export default function DealDetail() {
     if (!deal) {
       setParticipationFee(null);
       setFeeError(null);
+      return;
+    }
+    if (isShowcase()) {
+      // Demo screens: a representative, system-decided fee (never charged).
+      setParticipationFee({ feeAmount: 49, dealPrice: Number(deal.discounted_price ?? deal.base_price ?? 0), source: "price_band" } as unknown as ResolvedParticipationFee);
+      setFeeError(null);
+      setFeeLoading(false);
       return;
     }
     if ((deal.listing_type ?? "group_buy") === "regular") {

@@ -12,6 +12,7 @@ import { listFavoriteIds } from "@/lib/favorites";
 import type { OfferTier } from "@/lib/offerPricing";
 import { cachedQuery, getCachedValue } from "@/lib/clientCache";
 import { Seo } from "@/components/seo/Seo";
+import { isShowcase, showcaseDealCards, SHOWCASE_DEAL_COUNTS } from "@/lib/showcase";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 
@@ -56,6 +57,12 @@ export default function DealsList() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      if (isShowcase()) {
+        setDeals(showcaseDealCards() as unknown as DealWithSupplier[]);
+        setCounts(SHOWCASE_DEAL_COUNTS);
+        setLoading(false);
+        return;
+      }
       // ✅ אם יש cache — לא מציג skeleton, טוען ברקע בשקט
       if (!cached) setLoading(true);
       setError(null);

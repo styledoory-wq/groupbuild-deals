@@ -25,6 +25,7 @@ import {
   notifyProjectChanged,
 } from "@/lib/projectStore";
 import { useProjectCloudSync, useMyProject } from "@/lib/projectClient";
+import { isShowcase } from "@/lib/showcase";
 import { ProjectMembersCard } from "@/components/project/ProjectMembersCard";
 import { ProjectStagesStepper } from "@/components/project/ProjectStagesStepper";
 import { CategoryIcon, StageIcon } from "@/components/ds/CategoryIcon";
@@ -545,6 +546,20 @@ export default function ProjectManagement() {
   }, [completed]);
 
   const toggleTask = (key: string) => setCompleted((p) => ({ ...p, [key]: !p[key] }));
+
+  // Showcase (App Store screenshots): mark the first stages as done so the
+  // progress UI looks realistic. Device-local only, never written to the server.
+  useEffect(() => {
+    if (!isShowcase()) return;
+    setCompleted((prev) => {
+      if (Object.keys(prev).length) return prev;
+      const next: Record<string, boolean> = {};
+      stages.slice(0, 2).forEach((s) => s.tasks.forEach((t) => { next[`${s.key}::${t}`] = true; }));
+      const third = stages[2];
+      if (third) third.tasks.slice(0, Math.ceil(third.tasks.length / 2)).forEach((t) => { next[`${third.key}::${t}`] = true; });
+      return next;
+    });
+  }, [stages]);
 
   // Auto-advance stage: derive first incomplete stage; allow manual override.
   const autoIdx = useMemo(() => {

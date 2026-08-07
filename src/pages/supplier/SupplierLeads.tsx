@@ -23,6 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { isShowcase, SHOWCASE_LEADS, SHOWCASE_SUPPLIER_DEALS } from "@/lib/showcase";
 import { ils } from "@/lib/offerPricing";
 import { normalizeWhatsappUrl } from "@/lib/whatsapp";
 import { isAdminEmail } from "@/lib/auth";
@@ -303,6 +304,15 @@ export default function SupplierLeads() {
     const safety = window.setTimeout(() => {
       if (!cancelled) { setError("טעינת הלידים נמשכת יותר מדי זמן. נסו לרענן."); setLoading(false); }
     }, 12000);
+    if (isShowcase()) {
+      setApprovalStatus("approved");
+      setDeals(SHOWCASE_SUPPLIER_DEALS as unknown as Array<DealLite & { is_deleted?: boolean }>);
+      setInterests(SHOWCASE_LEADS as unknown as InterestRow[]);
+      setTrashedInterests([]);
+      setLoading(false);
+      window.clearTimeout(safety);
+      return () => { cancelled = true; window.clearTimeout(safety); };
+    }
     (async () => {
       try {
         const { data: session } = await supabase.auth.getSession();

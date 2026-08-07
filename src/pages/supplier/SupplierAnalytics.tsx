@@ -6,6 +6,7 @@ import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { LoadingState, ErrorState } from "@/components/ds";
 import { supabase } from "@/integrations/supabase/client";
+import { isShowcase, SHOWCASE_SUPPLIER, SHOWCASE_ANALYTICS } from "@/lib/showcase";
 import { getCurrentSupplier } from "@/lib/supplierAuth";
 import { getFriendlyLoadError } from "@/lib/safeAsync";
 import { toast } from "sonner";
@@ -108,6 +109,10 @@ export default function SupplierAnalytics() {
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
   useEffect(() => {
+    if (isShowcase()) {
+      setSupplierId(SHOWCASE_SUPPLIER.id);
+      return;
+    }
     (async () => {
       try {
         const { supplier } = await getCurrentSupplier();
@@ -131,6 +136,15 @@ export default function SupplierAnalytics() {
     const from = new Date(to.getTime() - days * 86400_000);
     setLoading(true);
     setErr(null);
+    if (isShowcase()) {
+      setSummary(SHOWCASE_ANALYTICS.summary as never[]);
+      setSeries(SHOWCASE_ANALYTICS.series.slice(-days) as never[]);
+      setSources(SHOWCASE_ANALYTICS.sources as never[]);
+      setTerms(SHOWCASE_ANALYTICS.terms as never[]);
+      setUpdatedAt(new Date());
+      setLoading(false);
+      return;
+    }
     (async () => {
       try {
         const [sum, ts, src, tr] = await Promise.all([
