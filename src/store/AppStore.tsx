@@ -169,6 +169,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (resolvedRole === "admin") setAdminSession(true);
       } catch (err) {
         console.error("[AppStore] hydrate failed", err);
+        // Allow the next auth event / token refresh to retry the full hydrate.
+        // Without this reset, one transient Supabase failure can pin this user
+        // to the fallback state until a full app restart.
+        if (hydratingUserRef.current === uid) hydratingUserRef.current = null;
         if (cancelled) return;
         // Fallback: set a minimal user so UI isn't stuck and logout button works
         setUser({
