@@ -16,18 +16,42 @@ export function isAdminEmail(email: string | null | undefined): boolean {
 }
 
 export async function hasAdminRole(userId: string): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (error) {
-    console.warn("[auth] admin role check failed", error);
-    return false;
-  }
-  return !!data;
+  // Never let a hanging network call block the admin gate.
+  const query = (async () => {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (error) {
+      console.warn("[auth] admin role check failed", error);
+      return false;
+    }
+    return !!data;
+  })();
+  const timeout = new Promise<boolean>((resolve) =>
+    setTimeout(() => {
+      console.warn("[auth] admin role check timed out");
+      resolve(false);
+    }, 5000),
+  );
+  return Promise.race([query, timeout]);
 }
+
+/**
+ * Single source of truth for "is this signed-in user an admin?".
+ * The hardcoded owner email resolves instantly (no network), so a slow or
+ * stuck database call can never lock the owner out of the admin panel.
+ */
+export async function isAdminUser(
+  user: { id: string; email?: string | null } | null | undefined,
+): Promise<boolean> {
+  if (!user) return false;
+  if (isAdminEmail(user.email)) return true;
+  return hasAdminRole(user.id);
+}
+
 
 /**
  * Server-verified admin check.
