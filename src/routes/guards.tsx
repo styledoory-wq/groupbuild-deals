@@ -27,11 +27,15 @@ const authRouteFor = (role: "resident" | "supplier"): string => {
 function AuthPending() {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    const t = window.setTimeout(() => setShow(true), 800);
+    const t = window.setTimeout(() => setShow(true), 350);
     return () => window.clearTimeout(t);
   }, []);
   if (!show) return null;
-  return null;
+  return (
+    <div className="flex min-h-[45vh] w-full items-center justify-center" role="status" aria-label="טוען">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+    </div>
+  );
 }
 
 /** Save the current location so /auth can bounce the user back after signin. */
@@ -79,4 +83,3 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   if (!user) return <Navigate to={IS_SUPPLIERS_BUILD ? "/auth/supplier" : "/auth/resident"} replace />;
   return <>{children}</>;
 }
-
