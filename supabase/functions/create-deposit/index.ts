@@ -432,10 +432,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    let paymentUrl: string | null =
-      typeof reusable?.provider_payment_url === "string"
-        ? reusable.provider_payment_url
-        : null;
+    // A previously issued checkout URL is only safe to reuse when the amount
+    // Cardcom/Stripe will charge is IDENTICAL to what we now expect. If credit
+    // application (or the fee) changed, the stale URL would charge the wrong
+    // amount and the webhook amount check would leave the deposit pending.
+    const reusableUrlValid =
+      typeof reusable?.provider_payment_url === "string" &&
+      Number(reusable.card_amount ?? 0) === Number(cardAmount) &&
+      Number(reusable.amount ?? 0) === Number(amount);
+
+    let paymentUrl: string | null = reusableUrlValid
+      ? (reusable!.provider_payment_url as string)
+      : null;
 
     // For split payments, Cardcom must charge only the card portion.
     const chargeAmount = cardAmount;

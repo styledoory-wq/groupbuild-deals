@@ -11,7 +11,7 @@ const ROWS: Row[] = [
   { key: "failedPayments", icon: CreditCard, label: "תשלומים שנכשלו", to: "/admin/payments", severe: true },
   { key: "openLeads", icon: Inbox, label: "לידים ללא מענה", to: "/admin/leads" },
   { key: "pendingCommittee", icon: UserCheck, label: "בקשות ועד בית", to: "/admin/committee-requests" },
-  { key: "dealsNoImage", icon: ImageOff, label: "הצעות ללא תמונה", to: "/admin/deals?filter=no-image" },
+  { key: "dealsNoImage", icon: ImageOff, label: "הצעות ללא תמונה", to: "/admin/deals?tab=no_image" },
 ];
 
 /**
