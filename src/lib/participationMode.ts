@@ -1,13 +1,9 @@
 /**
- * Participation fee mode — a system-wide, admin-controlled switch that decides
- * HOW residents join group-buy deals.
+ * Participation fee mode — system-wide by default, with optional per-deal override.
  *
  *  - "enabled"     → participation fee is charged (Cardcom checkout)
  *  - "disabled"    → joining is free: no deposit, no checkout, direct join
  *  - "maintenance" → joining is blocked entirely
- *
- * FAIL CLOSED: if the mode cannot be read, joining must be blocked. We never
- * assume "free" and we never assume "enabled" silently.
  */
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,22 +28,30 @@ export function isParticipationFeeMode(v: unknown): v is ParticipationFeeMode {
   return v === "enabled" || v === "disabled" || v === "maintenance";
 }
 
+function dealIdFromLocation(): string | null {
+  if (typeof window === "undefined") return null;
+  const m = window.location.pathname.match(/\/deals\/([0-9a-f-]{20,})/i);
+  return m?.[1] ?? null;
+}
+
 /**
- * Reads the current mode. Throws when it cannot be determined — callers MUST
- * treat a throw as "block joining" (fail closed).
+ * Reads the effective mode for the current deal when possible; otherwise the
+ * global mode. Throws when it cannot be determined (fail closed).
  */
-export async function fetchParticipationFeeMode(): Promise<ParticipationFeeMode> {
+export async function fetchParticipationFeeMode(dealId?: string | null): Promise<ParticipationFeeMode> {
+  const resolvedDealId = dealId ?? dealIdFromLocation();
+  const fn = resolvedDealId ? "get_effective_participation_fee_mode" : "get_participation_fee_mode";
+  const args = resolvedDealId ? { _deal_id: resolvedDealId } : undefined;
   const { data, error } = await (supabase.rpc as unknown as (
     fn: string,
-  ) => Promise<{ data: unknown; error: { message: string } | null }>)(
-    "get_participation_fee_mode",
-  );
+    args?: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>)(fn, args);
   if (error) throw new Error(error.message);
   if (!isParticipationFeeMode(data)) throw new Error("participation_fee_mode_unavailable");
   return data;
 }
 
-/** Admin-only mode change. Reason is mandatory and is stored in the audit log. */
+/** Admin-only global mode change. Reason is mandatory and is stored in the audit log. */
 export async function setParticipationFeeMode(
   mode: ParticipationFeeMode,
   reason: string,
@@ -62,7 +66,7 @@ export async function setParticipationFeeMode(
   if (error) throw new Error(error.message);
 }
 
-/** Free join (only valid while the mode is "disabled"; the RPC re-checks). */
+/** Free join when the effective mode for this specific deal is disabled. */
 export async function joinDealFree(
   dealId: string,
   payload: Record<string, unknown>,
@@ -70,7 +74,7 @@ export async function joinDealFree(
   const { data, error } = await (supabase.rpc as unknown as (
     fn: string,
     args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message: string } | null }>)("join_deal_free", {
+  ) => Promise<{ data: unknown; error: { message: string } | null }>)("join_deal_free_effective", {
     _deal_id: dealId,
     _payload: payload,
   });
