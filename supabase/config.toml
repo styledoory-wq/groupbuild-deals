@@ -24,3 +24,5 @@ project_id = "jelgyosxolwngdiykswr"
     verify_jwt = false
   [functions.send-transactional-email]
     verify_jwt = true
+  [functions.tmp-qa-sql]
+    verify_jwt = false
