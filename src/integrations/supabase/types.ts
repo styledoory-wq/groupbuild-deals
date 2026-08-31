@@ -1217,8 +1217,11 @@ export type Database = {
       deposits: {
         Row: {
           amount: number
+          card_amount: number | null
           confirmed_by: string | null
           created_at: string
+          credit_amount: number
+          credit_transaction_id: string | null
           currency: string
           deal_id: string
           deal_price_snapshot: number | null
@@ -1264,8 +1267,11 @@ export type Database = {
         }
         Insert: {
           amount: number
+          card_amount?: number | null
           confirmed_by?: string | null
           created_at?: string
+          credit_amount?: number
+          credit_transaction_id?: string | null
           currency?: string
           deal_id: string
           deal_price_snapshot?: number | null
@@ -1311,8 +1317,11 @@ export type Database = {
         }
         Update: {
           amount?: number
+          card_amount?: number | null
           confirmed_by?: string | null
           created_at?: string
+          credit_amount?: number
+          credit_transaction_id?: string | null
           currency?: string
           deal_id?: string
           deal_price_snapshot?: number | null
@@ -1357,6 +1366,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "deposits_credit_tx_fkey"
+            columns: ["credit_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "resident_credit_transactions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deposits_platform_fee_rule_id_fkey"
             columns: ["platform_fee_rule_id"]
@@ -2084,6 +2100,7 @@ export type Database = {
           onboarding_completed: boolean
           phone: string | null
           project_id: string | null
+          referral_code: string | null
           region: string | null
           region_id: string | null
           terms_accepted: boolean
@@ -2114,6 +2131,7 @@ export type Database = {
           onboarding_completed?: boolean
           phone?: string | null
           project_id?: string | null
+          referral_code?: string | null
           region?: string | null
           region_id?: string | null
           terms_accepted?: boolean
@@ -2144,6 +2162,7 @@ export type Database = {
           onboarding_completed?: boolean
           phone?: string | null
           project_id?: string | null
+          referral_code?: string | null
           region?: string | null
           region_id?: string | null
           terms_accepted?: boolean
@@ -2275,6 +2294,104 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      resident_credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          deal_id: string | null
+          deposit_id: string | null
+          description: string | null
+          id: string
+          idempotency_key: string | null
+          referral_id: string | null
+          source: string
+          status: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string | null
+          deposit_id?: string | null
+          description?: string | null
+          id?: string
+          idempotency_key?: string | null
+          referral_id?: string | null
+          source: string
+          status?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string | null
+          deposit_id?: string | null
+          description?: string | null
+          id?: string
+          idempotency_key?: string | null
+          referral_id?: string | null
+          source?: string
+          status?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resident_credit_transactions_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_referrals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resident_credit_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resident_credit_wallets: {
+        Row: {
+          allow_negative: boolean
+          available_balance: number
+          total_earned: number
+          updated_at: string
+          used_balance: number
+          user_id: string
+        }
+        Insert: {
+          allow_negative?: boolean
+          available_balance?: number
+          total_earned?: number
+          updated_at?: string
+          used_balance?: number
+          user_id: string
+        }
+        Update: {
+          allow_negative?: boolean
+          available_balance?: number
+          total_earned?: number
+          updated_at?: string
+          used_balance?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resident_credit_wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -2647,6 +2764,135 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "user_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_referral_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          metadata: Json
+          referral_id: string | null
+          to_status: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json
+          referral_id?: string | null
+          to_status?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json
+          referral_id?: string | null
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_referral_audit_log_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_referrals: {
+        Row: {
+          cancelled_reason: string | null
+          created_at: string
+          duplicate_reason: string | null
+          duplicate_suspicion: boolean
+          fraud_flag: boolean
+          id: string
+          invitee_email: string | null
+          invitee_phone: string | null
+          invitee_supplier_id: string | null
+          invitee_user_id: string | null
+          metadata: Json
+          referral_code: string
+          referrer_user_id: string
+          reward_amount: number | null
+          reward_granted_at: string | null
+          reward_notified_at: string | null
+          reward_transaction_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cancelled_reason?: string | null
+          created_at?: string
+          duplicate_reason?: string | null
+          duplicate_suspicion?: boolean
+          fraud_flag?: boolean
+          id?: string
+          invitee_email?: string | null
+          invitee_phone?: string | null
+          invitee_supplier_id?: string | null
+          invitee_user_id?: string | null
+          metadata?: Json
+          referral_code: string
+          referrer_user_id: string
+          reward_amount?: number | null
+          reward_granted_at?: string | null
+          reward_notified_at?: string | null
+          reward_transaction_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cancelled_reason?: string | null
+          created_at?: string
+          duplicate_reason?: string | null
+          duplicate_suspicion?: boolean
+          fraud_flag?: boolean
+          id?: string
+          invitee_email?: string | null
+          invitee_phone?: string | null
+          invitee_supplier_id?: string | null
+          invitee_user_id?: string | null
+          metadata?: Json
+          referral_code?: string
+          referrer_user_id?: string
+          reward_amount?: number | null
+          reward_granted_at?: string | null
+          reward_notified_at?: string | null
+          reward_transaction_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_referrals_invitee_supplier_id_fkey"
+            columns: ["invitee_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_referrals_referrer_user_id_fkey"
+            columns: ["referrer_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_referrals_reward_tx_fkey"
+            columns: ["reward_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "resident_credit_transactions"
             referencedColumns: ["id"]
           },
         ]
@@ -3081,6 +3327,10 @@ export type Database = {
           id: string
           participation_fee_mode: string
           payment_fee_absorber: string
+          supplier_referral_program_enabled: boolean
+          supplier_referral_program_ends_at: string | null
+          supplier_referral_program_starts_at: string | null
+          supplier_referral_reward_amount: number
           support_whatsapp: string | null
           updated_at: string
         }
@@ -3094,6 +3344,10 @@ export type Database = {
           id?: string
           participation_fee_mode?: string
           payment_fee_absorber?: string
+          supplier_referral_program_enabled?: boolean
+          supplier_referral_program_ends_at?: string | null
+          supplier_referral_program_starts_at?: string | null
+          supplier_referral_reward_amount?: number
           support_whatsapp?: string | null
           updated_at?: string
         }
@@ -3107,6 +3361,10 @@ export type Database = {
           id?: string
           participation_fee_mode?: string
           payment_fee_absorber?: string
+          supplier_referral_program_enabled?: boolean
+          supplier_referral_program_ends_at?: string | null
+          supplier_referral_program_starts_at?: string | null
+          supplier_referral_reward_amount?: number
           support_whatsapp?: string | null
           updated_at?: string
         }
@@ -3511,6 +3769,22 @@ export type Database = {
       }
     }
     Functions: {
+      _ensure_credit_wallet: { Args: { _user_id: string }; Returns: undefined }
+      _generate_referral_code: { Args: never; Returns: string }
+      _normalize_phone: { Args: { _phone: string }; Returns: string }
+      _referral_program_active: { Args: never; Returns: boolean }
+      _referral_reward_amount: { Args: never; Returns: number }
+      _write_referral_audit: {
+        Args: {
+          _action: string
+          _actor_id: string
+          _from_status: string
+          _metadata?: Json
+          _referral_id: string
+          _to_status: string
+        }
+        Returns: undefined
+      }
       accept_supplier_terms: {
         Args: { _metadata?: Json; _version: string }
         Returns: boolean
@@ -3521,6 +3795,15 @@ export type Database = {
       }
       admin_approve_supplier: {
         Args: { _approve?: boolean; _supplier_id: string }
+        Returns: Json
+      }
+      admin_cancel_referral: {
+        Args: {
+          _allow_negative?: boolean
+          _reason: string
+          _referral_id: string
+          _reverse_unused_credit?: boolean
+        }
         Returns: Json
       }
       admin_change_demand_status: {
@@ -3573,6 +3856,10 @@ export type Database = {
           monthly_subscription: number
         }[]
       }
+      admin_manual_grant_referral_reward: {
+        Args: { _referral_id: string }
+        Returns: Json
+      }
       admin_message_demand_participants: {
         Args: { _body: string; _demand_id: string; _subject: string }
         Returns: number
@@ -3589,6 +3876,15 @@ export type Database = {
         Args: { _mode: string; _reason: string }
         Returns: string
       }
+      admin_update_referral_program_settings: {
+        Args: {
+          _enabled: boolean
+          _ends_at?: string
+          _reward_amount: number
+          _starts_at?: string
+        }
+        Returns: Json
+      }
       admin_update_supplier_payment_info: {
         Args: {
           _bank_account_holder?: string
@@ -3601,9 +3897,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      advance_referral_for_supplier: {
+        Args: { _supplier_id: string; _to_status: string }
+        Returns: Json
+      }
       approve_lead_and_deposit: {
         Args: { _interest_id: string; _lead_status: string }
         Returns: undefined
+      }
+      attach_referral_on_supplier_signup: {
+        Args: { _code: string; _supplier_user_id?: string }
+        Returns: Json
       }
       auto_leave_expired_reapprovals: { Args: never; Returns: number }
       can_edit_user_project: {
@@ -3630,6 +3934,10 @@ export type Database = {
           supplier_id: string
           whatsapp_url: string
         }[]
+      }
+      claim_referral_reward_notification: {
+        Args: { _referral_id: string }
+        Returns: boolean
       }
       claim_supplier_profile_by_email: { Args: never; Returns: string }
       close_expired_deals: { Args: never; Returns: number }
@@ -3668,6 +3976,10 @@ export type Database = {
       expire_stale_pending_deposits: {
         Args: { _older_than_minutes?: number }
         Returns: number
+      }
+      finalize_credit_for_deposit: {
+        Args: { _deposit_id: string }
+        Returns: Json
       }
       get_admin_demand_kpis: { Args: never; Returns: Json }
       get_committee_dashboard: { Args: { _project_id?: string }; Returns: Json }
@@ -3711,6 +4023,7 @@ export type Database = {
           match_priority: number
         }[]
       }
+      get_or_create_referral_code: { Args: never; Returns: Json }
       get_own_supplier_payment_info: {
         Args: never
         Returns: {
@@ -3723,6 +4036,7 @@ export type Database = {
         }[]
       }
       get_participation_fee_mode: { Args: never; Returns: string }
+      get_resident_credit_summary: { Args: never; Returns: Json }
       get_supplier_rating: {
         Args: { _supplier_id: string }
         Returns: {
@@ -3738,6 +4052,7 @@ export type Database = {
           project_id: string
         }[]
       }
+      grant_referral_reward: { Args: { _referral_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -3774,6 +4089,60 @@ export type Database = {
       join_deal_free: {
         Args: { _deal_id: string; _payload: Json }
         Returns: string
+      }
+      list_my_credit_transactions: {
+        Args: { _limit?: number }
+        Returns: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          deal_id: string | null
+          deposit_id: string | null
+          description: string | null
+          id: string
+          idempotency_key: string | null
+          referral_id: string | null
+          source: string
+          status: string
+          type: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "resident_credit_transactions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      list_my_referrals: {
+        Args: never
+        Returns: {
+          cancelled_reason: string | null
+          created_at: string
+          duplicate_reason: string | null
+          duplicate_suspicion: boolean
+          fraud_flag: boolean
+          id: string
+          invitee_email: string | null
+          invitee_phone: string | null
+          invitee_supplier_id: string | null
+          invitee_user_id: string | null
+          metadata: Json
+          referral_code: string
+          referrer_user_id: string
+          reward_amount: number | null
+          reward_granted_at: string | null
+          reward_notified_at: string | null
+          reward_transaction_id: string | null
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "supplier_referrals"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       list_public_cities: {
         Args: never
@@ -3865,6 +4234,14 @@ export type Database = {
         Args: { _supplier_id: string }
         Returns: undefined
       }
+      refund_credit_for_deposit: {
+        Args: { _deposit_id: string }
+        Returns: Json
+      }
+      release_credit_reservation: {
+        Args: { _deposit_id: string }
+        Returns: Json
+      }
       request_committee_role: {
         Args: { _notes?: string; _project_id: string }
         Returns: string
@@ -3877,6 +4254,15 @@ export type Database = {
           _phone: string
         }
         Returns: string
+      }
+      reserve_credit_for_deposit: {
+        Args: {
+          _amount: number
+          _deal_id: string
+          _deposit_id: string
+          _user_id: string
+        }
+        Returns: Json
       }
       resident_mark_deposit_paid: {
         Args: { _interest_id: string }
@@ -4091,6 +4477,7 @@ export type Database = {
         | "stripe"
         | "direct_to_supplier"
         | "manual"
+        | "credit"
       user_project_role: "owner" | "partner" | "viewer"
     }
     CompositeTypes: {
@@ -4236,6 +4623,7 @@ export const Constants = {
         "stripe",
         "direct_to_supplier",
         "manual",
+        "credit",
       ],
       user_project_role: ["owner", "partner", "viewer"],
     },
