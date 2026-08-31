@@ -197,26 +197,39 @@ export default function OfferEditor() {
           if (!cancelled) { setBootError("יש להתחבר כספק כדי ליצור הצעה."); setBootLoading(false); }
           return;
         }
+        const supplierSelect = "id, business_name, approval_status, categories, email, user_id";
         let s: SupplierLite | null = null;
+        // True when an admin manages an offer that belongs to another supplier.
+        let adminMode = false;
+
+        // When editing, find which supplier owns the offer.
+        let dealSupplierId: string | null = null;
+        if (isEditing && dealId) {
+          const { data: ownerRow } = await supabase
+            .from("deals").select("supplier_id").eq("id", dealId).maybeSingle();
+          dealSupplierId = (ownerRow?.supplier_id as string | null) ?? null;
+        }
+
         if (adminTargetSupplierId) {
           const isAdmin = await verifyAdminFromSession();
           if (!isAdmin) {
             if (!cancelled) { setBootError("רק אדמין יכול ליצור הצעה לספק אחר."); setBootLoading(false); }
             return;
           }
+          adminMode = true;
           const r = await supabase.from("suppliers")
-            .select("id, business_name, approval_status, categories, email, user_id")
+            .select(supplierSelect)
             .eq("id", adminTargetSupplierId).maybeSingle();
           s = (r.data as SupplierLite | null) ?? null;
         } else {
           const email = session.user.email ?? "";
           const byUser = await supabase.from("suppliers")
-            .select("id, business_name, approval_status, categories, email, user_id")
+            .select(supplierSelect)
             .eq("user_id", session.user.id).maybeSingle();
           s = (byUser.data as SupplierLite | null) ?? null;
           if (!s && email) {
             const byEmail = await supabase.from("suppliers")
-              .select("id, business_name, approval_status, categories, email, user_id")
+              .select(supplierSelect)
               .ilike("email", email).maybeSingle();
             s = (byEmail.data as SupplierLite | null) ?? null;
             if (s && !s.user_id) {
@@ -224,10 +237,25 @@ export default function OfferEditor() {
               if (!claimError) s = { ...s, user_id: session.user.id, email: email || s.email };
             }
           }
+
+          // Admin editing an offer of another supplier (e.g. from /admin/offers/:id/edit):
+          // load the offer's supplier instead of blocking on the admin's own profile.
+          if (dealSupplierId && (!s || s.id !== dealSupplierId)) {
+            const isAdmin = await verifyAdminFromSession();
+            if (isAdmin) {
+              const r = await supabase.from("suppliers")
+                .select(supplierSelect)
+                .eq("id", dealSupplierId).maybeSingle();
+              if (r.data) {
+                s = r.data as SupplierLite;
+                adminMode = true;
+              }
+            }
+          }
         }
 
         // Supplier agreement re-acceptance: blocks NEW offers only.
-        if (!adminTargetSupplierId && !isEditing) {
+        if (!adminMode && !isEditing) {
           const termsStatus = await loadSupplierTermsStatus(session.user.id);
           if (!cancelled) setNeedsTermsAccept(termsStatus.blocksNewActivity);
         }
@@ -240,8 +268,8 @@ export default function OfferEditor() {
         if (cancelled) return;
         setSupplier(s);
 
-        // Gate publishing: enforce profile completeness for supplier flow (skip for admin creating on behalf).
-        if (!adminTargetSupplierId) {
+        // Gate publishing: enforce profile completeness for supplier flow (skip for admin acting on behalf).
+        if (!adminMode) {
           try {
             const { completeness } = await loadSupplierCompletenessForUser(session.user.id);
             if (!cancelled && !completeness.complete) {
@@ -253,6 +281,7 @@ export default function OfferEditor() {
             console.warn("[offer-editor] completeness check failed", compErr);
           }
         }
+
         // Do NOT prefill deposit_amount — user asked for empty defaults.
         setDepositLimits({
           min: paymentSettings?.deposit_min_amount == null ? null : Number(paymentSettings.deposit_min_amount),
