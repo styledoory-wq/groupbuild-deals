@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { hasAdminRole, isAdminEmail, setAdminSession } from "@/lib/auth";
+import { isAdminUser, setAdminSession } from "@/lib/auth";
 import { toast } from "sonner";
 
 /**
@@ -35,7 +35,7 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
         finish("anon");
         return;
       }
-      const allowed = (await hasAdminRole(session.user.id)) || isAdminEmail(session.user.email);
+      const allowed = await isAdminUser(session.user);
       if (allowed) {
         setAdminSession(true);
         finish("allowed");
@@ -65,13 +65,21 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
         finish("error", err instanceof Error ? err.message : "שגיאה בטעינת ההזדהות");
       });
 
-    // Hard timeout — if nothing resolved in 4s, treat as anonymous (send to login)
+    // Hard timeout — if nothing resolved in 8s, decide from the session itself
+    // instead of bouncing a signed-in admin back to the login screen.
     const timeoutId = window.setTimeout(() => {
-      if (!resolved) {
+      if (resolved) return;
+      void (async () => {
+        const { data } = await supabase.auth.getSession();
+        if (data.session && (await isAdminUser(data.session.user))) {
+          setAdminSession(true);
+          finish("allowed");
+          return;
+        }
         setAdminSession(false);
         finish("anon");
-      }
-    }, 4000);
+      })();
+    }, 8000);
 
     return () => {
       window.clearTimeout(timeoutId);

@@ -4,7 +4,7 @@ import { ShieldCheck, Lock, ArrowRight, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useApp } from "@/store/AppStore";
-import { ADMIN_EMAIL, hasAdminRole, isAdminEmail, setAdminSession } from "@/lib/auth";
+import { ADMIN_EMAIL, isAdminUser, setAdminSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { translateAuthError } from "@/lib/authErrors";
@@ -21,7 +21,7 @@ export default function AdminLogin() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
-      if (data.session && ((await hasAdminRole(data.session.user.id)) || isAdminEmail(data.session.user.email))) {
+      if (data.session && (await isAdminUser(data.session.user))) {
         setAdminSession(true);
         const from = (location.state as { from?: string } | null)?.from;
         navigate(from && from.startsWith("/admin") ? from : "/admin", { replace: true });
@@ -39,7 +39,7 @@ export default function AdminLogin() {
         password,
       });
       if (error) throw error;
-      const allowed = data.user ? (await hasAdminRole(data.user.id)) || isAdminEmail(data.user.email) : false;
+      const allowed = await isAdminUser(data.user);
       if (!allowed) {
         await supabase.auth.signOut();
         toast.error("אין לך הרשאה לגשת לאזור זה");
