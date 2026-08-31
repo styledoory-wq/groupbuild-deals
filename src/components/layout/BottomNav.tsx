@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Tag, User, Briefcase, Users, Building2, ShieldCheck, TrendingUp, LayoutGrid, Search, Settings, type LucideIcon } from "lucide-react";
+import { Home, Tag, User, Briefcase, Users, ShieldCheck, TrendingUp, LayoutGrid, Search, CreditCard, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { preloadRoute } from "@/lib/routePreload";
 import { DesktopSidebar } from "./DesktopSidebar";
@@ -9,7 +9,7 @@ import { useApp } from "@/store/AppStore";
 import { GuestBottomNav } from "./GuestBottomNav";
 import type { Role } from "@/types";
 
-const items: Record<Role, { to: string; label: string; icon: LucideIcon; badgeKey?: "suppliers" | "deals" | "total" }[]> = {
+const items: Record<Role, { to: string; label: string; icon: LucideIcon; badgeKey?: "suppliers" | "deals" | "leads" | "total" }[]> = {
   resident: [
     { to: "/resident", label: "בית", icon: Home },
     { to: "/resident/deals", label: "עסקאות", icon: Tag },
@@ -25,11 +25,11 @@ const items: Record<Role, { to: string; label: string; icon: LucideIcon; badgeKe
     { to: "/supplier/account", label: "חשבון", icon: User },
   ],
   admin: [
-    { to: "/admin", label: "דשבורד", icon: Home, badgeKey: "total" },
+    { to: "/admin", label: "בית", icon: Home, badgeKey: "total" },
     { to: "/admin/suppliers", label: "ספקים", icon: ShieldCheck, badgeKey: "suppliers" },
     { to: "/admin/deals", label: "הצעות", icon: Tag, badgeKey: "deals" },
-    { to: "/admin/projects", label: "פרויקטים", icon: Building2 },
-    { to: "/admin/settings", label: "הגדרות", icon: Settings },
+    { to: "/admin/leads", label: "לידים", icon: Users, badgeKey: "leads" },
+    { to: "/admin/payments", label: "תשלומים", icon: CreditCard },
   ],
 };
 
@@ -38,16 +38,15 @@ function BottomNavImpl({ role }: { role: Role }) {
   const { user, authReady } = useApp();
   const { data: attention } = useAdminAttention();
 
-  // Guest visitors get a completely separate nav (no profile, no notifications, no personal area).
-  // We only downgrade to the guest nav for resident-facing chrome — supplier/admin surfaces are auth-only.
   if (role === "resident" && authReady && !user) {
     return <GuestBottomNav />;
   }
 
-  const badgeFor = (key?: "suppliers" | "deals" | "total"): number => {
+  const badgeFor = (key?: "suppliers" | "deals" | "leads" | "total"): number => {
     if (role !== "admin" || !attention || !key) return 0;
     if (key === "suppliers") return attention.pendingSuppliers;
     if (key === "deals") return attention.dealsNoImage;
+    if (key === "leads") return attention.openLeads;
     return attention.total;
   };
 
@@ -84,11 +83,7 @@ function BottomNavImpl({ role }: { role: Role }) {
                     active ? "h-9 w-11 bg-[#0E6B5A]/12" : "h-9 w-11 bg-transparent",
                   )}
                 >
-                  <Icon
-                    className="shrink-0"
-                    style={{ width: 22, height: 22 }}
-                    strokeWidth={active ? 2.35 : 1.9}
-                  />
+                  <Icon className="shrink-0" style={{ width: 22, height: 22 }} strokeWidth={active ? 2.35 : 1.9} />
                   {badge > 0 && (
                     <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-[#C1483C] text-white text-[9.5px] font-bold flex items-center justify-center leading-none tabular-nums">
                       {badge > 99 ? "99+" : badge}
