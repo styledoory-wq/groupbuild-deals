@@ -1,3 +1,4 @@
+-- Sync trigger: force Lovable to detect and apply this production repair.
 -- Repair migration: re-apply per-deal participation fee controls in production.
 -- Safe to run repeatedly: columns, indexes and functions are idempotent/replaced.
 -- Generated because the original migration existed in Git but was not active in the live database.
