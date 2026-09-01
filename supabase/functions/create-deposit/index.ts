@@ -81,12 +81,16 @@ Deno.serve(async (req) => {
     );
 
     // ---------------------------------------------------------------
-    // System-wide participation fee mode. Server-side enforcement so the
-    // UI cannot be bypassed. FAIL CLOSED when the mode cannot be read.
+    // Effective participation fee mode (global master switch + per-deal
+    // override). Server-side enforcement so the UI cannot be bypassed.
+    // FAIL CLOSED when the mode cannot be read.
     // ---------------------------------------------------------------
-    const { data: modeData, error: modeErr } = await admin.rpc("get_participation_fee_mode");
+    const { data: modeData, error: modeErr } = await admin.rpc(
+      "get_effective_participation_fee_mode",
+      { _deal_id: body.deal_id },
+    );
     if (modeErr || typeof modeData !== "string") {
-      console.error("[create-deposit] participation mode unavailable", modeErr);
+      console.error("[create-deposit] effective participation mode unavailable", modeErr);
       return json({ error: "mode_unavailable", message: BLOCKED_MESSAGE }, 503);
     }
     if (modeData === "maintenance") {
