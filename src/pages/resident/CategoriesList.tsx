@@ -13,7 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { ErrorState, EmptyState } from "@/components/ds";
+import { EmptyState } from "@/components/ds";
 import { CategorySquareCard } from "@/components/categories/CategorySquareCard";
 import { supabase } from "@/integrations/supabase/client";
 import { stageMeta, STAGE_ORDER, type ProjectType } from "@/lib/stageCatalog";
@@ -93,19 +93,15 @@ function ProjectTypeCircle({
             boxShadow: selected
               ? `0 0 0 1px ${BRAND}, 0 14px 28px -14px ${BRAND}88`
               : "0 8px 20px -12px rgba(15,23,42,0.16)",
-            /* CSS background so the circle never paints empty while <img> decodes */
             backgroundColor: "#E8F0ED",
-            backgroundImage: `url("${def.img}")`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
           }}
         >
           <img
             src={def.img}
             alt=""
-            loading="eager"
+            loading="lazy"
             decoding="async"
-            fetchPriority="high"
+            fetchPriority="low"
             className="h-full w-full object-cover object-center"
           />
         </span>
@@ -461,24 +457,23 @@ export default function CategoriesList() {
                   </button>
                 </div>
 
-                {errorMsg ? (
-                  <ErrorState
-                    title="לא הצלחנו לטעון את הקטגוריות"
-                    description="ייתכן שהחיבור לרשת נקטע. אפשר לנסות שוב."
-                    onRetry={() => {
-                      setErrorMsg(null);
-                      setCountsReady(false);
-                      setRefreshTick((n) => n + 1);
-                    }}
-                  />
-                ) : !countsReady ? (
-                  <div className="grid grid-cols-3 gap-3">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="aspect-square rounded-2xl bg-white border border-gray-100 animate-pulse" />
-                    ))}
+                {errorMsg && (
+                  <div className="mb-3 flex items-center justify-between gap-3 rounded-xl bg-[#FFF8E1] px-3 py-2 text-[11px] font-medium text-[#7A5A12]">
+                    <span>הספירות לא התעדכנו. הקטגוריות עדיין זמינות.</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setErrorMsg(null);
+                        setRefreshTick((n) => n + 1);
+                      }}
+                      className="shrink-0 font-extrabold underline"
+                    >
+                      נסה שוב
+                    </button>
                   </div>
-                ) : filtered.length === 0 ? (
+                )}
 
+                {filtered.length === 0 ? (
                   <EmptyState
                     icon={<Search size={26} className="text-[#9CA3AF]" />}
                     title={query.trim() ? "לא נמצאו קטגוריות" : "אין עדיין קטגוריות במסלול זה"}
