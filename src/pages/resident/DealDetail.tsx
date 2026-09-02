@@ -87,6 +87,7 @@ interface DealRow {
   listing_type: "group_buy" | "regular" | null;
   participation_fee_amount: number | null;
   participation_fee_locked_at: string | null;
+  participation_fee_override_mode: "inherit" | "enabled" | "disabled" | null;
 
 }
 
@@ -271,7 +272,7 @@ export default function DealDetail() {
         const { data: dealData, error: dErr } = await supabase
           .from("deals")
           .select(
-            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images,offer_terms,restrictions,service_areas,join_deadline,redemption_deadline,appointment_required,product_details,listing_type,participation_fee_amount,participation_fee_locked_at",
+            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images,offer_terms,restrictions,service_areas,join_deadline,redemption_deadline,appointment_required,product_details,listing_type,participation_fee_amount,participation_fee_locked_at,participation_fee_override_mode",
 
           )
           .eq("id", dealId)
@@ -399,6 +400,20 @@ export default function DealDetail() {
       window.clearTimeout(safety);
     };
   }, [dealId]);
+
+  // Per-deal admin choice is stored on the deal row itself. Apply it directly
+  // so a delayed/missing effective-mode RPC cannot hide the admin's explicit
+  // "free" or "manual amount" selection.
+  useEffect(() => {
+    if (!deal) return;
+    if (deal.participation_fee_override_mode === "disabled") {
+      setFeeMode("disabled");
+      return;
+    }
+    if (deal.participation_fee_override_mode === "enabled") {
+      setFeeMode((current) => current === "maintenance" ? current : "enabled");
+    }
+  }, [deal?.id, deal?.participation_fee_override_mode]);
 
   // Realtime: refresh paid count whenever a deposit row for this deal changes.
   useEffect(() => {
