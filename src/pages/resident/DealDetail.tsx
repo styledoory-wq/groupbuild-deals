@@ -85,6 +85,8 @@ interface DealRow {
   appointment_required: boolean | null;
   product_details: string | null;
   listing_type: "group_buy" | "regular" | null;
+  participation_fee_amount: number | null;
+  participation_fee_locked_at: string | null;
 
 }
 
@@ -269,7 +271,7 @@ export default function DealDetail() {
         const { data: dealData, error: dErr } = await supabase
           .from("deals")
           .select(
-            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images,offer_terms,restrictions,service_areas,join_deadline,redemption_deadline,appointment_required,product_details,listing_type",
+            "id,title,description,status,category_id,supplier_id,offer_type,original_price,discounted_price,discount_percentage,base_price,tiers,ends_at,deposit_required,deposit_amount,cover_image_url,gallery_images,offer_terms,restrictions,service_areas,join_deadline,redemption_deadline,appointment_required,product_details,listing_type,participation_fee_amount,participation_fee_locked_at",
 
           )
           .eq("id", dealId)
@@ -462,6 +464,24 @@ export default function DealDetail() {
       setFeeLoading(false);
       return;
     }
+    // A per-deal manual amount is already server-locked by the admin action.
+    // Use it directly in the resident UI instead of trying to derive a price
+    // from percentage-only offers that have no numeric base price.
+    const lockedManualFee = Number(deal.participation_fee_amount ?? 0);
+    if (deal.participation_fee_locked_at && Number.isFinite(lockedManualFee) && lockedManualFee > 0) {
+      setParticipationFee({
+        dealPrice: Number(deal.discounted_price ?? deal.base_price ?? 0),
+        feeAmount: lockedManualFee,
+        totalDueNow: lockedManualFee,
+        rule: null,
+        currency: "ILS",
+        source: "price_band",
+      });
+      setFeeError(null);
+      setFeeLoading(false);
+      return;
+    }
+
     // Join mode gates the whole fee flow (admin-controlled, fail closed).
     if (feeMode === null) {
       setFeeLoading(true);
