@@ -125,8 +125,20 @@ export default function ResidentDashboard() {
         const paidDepositsQ = supabase.from("deposits").select("deal_id").eq("status", "paid").eq("is_deleted", false);
         const freeInterestsQ = supabase.from("deal_interests").select("deal_id").eq("is_deleted", false).in("status", ["interested", "approved", "committed", "joined"]);
 
-        const [matchesResult, citySupResult, councilSupResult, regionSupResult, nationwideResult, paidDepositsResult, freeInterestsResult] = await Promise.all([
+        const [matchesResult, directCityDealsResult, citySupResult, councilSupResult, regionSupResult, nationwideResult, paidDepositsResult, freeInterestsResult] = await Promise.all([
           supabase.rpc("get_matching_deals_for_user", { _limit: 12 }),
+          // Deal-level coverage is the strongest signal. This also supports older
+          // resident profiles that have a city name but no normalized city_id.
+          cityName
+            ? supabase
+                .from("deals")
+                .select("id")
+                .eq("status", "active")
+                .eq("is_deleted", false)
+                .overlaps("service_areas", [cityName])
+                .order("created_at", { ascending: false })
+                .limit(12)
+            : Promise.resolve({ data: [] }),
           prof?.city_id ? supabase.from("supplier_cities").select("supplier_id").eq("city_id", prof.city_id) : Promise.resolve({ data: [] }),
           councilId ? supabase.from("supplier_councils").select("supplier_id").eq("council_id", councilId) : Promise.resolve({ data: [] }),
           regionId ? supabase.from("supplier_regions").select("supplier_id").eq("region_id", regionId) : Promise.resolve({ data: [] }),
@@ -136,9 +148,12 @@ export default function ResidentDashboard() {
         ]);
 
 
-        const dealIds = ((matchesResult.data ?? []) as { deal_id: string }[]).map((m) => m.deal_id);
+        const directCityDealIds = ((directCityDealsResult.data ?? []) as { id: string }[]).map((d) => d.id);
+        const rpcDealIds = ((matchesResult.data ?? []) as { deal_id: string }[]).map((m) => m.deal_id);
+        // Exact deal-area matches come first, followed by broader supplier/location matches.
+        const dealIds = Array.from(new Set([...directCityDealIds, ...rpcDealIds]));
         console.log("[Dashboard/ForYou] user location", { cityId: prof?.city_id, councilId, regionId, cityName });
-        console.log("[Dashboard/ForYou] matched deals from RPC:", dealIds.length, matchesResult.error ?? "");
+        console.log("[Dashboard/ForYou] matched deals:", { directCity: directCityDealIds.length, total: dealIds.length, rpcError: matchesResult.error ?? "" });
 
         // Fallback: if location match returns nothing, surface latest active deals so the card
         // is never empty when active deals exist in the system.
