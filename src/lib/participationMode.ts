@@ -42,13 +42,26 @@ export async function fetchParticipationFeeMode(dealId?: string | null): Promise
   const resolvedDealId = dealId ?? dealIdFromLocation();
   const fn = resolvedDealId ? "get_effective_participation_fee_mode" : "get_participation_fee_mode";
   const args = resolvedDealId ? { _deal_id: resolvedDealId } : undefined;
-  const { data, error } = await (supabase.rpc as unknown as (
+  const callMode = supabase.rpc as unknown as (
     fn: string,
     args?: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message: string } | null }>)(fn, args);
-  if (error) throw new Error(error.message);
-  if (!isParticipationFeeMode(data)) throw new Error("participation_fee_mode_unavailable");
-  return data;
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
+
+  const { data, error } = await callMode(fn, args);
+  if (!error && isParticipationFeeMode(data)) return data;
+
+  // Production-safe compatibility fallback: a newly pushed per-deal RPC may
+  // arrive after the frontend bundle. Never turn a temporary schema-sync lag
+  // into a full joining outage. The global mode still preserves the master
+  // disabled/maintenance safety switch.
+  if (resolvedDealId) {
+    console.warn("[participationMode] effective mode unavailable; using global mode", error);
+    const fallback = await callMode("get_participation_fee_mode");
+    if (!fallback.error && isParticipationFeeMode(fallback.data)) return fallback.data;
+    throw new Error(fallback.error?.message ?? error?.message ?? "participation_fee_mode_unavailable");
+  }
+
+  throw new Error(error?.message ?? "participation_fee_mode_unavailable");
 }
 
 /** Admin-only global mode change. Reason is mandatory and is stored in the audit log. */
