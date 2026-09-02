@@ -108,8 +108,11 @@ export default function AdminDealParticipationFees() {
     return deals.filter((d) => d.title.toLowerCase().includes(q));
   }, [deals, query]);
 
-  const save = async (deal: DealRow) => {
-    const draft = drafts[deal.id] ?? { mode: "inherit" as Mode, amount: "" };
+  const save = async (
+    deal: DealRow,
+    overrideDraft?: { mode: Mode; amount: string },
+  ) => {
+    const draft = overrideDraft ?? drafts[deal.id] ?? { mode: "inherit" as Mode, amount: "" };
     let amount: number | null = null;
     if (draft.mode === "enabled") {
       amount = Number(draft.amount);
@@ -220,8 +223,19 @@ export default function AdminDealParticipationFees() {
                       <button
                         key={mode}
                         type="button"
-                        onClick={() => setDrafts((prev) => ({ ...prev, [deal.id]: { ...draft, mode } }))}
-                        className={`h-10 rounded-xl border text-[12px] font-bold transition ${draft.mode === mode ? "bg-[#0F172A] text-white border-[#0F172A]" : "bg-white text-[#475569] border-[#E2E8F0]"}`}
+                        onClick={() => {
+                          const next = {
+                            ...draft,
+                            mode,
+                            amount: mode === "enabled" ? draft.amount : "",
+                          };
+                          setDrafts((prev) => ({ ...prev, [deal.id]: next }));
+                          // Binary choices are complete actions: persist immediately.
+                          // Manual amount still waits for a valid number + Save.
+                          if (mode !== "enabled") void save(deal, next);
+                        }}
+                        disabled={busy}
+                        className={`h-10 rounded-xl border text-[12px] font-bold transition disabled:opacity-60 ${draft.mode === mode ? "bg-[#0F172A] text-white border-[#0F172A]" : "bg-white text-[#475569] border-[#E2E8F0]"}`}
                       >
                         {label}
                       </button>
@@ -244,12 +258,17 @@ export default function AdminDealParticipationFees() {
 
                   {draft.mode === "disabled" && (
                     <div className="rounded-xl bg-emerald-50 text-emerald-800 px-3 py-2 text-[12px] font-semibold">
-                      המצטרפים לעסקה זו יעברו הצטרפות ישירה ללא מסך אשראי.
+                      ללא תשלום נשמר מיד בלחיצה. המצטרפים יעברו הצטרפות ישירה ללא מסך אשראי.
+                    </div>
+                  )}
+                  {draft.mode === "inherit" && (
+                    <div className="rounded-xl bg-slate-50 text-slate-700 px-3 py-2 text-[12px] font-semibold">
+                      תמחור אוטומטי נשמר מיד בלחיצה.
                     </div>
                   )}
 
-                  <Button onClick={() => void save(deal)} disabled={busy} className="w-full h-10 rounded-xl">
-                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-4 w-4 ml-1" /> שמירה</>}
+                  <Button onClick={() => void save(deal)} disabled={busy || draft.mode !== "enabled"} className="w-full h-10 rounded-xl">
+                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : draft.mode === "enabled" ? <><Save className="h-4 w-4 ml-1" /> שמירת סכום ידני</> : "נשמר אוטומטית"}
                   </Button>
                 </div>
               );
