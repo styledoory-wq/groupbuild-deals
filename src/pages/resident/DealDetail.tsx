@@ -216,7 +216,6 @@ export default function DealDetail() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [creditAvailable, setCreditAvailable] = useState(0);
   const [applyCredit, setApplyCredit] = useState(true);
-  const [howOpen, setHowOpen] = useState(false);
   const [showRequestGroupBuy, setShowRequestGroupBuy] = useState(false);
   const [submittingGroupBuyRequest, setSubmittingGroupBuyRequest] = useState(false);
   const [groupBuyRequested, setGroupBuyRequested] = useState(false);
@@ -1118,7 +1117,7 @@ export default function DealDetail() {
     <MobileShell>
       {/* Slim back header */}
       <div className="px-2 pt-2">
-        <PageHeader title="" subtitle="" back variant="navy" />
+        <PageHeader title="פרטי העסקה" subtitle="" back variant="navy" />
       </div>
 
       {isSupplierPreview && (
@@ -1147,7 +1146,7 @@ export default function DealDetail() {
       {/* ===== SECTION 1 — HERO IMAGE ===== */}
       <div className="px-4 mt-2">
         <div
-          className="relative rounded-[28px] overflow-hidden h-[260px]"
+          className="relative rounded-[26px] overflow-hidden h-[220px]"
           style={{
             background:
               heroImages.length > 0
@@ -1214,8 +1213,8 @@ export default function DealDetail() {
       </div>
 
       {/* ===== SECTION 2 — HEADLINE + PRICE CARD ===== */}
-      <div className="px-4 -mt-10 relative z-10">
-        <div className="bg-white rounded-[24px] p-5 shadow-[0_12px_30px_-12px_rgba(10,31,61,0.25)]">
+      <div className="px-4 -mt-8 relative z-10">
+        <div className="bg-white rounded-[22px] p-4 shadow-[0_12px_30px_-12px_rgba(10,31,61,0.25)]">
           <div className="flex items-center gap-2 mb-3 flex-wrap">
             {category?.name && (
               <span className="bg-[#0E6B5A]/10 text-[#0E6B5A] px-3 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wide">
@@ -1237,7 +1236,7 @@ export default function DealDetail() {
             field="title"
             value={deal.title}
             as="h1"
-            className="text-[22px] leading-[1.2] font-black text-[#1F2937] tracking-tight mb-3"
+            className="text-[20px] leading-[1.25] font-black text-[#1F2937] tracking-tight mb-1"
           />
           {sortedTiers.length > 0 ? null : display.effectivePrice != null ? (
             <div className="space-y-1.5">
@@ -1510,10 +1509,10 @@ export default function DealDetail() {
           )}
 
           {/* 3e — DARK SHARE CARD */}
-          <div className="bg-gradient-to-br from-[#062E27] to-[#0A4438] text-white rounded-[24px] p-5 shadow-xl relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#062E27] to-[#0A4438] text-white rounded-[22px] p-4 shadow-lg relative overflow-hidden">
             <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#34A88E]/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="text-center mb-1">
+            <div className="text-center mb-3">
               <div className="text-[15px] font-black leading-tight">
                 <span className="inline-block animate-bounce ml-1">🚀</span>
                 הזמינו שכנים והורידו מחיר לכולם!
@@ -1525,37 +1524,13 @@ export default function DealDetail() {
               </p>
             </div>
 
-            {/* 3 stats with arrows */}
-            <div className="flex items-center justify-around gap-2 my-4">
-              <div className="flex flex-col items-center text-center flex-1">
-                <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
-                  <Share2 className="w-5 h-5 text-white/90" strokeWidth={2.2} />
-                </div>
-                <div className="text-[11px] font-bold text-white/80 leading-tight">שתפו<br/>עם שכנים</div>
-              </div>
-              <ArrowRight className="w-4 h-4 text-white/30 shrink-0 rotate-180" />
-              <div className="flex flex-col items-center text-center flex-1">
-                <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
-                  <TrendingDown className="w-5 h-5 text-[#F5C547]" strokeWidth={2.4} />
-                </div>
-                <div className="text-[11px] font-bold text-white/80 leading-tight">המחיר יורד<br/>לכולם</div>
-              </div>
-              <ArrowRight className="w-4 h-4 text-white/30 shrink-0 rotate-180" />
-              <div className="flex flex-col items-center text-center flex-1">
-                <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
-                  <Heart className="w-5 h-5 text-[#FF7A7A]" strokeWidth={2.4} fill="currentColor" />
-                </div>
-                <div className="text-[11px] font-bold text-white/80 leading-tight">כולם<br/>חוסכים יותר</div>
-              </div>
-            </div>
-
             {/* WhatsApp pulse button */}
             <div className="relative">
               <span className="absolute inset-0 rounded-2xl bg-[#25D366] animate-ping opacity-20 pointer-events-none" />
               <button
                 type="button"
                 onClick={handleWhatsAppShare}
-                className="relative w-full bg-[#25D366] hover:bg-[#22c35e] text-white font-extrabold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.97] shadow-lg shadow-[#25D366]/30"
+                className="relative w-full bg-[#25D366] hover:bg-[#22c35e] text-white font-extrabold py-3 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.97] shadow-lg shadow-[#25D366]/30"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
@@ -1668,34 +1643,52 @@ export default function DealDetail() {
         </div>
       )}
 
-      {/* ===== SECTION 4 — HOW IT WORKS (modal, triggered by floating button) ===== */}
-      <Dialog open={howOpen} onOpenChange={setHowOpen}>
-        <DialogContent className="max-w-sm rounded-3xl p-5" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="text-right text-[17px] font-black text-[#1F2937]">איך זה עובד</DialogTitle>
-          </DialogHeader>
-          <ol className="relative mt-2">
-            {timeline.map((step, idx) => {
-              const last = idx === timeline.length - 1;
-              return (
-                <li key={step.title} className="relative flex gap-3 pb-5 last:pb-0">
-                  {!last && <span aria-hidden className="absolute right-[19px] top-10 bottom-0 w-px bg-[#ECEEF2]" />}
-                  <div className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: "#1F2937" }}>
-                    <step.icon className="w-[18px] h-[18px] text-white" strokeWidth={2.2} />
+      {/* ===== SECTION 4 — BENEFITS + HOW IT WORKS ===== */}
+      {!isRegularListing && (
+        <>
+          <div className="px-4 mt-6">
+            <SectionTitle>למה כדאי להצטרף</SectionTitle>
+            <div className="grid grid-cols-2 gap-2.5">
+              {benefits.map((benefit) => (
+                <div
+                  key={benefit.title}
+                  className="rounded-[18px] border border-[#ECEEF2] bg-white p-3 shadow-[0_6px_16px_-12px_rgba(10,31,61,0.25)]"
+                >
+                  <div
+                    className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl"
+                    style={{ background: benefit.tint }}
+                  >
+                    <benefit.icon className="h-4.5 w-4.5" style={{ color: benefit.accent }} strokeWidth={2.2} />
                   </div>
-                  <div className="flex-1 pt-1">
-                    <p className="text-[13px] font-extrabold text-[#1F2937] leading-tight">
-                      <span className="text-[#1A8870] font-black mr-1">{idx + 1}.</span>
-                      {step.title}
-                    </p>
-                    <p className="text-[11px] text-[#6B7280] leading-snug mt-1">{step.subtitle}</p>
+                  <p className="text-[12.5px] font-extrabold text-[#1F2937]">{benefit.title}</p>
+                  <p className="mt-1 text-[10.5px] leading-snug text-[#6B7280]">{benefit.subtitle}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="px-4 mt-6">
+            <SectionTitle>איך זה עובד</SectionTitle>
+            <ol className="overflow-hidden rounded-[22px] border border-[#ECEEF2] bg-white shadow-[0_8px_20px_-12px_rgba(10,31,61,0.22)]">
+              {timeline.map((step, idx) => (
+                <li
+                  key={step.title}
+                  className="flex items-center gap-3 border-b border-[#ECEEF2] px-3.5 py-3 last:border-b-0"
+                >
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0E6B5A] text-[12px] font-black text-white">
+                    {idx + 1}
+                  </span>
+                  <step.icon className="h-5 w-5 shrink-0 text-[#0E6B5A]" strokeWidth={2.1} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[12.5px] font-extrabold text-[#1F2937]">{step.title}</p>
+                    <p className="mt-0.5 text-[10.5px] leading-snug text-[#6B7280]">{step.subtitle}</p>
                   </div>
                 </li>
-              );
-            })}
-          </ol>
-        </DialogContent>
-      </Dialog>
+              ))}
+            </ol>
+          </div>
+        </>
+      )}
 
       {/* ===== Payment instructions (manual Bit / bank transfer) ===== */}
       <Dialog open={showPaymentInstructions} onOpenChange={setShowPaymentInstructions}>
@@ -1751,26 +1744,24 @@ export default function DealDetail() {
         </div>
       )}
 
-      {/* Participation fee breakdown */}
+      {/* Participation fee — transparent reassurance immediately before the CTA */}
       {!isSupplierPreview && !isRegularListing && depositRequired && (
-        <div className="px-5 mt-2 mb-2">
-          <div className="rounded-[20px] border border-[#0E6B5A]/15 bg-white p-4 space-y-2" dir="rtl">
-            <div className="text-[13px] font-extrabold text-[#0F172A]">{PARTICIPATION_FEE_LABEL}</div>
-            <div className="flex justify-between text-[13px]">
-              <span className="text-muted-foreground">מחיר העסקה</span>
-              <span className="font-bold">{dealPriceForFee > 0 ? ils(dealPriceForFee) : "לפי הצעה"}</span>
+        <div className="px-4 mt-5 mb-2">
+          <div
+            className="flex items-center gap-3 rounded-[20px] border border-[#0E6B5A]/15 bg-[#E8F4F1] px-4 py-3.5"
+            dir="rtl"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0E6B5A] shadow-sm">
+              <ShieldCheck className="h-6 w-6" strokeWidth={2.2} />
             </div>
-            <div className="flex justify-between text-[13px]">
-              <span className="text-muted-foreground">דמי השתתפות</span>
-              <span className="font-bold text-[#0E6B5A]">{ils(feeAmount)}</span>
+            <div className="min-w-0 flex-1">
+              <div className="text-[13px] font-extrabold text-[#0F172A]">
+                דמי רצינות חד־פעמיים: <span className="text-[#0E6B5A]">{ils(feeAmount)}</span>
+              </div>
+              <p className="mt-0.5 text-[10.5px] leading-relaxed text-[#6B7280]">
+                הסכום מאשר את ההצטרפות. מחיר העסקה עצמו משולם לספק בהתאם לתנאי ההצעה.
+              </p>
             </div>
-            <div className="flex justify-between text-[14px] pt-2 border-t border-[#ECEEF2]">
-              <span className="font-extrabold">סה״כ לתשלום כעת</span>
-              <span className="font-extrabold">{ils(feeAmount)}</span>
-            </div>
-            <p className="text-[11px] text-muted-foreground leading-relaxed pt-1">
-              {PARTICIPATION_FEE_DESCRIPTION}
-            </p>
           </div>
         </div>
       )}
@@ -1910,23 +1901,6 @@ export default function DealDetail() {
           </div>
         </div>
       )}
-
-      {/* Floating "How it works" button — fixed above the sticky CTA */}
-      <button
-        type="button"
-        onClick={() => setHowOpen(true)}
-        aria-label="איך זה עובד"
-        className="fixed z-50 left-3 h-10 px-3.5 rounded-full bg-white border border-[#ECEEF2] shadow-[0_8px_20px_-8px_rgba(10,31,61,0.25)] flex items-center gap-1.5 text-[12px] font-extrabold text-[#1F2937] active:scale-[0.96] transition-transform"
-        style={{ bottom: "calc(env(safe-area-inset-bottom) + var(--nav-h) + 84px)" }}
-      >
-        <span className="w-5 h-5 rounded-full bg-[#1A8870] text-white text-[11px] font-black flex items-center justify-center">?</span>
-        איך זה עובד
-      </button>
-
-
-
-
-
 
       {/* Request Group Buy modal (for regular listings) */}
       <Dialog open={showRequestGroupBuy} onOpenChange={setShowRequestGroupBuy}>
