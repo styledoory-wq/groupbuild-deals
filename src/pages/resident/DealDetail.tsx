@@ -1658,7 +1658,7 @@ export default function DealDetail() {
                     className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl"
                     style={{ background: benefit.tint }}
                   >
-                    <benefit.icon className="h-4.5 w-4.5" style={{ color: benefit.accent }} strokeWidth={2.2} />
+                    <benefit.icon className="h-[18px] w-[18px]" style={{ color: benefit.accent }} strokeWidth={2.2} />
                   </div>
                   <p className="text-[12.5px] font-extrabold text-[#1F2937]">{benefit.title}</p>
                   <p className="mt-1 text-[10.5px] leading-snug text-[#6B7280]">{benefit.subtitle}</p>
