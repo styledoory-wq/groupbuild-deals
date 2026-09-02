@@ -58,10 +58,19 @@ export async function fetchParticipationFeeMode(dealId?: string | null): Promise
     console.warn("[participationMode] effective mode unavailable; using global mode", error);
     const fallback = await callMode("get_participation_fee_mode");
     if (!fallback.error && isParticipationFeeMode(fallback.data)) return fallback.data;
-    throw new Error(fallback.error?.message ?? error?.message ?? "participation_fee_mode_unavailable");
+
+    // The public deal page must remain usable for guests even when the RPC
+    // execute grant has not reached production yet. This only controls the UI:
+    // create-deposit and join_deal_free_effective still re-check the mode on
+    // the server and fail closed before any charge or join is created.
+    console.warn("[participationMode] public RPC unavailable; deferring authority to server");
+    return "enabled";
   }
 
-  throw new Error(error?.message ?? "participation_fee_mode_unavailable");
+  // Same UI-only compatibility behavior for a global read failure. Charging
+  // remains impossible unless the server-side function approves it.
+  console.warn("[participationMode] global mode unavailable; deferring authority to server", error);
+  return "enabled";
 }
 
 /** Admin-only global mode change. Reason is mandatory and is stored in the audit log. */
