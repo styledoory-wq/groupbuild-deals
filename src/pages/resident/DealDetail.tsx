@@ -136,7 +136,7 @@ export default function DealDetail() {
     }
     (async () => {
       try {
-        const mode = await fetchParticipationFeeMode();
+        const mode = await fetchParticipationFeeMode(dealId ?? null);
         if (!cancelled) setFeeMode(mode);
       } catch (e) {
         console.error("[DealDetail] participation mode unavailable", e);
@@ -146,7 +146,7 @@ export default function DealDetail() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [dealId]);
 
 
   const openPaymentInstructions = (
