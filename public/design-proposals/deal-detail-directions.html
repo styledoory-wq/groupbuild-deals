@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GroupBuild — 4 כיווני עיצוב למסך דיל</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&family=Frank+Ruhl+Libre:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0B1220;
+      --muted: #5B6472;
+      --line: rgba(11,18,32,0.08);
+      --bg: #E9E6DF;
+      --brand: #0E6B5A;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Heebo, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 480px at 85% -10%, rgba(14,107,90,0.10), transparent 55%),
+        radial-gradient(700px 400px at 0% 20%, rgba(11,18,32,0.05), transparent 50%),
+        linear-gradient(180deg, #EDEAE3 0%, #F4F2EC 45%, #E9E6DF 100%);
+      min-height: 100vh;
+      padding: 40px 24px 80px;
+    }
+    .wrap { max-width: 1280px; margin: 0 auto; }
+
+    header { max-width: 720px; margin-bottom: 36px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--brand); font-size: 12px; font-weight: 800;
+      letter-spacing: 0.08em; margin-bottom: 12px;
+    }
+    h1 {
+      font-size: clamp(30px, 4.5vw, 44px);
+      font-weight: 900; letter-spacing: -0.03em; line-height: 1.12;
+      margin-bottom: 14px;
+    }
+    .lede {
+      font-size: 16.5px; line-height: 1.65; color: var(--muted); max-width: 52ch;
+    }
+    .note {
+      margin-top: 16px;
+      display: inline-block;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px; font-weight: 700; color: var(--ink);
+    }
+
+    .tabs {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin: 32px 0 28px;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.65);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font: inherit; font-size: 13px; font-weight: 800;
+      cursor: pointer; color: var(--muted);
+      transition: 0.2s ease;
+    }
+    .tab:hover { color: var(--ink); background: #fff; }
+    .tab.active {
+      background: var(--ink); color: #fff; border-color: var(--ink);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 24px 50px -36px rgba(11,18,32,0.35);
+      display: none;
+      animation: in 0.35s ease both;
+    }
+    .card.show { display: grid; grid-template-columns: 1.05fr 0.95fr; }
+    @media (max-width: 820px) {
+      .card.show { grid-template-columns: 1fr; }
+    }
+    @keyframes in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .card .shot {
+      background: #111;
+      min-height: 520px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 28px;
+    }
+    .card .shot img {
+      width: min(100%, 320px);
+      height: auto;
+      border-radius: 28px;
+      box-shadow: 0 30px 60px -20px rgba(0,0,0,0.55);
+    }
+
+    .card .info { padding: 28px 26px 30px; display: flex; flex-direction: column; }
+    .card .tag {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.12em;
+      color: var(--brand); margin-bottom: 10px;
+    }
+    .card h2 {
+      font-size: 26px; font-weight: 900; letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .card .desc {
+      font-size: 14.5px; line-height: 1.6; color: var(--muted);
+      margin-bottom: 18px;
+    }
+    .bullets { list-style: none; display: grid; gap: 10px; margin-bottom: 22px; }
+    .bullets li {
+      display: grid; grid-template-columns: 18px 1fr; gap: 8px;
+      font-size: 13.5px; line-height: 1.45; font-weight: 600;
+    }
+    .bullets li::before { content: "→"; color: var(--brand); font-weight: 900; }
+    .feel {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      font-size: 13px; color: var(--muted); line-height: 1.5;
+    }
+    .feel strong { color: var(--ink); }
+
+    .all {
+      margin-top: 48px;
+    }
+    .all h3 {
+      font-size: 18px; font-weight: 900; margin-bottom: 16px;
+    }
+    .thumbs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    @media (max-width: 900px) {
+      .thumbs { grid-template-columns: repeat(2, 1fr); }
+    }
+    .thumb {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.7);
+      border-radius: 20px;
+      overflow: hidden;
+      cursor: pointer;
+      text-align: right;
+      font: inherit;
+      padding: 0;
+      transition: 0.2s ease;
+    }
+    .thumb:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -22px rgba(11,18,32,0.4); }
+    .thumb img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top; display: block; }
+    .thumb span {
+      display: block; padding: 12px 14px 14px;
+      font-size: 13px; font-weight: 800;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 13.5px; color: var(--muted); line-height: 1.55;
+      max-width: 60ch;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">GroupBuild · דוגמאות בלבד · בלי ביצוע עדיין</div>
+      <h1>בחרו כיוון עיצוב למסך הדיל</h1>
+      <p class="lede">
+        ארבעה כיוונים שונים לאותו תוכן: ממ״ד, מחיר קבוצתי, הצטרפות.
+        כל אחד מרגיש אחרת — תגידו איזה מדבר אליכם (או שילוב), ורק אז ניישם.
+      </p>
+      <div class="note">אין כאן שינוי באפליקציה — רק הצעות ויזואליות</div>
+    </header>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-id="a" type="button">A · Immersive</button>
+      <button class="tab" data-id="b" type="button">B · Atelier</button>
+      <button class="tab" data-id="c" type="button">C · Gallery</button>
+      <button class="tab" data-id="d" type="button">D · Concierge</button>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 1fr;">
+      <!-- A -->
+      <article class="card show" id="card-a">
+        <div class="shot">
+          <img src="./directions/deal-direction-a-immersive.png" alt="כיוון A — Immersive Emerald" />
+        </div>
+        <div class="info">
+          <div class="tag">DIRECTION A</div>
+          <h2>Immersive Emerald</h2>
+          <p class="desc">
+            התמונה היא הגיבור. כותרת על התמונה, מחיר ו־CTA מתחת באוויר נקי.
+            מרגיש כמו אפליקציית נדל״ן פרימיום — חזק, ברור, מזמין.
+          </p>
+          <ul class="bullets">
+            <li>Hero מלא קצה־לקצה עם טקסט עליו</li>
+            <li>כפתור הצטרפות אחד ויזואלי</li>
+            <li>מינימום כרטיסים — מקסימום נוכחות</li>
+          </ul>
+          <p class="feel"><strong>מתאים אם:</strong> רוצים שהדיל \"ימכור\" מהתמונה והרגש.</p>
+        </div>
+      </article>
+
+      <!-- B -->
+      <article class="card" id="card-b">
+        <div class="shot">
+          <img src="./directions/deal-direction-b-atelier.png" alt="כיוון B — Soft Atelier" />
+        </div>
+        <div class="info">
+          <div class="tag">DIRECTION B</div>
+          <h2>Soft Atelier</h2>
+          <p class="desc">
+            סטודיו שקט: רקע חם־אבן, תמונה רכה, טיפוגרפיה גדולה, הרבה אוויר.
+            יוקרה דרך רוגע — לא דרך צבע כהה.
+          </p>
+          <ul class="bullets">
+            <li>רקע אטמוספרי + תמונה עדינה</li>
+            <li>סולם מדרגות אלגנטי בשורה</li>
+            <li>כפתור outline ירוק — עדין ומזמין</li>
+          </ul>
+          <p class="feel"><strong>מתאים אם:</strong> רוצים תחושת בוטיק / תכנון־בית, פחות \"דיל\".</p>
+        </div>
+      </article>
+
+      <!-- C -->
+      <article class="card" id="card-c">
+        <div class="shot">
+          <img src="./directions/deal-direction-c-gallery.png" alt="כיוון C — Quiet Gallery" />
+        </div>
+        <div class="info">
+          <div class="tag">DIRECTION C</div>
+          <h2>Quiet Gallery</h2>
+          <p class="desc">
+            גלריה מינימליסטית: לבן, צילום חד, המספר 5% כאלמנט עיצובי.
+            הכי נקי מבין הארבעה — כמעט editorial.
+          </p>
+          <ul class="bullets">
+            <li>טיפוגרפיית מחיר כגיבור משני</li>
+            <li>Sticky glass עם ״שמרו מקום״</li>
+            <li>אפס רעש ויזואלי</li>
+          </ul>
+          <p class="feel"><strong>מתאים אם:</strong> רוצים יוקרה של פשטות קיצונית ואמון.</p>
+        </div>
+      </article>
+
+      <!-- D -->
+      <article class="card" id="card-d">
+        <div class="shot">
+          <img src="./directions/deal-direction-d-concierge.png" alt="כיוון D — Night Concierge" />
+        </div>
+        <div class="info">
+          <div class="tag">DIRECTION D</div>
+          <h2>Night Concierge</h2>
+          <p class="desc">
+            הזמנה פרטית: ירוק־לילה עמוק, אור שמפניה רך, כפתור קרם.
+            מרגיש כמו מועדון / קונסיירז׳ — לא מבצע סופרמרקט.
+          </p>
+          <ul class="bullets">
+            <li>מסך כהה כרגע ראשון בלבד</li>
+            <li>CTA שמפניה על כהה = יוקרה</li>
+            <li>חזק מאוד על \"מזמין להצטרף\"</li>
+          </ul>
+          <p class="feel"><strong>מתאים אם:</strong> רוצים דרמה והרגשת VIP בכניסה לדיל.</p>
+        </div>
+      </article>
+    </div>
+
+    <section class="all">
+      <h3>כל הכיוונים במבט אחד — לחצו כדי להגדיל</h3>
+      <div class="thumbs">
+        <button class="thumb" data-id="a" type="button">
+          <img src="./directions/deal-direction-a-immersive.png" alt="" />
+          <span>A · Immersive</span>
+        </button>
+        <button class="thumb" data-id="b" type="button">
+          <img src="./directions/deal-direction-b-atelier.png" alt="" />
+          <span>B · Atelier</span>
+        </button>
+        <button class="thumb" data-id="c" type="button">
+          <img src="./directions/deal-direction-c-gallery.png" alt="" />
+          <span>C · Gallery</span>
+        </button>
+        <button class="thumb" data-id="d" type="button">
+          <img src="./directions/deal-direction-d-concierge.png" alt="" />
+          <span>D · Concierge</span>
+        </button>
+      </div>
+    </section>
+
+    <footer>
+      תגידו לי למשל: ״B״, ״A עם הכפתור של D״, או ״C אבל עם הירו של A״ —
+      ורק אז ניישם במסך האמיתי.
+    </footer>
+  </div>
+
+  <script>
+    const cards = [...document.querySelectorAll('.card')];
+    const tabs = [...document.querySelectorAll('.tab')];
+    const thumbs = [...document.querySelectorAll('.thumb')];
+
+    function show(id) {
+      cards.forEach((c) => c.classList.toggle('show', c.id === 'card-' + id));
+      tabs.forEach((t) => t.classList.toggle('active', t.dataset.id === id));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    tabs.forEach((t) => t.addEventListener('click', () => show(t.dataset.id)));
+    thumbs.forEach((t) => t.addEventListener('click', () => show(t.dataset.id)));
+  </script>
+</body>
+</html>
